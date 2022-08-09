@@ -50,6 +50,7 @@
         "gamboa.martin/plugins": "dev-main",
         "gamboa.martin/test": "dev-main",
         "gamboa.martin/configuraciones": "dev-main",
+        "gamboa.martin/documento": "dev-master",
         "gamboa.martin/services": "dev-main"
     },
     "require-dev": {
