@@ -11,7 +11,7 @@ class fc_cfd extends modelo{
     public function __construct(PDO $link){
         $tabla = __CLASS__;
         $columnas = array($tabla=>false,'org_sucursal'=>$tabla);
-        $campos_obligatorios = array('codigo','serie');
+        $campos_obligatorios = array('codigo','serie','org_sucursal_id');
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis','serie');
 
