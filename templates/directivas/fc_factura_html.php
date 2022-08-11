@@ -26,6 +26,12 @@ class fc_factura_html extends html_controler {
         $controler->inputs->select->dp_calle_pertenece_id = $inputs->selects->dp_calle_pertenece_id;
         $controler->inputs->select->cat_sat_regimen_fiscal_id = $inputs->selects->cat_sat_regimen_fiscal_id;
         $controler->inputs->select->com_sucursal_id = $inputs->selects->com_sucursal_id;
+        $controler->inputs->select->cat_sat_uso_cfdi_id = $inputs->selects->cat_sat_uso_cfdi_id;
+        $controler->inputs->select->dp_pais_id = $inputs->selects->dp_pais_id;
+        $controler->inputs->select->dp_estado_id = $inputs->selects->dp_estado_id;
+        $controler->inputs->select->dp_municipio_id = $inputs->selects->dp_municipio_id;
+        $controler->inputs->select->dp_cp_id = $inputs->selects->dp_cp_id;
+        $controler->inputs->select->dp_colonia_postal_id = $inputs->selects->dp_colonia_postal_id;
         $controler->inputs->version = $inputs->texts->version;
         $controler->inputs->serie = $inputs->texts->serie;
         $controler->inputs->folio = $inputs->texts->folio;
@@ -279,11 +285,53 @@ class fc_factura_html extends html_controler {
         $selects->com_tipo_cambio_id = $select;
 
         $select = (new cat_sat_regimen_fiscal_html(html:$this->html_base))->select_cat_sat_regimen_fiscal_id(
-            cols: 12, con_registros:true, id_selected:-1,link: $link);
+            cols: 6, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
         $selects->cat_sat_regimen_fiscal_id = $select;
+
+        $select = (new cat_sat_uso_cfdi_html(html:$this->html_base))->select_cat_sat_uso_cfdi_id(
+            cols: 6, con_registros:true, id_selected:-1,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->cat_sat_uso_cfdi_id = $select;
+
+        $select = (new dp_pais_html(html:$this->html_base))->select_dp_pais_id(
+            cols: 6, con_registros:true, id_selected:-1,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->dp_pais_id = $select;
+
+        $select = (new dp_estado_html(html:$this->html_base))->select_dp_estado_id(
+            cols: 6, con_registros:true, id_selected:-1,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->dp_estado_id = $select;
+
+        $select = (new dp_municipio_html(html:$this->html_base))->select_dp_municipio_id(
+            cols: 6, con_registros:true, id_selected:-1,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->dp_municipio_id = $select;
+
+        $select = (new dp_cp_html(html:$this->html_base))->select_dp_cp_id(
+            cols: 6, con_registros:true, id_selected:-1,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->dp_cp_id = $select;
+
+        $select = (new dp_colonia_postal_html(html:$this->html_base))->select_dp_colonia_postal_id(
+            cols: 6, con_registros:true, id_selected:-1,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->dp_colonia_postal_id = $select;
 
         return $selects;
     }
@@ -349,11 +397,53 @@ class fc_factura_html extends html_controler {
         $selects->com_tipo_cambio_id = $select;
 
         $select = (new cat_sat_regimen_fiscal_html(html:$this->html_base))->select_cat_sat_regimen_fiscal_id(
-            cols: 12, con_registros:true, id_selected:$row_upd->cat_sat_regimen_fiscal_id,link: $link);
+            cols: 6, con_registros:true, id_selected:$row_upd->cat_sat_regimen_fiscal_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
         $selects->cat_sat_regimen_fiscal_id = $select;
+
+        $select = (new cat_sat_uso_cfdi_html(html:$this->html_base))->select_cat_sat_uso_cfdi_id(
+            cols: 6, con_registros:true, id_selected:$row_upd->cat_sat_uso_cfdi_id,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->cat_sat_uso_cfdi_id = $select;
+
+        $select = (new dp_pais_html(html:$this->html_base))->select_dp_pais_id(
+            cols: 6, con_registros:true, id_selected:$row_upd->dp_pais_id,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->dp_pais_id = $select;
+
+        $select = (new dp_estado_html(html:$this->html_base))->select_dp_estado_id(
+            cols: 6, con_registros:true, id_selected:$row_upd->dp_estado_id,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->dp_estado_id = $select;
+
+        $select = (new dp_municipio_html(html:$this->html_base))->select_dp_municipio_id(
+            cols: 6, con_registros:true, id_selected:$row_upd->dp_municipio_id,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->dp_municipio_id = $select;
+
+        $select = (new dp_cp_html(html:$this->html_base))->select_dp_cp_id(
+            cols: 6, con_registros:true, id_selected:$row_upd->dp_cp_id,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->dp_cp_id = $select;
+
+        $select = (new dp_colonia_postal_html(html:$this->html_base))->select_dp_colonia_postal_id(
+            cols: 6, con_registros:true, id_selected:$row_upd->dp_colonia_postal_id,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->dp_colonia_postal_id = $select;
 
         return $selects;
     }
