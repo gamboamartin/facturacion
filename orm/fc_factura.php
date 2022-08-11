@@ -36,4 +36,4 @@ class fc_factura extends modelo{
 
         return $r_alta_bd;
     }
-}
+} 
