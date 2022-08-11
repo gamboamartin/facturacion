@@ -31,7 +31,7 @@ class fc_factura extends modelo{
             return $this->error->error(mensaje: 'Error al obtener fc cfd',data: $registro_cfd);
         }
 
-        $registro_org_sucursal = (new org_sucursal($this->link))->registro(1);
+        $registro_org_sucursal = (new org_sucursal($this->link))->registro($registro_cfd['org_sucursal_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener sucursal',data: $registro_org_sucursal);
         }
