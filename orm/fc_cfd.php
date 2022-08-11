@@ -10,7 +10,7 @@ use stdClass;
 class fc_cfd extends modelo{
     public function __construct(PDO $link){
         $tabla = __CLASS__;
-        $columnas = array($tabla=>false,'com_sucursal'=>$tabla);
+        $columnas = array($tabla=>false,'org_sucursal'=>$tabla);
         $campos_obligatorios = array('codigo','serie');
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis','serie');
