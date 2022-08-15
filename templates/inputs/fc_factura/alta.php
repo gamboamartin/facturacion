@@ -3,7 +3,6 @@
 <?php echo $controlador->inputs->folio; ?>
 <?php echo $controlador->inputs->fecha; ?>
 <?php echo $controlador->inputs->exportacion; ?>
-<?php echo $controlador->inputs->select->fc_cfd_id; ?>
 <?php echo $controlador->inputs->select->com_sucursal_id; ?>
 <?php echo $controlador->inputs->select->dp_pais_id; ?>
 <?php echo $controlador->inputs->select->dp_estado_id; ?>
