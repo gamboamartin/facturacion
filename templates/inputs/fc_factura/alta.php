@@ -4,7 +4,6 @@
 <?php echo $controlador->inputs->fecha; ?>
 <?php echo $controlador->inputs->exportacion; ?>
 <?php echo $controlador->inputs->select->com_sucursal_id; ?>
-<?php echo $controlador->inputs->select->dp_colonia_postal_id; ?>
 <?php echo $controlador->inputs->select->dp_calle_pertenece_id; ?>
 <?php echo $controlador->inputs->select->cat_sat_tipo_de_comprobante_id; ?>
 <?php echo $controlador->inputs->select->com_tipo_cambio_id; ?>
