@@ -256,7 +256,7 @@ class fc_factura_html extends html_controler {
         $selects->dp_calle_pertenece_id = $select;
 
         $select = (new com_sucursal_html(html:$this->html_base))->select_com_sucursal_id(
-            cols: 12, con_registros:true, id_selected:-1,link: $link);
+            cols: 12, con_registros:true, id_selected:-1,link: $link, label: 'Cliente');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
