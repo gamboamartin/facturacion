@@ -290,6 +290,11 @@ class fc_factura_html extends html_controler {
         return $div;
     }
 
+    /**
+     * Genera los selects a mostrar con sus respectivos parámetros
+     * @param PDO $link
+     * @return array|stdClass
+     */
     private function selects_alta(PDO $link): array|stdClass
     {
         $selects = new stdClass();
@@ -410,7 +415,7 @@ class fc_factura_html extends html_controler {
     }
 
     /**
-     * Genera los selects a mostrar con sus respectivos parámetros
+     * Genera los selects a mostrar para modificar con sus respectivos parámetros
      * @param PDO $link
      * @param stdClass $row_upd
      * @return array|stdClass
