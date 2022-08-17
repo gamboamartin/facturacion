@@ -533,6 +533,12 @@ class fc_factura_html extends html_controler {
         return $select;
     }
 
+    /**
+     * Genera los inputs text a mostrar con sus respectivos parámetros
+     * @param stdClass $row_upd
+     * @param bool $value_vacio
+     * @return array|stdClass
+     */
     private function texts_alta(stdClass $row_upd, bool $value_vacio): array|stdClass
     {
         $texts = new stdClass();
