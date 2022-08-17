@@ -34,6 +34,9 @@ class fc_factura_html extends html_controler {
         $controler->inputs->select->dp_colonia_postal_id = $inputs->selects->dp_colonia_postal_id;
         $controler->inputs->version = $inputs->texts->version;
         $controler->inputs->serie = $inputs->texts->serie;
+        $controler->inputs->subtotal = $inputs->texts->subtotal;
+        $controler->inputs->descuento = $inputs->texts->descuento;
+        $controler->inputs->total = $inputs->texts->total;
         $controler->inputs->folio = $inputs->texts->folio;
         $controler->inputs->fecha = $inputs->texts->fecha;
         $controler->inputs->exportacion = $inputs->texts->exportacion;
@@ -148,6 +151,69 @@ class fc_factura_html extends html_controler {
         }
 
         $html =$this->directivas->input_text_required(disable: $disabled,name: 'serie',place_holder: 'Serie',
+            row_upd: $row_upd, value_vacio: $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input', data: $html);
+        }
+
+        $div = $this->directivas->html->div_group(cols: $cols,html:  $html);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar div', data: $div);
+        }
+
+        return $div;
+    }
+
+    public function input_subtotal(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
+    {
+        $valida = $this->directivas->valida_cols(cols: $cols);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
+        }
+
+        $html =$this->directivas->input_text_required(disable: $disabled,name: 'subtotal',place_holder: 'Subtotal',
+            row_upd: $row_upd, value_vacio: $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input', data: $html);
+        }
+
+        $div = $this->directivas->html->div_group(cols: $cols,html:  $html);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar div', data: $div);
+        }
+
+        return $div;
+    }
+
+    public function input_descuento(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
+    {
+        $valida = $this->directivas->valida_cols(cols: $cols);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
+        }
+
+        $html =$this->directivas->input_text_required(disable: $disabled,name: 'descuento',place_holder: 'Descuento',
+            row_upd: $row_upd, value_vacio: $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input', data: $html);
+        }
+
+        $div = $this->directivas->html->div_group(cols: $cols,html:  $html);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar div', data: $div);
+        }
+
+        return $div;
+    }
+
+    public function input_total(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
+    {
+        $valida = $this->directivas->valida_cols(cols: $cols);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
+        }
+
+        $html =$this->directivas->input_text_required(disable: $disabled,name: 'total',place_holder: 'Total',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -482,6 +548,24 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_serie);
         }
         $texts->serie = $in_serie;
+
+        $in_subtotal = $this->input_subtotal(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input',data:  $in_subtotal);
+        }
+        $texts->subtotal = $in_subtotal;
+
+        $in_descuento = $this->input_descuento(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input',data:  $in_descuento);
+        }
+        $texts->descuento = $in_descuento;
+
+        $in_total = $this->input_total(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input',data:  $in_total);
+        }
+        $texts->total = $in_total;
 
         $in_folio = $this->input_folio(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
         if(errores::$error){
