@@ -529,6 +529,13 @@ class fc_factura_html extends html_controler {
         }
         $selects->dp_colonia_postal_id = $select;
 
+        $select = (new org_sucursal_html(html:$this->html_base))->select_org_sucursal_id(
+            cols: 12, con_registros:true, id_selected:$row_upd->org_sucursal_id,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->org_sucursal_id = $select;
+
         return $selects;
     }
 
