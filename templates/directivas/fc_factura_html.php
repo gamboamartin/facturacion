@@ -26,6 +26,7 @@ class fc_factura_html extends html_controler {
         $controler->inputs->select->cat_sat_regimen_fiscal_id = $inputs->selects->cat_sat_regimen_fiscal_id;
         $controler->inputs->select->com_sucursal_id = $inputs->selects->com_sucursal_id;
         $controler->inputs->select->cat_sat_uso_cfdi_id = $inputs->selects->cat_sat_uso_cfdi_id;
+        $controler->inputs->select->org_sucursal_id = $inputs->selects->org_sucursal_id;
         $controler->inputs->select->dp_pais_id = $inputs->selects->dp_pais_id;
         $controler->inputs->select->dp_estado_id = $inputs->selects->dp_estado_id;
         $controler->inputs->select->dp_municipio_id = $inputs->selects->dp_municipio_id;
@@ -331,6 +332,13 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
         $selects->dp_colonia_postal_id = $select;
+
+        $select = (new org_sucursal_html(html:$this->html_base))->select_org_sucursal_id(
+            cols: 12, con_registros:true, id_selected:-1,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->org_sucursal_id = $select;
 
         return $selects;
     }
