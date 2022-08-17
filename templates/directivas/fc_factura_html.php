@@ -235,14 +235,14 @@ class fc_factura_html extends html_controler {
         $selects->cat_sat_moneda_id = $select;
 
         $select = (new cat_sat_metodo_pago_html(html:$this->html_base))->select_cat_sat_metodo_pago_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
+            cols: 4, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
         $selects->cat_sat_metodo_pago_id = $select;
 
         $select = (new cat_sat_tipo_de_comprobante_html(html:$this->html_base))->select_cat_sat_tipo_de_comprobante_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
+            cols: 4, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
@@ -270,7 +270,7 @@ class fc_factura_html extends html_controler {
         $selects->fc_cfd_id = $select;
 
         $select = (new cat_sat_forma_pago_html(html:$this->html_base))->select_cat_sat_forma_pago_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
+            cols: 4, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
