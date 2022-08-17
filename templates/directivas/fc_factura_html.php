@@ -475,19 +475,19 @@ class fc_factura_html extends html_controler {
         }
         $texts->serie = $in_serie;
 
-        $in_folio = $this->input_folio(cols: 6,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        $in_folio = $this->input_folio(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_folio);
         }
         $texts->folio = $in_folio;
 
-        $in_fecha= $this->input_fecha(cols: 6,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        $in_fecha= $this->input_fecha(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_fecha);
         }
         $texts->fecha = $in_fecha;
 
-        $in_exportacion = $this->input_exportacion(cols: 6,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        $in_exportacion = $this->input_exportacion(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_exportacion);
         }
