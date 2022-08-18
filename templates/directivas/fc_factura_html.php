@@ -12,7 +12,13 @@ use stdClass;
 
 class fc_factura_html extends html_controler {
 
-
+    /**
+     * Asigna diferentes inputs de paquetes cat_sat, comercial, dirección postal, organigrama
+     * e inputs declarados localmente.
+     * @param controlador_fc_factura $controler Controlador en ejecución
+     * @param stdClass $inputs Inputs precargados
+     * @return array|stdClass
+     */
     private function asigna_inputs(controlador_fc_factura $controler, stdClass $inputs): array|stdClass
     {
         $controler->inputs->select = new stdClass();
