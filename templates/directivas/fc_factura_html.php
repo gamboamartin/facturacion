@@ -80,6 +80,10 @@ class fc_factura_html extends html_controler {
         return $inputs_asignados;
     }
 
+    /** Inicializa los datos para una accion de tipo alta bd
+     * @param PDO $link Conexion a la base de datos
+     * @return array|stdClass
+     */
     private function init_alta(PDO $link): array|stdClass
     {
         $selects = $this->selects_alta(link: $link);
@@ -99,6 +103,10 @@ class fc_factura_html extends html_controler {
         return $alta_inputs;
     }
 
+    /** Inicializa los datos para una accion de tipo modifica bd
+     * @param PDO $link Conexion a la base de datos
+     * @return array|stdClass
+     */
     private function init_modifica(PDO $link, stdClass $row_upd): array|stdClass
     {
 
@@ -298,7 +306,7 @@ class fc_factura_html extends html_controler {
 
     /**
      * Genera los selects a mostrar con sus respectivos parámetros
-     * @param PDO $link
+     * @param PDO $link Conexion a la base de datos
      * @return array|stdClass
      */
     private function selects_alta(PDO $link): array|stdClass
@@ -422,8 +430,8 @@ class fc_factura_html extends html_controler {
 
     /**
      * Genera los selects a mostrar para modificar con sus respectivos parámetros
-     * @param PDO $link
-     * @param stdClass $row_upd
+     * @param PDO $link Conexion a la base de datos
+     * @param stdClass $row_upd Registro obtenido para actualizar
      * @return array|stdClass
      */
     private function selects_modifica(PDO $link, stdClass $row_upd): array|stdClass
@@ -559,8 +567,8 @@ class fc_factura_html extends html_controler {
 
     /**
      * Genera los inputs text a mostrar con sus respectivos parámetros
-     * @param stdClass $row_upd
-     * @param bool $value_vacio
+     * @param stdClass $row_upd Registro obtenido para actualizar
+     * @param bool $value_vacio Si vacio no muestra datos
      * @return array|stdClass
      */
     private function texts_alta(stdClass $row_upd, bool $value_vacio): array|stdClass
