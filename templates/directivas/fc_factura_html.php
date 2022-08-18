@@ -321,7 +321,7 @@ class fc_factura_html extends html_controler {
         $selects->cat_sat_metodo_pago_id = $select;
 
         $select = (new cat_sat_moneda_html(html:$this->html_base))->select_cat_sat_moneda_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
+            cols: 4, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
@@ -365,7 +365,7 @@ class fc_factura_html extends html_controler {
         $selects->cat_sat_forma_pago_id = $select;
 
         $select = (new com_tipo_cambio_html(html:$this->html_base))->select_com_tipo_cambio_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
+            cols: 4, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
@@ -379,7 +379,7 @@ class fc_factura_html extends html_controler {
         $selects->cat_sat_regimen_fiscal_id = $select;
 
         $select = (new cat_sat_uso_cfdi_html(html:$this->html_base))->select_cat_sat_uso_cfdi_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
+            cols: 4, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
@@ -436,7 +436,7 @@ class fc_factura_html extends html_controler {
         $selects = new stdClass();
 
         $select = (new cat_sat_moneda_html(html:$this->html_base))->select_cat_sat_moneda_id(
-            cols: 6, con_registros:true, id_selected:$row_upd->cat_sat_moneda_id,link: $link);
+            cols: 4, con_registros:true, id_selected:$row_upd->cat_sat_moneda_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
@@ -485,7 +485,7 @@ class fc_factura_html extends html_controler {
         $selects->cat_sat_forma_pago_id = $select;
 
         $select = (new com_tipo_cambio_html(html:$this->html_base))->select_com_tipo_cambio_id(
-            cols: 6, con_registros:true, id_selected:$row_upd->com_tipo_cambio_id,link: $link);
+            cols: 4, con_registros:true, id_selected:$row_upd->com_tipo_cambio_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
@@ -499,7 +499,7 @@ class fc_factura_html extends html_controler {
         $selects->cat_sat_regimen_fiscal_id = $select;
 
         $select = (new cat_sat_uso_cfdi_html(html:$this->html_base))->select_cat_sat_uso_cfdi_id(
-            cols: 6, con_registros:true, id_selected:$row_upd->cat_sat_uso_cfdi_id,link: $link);
+            cols: 4, con_registros:true, id_selected:$row_upd->cat_sat_uso_cfdi_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
@@ -540,12 +540,7 @@ class fc_factura_html extends html_controler {
         }
         $selects->dp_colonia_postal_id = $select;
 
-        $select = (new org_sucursal_html(html:$this->html_base))->select_org_sucursal_id(
-            cols: 12, con_registros:true, id_selected:$row_upd->org_sucursal_id,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->org_sucursal_id = $select;
+
 
         return $selects;
     }
