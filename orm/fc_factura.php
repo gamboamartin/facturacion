@@ -18,7 +18,7 @@ class fc_factura extends modelo{
             'cat_sat_moneda_id', 'com_tipo_cambio_id', 'cat_sat_uso_cfdi_id', 'cat_sat_tipo_de_comprobante_id',
             'dp_calle_pertenece_id', 'cat_sat_regimen_fiscal_id', 'com_sucursal_id');
 
-        $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis','serie');
+        $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 
         parent::__construct(link: $link,tabla:  $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas,no_duplicados: $no_duplicados,tipo_campos: array());
