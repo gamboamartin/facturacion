@@ -58,6 +58,14 @@ class fc_factura extends modelo{
         if(!isset($registro['codigo_bis'])) {
             $registro['codigo_bis'] = $registro['serie'].' ' .$registro['folio'];
         }
+        if(!isset($registro['descripcion'])) {
+            $descripcion = $this->descripcion_select_default(registro: $registro,registro_cfd: $registro_cfd,
+                registro_com_sucursal: $registro_com_sucursal);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error generar descripcion',data: $descripcion);
+            }
+            $registro['descripcion'] =$descripcion;
+        }
         if(!isset($registro['descripcion_select'])) {
             $descripcion_select = $this->descripcion_select_default(registro: $registro,registro_cfd: $registro_cfd,
                 registro_com_sucursal: $registro_com_sucursal);
