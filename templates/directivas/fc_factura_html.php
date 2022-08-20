@@ -349,7 +349,6 @@ class fc_factura_html extends html_controler {
         }
         $selects->dp_calle_pertenece_id = $select;
 
-
         $select = (new fc_cfd_html(html:$this->html_base))->select_fc_cfd_id(
             cols: 12, con_registros:true, id_selected:-1,link: $link, label: 'Empresa');
         if(errores::$error){
@@ -443,25 +442,18 @@ class fc_factura_html extends html_controler {
         $selects->cat_sat_moneda_id = $select;
 
         $select = (new cat_sat_metodo_pago_html(html:$this->html_base))->select_cat_sat_metodo_pago_id(
-            cols: 6, con_registros:true, id_selected:$row_upd->cat_sat_metodo_pago_id,link: $link);
+            cols: 4, con_registros:true, id_selected:$row_upd->cat_sat_metodo_pago_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
         $selects->cat_sat_metodo_pago_id = $select;
 
         $select = (new cat_sat_tipo_de_comprobante_html(html:$this->html_base))->select_cat_sat_tipo_de_comprobante_id(
-            cols: 6, con_registros:true, id_selected:$row_upd->cat_sat_tipo_de_comprobante_id,link: $link);
+            cols: 4, con_registros:true, id_selected:$row_upd->cat_sat_tipo_de_comprobante_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
         $selects->cat_sat_tipo_de_comprobante_id = $select;
-
-        $select = (new dp_calle_pertenece_html(html:$this->html_base))->select_dp_calle_pertenece_id(
-            cols: 12, con_registros:true, id_selected:$row_upd->dp_calle_pertenece_id,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->dp_calle_pertenece_id = $select;
 
         $select = (new com_sucursal_html(html:$this->html_base))->select_com_sucursal_id(
             cols: 12, con_registros:true, id_selected:$row_upd->com_sucursal_id,link: $link);
@@ -470,15 +462,22 @@ class fc_factura_html extends html_controler {
         }
         $selects->com_sucursal_id = $select;
 
+        $select = (new dp_calle_pertenece_html(html:$this->html_base))->select_dp_calle_pertenece_id(
+            cols: 6, con_registros:true, id_selected:$row_upd->dp_calle_pertenece_id,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->dp_calle_pertenece_id = $select;
+
         $select = (new fc_cfd_html(html:$this->html_base))->select_fc_cfd_id(
-            cols: 6, con_registros:true, id_selected:$row_upd->fc_cfd_id,link: $link);
+            cols: 12, con_registros:true, id_selected:$row_upd->fc_cfd_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
         $selects->fc_cfd_id = $select;
 
         $select = (new cat_sat_forma_pago_html(html:$this->html_base))->select_cat_sat_forma_pago_id(
-            cols: 6, con_registros:true, id_selected:$row_upd->cat_sat_forma_pago_id,link: $link);
+            cols: 4, con_registros:true, id_selected:$row_upd->cat_sat_forma_pago_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
