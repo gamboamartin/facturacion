@@ -16,4 +16,4 @@
 <?php echo $controlador->inputs->select->cat_sat_moneda_id; ?>
 <?php echo $controlador->inputs->select->com_tipo_cambio_id; ?>
 <?php echo $controlador->inputs->select->cat_sat_uso_cfdi_id; ?>
-<?php include (new views())->ruta_templates.'botons/submit/alta_bd_otro.php';?>
+<?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>
