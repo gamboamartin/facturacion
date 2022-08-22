@@ -11,9 +11,9 @@ class fc_cfd_partida extends modelo{
     public function __construct(PDO $link){
         $tabla = __CLASS__;
         $columnas = array($tabla=>false,'com_producto'=>$tabla);
-        $campos_obligatorios = array('codigo','serie','com_producto_id');
+        $campos_obligatorios = array('codigo','com_producto_id');
 
-        $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis','serie');
+        $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 
         parent::__construct(link: $link,tabla:  $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas,no_duplicados: $no_duplicados,tipo_campos: array());
