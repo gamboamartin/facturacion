@@ -22,7 +22,7 @@ class fc_cfd_partida_html extends html_controler {
     {
         $controler->inputs->select = new stdClass();
         $controler->inputs->select->fc_factura_id = $inputs->selects->fc_factura_id;
-        $controler->inputs->select->com_sucursal_id = $inputs->selects->com_sucursal_id;
+        $controler->inputs->select->com_producto_id = $inputs->selects->com_producto_id;
 
         $controler->inputs->cantidad = $inputs->texts->cantidad;
         $controler->inputs->valor_unitario = $inputs->texts->valor_unitario;
@@ -46,7 +46,7 @@ class fc_cfd_partida_html extends html_controler {
         return $inputs_asignados;
     }
 
-    private function genera_inputs_modifica(controlador_fc_cfd_partida $controler, PDO $link): array|stdClass
+    public function genera_inputs_modifica(controlador_fc_cfd_partida $controler, PDO $link): array|stdClass
     {
         $inputs = $this->init_modifica(link: $link, row_upd: $controler->row_upd);
         if(errores::$error){
@@ -104,12 +104,12 @@ class fc_cfd_partida_html extends html_controler {
     {
         $selects = new stdClass();
 
-        $select = (new com_sucursal_html(html:$this->html_base))->select_com_sucursal_id(
+        $select = (new com_producto_html(html:$this->html_base))->select_com_producto_id(
             cols: 6, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
-        $selects->com_sucursal_id = $select;
+        $selects->com_producto_id = $select;
 
         $select = (new fc_factura_html(html:$this->html_base))->select_fc_factura_id(
             cols: 12, con_registros:true, id_selected:-1,link: $link);
@@ -125,15 +125,15 @@ class fc_cfd_partida_html extends html_controler {
     {
         $selects = new stdClass();
 
-        $select = (new com_sucursal_html(html:$this->html_base))->select_com_sucursal_id(
-            cols: 6, con_registros:true, id_selected:$row_upd->cat_sat_moneda_id,link: $link);
+        $select = (new com_producto_html(html:$this->html_base))->select_com_producto_id(
+            cols: 6, con_registros:true, id_selected:$row_upd->com_producto_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
-        $selects->com_sucursal_id = $select;
+        $selects->com_producto_id = $select;
 
         $select = (new fc_factura_html(html:$this->html_base))->select_fc_factura_id(
-            cols: 12, con_registros:true, id_selected:$row_upd->cat_sat_moneda_id,link: $link);
+            cols: 12, con_registros:true, id_selected:$row_upd->fc_factura_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
