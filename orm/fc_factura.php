@@ -12,8 +12,10 @@ class fc_factura extends modelo{
         $tabla = __CLASS__;
         $columnas = array($tabla=>false,'fc_cfd'=>$tabla, 'cat_sat_forma_pago'=>$tabla,'cat_sat_metodo_pago'=>$tabla,
             'cat_sat_moneda'=>$tabla, 'com_tipo_cambio'=>$tabla, 'cat_sat_uso_cfdi'=>$tabla,
-            'cat_sat_tipo_de_comprobante'=>$tabla, 'dp_calle_pertenece'=>$tabla, 'cat_sat_regimen_fiscal'=>$tabla,
-            'com_sucursal'=>$tabla);
+            'cat_sat_tipo_de_comprobante'=>$tabla, 'cat_sat_regimen_fiscal'=>$tabla, 'com_sucursal'=>$tabla,
+            'dp_calle_pertenece'=>$tabla, 'dp_calle' => 'dp_calle_pertenece', 'dp_colonia_postal'=>'dp_calle_pertenece',
+            'dp_colonia'=>'dp_colonia_postal', 'dp_cp'=>'dp_colonia_postal', 'dp_municipio'=>'dp_cp',
+            'dp_estado'=>'dp_municipio','dp_pais'=>'dp_estado');
         $campos_obligatorios = array('folio', 'fc_cfd_id','cat_sat_forma_pago_id','cat_sat_metodo_pago_id',
             'cat_sat_moneda_id', 'com_tipo_cambio_id', 'cat_sat_uso_cfdi_id', 'cat_sat_tipo_de_comprobante_id',
             'dp_calle_pertenece_id', 'cat_sat_regimen_fiscal_id', 'com_sucursal_id');

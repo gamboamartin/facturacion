@@ -5,6 +5,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
 use gamboamartin\system\html_controler;
 
+use models\base\limpieza;
 use models\fc_factura;
 use PDO;
 use stdClass;
@@ -129,6 +130,11 @@ class fc_factura_html extends html_controler {
 
     public function inputs_fc_factura(controlador_fc_factura $controlador): array|stdClass
     {
+        $init = (new limpieza())->init_modifica_fc_factura(controler: $controlador);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al inicializa datos',data:  $init);
+        }
+
         $inputs = $this->genera_inputs_modifica(controler: $controlador, link: $controlador->link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
