@@ -60,8 +60,12 @@ class controlador_fc_cfd_partida extends system{
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica, header: $header,ws:$ws);
         }
 
+        $params = new stdClass();
+        $params->codigo = new stdClass();
+        $params->codigo->cols = 6;
+
         $inputs = (new fc_cfd_partida_html(html: $this->html_base))->genera_inputs_modifica(controler: $this,
-            link: $this->link);
+            link: $this->link, params: $params);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);
         }

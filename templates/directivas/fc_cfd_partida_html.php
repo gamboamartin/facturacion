@@ -27,6 +27,7 @@ class fc_cfd_partida_html extends html_controler {
         $controler->inputs->cantidad = $inputs->texts->cantidad;
         $controler->inputs->valor_unitario = $inputs->texts->valor_unitario;
         $controler->inputs->descuento = $inputs->texts->descuento;
+        $controler->inputs->codigo = $inputs->texts->codigo;
 
         return $controler->inputs;
     }
@@ -46,9 +47,9 @@ class fc_cfd_partida_html extends html_controler {
         return $inputs_asignados;
     }
 
-    public function genera_inputs_modifica(controlador_fc_cfd_partida $controler, PDO $link): array|stdClass
+    public function genera_inputs_modifica(controlador_fc_cfd_partida $controler, PDO $link, stdClass $params = new stdClass()): array|stdClass
     {
-        $inputs = $this->init_modifica(link: $link, row_upd: $controler->row_upd);
+        $inputs = $this->init_modifica(link: $link, row_upd: $controler->row_upd, params: $params);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
         }
@@ -80,7 +81,7 @@ class fc_cfd_partida_html extends html_controler {
         return $alta_inputs;
     }
 
-    private function init_modifica(PDO $link, stdClass $row_upd): array|stdClass
+    private function init_modifica(PDO $link, stdClass $row_upd, stdClass $params = new stdClass()): array|stdClass
     {
 
         $selects = $this->selects_modifica(link: $link, row_upd: $row_upd);
@@ -88,7 +89,7 @@ class fc_cfd_partida_html extends html_controler {
             return $this->error->error(mensaje: 'Error al generar selects',data:  $selects);
         }
 
-        $texts = $this->texts_alta(row_upd: $row_upd, value_vacio: false);
+        $texts = $this->texts_alta(row_upd: $row_upd, value_vacio: false, params: $params);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar texts',data:  $texts);
         }
@@ -142,9 +143,19 @@ class fc_cfd_partida_html extends html_controler {
         return $selects;
     }
     
-    private function texts_alta(stdClass $row_upd, bool $value_vacio): array|stdClass
+    private function texts_alta(stdClass $row_upd, bool $value_vacio, stdClass $params = new stdClass()): array|stdClass
     {
         $texts = new stdClass();
+
+        $cols_codigo = $params->codigo->cols ?? 6;
+        $disabled_codigo = $params->codigo->disabled ?? false;
+
+        $in_codigo = $this->input_codigo(cols: $cols_codigo,row_upd:  $row_upd,value_vacio:  $value_vacio,
+            disabled: $disabled_codigo);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input',data:  $in_codigo);
+        }
+        $texts->codigo = $in_codigo;
 
         $in_cantidad= $this->input_cantidad(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
         if(errores::$error){
@@ -163,6 +174,7 @@ class fc_cfd_partida_html extends html_controler {
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_valor_unitario);
         }
         $texts->valor_unitario = $in_valor_unitario;
+
 
         return $texts;
     }
