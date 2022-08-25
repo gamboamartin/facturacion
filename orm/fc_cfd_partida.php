@@ -10,7 +10,7 @@ use stdClass;
 class fc_cfd_partida extends modelo{
     public function __construct(PDO $link){
         $tabla = __CLASS__;
-        $columnas = array($tabla=>false,'com_producto'=>$tabla);
+        $columnas = array($tabla=>false,'fc_factura'=>$tabla);
         $campos_obligatorios = array('codigo','com_producto_id');
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
@@ -27,5 +27,6 @@ class fc_cfd_partida extends modelo{
         }
         return $data->fc_cfd_partida_cantidad * $data->fc_cfd_partida_valor_unitario;
     }
+
 
 }
