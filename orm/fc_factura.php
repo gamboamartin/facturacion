@@ -24,6 +24,8 @@ class fc_factura extends modelo{
 
         parent::__construct(link: $link,tabla:  $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas,no_duplicados: $no_duplicados,tipo_campos: array());
+
+
     }
 
     public function alta_bd(): array|stdClass
@@ -87,6 +89,7 @@ class fc_factura extends modelo{
         $registro['cat_sat_regimen_fiscal_id'] = $registro_cfd->cat_sat_regimen_fiscal_id;
         return $registro;
     }
+
     private function descripcion_select_default(array $registro, stdClass $registro_cfd,
                                                 stdClass $registro_com_sucursal): string
     {
