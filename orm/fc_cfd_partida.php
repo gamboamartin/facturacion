@@ -43,4 +43,17 @@ class fc_cfd_partida extends modelo{
         return $r_fc_cfd_partida;
     }
 
+    public function data_partida_obj(int $fc_cfd_partida_id): array|stdClass
+    {
+        $fc_cfd_partida = $this->registro(registro_id: $fc_cfd_partida_id, columnas_en_bruto: true,retorno_obj: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partida',data:  $fc_cfd_partida);
+        }
+
+        $data = new stdClass();
+        $data->fc_cfd_partida = $fc_cfd_partida;
+
+        return $data;
+    }
+
 }
