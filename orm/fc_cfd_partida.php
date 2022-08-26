@@ -28,5 +28,17 @@ class fc_cfd_partida extends modelo{
         return $data->fc_cfd_partida_cantidad * $data->fc_cfd_partida_valor_unitario;
     }
 
+    public function partidas(int $fc_factura_id): array|stdClass
+    {
+        if($fc_factura_id <=0){
+            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
+        }
+        $filtro['fc_factura.id'] = $fc_factura_id;
+        $r_fc_cfd_partida = $this->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_cfd_partida);
+        }
+        return $r_fc_cfd_partida;
+    }
 
 }
