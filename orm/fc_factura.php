@@ -98,7 +98,7 @@ class fc_factura extends modelo{
         return $descripcion_select;
     }
 
-    public function get_factura_sub_total(int $fc_factura_id): float
+    public function get_factura_sub_total(int $fc_factura_id): float|array
     {
         $filtro['fc_factura.id'] = $fc_factura_id;
         $fc_cfd_partida = (new fc_cfd_partida($this->link))->filtro_and( filtro: $filtro);
@@ -116,7 +116,7 @@ class fc_factura extends modelo{
         return $subtotal;
     }
 
-    public function get_descuento(int $fc_factura_id): float
+    public function get_descuento(int $fc_factura_id): float|array
     {
         $filtro['fc_factura.id'] = $fc_factura_id;
         $fc_cfd_partida = (new fc_cfd_partida($this->link))->filtro_and( filtro: $filtro);
