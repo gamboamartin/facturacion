@@ -116,6 +116,23 @@ class fc_factura extends modelo{
         return $subtotal;
     }
 
+    public function get_descuento(int $fc_factura_id): float
+    {
+        $filtro['fc_factura.id'] = $fc_factura_id;
+        $fc_cfd_partida = (new fc_cfd_partida($this->link))->filtro_and( filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener partidas de factura',
+                data: $fc_cfd_partida);
+        }
+
+        $descuento = 0.0;
+
+        foreach ($fc_cfd_partida->registros as $valor) {
+            $descuento += $valor['fc_cfd_partida_descuento'];
+        }
+        return $descuento;
+    }
+
     private function init_data_alta_bd(array $registro): array
     {
         $registro_cfd = (new fc_cfd($this->link))->registro(registro_id: $registro['fc_cfd_id'],retorno_obj: true);
