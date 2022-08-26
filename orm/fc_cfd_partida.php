@@ -10,7 +10,9 @@ use stdClass;
 class fc_cfd_partida extends modelo{
     public function __construct(PDO $link){
         $tabla = __CLASS__;
-        $columnas = array($tabla=>false,'fc_factura'=>$tabla);
+        $columnas = array($tabla=>false,'fc_factura'=>$tabla, 'com_producto' => $tabla,
+            'cat_sat_producto' => 'com_producto','cat_sat_unidad' => 'com_producto',
+            'cat_sat_tipo_factor' => 'com_producto','cat_sat_factor' => 'com_producto');
         $campos_obligatorios = array('codigo','com_producto_id');
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
