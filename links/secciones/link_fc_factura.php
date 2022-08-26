@@ -24,7 +24,7 @@ class link_fc_factura extends links_menu
     public function link_fc_cfd_partida_alta_bd(int $fc_factura_id): string
     {
 
-        $link = $this->link_con_id(accion: 'alta_sucursal_bd', registro_id: $fc_factura_id, seccion: 'fc_factura');
+        $link = $this->link_con_id(accion: 'alta_partida_bd', registro_id: $fc_factura_id, seccion: 'fc_factura');
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar link', data: $link);
         }

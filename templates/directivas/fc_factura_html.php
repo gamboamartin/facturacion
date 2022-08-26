@@ -2,6 +2,7 @@
 namespace html;
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\controllers\controlador_fc_cfd_partida;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
 use gamboamartin\system\html_controler;
 
@@ -51,6 +52,21 @@ class fc_factura_html extends html_controler {
         return $controler->inputs;
     }
 
+    private function asigna_inputs_fc_cfd_partida(controlador_fc_factura $controler, stdClass $inputs): array|stdClass
+    {
+        $controler->inputs->select = new stdClass();
+        $controler->inputs->select->fc_factura_id = $inputs->selects->fc_factura_id;
+        $controler->inputs->select->com_producto_id = $inputs->selects->com_producto_id;
+
+        $controler->inputs->cantidad = $inputs->texts->cantidad;
+        $controler->inputs->valor_unitario = $inputs->texts->valor_unitario;
+        $controler->inputs->descuento = $inputs->texts->descuento;
+        $controler->inputs->codigo = $inputs->texts->codigo;
+
+        return $controler->inputs;
+    }
+
+
     public function genera_inputs_alta(controlador_fc_factura $controler, PDO $link): array|stdClass
     {
         $inputs = $this->init_alta(link: $link);
@@ -79,6 +95,139 @@ class fc_factura_html extends html_controler {
         }
 
         return $inputs_asignados;
+    }
+
+    public function genera_inputs_fc_cfd_partida(controlador_fc_factura $controler, PDO $link): array|stdClass
+    {
+        $inputs = $this->init_alta_fc_cfd_partida(link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
+
+        }
+        $inputs_asignados = $this->asigna_inputs_fc_cfd_partida(controler:$controler, inputs: $inputs);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al asignar inputs',data:  $inputs_asignados);
+        }
+
+        return $inputs_asignados;
+    }
+
+    private function init_alta_fc_cfd_partida(PDO $link): array|stdClass
+    {
+        $selects = $this->selects_alta_fc_cfd_partida(link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar selects',data:  $selects);
+        }
+
+        $texts = $this->texts_alta_fc_cfd_partida(row_upd: new stdClass(), value_vacio: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar texts',data:  $texts);
+        }
+
+        $alta_inputs = new stdClass();
+        $alta_inputs->selects = $selects;
+        $alta_inputs->texts = $texts;
+
+        return $alta_inputs;
+    }
+
+    private function texts_alta_fc_cfd_partida(stdClass $row_upd, bool $value_vacio, stdClass $params = new stdClass()): array|stdClass
+    {
+        $texts = new stdClass();
+
+        $cols_codigo = $params->codigo->cols ?? 4   ;
+        $disabled_codigo = $params->codigo->disabled ?? false;
+
+        $in_codigo = $this->input_codigo(cols: $cols_codigo,row_upd:  $row_upd,value_vacio:  $value_vacio,
+            disabled: $disabled_codigo);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input',data:  $in_codigo);
+        }
+        $texts->codigo = $in_codigo;
+
+        $in_cantidad= $this->input_cantidad(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input',data:  $in_cantidad);
+        }
+        $texts->cantidad = $in_cantidad;
+
+        $in_descuento= $this->input_descuento(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input',data:  $in_descuento);
+        }
+        $texts->descuento = $in_descuento;
+
+        $in_valor_unitario= $this->input_valor_unitario(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input',data:  $in_valor_unitario);
+        }
+        $texts->valor_unitario = $in_valor_unitario;
+
+
+        return $texts;
+    }
+
+    public function input_cantidad(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
+    {
+        $valida = $this->directivas->valida_cols(cols: $cols);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
+        }
+
+        $html =$this->directivas->input_text_required(disable: $disabled,name: 'cantidad',place_holder: 'cantidad',
+            row_upd: $row_upd, value_vacio: $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input', data: $html);
+        }
+
+        $div = $this->directivas->html->div_group(cols: $cols,html:  $html);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar div', data: $div);
+        }
+
+        return $div;
+    }
+
+    public function input_valor_unitario(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
+    {
+        $valida = $this->directivas->valida_cols(cols: $cols);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
+        }
+
+        $html =$this->directivas->input_text_required(disable: $disabled,name: 'valor_unitario',place_holder: 'valor_unitario',
+            row_upd: $row_upd, value_vacio: $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input', data: $html);
+        }
+
+        $div = $this->directivas->html->div_group(cols: $cols,html:  $html);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar div', data: $div);
+        }
+
+        return $div;
+    }
+
+    private function selects_alta_fc_cfd_partida(PDO $link): array|stdClass
+    {
+        $selects = new stdClass();
+
+        $select = (new com_producto_html(html:$this->html_base))->select_com_producto_id(
+            cols: 4, con_registros:true, id_selected:-1,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->com_producto_id = $select;
+
+        $select = (new fc_factura_html(html:$this->html_base))->select_fc_factura_id(
+            cols: 12, con_registros:true, id_selected:-1,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->fc_factura_id = $select;
+
+        return $selects;
     }
 
     /** Inicializa los datos para una accion de tipo alta bd
