@@ -331,21 +331,21 @@ class controlador_fc_factura extends system{
         }
 
         $partida_cantidad_disabled = $params->partida_cantidad->disabled ?? true;
-        $fc_cfd_partida_cantidad = $html->input_cantidad(cols: 6, row_upd:  $fc_cfd_partida,
+        $fc_cfd_partida_cantidad = $html->input_cantidad(cols: 4, row_upd:  $fc_cfd_partida,
             value_vacio: false, disabled: $partida_cantidad_disabled);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener $fc_cfd_partida_cantidad',data:  $fc_cfd_partida_cantidad);
         }
 
         $partida_valor_unitario_disabled = $params->partida_valor_unitario->disabled ?? true;
-        $fc_cfd_partida_valor_unitario = $html->input_valor_unitario(cols: 6, row_upd:  $fc_cfd_partida,
+        $fc_cfd_partida_valor_unitario = $html->input_valor_unitario(cols: 4, row_upd:  $fc_cfd_partida,
             value_vacio: false, disabled: $partida_valor_unitario_disabled);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener $fc_cfd_partida_valor_unitario',data:  $fc_cfd_partida_valor_unitario);
         }
 
         $partida_descuento_disabled = $params->partida_descuento->disabled ?? true;
-        $fc_cfd_partida_descuento = $html->input_descuento(cols: 6, row_upd:  $fc_cfd_partida,
+        $fc_cfd_partida_descuento = $html->input_descuento(cols: 4, row_upd:  $fc_cfd_partida,
             value_vacio: false, disabled: $partida_descuento_disabled);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener $fc_cfd_partida_descuento',data:  $fc_cfd_partida_descuento);
