@@ -67,4 +67,16 @@ class controlador_fc_cfd extends system{
         return $r_modifica;
     }
 
+    public function get_cfd(bool $header, bool $ws = true): array|stdClass
+    {
+        $keys['org_sucursal'] = array('id','descripcion','codigo','codigo_bis');;
+
+        $salida = $this->get_out(header: $header,keys: $keys, ws: $ws);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar salida',data:  $salida,header: $header,ws: $ws);
+        }
+
+        return $salida;
+    }
+
 }
