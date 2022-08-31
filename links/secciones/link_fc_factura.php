@@ -32,6 +32,18 @@ class link_fc_factura extends links_menu
         return $link;
     }
 
+    public function link_fc_factura_partidas(int $fc_factura_id): string
+    {
+
+        $link = $this->link_con_id(accion: 'partidas', registro_id: $fc_factura_id, seccion: 'fc_factura');
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar link', data: $link);
+        }
+
+        return $link;
+    }
+
+
     protected function links(int $registro_id): stdClass|array
     {
 
