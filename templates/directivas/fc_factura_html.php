@@ -46,7 +46,7 @@ class fc_factura_html extends html_controler {
         $controler->inputs->total = $inputs->texts->total;
         $controler->inputs->folio = $inputs->texts->folio;
         $controler->inputs->fecha = $inputs->texts->fecha;
-        $controler->inputs->exportacion = $inputs->texts->exportacion;
+        $controler->inputs->select->exportacion = $inputs->selects->exportacion;
 
         return $controler->inputs;
     }
@@ -295,6 +295,14 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al generar selects',data:  $selects);
         }
 
+        $row_upd = new stdClass();
+        $row_upd->exportacion = -1;
+        $in_exportacion = $this->select_exportacion(cols: 6,row_upd: $row_upd);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input',data:  $in_exportacion);
+        }
+        $selects->exportacion = $in_exportacion;
+
         $texts = $this->texts_alta(row_upd: new stdClass(), value_vacio: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar texts',data:  $texts);
@@ -318,6 +326,12 @@ class fc_factura_html extends html_controler {
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar selects',data:  $selects);
         }
+
+        $in_exportacion = $this->select_exportacion(cols: 6,row_upd: $row_upd);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input',data:  $in_exportacion);
+        }
+        $selects->exportacion = $in_exportacion;
 
         $texts = $this->texts_alta(row_upd: $row_upd, value_vacio: false);
         if(errores::$error){
@@ -536,7 +550,6 @@ class fc_factura_html extends html_controler {
         }
         $selects->cat_sat_moneda_id = $select;
 
-
         $select = (new cat_sat_tipo_de_comprobante_html(html:$this->html_base))->select_cat_sat_tipo_de_comprobante_id(
             cols: 4, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
@@ -628,9 +641,22 @@ class fc_factura_html extends html_controler {
         }
         $selects->dp_colonia_postal_id = $select;
 
-
-
         return $selects;
+    }
+
+    public function select_exportacion(int $cols, stdClass $row_upd){
+        $exportacion = (int)$row_upd->exportacion;
+
+        $values['01']['descripcion_select'] = '01';
+        $values['02']['descripcion_select'] = '02';
+
+        $select = $this->html_base->select(cols:$cols, id_selected: $exportacion, label: 'Exportacion',
+            name:'exportacion', values: $values, extra_params_key: array(),required: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select', data: $select);
+        }
+
+        return $select;
     }
 
     /**
@@ -800,7 +826,7 @@ class fc_factura_html extends html_controler {
         }
         $texts->total = $in_total;
 
-        $in_folio = $this->input_folio(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        $in_folio = $this->input_folio(cols: 6,row_upd:  $row_upd,value_vacio:  $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_folio);
         }
@@ -810,17 +836,11 @@ class fc_factura_html extends html_controler {
             $row_upd->fecha = date('Y-m-d');
         }
 
-        $in_fecha= $this->input_fecha(cols: 4,row_upd:  $row_upd,value_vacio:  false);
+        $in_fecha= $this->input_fecha(cols: 6,row_upd:  $row_upd,value_vacio:  false);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_fecha);
         }
         $texts->fecha = $in_fecha;
-
-        $in_exportacion = $this->input_exportacion(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar input',data:  $in_exportacion);
-        }
-        $texts->exportacion = $in_exportacion;
 
         return $texts;
     }
