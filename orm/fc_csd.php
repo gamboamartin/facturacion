@@ -7,7 +7,7 @@ use models\base\limpieza;
 use PDO;
 use stdClass;
 
-class fc_cfd extends modelo{
+class fc_csd extends modelo{
     public function __construct(PDO $link){
         $tabla = __CLASS__;
         $columnas = array($tabla=>false,'org_sucursal'=>$tabla,'org_empresa'=>'org_sucursal',

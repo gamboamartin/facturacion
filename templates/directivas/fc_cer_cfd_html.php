@@ -113,7 +113,7 @@ class fc_cer_cfd_html extends html_controler {
         }
         $selects->doc_documento_id = $select;
 
-        $select = (new fc_cfd_html(html:$this->html_base))->select_fc_cfd_id(
+        $select = (new fc_csd_html(html:$this->html_base))->select_fc_cfd_id(
             cols: 6, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
@@ -134,7 +134,7 @@ class fc_cer_cfd_html extends html_controler {
         }
         $selects->doc_documento_id = $select;
 
-        $select = (new fc_cfd_html(html:$this->html_base))->select_fc_cfd_id(
+        $select = (new fc_csd_html(html:$this->html_base))->select_fc_cfd_id(
             cols: 6, con_registros:true, id_selected:$row_upd->fc_cfd_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);

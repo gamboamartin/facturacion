@@ -3,20 +3,20 @@ namespace html;
 
 
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\controllers\controlador_fc_cfd;
+use gamboamartin\facturacion\controllers\controlador_fc_csd;
 use gamboamartin\organigrama\controllers\controlador_org_empresa;
 use gamboamartin\system\html_controler;
 
 use models\base\limpieza;
-use models\fc_cfd;
+use models\fc_csd;
 use models\org_empresa;
 use PDO;
 use stdClass;
 
 
-class fc_cfd_html extends html_controler {
+class fc_csd_html extends html_controler {
 
-    private function asigna_inputs(controlador_fc_cfd $controler, stdClass $inputs): array|stdClass
+    private function asigna_inputs(controlador_fc_csd $controler, stdClass $inputs): array|stdClass
     {
         $controler->inputs->select = new stdClass();
         $controler->inputs->select->org_sucursal_id = $inputs->selects->org_sucursal_id;
@@ -25,7 +25,7 @@ class fc_cfd_html extends html_controler {
         return $controler->inputs;
     }
 
-    public function genera_inputs_alta(controlador_fc_cfd $controler, PDO $link): array|stdClass
+    public function genera_inputs_alta(controlador_fc_csd $controler, PDO $link): array|stdClass
     {
         $inputs = $this->init_alta(link: $link);
         if(errores::$error){
@@ -39,7 +39,7 @@ class fc_cfd_html extends html_controler {
         return $inputs_asignados;
     }
 
-    private function genera_inputs_modifica(controlador_fc_cfd $controler, PDO $link): array|stdClass
+    private function genera_inputs_modifica(controlador_fc_csd $controler, PDO $link): array|stdClass
     {
         $inputs = $this->init_modifica(link: $link, row_upd: $controler->row_upd);
         if(errores::$error){
@@ -93,7 +93,7 @@ class fc_cfd_html extends html_controler {
         return $alta_inputs;
     }
 
-    public function inputs_fc_cfd(controlador_fc_cfd $controlador): array|stdClass
+    public function inputs_fc_csd(controlador_fc_csd $controlador): array|stdClass
     {
         $inputs = $this->genera_inputs_modifica(controler: $controlador, link: $controlador->link);
         if(errores::$error){
@@ -151,10 +151,10 @@ class fc_cfd_html extends html_controler {
         return $selects;
     }
 
-    public function select_fc_cfd_id(int $cols, bool $con_registros, int $id_selected, PDO $link,
-                                     string $label = 'CFD'): array|string
+    public function select_fc_csd_id(int $cols, bool $con_registros, int $id_selected, PDO $link,
+                                     string $label = 'CSD'): array|string
     {
-        $modelo = new fc_cfd($link);
+        $modelo = new fc_csd($link);
 
         $select = $this->select_catalogo(cols:$cols,con_registros:$con_registros,id_selected:$id_selected,
             modelo: $modelo, label: $label);

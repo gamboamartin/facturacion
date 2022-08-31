@@ -18,7 +18,6 @@ use gamboamartin\template\html;
 use html\fc_cer_cfd_html;
 use models\fc_cer_cfd;
 use PDO;
-use phpDocumentor\Reflection\DocBlock\Tags\Link;
 use stdClass;
 
 class controlador_fc_cer_cfd extends system{
@@ -32,7 +31,7 @@ class controlador_fc_cer_cfd extends system{
         $obj_link = new links_menu($this->registro_id);
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, paths_conf: $paths_conf);
 
-        $this->titulo_lista = 'CER CFD';
+        $this->titulo_lista = 'CER CSD';
     }
 
     public function alta(bool $header, bool $ws = false): array|string

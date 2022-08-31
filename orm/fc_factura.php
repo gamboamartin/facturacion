@@ -10,7 +10,7 @@ use stdClass;
 class fc_factura extends modelo{
     public function __construct(PDO $link){
         $tabla = __CLASS__;
-        $columnas = array($tabla=>false,'fc_cfd'=>$tabla, 'cat_sat_forma_pago'=>$tabla,'cat_sat_metodo_pago'=>$tabla,
+        $columnas = array($tabla=>false,'fc_csd'=>$tabla, 'cat_sat_forma_pago'=>$tabla,'cat_sat_metodo_pago'=>$tabla,
             'cat_sat_moneda'=>$tabla, 'com_tipo_cambio'=>$tabla, 'cat_sat_uso_cfdi'=>$tabla,
             'cat_sat_tipo_de_comprobante'=>$tabla, 'cat_sat_regimen_fiscal'=>$tabla, 'com_sucursal'=>$tabla,
             'dp_calle_pertenece'=>$tabla, 'dp_calle' => 'dp_calle_pertenece', 'dp_colonia_postal'=>'dp_calle_pertenece',
@@ -135,7 +135,7 @@ class fc_factura extends modelo{
 
     private function init_data_alta_bd(array $registro): array
     {
-        $registro_cfd = (new fc_cfd($this->link))->registro(registro_id: $registro['fc_cfd_id'],retorno_obj: true);
+        $registro_cfd = (new fc_csd($this->link))->registro(registro_id: $registro['fc_cfd_id'],retorno_obj: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc cfd',data: $registro_cfd);
         }
