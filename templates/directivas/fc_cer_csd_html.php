@@ -3,20 +3,20 @@ namespace html;
 
 
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\controllers\controlador_fc_cer_cfd;
+use gamboamartin\facturacion\controllers\controlador_fc_cer_csd;
 use gamboamartin\organigrama\controllers\controlador_org_empresa;
 use gamboamartin\system\html_controler;
 
 use models\base\limpieza;
-use models\fc_cer_cfd;
+use models\fc_cer_csd;
 use models\org_empresa;
 use PDO;
 use stdClass;
 
 
-class fc_cer_cfd_html extends html_controler {
+class fc_cer_csd_html extends html_controler {
 
-    private function asigna_inputs(controlador_fc_cer_cfd $controler, stdClass $inputs): array|stdClass
+    private function asigna_inputs(controlador_fc_cer_csd $controler, stdClass $inputs): array|stdClass
     {
         $controler->inputs->select = new stdClass();
         $controler->inputs->select->doc_documento_id = $inputs->selects->doc_documento_id;
@@ -25,7 +25,7 @@ class fc_cer_cfd_html extends html_controler {
         return $controler->inputs;
     }
 
-    public function genera_inputs_alta(controlador_fc_cer_cfd $controler, PDO $link): array|stdClass
+    public function genera_inputs_alta(controlador_fc_cer_csd $controler, PDO $link): array|stdClass
     {
         $inputs = $this->init_alta(link: $link);
         if(errores::$error){
@@ -39,7 +39,7 @@ class fc_cer_cfd_html extends html_controler {
         return $inputs_asignados;
     }
 
-    private function genera_inputs_modifica(controlador_fc_cer_cfd $controler, PDO $link): array|stdClass
+    private function genera_inputs_modifica(controlador_fc_cer_csd $controler, PDO $link): array|stdClass
     {
         $inputs = $this->init_modifica(link: $link, row_upd: $controler->row_upd);
         if(errores::$error){
@@ -93,7 +93,7 @@ class fc_cer_cfd_html extends html_controler {
         return $alta_inputs;
     }
 
-    public function inputs_fc_cer_cfd(controlador_fc_cer_cfd $controlador): array|stdClass
+    public function inputs_fc_cer_cfd(controlador_fc_cer_csd $controlador): array|stdClass
     {
         $inputs = $this->genera_inputs_modifica(controler: $controlador, link: $controlador->link);
         if(errores::$error){
@@ -146,9 +146,9 @@ class fc_cer_cfd_html extends html_controler {
 
     public function select_fc_cer_cfd_id(int $cols, bool $con_registros, int $id_selected, PDO $link): array|string
     {
-        $modelo = new fc_cer_cfd($link);
+        $modelo = new fc_cer_csd($link);
 
-        $select = $this->select_catalogo(cols:$cols,con_registros:$con_registros,id_selected:$id_selected, modelo: $modelo, label: "CER CFD");
+        $select = $this->select_catalogo(cols:$cols,con_registros:$con_registros,id_selected:$id_selected, modelo: $modelo, label: "CER CSD");
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select', data: $select);
         }

@@ -1,4 +1,4 @@
-<?php /** @var  \gamboamartin\facturacion\controllers\controlador_fc_cer_cfd $controlador  controlador en ejecucion */ ?>
+<?php /** @var  \gamboamartin\facturacion\controllers\controlador_fc_cer_csd $controlador  controlador en ejecucion */ ?>
 <?php use config\views; ?>
 <?php echo $controlador->inputs->codigo; ?>
 <?php echo $controlador->inputs->codigo_bis; ?>
