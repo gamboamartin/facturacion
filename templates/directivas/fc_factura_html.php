@@ -2,7 +2,7 @@
 namespace html;
 
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\controllers\controlador_fc_cfd_partida;
+use gamboamartin\facturacion\controllers\controlador_fc__partida;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
 use gamboamartin\system\html_controler;
 

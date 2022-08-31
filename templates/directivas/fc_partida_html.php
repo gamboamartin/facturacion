@@ -4,7 +4,7 @@ namespace html;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_fc_csd;
-use gamboamartin\facturacion\controllers\controlador_fc_cfd_partida;
+use gamboamartin\facturacion\controllers\controlador_fc_partida;
 use gamboamartin\organigrama\controllers\controlador_org_empresa;
 use gamboamartin\system\html_controler;
 
@@ -15,10 +15,10 @@ use PDO;
 use stdClass;
 
 
-class fc_cfd_partida_html extends html_controler {
+class fc_partida_html extends html_controler {
 
 
-    private function asigna_inputs(controlador_fc_cfd_partida $controler, stdClass $inputs): array|stdClass
+    private function asigna_inputs(controlador_fc_partida $controler, stdClass $inputs): array|stdClass
     {
         $controler->inputs->select = new stdClass();
         $controler->inputs->select->fc_factura_id = $inputs->selects->fc_factura_id;
@@ -32,7 +32,7 @@ class fc_cfd_partida_html extends html_controler {
         return $controler->inputs;
     }
 
-    public function genera_inputs_alta(controlador_fc_cfd_partida $controler, PDO $link): array|stdClass
+    public function genera_inputs_alta(controlador_fc_partida $controler, PDO $link): array|stdClass
     {
         $inputs = $this->init_alta(link: $link);
         if(errores::$error){
@@ -47,7 +47,7 @@ class fc_cfd_partida_html extends html_controler {
         return $inputs_asignados;
     }
 
-    public function genera_inputs_modifica(controlador_fc_cfd_partida $controler, PDO $link, stdClass $params = new stdClass()): array|stdClass
+    public function genera_inputs_modifica(controlador_fc_partida $controler, PDO $link, stdClass $params = new stdClass()): array|stdClass
     {
         $inputs = $this->init_modifica(link: $link, row_upd: $controler->row_upd, params: $params);
         if(errores::$error){

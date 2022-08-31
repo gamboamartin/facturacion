@@ -15,20 +15,19 @@ use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 
 use gamboamartin\template\html;
-use html\fc_cfd_partida_html;
-use models\fc_cfd_partida;
+use html\fc_partida_html;
+use models\fc_partida;
 use PDO;
-use phpDocumentor\Reflection\DocBlock\Tags\Link;
 use stdClass;
 
-class controlador_fc_cfd_partida extends system{
+class controlador_fc_partida extends system{
     public string $rfc = '';
     public string $razon_social = '';
 
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass()){
-        $modelo = new fc_cfd_partida(link: $link);
-        $html_ = new fc_cfd_partida_html(html: $html);
+        $modelo = new fc_partida(link: $link);
+        $html_ = new fc_partida_html(html: $html);
         $obj_link = new links_menu($this->registro_id);
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, paths_conf: $paths_conf);
 
@@ -42,7 +41,7 @@ class controlador_fc_cfd_partida extends system{
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);
         }
 
-        $inputs = (new fc_cfd_partida_html(html: $this->html_base))->genera_inputs_alta(controler: $this,
+        $inputs = (new fc_partida_html(html: $this->html_base))->genera_inputs_alta(controler: $this,
             link: $this->link);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);
@@ -64,7 +63,7 @@ class controlador_fc_cfd_partida extends system{
         $params->codigo = new stdClass();
         $params->codigo->cols = 6;
 
-        $inputs = (new fc_cfd_partida_html(html: $this->html_base))->genera_inputs_modifica(controler: $this,
+        $inputs = (new fc_partida_html(html: $this->html_base))->genera_inputs_modifica(controler: $this,
             link: $this->link, params: $params);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);
