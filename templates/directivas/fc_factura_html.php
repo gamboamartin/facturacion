@@ -813,7 +813,11 @@ class fc_factura_html extends html_controler {
         }
         $texts->folio = $in_folio;
 
-        $in_fecha= $this->input_fecha(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        if(!isset($row_upd->fecha) || $row_upd->fecha === '0000-00-00'){
+            $row_upd->fecha = date('Y-m-d');
+        }
+
+        $in_fecha= $this->input_fecha(cols: 4,row_upd:  $row_upd,value_vacio:  false);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_fecha);
         }
