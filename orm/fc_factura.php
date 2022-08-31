@@ -47,7 +47,7 @@ class fc_factura extends modelo{
 
 
 
-    private function defaults_alta_bd(array $registro, stdClass $registro_cfd): array
+    private function defaults_alta_bd(array $registro, stdClass $registro_csd): array
     {
 
         $registro_com_sucursal = (new com_sucursal($this->link))->registro(
@@ -62,7 +62,7 @@ class fc_factura extends modelo{
             $registro['codigo_bis'] = $registro['serie'].' ' .$registro['folio'];
         }
         if(!isset($registro['descripcion'])) {
-            $descripcion = $this->descripcion_select_default(registro: $registro,registro_cfd: $registro_cfd,
+            $descripcion = $this->descripcion_select_default(registro: $registro,registro_csd: $registro_csd,
                 registro_com_sucursal: $registro_com_sucursal);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error generar descripcion',data: $descripcion);
@@ -70,7 +70,7 @@ class fc_factura extends modelo{
             $registro['descripcion'] =$descripcion;
         }
         if(!isset($registro['descripcion_select'])) {
-            $descripcion_select = $this->descripcion_select_default(registro: $registro,registro_cfd: $registro_cfd,
+            $descripcion_select = $this->descripcion_select_default(registro: $registro,registro_csd: $registro_csd,
                 registro_com_sucursal: $registro_com_sucursal);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error generar descripcion',data: $descripcion_select);
@@ -82,18 +82,18 @@ class fc_factura extends modelo{
         }
         return $registro;
     }
-    private function default_alta_emisor_data(array $registro, stdClass $registro_cfd): array
+    private function default_alta_emisor_data(array $registro, stdClass $registro_csd): array
     {
-        $registro['dp_calle_pertenece_id'] = $registro_cfd->dp_calle_pertenece_id;
-        $registro['cat_sat_regimen_fiscal_id'] = $registro_cfd->cat_sat_regimen_fiscal_id;
+        $registro['dp_calle_pertenece_id'] = $registro_csd->dp_calle_pertenece_id;
+        $registro['cat_sat_regimen_fiscal_id'] = $registro_csd->cat_sat_regimen_fiscal_id;
         return $registro;
     }
 
-    private function descripcion_select_default(array $registro, stdClass $registro_cfd,
+    private function descripcion_select_default(array $registro, stdClass $registro_csd,
                                                 stdClass $registro_com_sucursal): string
     {
         $descripcion_select = $registro['folio'].' ';
-        $descripcion_select .= $registro_cfd->org_empresa_razon_social.' ';
+        $descripcion_select .= $registro_csd->org_empresa_razon_social.' ';
         $descripcion_select .= $registro_com_sucursal->com_cliente_razon_social;
         return $descripcion_select;
     }
@@ -101,16 +101,16 @@ class fc_factura extends modelo{
     public function get_factura_sub_total(int $fc_factura_id): float|array
     {
         $filtro['fc_factura.id'] = $fc_factura_id;
-        $fc_cfd_partida = (new fc_cfd_partida($this->link))->filtro_and( filtro: $filtro);
+        $fc_partida = (new fc_partida($this->link))->filtro_and( filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas de factura',
-                data: $fc_cfd_partida);
+                data: $fc_partida);
         }
 
         $subtotal = 0.0;
 
-        foreach ($fc_cfd_partida->registros as $valor) {
-            $subtotal += (new fc_cfd_partida($this->link))->calculo_sub_total_partida($valor['fc_cfd_partida_id']);
+        foreach ($fc_partida->registros as $valor) {
+            $subtotal += (new fc_partida($this->link))->calculo_sub_total_partida($valor['fc_partida_id']);
         }
 
         return $subtotal;
@@ -119,25 +119,25 @@ class fc_factura extends modelo{
     public function get_descuento(int $fc_factura_id): float|array
     {
         $filtro['fc_factura.id'] = $fc_factura_id;
-        $fc_cfd_partida = (new fc_cfd_partida($this->link))->filtro_and( filtro: $filtro);
+        $fc_partida = (new fc_partida($this->link))->filtro_and( filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas de factura',
-                data: $fc_cfd_partida);
+                data: $fc_partida);
         }
 
         $descuento = 0.0;
 
-        foreach ($fc_cfd_partida->registros as $valor) {
-            $descuento += $valor['fc_cfd_partida_descuento'];
+        foreach ($fc_partida->registros as $valor) {
+            $descuento += $valor['fc_partida_descuento'];
         }
         return $descuento;
     }
 
     private function init_data_alta_bd(array $registro): array
     {
-        $registro_cfd = (new fc_csd($this->link))->registro(registro_id: $registro['fc_cfd_id'],retorno_obj: true);
+        $registro_csd = (new fc_csd($this->link))->registro(registro_id: $registro['fc_csd_id'],retorno_obj: true);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener fc cfd',data: $registro_cfd);
+            return $this->error->error(mensaje: 'Error al obtener fc csd',data: $registro_csd);
         }
 
 
@@ -149,14 +149,14 @@ class fc_factura extends modelo{
 
 
 
-        $registro = $this->default_alta_emisor_data(registro: $registro, registro_cfd: $registro_cfd);
+        $registro = $this->default_alta_emisor_data(registro: $registro, registro_csd: $registro_csd);
 
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar keys',data: $registro);
         }
 
 
-        $registro = $this->defaults_alta_bd(registro:$registro,registro_cfd:  $registro_cfd);
+        $registro = $this->defaults_alta_bd(registro:$registro,registro_csd:  $registro_csd);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar registro',data: $registro);
         }
