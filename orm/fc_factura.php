@@ -101,7 +101,7 @@ class fc_factura extends modelo{
     public function get_factura_sub_total(int $fc_factura_id): float|array
     {
         $filtro['fc_factura.id'] = $fc_factura_id;
-        $fc_cfd_partida = (new fc_cfd_partida($this->link))->filtro_and( filtro: $filtro);
+        $fc_cfd_partida = (new fc_partida($this->link))->filtro_and( filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas de factura',
                 data: $fc_cfd_partida);
@@ -110,7 +110,7 @@ class fc_factura extends modelo{
         $subtotal = 0.0;
 
         foreach ($fc_cfd_partida->registros as $valor) {
-            $subtotal += (new fc_cfd_partida($this->link))->calculo_sub_total_partida($valor['fc_cfd_partida_id']);
+            $subtotal += (new fc_partida($this->link))->calculo_sub_total_partida($valor['fc_cfd_partida_id']);
         }
 
         return $subtotal;
@@ -119,7 +119,7 @@ class fc_factura extends modelo{
     public function get_descuento(int $fc_factura_id): float|array
     {
         $filtro['fc_factura.id'] = $fc_factura_id;
-        $fc_cfd_partida = (new fc_cfd_partida($this->link))->filtro_and( filtro: $filtro);
+        $fc_cfd_partida = (new fc_partida($this->link))->filtro_and( filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas de factura',
                 data: $fc_cfd_partida);
