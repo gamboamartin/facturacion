@@ -26,6 +26,7 @@ class controlador_fc_factura extends system{
     public string $rfc = '';
     public string $razon_social = '';
     public string $link_fc_partida_alta_bd = '';
+    public string $link_fc_factura_partidas = '';
     public int $fc_factura_id = -1;
     public stdClass $partidas;
 
@@ -47,6 +48,15 @@ class controlador_fc_factura extends system{
             exit;
         }
         $this->link_fc_partida_alta_bd = $link_fc_partida_alta_bd;
+
+        $link_fc_partida_partidas = $obj_link->link_fc_factura_partidas(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al generar link sucursal alta',
+                data:  $link_fc_partida_partidas);
+            print_r($error);
+            exit;
+        }
+        $this->link_fc_factura_partidas = $link_fc_partida_partidas;
     }
 
     public function alta(bool $header, bool $ws = false): array|string

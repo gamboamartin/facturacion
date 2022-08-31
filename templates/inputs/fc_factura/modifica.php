@@ -18,12 +18,14 @@
 <?php echo $controlador->inputs->select->com_tipo_cambio_id; ?>
 <?php echo $controlador->inputs->select->cat_sat_uso_cfdi_id; ?>
 <?php include (new views())->ruta_templates.'botons/submit/modifica_bd.php';?>
+<a href="<?php echo $controlador->link_fc_factura_partidas; ?>" class="btn btn-info"><i class="icon-edit"></i>
+    Nueva Partida
+</a>
 
-
-<div class="widget-header">
-    <h2>Partidas</h2>
-</div>
             <div class="widget widget-box box-container widget-mylistings">
+                <div class="widget-header">
+                    <h2>Partidas</h2>
+                </div>
                 <div class="">
                     <table class="table table-striped footable-sort" data-sorting="true">
                         <th>Id</th>
