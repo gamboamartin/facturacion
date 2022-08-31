@@ -131,6 +131,22 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);
         }
 
+        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->fc_factura_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
+        }
+
+        foreach ($partidas->registros as $indice=>$partida){
+            $partida = $this->data_partida_btn(partida:$partida);
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al asignar botones',data:  $partida, header: $header,ws:$ws);
+            }
+            $partidas->registros[$indice] = $partida;
+
+        }
+
+        $this->partidas = $partidas;
+
         return $r_modifica;
     }
 

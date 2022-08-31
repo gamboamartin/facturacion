@@ -17,4 +17,50 @@
 <?php echo $controlador->inputs->select->cat_sat_moneda_id; ?>
 <?php echo $controlador->inputs->select->com_tipo_cambio_id; ?>
 <?php echo $controlador->inputs->select->cat_sat_uso_cfdi_id; ?>
-<?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>
+<?php include (new views())->ruta_templates.'botons/submit/modifica_bd.php';?>
+
+
+<div class="widget-header">
+    <h2>Partidas</h2>
+</div>
+            <div class="widget widget-box box-container widget-mylistings">
+                <div class="">
+                    <table class="table table-striped footable-sort" data-sorting="true">
+                        <th>Id</th>
+                        <th>Codigo</th>
+                        <th>Descripcion</th>
+                        <th>Producto SAT</th>
+                        <th>Unidad</th>
+                        <th>Cantidad</th>
+                        <th>Valor Unitario</th>
+                        <th>Descuento</th>
+                        <th>Ver</th>
+                        <th>Modifica</th>
+                        <th>Elimina</th>
+
+                        <tbody>
+                        <?php foreach ($controlador->partidas->registros as $partida){
+                            ?>
+                            <tr>
+                                <td><?php echo $partida['fc_partida_id']; ?></td>
+                                <td><?php echo $partida['fc_partida_codigo']; ?></td>
+                                <td><?php echo $partida['fc_partida_descripcion']; ?></td>
+                                <td><?php echo $partida['cat_sat_producto_descripcion']; ?></td>
+                                <td><?php echo $partida['cat_sat_unidad_descripcion']; ?></td>
+                                <td><?php echo $partida['fc_partida_cantidad']; ?></td>
+                                <td><?php echo $partida['fc_partida_valor_unitario']; ?></td>
+                                <td><?php echo $partida['fc_partida_descuento']; ?></td>
+                                <td><?php echo $partida['link_ve']; ?></td>
+                                <td><?php echo $partida['link_modifica']; ?></td>
+                                <td><?php echo $partida['link_elimina']; ?></td>
+
+                            </tr>
+                        <?php } ?>
+                        </tbody>
+                    </table>
+                    <div class="box-body">
+                        * Total registros: <?php echo $controlador->partidas->n_registros; ?><br />
+                        * Fecha Hora: <?php echo $controlador->fecha_hoy; ?>
+                    </div>
+                </div>
+            </div>
