@@ -186,10 +186,10 @@ class controlador_fc_factura extends system{
     private function data_partida_btn(array $partida): array
     {
 
-        $params['fc_cfd_partida_id'] = $partida['fc_cfd_partida_id'];
+        $params['fc_partida_id'] = $partida['fc_partida_id'];
 
         $btn_elimina = $this->html_base->button_href(accion:'elimina_bd',etiqueta:  'Elimina',
-            registro_id:  $partida['fc_cfd_partida_id'], seccion: 'fc_cfd_partida',style:  'danger');
+            registro_id:  $partida['fc_partida_id'], seccion: 'fc_partida',style:  'danger');
 
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar btn',data:  $btn_elimina);
@@ -223,7 +223,7 @@ class controlador_fc_factura extends system{
             return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
         }
 
-        $inputs = (new fc_factura_html(html: $this->html_base))->genera_inputs_fc_cfd_partida(controler:$this,
+        $inputs = (new fc_factura_html(html: $this->html_base))->genera_inputs_fc_partida(controler:$this,
             link: $this->link);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);
@@ -236,7 +236,7 @@ class controlador_fc_factura extends system{
         }
 
 
-        $partidas = (new fc_cfd_partida($this->link))->partidas(fc_factura_id: $this->fc_factura_id);
+        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->fc_factura_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
         }
@@ -273,7 +273,7 @@ class controlador_fc_factura extends system{
     public function ve_partida(bool $header, bool $ws = false): array|stdClass
     {
 
-        $keys = array('fc_cfd_partida_id','registro_id');
+        $keys = array('fc_partida_id','registro_id');
         $valida = $this->validacion->valida_ids(keys: $keys, registro: $_GET);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al validar GET',data:  $valida, header: $header,ws:$ws);
@@ -284,20 +284,20 @@ class controlador_fc_factura extends system{
             return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
         }
 
-        $inputs = (new fc_factura_html(html: $this->html_base))->genera_inputs_fc_cfd_partida(controler:$this,
+        $inputs = (new fc_factura_html(html: $this->html_base))->genera_inputs_fc_partida(controler:$this,
             link: $this->link);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);
         }
 
-        $data_base = $this->base_data_partida(fc_cfd_partida_id: $_GET['fc_cfd_partida_id']);
+        $data_base = $this->base_data_partida(fc_partida_id: $_GET['fc_partida_id']);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar base',data:  $data_base->htmls,
                 header: $header,ws:$ws);
         }
 
-        $inputs_partida = $this->inputs_partida(html: $data_base->htmls->fc_cfd_partida,
-            fc_cfd_partida: $data_base->data->data_partida->fc_cfd_partida);
+        $inputs_partida = $this->inputs_partida(html: $data_base->htmls->fc_partida,
+            fc_partida: $data_base->data->data_partida->fc_partida);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar inputs partida',
                 data:  $inputs_partida, header: $header,ws:$ws);
@@ -306,60 +306,60 @@ class controlador_fc_factura extends system{
         return $inputs_partida;
     }
 
-    private function inputs_partida(fc_partida_html $html, stdClass $fc_cfd_partida,
+    private function inputs_partida(fc_partida_html $html, stdClass $fc_partida,
                                     stdClass         $params = new stdClass()): array|stdClass{
         $partida_codigo_disabled = $params->partida_codigo->disabled ?? true;
-        $fc_cfd_partida_codigo = $html->input_codigo(cols: 4,row_upd:  $fc_cfd_partida, value_vacio: false,
+        $fc_partida_codigo = $html->input_codigo(cols: 4,row_upd:  $fc_partida, value_vacio: false,
             disabled: $partida_codigo_disabled);
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener partida_codigo select',data:  $fc_cfd_partida_codigo);
+            return $this->errores->error(mensaje: 'Error al obtener partida_codigo select',data:  $fc_partida_codigo);
         }
 
         $partida_codigo_bis_disabled = $params->partida_codigo_bis->disabled ?? true;
-        $fc_cfd_partida_codigo_bis = $html->input_codigo_bis(cols: 4,row_upd:  $fc_cfd_partida, value_vacio: false,
+        $fc_partida_codigo_bis = $html->input_codigo_bis(cols: 4,row_upd:  $fc_partida, value_vacio: false,
             disabled: $partida_codigo_bis_disabled);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener partida_codigo_bis',
-                data:  $fc_cfd_partida_codigo_bis);
+                data:  $fc_partida_codigo_bis);
         }
 
         $partida_descripcion_disabled = $params->partida_descripcion->disabled ?? true;
-        $fc_cfd_partida_descripcion = $html->input_descripcion(cols: 12,row_upd:  $fc_cfd_partida, value_vacio: false,
+        $fc_partida_descripcion = $html->input_descripcion(cols: 12,row_upd:  $fc_partida, value_vacio: false,
             disabled: $partida_descripcion_disabled);
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener descripcion',data:  $fc_cfd_partida_descripcion);
+            return $this->errores->error(mensaje: 'Error al obtener descripcion',data:  $fc_partida_descripcion);
         }
 
         $partida_cantidad_disabled = $params->partida_cantidad->disabled ?? true;
-        $fc_cfd_partida_cantidad = $html->input_cantidad(cols: 4, row_upd:  $fc_cfd_partida,
+        $fc_partida_cantidad = $html->input_cantidad(cols: 4, row_upd:  $fc_partida,
             value_vacio: false, disabled: $partida_cantidad_disabled);
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener $fc_cfd_partida_cantidad',data:  $fc_cfd_partida_cantidad);
+            return $this->errores->error(mensaje: 'Error al obtener $fc_partida_cantidad',data:  $fc_partida_cantidad);
         }
 
         $partida_valor_unitario_disabled = $params->partida_valor_unitario->disabled ?? true;
-        $fc_cfd_partida_valor_unitario = $html->input_valor_unitario(cols: 4, row_upd:  $fc_cfd_partida,
+        $fc_partida_valor_unitario = $html->input_valor_unitario(cols: 4, row_upd:  $fc_partida,
             value_vacio: false, disabled: $partida_valor_unitario_disabled);
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener $fc_cfd_partida_valor_unitario',data:  $fc_cfd_partida_valor_unitario);
+            return $this->errores->error(mensaje: 'Error al obtener $fc_partida_valor_unitario',data:  $fc_partida_valor_unitario);
         }
 
         $partida_descuento_disabled = $params->partida_descuento->disabled ?? true;
-        $fc_cfd_partida_descuento = $html->input_descuento(cols: 4, row_upd:  $fc_cfd_partida,
+        $fc_partida_descuento = $html->input_descuento(cols: 4, row_upd:  $fc_partida,
             value_vacio: false, disabled: $partida_descuento_disabled);
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener $fc_cfd_partida_descuento',data:  $fc_cfd_partida_descuento);
+            return $this->errores->error(mensaje: 'Error al obtener $fc_partida_descuento',data:  $fc_partida_descuento);
         }
 
         $factura_id_disabled = $params->fc_factura_id->disabled ?? true;
-        $fc_factura_id = $html->input_id(cols: 12,row_upd:  $fc_cfd_partida, value_vacio: false,
+        $fc_factura_id = $html->input_id(cols: 12,row_upd:  $fc_partida, value_vacio: false,
             disabled: $factura_id_disabled,place_holder: 'ID factura');
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener sucursal_id select',data:  $fc_factura_id);
         }
         
         $com_producto_id_disabled = $params->com_producto_id->disabled ?? true;
-        $com_producto_id = $html->input_id(cols: 4,row_upd:  $fc_cfd_partida, value_vacio: false,
+        $com_producto_id = $html->input_id(cols: 4,row_upd:  $fc_partida, value_vacio: false,
             disabled: $com_producto_id_disabled,place_holder: 'ID Producto');
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener sucursal_id select',data:  $com_producto_id);
@@ -367,19 +367,19 @@ class controlador_fc_factura extends system{
 
         $this->inputs->fc_factura_id = $fc_factura_id;
         $this->inputs->com_producto_id = $com_producto_id;
-        $this->inputs->codigo = $fc_cfd_partida_codigo;
-        $this->inputs->codigo_bis = $fc_cfd_partida_codigo_bis;
-        $this->inputs->descripcion = $fc_cfd_partida_descripcion;
-        $this->inputs->cantidad = $fc_cfd_partida_cantidad;
-        $this->inputs->valor_unitario = $fc_cfd_partida_valor_unitario;
-        $this->inputs->descuento = $fc_cfd_partida_descuento;
+        $this->inputs->codigo = $fc_partida_codigo;
+        $this->inputs->codigo_bis = $fc_partida_codigo_bis;
+        $this->inputs->descripcion = $fc_partida_descripcion;
+        $this->inputs->cantidad = $fc_partida_cantidad;
+        $this->inputs->valor_unitario = $fc_partida_valor_unitario;
+        $this->inputs->descuento = $fc_partida_descuento;
 
         return $this->inputs;
     }
 
-    private function base_data_partida(int $fc_cfd_partida_id): array|stdClass
+    private function base_data_partida(int $fc_partida_id): array|stdClass
     {
-        $data = $this->data_partida(fc_cfd_partida_id: $fc_cfd_partida_id);
+        $data = $this->data_partida(fc_partida_id: $fc_partida_id);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al cargar datos de partida', data: $data);
         }
@@ -397,17 +397,17 @@ class controlador_fc_factura extends system{
 
     private function htmls_partida(): stdClass
     {
-        $fc_cfd_partida_html = (new fc_partida_html(html: $this->html_base));
+        $fc_partida_html = (new fc_partida_html(html: $this->html_base));
 
         $data = new stdClass();
-        $data->fc_cfd_partida = $fc_cfd_partida_html;
+        $data->fc_partida = $fc_partida_html;
         
         return $data;
     }
 
-    private function data_partida(int $fc_cfd_partida_id): array|stdClass
+    private function data_partida(int $fc_partida_id): array|stdClass
     {
-        $data_partida = (new fc_partida($this->link))->data_partida_obj(fc_cfd_partida_id: $fc_cfd_partida_id);
+        $data_partida = (new fc_partida($this->link))->data_partida_obj(fc_partida_id: $fc_partida_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener partida',data:  $data_partida);
         }
