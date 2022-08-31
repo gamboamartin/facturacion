@@ -808,20 +808,29 @@ class fc_factura_html extends html_controler {
         }
         $texts->serie = $in_serie;
 
+        if(!isset($row_upd->subtotal)){
+            $row_upd->subtotal = 0;
+        }
+        if(!isset($row_upd->descuento)){
+            $row_upd->descuento = 0;
+        }
+        if(!isset($row_upd->total)){
+            $row_upd->total = 0;
+        }
 
-        $in_subtotal = $this->input_subtotal(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        $in_subtotal = $this->input_subtotal(cols: 4,row_upd:  $row_upd,value_vacio:  false);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_subtotal);
         }
         $texts->subtotal = $in_subtotal;
 
-        $in_descuento = $this->input_descuento(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        $in_descuento = $this->input_descuento(cols: 4,row_upd:  $row_upd,value_vacio:  false);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_descuento);
         }
         $texts->descuento = $in_descuento;
 
-        $in_total = $this->input_total(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        $in_total = $this->input_total(cols: 4,row_upd:  $row_upd,value_vacio:  false);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_total);
         }
