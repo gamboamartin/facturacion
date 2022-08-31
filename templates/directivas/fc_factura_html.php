@@ -24,7 +24,7 @@ class fc_factura_html extends html_controler {
     private function asigna_inputs(controlador_fc_factura $controler, stdClass $inputs): array|stdClass
     {
         $controler->inputs->select = new stdClass();
-        $controler->inputs->select->fc_cfd_id = $inputs->selects->fc_cfd_id;
+        $controler->inputs->select->fc_csd_id = $inputs->selects->fc_csd_id;
         $controler->inputs->select->cat_sat_forma_pago_id = $inputs->selects->cat_sat_forma_pago_id;
         $controler->inputs->select->cat_sat_metodo_pago_id = $inputs->selects->cat_sat_metodo_pago_id;
         $controler->inputs->select->cat_sat_moneda_id = $inputs->selects->cat_sat_moneda_id;
@@ -52,7 +52,7 @@ class fc_factura_html extends html_controler {
         return $controler->inputs;
     }
 
-    private function asigna_inputs_fc_cfd_partida(controlador_fc_factura $controler, stdClass $inputs): array|stdClass
+    private function asigna_inputs_fc_partida(controlador_fc_factura $controler, stdClass $inputs): array|stdClass
     {
         $controler->inputs->select = new stdClass();
         $controler->inputs->select->fc_factura_id = $inputs->selects->fc_factura_id;
@@ -97,14 +97,14 @@ class fc_factura_html extends html_controler {
         return $inputs_asignados;
     }
 
-    public function genera_inputs_fc_cfd_partida(controlador_fc_factura $controler, PDO $link): array|stdClass
+    public function genera_inputs_fc_partida(controlador_fc_factura $controler, PDO $link): array|stdClass
     {
-        $inputs = $this->init_alta_fc_cfd_partida(link: $link);
+        $inputs = $this->init_alta_fc_partida(link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
 
         }
-        $inputs_asignados = $this->asigna_inputs_fc_cfd_partida(controler:$controler, inputs: $inputs);
+        $inputs_asignados = $this->asigna_inputs_fc_partida(controler:$controler, inputs: $inputs);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al asignar inputs',data:  $inputs_asignados);
         }
@@ -112,14 +112,14 @@ class fc_factura_html extends html_controler {
         return $inputs_asignados;
     }
 
-    public function genera_inputs_fc_cfd_partida_modifica(controlador_fc_factura $controler, PDO $link): array|stdClass
+    public function genera_inputs_fc_partida_modifica(controlador_fc_factura $controler, PDO $link): array|stdClass
     {
-        $inputs = $this->init_modifica_fc_cfd_partida(link: $link, row_upd: $controler->row_upd);
+        $inputs = $this->init_modifica_fc_partida(link: $link, row_upd: $controler->row_upd);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
 
         }
-        $inputs_asignados = $this->asigna_inputs_fc_cfd_partida(controler:$controler, inputs: $inputs);
+        $inputs_asignados = $this->asigna_inputs_fc_partida(controler:$controler, inputs: $inputs);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al asignar inputs',data:  $inputs_asignados);
         }
@@ -127,14 +127,14 @@ class fc_factura_html extends html_controler {
         return $inputs_asignados;
     }
 
-    private function init_alta_fc_cfd_partida(PDO $link): array|stdClass
+    private function init_alta_fc_partida(PDO $link): array|stdClass
     {
-        $selects = $this->selects_alta_fc_cfd_partida(link: $link);
+        $selects = $this->selects_alta_fc_partida(link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar selects',data:  $selects);
         }
 
-        $texts = $this->texts_alta_fc_cfd_partida(row_upd: new stdClass(), value_vacio: true);
+        $texts = $this->texts_alta_fc_partida(row_upd: new stdClass(), value_vacio: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar texts',data:  $texts);
         }
@@ -146,14 +146,14 @@ class fc_factura_html extends html_controler {
         return $alta_inputs;
     }
 
-    private function init_modifica_fc_cfd_partida(PDO $link, stdClass $row_upd): array|stdClass
+    private function init_modifica_fc_partida(PDO $link, stdClass $row_upd): array|stdClass
     {
-        $selects = $this->selects_modifica_fc_cfd_partida(link: $link, row_upd: $row_upd);
+        $selects = $this->selects_modifica_fc_partida(link: $link, row_upd: $row_upd);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar selects',data:  $selects);
         }
 
-        $texts = $this->texts_alta_fc_cfd_partida(row_upd: $row_upd, value_vacio: false);
+        $texts = $this->texts_alta_fc_partida(row_upd: $row_upd, value_vacio: false);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar texts',data:  $texts);
         }
@@ -165,7 +165,7 @@ class fc_factura_html extends html_controler {
         return $alta_inputs;
     }
 
-    private function texts_alta_fc_cfd_partida(stdClass $row_upd, bool $value_vacio, stdClass $params = new stdClass()): array|stdClass
+    private function texts_alta_fc_partida(stdClass $row_upd, bool $value_vacio, stdClass $params = new stdClass()): array|stdClass
     {
         $texts = new stdClass();
 
@@ -243,7 +243,7 @@ class fc_factura_html extends html_controler {
         return $div;
     }
 
-    private function selects_alta_fc_cfd_partida(PDO $link): array|stdClass
+    private function selects_alta_fc_partida(PDO $link): array|stdClass
     {
         $selects = new stdClass();
 
@@ -264,7 +264,7 @@ class fc_factura_html extends html_controler {
         return $selects;
     }
 
-    private function selects_modifica_fc_cfd_partida(PDO $link, stdClass $row_upd): array|stdClass
+    private function selects_modifica_fc_partida(PDO $link, stdClass $row_upd): array|stdClass
     {
         $selects = new stdClass();
 
@@ -559,12 +559,12 @@ class fc_factura_html extends html_controler {
         }
         $selects->dp_calle_pertenece_id = $select;
 
-        $select = (new fc_csd_html(html:$this->html_base))->select_fc_cfd_id(
+        $select = (new fc_csd_html(html:$this->html_base))->select_fc_csd_id(
             cols: 12, con_registros:true, id_selected:-1,link: $link, label: 'Empresa');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
-        $selects->fc_cfd_id = $select;
+        $selects->fc_csd_id = $select;
 
         $select = (new cat_sat_forma_pago_html(html:$this->html_base))->select_cat_sat_forma_pago_id(
             cols: 4, con_registros:true, id_selected:-1,link: $link);
@@ -679,12 +679,12 @@ class fc_factura_html extends html_controler {
         }
         $selects->dp_calle_pertenece_id = $select;
 
-        $select = (new fc_csd_html(html:$this->html_base))->select_fc_cfd_id(
-            cols: 12, con_registros:true, id_selected:$row_upd->fc_cfd_id,link: $link);
+        $select = (new fc_csd_html(html:$this->html_base))->select_fc_csd_id(
+            cols: 12, con_registros:true, id_selected:$row_upd->fc_csd_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
-        $selects->fc_cfd_id = $select;
+        $selects->fc_csd_id = $select;
 
         $select = (new cat_sat_forma_pago_html(html:$this->html_base))->select_cat_sat_forma_pago_id(
             cols: 4, con_registros:true, id_selected:$row_upd->cat_sat_forma_pago_id,link: $link);
