@@ -808,6 +808,7 @@ class fc_factura_html extends html_controler {
         }
         $texts->serie = $in_serie;
 
+
         $in_subtotal = $this->input_subtotal(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_subtotal);
@@ -835,6 +836,7 @@ class fc_factura_html extends html_controler {
         if(!isset($row_upd->fecha) || $row_upd->fecha === '0000-00-00'){
             $row_upd->fecha = date('Y-m-d');
         }
+        $row_upd->fecha = date('Y-m-d',strtotime($row_upd->fecha));
 
         $in_fecha= $this->input_fecha(cols: 6,row_upd:  $row_upd,value_vacio:  false);
         if(errores::$error){
