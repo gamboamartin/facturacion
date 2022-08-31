@@ -5,7 +5,6 @@
 <?php echo $controlador->inputs->folio; ?>
 <?php echo $controlador->inputs->fecha; ?>
 <?php echo $controlador->inputs->exportacion; ?>
-<?php echo $controlador->inputs->version; ?>
 <?php echo $controlador->inputs->serie; ?>
 <?php echo $controlador->inputs->subtotal; ?>
 <?php echo $controlador->inputs->descuento; ?>

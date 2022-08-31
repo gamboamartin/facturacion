@@ -40,7 +40,6 @@ class fc_factura_html extends html_controler {
         $controler->inputs->select->dp_municipio_id = $inputs->selects->dp_municipio_id;
         $controler->inputs->select->dp_cp_id = $inputs->selects->dp_cp_id;
         $controler->inputs->select->dp_colonia_postal_id = $inputs->selects->dp_colonia_postal_id;
-        $controler->inputs->version = $inputs->texts->version;
         $controler->inputs->serie = $inputs->texts->serie;
         $controler->inputs->subtotal = $inputs->texts->subtotal;
         $controler->inputs->descuento = $inputs->texts->descuento;
@@ -776,12 +775,6 @@ class fc_factura_html extends html_controler {
     private function texts_alta(stdClass $row_upd, bool $value_vacio): array|stdClass
     {
         $texts = new stdClass();
-
-        $in_version= $this->input_version(cols: 6,row_upd:  $row_upd,value_vacio:  $value_vacio);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar input',data:  $in_version);
-        }
-        $texts->version = $in_version;
 
         $in_serie = $this->input_serie(cols: 6,row_upd:  $row_upd,value_vacio:  $value_vacio);
         if(errores::$error){
