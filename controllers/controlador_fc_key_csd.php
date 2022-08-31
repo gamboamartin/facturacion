@@ -15,24 +15,24 @@ use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 
 use gamboamartin\template\html;
-use html\fc_key_cfd_html;
-use models\fc_key_cfd;
+use html\fc_key_csd_html;
+use models\fc_key_csd;
 use PDO;
 use phpDocumentor\Reflection\DocBlock\Tags\Link;
 use stdClass;
 
-class controlador_fc_key_cfd extends system{
+class controlador_fc_key_csd extends system{
     public string $rfc = '';
     public string $razon_social = '';
 
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass()){
-        $modelo = new fc_key_cfd(link: $link);
-        $html_ = new fc_key_cfd_html(html: $html);
+        $modelo = new fc_key_csd(link: $link);
+        $html_ = new fc_key_csd_html(html: $html);
         $obj_link = new links_menu($this->registro_id);
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, paths_conf: $paths_conf);
 
-        $this->titulo_lista = 'Empresas';
+        $this->titulo_lista = 'Key CSD';
 
     }
 
@@ -43,7 +43,7 @@ class controlador_fc_key_cfd extends system{
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);
         }
 
-        $inputs = (new fc_key_cfd_html(html: $this->html_base))->genera_inputs_alta(controler: $this, link: $this->link);
+        $inputs = (new fc_key_csd_html(html: $this->html_base))->genera_inputs_alta(controler: $this, link: $this->link);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);
             print_r($error);
@@ -60,7 +60,7 @@ class controlador_fc_key_cfd extends system{
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica, header: $header,ws:$ws);
         }
 
-        $inputs = (new fc_key_cfd_html(html: $this->html_base))->inputs_fc_key_cfd(controlador:$this);
+        $inputs = (new fc_key_csd_html(html: $this->html_base))->inputs_fc_key_csd(controlador:$this);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);
         }
