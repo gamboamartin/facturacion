@@ -93,7 +93,7 @@ class fc_cer_csd_html extends html_controler {
         return $alta_inputs;
     }
 
-    public function inputs_fc_cer_cfd(controlador_fc_cer_csd $controlador): array|stdClass
+    public function inputs_fc_cer_csd(controlador_fc_cer_csd $controlador): array|stdClass
     {
         $inputs = $this->genera_inputs_modifica(controler: $controlador, link: $controlador->link);
         if(errores::$error){
@@ -144,7 +144,7 @@ class fc_cer_csd_html extends html_controler {
         return $selects;
     }
 
-    public function select_fc_cer_cfd_id(int $cols, bool $con_registros, int $id_selected, PDO $link): array|string
+    public function select_fc_cer_csd_id(int $cols, bool $con_registros, int $id_selected, PDO $link): array|string
     {
         $modelo = new fc_cer_csd($link);
 

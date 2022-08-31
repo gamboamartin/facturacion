@@ -58,7 +58,7 @@ class controlador_fc_cer_csd extends system{
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica, header: $header,ws:$ws);
         }
 
-        $inputs = (new fc_cer_csd_html(html: $this->html_base))->inputs_fc_cer_cfd(controlador:$this);
+        $inputs = (new fc_cer_csd_html(html: $this->html_base))->inputs_fc_cer_csd(controlador:$this);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);
         }
