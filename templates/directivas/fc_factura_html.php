@@ -43,6 +43,8 @@ class fc_factura_html extends html_controler {
         $controler->inputs->serie = $inputs->texts->serie;
         $controler->inputs->subtotal = $inputs->texts->subtotal;
         $controler->inputs->descuento = $inputs->texts->descuento;
+        $controler->inputs->impuestos_trasladados = $inputs->texts->impuestos_trasladados;
+        $controler->inputs->impuestos_retenidos = $inputs->texts->impuestos_retenidos;
         $controler->inputs->total = $inputs->texts->total;
         $controler->inputs->folio = $inputs->texts->folio;
         $controler->inputs->fecha = $inputs->texts->fecha;
@@ -443,6 +445,50 @@ class fc_factura_html extends html_controler {
         return $div;
     }
 
+    public function input_impuestos_trasladados(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
+    {
+        $valida = $this->directivas->valida_cols(cols: $cols);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
+        }
+
+        $html =$this->directivas->input_text_required(disable: $disabled,name: 'impuestos_trasladados',
+            place_holder: 'Imp Trasladados',
+            row_upd: $row_upd, value_vacio: $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input', data: $html);
+        }
+
+        $div = $this->directivas->html->div_group(cols: $cols,html:  $html);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar div', data: $div);
+        }
+
+        return $div;
+    }
+
+    public function input_impuestos_retenidos(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
+    {
+        $valida = $this->directivas->valida_cols(cols: $cols);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
+        }
+
+        $html =$this->directivas->input_text_required(disable: $disabled,name: 'impuestos_retenidos',
+            place_holder: 'Imp Retenidos',
+            row_upd: $row_upd, value_vacio: $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input', data: $html);
+        }
+
+        $div = $this->directivas->html->div_group(cols: $cols,html:  $html);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar div', data: $div);
+        }
+
+        return $div;
+    }
+
     public function input_total(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
     {
         $valida = $this->directivas->valida_cols(cols: $cols);
@@ -817,6 +863,25 @@ class fc_factura_html extends html_controler {
         if(!isset($row_upd->total)){
             $row_upd->total = 0;
         }
+        if(!isset($row_upd->impuestos_trasladados)){
+            $row_upd->impuestos_trasladados = 0;
+        }
+        if(!isset($row_upd->impuestos_retenidos)){
+            $row_upd->impuestos_retenidos = 0;
+        }
+
+
+        $in_impuestos_trasladados = $this->input_impuestos_trasladados(cols: 6,row_upd: $row_upd,value_vacio:  false);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input',data:  $in_impuestos_trasladados);
+        }
+        $texts->impuestos_trasladados = $in_impuestos_trasladados;
+
+        $in_impuestos_retenidos = $this->input_impuestos_retenidos(cols: 6,row_upd:  $row_upd,value_vacio:  false);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input',data:  $in_impuestos_retenidos);
+        }
+        $texts->impuestos_retenidos = $in_impuestos_retenidos;
 
         $in_subtotal = $this->input_subtotal(cols: 4,row_upd:  $row_upd,value_vacio:  false);
         if(errores::$error){
