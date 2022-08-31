@@ -1,6 +1,7 @@
 <?php
 namespace html;
 
+use config\generales;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_fc__partida;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
@@ -596,8 +597,13 @@ class fc_factura_html extends html_controler {
         }
         $selects->cat_sat_moneda_id = $select;
 
+        $generales = new generales();
+        $cat_sat_tipo_de_comprobante_id = -1;
+        if(isset($generales->tipo_de_comprobante_id)){
+            $cat_sat_tipo_de_comprobante_id = $generales->tipo_de_comprobante_id;
+        }
         $select = (new cat_sat_tipo_de_comprobante_html(html:$this->html_base))->select_cat_sat_tipo_de_comprobante_id(
-            cols: 4, con_registros:true, id_selected:-1,link: $link);
+            cols: 4, con_registros:true, id_selected:$cat_sat_tipo_de_comprobante_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
