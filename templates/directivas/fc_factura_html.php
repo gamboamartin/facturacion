@@ -645,7 +645,7 @@ class fc_factura_html extends html_controler {
         $selects->com_tipo_cambio_id = $select;
 
         $select = (new cat_sat_regimen_fiscal_html(html:$this->html_base))->select_cat_sat_regimen_fiscal_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
+            cols: 12, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
