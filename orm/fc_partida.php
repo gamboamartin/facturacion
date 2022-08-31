@@ -21,13 +21,13 @@ class fc_partida extends modelo{
             columnas: $columnas,no_duplicados: $no_duplicados,tipo_campos: array());
     }
 
-    public function calculo_sub_total_partida(int $fc_cfd_partida_id): float| array
+    public function calculo_sub_total_partida(int $fc_partida_id): float| array
     {
-        $data = $this->registro(registro_id: $fc_cfd_partida_id, retorno_obj: true);
+        $data = $this->registro(registro_id: $fc_partida_id, retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener los registros', data: $data);
         }
-        return $data->fc_cfd_partida_cantidad * $data->fc_cfd_partida_valor_unitario;
+        return $data->fc_partida_cantidad * $data->fc_partida_valor_unitario;
     }
 
     public function partidas(int $fc_factura_id): array|stdClass
@@ -36,22 +36,22 @@ class fc_partida extends modelo{
             return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
         }
         $filtro['fc_factura.id'] = $fc_factura_id;
-        $r_fc_cfd_partida = $this->filtro_and(filtro: $filtro);
+        $r_fc_partida = $this->filtro_and(filtro: $filtro);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_cfd_partida);
+            return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_partida);
         }
-        return $r_fc_cfd_partida;
+        return $r_fc_partida;
     }
 
-    public function data_partida_obj(int $fc_cfd_partida_id): array|stdClass
+    public function data_partida_obj(int $fc_partida_id): array|stdClass
     {
-        $fc_cfd_partida = $this->registro(registro_id: $fc_cfd_partida_id, columnas_en_bruto: true,retorno_obj: true);
+        $fc_partida = $this->registro(registro_id: $fc_partida_id, columnas_en_bruto: true,retorno_obj: true);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener partida',data:  $fc_cfd_partida);
+            return $this->error->error(mensaje: 'Error al obtener partida',data:  $fc_partida);
         }
 
         $data = new stdClass();
-        $data->fc_cfd_partida = $fc_cfd_partida;
+        $data->fc_partida = $fc_partida;
 
         return $data;
     }
