@@ -1,6 +1,8 @@
 <?php
 namespace models;
+use base\orm\data_format;
 use base\orm\modelo;
+use DateTime;
 use gamboamartin\errores\errores;
 use gamboamartin\organigrama\controllers\controlador_org_empresa;
 use models\base\limpieza;
@@ -79,6 +81,11 @@ class fc_factura extends modelo{
         }
         if(!isset($registro['alias'])) {
             $registro['alias'] = $registro['descripcion_select'];
+        }
+        
+        $hora =  date('h:i:s');
+        if(isset($registro['fecha'])) {
+            $registro['fecha'] = $registro['fecha'].' '.$hora;
         }
         return $registro;
     }
