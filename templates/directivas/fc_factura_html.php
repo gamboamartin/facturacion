@@ -210,7 +210,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'cantidad',place_holder: 'cantidad',
+        $html =$this->directivas->input_text_required(disable: $disabled,name: 'cantidad',place_holder: 'Cantidad',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -231,7 +231,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'valor_unitario',place_holder: 'valor_unitario',
+        $html =$this->directivas->input_text_required(disable: $disabled,name: 'valor_unitario',place_holder: 'Valor Unitario',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -250,7 +250,7 @@ class fc_factura_html extends html_controler {
         $selects = new stdClass();
 
         $select = (new com_producto_html(html:$this->html_base))->select_com_producto_id(
-            cols: 4, con_registros:true, id_selected:-1,link: $link);
+            cols: 12, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
@@ -271,7 +271,7 @@ class fc_factura_html extends html_controler {
         $selects = new stdClass();
 
         $select = (new com_producto_html(html:$this->html_base))->select_com_producto_id(
-            cols: 4, con_registros:true, id_selected:$row_upd->com_producto_id,link: $link);
+            cols: 12, con_registros:true, id_selected:$row_upd->com_producto_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
