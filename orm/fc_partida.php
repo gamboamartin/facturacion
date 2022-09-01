@@ -56,8 +56,14 @@ class fc_partida extends modelo{
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
             }
+
+            $com_producto = (new com_producto($this->link))->registro(registro_id: $registro['com_producto_id']);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener producto', data: $com_producto);
+            }
+
             $registro[$key] = $registro['fc_factura_id'].' '.
-                $registro['cat_sat_producto_descripcion'];
+                $com_producto['cat_sat_producto_descripcion'];
         }
         return $registro;
     }
@@ -101,18 +107,20 @@ class fc_partida extends modelo{
         return $data;
     }
 
+    /**
+     * Valida campos necesarios para la generacion de un codigo automatico
+     * @param array $registro Registro en proceso
+     * @return bool|array
+     *
+     */
     private function valida_partida_alta(array $registro): bool|array
     {
-        $keys = array('fc_factura_id');
+        $keys = array('fc_factura_id','com_producto_id');
         $valida = $this->validacion->valida_ids(keys: $keys, registro: $registro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
         }
-        $keys = array('cat_sat_producto_descripcion');
-        $valida = $this->validacion->valida_existencia_keys(keys: $keys, registro: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
-        }
+
         return true;
     }
 
