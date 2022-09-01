@@ -877,31 +877,33 @@ class fc_factura_html extends html_controler {
         }
 
 
-        $in_impuestos_trasladados = $this->input_impuestos_trasladados(cols: 6,row_upd: $row_upd,value_vacio:  false);
+        $in_impuestos_trasladados = $this->input_impuestos_trasladados(cols: 6,row_upd: $row_upd,value_vacio:  false,
+            disabled: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_impuestos_trasladados);
         }
         $texts->impuestos_trasladados = $in_impuestos_trasladados;
 
-        $in_impuestos_retenidos = $this->input_impuestos_retenidos(cols: 6,row_upd:  $row_upd,value_vacio:  false);
+        $in_impuestos_retenidos = $this->input_impuestos_retenidos(cols: 6,row_upd:  $row_upd,value_vacio:  false,
+            disabled: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_impuestos_retenidos);
         }
         $texts->impuestos_retenidos = $in_impuestos_retenidos;
 
-        $in_subtotal = $this->input_subtotal(cols: 4,row_upd:  $row_upd,value_vacio:  false);
+        $in_subtotal = $this->input_subtotal(cols: 4,row_upd:  $row_upd,value_vacio:  false,  disabled: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_subtotal);
         }
         $texts->subtotal = $in_subtotal;
 
-        $in_descuento = $this->input_descuento(cols: 4,row_upd:  $row_upd,value_vacio:  false);
+        $in_descuento = $this->input_descuento(cols: 4,row_upd:  $row_upd,value_vacio:  false, disabled: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_descuento);
         }
         $texts->descuento = $in_descuento;
 
-        $in_total = $this->input_total(cols: 4,row_upd:  $row_upd,value_vacio:  false);
+        $in_total = $this->input_total(cols: 4,row_upd:  $row_upd,value_vacio:  false, disabled: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_total);
         }
