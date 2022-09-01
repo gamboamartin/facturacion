@@ -6,11 +6,12 @@
 <?php echo $controlador->inputs->fecha; ?>
 <?php echo $controlador->inputs->select->exportacion; ?>
 <?php echo $controlador->inputs->serie; ?>
-<input disabled<?php echo $controlador->inputs->subtotal; ?>>
-<input disabled<?php echo $controlador->inputs->descuento; ?>>
-<input disabled<?php echo $controlador->inputs->total; ?>>
-<input disabled<?php echo $controlador->inputs->impuestos_trasladados; ?>>
-<input disabled<?php echo $controlador->inputs->impuestos_retenidos; ?>>
+
+<?php echo $controlador->inputs->subtotal; ?>
+<?php echo $controlador->inputs->descuento; ?>
+<?php echo $controlador->inputs->total; ?>
+<?php echo $controlador->inputs->impuestos_trasladados; ?>
+<?php echo $controlador->inputs->impuestos_retenidos; ?>
 <?php echo $controlador->inputs->select->cat_sat_tipo_de_comprobante_id; ?>
 <?php echo $controlador->inputs->select->cat_sat_forma_pago_id; ?>
 <?php echo $controlador->inputs->select->cat_sat_metodo_pago_id; ?>

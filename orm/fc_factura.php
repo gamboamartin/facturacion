@@ -174,7 +174,7 @@ class fc_factura extends modelo{
     private function limpia_alta_factura(array $registro): array
     {
 
-        $keys = array('descuento','subtotal','total');
+        $keys = array('descuento','subtotal','total', 'impuestos_trasladados','impuestos_retenidos');
         foreach ($keys as $key){
             $registro = $this->limpia_si_existe(key:$key, registro:$registro);
             if(errores::$error){
