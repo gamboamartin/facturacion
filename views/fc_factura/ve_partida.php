@@ -20,9 +20,9 @@
                 <?php echo $controlador->inputs->descripcion; ?>
                 <?php echo $controlador->inputs->cantidad; ?>
                 <?php echo $controlador->inputs->valor_unitario; ?>
-                <?php echo $controlador->inp222uts->descuento; ?><input disabled>
+                <?php echo $controlador->inputs->descuento; ?>
             </div>
-            </div>
+        </div>
 
 
     </div>
