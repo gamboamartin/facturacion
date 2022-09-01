@@ -111,7 +111,7 @@ class fc_partida extends modelo{
      * Valida campos necesarios para la generacion de un codigo automatico
      * @param array $registro Registro en proceso
      * @return bool|array
-     *
+     * @version 0.74.24
      */
     private function valida_partida_alta(array $registro): bool|array
     {
