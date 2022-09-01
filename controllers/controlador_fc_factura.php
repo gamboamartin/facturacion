@@ -167,7 +167,13 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $r_lista, header: $header,ws:$ws);
         }
 
-        $registros = $this->maqueta_registros_lista(registros: $this->registros);
+        $registros = (new fc_factura($this->link))->registros(return_obj: true);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar registros',data:  $registros,
+                header: $header,ws:$ws);
+        }
+
+        $registros = $this->maqueta_registros_lista(registros: $registros);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar registros',data:  $registros, header: $header,ws:$ws);
         }
@@ -203,8 +209,24 @@ class controlador_fc_factura extends system{
             return $this->errores->error(mensaje: 'Error al genera link',data:  $link_partidas);
         }
 
+        $link_modifica = $this->obj_link->link_con_id(accion:'modifica',registro_id:  $row->fc_factura_id,
+            seccion:  $this->tabla);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al genera link',data:  $link_modifica);
+        }
+
+        $link_elimina_bd = $this->obj_link->link_con_id(accion:'elimina_bd',registro_id:  $row->fc_factura_id,
+            seccion:  $this->tabla);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al genera link',data:  $link_elimina_bd);
+        }
+
         $row->link_partidas = $link_partidas;
         $row->link_partidas_style = 'info';
+
+        $row->link_modifica = $link_modifica;
+
+        $row->link_elimina_bd = $link_elimina_bd;
 
         return $row;
     }
