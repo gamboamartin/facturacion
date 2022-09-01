@@ -16,7 +16,7 @@
                         <?php echo $controlador->inputs->descripcion; ?>
                         <?php echo $controlador->inputs->cantidad; ?>
                         <?php echo $controlador->inputs->valor_unitario; ?>
-                        <?php echo $controlador->inputs->descuento; ?><input disabled>
+                        <?php echo $controlador->inputs->descuento; ?>
 
                         <div class="control-group btn-alta">
                             <div class="controls">
