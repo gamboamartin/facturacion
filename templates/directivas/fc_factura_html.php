@@ -181,19 +181,29 @@ class fc_factura_html extends html_controler {
         }
         $texts->codigo = $in_codigo;
 
-        $in_cantidad= $this->input_cantidad(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        if(!isset($row_upd->cantidad)){
+            $row_upd->cantidad = 0;
+        }
+        if(!isset($row_upd->descuento)){
+            $row_upd->descuento = 0;
+        }
+        if(!isset($row_upd->valor_unitario)){
+            $row_upd->valor_unitario = 0;
+        }
+
+        $in_cantidad= $this->input_cantidad(cols: 4,row_upd:  $row_upd,value_vacio:  false);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_cantidad);
         }
         $texts->cantidad = $in_cantidad;
 
-        $in_descuento= $this->input_descuento(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        $in_descuento= $this->input_descuento(cols: 4,row_upd:  $row_upd,value_vacio:  false);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_descuento);
         }
         $texts->descuento = $in_descuento;
 
-        $in_valor_unitario= $this->input_valor_unitario(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
+        $in_valor_unitario= $this->input_valor_unitario(cols: 4,row_upd:  $row_upd,value_vacio:  false);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_valor_unitario);
         }
