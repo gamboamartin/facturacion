@@ -191,6 +191,15 @@ class fc_factura_html extends html_controler {
             $row_upd->valor_unitario = 0;
         }
 
+        if($row_upd->cantidad === 0 && isset($row_upd->fc_partida_cantidad)){
+            $row_upd->cantidad = $row_upd->fc_partida_cantidad;
+        }
+        if($row_upd->descuento === 0 && isset($row_upd->fc_partida_descuento)){
+            $row_upd->descuento = $row_upd->fc_partida_descuento;
+        }
+        if($row_upd->valor_unitario === 0 && isset($row_upd->fc_partida_valor_unitario)){
+            $row_upd->valor_unitario = $row_upd->fc_partida_valor_unitario;
+        }
         $in_cantidad= $this->input_cantidad(cols: 4,row_upd:  $row_upd,value_vacio:  false);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_cantidad);

@@ -329,7 +329,14 @@ class controlador_fc_factura extends system{
             return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
         }
 
-        $inputs = (new fc_factura_html(html: $this->html_base))->genera_inputs_fc_partida(controler:$this,
+        $registro = (new fc_partida($this->link))->registro(registro_id: $this->fc_partida_id,retorno_obj: true);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al generar template',data:  $registro);
+        }
+
+        $this->row_upd = $registro;
+
+        $inputs = (new fc_factura_html(html: $this->html_base))->genera_inputs_fc_partida_modifica(controler:$this,
             link: $this->link);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);
