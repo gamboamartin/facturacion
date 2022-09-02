@@ -32,13 +32,15 @@ class link_fc_factura extends links_menu
         return $link;
     }
 
-    public function link_fc_partida_modifica_bd(int $fc_factura_id): string
+    public function link_fc_partida_modifica_bd(int $fc_factura_id, int $fc_partida_id): string
     {
 
         $link = $this->link_con_id(accion: 'modifica_partida_bd', registro_id: $fc_factura_id, seccion: 'fc_factura');
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar link', data: $link);
         }
+
+        $link .= '&fc_partida_id='.$fc_partida_id;
 
         return $link;
     }

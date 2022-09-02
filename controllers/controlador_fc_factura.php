@@ -29,6 +29,7 @@ class controlador_fc_factura extends system{
     public string $link_fc_partida_modifica_bd = '';
     public string $link_fc_factura_partidas = '';
     public int $fc_factura_id = -1;
+    public int $fc_partida_id = -1;
     public stdClass $partidas;
 
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
@@ -38,6 +39,10 @@ class controlador_fc_factura extends system{
         $obj_link = new link_fc_factura($this->registro_id);
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, paths_conf: $paths_conf);
         $this->titulo_lista = 'Facturas';
+
+        if(isset($_GET['fc_partida_id'])){
+            $this->fc_partida_id = $_GET['fc_partida_id'];
+        }
 
         $this->fc_factura_id = $this->registro_id;
         
@@ -50,7 +55,8 @@ class controlador_fc_factura extends system{
         }
         $this->link_fc_partida_alta_bd = $link_fc_partida_alta_bd;     
         
-        $link_fc_partida_modifica_bd = $obj_link->link_fc_partida_modifica_bd(fc_factura_id: $this->registro_id);
+        $link_fc_partida_modifica_bd = $obj_link->link_fc_partida_modifica_bd(fc_factura_id: $this->registro_id,
+            fc_partida_id: $this->fc_partida_id );
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar link sucursal modifica',
                 data:  $link_fc_partida_modifica_bd);
@@ -355,6 +361,52 @@ class controlador_fc_factura extends system{
         return $inputs;
 
     }
+
+    public function modifica_partida_bd(bool $header, bool $ws = false): array|stdClass
+    {
+        $siguiente_view = (new actions())->siguiente_view();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener siguiente view sucursal',data:  $siguiente_view,
+                header: $header,ws:$ws);
+        }
+        if(isset($_POST['guarda'])){
+            unset($_POST['guarda']);
+        }
+        if(isset($_POST['btn_action_next'])){
+            unset($_POST['btn_action_next']);
+        }
+
+        $fc_partida_modelo = new fc_partida($this->link);
+
+        $fc_partida_ins = $_POST;
+        $fc_partida_ins['fc_factura_id'] = $this->registro_id;
+
+        $r_modifica_bd = $fc_partida_modelo->modifica_bd(registro:$fc_partida_ins, id: $this->fc_partida_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al modificar partida',data:  $r_modifica_bd,
+                header: $header,ws:$ws);
+        }
+
+        if($header){
+            $params = array('fc_partida_id'=>$this->fc_partida_id);
+            $retorno = (new actions())->retorno_alta_bd(registro_id:$this->registro_id,seccion: $this->tabla,
+                siguiente_view: $siguiente_view, params:$params );
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_modifica_bd,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($r_modifica_bd, JSON_THROW_ON_ERROR);
+            exit;
+        }
+        return $r_modifica_bd;
+
+    }
+
 
     private function select_fc_factura_id(): array|string
     {
