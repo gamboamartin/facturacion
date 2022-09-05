@@ -169,8 +169,17 @@ class fc_factura extends modelo{
         return $descuento;
     }
 
+    /**
+     * Obtiene las partidas de una factura
+     * @param int $fc_factura_id Factura a validar
+     * @return array
+     * @version 0.83.26
+     */
     private function get_partidas(int $fc_factura_id): array
     {
+        if($fc_factura_id<=0){
+            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0',data:  $fc_factura_id);
+        }
         $filtro['fc_factura.id'] = $fc_factura_id;
         $r_fc_partida = (new fc_partida($this->link))->filtro_and(filtro: $filtro);
         if(errores::$error){
