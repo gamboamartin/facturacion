@@ -124,7 +124,7 @@ class fc_factura extends modelo{
 
     public function elimina_bd(int $id): array
     {
-        
+
         $del = $this->elimina_partidas(fc_factura_id: $id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al eliminar partida',data:  $del);
