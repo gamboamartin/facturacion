@@ -124,12 +124,8 @@ class fc_factura extends modelo{
 
     public function elimina_bd(int $id): array
     {
-        $fc_partidas = $this->get_partidas(fc_factura_id: $id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener partidas',data:  $fc_partidas);
-        }
-
-        $del = $this->del_partidas(fc_partidas: $fc_partidas);
+        
+        $del = $this->elimina_partidas(fc_factura_id: $id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al eliminar partida',data:  $del);
         }
@@ -139,6 +135,23 @@ class fc_factura extends modelo{
             return $this->error->error(mensaje: 'Error al eliminar factura',data:  $r_elimina_factura);
         }
         return $r_elimina_factura;
+    }
+
+    /**
+     * @throws JsonException
+     */
+    private function elimina_partidas(int $fc_factura_id): array
+    {
+        $fc_partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partidas',data:  $fc_partidas);
+        }
+
+        $del = $this->del_partidas(fc_partidas: $fc_partidas);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al eliminar partida',data:  $del);
+        }
+        return $del;
     }
 
     public function get_factura_sub_total(int $fc_factura_id): float|array
