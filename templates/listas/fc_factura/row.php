@@ -8,6 +8,7 @@
     <td><?php echo $row->com_cliente_rfc; ?></td>
     <td><?php echo $row->com_cliente_razon_social; ?></td>
     <td><?php echo $row->fc_factura_fecha; ?></td>
+    <td><?php include 'templates/botons/fc_factura/link_genera_xml.php';?></td>
     <td><?php include 'templates/botons/fc_factura/link_factura_partidas.php';?></td>
 
     <!-- End dynamic generated -->

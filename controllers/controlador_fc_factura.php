@@ -219,6 +219,12 @@ class controlador_fc_factura extends system{
             return $this->errores->error(mensaje: 'Error al validar row',data:  $valida);
         }
 
+        $link_genera_xml = $this->obj_link->link_con_id(accion:'genera_xml',registro_id:  $row->fc_factura_id,
+            seccion:  $this->tabla);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al genera link',data:  $link_genera_xml);
+        }
+
         $link_partidas = $this->obj_link->link_con_id(accion:'partidas',registro_id:  $row->fc_factura_id,
             seccion:  $this->tabla);
         if(errores::$error){
@@ -236,6 +242,9 @@ class controlador_fc_factura extends system{
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al genera link',data:  $link_elimina_bd);
         }
+
+        $row->link_genera_xml = $link_genera_xml;
+        $row->link_genera_xml_style = 'info';
 
         $row->link_partidas = $link_partidas;
         $row->link_partidas_style = 'info';
