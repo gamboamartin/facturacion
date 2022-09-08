@@ -122,6 +122,12 @@ class fc_factura extends modelo{
         return $descripcion_select;
     }
 
+    /**
+     * Obtiene y redondea un descuento de una partida
+     * @param int $fc_partida_id partida
+     * @return float|array
+     * @version 0.98.26
+     */
     private function descuento_partida(int $fc_partida_id): float|array
     {
         if($fc_partida_id <=0 ){
