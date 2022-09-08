@@ -92,6 +92,14 @@ class fc_partida extends modelo{
                 return $this->error->error(mensaje: 'Error al inicializar registro', data: $registro);
             }
         }
+
+        if(!isset($registro['descripcion_select'])){
+            $registro['descripcion_select'] = $registro['fc_factura_id'] .' - '.$registro['descripcion'];
+        }
+        if(!isset($registro['alias'])){
+            $registro['alias'] = $registro['descripcion_select'];
+        }
+
         return $registro;
 
     }
