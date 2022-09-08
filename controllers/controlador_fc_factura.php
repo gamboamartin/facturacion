@@ -170,6 +170,7 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al obtener imp_trasladados',data:  $imp_trasladados,
                 header: $header,ws:$ws);
         }
+        $this->row_upd->impuestos_trasladados = $imp_trasladados;
         
         $imp_retenidos = (new fc_factura($this->link))->get_factura_imp_retenidos(fc_factura_id:
             $this->fc_factura_id);
@@ -177,6 +178,7 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al obtener imp_retenidos',data:  $imp_retenidos,
                 header: $header,ws:$ws);
         }
+        $this->row_upd->impuestos_retenidos = $imp_retenidos;
 
         $inputs = (new fc_factura_html(html: $this->html_base))->inputs_fc_factura(controlador:$this);
         if(errores::$error){
