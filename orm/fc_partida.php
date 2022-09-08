@@ -25,6 +25,18 @@ class fc_partida extends modelo{
     public function alta_bd(): array|stdClass
     {
 
+        $keys = array('cantidad', 'valor_unitario');
+        foreach ($keys as $key){
+            if(!isset($this->registro[$key])){
+                return $this->error->error(mensaje: 'Error debe de existir '. $key, data: $this->registro);
+            }
+
+            if((int)$this->registro[$key] <= 0){
+                return $this->error->error(mensaje: 'Error el campo '.$key.' no puede ser menor o igual a 0',
+                    data: $this->registro);
+            }
+        }
+
         $registro = $this->init_partida_alta_campos(registro: $this->registro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al inicializar registro', data: $registro);
