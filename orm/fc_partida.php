@@ -106,7 +106,7 @@ class fc_partida extends modelo{
         }
 
         if(!isset($registro['descripcion_select'])){
-            $registro['descripcion_select'] = $registro['fc_factura_id'] .' - '.$registro['descripcion'];
+            $registro['descripcion_select'] = $registro['descripcion'].' - '.$registro['codigo'];
         }
         if(!isset($registro['alias'])){
             $registro['alias'] = $registro['descripcion_select'];
