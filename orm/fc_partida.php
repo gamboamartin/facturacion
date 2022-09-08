@@ -24,6 +24,14 @@ class fc_partida extends modelo{
 
     public function alta_bd(): array|stdClass
     {
+        $registro_imp = $this->registro;
+
+        $key_imp = array('cat_sat_tipo_factor_id','cat_sat_factor_id','cat_sat_tipo_impuesto_id');
+        foreach ($key_imp as $key){
+            if(isset($this->registro[$key])){
+                unset($this->registro[$key]);
+            }
+        }
 
         $keys = array('cantidad', 'valor_unitario');
         foreach ($keys as $key){
