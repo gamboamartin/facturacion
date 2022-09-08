@@ -286,9 +286,21 @@ class fc_factura extends modelo{
 
     }
 
-    public function sub_total_partida(int $fc_partida_id): float
+    /**
+     * Calcula el subtotal de una partida
+     * @param int $fc_partida_id Partida a verificar sub total
+     * @return float|array
+     * @version 0.95.26
+     */
+    private function sub_total_partida(int $fc_partida_id): float|array
     {
+        if($fc_partida_id <=0 ){
+            return $this->error->error(mensaje: 'Error $fc_partida_id debe ser mayor a 0',data: $fc_partida_id);
+        }
         $fc_partida = (new fc_partida($this->link))->registro(registro_id: $fc_partida_id, retorno_obj: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener $fc_partida',data: $fc_partida);
+        }
 
         $cantidad = $fc_partida->fc_partida_cantidad;
         $cantidad = round($cantidad,4);
