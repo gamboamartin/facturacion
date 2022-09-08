@@ -16,6 +16,9 @@
                         <?php echo $controlador->inputs->cantidad; ?>
                         <?php echo $controlador->inputs->valor_unitario; ?>
                         <?php echo $controlador->inputs->descuento; ?>
+                        <?php echo $controlador->inputs->select->cat_sat_tipo_factor_id; ?>
+                        <?php echo $controlador->inputs->select->cat_sat_factor_id; ?>
+                        <?php echo $controlador->inputs->select->cat_sat_tipo_impuesto_id; ?>
 
                         <div class="control-group btn-alta">
                             <div class="controls">

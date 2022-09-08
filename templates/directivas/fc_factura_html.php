@@ -59,6 +59,9 @@ class fc_factura_html extends html_controler {
         $controler->inputs->select = new stdClass();
         $controler->inputs->select->fc_factura_id = $inputs->selects->fc_factura_id;
         $controler->inputs->select->com_producto_id = $inputs->selects->com_producto_id;
+        $controler->inputs->select->cat_sat_tipo_factor_id = $inputs->selects->cat_sat_tipo_factor_id;
+        $controler->inputs->select->cat_sat_factor_id = $inputs->selects->cat_sat_factor_id;
+        $controler->inputs->select->cat_sat_tipo_impuesto_id = $inputs->selects->cat_sat_tipo_impuesto_id;
 
         $controler->inputs->cantidad = $inputs->texts->cantidad;
         $controler->inputs->valor_unitario = $inputs->texts->valor_unitario;
@@ -281,6 +284,27 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
         $selects->fc_factura_id = $select;
+        
+        $select = (new cat_sat_tipo_factor_html(html:$this->html_base))->select_cat_sat_tipo_factor_id(
+            cols: 4, con_registros:true, id_selected:-1,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->cat_sat_tipo_factor_id = $select;
+
+        $select = (new cat_sat_factor_html(html:$this->html_base))->select_cat_sat_factor_id(
+            cols: 4, con_registros:true, id_selected:-1,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->cat_sat_factor_id = $select;
+        
+        $select = (new cat_sat_tipo_impuesto_html(html:$this->html_base))->select_cat_sat_tipo_impuesto_id(
+            cols: 4, con_registros:true, id_selected:-1,link: $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
+        }
+        $selects->cat_sat_tipo_impuesto_id = $select;
 
         return $selects;
     }
