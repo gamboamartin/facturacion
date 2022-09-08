@@ -164,6 +164,20 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica, header: $header,ws:$ws);
         }
 
+        $imp_trasladados = (new fc_factura($this->link))->get_factura_imp_trasladados(fc_factura_id:
+            $this->fc_factura_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener imp_trasladados',data:  $imp_trasladados,
+                header: $header,ws:$ws);
+        }
+        
+        $imp_retenidos = (new fc_factura($this->link))->get_factura_imp_retenidos(fc_factura_id:
+            $this->fc_factura_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener imp_retenidos',data:  $imp_retenidos,
+                header: $header,ws:$ws);
+        }
+
         $inputs = (new fc_factura_html(html: $this->html_base))->inputs_fc_factura(controlador:$this);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);

@@ -81,7 +81,12 @@ class fc_partida extends modelo{
             return $this->error->error(mensaje: 'Error al obtener los registros', data: $subtotal);
         }
 
-        return $subtotal * (int)$traslado->registros[0]['cat_sat_factor_factor'];
+
+        if((int)$traslado->n_registros > 0){
+            return $subtotal * (float)$traslado->registros[0]['cat_sat_factor_factor'];
+        }
+
+        return 0;
     }
 
 
@@ -97,7 +102,11 @@ class fc_partida extends modelo{
             return $this->error->error(mensaje: 'Error al obtener los registros', data: $subtotal);
         }
 
-        return $subtotal * (int)$retenido->registros[0]['cat_sat_factor_factor'];
+        if((int)$retenido->n_registros > 0){
+            return $subtotal * (float)$retenido->registros[0]['cat_sat_factor_factor'];
+        }
+
+        return 0;
     }
 
 
