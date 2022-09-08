@@ -18,7 +18,9 @@ class fc_factura extends modelo{
             'cat_sat_tipo_de_comprobante'=>$tabla, 'cat_sat_regimen_fiscal'=>$tabla, 'com_sucursal'=>$tabla,
             'com_cliente'=>'com_sucursal', 'dp_calle_pertenece'=>$tabla, 'dp_calle' => 'dp_calle_pertenece',
             'dp_colonia_postal'=>'dp_calle_pertenece', 'dp_colonia'=>'dp_colonia_postal', 'dp_cp'=>'dp_colonia_postal',
-            'dp_municipio'=>'dp_cp', 'dp_estado'=>'dp_municipio','dp_pais'=>'dp_estado');
+            'dp_municipio'=>'dp_cp', 'dp_estado'=>'dp_municipio','dp_pais'=>'dp_estado','org_sucursal'=>'fc_csd',
+            'org_empresa'=>'org_sucursal');
+
         $campos_obligatorios = array('folio', 'fc_csd_id','cat_sat_forma_pago_id','cat_sat_metodo_pago_id',
             'cat_sat_moneda_id', 'com_tipo_cambio_id', 'cat_sat_uso_cfdi_id', 'cat_sat_tipo_de_comprobante_id',
             'dp_calle_pertenece_id', 'cat_sat_regimen_fiscal_id', 'com_sucursal_id');
@@ -47,8 +49,6 @@ class fc_factura extends modelo{
 
         return $r_alta_bd;
     }
-
-
 
     private function defaults_alta_bd(array $registro, stdClass $registro_csd): array
     {
@@ -90,6 +90,7 @@ class fc_factura extends modelo{
         }
         return $registro;
     }
+
     private function default_alta_emisor_data(array $registro, stdClass $registro_csd): array
     {
         $registro['dp_calle_pertenece_id'] = $registro_csd->dp_calle_pertenece_id;
@@ -98,7 +99,6 @@ class fc_factura extends modelo{
     }
 
     /**
-     * @throws JsonException
      */
     private function del_partidas(array $fc_partidas): array
     {
@@ -122,6 +122,29 @@ class fc_factura extends modelo{
         return $descripcion_select;
     }
 
+    /**
+     * Obtiene y redondea un descuento de una partida
+     * @param int $fc_partida_id partida
+     * @return float|array
+     * @version 0.98.26
+     */
+    private function descuento_partida(int $fc_partida_id): float|array
+    {
+        if($fc_partida_id <=0 ){
+            return $this->error->error(mensaje: 'Error $fc_partida_id debe ser mayor a 0',data: $fc_partida_id);
+        }
+        $fc_partida = (new fc_partida($this->link))->registro(registro_id: $fc_partida_id, retorno_obj: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener $fc_partida',data: $fc_partida);
+        }
+
+        $descuento = $fc_partida->fc_partida_descuento;
+
+        return round($descuento,4);
+
+
+    }
+
     public function elimina_bd(int $id): array
     {
 
@@ -138,7 +161,6 @@ class fc_factura extends modelo{
     }
 
     /**
-     * @throws JsonException
      */
     private function elimina_partidas(int $fc_factura_id): array
     {
@@ -178,21 +200,20 @@ class fc_factura extends modelo{
 
     public function get_descuento(int $fc_factura_id): float|array
     {
-        $filtro['fc_factura.id'] = $fc_factura_id;
 
-
-        $fc_partida = (new fc_partida($this->link))->filtro_and( filtro: $filtro);
-
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas de factura',
-                data: $fc_partida);
+        $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partidas',data: $partidas);
+        }
+        $descuento = 0;
+        foreach ($partidas as $partida){
+            $descuento += $this->descuento_partida(fc_partida_id: $partida['fc_partida_id']);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener descuento',data: $descuento);
+            }
+            $descuento = round($descuento,2);
         }
 
-        $descuento = 0.0;
-
-        foreach ($fc_partida->registros as $valor) {
-            $descuento += $valor['fc_partida_descuento'];
-        }
         return $descuento;
     }
 
@@ -266,5 +287,63 @@ class fc_factura extends modelo{
             unset($registro[$key]);
         }
         return $registro;
+    }
+
+    public function sub_total(int $fc_factura_id): float|int|array
+    {
+        $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partidas',data: $partidas);
+        }
+        $sub_total = 0;
+        foreach ($partidas as $partida){
+            $sub_total += $this->sub_total_partida(fc_partida_id: $partida['fc_partida_id']);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener sub total',data: $sub_total);
+            }
+            $sub_total = round($sub_total,2);
+        }
+
+        return $sub_total;
+
+    }
+
+    /**
+     * Calcula el subtotal de una partida
+     * @param int $fc_partida_id Partida a verificar sub total
+     * @return float|array
+     * @version 0.95.26
+     */
+    private function sub_total_partida(int $fc_partida_id): float|array
+    {
+        if($fc_partida_id <=0 ){
+            return $this->error->error(mensaje: 'Error $fc_partida_id debe ser mayor a 0',data: $fc_partida_id);
+        }
+        $fc_partida = (new fc_partida($this->link))->registro(registro_id: $fc_partida_id, retorno_obj: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener $fc_partida',data: $fc_partida);
+        }
+
+        $cantidad = $fc_partida->fc_partida_cantidad;
+        $cantidad = round($cantidad,4);
+
+        $valor_unitario = $fc_partida->fc_partida_valor_unitario;
+        $valor_unitario = round($valor_unitario,4);
+
+        $sub_total = $cantidad * $valor_unitario;
+        return round($sub_total,4);
+
+
+    }
+
+    public function total(int $fc_factura_id){
+        $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partidas',data: $partidas);
+        }
+        foreach ($partidas as $partida){
+
+        }
+
     }
 }
