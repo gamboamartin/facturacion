@@ -1,5 +1,6 @@
 <?php
 namespace models;
+use base\orm\codigos;
 use base\orm\modelo;
 use gamboamartin\errores\errores;
 use gamboamartin\organigrama\controllers\controlador_org_empresa;
@@ -62,8 +63,22 @@ class fc_partida extends modelo{
                 return $this->error->error(mensaje: 'Error al obtener producto', data: $com_producto);
             }
 
-            $registro[$key] = $registro['fc_factura_id'].' '.
-                $com_producto['cat_sat_producto_descripcion'];
+            $factura = new fc_factura($this->link);
+            $keys_registro = array('fc_factura_id');
+            $keys_row = array();
+
+            $registro = $this->asigna_codigo(keys_registro: $keys_registro,keys_row:  $keys_row,
+                modelo:  $factura,registro:  $registro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al asignar codigo', data: $registro);
+            }
+
+            $registro[$key] .= '-'.$com_producto['cat_sat_producto_descripcion'];
+
+            $registro = $this->asigna_codigo_bis(registro:  $registro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al asignar codigo', data: $registro);
+            }
         }
         return $registro;
     }
