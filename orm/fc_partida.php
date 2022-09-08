@@ -85,6 +85,21 @@ class fc_partida extends modelo{
     }
 
 
+    public function calculo_imp_retenido(int $fc_partida_id){
+        $filtro['fc_partida.id'] = $fc_partida_id;
+        $retenido = (new fc_retenido($this->link))->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener los registros', data: $retenido);
+        }
+
+        $subtotal = $this->calculo_sub_total_partida(fc_partida_id: $fc_partida_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener los registros', data: $subtotal);
+        }
+
+        return $subtotal * (int)$retenido->registros[0]['cat_sat_factor_factor'];
+    }
+
 
     private function init_partida_alta(string $key, array $registro): array
     {

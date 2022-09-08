@@ -218,6 +218,27 @@ class fc_factura extends modelo{
 
         return $imp_traslado;
     }
+    
+    public function get_factura_imp_retenidos(int $fc_factura_id): float|array
+    {
+        $filtro['fc_factura.id'] = $fc_factura_id;
+        $fc_partida = (new fc_partida($this->link))->filtro_and( filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener partidas de factura',
+                data: $fc_partida);
+        }
+
+        $imp_traslado= 0.0;
+
+        foreach ($fc_partida->registros as $valor) {
+            $imp_traslado += (new fc_partida($this->link))->calculo_imp_retenido($valor['fc_partida_id']);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
+            }
+        }
+
+        return $imp_traslado;
+    }
 
     public function get_descuento(int $fc_factura_id): float|array
     {
