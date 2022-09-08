@@ -267,14 +267,22 @@ class fc_factura extends modelo{
         return $registro;
     }
 
-    public function sub_total(int $fc_factura_id){
+    public function sub_total(int $fc_factura_id): float|int|array
+    {
         $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener partidas',data: $partidas);
         }
+        $sub_total = 0;
         foreach ($partidas as $partida){
-
+            $sub_total += $this->sub_total_partida(fc_partida_id: $partida['fc_partida_id']);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener sub total',data: $sub_total);
+            }
+            $sub_total = round($sub_total,2);
         }
+
+        return $sub_total;
 
     }
 
