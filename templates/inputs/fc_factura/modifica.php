@@ -9,9 +9,9 @@
 
 <?php echo $controlador->inputs->subtotal; ?>
 <?php echo $controlador->inputs->descuento; ?>
-<?php echo $controlador->inputs->total; ?>
 <?php echo $controlador->inputs->impuestos_trasladados; ?>
 <?php echo $controlador->inputs->impuestos_retenidos; ?>
+<?php echo $controlador->inputs->total; ?>
 <?php echo $controlador->inputs->select->cat_sat_tipo_de_comprobante_id; ?>
 <?php echo $controlador->inputs->select->cat_sat_forma_pago_id; ?>
 <?php echo $controlador->inputs->select->cat_sat_metodo_pago_id; ?>
@@ -19,7 +19,7 @@
 <?php echo $controlador->inputs->select->com_tipo_cambio_id; ?>
 <?php echo $controlador->inputs->select->cat_sat_uso_cfdi_id; ?>
 <?php include (new views())->ruta_templates.'botons/submit/modifica_bd.php';?>
-<a href="<?php echo $controlador->link_fc_factura_partidas; ?>" class="btn btn-info"><i class="icon-edit"></i>
+<a href="<?php echo $controlador->link_fc_factura_nueva_partida; ?>" class="btn btn-info"><i class="icon-edit"></i>
     Nueva Partida
 </a>
 
