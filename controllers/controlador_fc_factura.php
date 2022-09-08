@@ -14,6 +14,8 @@ use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 
 use gamboamartin\template\html;
+use gamboamartin\xml_cfdi_4\cfdis;
+use gamboamartin\xml_cfdi_4\xml;
 use html\fc_partida_html;
 use html\fc_factura_html;
 use links\secciones\link_fc_factura;
@@ -286,6 +288,48 @@ class controlador_fc_factura extends system{
         }
         $partida['link_ve'] = $btn_ve;
         return $partida;
+    }
+
+    public function genera_xml(bool $header, bool $ws = false){
+        $fc_factura = $this->modelo->registro(registro_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener fc_factura',data:  $fc_factura, header: $header,ws:$ws);
+        }
+        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener partidas',data:  $partidas, header: $header,ws:$ws);
+        }
+
+       // $total = (new fc_factura($this->link))->t
+
+        $comprobante = array();
+        $comprobante['lugar_expedicion'] = $fc_factura['dp_cp_descripcion'];
+        $comprobante['tipo_de_comprobante'] = $fc_factura['cat_sat_tipo_de_comprobante_codigo'];
+        $comprobante['moneda'] = $fc_factura['cat_sat_moneda_codigo'];
+
+
+
+        $emisor = array();
+        $emisor['rfc'] = $fc_factura['org_empresa_rfc'];
+        $receptor = array();
+        $receptor['rfc'] = $fc_factura['com_cliente_rfc'];
+
+
+        $conceptos = array();
+
+        $impuestos = array();
+
+
+        $cfdi = new cfdis();
+
+        $ingreso = $cfdi->ingreso(comprobante: $comprobante,conceptos:  $conceptos, emisor: $emisor,
+            impuestos: $impuestos,receptor:  $receptor);
+
+        print_r($ingreso);exit;
+
+
+
+
     }
 
     public function partidas(bool $header, bool $ws = false): array|stdClass
