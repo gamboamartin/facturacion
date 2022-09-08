@@ -896,14 +896,14 @@ class fc_factura_html extends html_controler {
         }
 
 
-        $in_impuestos_trasladados = $this->input_impuestos_trasladados(cols: 6,row_upd: $row_upd,value_vacio:  false,
+        $in_impuestos_trasladados = $this->input_impuestos_trasladados(cols: 4,row_upd: $row_upd,value_vacio:  false,
             disabled: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_impuestos_trasladados);
         }
         $texts->impuestos_trasladados = $in_impuestos_trasladados;
 
-        $in_impuestos_retenidos = $this->input_impuestos_retenidos(cols: 6,row_upd:  $row_upd,value_vacio:  false,
+        $in_impuestos_retenidos = $this->input_impuestos_retenidos(cols: 4,row_upd:  $row_upd,value_vacio:  false,
             disabled: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_impuestos_retenidos);
@@ -922,7 +922,7 @@ class fc_factura_html extends html_controler {
         }
         $texts->descuento = $in_descuento;
 
-        $in_total = $this->input_total(cols: 4,row_upd:  $row_upd,value_vacio:  false, disabled: true);
+        $in_total = $this->input_total(cols: 8,row_upd:  $row_upd,value_vacio:  false, disabled: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_total);
         }
