@@ -194,21 +194,20 @@ class fc_factura extends modelo{
 
     public function get_descuento(int $fc_factura_id): float|array
     {
-        $filtro['fc_factura.id'] = $fc_factura_id;
 
-
-        $fc_partida = (new fc_partida($this->link))->filtro_and( filtro: $filtro);
-
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas de factura',
-                data: $fc_partida);
+        $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partidas',data: $partidas);
+        }
+        $descuento = 0;
+        foreach ($partidas as $partida){
+            $descuento += $this->descuento_partida(fc_partida_id: $partida['fc_partida_id']);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener descuento',data: $descuento);
+            }
+            $descuento = round($descuento,2);
         }
 
-        $descuento = 0.0;
-
-        foreach ($fc_partida->registros as $valor) {
-            $descuento += $valor['fc_partida_descuento'];
-        }
         return $descuento;
     }
 
