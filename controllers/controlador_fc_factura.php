@@ -164,6 +164,14 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica, header: $header,ws:$ws);
         }
 
+        $sub_total = (new fc_factura($this->link))->get_factura_sub_total(fc_factura_id:
+            $this->fc_factura_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener sub_total',data:  $sub_total,
+                header: $header,ws:$ws);
+        }
+        $this->row_upd->subtotal = $sub_total;
+        
         $imp_trasladados = (new fc_factura($this->link))->get_factura_imp_trasladados(fc_factura_id:
             $this->fc_factura_id);
         if(errores::$error){
