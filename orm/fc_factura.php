@@ -178,16 +178,14 @@ class fc_factura extends modelo{
 
     public function get_factura_sub_total(int $fc_factura_id): float|array
     {
-        $filtro['fc_factura.id'] = $fc_factura_id;
-        $fc_partida = (new fc_partida($this->link))->filtro_and( filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas de factura',
-                data: $fc_partida);
+        $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partidas',data: $partidas);
         }
 
         $subtotal = 0.0;
 
-        foreach ($fc_partida->registros as $valor) {
+        foreach ($partidas as $valor) {
             $subtotal += (new fc_partida($this->link))->calculo_sub_total_partida($valor['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $subtotal);
@@ -199,16 +197,13 @@ class fc_factura extends modelo{
 
     public function get_factura_imp_trasladados(int $fc_factura_id): float|array
     {
-        $filtro['fc_factura.id'] = $fc_factura_id;
-        $fc_partida = (new fc_partida($this->link))->filtro_and( filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas de factura',
-                data: $fc_partida);
+        $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partidas',data: $partidas);
         }
-
         $imp_traslado= 0.0;
 
-        foreach ($fc_partida->registros as $valor) {
+        foreach ($partidas as $valor) {
             $imp_traslado += (new fc_partida($this->link))->calculo_imp_trasladado($valor['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
@@ -220,16 +215,14 @@ class fc_factura extends modelo{
     
     public function get_factura_imp_retenidos(int $fc_factura_id): float|array
     {
-        $filtro['fc_factura.id'] = $fc_factura_id;
-        $fc_partida = (new fc_partida($this->link))->filtro_and( filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas de factura',
-                data: $fc_partida);
+        $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partidas',data: $partidas);
         }
 
         $imp_traslado= 0.0;
 
-        foreach ($fc_partida->registros as $valor) {
+        foreach ($partidas as $valor) {
             $imp_traslado += (new fc_partida($this->link))->calculo_imp_retenido($valor['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
