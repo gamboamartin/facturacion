@@ -170,7 +170,15 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al obtener sub_total',data:  $sub_total,
                 header: $header,ws:$ws);
         }
+        
         $this->row_upd->subtotal = $sub_total;
+        $descuento = (new fc_factura($this->link))->get_factura_descuento(fc_factura_id:
+            $this->fc_factura_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener descuento',data:  $descuento,
+                header: $header,ws:$ws);
+        }
+        $this->row_upd->descuento = $descuento;
         
         $imp_trasladados = (new fc_factura($this->link))->get_factura_imp_trasladados(fc_factura_id:
             $this->fc_factura_id);

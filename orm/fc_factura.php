@@ -232,7 +232,7 @@ class fc_factura extends modelo{
         return $imp_traslado;
     }
 
-    public function get_descuento(int $fc_factura_id): float|array
+    public function get_factura_descuento(int $fc_factura_id): float|array
     {
 
         $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
