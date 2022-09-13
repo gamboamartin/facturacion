@@ -1,12 +1,14 @@
 <?php
 namespace html;
 
+use base\frontend\validaciones_directivas;
 use config\generales;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_fc__partida;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
 use gamboamartin\system\html_controler;
 
+use gamboamartin\validacion\validacion;
 use models\base\limpieza;
 use models\fc_factura;
 use PDO;
@@ -618,9 +620,26 @@ class fc_factura_html extends html_controler {
         return $div;
     }
 
+    /**
+     * Genera un select de tipo exportacion
+     * @param int $cols N columnas css
+     * @param stdClass $row_upd Registro en proceso
+     * @return array|string
+     * @version 0.113.26
+     */
+    public function select_exportacion(int $cols, stdClass $row_upd): array|string
+    {
+        $keys = array('exportacion');
+        $valida = (new validacion())->valida_existencia_keys(keys: $keys, registro: $row_upd);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar',data:  $valida);
+        }
 
+        $valida = (new validaciones_directivas())->valida_cols(cols: $cols);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar cols',data:  $valida);
+        }
 
-    public function select_exportacion(int $cols, stdClass $row_upd){
         $exportacion = (int)$row_upd->exportacion;
 
         $values['01']['descripcion_select'] = '01';
