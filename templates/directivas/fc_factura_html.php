@@ -72,9 +72,9 @@ class fc_factura_html extends html_controler {
     }
 
 
-    public function genera_inputs_alta(controlador_fc_factura $controler, PDO $link): array|stdClass
+    public function genera_inputs_alta(controlador_fc_factura $controler, array $keys_selects, PDO $link): array|stdClass
     {
-        $inputs = $this->init_alta(link: $link);
+        $inputs = $this->init_alta(keys_selects: $keys_selects, link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
 
@@ -331,12 +331,13 @@ class fc_factura_html extends html_controler {
     }
 
     /** Inicializa los datos para una accion de tipo alta bd
+     * @param array $keys_selects
      * @param PDO $link Conexion a la base de datos
      * @return array|stdClass
      */
-    private function init_alta(PDO $link): array|stdClass
+    private function init_alta(array $keys_selects, PDO $link): array|stdClass
     {
-        $selects = $this->selects_alta(link: $link);
+        $selects = $this->selects_alta(keys_selects: $keys_selects, link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar selects',data:  $selects);
         }
@@ -617,127 +618,7 @@ class fc_factura_html extends html_controler {
         return $div;
     }
 
-    /**
-     * Genera los selects a mostrar con sus respectivos parámetros
-     * @param PDO $link Conexion a la base de datos
-     * @return array|stdClass
-     */
-    private function selects_alta(PDO $link): array|stdClass
-    {
-        $selects = new stdClass();
 
-        $select = (new cat_sat_metodo_pago_html(html:$this->html_base))->select_cat_sat_metodo_pago_id(
-            cols: 4, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->cat_sat_metodo_pago_id = $select;
-
-        $select = (new cat_sat_moneda_html(html:$this->html_base))->select_cat_sat_moneda_id(
-            cols: 4, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->cat_sat_moneda_id = $select;
-
-        $generales = new generales();
-        $cat_sat_tipo_de_comprobante_id = -1;
-        if(isset($generales->tipo_de_comprobante_id)){
-            $cat_sat_tipo_de_comprobante_id = $generales->tipo_de_comprobante_id;
-        }
-        $select = (new cat_sat_tipo_de_comprobante_html(html:$this->html_base))->select_cat_sat_tipo_de_comprobante_id(
-            cols: 4, con_registros:true, id_selected:$cat_sat_tipo_de_comprobante_id,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->cat_sat_tipo_de_comprobante_id = $select;
-
-        $select = (new com_sucursal_html(html:$this->html_base))->select_com_sucursal_id(
-            cols: 12, con_registros:true, id_selected:-1,link: $link, label: 'Cliente');
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->com_sucursal_id = $select;
-
-        $select = (new dp_calle_pertenece_html(html:$this->html_base))->select_dp_calle_pertenece_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->dp_calle_pertenece_id = $select;
-
-        $select = (new fc_csd_html(html:$this->html_base))->select_fc_csd_id(
-            cols: 12, con_registros:true, id_selected:-1,link: $link, label: 'Empresa');
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->fc_csd_id = $select;
-
-        $select = (new cat_sat_forma_pago_html(html:$this->html_base))->select_cat_sat_forma_pago_id(
-            cols: 4, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->cat_sat_forma_pago_id = $select;
-
-        $select = (new com_tipo_cambio_html(html:$this->html_base))->select_com_tipo_cambio_id(
-            cols: 4, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->com_tipo_cambio_id = $select;
-
-        $select = (new cat_sat_regimen_fiscal_html(html:$this->html_base))->select_cat_sat_regimen_fiscal_id(
-            cols: 12, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->cat_sat_regimen_fiscal_id = $select;
-
-        $select = (new cat_sat_uso_cfdi_html(html:$this->html_base))->select_cat_sat_uso_cfdi_id(
-            cols: 4, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->cat_sat_uso_cfdi_id = $select;
-
-        $select = (new dp_pais_html(html:$this->html_base))->select_dp_pais_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->dp_pais_id = $select;
-
-        $select = (new dp_estado_html(html:$this->html_base))->select_dp_estado_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->dp_estado_id = $select;
-
-        $select = (new dp_municipio_html(html:$this->html_base))->select_dp_municipio_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->dp_municipio_id = $select;
-
-        $select = (new dp_cp_html(html:$this->html_base))->select_dp_cp_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->dp_cp_id = $select;
-
-        $select = (new dp_colonia_postal_html(html:$this->html_base))->select_dp_colonia_postal_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->dp_colonia_postal_id = $select;
-
-        return $selects;
-    }
 
     public function select_exportacion(int $cols, stdClass $row_upd){
         $exportacion = (int)$row_upd->exportacion;
@@ -891,6 +772,7 @@ class fc_factura_html extends html_controler {
      * Genera los inputs text a mostrar con sus respectivos parámetros
      * @param stdClass $row_upd Registro obtenido para actualizar
      * @param bool $value_vacio Si vacio no muestra datos
+     * @param stdClass $params
      * @return array|stdClass
      */
     protected function texts_alta(stdClass $row_upd, bool $value_vacio, stdClass $params = new stdClass()): array|stdClass

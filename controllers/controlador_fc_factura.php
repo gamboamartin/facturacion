@@ -8,6 +8,7 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
+use config\generales;
 use gamboamartin\errores\errores;
 use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
@@ -94,7 +95,76 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);
         }
 
-        $inputs = (new fc_factura_html(html: $this->html_base))->genera_inputs_alta(controler: $this, link: $this->link);
+        $keys_selects = array();
+        $keys_selects['cat_sat_metodo_pago'] = new stdClass();
+        $keys_selects['cat_sat_metodo_pago']->label = 'Metodo de Pago';
+        $keys_selects['cat_sat_metodo_pago']->cols = 4;
+
+        $keys_selects['cat_sat_moneda'] = new stdClass();
+        $keys_selects['cat_sat_moneda']->label = 'Moneda';
+        $keys_selects['cat_sat_moneda']->cols = 4;
+
+        $keys_selects['com_sucursal'] = new stdClass();
+        $keys_selects['com_sucursal']->label = 'Cliente';
+        $keys_selects['com_sucursal']->cols = 12;
+
+        $keys_selects['dp_calle_pertenece'] = new stdClass();
+        $keys_selects['dp_calle_pertenece']->label = 'Calle';
+        $keys_selects['dp_calle_pertenece']->cols = 6;
+
+        $keys_selects['fc_csd'] = new stdClass();
+        $keys_selects['fc_csd']->label = 'CSD';
+        $keys_selects['fc_csd']->cols = 12;
+
+        $keys_selects['cat_sat_forma_pago'] = new stdClass();
+        $keys_selects['cat_sat_forma_pago']->label = 'Forma de pago';
+        $keys_selects['cat_sat_forma_pago']->cols = 4;
+
+        $keys_selects['com_tipo_cambio'] = new stdClass();
+        $keys_selects['com_tipo_cambio']->label = 'Tipo de Cambio';
+        $keys_selects['com_tipo_cambio']->cols = 4;
+
+        $keys_selects['cat_sat_regimen_fiscal'] = new stdClass();
+        $keys_selects['cat_sat_regimen_fiscal']->label = 'Regimen Fiscal';
+        $keys_selects['cat_sat_regimen_fiscal']->cols = 12;
+
+        $keys_selects['cat_sat_uso_cfdi'] = new stdClass();
+        $keys_selects['cat_sat_uso_cfdi']->label = 'Uso CFDI';
+        $keys_selects['cat_sat_uso_cfdi']->cols = 4;
+
+        $keys_selects['dp_pais'] = new stdClass();
+        $keys_selects['dp_pais']->label = 'Pais';
+        $keys_selects['dp_pais']->cols = 6;
+
+        $keys_selects['dp_estado'] = new stdClass();
+        $keys_selects['dp_estado']->label = 'Estado';
+        $keys_selects['dp_estado']->cols = 6;
+
+        $keys_selects['dp_municipio'] = new stdClass();
+        $keys_selects['dp_municipio']->label = 'Municipio';
+        $keys_selects['dp_municipio']->cols = 6;
+
+        $keys_selects['dp_cp'] = new stdClass();
+        $keys_selects['dp_cp']->label = 'CP';
+        $keys_selects['dp_cp']->cols = 6;
+
+        $keys_selects['dp_colonia_postal'] = new stdClass();
+        $keys_selects['dp_colonia_postal']->label = 'Colonia';
+        $keys_selects['dp_colonia_postal']->cols = 6;
+
+        $generales = new generales();
+        $cat_sat_tipo_de_comprobante_id = -1;
+        if(isset($generales->tipo_de_comprobante_id)){
+            $cat_sat_tipo_de_comprobante_id = $generales->tipo_de_comprobante_id;
+        }
+
+        $keys_selects['cat_sat_tipo_de_comprobante'] = new stdClass();
+        $keys_selects['cat_sat_tipo_de_comprobante']->label = 'Tipo de Comprobante';
+        $keys_selects['cat_sat_tipo_de_comprobante']->cols = 4;
+        $keys_selects['cat_sat_tipo_de_comprobante']->id_selected = $cat_sat_tipo_de_comprobante_id;
+
+        $inputs = (new fc_factura_html(html: $this->html_base))->genera_inputs_alta(
+            controler: $this, keys_selects: $keys_selects, link: $this->link);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);
             print_r($error);
