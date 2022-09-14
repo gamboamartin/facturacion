@@ -337,7 +337,7 @@ class fc_factura_html extends html_controler {
      * @param PDO $link Conexion a la base de datos
      * @return array|stdClass
      */
-    private function init_alta(array $keys_selects, PDO $link): array|stdClass
+    protected function init_alta(array $keys_selects, PDO $link): array|stdClass
     {
         $selects = $this->selects_alta(keys_selects: $keys_selects, link: $link);
         if(errores::$error){
