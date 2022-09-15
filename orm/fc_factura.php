@@ -145,7 +145,7 @@ class fc_factura extends modelo{
 
     }
 
-    public function elimina_bd(int $id): array
+    public function elimina_bd(int $id): array|stdClass
     {
 
         $del = $this->elimina_partidas(fc_factura_id: $id);
