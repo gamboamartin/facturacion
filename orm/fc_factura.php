@@ -49,6 +49,32 @@ class fc_factura extends modelo{
         return $r_alta_bd;
     }
 
+    /**
+     * Carga un descuento nuevo a un descuento previo
+     * @param float $descuento Descuento previo
+     * @param array $partida Partida a sumar descuento
+     * @return float|array
+     * @version 0.117.27
+     */
+    private function carga_descuento(float $descuento, array $partida): float|array
+    {
+        if($descuento < 0.0){
+            return $this->error->error(mensaje: 'Error el descuento previo no puede ser menor a 0',data: $descuento);
+        }
+
+        $keys = array('fc_partida_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro: $partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida',data: $valida);
+        }
+
+        $descuento_nuevo = $this->descuento_partida(fc_partida_id: $partida['fc_partida_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener descuento',data: $descuento);
+        }
+        return round($descuento+$descuento_nuevo,2);
+    }
+
     private function defaults_alta_bd(array $registro, stdClass $registro_csd): array
     {
 
@@ -231,6 +257,10 @@ class fc_factura extends modelo{
         return $imp_traslado;
     }
 
+    /**
+     * @param int $fc_factura_id
+     * @return float|array
+     */
     public function get_factura_descuento(int $fc_factura_id): float|array
     {
 
@@ -238,14 +268,12 @@ class fc_factura extends modelo{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener partidas',data: $partidas);
         }
-        $descuento = 0;
-        foreach ($partidas as $partida){
-            $descuento += $this->descuento_partida(fc_partida_id: $partida['fc_partida_id']);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener descuento',data: $descuento);
-            }
-            $descuento = round($descuento,2);
+
+        $descuento = $this->suma_descuento_partida(partidas: $partidas);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al cargar descuentos',data: $descuento);
         }
+
 
         return $descuento;
     }
@@ -392,6 +420,22 @@ class fc_factura extends modelo{
         return round($sub_total,4);
 
 
+    }
+
+    /**
+     * @param array $partidas
+     * @return float|array|int
+     */
+    private function suma_descuento_partida(array $partidas): float|array|int
+    {
+        $descuento = 0;
+        foreach ($partidas as $partida){
+            $descuento += $this->carga_descuento(descuento:$descuento, partida: $partida);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al cargar descuento',data: $descuento);
+            }
+        }
+        return $descuento;
     }
 
     public function total(int $fc_factura_id): float|array
