@@ -394,18 +394,20 @@ class fc_factura extends modelo{
 
     }
 
-    public function total(int $fc_factura_id){
+    public function total(int $fc_factura_id): float|array
+    {
 
         $sub_total = $this->sub_total(fc_factura_id: $fc_factura_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener sub total',data: $sub_total);
         }
-        $descuento = $this->get_descuento(fc_factura_id: $fc_factura_id);
+        $descuento = $this->get_factura_descuento(fc_factura_id: $fc_factura_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener descuento',data: $descuento);
         }
 
-
+        $total = $sub_total - $descuento;
+        return round($total,2);
 
     }
 }
