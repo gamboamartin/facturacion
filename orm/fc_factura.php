@@ -258,11 +258,17 @@ class fc_factura extends modelo{
     }
 
     /**
+     * Obtiene el total de descuento de una factura
      * @param int $fc_factura_id Identificador de factura
      * @return float|array
+     * @version 0.119.26
      */
     public function get_factura_descuento(int $fc_factura_id): float|array
     {
+
+        if($fc_factura_id<=0){
+            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0',data:  $fc_factura_id);
+        }
 
         $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
         if(errores::$error){

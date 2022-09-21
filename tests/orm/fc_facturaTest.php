@@ -70,6 +70,30 @@ class fc_facturaTest extends test {
         errores::$error = false;
     }
 
+    public function test_get_factura_descuento(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_factura($this->link);
+        //$modelo = new liberator($modelo);
+
+
+
+        $fc_factura_id = 1;
+
+        $resultado = $modelo->get_factura_descuento($fc_factura_id);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(1,$resultado);
+        errores::$error = false;
+    }
+
     public function test_get_partidas(): void
     {
         errores::$error = false;

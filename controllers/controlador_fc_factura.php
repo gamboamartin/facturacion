@@ -227,7 +227,7 @@ class controlador_fc_factura extends system{
     }
 
     /**
-     * @param bool $header
+     * @param bool $header Si header se muestra result en http
      * @param bool $ws
      * @param string $breadcrumbs
      * @param bool $aplica_form
