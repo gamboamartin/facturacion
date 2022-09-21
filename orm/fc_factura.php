@@ -383,6 +383,10 @@ class fc_factura extends modelo{
      */
     public function sub_total(int $fc_factura_id): float|int|array
     {
+        if($fc_factura_id<=0){
+            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0',data:  $fc_factura_id);
+        }
+
         $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener partidas',data: $partidas);
@@ -456,11 +460,16 @@ class fc_factura extends modelo{
     }
 
     /**
+     * Obtiene el total de una factura
      * @param int $fc_factura_id Identificador de factura
      * @return float|array
      */
     public function total(int $fc_factura_id): float|array
     {
+
+        if($fc_factura_id<=0){
+            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0',data:  $fc_factura_id);
+        }
 
         $sub_total = $this->sub_total(fc_factura_id: $fc_factura_id);
         if(errores::$error){

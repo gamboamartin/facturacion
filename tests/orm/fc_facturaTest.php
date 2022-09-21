@@ -208,6 +208,29 @@ class fc_facturaTest extends test {
         errores::$error = false;
     }
 
+    public function test_total(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_factura($this->link);
+        //$modelo = new liberator($modelo);
+
+
+        $fc_factura_id = 1;
+
+        $resultado = $modelo->total($fc_factura_id);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(0,$resultado);
+        errores::$error = false;
+    }
+
 
 }
 
