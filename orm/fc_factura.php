@@ -1,12 +1,8 @@
 <?php
 namespace models;
-use base\orm\data_format;
 use base\orm\modelo;
-use DateTime;
+
 use gamboamartin\errores\errores;
-use gamboamartin\organigrama\controllers\controlador_org_empresa;
-use JsonException;
-use models\base\limpieza;
 use PDO;
 use stdClass;
 
@@ -32,6 +28,9 @@ class fc_factura extends modelo{
 
     }
 
+    /**
+     * @return array|stdClass
+     */
     public function alta_bd(): array|stdClass
     {
 
@@ -270,6 +269,10 @@ class fc_factura extends modelo{
         return $r_fc_partida->registros;
     }
 
+    /**
+     * @param array $registro
+     * @return array
+     */
     private function init_data_alta_bd(array $registro): array
     {
         $registro_csd = (new fc_csd($this->link))->registro(registro_id: $registro['fc_csd_id'],retorno_obj: true);
@@ -301,6 +304,10 @@ class fc_factura extends modelo{
        return $registro;
     }
 
+    /**
+     * @param array $registro
+     * @return array
+     */
     private function limpia_alta_factura(array $registro): array
     {
 
@@ -315,8 +322,19 @@ class fc_factura extends modelo{
         return $registro;
     }
 
+    /**
+     * Limpia un key de un registro si es que existe
+     * @param string $key Key a limpiar
+     * @param array $registro Registro para aplicacion de limpieza
+     * @return array
+     * @version 0.115.26
+     */
     private function limpia_si_existe(string $key, array $registro): array
     {
+        $key = trim($key);
+        if($key === ''){
+            return $this->error->error(mensaje: 'Error key esta vacio',data: $key);
+        }
         if(isset($registro[$key])){
             unset($registro[$key]);
         }

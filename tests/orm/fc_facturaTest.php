@@ -71,6 +71,29 @@ class fc_facturaTest extends test {
         errores::$error = false;
     }
 
+    public function test_limpia_si_existe(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_factura($this->link);
+        $modelo = new liberator($modelo);
+
+        $key = 'a';
+        $registro = array();
+        $registro['a'] = 'z';
+        $resultado = $modelo->limpia_si_existe($key, $registro);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEmpty($resultado);
+        errores::$error = false;
+    }
+
     public function test_sub_total(): void
     {
         errores::$error = false;
