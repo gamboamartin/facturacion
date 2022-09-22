@@ -2,9 +2,7 @@
 namespace html;
 
 use base\frontend\validaciones_directivas;
-use config\generales;
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\controllers\controlador_fc__partida;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
 use gamboamartin\system\html_controler;
 

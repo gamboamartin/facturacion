@@ -8,15 +8,12 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
-use gamboamartin\errores\errores;
-use gamboamartin\system\actions;
-use gamboamartin\system\init;
+use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 
 use gamboamartin\template\html;
 use html\fc_retenido_html;
-use models\fc_retenido;
 use PDO;
 use stdClass;
 

@@ -1,17 +1,14 @@
 <?php
-namespace models;
+namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
-use gamboamartin\errores\errores;
-use gamboamartin\organigrama\controllers\controlador_org_empresa;
-use models\base\limpieza;
 use PDO;
-use stdClass;
+
 
 class fc_retenido extends modelo{
     public function __construct(PDO $link){
-        $tabla = __CLASS__;
+        $tabla = 'fc_retenido';
         $columnas = array($tabla=>false,'fc_partida'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla,
-            'cat_sat_tipo_impuesto'=>$tabla);
+            'cat_sat_tipo_impuesto'=>$tabla,'com_producto'=>'fc_partida');
         $campos_obligatorios = array('codigo','serie','fc_partida_id');
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis','serie');

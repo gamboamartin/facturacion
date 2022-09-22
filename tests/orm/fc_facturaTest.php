@@ -1,15 +1,13 @@
 <?php
-namespace tests\controllers;
+namespace tests\orm;
 
-use controllers\controlador_cat_sat_tipo_persona;
+
 use gamboamartin\errores\errores;
 use gamboamartin\test\liberator;
 use gamboamartin\test\test;
-use JsonException;
-use models\adm_dia;
+use gamboamartin\facturacion\models\fc_factura;
 
-use models\fc_factura;
-use models\fc_partida;
+
 use stdClass;
 
 
@@ -21,9 +19,9 @@ class fc_facturaTest extends test {
         parent::__construct($name, $data, $dataName);
         $this->errores = new errores();
         $this->paths_conf = new stdClass();
-        $this->paths_conf->generales = '/var/www/html/cat_sat/config/generales.php';
-        $this->paths_conf->database = '/var/www/html/cat_sat/config/database.php';
-        $this->paths_conf->views = '/var/www/html/cat_sat/config/views.php';
+        $this->paths_conf->generales = '/var/www/html/facturacion/config/generales.php';
+        $this->paths_conf->database = '/var/www/html/facturacion/config/database.php';
+        $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
     public function test_carga_descuento(): void
@@ -43,6 +41,7 @@ class fc_facturaTest extends test {
         $partida = array();
         $partida['fc_partida_id'] = 1;
         $resultado = $modelo->carga_descuento($descuento, $partida);
+
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(11,$resultado);

@@ -1,14 +1,15 @@
 <?php
-namespace models;
+namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 
 use gamboamartin\errores\errores;
+use models\com_sucursal;
 use PDO;
 use stdClass;
 
 class fc_factura extends modelo{
     public function __construct(PDO $link){
-        $tabla = __CLASS__;
+        $tabla = 'fc_factura';
         $columnas = array($tabla=>false,'fc_csd'=>$tabla, 'cat_sat_forma_pago'=>$tabla,'cat_sat_metodo_pago'=>$tabla,
             'cat_sat_moneda'=>$tabla, 'com_tipo_cambio'=>$tabla, 'cat_sat_uso_cfdi'=>$tabla,
             'cat_sat_tipo_de_comprobante'=>$tabla, 'cat_sat_regimen_fiscal'=>$tabla, 'com_sucursal'=>$tabla,
@@ -70,7 +71,7 @@ class fc_factura extends modelo{
 
         $descuento_nuevo = $this->descuento_partida(fc_partida_id: $partida['fc_partida_id']);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener descuento',data: $descuento);
+            return $this->error->error(mensaje: 'Error al obtener descuento',data: $descuento_nuevo);
         }
         return round($descuento+$descuento_nuevo,2);
     }

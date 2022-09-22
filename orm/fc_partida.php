@@ -1,16 +1,13 @@
 <?php
-namespace models;
-use base\orm\codigos;
+namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 use gamboamartin\errores\errores;
-use gamboamartin\organigrama\controllers\controlador_org_empresa;
-use models\base\limpieza;
 use PDO;
 use stdClass;
 
 class fc_partida extends modelo{
     public function __construct(PDO $link){
-        $tabla = __CLASS__;
+        $tabla = 'fc_partida';
         $columnas = array($tabla=>false,'fc_factura'=>$tabla, 'com_producto' => $tabla,
             'cat_sat_producto' => 'com_producto','cat_sat_unidad' => 'com_producto',
             'cat_sat_tipo_factor' => 'com_producto','cat_sat_factor' => 'com_producto');

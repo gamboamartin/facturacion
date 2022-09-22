@@ -1,15 +1,12 @@
 <?php
-namespace models;
+namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
-use gamboamartin\errores\errores;
-use gamboamartin\organigrama\controllers\controlador_org_empresa;
-use models\base\limpieza;
 use PDO;
-use stdClass;
+
 
 class fc_cer_csd extends modelo{
     public function __construct(PDO $link){
-        $tabla = __CLASS__;
+        $tabla = 'fc_cer_csd';
         $columnas = array($tabla=>false,'fc_csd'=>$tabla);
         $campos_obligatorios = array('codigo');
 

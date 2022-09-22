@@ -10,18 +10,16 @@ namespace gamboamartin\facturacion\controllers;
 
 use config\generales;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\system\actions;
-use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 
 use gamboamartin\template\html;
 use gamboamartin\xml_cfdi_4\cfdis;
-use gamboamartin\xml_cfdi_4\xml;
 use html\fc_partida_html;
 use html\fc_factura_html;
 use links\secciones\link_fc_factura;
-use models\fc_partida;
-use models\fc_factura;
 use PDO;
 use stdClass;
 

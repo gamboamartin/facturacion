@@ -1,14 +1,11 @@
 <?php
-namespace tests\controllers;
+namespace tests\orm;
 
-use controllers\controlador_cat_sat_tipo_persona;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\test\liberator;
 use gamboamartin\test\test;
-use JsonException;
-use models\adm_dia;
 
-use models\fc_partida;
 use stdClass;
 
 

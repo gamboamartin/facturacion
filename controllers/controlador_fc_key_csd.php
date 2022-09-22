@@ -9,16 +9,12 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
-use gamboamartin\system\actions;
-use gamboamartin\system\init;
+use gamboamartin\facturacion\models\fc_key_csd;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
-
 use gamboamartin\template\html;
 use html\fc_key_csd_html;
-use models\fc_key_csd;
 use PDO;
-use phpDocumentor\Reflection\DocBlock\Tags\Link;
 use stdClass;
 
 class controlador_fc_key_csd extends system{

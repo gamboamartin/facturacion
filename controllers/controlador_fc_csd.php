@@ -9,14 +9,12 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
-use gamboamartin\system\actions;
-use gamboamartin\system\init;
+use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 
 use gamboamartin\template\html;
 use html\fc_csd_html;
-use models\fc_csd;
 use PDO;
 use stdClass;
 
