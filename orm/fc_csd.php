@@ -9,7 +9,7 @@ class fc_csd extends modelo{
         $tabla = 'fc_csd';
         $columnas = array($tabla=>false,'org_sucursal'=>$tabla,'org_empresa'=>'org_sucursal',
             'dp_calle_pertenece'=>'org_empresa','cat_sat_regimen_fiscal'=>'org_empresa');
-        $campos_obligatorios = array('codigo','serie','org_sucursal_id');
+        $campos_obligatorios = array('codigo','serie','org_sucursal_id','descripcion_select');
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis','serie');
 
