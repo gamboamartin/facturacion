@@ -97,6 +97,14 @@ class fc_csd_html extends html_controler {
         return $inputs;
     }
 
+    /**
+     * Genera un input de tipo serie
+     * @param int $cols numero de columnas css1
+     * @param stdClass $row_upd registro en proceso
+     * @param bool $value_vacio Si vacio deja el input sin value
+     * @return array|string
+     * @version 0.126.26
+     */
     public function input_serie(int $cols, stdClass $row_upd, bool $value_vacio): array|string
     {
         $valida = $this->directivas->valida_cols(cols: $cols);
