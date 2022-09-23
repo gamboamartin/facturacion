@@ -117,6 +117,27 @@ class fc_facturaTest extends test {
         errores::$error = false;
     }
 
+    public function test_limpia_alta_factura(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $registro = array();
+        $registro['descuento'] = 10;
+        $modelo = new fc_factura($this->link);
+        $modelo = new liberator($modelo);
+        $resultado = $modelo->limpia_alta_factura($registro);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEmpty($resultado);
+        errores::$error = false;
+    }
+
     public function test_limpia_si_existe(): void
     {
         errores::$error = false;

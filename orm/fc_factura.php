@@ -305,6 +305,7 @@ class fc_factura extends modelo{
     }
 
     /**
+     * Inicializa los datos de un registro
      * @param array $registro
      * @return array
      */
@@ -340,8 +341,10 @@ class fc_factura extends modelo{
     }
 
     /**
-     * @param array $registro
+     * Limpia los parametros de una factura
+     * @param array $registro registro en proceso
      * @return array
+     * @version 0.127.26
      */
     private function limpia_alta_factura(array $registro): array
     {
@@ -464,6 +467,7 @@ class fc_factura extends modelo{
      * Obtiene el total de una factura
      * @param int $fc_factura_id Identificador de factura
      * @return float|array
+     * @version 0.127.26
      */
     public function total(int $fc_factura_id): float|array
     {
