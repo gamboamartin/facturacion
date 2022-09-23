@@ -4,12 +4,7 @@ namespace html;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_fc_csd;
-use gamboamartin\organigrama\controllers\controlador_org_empresa;
 use gamboamartin\system\html_controler;
-
-use models\base\limpieza;
-use models\fc_csd;
-use models\org_empresa;
 use PDO;
 use stdClass;
 
@@ -25,9 +20,9 @@ class fc_csd_html extends html_controler {
         return $controler->inputs;
     }
 
-    public function genera_inputs_alta(controlador_fc_csd $controler, PDO $link): array|stdClass
+    public function genera_inputs_alta(controlador_fc_csd $controler, array $keys_selects, PDO $link): array|stdClass
     {
-        $inputs = $this->init_alta(link: $link);
+        $inputs = $this->init_alta(keys_selects: $keys_selects, link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
         }
@@ -54,9 +49,9 @@ class fc_csd_html extends html_controler {
         return $inputs_asignados;
     }
 
-    private function init_alta(PDO $link): array|stdClass
+    protected function init_alta(array $keys_selects, PDO $link): array|stdClass
     {
-        $selects = $this->selects_alta(link: $link);
+        $selects = $this->selects_alta(link: $link, keys_selects: $keys_selects);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar selects',data:  $selects);
         }
@@ -123,19 +118,6 @@ class fc_csd_html extends html_controler {
         return $div;
     }
 
-    private function selects_alta(PDO $link): array|stdClass
-    {
-        $selects = new stdClass();
-
-        $select = (new org_sucursal_html(html:$this->html_base))->select_org_sucursal_id(
-            cols: 6, con_registros:true, id_selected:-1,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select',data:  $select);
-        }
-        $selects->org_sucursal_id = $select;
-
-        return $selects;
-    }
 
     private function selects_modifica(PDO $link, stdClass $row_upd): array|stdClass
     {
@@ -164,7 +146,7 @@ class fc_csd_html extends html_controler {
         return $select;
     }
 
-    private function texts_alta(stdClass $row_upd, bool $value_vacio): array|stdClass
+    protected function texts_alta(stdClass $row_upd, bool $value_vacio, stdClass $params = new stdClass()): array|stdClass
     {
         $texts = new stdClass();
 

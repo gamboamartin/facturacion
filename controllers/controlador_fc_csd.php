@@ -39,7 +39,12 @@ class controlador_fc_csd extends system{
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);
         }
 
-        $inputs = (new fc_csd_html(html: $this->html_base))->genera_inputs_alta(controler: $this, link: $this->link);
+        $keys_selects = array();
+        $keys_select['org_sucursal'] = new stdClass();
+        $keys_select['org_sucursal']->Label = 'Sucursal';
+        $keys_select['org_sucursal']->cols = 6;
+
+        $inputs = (new fc_csd_html(html: $this->html_base))->genera_inputs_alta(controler: $this, keys_selects: $keys_selects, link: $this->link);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);
             print_r($error);
