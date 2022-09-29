@@ -15,7 +15,7 @@
           "gamboamartin\\facturacion\\controllers\\": "controllers",
           "gamboamartin\\facturacion\\models\\": "orm",
           "config\\": "config/",
-          "tests\\": "tests/",
+          "gamboamartin\\facturacion\\tests\\": "tests",
           "links\\": "links/",
           "html\\": "templates/directivas/"
 

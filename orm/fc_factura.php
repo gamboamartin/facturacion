@@ -35,6 +35,12 @@ class fc_factura extends modelo{
     public function alta_bd(): array|stdClass
     {
 
+        $keys = array('fc_csd_id');
+        $valida = $this->validacion->valida_ids(keys: $keys, registro: $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data: $valida);
+        }
+
         $registro = $this->init_data_alta_bd(registro:$this->registro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar registro',data: $registro);
@@ -78,6 +84,18 @@ class fc_factura extends modelo{
 
     private function defaults_alta_bd(array $registro, stdClass $registro_csd): array
     {
+
+        $keys = array('com_sucursal_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data: $valida);
+        }
+
+        $keys = array('serie','folio');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data: $valida);
+        }
 
         $registro_com_sucursal = (new com_sucursal($this->link))->registro(
             registro_id: $registro['com_sucursal_id'], retorno_obj: true);
@@ -311,6 +329,11 @@ class fc_factura extends modelo{
      */
     private function init_data_alta_bd(array $registro): array
     {
+        $keys = array('fc_csd_id');
+        $valida = $this->validacion->valida_ids(keys: $keys, registro: $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data: $valida);
+        }
         $registro_csd = (new fc_csd($this->link))->registro(registro_id: $registro['fc_csd_id'],retorno_obj: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc csd',data: $registro_csd);
@@ -329,6 +352,18 @@ class fc_factura extends modelo{
 
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar keys',data: $registro);
+        }
+
+        $keys = array('com_sucursal_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data: $valida);
+        }
+
+        $keys = array('serie','folio');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data: $valida);
         }
 
 
@@ -404,6 +439,10 @@ class fc_factura extends modelo{
             $sub_total = round($sub_total,2);
         }
 
+        if($sub_total<=0.0){
+            return $this->error->error(mensaje: 'Error al obtener sub total debe ser mayor a 0',data: $sub_total);
+        }
+
         return $sub_total;
 
     }
@@ -423,6 +462,13 @@ class fc_factura extends modelo{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener $fc_partida',data: $fc_partida);
         }
+
+        $keys = array('fc_partida_cantidad','fc_partida_valor_unitario');
+        $valida = $this->validacion->valida_double_mayores_0(keys: $keys,registro:  $fc_partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida',data: $valida);
+        }
+
 
         $cantidad = $fc_partida->fc_partida_cantidad;
         $cantidad = round($cantidad,4);
@@ -486,7 +532,13 @@ class fc_factura extends modelo{
         }
 
         $total = $sub_total - $descuento;
-        return round($total,2);
+
+        $total = round($total,2);
+        if($total<=0.0){
+            return $this->error->error(mensaje: 'Error total debe ser mayor a 0',data: $total);
+        }
+
+        return $total;
 
     }
 }

@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 use gamboamartin\errores\errores;
+use models\com_producto;
 use PDO;
 use stdClass;
 
