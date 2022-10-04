@@ -2,8 +2,8 @@
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 
+use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\errores\errores;
-use models\com_sucursal;
 use PDO;
 use stdClass;
 
