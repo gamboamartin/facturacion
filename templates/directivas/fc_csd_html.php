@@ -4,6 +4,7 @@ namespace html;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_fc_csd;
+use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\system\html_controler;
 use PDO;
 use stdClass;
