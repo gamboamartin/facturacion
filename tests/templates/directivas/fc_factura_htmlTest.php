@@ -48,7 +48,10 @@ class fc_factura_htmlTest extends test {
 
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertStringContainsStringIgnoringCase("ortacion' id='exportacion' name='exportacion", $resultado);
+        $this->assertStringContainsStringIgnoringCase("<div class='control-group col-sm-1'><div class='controls'><select", $resultado);
+        $this->assertStringContainsStringIgnoringCase("<select class='form-control selectpicker color-se", $resultado);
+        $this->assertStringContainsStringIgnoringCase("or-secondary  exportacion' data-live-search='true' id='expo", $resultado);
+        $this->assertStringContainsStringIgnoringCase(" id='exportacion' name='exportacion' required ><option value", $resultado);
         errores::$error = false;
 
 

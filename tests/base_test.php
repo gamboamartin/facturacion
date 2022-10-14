@@ -19,6 +19,13 @@ class base_test{
 
     public function alta_fc_csd(PDO $link): array|\stdClass
     {
+
+        $alta = $this->alta_org_sucursal_id($link);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+
         $registro = array();
         $registro['id'] = 1;
         $registro['codigo'] = 1;
@@ -88,6 +95,18 @@ class base_test{
 
 
         $alta = (new fc_partida($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_org_sucursal_id(PDO $link): array|\stdClass
+    {
+
+
+        $alta = (new \gamboamartin\organigrama\tests\base_test())->alta_org_sucursal($link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
 
