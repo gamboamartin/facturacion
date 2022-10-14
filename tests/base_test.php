@@ -20,7 +20,7 @@ class base_test{
     public function alta_fc_csd(PDO $link): array|\stdClass
     {
 
-        $alta = $this->alta_org_sucursal_id($link);
+        $alta = $this->alta_org_sucursal($link);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -102,7 +102,7 @@ class base_test{
         return $alta;
     }
 
-    public function alta_org_sucursal_id(PDO $link): array|\stdClass
+    public function alta_org_sucursal(PDO $link): array|\stdClass
     {
 
 
