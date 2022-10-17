@@ -16,6 +16,36 @@ class base_test{
 
 
 
+    public function alta_com_cliente(PDO $link): array|\stdClass
+    {
+        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_cliente($link);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_com_sucursal(PDO $link): array|\stdClass
+    {
+        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_sucursal($link);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_com_tipo_cambio(PDO $link): array|\stdClass
+    {
+        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_tipo_cambio($link);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
+
 
     public function alta_fc_csd(PDO $link): array|\stdClass
     {
@@ -47,6 +77,24 @@ class base_test{
 
     public function alta_fc_factura(PDO $link): array|\stdClass
     {
+
+        $alta = $this->alta_com_cliente($link);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+
+        $alta = $this->alta_com_sucursal($link);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+
+        $alta = $this->alta_com_tipo_cambio($link);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
 
         $registro = array();
         $registro['id'] = 1;
@@ -127,7 +175,70 @@ class base_test{
         return $del;
     }
 
+    public function del_cat_sat_metodo_pago(PDO $link): array|\stdClass
+    {
 
+
+        $del = (new \gamboamartin\cat_sat\tests\base_test())->del_cat_sat_metodo_pago($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
+    public function del_cat_sat_moneda(PDO $link): array|\stdClass
+    {
+
+        $del = (new base_test())->del_fc_factura($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new base_test())->del_com_cliente($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new base_test())->del_com_tipo_cambio($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new \gamboamartin\cat_sat\tests\base_test())->del_cat_sat_moneda($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
+    public function del_com_cliente(PDO $link): array|\stdClass
+    {
+
+
+        $del = (new \gamboamartin\comercial\test\base_test())->del_com_cliente($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
+    public function del_com_tipo_cambio(PDO $link): array|\stdClass
+    {
+
+
+        $del = (new \gamboamartin\comercial\test\base_test())->del_com_tipo_cambio($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
 
     public function del_fc_csd(PDO $link): array
     {
