@@ -8,6 +8,7 @@ use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
 
 
+use gamboamartin\organigrama\models\org_sucursal;
 use PDO;
 
 
@@ -47,21 +48,27 @@ class base_test{
     }
 
 
-    public function alta_fc_csd(PDO $link): array|\stdClass
+    public function alta_fc_csd(PDO $link, int $org_sucursal_id): array|\stdClass
     {
 
-        $alta = $this->alta_org_sucursal($link);
+        $existe = (new org_sucursal($link))->existe_by_id(registro_id: $org_sucursal_id);
         if(errores::$error){
-            return (new errores())->error('Error al insertar', $alta);
-
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
         }
+        if(!$existe) {
+            $alta = $this->alta_org_sucursal(link: $link, id: $org_sucursal_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+            }
+        }
+
 
         $registro = array();
         $registro['id'] = 1;
         $registro['codigo'] = 1;
         $registro['descripcion'] = 1;
         $registro['serie'] = 1;
-        $registro['org_sucursal_id'] = 1;
+        $registro['org_sucursal_id'] = $org_sucursal_id;
         $registro['descripcion_select'] = 1;
         $registro['alias'] = 1;
         $registro['codigo_bis'] = 1;
@@ -150,11 +157,11 @@ class base_test{
         return $alta;
     }
 
-    public function alta_org_sucursal(PDO $link): array|\stdClass
+    public function alta_org_sucursal(PDO $link, int $id = 1): array|\stdClass
     {
 
 
-        $alta = (new \gamboamartin\organigrama\tests\base_test())->alta_org_sucursal($link);
+        $alta = (new \gamboamartin\organigrama\tests\base_test())->alta_org_sucursal(link: $link, id: $id);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
 
