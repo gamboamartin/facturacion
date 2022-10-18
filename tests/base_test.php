@@ -48,7 +48,7 @@ class base_test{
     }
 
 
-    public function alta_fc_csd(PDO $link, int $org_sucursal_id = 1): array|\stdClass
+    public function alta_fc_csd(PDO $link, int $id = 1, int $org_sucursal_id = 1): array|\stdClass
     {
 
         $existe = (new org_sucursal($link))->existe_by_id(registro_id: $org_sucursal_id);
@@ -64,7 +64,7 @@ class base_test{
 
 
         $registro = array();
-        $registro['id'] = 1;
+        $registro['id'] = $id;
         $registro['codigo'] = 1;
         $registro['descripcion'] = 1;
         $registro['serie'] = 1;
