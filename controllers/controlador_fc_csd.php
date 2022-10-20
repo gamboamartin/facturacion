@@ -40,9 +40,11 @@ class controlador_fc_csd extends system{
         }
 
         $keys_selects = array();
-        $keys_select['org_sucursal'] = new stdClass();
-        $keys_select['org_sucursal']->Label = 'Sucursal';
-        $keys_select['org_sucursal']->cols = 6;
+        $keys_selects['org_sucursal_id'] = new stdClass();
+        $keys_selects['org_sucursal_id']->label = 'Sucursal';
+        $keys_selects['org_sucursal_id']->cols = 6;
+
+        $campos_view['serie']['type'] = 'dates';
 
         $inputs = (new fc_csd_html(html: $this->html_base))->genera_inputs_alta(controler: $this, keys_selects: $keys_selects, link: $this->link);
         if(errores::$error){

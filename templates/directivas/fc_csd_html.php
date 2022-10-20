@@ -12,7 +12,7 @@ use stdClass;
 
 class fc_csd_html extends html_controler {
 
-    private function asigna_inputs(controlador_fc_csd $controler, stdClass $inputs): array|stdClass
+    private function asigna_inputs(controlador_fc_csd $controler, stdClass|array $inputs): array|stdClass
     {
         $controler->inputs->select = new stdClass();
         $controler->inputs->select->org_sucursal_id = $inputs->selects->org_sucursal_id;
@@ -21,13 +21,23 @@ class fc_csd_html extends html_controler {
         return $controler->inputs;
     }
 
+    private function asigna_inputs_alta(controlador_fc_csd $controler, stdClass|array $inputs): array|stdClass
+    {
+        $controler->inputs->select = new stdClass();
+        $controler->inputs->select->org_sucursal_id = $inputs['selects']->org_sucursal_id;
+        $controler->inputs->serie = $inputs['inputs']->serie;
+
+        return $controler->inputs;
+    }
+
     public function genera_inputs_alta(controlador_fc_csd $controler, array $keys_selects, PDO $link): array|stdClass
     {
-        $inputs = $this->init_alta(keys_selects: $keys_selects, link: $link);
+        $inputs = $this->init_alta2(row_upd: $controler->row_upd, modelo: $controler->modelo, link: $link,
+            keys_selects:  $keys_selects);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
         }
-        $inputs_asignados = $this->asigna_inputs(controler:$controler, inputs: $inputs);
+        $inputs_asignados = $this->asigna_inputs_alta(controler:$controler, inputs: $inputs);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al asignar inputs',data:  $inputs_asignados);
         }
