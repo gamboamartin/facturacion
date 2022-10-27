@@ -232,7 +232,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'cantidad',place_holder: 'Cantidad',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'cantidad',place_holder: 'Cantidad',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -253,7 +253,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'valor_unitario',place_holder: 'Valor Unitario',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'valor_unitario',place_holder: 'Valor Unitario',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -413,7 +413,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'version',place_holder: 'Version',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'version',place_holder: 'Version',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -434,7 +434,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'serie',place_holder: 'Serie',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'serie',place_holder: 'Serie',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -455,7 +455,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'subtotal',place_holder: 'Subtotal',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'subtotal',place_holder: 'Subtotal',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -476,7 +476,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'descuento',place_holder: 'Descuento',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'descuento',place_holder: 'Descuento',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -497,7 +497,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'impuestos_trasladados',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'impuestos_trasladados',
             place_holder: 'Imp Trasladados',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
@@ -519,7 +519,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'impuestos_retenidos',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'impuestos_retenidos',
             place_holder: 'Imp Retenidos',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
@@ -541,7 +541,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'total',place_holder: 'Total',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'total',place_holder: 'Total',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -562,7 +562,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'folio',place_holder: 'Folio',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'folio',place_holder: 'Folio',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -583,7 +583,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->fecha_required(disable: $disabled,name: 'fecha',place_holder: 'Fecha',
+        $html =$this->directivas->fecha_required(disabled: $disabled,name: 'fecha',place_holder: 'Fecha',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -604,7 +604,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'exportacion',place_holder: 'Exportacion',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'exportacion',place_holder: 'Exportacion',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
