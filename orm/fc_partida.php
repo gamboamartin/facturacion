@@ -31,7 +31,7 @@ class fc_partida extends modelo{
             }
         }
 
-        $keys = array('cantidad', 'valor_unitario');
+        $keys = array('cantidad');
         foreach ($keys as $key){
             if(!isset($this->registro[$key])){
                 return $this->error->error(mensaje: 'Error debe de existir '. $key, data: $this->registro);
