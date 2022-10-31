@@ -62,7 +62,8 @@ class fc_partida_html extends html_controler {
         return $inputs_asignados;
     }
 
-    private function init_alta(PDO $link): array|stdClass
+
+    protected function init_alta(array $keys_selects, PDO $link): array|stdClass
     {
         $selects = $this->selects_alta(link: $link);
         if(errores::$error){
@@ -101,7 +102,7 @@ class fc_partida_html extends html_controler {
         return $alta_inputs;
     }
 
-    private function selects_alta(PDO $link): array|stdClass
+    protected function selects_alta(array $keys_selects, PDO $link): array|stdClass
     {
         $selects = new stdClass();
 
@@ -143,7 +144,7 @@ class fc_partida_html extends html_controler {
         return $selects;
     }
     
-    private function texts_alta(stdClass $row_upd, bool $value_vacio, stdClass $params = new stdClass()): array|stdClass
+    protected function texts_alta(stdClass $row_upd, bool $value_vacio, stdClass $params = new stdClass()): array|stdClass
     {
         $texts = new stdClass();
 
@@ -162,7 +163,7 @@ class fc_partida_html extends html_controler {
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_cantidad);
         }
         $texts->cantidad = $in_cantidad;
-        
+
         $in_descuento= $this->input_descuento(cols: 4,row_upd:  $row_upd,value_vacio:  $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_descuento);
@@ -186,7 +187,7 @@ class fc_partida_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'cantidad',place_holder: 'Cantidad',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'cantidad',place_holder: 'Cantidad',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -207,7 +208,7 @@ class fc_partida_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'valor_unitario',place_holder: 'Valor Unitario',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'valor_unitario',place_holder: 'Valor Unitario',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -228,7 +229,7 @@ class fc_partida_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: $disabled,name: 'descuento',place_holder: 'Descuento',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'descuento',place_holder: 'Descuento',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);

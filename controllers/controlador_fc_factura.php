@@ -24,6 +24,8 @@ use PDO;
 use stdClass;
 
 class controlador_fc_factura extends system{
+
+    public array $keys_selects = array();
     public string $rfc = '';
     public string $razon_social = '';
     public string $link_fc_partida_alta_bd = '';
@@ -39,7 +41,18 @@ class controlador_fc_factura extends system{
         $modelo = new fc_factura(link: $link);
         $html_ = new fc_factura_html(html: $html);
         $obj_link = new link_fc_factura($this->registro_id);
-        parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, paths_conf: $paths_conf);
+
+        $columns["fc_factura_id"]["titulo"] = "Id";
+        $columns["fc_factura_codigo"]["titulo"] = "Codigo";
+        $columns["fc_factura_descripcion"]["titulo"] = "Descripcion";
+        $columns["fc_factura_folio"]["titulo"] = "Folio";
+        $columns["fc_factura_serie"]["titulo"] = "Serie";
+
+        $datatables = new stdClass();
+        $datatables->columns = $columns;
+
+        parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, datatables: $datatables,
+            paths_conf: $paths_conf);
         $this->titulo_lista = 'Facturas';
 
         if(isset($_GET['fc_partida_id'])){
@@ -84,6 +97,26 @@ class controlador_fc_factura extends system{
             exit;
         }
         $this->link_fc_factura_nueva_partida = $link_fc_partida_nueva_partida;
+
+        $this->asignar_propiedad(identificador:'fc_csd_id', propiedades: ["label" => "CSD"]);
+        $this->asignar_propiedad(identificador:'cat_sat_forma_pago_id', propiedades: ["label" => "Forma Pago"]);
+        $this->asignar_propiedad(identificador:'cat_sat_metodo_pago_id', propiedades: ["label" => "Metodo Pago"]);
+        $this->asignar_propiedad(identificador:'cat_sat_moneda_id', propiedades: ["label" => "Moneda"]);
+        $this->asignar_propiedad(identificador:'com_tipo_cambio_id', propiedades: ["label" => "Tipo Cambio"]);
+        $this->asignar_propiedad(identificador:'cat_sat_uso_cfdi_id', propiedades: ["label" => "CFDI"]);
+        $this->asignar_propiedad(identificador:'cat_sat_tipo_de_comprobante_id', propiedades: ["label" => "Tipo Comprobante"]);
+        $this->asignar_propiedad(identificador:'dp_calle_pertenece_id', propiedades: ["label" => "Calle"]);
+        $this->asignar_propiedad(identificador:'cat_sat_regimen_fiscal_id', propiedades: ["label" => "Regimen Fiscal"]);
+        $this->asignar_propiedad(identificador:'com_sucursal_id', propiedades: ["label" => "Sucursal"]);
+        $this->asignar_propiedad(identificador: 'folio', propiedades: ['place_holder'=> 'Folio']);
+        $this->asignar_propiedad(identificador: 'exportacion', propiedades: ['place_holder'=> 'Exportacion']);
+        $this->asignar_propiedad(identificador: 'serie', propiedades: ['place_holder'=> 'serie']);
+        $this->asignar_propiedad(identificador: 'subtotal', propiedades: ['place_holder'=> 'Subtotal']);
+        $this->asignar_propiedad(identificador: 'descuento', propiedades: ['place_holder'=> 'Descuento']);
+        $this->asignar_propiedad(identificador: 'impuestos_trasladados', propiedades: ['place_holder'=> 'Imp. Trasladados']);
+        $this->asignar_propiedad(identificador: 'impuestos_retenidos', propiedades: ['place_holder'=> 'Imp. Retenidos']);
+        $this->asignar_propiedad(identificador: 'total', propiedades: ['place_holder'=> 'Total']);
+        $this->asignar_propiedad(identificador: 'fecha', propiedades: ['place_holder'=> 'Fecha']);
     }
 
     public function alta(bool $header, bool $ws = false): array|string
@@ -93,81 +126,20 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);
         }
 
-        $keys_selects = array();
-        $keys_selects['cat_sat_metodo_pago'] = new stdClass();
-        $keys_selects['cat_sat_metodo_pago']->label = 'Metodo de Pago';
-        $keys_selects['cat_sat_metodo_pago']->cols = 4;
+        $this->row_upd->fecha = date('Y-m-d');
+        $this->row_upd->subtotal = 0;
+        $this->row_upd->descuento = 0;
+        $this->row_upd->impuestos_trasladados = 0;
+        $this->row_upd->impuestos_retenidos = 0;
+        $this->row_upd->total = 0;
 
-        $keys_selects['cat_sat_moneda'] = new stdClass();
-        $keys_selects['cat_sat_moneda']->label = 'Moneda';
-        $keys_selects['cat_sat_moneda']->cols = 4;
-
-        $keys_selects['com_sucursal'] = new stdClass();
-        $keys_selects['com_sucursal']->label = 'Cliente';
-        $keys_selects['com_sucursal']->cols = 12;
-
-        $keys_selects['dp_calle_pertenece'] = new stdClass();
-        $keys_selects['dp_calle_pertenece']->label = 'Calle';
-        $keys_selects['dp_calle_pertenece']->cols = 6;
-
-        $keys_selects['fc_csd'] = new stdClass();
-        $keys_selects['fc_csd']->label = 'CSD';
-        $keys_selects['fc_csd']->cols = 12;
-
-        $keys_selects['cat_sat_forma_pago'] = new stdClass();
-        $keys_selects['cat_sat_forma_pago']->label = 'Forma de pago';
-        $keys_selects['cat_sat_forma_pago']->cols = 4;
-
-        $keys_selects['com_tipo_cambio'] = new stdClass();
-        $keys_selects['com_tipo_cambio']->label = 'Tipo de Cambio';
-        $keys_selects['com_tipo_cambio']->cols = 4;
-
-        $keys_selects['cat_sat_regimen_fiscal'] = new stdClass();
-        $keys_selects['cat_sat_regimen_fiscal']->label = 'Regimen Fiscal';
-        $keys_selects['cat_sat_regimen_fiscal']->cols = 12;
-
-        $keys_selects['cat_sat_uso_cfdi'] = new stdClass();
-        $keys_selects['cat_sat_uso_cfdi']->label = 'Uso CFDI';
-        $keys_selects['cat_sat_uso_cfdi']->cols = 4;
-
-        $keys_selects['dp_pais'] = new stdClass();
-        $keys_selects['dp_pais']->label = 'Pais';
-        $keys_selects['dp_pais']->cols = 6;
-
-        $keys_selects['dp_estado'] = new stdClass();
-        $keys_selects['dp_estado']->label = 'Estado';
-        $keys_selects['dp_estado']->cols = 6;
-
-        $keys_selects['dp_municipio'] = new stdClass();
-        $keys_selects['dp_municipio']->label = 'Municipio';
-        $keys_selects['dp_municipio']->cols = 6;
-
-        $keys_selects['dp_cp'] = new stdClass();
-        $keys_selects['dp_cp']->label = 'CP';
-        $keys_selects['dp_cp']->cols = 6;
-
-        $keys_selects['dp_colonia_postal'] = new stdClass();
-        $keys_selects['dp_colonia_postal']->label = 'Colonia';
-        $keys_selects['dp_colonia_postal']->cols = 6;
-
-        $generales = new generales();
-        $cat_sat_tipo_de_comprobante_id = -1;
-        if(isset($generales->tipo_de_comprobante_id)){
-            $cat_sat_tipo_de_comprobante_id = $generales->tipo_de_comprobante_id;
-        }
-
-        $keys_selects['cat_sat_tipo_de_comprobante'] = new stdClass();
-        $keys_selects['cat_sat_tipo_de_comprobante']->label = 'Tipo de Comprobante';
-        $keys_selects['cat_sat_tipo_de_comprobante']->cols = 4;
-        $keys_selects['cat_sat_tipo_de_comprobante']->id_selected = $cat_sat_tipo_de_comprobante_id;
-
-        $inputs = (new fc_factura_html(html: $this->html_base))->genera_inputs_alta(
-            controler: $this, keys_selects: $keys_selects, link: $this->link);
+        $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);
             print_r($error);
             die('Error');
         }
+
         return $r_alta;
     }
 
@@ -224,6 +196,98 @@ class controlador_fc_factura extends system{
 
     }
 
+    public function asignar_propiedad(string $identificador, mixed $propiedades)
+    {
+        if (!array_key_exists($identificador,$this->keys_selects)){
+            $this->keys_selects[$identificador] = new stdClass();
+        }
+
+        foreach ($propiedades as $key => $value){
+            $this->keys_selects[$identificador]->$key = $value;
+        }
+    }
+
+    private function base(): array|stdClass
+    {
+        $columns["fc_partida_id"]["titulo"] = "Id";
+        $columns["fc_partida_codigo"]["titulo"] = "Codigo";
+        $columns["fc_partida_descripcion"]["titulo"] = "Descripcion";
+        $columns["modifica"]["titulo"] = "Acciones";
+        $columns["modifica"]["type"] = "button";
+        $columns["modifica"]["campos"] = array("elimina_bd");
+
+        $colums_rs =$this->datatable_init(columns: $columns,identificador: "#fc_partida",
+            data: array("fc_factura.id" => $this->registro_id));
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al inicializar links', data: $colums_rs);
+            print_r($error);
+            die('Error');
+        }
+
+        $r_modifica =  parent::modifica(header: false,aplica_form:  false);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
+        }
+
+        $this->asignar_propiedad(identificador:'fc_csd_id', propiedades: ["id_selected"=>$this->row_upd->fc_csd_id]);
+        $this->asignar_propiedad(identificador:'cat_sat_forma_pago_id',
+            propiedades: ["id_selected"=>$this->row_upd->cat_sat_forma_pago_id]);
+        $this->asignar_propiedad(identificador:'cat_sat_metodo_pago_id',
+            propiedades: ["id_selected"=>$this->row_upd->cat_sat_metodo_pago_id]);
+        $this->asignar_propiedad(identificador:'cat_sat_moneda_id',
+            propiedades: ["id_selected"=>$this->row_upd->cat_sat_moneda_id]);
+        $this->asignar_propiedad(identificador:'com_tipo_cambio_id',
+            propiedades: ["id_selected"=>$this->row_upd->com_tipo_cambio_id]);
+        $this->asignar_propiedad(identificador:'cat_sat_uso_cfdi_id',
+            propiedades: ["id_selected"=>$this->row_upd->cat_sat_uso_cfdi_id]);
+        $this->asignar_propiedad(identificador:'cat_sat_tipo_de_comprobante_id',
+            propiedades: ["id_selected"=>$this->row_upd->cat_sat_tipo_de_comprobante_id]);
+        $this->asignar_propiedad(identificador:'dp_calle_pertenece_id',
+            propiedades: ["id_selected"=>$this->row_upd->dp_calle_pertenece_id]);
+        $this->asignar_propiedad(identificador:'cat_sat_regimen_fiscal_id',
+            propiedades: ["id_selected"=>$this->row_upd->cat_sat_regimen_fiscal_id]);
+        $this->asignar_propiedad(identificador:'com_sucursal_id',
+            propiedades: ["id_selected"=>$this->row_upd->com_sucursal_id]);
+
+        $sub_total = (new fc_factura($this->link))->get_factura_sub_total(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener sub_total',data:  $sub_total);
+        }
+
+        $descuento = (new fc_factura($this->link))->get_factura_descuento(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener descuento',data:  $descuento);
+        }
+
+        $imp_trasladados = (new fc_factura($this->link))->get_factura_imp_trasladados(fc_factura_id:
+            $this->registro_id);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener imp_trasladados',data:  $imp_trasladados);
+        }
+
+        $imp_retenidos = (new fc_factura($this->link))->get_factura_imp_retenidos(fc_factura_id:
+            $this->registro_id);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener imp_retenidos',data:  $imp_retenidos);
+        }
+
+        $this->row_upd->subtotal = $sub_total;
+        $this->row_upd->descuento = $descuento;
+        $this->row_upd->impuestos_trasladados = $imp_trasladados;
+        $this->row_upd->impuestos_retenidos = $imp_retenidos;
+
+        $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al inicializar inputs',data:  $inputs);
+        }
+
+        $data = new stdClass();
+        $data->template = $r_modifica;
+        $data->inputs = $inputs;
+
+        return $data;
+    }
+
     /**
      * @param bool $header Si header se muestra result en http
      * @param bool $ws
@@ -235,65 +299,13 @@ class controlador_fc_factura extends system{
     public function modifica(bool $header, bool $ws = false, string $breadcrumbs = '', bool $aplica_form = true,
                              bool $muestra_btn = true): array|string
     {
-        $r_modifica =  parent::modifica(header: false,aplica_form:  false); // TODO: Change the autogenerated stub
+        $base = $this->base();
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica, header: $header,ws:$ws);
-        }
-
-        $sub_total = (new fc_factura($this->link))->get_factura_sub_total(fc_factura_id:
-            $this->fc_factura_id);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener sub_total',data:  $sub_total,
+            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
         }
-        
-        $this->row_upd->subtotal = $sub_total;
-        $descuento = (new fc_factura($this->link))->get_factura_descuento(fc_factura_id:
-            $this->fc_factura_id);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener descuento',data:  $descuento,
-                header: $header,ws:$ws);
-        }
-        $this->row_upd->descuento = $descuento;
-        
-        $imp_trasladados = (new fc_factura($this->link))->get_factura_imp_trasladados(fc_factura_id:
-            $this->fc_factura_id);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener imp_trasladados',data:  $imp_trasladados,
-                header: $header,ws:$ws);
-        }
-        $this->row_upd->impuestos_trasladados = $imp_trasladados;
-        
-        $imp_retenidos = (new fc_factura($this->link))->get_factura_imp_retenidos(fc_factura_id:
-            $this->fc_factura_id);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener imp_retenidos',data:  $imp_retenidos,
-                header: $header,ws:$ws);
-        }
-        $this->row_upd->impuestos_retenidos = $imp_retenidos;
 
-        $inputs = (new fc_factura_html(html: $this->html_base))->inputs_fc_factura(controlador:$this);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);
-        }
-
-        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->fc_factura_id);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
-        }
-
-        foreach ($partidas->registros as $indice=>$partida){
-            $partida = $this->data_partida_btn(partida:$partida);
-            if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al asignar botones',data:  $partida, header: $header,ws:$ws);
-            }
-            $partidas->registros[$indice] = $partida;
-
-        }
-
-        $this->partidas = $partidas;
-
-        return $r_modifica;
+        return $base->template;
     }
 
     public function lista(bool $header, bool $ws = false): array
