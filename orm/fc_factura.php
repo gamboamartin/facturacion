@@ -53,11 +53,10 @@ class fc_factura extends modelo{
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 
-
-
         parent::__construct(link: $link,tabla:  $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas,campos_view: $campos_view, no_duplicados: $no_duplicados,tipo_campos: array());
 
+        $this->NAMESPACE = __NAMESPACE__;
     }
 
     /**

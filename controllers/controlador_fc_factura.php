@@ -111,11 +111,13 @@ class controlador_fc_factura extends system{
         $this->asignar_propiedad(identificador: 'folio', propiedades: ['place_holder'=> 'Folio']);
         $this->asignar_propiedad(identificador: 'exportacion', propiedades: ['place_holder'=> 'Exportacion']);
         $this->asignar_propiedad(identificador: 'serie', propiedades: ['place_holder'=> 'serie']);
-        $this->asignar_propiedad(identificador: 'subtotal', propiedades: ['place_holder'=> 'Subtotal']);
-        $this->asignar_propiedad(identificador: 'descuento', propiedades: ['place_holder'=> 'Descuento']);
-        $this->asignar_propiedad(identificador: 'impuestos_trasladados', propiedades: ['place_holder'=> 'Imp. Trasladados']);
-        $this->asignar_propiedad(identificador: 'impuestos_retenidos', propiedades: ['place_holder'=> 'Imp. Retenidos']);
-        $this->asignar_propiedad(identificador: 'total', propiedades: ['place_holder'=> 'Total']);
+        $this->asignar_propiedad(identificador: 'subtotal', propiedades: ['place_holder'=> 'Subtotal',"disabled"=>true]);
+        $this->asignar_propiedad(identificador: 'descuento', propiedades: ['place_holder'=> 'Descuento',"disabled"=>true]);
+        $this->asignar_propiedad(identificador: 'impuestos_trasladados', propiedades: ['place_holder'=> 'Imp. Trasladados',
+            "disabled"=>true]);
+        $this->asignar_propiedad(identificador: 'impuestos_retenidos', propiedades: ['place_holder'=> 'Imp. Retenidos',
+            "disabled"=>true]);
+        $this->asignar_propiedad(identificador: 'total', propiedades: ['place_holder'=> 'Total',"disabled"=>true]);
         $this->asignar_propiedad(identificador: 'fecha', propiedades: ['place_holder'=> 'Fecha']);
     }
 

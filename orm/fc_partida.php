@@ -1,8 +1,8 @@
 <?php
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
+use gamboamartin\comercial\models\com_producto;
 use gamboamartin\errores\errores;
-use models\com_producto;
 use PDO;
 use stdClass;
 
@@ -14,10 +14,19 @@ class fc_partida extends modelo{
             'cat_sat_tipo_factor' => 'com_producto','cat_sat_factor' => 'com_producto');
         $campos_obligatorios = array('codigo','com_producto_id');
 
+        $campos_view['com_producto_id'] = array('type' => 'selects', 'model' => new com_producto($link));
+        $campos_view['fc_factura_id'] = array('type' => 'selects', 'model' => new fc_factura($link));
+        $campos_view['codigo'] = array('type' => 'inputs');
+        $campos_view['cantidad'] = array('type' => 'inputs');
+        $campos_view['valor_unitario'] = array('type' => 'inputs');
+        $campos_view['descuento'] = array('type' => 'inputs');
+
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 
         parent::__construct(link: $link,tabla:  $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas,no_duplicados: $no_duplicados,tipo_campos: array());
+            columnas: $columnas, campos_view: $campos_view,no_duplicados: $no_duplicados,tipo_campos: array());
+
+        $this->NAMESPACE = __NAMESPACE__;
     }
 
     public function alta_bd(): array|stdClass
