@@ -21,8 +21,6 @@ class fc_csd extends modelo{
         $campos_view['codigo_bis'] = array('type' => 'inputs');
         $campos_view['serie'] = array('type' => 'inputs');
 
-        $campos_view['serie']['type'] = 'inputs';
-
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas, campos_view: $campos_view, no_duplicados: $no_duplicados, tipo_campos: array());
 
