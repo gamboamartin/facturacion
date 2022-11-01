@@ -38,8 +38,12 @@ class controlador_fc_partida extends system{
         $columns["fc_partida_valor_unitario"]["titulo"] = "Valor Unitario";
         $columns["fc_partida_descuento"]["titulo"] = "Descuento";
 
+        $filtro = array("fc_partida.id","fc_partida.codigo","fc_partida.descripcion","com_producto.descripcion");
+
         $datatables = new stdClass();
         $datatables->columns = $columns;
+        $datatables->filtro = $filtro;
+
 
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, datatables: $datatables,
             paths_conf: $paths_conf);

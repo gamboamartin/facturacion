@@ -48,8 +48,12 @@ class controlador_fc_factura extends system{
         $columns["fc_factura_folio"]["titulo"] = "Folio";
         $columns["fc_factura_serie"]["titulo"] = "Serie";
 
+        $filtro = array("fc_factura.id","fc_factura.codigo","fc_factura.descripcion","fc_factura.folio",
+            "fc_factura.serie");
+
         $datatables = new stdClass();
         $datatables->columns = $columns;
+        $datatables->filtro = $filtro;
 
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, datatables: $datatables,
             paths_conf: $paths_conf);

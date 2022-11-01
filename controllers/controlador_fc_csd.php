@@ -35,8 +35,11 @@ class controlador_fc_csd extends system{
         $columns["fc_csd_serie"]["titulo"] = "Serie";
         $columns["org_sucursal_descripcion"]["titulo"] = "Sucursal";
 
+        $filtro = array("fc_csd.id","fc_csd.codigo","fc_csd.descripcion","org_sucursal.descripcion");
+
         $datatables = new stdClass();
         $datatables->columns = $columns;
+        $datatables->filtro = $filtro;
 
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, datatables: $datatables,
             paths_conf: $paths_conf);
