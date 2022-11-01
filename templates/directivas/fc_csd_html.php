@@ -123,7 +123,7 @@ class fc_csd_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->input_text_required(disable: false,name: 'serie',place_holder: 'Serie',
+        $html =$this->directivas->input_text_required(disabled: false,name: 'serie',place_holder: 'Serie',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
