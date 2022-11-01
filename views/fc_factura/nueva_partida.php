@@ -11,15 +11,13 @@
                         <?php include (new views())->ruta_templates."head/subtitulo.php"; ?>
                         <?php include (new views())->ruta_templates."mensajes.php"; ?>
 
-                        <?php echo $controlador->inputs->select->fc_factura_id; ?>
-                        <?php echo $controlador->inputs->select->com_producto_id; ?>
+                        <?php echo $controlador->inputs->fc_factura_id; ?>
+                        <?php echo $controlador->inputs->com_producto_id; ?>
+                        <?php echo $controlador->inputs->codigo; ?>
                         <?php echo $controlador->inputs->descripcion; ?>
                         <?php echo $controlador->inputs->cantidad; ?>
                         <?php echo $controlador->inputs->valor_unitario; ?>
                         <?php echo $controlador->inputs->descuento; ?>
-                        <?php echo $controlador->inputs->select->cat_sat_tipo_factor_id; ?>
-                        <?php echo $controlador->inputs->select->cat_sat_factor_id; ?>
-                        <?php echo $controlador->inputs->select->cat_sat_tipo_impuesto_id; ?>
 
                         <div class="control-group btn-alta">
                             <div class="controls">
