@@ -29,11 +29,11 @@ class controlador_fc_key_csd extends system{
 
         $columns["fc_key_csd_id"]["titulo"] = "Id";
         $columns["fc_key_csd_codigo"]["titulo"] = "Codigo";
-        $columns["fc_key_csd_descripcion"]["titulo"] = "Factura";
+        $columns["fc_key_csd_descripcion"]["titulo"] = "Descripcion";
         $columns["fc_csd_descripcion"]["titulo"] = "CSD";
         $columns["doc_documento_descripcion"]["titulo"] = "Documento";
 
-        $filtro = array("fc_key_csd.id","fc_key_csd.codigo","fc_key_csd.descripcion","fc_key_csd.descripcion",
+        $filtro = array("fc_key_csd.id","fc_key_csd.codigo","fc_key_csd.descripcion","fc_csd.descripcion",
             "doc_documento.descripcion");
 
         $datatables = new stdClass();
@@ -48,7 +48,6 @@ class controlador_fc_key_csd extends system{
         $this->asignar_propiedad(identificador:'fc_csd_id', propiedades: ["label" => "CSD"]);
         $this->asignar_propiedad(identificador:'doc_documento_id', propiedades: ["label" => "Documento"]);
         $this->asignar_propiedad(identificador: 'codigo_bis', propiedades: ['place_holder'=> 'Codigo BIS']);
-        $this->asignar_propiedad(identificador: 'serie', propiedades: ['place_holder'=> 'Serie']);
     }
 
     public function alta(bool $header, bool $ws = false): array|string
