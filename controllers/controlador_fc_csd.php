@@ -31,7 +31,7 @@ class controlador_fc_csd extends system{
 
         $columns["fc_csd_id"]["titulo"] = "Id";
         $columns["fc_csd_codigo"]["titulo"] = "Codigo";
-        $columns["fc_csd_descripcion"]["titulo"] = "Factura";
+        $columns["fc_csd_descripcion"]["titulo"] = "Descripcion";
         $columns["fc_csd_serie"]["titulo"] = "Serie";
         $columns["org_sucursal_descripcion"]["titulo"] = "Sucursal";
 

@@ -60,7 +60,7 @@
         "gamboa.martin/template": "dev-main",
         "gamboa.martin/comercial": "dev-master",
         "gamboa.martin/services": "dev-main",
-      "gamboa.martin/empleado": "dev-main",
+        "gamboa.martin/empleado": "dev-main",
         "gamboa.martin/im_registro_patronal": "dev-main",
         "gamboa.martin/banco": "dev-main",
         "gamboa.martin/xml_cfdi_4": "dev-master",
