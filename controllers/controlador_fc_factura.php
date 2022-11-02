@@ -13,19 +13,20 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\system\actions;
+use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 
 use gamboamartin\template\html;
 use gamboamartin\xml_cfdi_4\cfdis;
 use html\fc_partida_html;
 use html\fc_factura_html;
-use links\secciones\link_fc_factura;
 use PDO;
 use stdClass;
 
 class controlador_fc_factura extends system{
 
     public array $keys_selects = array();
+    public stdClass $links;
     public controlador_fc_partida $controlador_fc_partida;
 
     public string $rfc = '';
@@ -42,7 +43,7 @@ class controlador_fc_factura extends system{
                                 stdClass $paths_conf = new stdClass()){
         $modelo = new fc_factura(link: $link);
         $html_ = new fc_factura_html(html: $html);
-        $obj_link = new link_fc_factura($this->registro_id);
+        $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
         $columns["fc_factura_id"]["titulo"] = "Id";
         $columns["fc_factura_codigo"]["titulo"] = "Codigo";
@@ -68,71 +69,24 @@ class controlador_fc_factura extends system{
             $this->fc_partida_id = $_GET['fc_partida_id'];
         }
 
-        $this->fc_factura_id = $this->registro_id;
-        
-        $link_fc_partida_alta_bd = $obj_link->link_fc_partida_alta_bd(fc_factura_id: $this->registro_id);
+        $links = $this->inicializa_links();
         if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al generar link sucursal alta',
-                data:  $link_fc_partida_alta_bd);
+            $error = $this->errores->error(mensaje: 'Error al inicializar links',data:  $links);
             print_r($error);
-            exit;
+            die('Error');
         }
-        $this->link_fc_partida_alta_bd = $link_fc_partida_alta_bd;     
-        
-        $link_fc_partida_modifica_bd = $obj_link->link_fc_partida_modifica_bd(fc_factura_id: $this->registro_id,
-            fc_partida_id: $this->fc_partida_id );
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al generar link sucursal modifica',
-                data:  $link_fc_partida_modifica_bd);
-            print_r($error);
-            exit;
-        }
-        $this->link_fc_partida_modifica_bd = $link_fc_partida_modifica_bd;
 
-        $link_fc_partida_partidas = $obj_link->link_fc_factura_partidas(fc_factura_id: $this->registro_id);
+        $propiedades = $this->inicializa_priedades();
         if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al generar link sucursal alta',
-                data:  $link_fc_partida_partidas);
+            $error = $this->errores->error(mensaje: 'Error al inicializar propiedades',data:  $propiedades);
             print_r($error);
-            exit;
+            die('Error');
         }
-        $this->link_fc_factura_partidas = $link_fc_partida_partidas;
-        
-        $link_fc_partida_nueva_partida = $obj_link->link_fc_factura_nueva_partida(fc_factura_id: $this->registro_id);
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al generar link sucursal alta',
-                data:  $link_fc_partida_nueva_partida);
-            print_r($error);
-            exit;
-        }
-        $this->link_fc_factura_nueva_partida = $link_fc_partida_nueva_partida;
-
-        $this->asignar_propiedad(identificador:'fc_csd_id', propiedades: ["label" => "CSD"]);
-        $this->asignar_propiedad(identificador:'cat_sat_forma_pago_id', propiedades: ["label" => "Forma Pago"]);
-        $this->asignar_propiedad(identificador:'cat_sat_metodo_pago_id', propiedades: ["label" => "Metodo Pago"]);
-        $this->asignar_propiedad(identificador:'cat_sat_moneda_id', propiedades: ["label" => "Moneda"]);
-        $this->asignar_propiedad(identificador:'com_tipo_cambio_id', propiedades: ["label" => "Tipo Cambio"]);
-        $this->asignar_propiedad(identificador:'cat_sat_uso_cfdi_id', propiedades: ["label" => "CFDI"]);
-        $this->asignar_propiedad(identificador:'cat_sat_tipo_de_comprobante_id', propiedades: ["label" => "Tipo Comprobante"]);
-        $this->asignar_propiedad(identificador:'dp_calle_pertenece_id', propiedades: ["label" => "Calle"]);
-        $this->asignar_propiedad(identificador:'cat_sat_regimen_fiscal_id', propiedades: ["label" => "Regimen Fiscal"]);
-        $this->asignar_propiedad(identificador:'com_sucursal_id', propiedades: ["label" => "Sucursal"]);
-        $this->asignar_propiedad(identificador: 'folio', propiedades: ['place_holder'=> 'Folio']);
-        $this->asignar_propiedad(identificador: 'exportacion', propiedades: ['place_holder'=> 'Exportacion']);
-        $this->asignar_propiedad(identificador: 'serie', propiedades: ['place_holder'=> 'serie']);
-        $this->asignar_propiedad(identificador: 'subtotal', propiedades: ['place_holder'=> 'Subtotal',"disabled"=>true]);
-        $this->asignar_propiedad(identificador: 'descuento', propiedades: ['place_holder'=> 'Descuento',"disabled"=>true]);
-        $this->asignar_propiedad(identificador: 'impuestos_trasladados', propiedades: ['place_holder'=> 'Imp. Trasladados',
-            "disabled"=>true]);
-        $this->asignar_propiedad(identificador: 'impuestos_retenidos', propiedades: ['place_holder'=> 'Imp. Retenidos',
-            "disabled"=>true]);
-        $this->asignar_propiedad(identificador: 'total', propiedades: ['place_holder'=> 'Total',"disabled"=>true]);
-        $this->asignar_propiedad(identificador: 'fecha', propiedades: ['place_holder'=> 'Fecha']);
     }
 
     public function alta(bool $header, bool $ws = false): array|string
     {
-        $r_alta =  parent::alta(header: false, ws: false); // TODO: Change the autogenerated stub
+        $r_alta =  parent::alta(header: false, ws: false);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);
         }
@@ -299,6 +253,116 @@ class controlador_fc_factura extends system{
         return $data;
     }
 
+    private function inicializa_links(): array|string
+    {
+        $link = $this->obj_link->get_link($this->seccion,"lista");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener link partida alta',data:  $link);
+        }
+        $this->link_fc_partida_alta_bd = $link;
+
+        $link = $this->obj_link->get_link($this->seccion,"lista");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener link partida alta',data:  $link);
+        }
+        $this->link_fc_partida_modifica_bd = $link;
+
+        $link = $this->obj_link->get_link($this->seccion,"lista");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener link partida alta',data:  $link);
+        }
+        $this->link_fc_factura_partidas = $link;
+
+        $link = $this->obj_link->get_link($this->seccion,"lista");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener link partida alta',data:  $link);
+        }
+        $this->link_fc_factura_nueva_partida = $link;
+
+        return $link;
+    }
+
+    private function inicializa_priedades(): array
+    {
+        $identificador = "fc_csd_id";
+        $propiedades = array("label" => "CSD");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "cat_sat_forma_pago_id";
+        $propiedades = array("label" => "Forma Pago");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "cat_sat_metodo_pago_id";
+        $propiedades = array("label" => "Metodo Pago");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "cat_sat_moneda_id";
+        $propiedades = array("label" => "Moneda");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "com_tipo_cambio_id";
+        $propiedades = array("label" => "Tipo Cambio");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "cat_sat_uso_cfdi_id";
+        $propiedades = array("label" => "CFDI");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "cat_sat_tipo_de_comprobante_id";
+        $propiedades = array("label" => "Tipo Comprobante");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "dp_calle_pertenece_id";
+        $propiedades = array("label" => "Calle");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "cat_sat_regimen_fiscal_id";
+        $propiedades = array("label" => "Regimen Fiscal");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "com_sucursal_id";
+        $propiedades = array("label" => "Sucursal");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "folio";
+        $propiedades = array("place_holder" => "Folio");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "exportacion";
+        $propiedades = array("place_holder" => "Exportacion");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "serie";
+        $propiedades = array("place_holder" => "serie");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "subtotal";
+        $propiedades = array("place_holder" => "Subtotal", "disabled" => true);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "descuento";
+        $propiedades = array("place_holder" => "Descuento", "disabled" => true);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "impuestos_trasladados";
+        $propiedades = array("place_holder" => "Imp. Trasladados", "disabled" => true);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "impuestos_retenidos";
+        $propiedades = array("place_holder" => "Imp. Retenidos", "disabled" => true);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "total";
+        $propiedades = array("place_holder" => "Total", "disabled" => true);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "fecha";
+        $propiedades = array("place_holder" => "Fecha");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        return $this->keys_selects;
+    }
+
     /**
      * @param bool $header Si header se muestra result en http
      * @param bool $ws
@@ -362,6 +426,7 @@ class controlador_fc_factura extends system{
             return $this->errores->error(mensaje: 'Error al validar row',data:  $valida);
         }
 
+        /*
         $link_genera_xml = $this->obj_link->link_con_id(accion:'genera_xml',registro_id:  $row->fc_factura_id,
             seccion:  $this->tabla);
         if(errores::$error){
@@ -395,6 +460,7 @@ class controlador_fc_factura extends system{
         $row->link_modifica = $link_modifica;
 
         $row->link_elimina_bd = $link_elimina_bd;
+        */
 
         return $row;
     }

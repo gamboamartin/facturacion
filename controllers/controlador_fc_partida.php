@@ -28,7 +28,7 @@ class controlador_fc_partida extends system{
                                 stdClass $paths_conf = new stdClass()){
         $modelo = new fc_partida(link: $link);
         $html_ = new fc_partida_html(html: $html);
-        $obj_link = new links_menu($this->registro_id);
+        $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
         $columns["fc_partida_id"]["titulo"] = "Id";
         $columns["fc_partida_codigo"]["titulo"] = "Codigo";

@@ -26,7 +26,7 @@ class controlador_fc_retenido extends system{
                                 stdClass $paths_conf = new stdClass()){
         $modelo = new fc_retenido(link: $link);
         $html_ = new fc_retenido_html(html: $html);
-        $obj_link = new links_menu($this->registro_id);
+        $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
         $columns["fc_retenido_id"]["titulo"] = "Id";
         $columns["fc_retenido_codigo"]["titulo"] = "Codigo";

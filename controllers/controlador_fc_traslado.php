@@ -26,7 +26,7 @@ class controlador_fc_traslado extends system{
                                 stdClass $paths_conf = new stdClass()){
         $modelo = new fc_traslado(link: $link);
         $html_ = new fc_traslado_html(html: $html);
-        $obj_link = new links_menu($this->registro_id);
+        $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
         $columns["fc_traslado_id"]["titulo"] = "Id";
         $columns["fc_traslado_codigo"]["titulo"] = "Codigo";
