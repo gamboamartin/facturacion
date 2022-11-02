@@ -153,12 +153,8 @@ class fc_partida extends modelo{
 
     private function init_partida_alta_campos(array $registro): array
     {
-        $keys_init = array('codigo','codigo_bis');
-        foreach ($keys_init as $key){
-            $registro = $this->init_partida_alta(key: $key, registro: $registro);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al inicializar registro', data: $registro);
-            }
+        if(!isset($registro['codigo_bis'])){
+            $registro['codigo_bis'] = $registro['codigo'];
         }
 
         if(!isset($registro['descripcion_select'])){
@@ -167,9 +163,7 @@ class fc_partida extends modelo{
         if(!isset($registro['alias'])){
             $registro['alias'] = $registro['descripcion_select'];
         }
-
         return $registro;
-
     }
 
     public function partidas(int $fc_factura_id): array|stdClass

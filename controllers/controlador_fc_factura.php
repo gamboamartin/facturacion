@@ -26,7 +26,6 @@ use stdClass;
 class controlador_fc_factura extends system{
 
     public array $keys_selects = array();
-    public stdClass $links;
     public controlador_fc_partida $controlador_fc_partida;
 
     public string $rfc = '';
@@ -119,7 +118,6 @@ class controlador_fc_factura extends system{
                 header:  $header, ws: $ws);
         }
 
-
         if(isset($_POST['guarda'])){
             unset($_POST['guarda']);
         }
@@ -142,8 +140,8 @@ class controlador_fc_factura extends system{
 
         if($header){
 
-            $retorno = (new actions())->retorno_alta_bd(registro_id:$this->registro_id,seccion: $this->tabla,
-                siguiente_view: $siguiente_view);
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: $siguiente_view);
             if(errores::$error){
                 return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_alta_partida_bd,
                     header:  true, ws: $ws);
@@ -177,6 +175,9 @@ class controlador_fc_factura extends system{
         $columns["fc_partida_id"]["titulo"] = "Id";
         $columns["fc_partida_codigo"]["titulo"] = "Codigo";
         $columns["fc_partida_descripcion"]["titulo"] = "Descripcion";
+        $columns["fc_partida_cantidad"]["titulo"] = "Cantidad";
+        $columns["fc_partida_valor_unitario"]["titulo"] = "Valor Unitario";
+        $columns["fc_partida_descuento"]["titulo"] = "Descuento";
         $columns["modifica"]["titulo"] = "Acciones";
         $columns["modifica"]["type"] = "button";
         $columns["modifica"]["campos"] = array("elimina_bd");
@@ -255,7 +256,18 @@ class controlador_fc_factura extends system{
 
     private function inicializa_links(): array|string
     {
-        $link = $this->obj_link->get_link($this->seccion,"lista");
+        $this->obj_link->genera_links($this);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al generar links para factura',data:  $this->obj_link);
+        }
+
+        $link = $this->obj_link->get_link($this->seccion,"nueva_partida");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener link partida alta',data:  $link);
+        }
+        $this->link_fc_factura_nueva_partida = $link;
+
+        $link = $this->obj_link->get_link($this->seccion,"alta_partida_bd");
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener link partida alta',data:  $link);
         }
@@ -273,11 +285,7 @@ class controlador_fc_factura extends system{
         }
         $this->link_fc_factura_partidas = $link;
 
-        $link = $this->obj_link->get_link($this->seccion,"lista");
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener link partida alta',data:  $link);
-        }
-        $this->link_fc_factura_nueva_partida = $link;
+
 
         return $link;
     }
