@@ -45,10 +45,12 @@ class controlador_fc_csd extends system{
 
         $this->titulo_lista = 'Empresas';
 
-        $this->asignar_propiedad(identificador:'org_sucursal_id', propiedades: ["label" => "Sucursal", "cols" => 12]);
-        $this->asignar_propiedad(identificador: 'codigo', propiedades: ['place_holder'=> 'Codigo']);
-        $this->asignar_propiedad(identificador: 'codigo_bis', propiedades: ['place_holder'=> 'Codigo BIS']);
-        $this->asignar_propiedad(identificador: 'serie', propiedades: ['place_holder'=> 'Serie']);
+        $propiedades = $this->inicializa_priedades();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar propiedades',data:  $propiedades);
+            print_r($error);
+            die('Error');
+        }
     }
 
     public function alta(bool $header, bool $ws = false): array|string
@@ -111,6 +113,27 @@ class controlador_fc_csd extends system{
         }
 
         return $salida;
+    }
+
+    private function inicializa_priedades(): array
+    {
+        $identificador = "org_sucursal_id";
+        $propiedades = array("label" => "Sucursal","cols" => 12);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "codigo";
+        $propiedades = array("place_holder" => "Codigo");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "codigo_bis";
+        $propiedades = array("place_holder" => "Codigo BIS");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "serie";
+        $propiedades = array("place_holder" => "serie");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        return $this->keys_selects;
     }
 
     public function modifica(bool $header, bool $ws = false, string $breadcrumbs = '', bool $aplica_form = true,

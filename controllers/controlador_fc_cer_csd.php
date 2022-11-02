@@ -46,9 +46,12 @@ class controlador_fc_cer_csd extends system{
 
         $this->titulo_lista = 'CER CSD';
 
-        $this->asignar_propiedad(identificador:'fc_csd_id', propiedades: ["label" => "CSD"]);
-        $this->asignar_propiedad(identificador:'doc_documento_id', propiedades: ["label" => "Documento"]);
-        $this->asignar_propiedad(identificador: 'codigo_bis', propiedades: ['place_holder'=> 'Codigo BIS']);
+        $propiedades = $this->inicializa_priedades();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar propiedades',data:  $propiedades);
+            print_r($error);
+            die('Error');
+        }
     }
 
     public function alta(bool $header, bool $ws = false): array|string
@@ -103,6 +106,23 @@ class controlador_fc_cer_csd extends system{
         return $data;
     }
 
+    private function inicializa_priedades(): array
+    {
+        $identificador = "fc_csd_id";
+        $propiedades = array("label" => "CSD");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "doc_documento_id";
+        $propiedades = array("label" => "Documento");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "codigo_bis";
+        $propiedades = array("place_holder" => "Codigo BIS");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        return $this->keys_selects;
+    }
+
     public function modifica(bool $header, bool $ws = false, string $breadcrumbs = '', bool $aplica_form = true,
                              bool $muestra_btn = true): array|string
     {
@@ -114,7 +134,4 @@ class controlador_fc_cer_csd extends system{
 
         return $base->template;
     }
-
-    
-
 }

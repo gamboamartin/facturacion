@@ -46,12 +46,12 @@ class controlador_fc_traslado extends system{
 
         $this->titulo_lista = 'Traslado';
 
-        $this->asignar_propiedad(identificador:'fc_partida_id', propiedades: ["label" => "Partida"]);
-        $this->asignar_propiedad(identificador:'cat_sat_tipo_factor_id', propiedades: ["label" => "Tipo Factor"]);
-        $this->asignar_propiedad(identificador:'cat_sat_factor_id', propiedades: ["label" => "Factor"]);
-        $this->asignar_propiedad(identificador:'cat_sat_tipo_impuesto_id', propiedades: ["label" => "Tipo Impuesto"]);
-        $this->asignar_propiedad(identificador: 'codigo', propiedades: ['place_holder'=> 'Codigo']);
-        $this->asignar_propiedad(identificador: 'codigo_bis', propiedades: ['place_holder'=> 'Codigo BIS']);
+        $propiedades = $this->inicializa_priedades();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar propiedades',data:  $propiedades);
+            print_r($error);
+            die('Error');
+        }
     }
 
     public function alta(bool $header, bool $ws = false): array|string
@@ -108,6 +108,36 @@ class controlador_fc_traslado extends system{
         $data->inputs = $inputs;
 
         return $data;
+    }
+
+    private function inicializa_priedades(): array
+    {
+        $identificador = "fc_partida_id";
+        $propiedades = array("label" => "Partida");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "cat_sat_tipo_factor_id";
+        $propiedades = array("label" => "Tipo Factor");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "cat_sat_factor_id";
+        $propiedades = array("label" => "Factor");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "cat_sat_tipo_impuesto_id";
+        $propiedades = array("label" => "Tipo Impuesto");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+
+        $identificador = "codigo";
+        $propiedades = array("place_holder" => "Codigo");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "codigo_bis";
+        $propiedades = array("place_holder" => "Codigo BIS");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        return $this->keys_selects;
     }
 
     public function modifica(bool $header, bool $ws = false, string $breadcrumbs = '', bool $aplica_form = true,
