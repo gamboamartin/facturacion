@@ -27,6 +27,8 @@ class controlador_fc_csd extends system{
     public controlador_fc_key_csd $controlador_fc_key_csd;
     public controlador_fc_cer_csd $controlador_fc_cer_csd;
 
+    public string $link_fc_key_csd = '';
+    public string $link_fc_cer_csd = '';
     public string $link_fc_key_csd_alta_bd = '';
     public string $link_fc_cer_csd_alta_bd = '';
 
@@ -139,6 +141,18 @@ class controlador_fc_csd extends system{
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar links para factura',data:  $this->obj_link);
         }
+
+        $link = $this->obj_link->get_link($this->seccion,"subir_key");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener link subir_key_alta_bd',data:  $link);
+        }
+        $this->link_fc_key_csd = $link;
+
+        $link = $this->obj_link->get_link($this->seccion,"subir_cer");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener link subir_key_alta_bd',data:  $link);
+        }
+        $this->link_fc_cer_csd = $link;
 
         $link = $this->obj_link->get_link($this->seccion,"subir_key_alta_bd");
         if(errores::$error){
