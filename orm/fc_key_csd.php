@@ -13,8 +13,8 @@ class fc_key_csd extends modelo{
         $columnas = array($tabla=>false,'fc_csd'=>$tabla,'doc_documento'=>$tabla);
         $campos_obligatorios = array('codigo');
 
-        $campos_view['doc_documento_id'] = array('type' => 'selects', 'model' => new doc_documento($link));
         $campos_view['fc_csd_id'] = array('type' => 'selects', 'model' => new fc_csd($link));
+        $campos_view['documento'] = array('type' => 'files');
         $campos_view['codigo'] = array('type' => 'inputs');
         $campos_view['codigo_bis'] = array('type' => 'inputs');
 
@@ -28,6 +28,14 @@ class fc_key_csd extends modelo{
 
     public function alta_bd(): array|stdClass
     {
+        $doc_documento_modelo = new doc_documento($this->link);
+        $doc_documento_modelo->registro['doc_tipo_documento_id'] = 2;
+        $doc_documento_modelo->registro['descripcion'] = $_FILES['documento']['name'];
+        $doc_documento = $doc_documento_modelo->alta_bd(file: $_FILES['documento']);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al dar de alta el documento', data: $doc_documento);
+        }
+
         if(!isset($this->registro['codigo_bis'])){
             $this->registro['codigo_bis'] = $this->registro['codigo'];
         }
@@ -42,6 +50,10 @@ class fc_key_csd extends modelo{
 
         if(!isset($this->registro['alias'])){
             $this->registro['alias'] = $this->registro['codigo'];
+        }
+
+        if(!isset($this->registro['doc_documento_id'])){
+            $this->registro['doc_documento_id'] = $doc_documento->registro_id;
         }
 
         $r_alta_bd = parent::alta_bd();
