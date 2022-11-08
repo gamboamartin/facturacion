@@ -9,6 +9,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_cer_csd;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_key_csd;
 use gamboamartin\system\actions;
@@ -185,6 +186,93 @@ class controlador_fc_csd extends system{
         }
 
         return $base->template;
+    }
+
+    public function subir_cer(bool $header, bool $ws = false): array|stdClass
+    {
+        $columns["fc_cer_csd_id"]["titulo"] = "Id";
+        $columns["fc_cer_csd_codigo"]["titulo"] = "Codigo";
+        $columns["fc_cer_csd_descripcion"]["titulo"] = "Descripcion";
+        $columns["fc_csd_descripcion"]["titulo"] = "CSD";
+        $columns["doc_documento_descripcion"]["titulo"] = "Documento";
+        $columns["modifica"]["titulo"] = "Acciones";
+        $columns["modifica"]["type"] = "button";
+        $columns["modifica"]["campos"] = array("elimina_bd");
+
+        $colums_rs =$this->datatable_init(columns: $columns,identificador: "#fc_cer_csd",
+            data: array("fc_csd.id" => $this->registro_id));
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al inicializar links', data: $colums_rs);
+            print_r($error);
+            die('Error');
+        }
+
+        $alta = $this->controlador_fc_cer_csd->alta(header: false);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
+        }
+
+        $this->controlador_fc_cer_csd->asignar_propiedad(identificador: 'fc_csd_id',
+            propiedades: ["id_selected" => $this->registro_id, "disabled" => true, "cols" => 12,
+                "filtro" => array('fc_csd.id' => $this->registro_id)]);
+        $this->controlador_fc_cer_csd->asignar_propiedad(identificador: 'documento', propiedades: ["cols" => 12]);
+
+        $this->inputs = $this->controlador_fc_cer_csd->genera_inputs(
+            keys_selects:  $this->controlador_fc_cer_csd->keys_selects);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al generar inputs', data: $this->inputs);
+            print_r($error);
+            die('Error');
+        }
+
+        return $this->inputs;
+    }
+
+    public function subir_cer_alta_bd(bool $header, bool $ws = false): array|stdClass
+    {
+        $this->link->beginTransaction();
+
+        $siguiente_view = (new actions())->init_alta_bd(siguiente_view:"subir_cer");
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
+                header:  $header, ws: $ws);
+        }
+
+        if(isset($_POST['btn_action_next'])){
+            unset($_POST['btn_action_next']);
+        }
+
+        $registro = $_POST;
+        $registro['fc_csd_id'] = $this->registro_id;
+
+        $r_alta_cer_csd_bd = (new fc_cer_csd($this->link))->alta_registro(registro:$registro);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al dar de alta cer csd',data:  $r_alta_cer_csd_bd,
+                header: $header,ws:$ws);
+        }
+
+        $this->link->commit();
+
+        if($header){
+
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: "$siguiente_view");
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_alta_cer_csd_bd,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($r_alta_cer_csd_bd, JSON_THROW_ON_ERROR);
+            exit;
+        }
+
+        return $r_alta_cer_csd_bd;
     }
 
     public function subir_key(bool $header, bool $ws = false): array|stdClass
