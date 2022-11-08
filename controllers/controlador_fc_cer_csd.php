@@ -112,8 +112,12 @@ class controlador_fc_cer_csd extends system{
         $propiedades = array("label" => "CSD");
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
-        $identificador = "doc_documento_id";
-        $propiedades = array("label" => "Documento");
+        $identificador = "documento";
+        $propiedades = array("place_holder" => "Documento");
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "codigo";
+        $propiedades = array("place_holder" => "Codigo");
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "codigo_bis";
