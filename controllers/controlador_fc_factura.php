@@ -218,8 +218,9 @@ class controlador_fc_factura extends system{
             propiedades: ["id_selected"=>$this->row_upd->com_tipo_cambio_id]);
         $this->asignar_propiedad(identificador:'cat_sat_uso_cfdi_id',
             propiedades: ["id_selected"=>$this->row_upd->cat_sat_uso_cfdi_id]);
-        $this->asignar_propiedad(identificador:'cat_sat_tipo_de_comprobante_id',
-            propiedades: ["id_selected"=>$this->row_upd->cat_sat_tipo_de_comprobante_id]);
+        $this->asignar_propiedad(identificador: 'cat_sat_tipo_de_comprobante_id',
+            propiedades: ["id_selected" => $this->row_upd->cat_sat_uso_cfdi_id,
+                "filtro" => array('cat_sat_tipo_de_comprobante.id' => $this->row_upd->cat_sat_uso_cfdi_id)]);
         $this->asignar_propiedad(identificador:'dp_calle_pertenece_id',
             propiedades: ["id_selected"=>$this->row_upd->dp_calle_pertenece_id]);
         $this->asignar_propiedad(identificador:'cat_sat_regimen_fiscal_id',
