@@ -184,7 +184,7 @@ class controlador_fc_csd extends system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "serie";
-        $propiedades = array("place_holder" => "serie");
+        $propiedades = array("place_holder" => "Serie");
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         return $this->keys_selects;

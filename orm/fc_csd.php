@@ -29,20 +29,9 @@ class fc_csd extends modelo{
 
     public function alta_bd(): array|stdClass
     {
-        if(!isset($this->registro['codigo_bis'])){
-            $this->registro['codigo_bis'] = $this->registro['codigo'];
-        }
-
-        if(!isset($this->registro['descripcion'])){
-            $this->registro['descripcion'] = $this->registro['codigo'];
-        }
-
-        if(!isset($this->registro['descripcion_select'])){
-            $this->registro['descripcion_select'] = $this->registro['codigo'];
-        }
-
-        if(!isset($this->registro['alias'])){
-            $this->registro['alias'] = $this->registro['codigo'];
+        $this->registro = $this->inicializa_campos_base(data: $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
         }
 
         $r_alta_bd = parent::alta_bd();
@@ -55,20 +44,9 @@ class fc_csd extends modelo{
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
-        if(!isset($this->registro['codigo_bis'])){
-            $this->registro['codigo_bis'] = $this->registro['codigo'];
-        }
-
-        if(!isset($this->registro['descripcion'])){
-            $this->registro['descripcion'] = $this->registro['codigo'];
-        }
-
-        if(!isset($this->registro['descripcion_select'])){
-            $this->registro['descripcion_select'] = $this->registro['codigo'];
-        }
-
-        if(!isset($this->registro['alias'])){
-            $this->registro['alias'] = $this->registro['codigo'];
+        $this->registro = $this->inicializa_campos_base(data: $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
         }
 
         $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
@@ -77,6 +55,34 @@ class fc_csd extends modelo{
         }
 
         return $r_modifica_bd;
+    }
+
+    private function inicializa_campos_base(array $data): array
+    {
+        $sucursal = $this->registro_por_id(entidad: new org_sucursal($this->link),id: $data['org_sucursal_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener la sucursal',data: $sucursal);
+        }
+
+        if(!isset($data['codigo_bis'])){
+            $data['codigo_bis'] = $data['codigo'];
+        }
+
+        if(!isset($data['descripcion'])){
+            $data['descripcion'] = $data['codigo'];
+        }
+
+        if(!isset($data['descripcion_select'])){
+            $data['descripcion_select'] = $data['codigo'];
+            $data['descripcion_select'] .= " - ";
+            $data['descripcion_select'] .= $sucursal->org_empresa_descripcion;
+        }
+
+        if(!isset($data['alias'])){
+            $data['alias'] = $data['codigo'];
+        }
+
+        return $data;
     }
 
 }
