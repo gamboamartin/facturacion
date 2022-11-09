@@ -9,6 +9,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use config\generales;
+use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
@@ -85,10 +86,21 @@ class controlador_fc_factura extends system{
 
     public function alta(bool $header, bool $ws = false): array|string
     {
-        $r_alta =  parent::alta(header: false, ws: false);
+        $r_alta =  parent::alta(header: false);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);
         }
+
+        $tipo_comprobante = $this->get_tipo_comprobante();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al obtener tipo de comprobante',data:  $tipo_comprobante);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->asignar_propiedad(identificador: 'cat_sat_tipo_de_comprobante_id',
+            propiedades: ["id_selected" => $tipo_comprobante,
+                "filtro" => array('cat_sat_tipo_de_comprobante.id' => $tipo_comprobante)]);
 
         $this->row_upd->fecha = date('Y-m-d');
         $this->row_upd->subtotal = 0;
@@ -254,6 +266,28 @@ class controlador_fc_factura extends system{
         return $data;
     }
 
+    private function get_tipo_comprobante(): array|int
+    {
+        if (generales::CAT_SAT_TIPO_DE_COMPROBANTE === ""){
+            return $this->errores->error(mensaje: 'Error CAT_SAT_TIPO_DE_COMPROBANTE no puede estar vacio',data:  $this);
+        }
+
+        $filtro['cat_sat_tipo_de_comprobante.descripcion'] = generales::CAT_SAT_TIPO_DE_COMPROBANTE;
+        $tipo_comprobante = (new cat_sat_tipo_de_comprobante($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener tipo de comprobante',data:  $this);
+        }
+
+        if ($tipo_comprobante->n_registros === 0){
+            $tipo_comprobante = (new cat_sat_tipo_de_comprobante($this->link))->get_tipo_comprobante_predeterminado();
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error al obtener tipo de comprobante predeterminado',data:  $this);
+            }
+        }
+
+        return $tipo_comprobante->registros[0]['cat_sat_tipo_de_comprobante_id'];
+    }
+
     private function inicializa_links(): array|string
     {
         $this->obj_link->genera_links($this);
@@ -293,7 +327,7 @@ class controlador_fc_factura extends system{
     private function inicializa_priedades(): array
     {
         $identificador = "fc_csd_id";
-        $propiedades = array("label" => "CSD");
+        $propiedades = array("label" => "CSD - Empresa", "cols" => 12,"extra_params_keys"=>array("fc_csd_serie"));
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "cat_sat_forma_pago_id";
@@ -329,7 +363,8 @@ class controlador_fc_factura extends system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "com_sucursal_id";
-        $propiedades = array("label" => "Sucursal");
+        $propiedades = array("label" => "Cliente","extra_params_keys" => array("com_cliente_cat_sat_forma_pago_id",
+            "com_cliente_cat_sat_metodo_pago_id","com_cliente_cat_sat_moneda_id","com_cliente_cat_sat_uso_cfdi_id"));
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "folio";
@@ -341,7 +376,7 @@ class controlador_fc_factura extends system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "serie";
-        $propiedades = array("place_holder" => "serie");
+        $propiedades = array("place_holder" => "Serie");
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "subtotal";
