@@ -32,6 +32,8 @@ class controlador_fc_traslado extends system{
         $columns["fc_traslado_codigo"]["titulo"] = "Codigo";
         $columns["fc_traslado_descripcion"]["titulo"] = "Descripcion";
         $columns["fc_partida_descripcion"]["titulo"] = "Partida";
+        $columns["cat_sat_tipo_factor_descripcion"]["titulo"] = "Tipo Factor";
+        $columns["cat_sat_factor_factor"]["titulo"] = "Factor";
         $columns["cat_sat_tipo_impuesto_descripcion"]["titulo"] = "Tipo Impuesto";
 
         $filtro = array("fc_traslado.id","fc_traslado.codigo","fc_traslado.descripcion","fc_partida.descripcion",
