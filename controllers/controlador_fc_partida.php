@@ -174,6 +174,9 @@ class controlador_fc_partida extends system{
         $columns["cat_sat_tipo_factor_descripcion"]["titulo"] = "Tipo Factor";
         $columns["cat_sat_factor_factor"]["titulo"] = "Factor";
         $columns["cat_sat_tipo_impuesto_descripcion"]["titulo"] = "Tipo Impuesto";
+        $columns["modifica"]["titulo"] = "Acciones";
+        $columns["modifica"]["type"] = "button";
+        $columns["modifica"]["campos"] = array("elimina_bd");
 
         $colums_rs =$this->datatable_init(columns: $columns,identificador: "#fc_traslado",
             data: array("fc_partida.id" => $this->registro_id));
@@ -254,7 +257,7 @@ class controlador_fc_partida extends system{
     }
 
     public function modifica(bool $header, bool $ws = false, string $breadcrumbs = '', bool $aplica_form = true,
-                             bool $muestra_btn = true): array|string
+                             bool $muestra_btn = true): array|stdClass
     {
         $base = $this->base();
         if(errores::$error){

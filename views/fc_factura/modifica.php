@@ -37,27 +37,6 @@
 
         </div>
     </div>
-
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-
-                <div class="widget widget-box box-container widget-mylistings">
-                    <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
-                        <h2>Partidas</h2>
-                        <a href="<?php echo $controlador->link_fc_factura_nueva_partida; ?>" class="btn btn-info"><i class="icon-edit"></i>
-                            Nueva Partida
-                        </a>
-                    </div>
-                    <div class="">
-                        <table id="fc_partida" class="table table-striped" >
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </main>
 
 

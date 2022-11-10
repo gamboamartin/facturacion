@@ -416,7 +416,7 @@ class controlador_fc_factura extends system{
      * @return array|string
      */
     public function modifica(bool $header, bool $ws = false, string $breadcrumbs = '', bool $aplica_form = true,
-                             bool $muestra_btn = true): array|string
+                             bool $muestra_btn = true): array|stdClass
     {
         $base = $this->base();
         if(errores::$error){
@@ -585,6 +585,24 @@ class controlador_fc_factura extends system{
 
     public function nueva_partida(bool $header, bool $ws = false): array|stdClass
     {
+        $columns["fc_partida_id"]["titulo"] = "Id";
+        $columns["fc_partida_codigo"]["titulo"] = "Codigo";
+        $columns["fc_partida_descripcion"]["titulo"] = "Descripcion";
+        $columns["fc_partida_cantidad"]["titulo"] = "Cantidad";
+        $columns["fc_partida_valor_unitario"]["titulo"] = "Valor Unitario";
+        $columns["fc_partida_descuento"]["titulo"] = "Descuento";
+        $columns["modifica"]["titulo"] = "Acciones";
+        $columns["modifica"]["type"] = "button";
+        $columns["modifica"]["campos"] = array("elimina_bd","nuevo_traslado");
+
+        $colums_rs =$this->datatable_init(columns: $columns,identificador: "#fc_partida",
+            data: array("fc_factura.id" => $this->registro_id));
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al inicializar links', data: $colums_rs);
+            print_r($error);
+            die('Error');
+        }
+
         $alta = $this->controlador_fc_partida->alta(header: false);
         if (errores::$error) {
             return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
