@@ -57,7 +57,7 @@
         "gamboa.martin/empleado": "dev-main",
         "gamboa.martin/im_registro_patronal": "dev-main",
         "gamboa.martin/nomina": "dev-master",
-        "gamboa.martin/direccion_postal": "dev-main",
+        "gamboa.martin/direccion_postal": "^1.0.0",
         "gamboa.martin/system": "dev-main",
         "gamboa.martin/template_1": "dev-main",
         "gamboa.martin/template": "dev-main",
