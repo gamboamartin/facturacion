@@ -215,37 +215,23 @@ class controlador_fc_partida extends system{
         return $data;
     }
 
-    public function modifica(bool $header, bool $ws = false): array|stdClass
-    {
-        $base = $this->init_modifica();
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
-                header: $header,ws:$ws);
-        }
-
-        return $base->template;
-    }
-
-
-
     public function nuevo_traslado(bool $header, bool $ws = false): array|stdClass
     {
-        $columns["fc_traslado_id"]["titulo"] = "Id";
-        $columns["fc_traslado_codigo"]["titulo"] = "Codigo";
-        $columns["fc_traslado_descripcion"]["titulo"] = "Descripcion";
-        $columns["cat_sat_tipo_factor_descripcion"]["titulo"] = "Tipo Factor";
-        $columns["cat_sat_factor_factor"]["titulo"] = "Factor";
-        $columns["cat_sat_tipo_impuesto_descripcion"]["titulo"] = "Tipo Impuesto";
-        $columns["modifica"]["titulo"] = "Acciones";
-        $columns["modifica"]["type"] = "button";
-        $columns["modifica"]["campos"] = array("elimina_bd");
-
-        $colums_rs =$this->datatable_init(columns: $columns,identificador: "#fc_traslado",
-            data: array("fc_partida.id" => $this->registro_id));
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al inicializar links', data: $colums_rs);
+        $datatables = $this->controlador_fc_traslado->init_datatable();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar datatable',data: $datatables);
             print_r($error);
             die('Error');
+        }
+
+        $datatables->columns["modifica"]["titulo"] = "Acciones";
+        $datatables->columns["modifica"]["type"] = "button";
+        $datatables->columns["modifica"]["campos"] = array("elimina_bd");
+
+        $table = $this->datatable_init(columns: $datatables->columns, filtro: $datatables->filtro,
+            identificador: "#fc_traslado", data: array("fc_partida.id" => $this->registro_id));
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al generar datatable', data: $table, header: $header, ws: $ws);
         }
 
         $alta = $this->controlador_fc_traslado->alta(header: false);
@@ -253,12 +239,18 @@ class controlador_fc_partida extends system{
             return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
         }
 
-        $this->controlador_fc_traslado->asignar_propiedad(identificador: 'fc_partida_id',
-            propiedades: ["id_selected" => $this->registro_id, "disabled" => true, "cols" => 12,
-                "filtro" => array('fc_partida.id' => $this->registro_id)]);
+        $partida = (new fc_partida($this->link))->get_partida(fc_partida_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener partida', data: $alta, header: $header, ws: $ws);
+        }
 
-        $this->controlador_fc_traslado->asignar_propiedad(identificador: 'cat_sat_factor_id',
-            propiedades: ["cols" => 12]);
+        $this->controlador_fc_traslado->row_upd->codigo = $partida["fc_partida_codigo"];
+        $this->controlador_fc_traslado->row_upd->descripcion = $partida["fc_partida_descripcion"];
+
+        $identificador = "fc_partida_id";
+        $propiedades = array("id_selected" => $this->registro_id, "disabled" => true,
+            "filtro" => array('fc_partida.id' => $this->registro_id));
+        $this->controlador_fc_traslado->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $this->inputs = $this->controlador_fc_traslado->genera_inputs(
             keys_selects:  $this->controlador_fc_traslado->keys_selects);
@@ -318,5 +310,14 @@ class controlador_fc_partida extends system{
         return $alta;
     }
 
+    public function modifica(bool $header, bool $ws = false): array|stdClass
+    {
+        $base = $this->init_modifica();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
+                header: $header,ws:$ws);
+        }
 
+        return $base->template;
+    }
 }

@@ -117,6 +117,16 @@ class fc_partida extends modelo{
         return $data;
     }
 
+    public function get_partida(int $fc_partida_id): array|stdClass|int
+    {
+        $registro = $this->registro(registro_id: $fc_partida_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partida',data:  $registro);
+        }
+
+        return $registro;
+    }
+
     private function init_campos_base(array $data): array
     {
         if(!isset($data['codigo'])){
