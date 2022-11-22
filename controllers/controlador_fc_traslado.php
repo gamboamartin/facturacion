@@ -61,10 +61,6 @@ class controlador_fc_traslado extends system{
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);
         }
 
-        $this->row_upd->cantidad = 0;
-        $this->row_upd->valor_unitario = 0;
-        $this->row_upd->descuento = 0;
-
         $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);

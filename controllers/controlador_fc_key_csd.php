@@ -8,6 +8,7 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
+use base\controller\controler;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_key_csd;
 use gamboamartin\system\links_menu;
@@ -27,27 +28,26 @@ class controlador_fc_key_csd extends system{
         $html_ = new fc_key_csd_html(html: $html);
         $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
-        $columns["fc_key_csd_id"]["titulo"] = "Id";
-        $columns["fc_key_csd_codigo"]["titulo"] = "Codigo";
-        $columns["fc_key_csd_descripcion"]["titulo"] = "Descripcion";
-        $columns["fc_csd_descripcion"]["titulo"] = "CSD";
-        $columns["doc_documento_descripcion"]["titulo"] = "Documento";
-
-        $filtro = array("fc_key_csd.id","fc_key_csd.codigo","fc_key_csd.descripcion","fc_csd.descripcion",
-            "doc_documento.descripcion");
-
-        $datatables = new stdClass();
-        $datatables->columns = $columns;
-        $datatables->filtro = $filtro;
+        $datatables = $this->init_datatable();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar datatable',data: $datatables);
+            print_r($error);
+            die('Error');
+        }
 
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, datatables: $datatables,
             paths_conf: $paths_conf);
 
-        $this->titulo_lista = 'Key CSD';
-
-        $propiedades = $this->inicializa_priedades();
+        $configuraciones = $this->init_configuraciones();
         if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar propiedades',data:  $propiedades);
+            $error = $this->errores->error(mensaje: 'Error al inicializar configuraciones',data: $configuraciones);
+            print_r($error);
+            die('Error');
+        }
+
+        $inputs = $this->init_inputs();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar inputs',data:  $inputs);
             print_r($error);
             die('Error');
         }
@@ -81,21 +81,72 @@ class controlador_fc_key_csd extends system{
         }
     }
 
-    private function base(): array|stdClass
+    private function init_configuraciones(): controler
     {
-        $r_modifica =  parent::modifica(header: false,aplica_form:  false);
+        $this->seccion_titulo = 'Keys CSD';
+        $this->titulo_lista = 'Registro de Keys CSD';
+
+        return $this;
+    }
+
+    public function init_datatable(): stdClass
+    {
+        $columns["fc_key_csd_id"]["titulo"] = "Id";
+        $columns["fc_key_csd_codigo"]["titulo"] = "Código";
+        $columns["fc_csd_descripcion"]["titulo"] = "CSD";
+        $columns["fc_key_csd_descripcion"]["titulo"] = "Key CSD";
+        $columns["doc_documento_descripcion"]["titulo"] = "Documento";
+
+        $filtro = array("fc_key_csd.id","fc_key_csd.codigo","fc_key_csd.descripcion","fc_csd.descripcion",
+            "doc_documento.descripcion");
+
+        $datatables = new stdClass();
+        $datatables->columns = $columns;
+        $datatables->filtro = $filtro;
+
+        return $datatables;
+    }
+
+    private function init_inputs(): array
+    {
+        $identificador = "fc_csd_id";
+        $propiedades = array("label" => "CSD", "cols" => 12);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "doc_documento_id";
+        $propiedades = array("label" => "Documento", "cols" => 8);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "documento";
+        $propiedades = array("place_holder" => "Documento", "cols" => 8);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "codigo";
+        $propiedades = array("place_holder" => "Código", "cols" => 4);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+
+        return $this->keys_selects;
+    }
+
+    private function init_modifica(): array|stdClass
+    {
+        $r_modifica =  parent::modifica(header: false);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
         }
 
-        $this->asignar_propiedad(identificador:'fc_csd_id',
-            propiedades: ["id_selected"=>$this->row_upd->fc_csd_id]);
-        $this->asignar_propiedad(identificador:'doc_documento_id',
-            propiedades: ["id_selected"=>$this->row_upd->doc_documento_id]);
+        $identificador = "fc_csd_id";
+        $propiedades = array("id_selected" => $this->row_upd->fc_csd_id);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "doc_documento_id";
+        $propiedades = array("id_selected" => $this->row_upd->doc_documento_id);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al inicializar inputs',data:  $inputs);
+            return $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);
         }
 
         $data = new stdClass();
@@ -105,31 +156,9 @@ class controlador_fc_key_csd extends system{
         return $data;
     }
 
-    private function inicializa_priedades(): array
+    public function modifica(bool $header, bool $ws = false): array|stdClass
     {
-        $identificador = "fc_csd_id";
-        $propiedades = array("label" => "CSD");
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "documento";
-        $propiedades = array("place_holder" => "Documento");
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "codigo";
-        $propiedades = array("place_holder" => "Codigo");
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "codigo_bis";
-        $propiedades = array("place_holder" => "Codigo BIS");
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        return $this->keys_selects;
-    }
-
-    public function modifica(bool $header, bool $ws = false, string $breadcrumbs = '', bool $aplica_form = true,
-                             bool $muestra_btn = true): array|string
-    {
-        $base = $this->base();
+        $base = $this->init_modifica();
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);

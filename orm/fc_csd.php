@@ -42,6 +42,16 @@ class fc_csd extends modelo{
         return $r_alta_bd;
     }
 
+    public function get_csd(int $fc_csd_id): array|stdClass|int
+    {
+        $registro = $this->registro(registro_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener CSD',data:  $registro);
+        }
+
+        return $registro;
+    }
+
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
         $this->registro = $this->inicializa_campos_base(data: $registro);
