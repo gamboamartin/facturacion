@@ -250,6 +250,16 @@ class fc_factura extends modelo{
         return $del;
     }
 
+    public function get_factura(int $fc_factura_id): array|stdClass|int
+    {
+        $registro = $this->registro(registro_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener factura',data:  $registro);
+        }
+
+        return $registro;
+    }
+
     public function get_factura_sub_total(int $fc_factura_id): float|array
     {
         $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);

@@ -215,6 +215,17 @@ class controlador_fc_partida extends system{
         return $data;
     }
 
+    public function modifica(bool $header, bool $ws = false): array|stdClass
+    {
+        $base = $this->init_modifica();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
+                header: $header,ws:$ws);
+        }
+
+        return $base->template;
+    }
+
     public function nuevo_traslado(bool $header, bool $ws = false): array|stdClass
     {
         $datatables = $this->controlador_fc_traslado->init_datatable();
@@ -308,16 +319,5 @@ class controlador_fc_partida extends system{
         }
 
         return $alta;
-    }
-
-    public function modifica(bool $header, bool $ws = false): array|stdClass
-    {
-        $base = $this->init_modifica();
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
-                header: $header,ws:$ws);
-        }
-
-        return $base->template;
     }
 }
