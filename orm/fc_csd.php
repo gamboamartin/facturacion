@@ -18,7 +18,7 @@ class fc_csd extends modelo{
 
         $campos_view['org_sucursal_id'] = array('type' => 'selects', 'model' => new org_sucursal($link));
         $campos_view['codigo'] = array('type' => 'inputs');
-        $campos_view['codigo_bis'] = array('type' => 'inputs');
+        $campos_view['descripcion'] = array('type' => 'inputs');
         $campos_view['serie'] = array('type' => 'inputs');
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
@@ -29,7 +29,12 @@ class fc_csd extends modelo{
 
     public function alta_bd(): array|stdClass
     {
-        $this->registro = $this->inicializa_campos_base(data: $this->registro);
+        $validacion = $this->validaciones(data: $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
+        }
+
+        $this->registro = $this->init_campos_base(data: $this->registro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
         }
@@ -52,47 +57,59 @@ class fc_csd extends modelo{
         return $registro;
     }
 
-    public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
+    private function init_campos_base(array $data): array
     {
-        $this->registro = $this->inicializa_campos_base(data: $registro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
-        }
-
-        $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al modificar csd',data: $r_modifica_bd);
-        }
-
-        return $r_modifica_bd;
-    }
-
-    private function inicializa_campos_base(array $data): array
-    {
-        $sucursal = $this->registro_por_id(entidad: new org_sucursal($this->link),id: $data['org_sucursal_id']);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener la sucursal',data: $sucursal);
-        }
-
         if(!isset($data['codigo_bis'])){
-            $data['codigo_bis'] = $data['codigo'];
-        }
-
-        if(!isset($data['descripcion'])){
-            $data['descripcion'] = $data['codigo'];
+            $data['codigo_bis'] =  $data['codigo'];
         }
 
         if(!isset($data['descripcion_select'])){
-            $data['descripcion_select'] = $data['codigo'];
-            $data['descripcion_select'] .= " - ";
-            $data['descripcion_select'] .= $sucursal->org_empresa_descripcion;
+            $ds = str_replace("_"," ",$data['descripcion']);
+            $ds = ucwords($ds);
+            $data['descripcion_select'] =  "{$data['codigo']} - {$ds}";
         }
 
         if(!isset($data['alias'])){
             $data['alias'] = $data['codigo'];
         }
-
         return $data;
+    }
+
+    public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
+    {
+        $validacion = $this->validaciones(data: $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
+        }
+
+        $registro = $this->init_campos_base(data: $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $registro);
+        }
+
+        $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al modificar partida',data:  $r_modifica_bd);
+        }
+
+        return $r_modifica_bd;
+    }
+
+    private function validaciones(array $data): bool|array
+    {
+        $keys = array('descripcion','codigo');
+        $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro:  $data);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
+        }
+
+        $keys = array('org_sucursal_id');
+        $valida = $this->validacion->valida_ids(keys: $keys, registro: $data);
+        if(errores::$error){
+            return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
+        }
+
+        return true;
     }
 
 }

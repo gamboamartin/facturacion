@@ -8,6 +8,7 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
+use base\controller\controler;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_cer_csd;
 use gamboamartin\facturacion\models\fc_csd;
@@ -38,36 +39,40 @@ class controlador_fc_csd extends system{
         $html_ = new fc_csd_html(html: $html);
         $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
-        $columns["fc_csd_id"]["titulo"] = "Id";
-        $columns["fc_csd_codigo"]["titulo"] = "Codigo";
-        $columns["fc_csd_descripcion"]["titulo"] = "Descripcion";
-        $columns["fc_csd_serie"]["titulo"] = "Serie";
-        $columns["org_sucursal_descripcion"]["titulo"] = "Sucursal";
-
-        $filtro = array("fc_csd.id","fc_csd.codigo","fc_csd.descripcion","org_sucursal.descripcion");
-
-        $datatables = new stdClass();
-        $datatables->columns = $columns;
-        $datatables->filtro = $filtro;
+        $datatables = $this->init_datatable();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar datatable',data: $datatables);
+            print_r($error);
+            die('Error');
+        }
 
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, datatables: $datatables,
             paths_conf: $paths_conf);
 
-        $this->titulo_lista = 'Empresas';
+        $configuraciones = $this->init_configuraciones();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar configuraciones',data: $configuraciones);
+            print_r($error);
+            die('Error');
+        }
 
-        $this->controlador_fc_key_csd = new controlador_fc_key_csd(link:$this->link, paths_conf: $paths_conf);
-        $this->controlador_fc_cer_csd = new controlador_fc_cer_csd(link:$this->link, paths_conf: $paths_conf);
+        $controladores = $this->init_controladores(paths_conf: $paths_conf);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
+            print_r($error);
+            die('Error');
+        }
 
-        $links = $this->inicializa_links();
+        $links = $this->init_links();
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al inicializar links',data:  $links);
             print_r($error);
             die('Error');
         }
 
-        $propiedades = $this->inicializa_priedades();
+        $inputs = $this->init_inputs();
         if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar propiedades',data:  $propiedades);
+            $error = $this->errores->error(mensaje: 'Error al inicializar inputs',data:  $inputs);
             print_r($error);
             die('Error');
         }
@@ -79,6 +84,10 @@ class controlador_fc_csd extends system{
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);
         }
+
+        $this->row_upd->cantidad = 0;
+        $this->row_upd->valor_unitario = 0;
+        $this->row_upd->descuento = 0;
 
         $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
         if(errores::$error){
@@ -101,28 +110,6 @@ class controlador_fc_csd extends system{
         }
     }
 
-    private function base(): array|stdClass
-    {
-        $r_modifica =  parent::modifica(header: false,aplica_form:  false);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
-        }
-
-        $this->asignar_propiedad(identificador:'org_sucursal_id',
-            propiedades: ["id_selected"=>$this->row_upd->org_sucursal_id]);
-
-        $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al inicializar inputs',data:  $inputs);
-        }
-
-        $data = new stdClass();
-        $data->template = $r_modifica;
-        $data->inputs = $inputs;
-
-        return $data;
-    }
-
     public function get_csd(bool $header, bool $ws = true): array|stdClass
     {
         $keys['org_sucursal'] = array('id','descripcion','codigo','codigo_bis');;
@@ -135,11 +122,44 @@ class controlador_fc_csd extends system{
         return $salida;
     }
 
-    private function inicializa_links(): array|string
+    private function init_configuraciones(): controler
+    {
+        $this->seccion_titulo = 'Certificados de Sello Digital';
+        $this->titulo_lista = 'Registro de Certificados de Sello Digital';
+
+        return $this;
+    }
+
+    private function init_controladores(stdClass $paths_conf): controler
+    {
+        $this->controlador_fc_key_csd = new controlador_fc_key_csd(link:$this->link, paths_conf: $paths_conf);
+        $this->controlador_fc_cer_csd = new controlador_fc_cer_csd(link:$this->link, paths_conf: $paths_conf);
+
+        return $this;
+    }
+
+    public function init_datatable(): stdClass
+    {
+        $columns["fc_csd_id"]["titulo"] = "Id";
+        $columns["fc_csd_codigo"]["titulo"] = "Código";
+        $columns["fc_csd_descripcion"]["titulo"] = "CSD";
+        $columns["fc_csd_serie"]["titulo"] = "Serie";
+        $columns["org_sucursal_descripcion"]["titulo"] = "Sucursal";
+
+        $filtro = array("fc_csd.id","fc_csd.codigo","fc_csd.descripcion","fc_csd.serie", "org_sucursal.descripcion");
+
+        $datatables = new stdClass();
+        $datatables->columns = $columns;
+        $datatables->filtro = $filtro;
+
+        return $datatables;
+    }
+
+    private function init_links(): array|string
     {
         $this->obj_link->genera_links($this);
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al generar links para factura',data:  $this->obj_link);
+            return $this->errores->error(mensaje: 'Error al generar links para partida',data:  $this->obj_link);
         }
 
         $link = $this->obj_link->get_link($this->seccion,"subir_key");
@@ -169,31 +189,53 @@ class controlador_fc_csd extends system{
         return $link;
     }
 
-    private function inicializa_priedades(): array
+    private function init_inputs(): array
     {
         $identificador = "org_sucursal_id";
-        $propiedades = array("label" => "Sucursal","cols" => 12);
+        $propiedades = array("label" => "Sucursal","cols" => 8);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "codigo";
-        $propiedades = array("place_holder" => "Codigo");
+        $propiedades = array("place_holder" => "Código","cols" => 4);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
-        $identificador = "codigo_bis";
-        $propiedades = array("place_holder" => "Codigo BIS");
+        $identificador = "descripcion";
+        $propiedades = array("place_holder" => "CSD","cols" => 8);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "serie";
-        $propiedades = array("place_holder" => "Serie");
+        $propiedades = array("place_holder" => "Serie", "cols" => 4);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         return $this->keys_selects;
     }
 
-    public function modifica(bool $header, bool $ws = false, string $breadcrumbs = '', bool $aplica_form = true,
-                             bool $muestra_btn = true): array|string
+    private function init_modifica(): array|stdClass
     {
-        $base = $this->base();
+        $r_modifica =  parent::modifica(header: false);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
+        }
+
+        $identificador = "org_sucursal_id";
+        $propiedades = array("id_selected" => $this->row_upd->org_sucursal_id);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);
+        }
+
+        $data = new stdClass();
+        $data->template = $r_modifica;
+        $data->inputs = $inputs;
+
+        return $data;
+    }
+
+    public function modifica(bool $header, bool $ws = false): array|stdClass
+    {
+        $base = $this->init_modifica();
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
@@ -204,21 +246,21 @@ class controlador_fc_csd extends system{
 
     public function subir_cer(bool $header, bool $ws = false): array|stdClass
     {
-        $columns["fc_cer_csd_id"]["titulo"] = "Id";
-        $columns["fc_cer_csd_codigo"]["titulo"] = "Codigo";
-        $columns["fc_cer_csd_descripcion"]["titulo"] = "Descripcion";
-        $columns["fc_csd_descripcion"]["titulo"] = "CSD";
-        $columns["doc_documento_descripcion"]["titulo"] = "Documento";
-        $columns["modifica"]["titulo"] = "Acciones";
-        $columns["modifica"]["type"] = "button";
-        $columns["modifica"]["campos"] = array("elimina_bd");
-
-        $colums_rs =$this->datatable_init(columns: $columns,identificador: "#fc_cer_csd",
-            data: array("fc_csd.id" => $this->registro_id));
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al inicializar links', data: $colums_rs);
+        $datatables = $this->controlador_fc_cer_csd->init_datatable();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar datatable',data: $datatables);
             print_r($error);
             die('Error');
+        }
+
+        $datatables->columns["modifica"]["titulo"] = "Acciones";
+        $datatables->columns["modifica"]["type"] = "button";
+        $datatables->columns["modifica"]["campos"] = array("elimina_bd");
+
+        $table = $this->datatable_init(columns: $datatables->columns, filtro: $datatables->filtro,
+            identificador: "#fc_cer_csd", data: array("fc_csd.id" => $this->registro_id));
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al generar datatable', data: $table, header: $header, ws: $ws);
         }
 
         $alta = $this->controlador_fc_cer_csd->alta(header: false);
@@ -226,10 +268,10 @@ class controlador_fc_csd extends system{
             return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
         }
 
-        $this->controlador_fc_cer_csd->asignar_propiedad(identificador: 'fc_csd_id',
-            propiedades: ["id_selected" => $this->registro_id, "disabled" => true, "cols" => 12,
-                "filtro" => array('fc_csd.id' => $this->registro_id)]);
-        $this->controlador_fc_cer_csd->asignar_propiedad(identificador: 'documento', propiedades: ["cols" => 12]);
+        $identificador = "fc_csd_id";
+        $propiedades = array("id_selected" => $this->registro_id, "disabled" => true,
+            "filtro" => array('fc_csd.id' => $this->registro_id));
+        $this->controlador_fc_cer_csd->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $this->inputs = $this->controlador_fc_cer_csd->genera_inputs(
             keys_selects:  $this->controlador_fc_cer_csd->keys_selects);
@@ -291,21 +333,21 @@ class controlador_fc_csd extends system{
 
     public function subir_key(bool $header, bool $ws = false): array|stdClass
     {
-        $columns["fc_key_csd_id"]["titulo"] = "Id";
-        $columns["fc_key_csd_codigo"]["titulo"] = "Codigo";
-        $columns["fc_key_csd_descripcion"]["titulo"] = "Descripcion";
-        $columns["fc_csd_descripcion"]["titulo"] = "CSD";
-        $columns["doc_documento_descripcion"]["titulo"] = "Documento";
-        $columns["modifica"]["titulo"] = "Acciones";
-        $columns["modifica"]["type"] = "button";
-        $columns["modifica"]["campos"] = array("elimina_bd");
-
-        $colums_rs =$this->datatable_init(columns: $columns,identificador: "#fc_key_csd",
-            data: array("fc_csd.id" => $this->registro_id));
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al inicializar links', data: $colums_rs);
+        $datatables = $this->controlador_fc_key_csd->init_datatable();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar datatable',data: $datatables);
             print_r($error);
             die('Error');
+        }
+
+        $datatables->columns["modifica"]["titulo"] = "Acciones";
+        $datatables->columns["modifica"]["type"] = "button";
+        $datatables->columns["modifica"]["campos"] = array("elimina_bd");
+
+        $table = $this->datatable_init(columns: $datatables->columns, filtro: $datatables->filtro,
+            identificador: "#fc_key_csd", data: array("fc_csd.id" => $this->registro_id));
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al generar datatable', data: $table, header: $header, ws: $ws);
         }
 
         $alta = $this->controlador_fc_key_csd->alta(header: false);
@@ -313,10 +355,10 @@ class controlador_fc_csd extends system{
             return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
         }
 
-        $this->controlador_fc_key_csd->asignar_propiedad(identificador: 'fc_csd_id',
-            propiedades: ["id_selected" => $this->registro_id, "disabled" => true, "cols" => 12,
-                "filtro" => array('fc_csd.id' => $this->registro_id)]);
-        $this->controlador_fc_key_csd->asignar_propiedad(identificador: 'documento', propiedades: ["cols" => 12]);
+        $identificador = "fc_csd_id";
+        $propiedades = array("id_selected" => $this->registro_id, "disabled" => true,
+            "filtro" => array('fc_csd.id' => $this->registro_id));
+        $this->controlador_fc_cer_csd->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $this->inputs = $this->controlador_fc_key_csd->genera_inputs(
             keys_selects:  $this->controlador_fc_key_csd->keys_selects);
