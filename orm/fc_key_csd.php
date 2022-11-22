@@ -55,7 +55,7 @@ class fc_key_csd extends modelo{
         return $r_alta_bd;
     }
 
-    private function alta_documento(string $documento): array|stdClass
+    public function alta_documento(string $documento): array|stdClass
     {
         if (!array_key_exists($documento,$_FILES)){
             return $this->error->error(mensaje: "Error no existe: $documento", data: $documento);
