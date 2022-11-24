@@ -273,6 +273,10 @@ class controlador_fc_csd extends system{
             "filtro" => array('fc_csd.id' => $this->registro_id));
         $this->controlador_fc_cer_csd->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
+        $identificador = "documento";
+        $propiedades = array("cols" => 12);
+        $this->controlador_fc_cer_csd->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
         $this->inputs = $this->controlador_fc_cer_csd->genera_inputs(
             keys_selects:  $this->controlador_fc_cer_csd->keys_selects);
         if (errores::$error) {
@@ -299,8 +303,16 @@ class controlador_fc_csd extends system{
             unset($_POST['btn_action_next']);
         }
 
+        $csd = (new fc_csd($this->link))->get_csd(fc_csd_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener csd', data: $csd, header: $header, ws: $ws);
+        }
+
+        $nombre_archivo = explode(".",$_FILES['documento']['name'])[0];
+
         $registro = $_POST;
         $registro['fc_csd_id'] = $this->registro_id;
+        $registro['codigo'] = $csd['fc_csd_id'].$nombre_archivo;
 
         $r_alta_cer_csd_bd = (new fc_cer_csd($this->link))->alta_registro(registro:$registro);
         if(errores::$error){
@@ -399,7 +411,7 @@ class controlador_fc_csd extends system{
 
         $registro = $_POST;
         $registro['fc_csd_id'] = $this->registro_id;
-        $registro['codigo'] = $csd['fc_csd_codigo'].$nombre_archivo;
+        $registro['codigo'] = $csd['fc_csd_id'].$nombre_archivo;
 
         $r_alta_key_csd_bd = (new fc_key_csd($this->link))->alta_registro(registro:$registro);
         if(errores::$error){

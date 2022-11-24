@@ -302,7 +302,7 @@ class controlador_fc_partida extends system{
 
         $registro = $_POST;
         $registro['fc_partida_id'] = $this->registro_id;
-        $registro['codigo'] = $partida['fc_partida_codigo'].$registro['descripcion'];
+        $registro['codigo'] = $partida['fc_partida_id'].$registro['descripcion'];
 
         $alta = (new fc_traslado($this->link))->alta_registro(registro:$registro);
         if(errores::$error){

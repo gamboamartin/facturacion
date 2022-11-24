@@ -12,7 +12,6 @@
                         <?php include (new views())->ruta_templates."mensajes.php"; ?>
 
                         <?php echo $controlador->inputs->fc_csd_id; ?>
-                        <?php echo $controlador->inputs->codigo; ?>
                         <?php echo $controlador->inputs->documento; ?>
 
                         <?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>
