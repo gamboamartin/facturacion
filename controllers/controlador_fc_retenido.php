@@ -95,7 +95,7 @@ class controlador_fc_retenido extends system{
         $columns["fc_retenido_id"]["titulo"] = "Id";
         $columns["fc_retenido_codigo"]["titulo"] = "Codigo";
         $columns["fc_partida_descripcion"]["titulo"] = "Partida";
-        $columns["fc_retenido_descripcion"]["titulo"] = "Retenido";
+        $columns["fc_retenido_descripcion"]["titulo"] = "Descripción";
         $columns["cat_sat_tipo_factor_descripcion"]["titulo"] = "Tipo Factor";
         $columns["cat_sat_factor_factor"]["titulo"] = "Factor";
         $columns["cat_sat_tipo_impuesto_descripcion"]["titulo"] = "Tipo Impuesto";
@@ -134,7 +134,7 @@ class controlador_fc_retenido extends system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "descripcion";
-        $propiedades = array("place_holder" => "Retenido","cols" => 8);
+        $propiedades = array("place_holder" => "Descripción","cols" => 8);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         return $this->keys_selects;

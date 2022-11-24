@@ -13,7 +13,6 @@
 
                         <?php echo $controlador->inputs->fc_factura_id; ?>
                         <?php echo $controlador->inputs->com_producto_id; ?>
-                        <?php echo $controlador->inputs->codigo; ?>
                         <?php echo $controlador->inputs->descripcion; ?>
                         <?php echo $controlador->inputs->cantidad; ?>
                         <?php echo $controlador->inputs->valor_unitario; ?>

@@ -170,7 +170,7 @@ class controlador_fc_partida extends system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "descripcion";
-        $propiedades = array("place_holder" => "Partida","cols" => 8);
+        $propiedades = array("place_holder" => "Descripción","cols" => 8);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "cantidad";
@@ -263,6 +263,10 @@ class controlador_fc_partida extends system{
             "filtro" => array('fc_partida.id' => $this->registro_id));
         $this->controlador_fc_traslado->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
+        $identificador = "descripcion";
+        $propiedades = array("cols" => 12);
+        $this->controlador_fc_traslado->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
         $this->inputs = $this->controlador_fc_traslado->genera_inputs(
             keys_selects:  $this->controlador_fc_traslado->keys_selects);
         if (errores::$error) {
@@ -289,8 +293,16 @@ class controlador_fc_partida extends system{
             unset($_POST['btn_action_next']);
         }
 
+        $partida = (new fc_partida($this->link))->get_partida(fc_partida_id: $this->registro_id);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al obtener partida', data: $siguiente_view,
+                header:  $header, ws: $ws);
+        }
+
         $registro = $_POST;
         $registro['fc_partida_id'] = $this->registro_id;
+        $registro['codigo'] = $partida['fc_partida_codigo'].$registro['descripcion'];
 
         $alta = (new fc_traslado($this->link))->alta_registro(registro:$registro);
         if(errores::$error){
