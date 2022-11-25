@@ -14,7 +14,7 @@ class fc_csd extends modelo{
             'dp_calle_pertenece'=>'org_sucursal','cat_sat_regimen_fiscal'=>'org_empresa');
         $campos_obligatorios = array('codigo','serie','org_sucursal_id','descripcion_select','alias','codigo_bis');
 
-        $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis','serie');
+        $no_duplicados = array('serie','codigo','descripcion_select','alias','codigo_bis');
 
         $campos_view['org_sucursal_id'] = array('type' => 'selects', 'model' => new org_sucursal($link));
         $campos_view['codigo'] = array('type' => 'inputs');
@@ -59,14 +59,23 @@ class fc_csd extends modelo{
 
     private function init_campos_base(array $data): array
     {
+        $sucursal = (new org_sucursal($this->link))->get_sucursal(org_sucursal_id: $data["org_sucursal_id"]);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener sucursal',data:  $sucursal);
+        }
+
+        if(!isset($data['codigo'])){
+            $data['codigo'] =  $data['serie'];
+        }
+
         if(!isset($data['codigo_bis'])){
             $data['codigo_bis'] =  $data['codigo'];
         }
 
         if(!isset($data['descripcion_select'])){
-            $ds = str_replace("_"," ",$data['descripcion']);
-            $ds = ucwords($ds);
-            $data['descripcion_select'] =  "{$data['codigo']} - {$ds}";
+            $data['descripcion_select'] =  "{$data['codigo']} - ";
+            $data['descripcion_select'] .= "{$sucursal['org_empresa_rfc']} - ";
+            $data['descripcion_select'] .= "{$sucursal['org_empresa_razon_social']}";
         }
 
         if(!isset($data['alias'])){
@@ -97,7 +106,7 @@ class fc_csd extends modelo{
 
     private function validaciones(array $data): bool|array
     {
-        $keys = array('descripcion','codigo');
+        $keys = array('serie','descripcion');
         $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro:  $data);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar campos', data: $valida);

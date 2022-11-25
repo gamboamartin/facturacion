@@ -192,7 +192,7 @@ class controlador_fc_csd extends system{
     private function init_inputs(): array
     {
         $identificador = "org_sucursal_id";
-        $propiedades = array("label" => "Sucursal","cols" => 8);
+        $propiedades = array("label" => "Sucursal","cols" => 12);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "codigo";
