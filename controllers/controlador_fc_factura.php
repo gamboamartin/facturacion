@@ -369,11 +369,16 @@ class controlador_fc_factura extends system{
             return $this->errores->error(mensaje: 'Error al obtener imp_retenidos',data:  $imp_retenidos);
         }
 
+        $total = (new fc_factura($this->link))->get_factura_total(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener total factura',data:  $total);
+        }
+
         $this->row_upd->subtotal = $sub_total;
         $this->row_upd->descuento = $descuento;
         $this->row_upd->impuestos_trasladados = $imp_trasladados;
         $this->row_upd->impuestos_retenidos = $imp_retenidos;
-        $this->row_upd->total = 0;
+        $this->row_upd->total = $total;
 
         $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
         if(errores::$error){
@@ -455,7 +460,6 @@ class controlador_fc_factura extends system{
         if (errores::$error) {
             return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
         }
-
 
         $identificador = "fc_factura_id";
         $propiedades = array("id_selected" => $this->registro_id, "disabled" => true,

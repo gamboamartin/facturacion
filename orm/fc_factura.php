@@ -275,7 +275,6 @@ class fc_factura extends modelo{
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $subtotal);
             }
         }
-
         return $subtotal;
     }
 
@@ -287,8 +286,8 @@ class fc_factura extends modelo{
         }
         $imp_traslado= 0.0;
 
-        foreach ($partidas as $valor) {
-            $imp_traslado += (new fc_partida($this->link))->calculo_imp_trasladado($valor['fc_partida_id']);
+        foreach ($partidas as $partida) {
+            $imp_traslado += (new fc_partida($this->link))->calculo_imp_trasladado($partida['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
             }
@@ -324,7 +323,6 @@ class fc_factura extends modelo{
      */
     public function get_factura_descuento(int $fc_factura_id): float|array
     {
-
         if($fc_factura_id<=0){
             return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0',data:  $fc_factura_id);
         }
@@ -339,8 +337,32 @@ class fc_factura extends modelo{
             return $this->error->error(mensaje: 'Error al cargar descuentos',data: $descuento);
         }
 
-
         return $descuento;
+    }
+
+    public function get_factura_total(int $fc_factura_id): float|array
+    {
+        $sub_total = $this->get_factura_sub_total(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener sub_total',data:  $sub_total);
+        }
+
+        $descuento = $this->get_factura_descuento(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener descuento',data:  $descuento);
+        }
+
+        $imp_trasladados = $this->get_factura_imp_trasladados(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener imp_trasladados',data:  $imp_trasladados);
+        }
+
+        $imp_retenidos = $this->get_factura_imp_retenidos(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener imp_retenidos',data:  $imp_retenidos);
+        }
+
+        return $sub_total - $descuento - $imp_trasladados - $imp_retenidos;
     }
 
     /**
@@ -359,6 +381,7 @@ class fc_factura extends modelo{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener partidas',data:  $r_fc_partida);
         }
+
         return $r_fc_partida->registros;
     }
 
@@ -533,18 +556,14 @@ class fc_factura extends modelo{
         $descuento = 0;
         foreach ($partidas as $partida){
             if(!is_array($partida)){
-                return $this->error->error(mensaje: 'Error partida debe ser un array',data: $descuento);
+                return $this->error->error(mensaje: 'Error partida debe ser un array',data: $partida);
             }
-            $keys = array('fc_partida_id');
-            $valida = $this->validacion->valida_ids(keys: $keys,registro: $partida);
+
+            $descuento_partida = $this->descuento_partida(fc_partida_id: $partida['fc_partida_id']);
             if(errores::$error){
-                return $this->error->error(mensaje: 'Error al validar partida',data: $valida);
+                return $this->error->error(mensaje: 'Error al obtener descuento partida',data: $descuento_partida);
             }
-            $descuento_as = $this->carga_descuento(descuento:$descuento, partida: $partida);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al cargar descuento',data: $descuento_as);
-            }
-            $descuento += $descuento_as;
+            $descuento += $descuento_partida;
         }
         return $descuento;
     }
