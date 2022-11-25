@@ -228,7 +228,12 @@ class controlador_fc_factura extends system{
     private function init_inputs(): array
     {
         $identificador = "fc_csd_id";
-        $propiedades = array("label" => "CSD - Empresa", "cols" => 12,"extra_params_keys"=>array("fc_csd_serie"));
+        $propiedades = array("label" => "Empresa", "cols" => 12,"extra_params_keys"=>array("fc_csd_serie"));
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "com_sucursal_id";
+        $propiedades = array("label" => "Cliente", "cols" => 12,"extra_params_keys" => array("com_cliente_cat_sat_forma_pago_id",
+            "com_cliente_cat_sat_metodo_pago_id","com_cliente_cat_sat_moneda_id","com_cliente_cat_sat_uso_cfdi_id"));
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "cat_sat_forma_pago_id";
@@ -263,17 +268,12 @@ class controlador_fc_factura extends system{
         $propiedades = array("label" => "Regimen Fiscal");
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
-        $identificador = "com_sucursal_id";
-        $propiedades = array("label" => "Cliente","extra_params_keys" => array("com_cliente_cat_sat_forma_pago_id",
-            "com_cliente_cat_sat_metodo_pago_id","com_cliente_cat_sat_moneda_id","com_cliente_cat_sat_uso_cfdi_id"));
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
         $identificador = "folio";
         $propiedades = array("place_holder" => "Folio");
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "exportacion";
-        $propiedades = array("place_holder" => "Exportacion");
+        $propiedades = array("place_holder" => "Exportación");
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "serie";
@@ -281,11 +281,11 @@ class controlador_fc_factura extends system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "subtotal";
-        $propiedades = array("place_holder" => "Subtotal", "disabled" => true);
+        $propiedades = array("place_holder" => "Subtotal", "cols" => 4,"disabled" => true);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "descuento";
-        $propiedades = array("place_holder" => "Descuento", "disabled" => true);
+        $propiedades = array("place_holder" => "Descuento", "cols" => 4,"disabled" => true);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "impuestos_trasladados";
@@ -297,7 +297,7 @@ class controlador_fc_factura extends system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "total";
-        $propiedades = array("place_holder" => "Total", "disabled" => true);
+        $propiedades = array("place_holder" => "Total", "cols" => 4, "disabled" => true);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "fecha";
@@ -373,6 +373,7 @@ class controlador_fc_factura extends system{
         $this->row_upd->descuento = $descuento;
         $this->row_upd->impuestos_trasladados = $imp_trasladados;
         $this->row_upd->impuestos_retenidos = $imp_retenidos;
+        $this->row_upd->total = 0;
 
         $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
         if(errores::$error){
@@ -388,6 +389,21 @@ class controlador_fc_factura extends system{
 
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
+        $datatables = $this->controlador_fc_partida->init_datatable();
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al inicializar datatable', data: $datatables, header: $header, ws: $ws);
+        }
+        $datatables->columns["modifica"]["titulo"] = "Acciones";
+        $datatables->columns["modifica"]["type"] = "button";
+        $datatables->columns["modifica"]["campos"] = array("elimina_bd");
+        unset($datatables->columns["fc_factura_descripcion"]);
+
+        $table = $this->datatable_init(columns: $datatables->columns, filtro: $datatables->filtro,
+            identificador: "#fc_partida", data: array("fc_factura.id" => $this->registro_id));
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al generar datatable', data: $table, header: $header, ws: $ws);
+        }
+
         $base = $this->init_modifica();
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
@@ -406,6 +422,7 @@ class controlador_fc_factura extends system{
         $datatables->columns["modifica"]["titulo"] = "Acciones";
         $datatables->columns["modifica"]["type"] = "button";
         $datatables->columns["modifica"]["campos"] = array("elimina_bd");
+        unset($datatables->columns["fc_factura_descripcion"]);
 
         $table = $this->datatable_init(columns: $datatables->columns, filtro: $datatables->filtro,
             identificador: "#fc_partida", data: array("fc_factura.id" => $this->registro_id));
@@ -413,18 +430,32 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al generar datatable', data: $table, header: $header, ws: $ws);
         }
 
+        $this->controlador_fc_partida->modelo->campos_view['unidad'] = array('type' => 'inputs');
+        $this->controlador_fc_partida->modelo->campos_view['impuesto'] = array('type' => 'inputs');
+        $this->controlador_fc_partida->modelo->campos_view['tipo_factor'] = array('type' => 'inputs');
+        $this->controlador_fc_partida->modelo->campos_view['factor'] = array('type' => 'inputs');
+
+        $identificador = "unidad";
+        $propiedades = array("place_holder" => "Unidad", "disabled" => true);
+        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "impuesto";
+        $propiedades = array("place_holder" => "Objeto del Impuesto", "disabled" => true);
+        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "tipo_factor";
+        $propiedades = array("place_holder" => "Tipo Factor", "disabled" => true);
+        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "factor";
+        $propiedades = array("place_holder" => "Factor", "disabled" => true);
+        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
         $alta = $this->controlador_fc_partida->alta(header: false);
         if (errores::$error) {
             return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
         }
 
-        $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $this->registro_id);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener factura', data: $factura, header: $header, ws: $ws);
-        }
-
-        $this->controlador_fc_partida->row_upd->codigo = $factura["fc_factura_codigo"];
-        $this->controlador_fc_partida->row_upd->descripcion = $factura["fc_factura_descripcion"];
 
         $identificador = "fc_factura_id";
         $propiedades = array("id_selected" => $this->registro_id, "disabled" => true,

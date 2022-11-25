@@ -13,14 +13,14 @@
 
                         <?php echo $controlador->inputs->fc_csd_id; ?>
                         <?php echo $controlador->inputs->com_sucursal_id; ?>
-                        <?php echo $controlador->inputs->fecha; ?>
-                        <?php echo $controlador->inputs->folio; ?>
                         <?php echo $controlador->inputs->serie; ?>
+                        <?php echo $controlador->inputs->folio; ?>
                         <?php echo $controlador->inputs->exportacion; ?>
-                        <?php echo $controlador->inputs->descuento; ?>
+                        <?php echo $controlador->inputs->fecha; ?>
                         <?php echo $controlador->inputs->impuestos_trasladados; ?>
                         <?php echo $controlador->inputs->impuestos_retenidos; ?>
                         <?php echo $controlador->inputs->subtotal; ?>
+                        <?php echo $controlador->inputs->descuento; ?>
                         <?php echo $controlador->inputs->total; ?>
                         <?php echo $controlador->inputs->cat_sat_tipo_de_comprobante_id; ?>
                         <?php echo $controlador->inputs->cat_sat_forma_pago_id; ?>
@@ -37,6 +37,26 @@
 
         </div>
     </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+
+                <div class="widget widget-box box-container widget-mylistings">
+                    <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
+                        <h2>Partidas</h2>
+                        <div class="controls">
+                            <a href="<?php echo $controlador->link_fc_factura_nueva_partida; ?>" class="btn btn-info" >Nuevo Registro</a><br>
+                        </div>
+                    </div>
+                    <div class="">
+                        <table id="fc_partida" class="table table-striped" >
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 

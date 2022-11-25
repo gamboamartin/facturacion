@@ -13,6 +13,10 @@
 
                         <?php echo $controlador->inputs->fc_factura_id; ?>
                         <?php echo $controlador->inputs->com_producto_id; ?>
+                        <?php echo $controlador->inputs->unidad; ?>
+                        <?php echo $controlador->inputs->impuesto; ?>
+                        <?php echo $controlador->inputs->tipo_factor; ?>
+                        <?php echo $controlador->inputs->factor; ?>
                         <?php echo $controlador->inputs->descripcion; ?>
                         <?php echo $controlador->inputs->cantidad; ?>
                         <?php echo $controlador->inputs->valor_unitario; ?>
@@ -39,6 +43,9 @@
                 <div class="widget widget-box box-container widget-mylistings">
                     <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
                         <h2>Partidas</h2>
+                        <div class="controls">
+                            <a href="<?php echo $controlador->link_modifica; ?>" class="btn btn-link" ><b>Ir Factura</b></a><br>
+                        </div>
                     </div>
                     <div class="">
                         <table id="fc_partida" class="table table-striped" >

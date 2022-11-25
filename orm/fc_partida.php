@@ -204,7 +204,7 @@ class fc_partida extends modelo{
 
     private function valida_cantidades(array $data): bool|array
     {
-        $keys = array('cantidad');
+        $keys = array('cantidad','valor_unitario');
         foreach ($keys as $key){
             if(!isset($data[$key])){
                 return $this->error->error(mensaje: "Error debe de existir: $key", data: $data);

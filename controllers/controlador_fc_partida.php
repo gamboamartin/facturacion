@@ -158,7 +158,8 @@ class controlador_fc_partida extends system{
     {
         $identificador = "com_producto_id";
         $propiedades = array("label" => "Producto", "extra_params_keys" => array("com_producto_codigo",
-            "com_producto_descripcion"));
+            "com_producto_descripcion","cat_sat_unidad_descripcion","cat_sat_obj_imp_descripcion",
+            "cat_sat_tipo_factor_descripcion","cat_sat_factor_factor"));
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "fc_factura_id";
