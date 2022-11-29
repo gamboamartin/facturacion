@@ -1,12 +1,13 @@
 <?php
 namespace gamboamartin\facturacion\models;
+use base\orm\_modelo_parent;
 use base\orm\modelo;
 use gamboamartin\comercial\models\com_producto;
 use gamboamartin\errores\errores;
 use PDO;
 use stdClass;
 
-class fc_partida extends modelo{
+class fc_partida extends _modelo_parent {
     public function __construct(PDO $link){
         $tabla = 'fc_partida';
         $columnas = array($tabla=>false,'fc_factura'=>$tabla, 'com_producto' => $tabla,
@@ -21,6 +22,8 @@ class fc_partida extends modelo{
         $campos_view['cantidad'] = array('type' => 'inputs');
         $campos_view['valor_unitario'] = array('type' => 'inputs');
         $campos_view['descuento'] = array('type' => 'inputs');
+        $campos_view['subtotal'] = array('type' => 'inputs');
+        $campos_view['total'] = array('type' => 'inputs');
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 
@@ -30,16 +33,23 @@ class fc_partida extends modelo{
         $this->NAMESPACE = __NAMESPACE__;
     }
 
-    public function alta_bd(): array|stdClass
+    public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
+        if(!isset($this->registro['codigo'])){
+            $this->registro['codigo'] =  $this->get_codigo_aleatorio();
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $this->registro);
+            }
+        }
+
+        $this->registro = $this->campos_base(data: $this->registro,modelo: $this);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
+        }
+
         $validacion = $this->validaciones(data: $this->registro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
-        }
-
-        $this->registro = $this->init_campos_base(data: $this->registro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
         }
 
         $this->registro = $this->limpia_campos(registro: $this->registro,
@@ -117,6 +127,19 @@ class fc_partida extends modelo{
         return $data;
     }
 
+    public function get_codigo_aleatorio(int $longitud = 6): string
+    {
+        $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $random_string = '';
+
+        for($i = 0; $i < $longitud; $i++) {
+            $random_character = $chars[mt_rand(0, strlen($chars) - 1)];
+            $random_string .= $random_character;
+        }
+
+        return $random_string;
+    }
+
     public function get_partida(int $fc_partida_id): array|stdClass|int
     {
         $registro = $this->registro(registro_id: $fc_partida_id);
@@ -125,32 +148,6 @@ class fc_partida extends modelo{
         }
 
         return $registro;
-    }
-
-    private function init_campos_base(array $data): array
-    {
-        if(!isset($data['codigo'])){
-            $producto = (new com_producto($this->link))->get_producto(com_producto_id: $data["com_producto_id"]);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener producto',data:  $producto);
-            }
-            $data['codigo'] =  $data['com_producto_codigo'];
-        }
-
-        if(!isset($data['codigo_bis'])){
-            $data['codigo_bis'] =  $data['codigo'];
-        }
-
-        if(!isset($data['descripcion_select'])){
-            $ds = str_replace("_"," ",$data['descripcion']);
-            $ds = ucwords($ds);
-            $data['descripcion_select'] =  "{$data['codigo']} - {$ds}";
-        }
-
-        if(!isset($data['alias'])){
-            $data['alias'] = $data['codigo'];
-        }
-        return $data;
     }
 
     private function limpia_campos(array $registro, array $campos_limpiar): array
@@ -163,31 +160,44 @@ class fc_partida extends modelo{
         return $registro;
     }
 
-    public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
-    {
-        $validacion = $this->validaciones(data: $registro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
-        }
+   public function modifica_bd(array $registro, int $id, bool $reactiva = false,
+                               array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
+   {
+       $partida = $this->get_partida(fc_partida_id: $id);
+       if(errores::$error){
+           return $this->error->error(mensaje: 'Error al obtener partida',data: $partida);
+       }
 
-        $registro = $this->init_campos_base(data: $registro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $registro);
-        }
+       if(!isset($registro['codigo'])){
+           $registro['codigo'] =  $partida["fc_partida_codigo"];
+           if(errores::$error){
+               return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data: $registro);
+           }
+       }
 
-        $registro = $this->limpia_campos(registro: $registro,
-            campos_limpiar: array('cat_sat_tipo_factor_id', 'cat_sat_factor_id','cat_sat_tipo_impuesto_id'));
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al limpiar campos', data: $registro);
-        }
+       $registro = $this->campos_base(data: $registro,modelo: $this,id: $id);
+       if(errores::$error){
+           return $this->error->error(mensaje: 'Error al inicializar campos base',data: $registro);
+       }
 
-        $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al modificar partida',data:  $r_modifica_bd);
-        }
+       $validacion = $this->validaciones(data: $registro);
+       if(errores::$error){
+           return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
+       }
 
-        return $r_modifica_bd;
-    }
+       $registro = $this->limpia_campos(registro: $registro,
+           campos_limpiar: array('cat_sat_tipo_factor_id', 'cat_sat_factor_id','cat_sat_tipo_impuesto_id'));
+       if (errores::$error) {
+           return $this->error->error(mensaje: 'Error al limpiar campos', data: $registro);
+       }
+
+       $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
+       if(errores::$error){
+           return $this->error->error(mensaje: 'Error al modificar partida',data:  $r_modifica_bd);
+       }
+
+       return $r_modifica_bd;
+   }
 
     public function partidas(int $fc_factura_id): array|stdClass
     {

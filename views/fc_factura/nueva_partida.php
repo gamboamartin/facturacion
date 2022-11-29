@@ -20,7 +20,9 @@
                         <?php echo $controlador->inputs->descripcion; ?>
                         <?php echo $controlador->inputs->cantidad; ?>
                         <?php echo $controlador->inputs->valor_unitario; ?>
+                        <?php echo $controlador->inputs->subtotal; ?>
                         <?php echo $controlador->inputs->descuento; ?>
+                        <?php echo $controlador->inputs->total; ?>
 
                         <div class="control-group btn-alta">
                             <div class="controls">

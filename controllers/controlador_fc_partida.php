@@ -81,6 +81,8 @@ class controlador_fc_partida extends system{
         $this->row_upd->cantidad = 0;
         $this->row_upd->valor_unitario = 0;
         $this->row_upd->descuento = 0;
+        $this->row_upd->subtotal = 0;
+        $this->row_upd->total = 0;
 
         $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
         if(errores::$error){
@@ -121,9 +123,9 @@ class controlador_fc_partida extends system{
     public function init_datatable(): stdClass
     {
         $columns["fc_partida_id"]["titulo"] = "Id";
-        $columns["fc_partida_codigo"]["titulo"] = "Código";
-        $columns["fc_factura_descripcion"]["titulo"] = "Factura";
+        $columns["com_producto_codigo"]["titulo"] = "Código Producto";
         $columns["com_producto_descripcion"]["titulo"] = "Producto";
+        $columns["fc_factura_descripcion"]["titulo"] = "Factura";
         $columns["fc_partida_cantidad"]["titulo"] = "Cantidad";
         $columns["fc_partida_valor_unitario"]["titulo"] = "Valor Unitario";
         $columns["fc_partida_descuento"]["titulo"] = "Descuento";
@@ -171,19 +173,27 @@ class controlador_fc_partida extends system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "descripcion";
-        $propiedades = array("place_holder" => "Descripción","cols" => 8);
+        $propiedades = array("place_holder" => "Descripción","cols" => 12);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "cantidad";
-        $propiedades = array("place_holder" => "Cantidad" ,"cols" => 4);
+        $propiedades = array("place_holder" => "Cantidad" );
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "valor_unitario";
-        $propiedades = array("place_holder" => "Valor Unitario" ,"cols" => 4);
+        $propiedades = array("place_holder" => "Valor Unitario" );
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "descuento";
         $propiedades = array("place_holder" => "Descuento" ,"cols" => 4);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "subtotal";
+        $propiedades = array("place_holder" => "Subtotal" ,"cols" => 4,"disabled" => true);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "total";
+            $propiedades = array("place_holder" => "Total" ,"cols" => 4,"disabled" => true);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         return $this->keys_selects;
@@ -195,6 +205,9 @@ class controlador_fc_partida extends system{
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
         }
+
+        $this->row_upd->subtotal = $this->row_upd->cantidad * $this->row_upd->valor_unitario;
+        $this->row_upd->total = $this->row_upd->subtotal - $this->row_upd->descuento;
 
         $identificador = "fc_factura_id";
         $propiedades = array("id_selected" => $this->row_upd->fc_factura_id);
