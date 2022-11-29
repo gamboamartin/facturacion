@@ -1,5 +1,6 @@
 <?php
 namespace gamboamartin\facturacion\models;
+use base\orm\_modelo_parent;
 use base\orm\modelo;
 use gamboamartin\errores\errores;
 use gamboamartin\organigrama\models\org_sucursal;
@@ -7,7 +8,7 @@ use PDO;
 use stdClass;
 
 
-class fc_csd extends modelo{
+class fc_csd extends _modelo_parent {
     public function __construct(PDO $link){
         $tabla = 'fc_csd';
         $columnas = array($tabla=>false,'org_sucursal'=>$tabla,'org_empresa'=>'org_sucursal',
@@ -25,18 +26,19 @@ class fc_csd extends modelo{
             columnas: $columnas, campos_view: $campos_view, no_duplicados: $no_duplicados, tipo_campos: array());
 
         $this->NAMESPACE = __NAMESPACE__;
+
     }
 
-    public function alta_bd(): array|stdClass
+    public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-        $validacion = $this->validaciones(data: $this->registro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
-        }
-
-        $this->registro = $this->init_campos_base(data: $this->registro);
+        $this->registro = $this->campos_base(data: $this->registro,modelo: $this);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
+        }
+
+        $this->registro = $this->validaciones(data: $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar datos',data: $this->registro);
         }
 
         $r_alta_bd = parent::alta_bd();
@@ -47,18 +49,13 @@ class fc_csd extends modelo{
         return $r_alta_bd;
     }
 
-    public function get_csd(int $fc_csd_id): array|stdClass|int
+    protected function campos_base(array $data, modelo $modelo, int $id = -1,
+                                   array $keys_integra_ds = array('codigo', 'descripcion')): array
     {
-        $registro = $this->registro(registro_id: $fc_csd_id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener CSD',data:  $registro);
+        if(isset($data['status'])){
+            return $data;
         }
 
-        return $registro;
-    }
-
-    private function init_campos_base(array $data): array
-    {
         $sucursal = (new org_sucursal($this->link))->get_sucursal(org_sucursal_id: $data["org_sucursal_id"]);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener sucursal',data:  $sucursal);
@@ -70,6 +67,12 @@ class fc_csd extends modelo{
 
         if(!isset($data['codigo_bis'])){
             $data['codigo_bis'] =  $data['codigo'];
+        }
+
+        if(!isset($data['descripcion'])){
+            $data['descripcion'] =  "{$sucursal['org_empresa_rfc']} - ";
+            $data['descripcion'] .= "{$sucursal['org_empresa_razon_social']} - ";
+            $data['descripcion'] .= "{$data['serie']}";
         }
 
         if(!isset($data['descripcion_select'])){
@@ -84,21 +87,32 @@ class fc_csd extends modelo{
         return $data;
     }
 
-    public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
+    public function get_csd(int $fc_csd_id): array|stdClass|int
     {
-        $validacion = $this->validaciones(data: $registro);
+        $registro = $this->registro(registro_id: $fc_csd_id);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
+            return $this->error->error(mensaje: 'Error al obtener CSD',data:  $registro);
         }
 
-        $registro = $this->init_campos_base(data: $registro);
+        return $registro;
+    }
+
+    public function modifica_bd(array $registro, int $id, bool $reactiva = false,
+                                array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
+    {
+        $registro = $this->campos_base(data: $registro,modelo: $this,id: $id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar campos base',data: $registro);
         }
 
-        $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
+        $registro = $this->validaciones(data: $registro);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al modificar partida',data:  $r_modifica_bd);
+            return $this->error->error(mensaje: 'Error al validar datos',data: $registro);
+        }
+
+        $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva, $keys_integra_ds);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al modificar csd',data: $r_modifica_bd);
         }
 
         return $r_modifica_bd;
@@ -106,7 +120,11 @@ class fc_csd extends modelo{
 
     private function validaciones(array $data): bool|array
     {
-        $keys = array('serie','descripcion');
+        if(isset($data['status'])){
+            return $data;
+        }
+
+        $keys = array('serie');
         $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro:  $data);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
@@ -118,7 +136,7 @@ class fc_csd extends modelo{
             return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
         }
 
-        return true;
+        return $data;
     }
 
 }
