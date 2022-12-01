@@ -103,7 +103,7 @@ class fc_conf_traslado extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al obtener conf. traslado',data:  $registro);
         }
 
-        return $registro->registros;
+        return $registro;
     }
 
     public function get_configuraciones(int $com_producto_id): array|stdClass|int
@@ -115,7 +115,7 @@ class fc_conf_traslado extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al configuraciones de traslado',data:  $registro);
         }
 
-        return $registro->registros;
+        return $registro;
     }
 
     private function limpia_campos(array $registro, array $campos_limpiar): array

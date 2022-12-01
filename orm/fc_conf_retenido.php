@@ -105,7 +105,7 @@ class fc_conf_retenido extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al configuraciones de traslado',data:  $registro);
         }
 
-        return $registro->registros;
+        return $registro;
     }
 
     public function get_conf_retenido(int $fc_conf_retenido_id): array|stdClass|int
