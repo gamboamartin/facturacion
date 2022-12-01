@@ -277,11 +277,48 @@ class base_test{
         return $del;
     }
 
+
     public function del_fc_partida(PDO $link): array
     {
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_partida');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_traslado(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_traslado');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar traslado', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_producto(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\comercial\\models\\com_producto');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_tipo_producto(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\comercial\\models\\com_tipo_producto');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_retenido(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_retenido');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar retenido', $del);
         }
         return $del;
     }

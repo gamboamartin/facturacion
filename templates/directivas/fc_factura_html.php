@@ -633,7 +633,7 @@ class fc_factura_html extends html_controler {
             return $this->error->error(mensaje: 'Error al validar',data:  $valida);
         }
 
-        $valida = (new validaciones_directivas())->valida_cols(cols: $cols);
+        $valida = (new validacion())->valida_cols_css(cols: $cols);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar cols',data:  $valida);
         }

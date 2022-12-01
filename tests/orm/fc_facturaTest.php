@@ -35,6 +35,27 @@ class fc_facturaTest extends test {
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
+        $del = (new base_test())->del_fc_retenido($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar retenido',$del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_fc_traslado($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar traslado',$del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_fc_partida($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar partida',$del);
+            print_r($error);
+            exit;
+        }
+
         $del = (new base_test())->del_fc_factura($this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al eliminar factura',$del);
@@ -45,9 +66,24 @@ class fc_facturaTest extends test {
         $modelo = new fc_factura($this->link);
         $modelo = new liberator($modelo);
 
+
         $del = (new base_test())->del_fc_factura($this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al eliminar factura',$del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_fc_producto($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar producto',$del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_fc_tipo_producto($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar tipo_producto',$del);
             print_r($error);
             exit;
         }

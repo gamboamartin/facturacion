@@ -75,6 +75,24 @@ class fc_conf_retenido extends _modelo_parent {
         return $random_string;
     }
 
+    public function get_configuraciones(int $com_producto_id): array|stdClass|int
+    {
+        $filtro['fc_conf_retenido.status'] = 'activo';
+        $filtro['fc_conf_retenido.predeterminado'] = 'activo';
+        $filtro['com_producto.id'] = $com_producto_id;
+        $registro = $this->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al configuraciones de traslado',data:  $registro);
+        }
+
+        if ($registro->n_registros > 1){
+            return $this->error->error(mensaje: 'Error: Solo puede existir una conf. predeterminada para traslados',
+                data:  $registro);
+        }
+
+        return $registro;
+    }
+
     public function get_conf_retenido(int $fc_conf_retenido_id): array|stdClass|int
     {
         $registro = $this->registro(registro_id: $fc_conf_retenido_id);
