@@ -31,9 +31,9 @@ class fc_partida extends _modelo_parent {
         $this->NAMESPACE = __NAMESPACE__;
     }
 
-    private function acciones_conf_traslado(stdClass $partida): array|stdClass
+    private function acciones_conf_traslado(stdClass $fc_partida): array|stdClass
     {
-        $conf_traslados = (new fc_conf_traslado($this->link))->get_configuraciones(com_producto_id: 1);
+        $conf_traslados = (new fc_conf_traslado($this->link))->get_configuraciones(com_producto_id: (int)$fc_partida->com_producto_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener conf. traslados',data:  $conf_traslados);
         }
@@ -43,7 +43,7 @@ class fc_partida extends _modelo_parent {
         }
 
         $traslado = $this->maqueta_datos(configuracion: $conf_traslados->registros,
-            conf_descripcion: "fc_conf_traslado_descripcion",partida: $partida);
+            conf_descripcion: "fc_conf_traslado_descripcion",fc_partida: $fc_partida);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar datos traslados',data:  $traslado);
         }
@@ -56,9 +56,9 @@ class fc_partida extends _modelo_parent {
         return $alta_traslado;
     }
 
-    private function acciones_conf_retenido(stdClass $partida): array|stdClass
+    private function acciones_conf_retenido(stdClass $fc_partida): array|stdClass
     {
-        $conf_retenidos = (new fc_conf_retenido($this->link))->get_configuraciones(com_producto_id: 1);
+        $conf_retenidos = (new fc_conf_retenido($this->link))->get_configuraciones(com_producto_id: (int)$fc_partida->com_producto_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener conf. traslados',data:  $conf_retenidos);
         }
@@ -68,7 +68,7 @@ class fc_partida extends _modelo_parent {
         }
 
         $retenido = $this->maqueta_datos(configuracion: $conf_retenidos->registros,
-            conf_descripcion: "fc_conf_retenido_descripcion",partida: $partida);
+            conf_descripcion: "fc_conf_retenido_descripcion",fc_partida: $fc_partida);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar datos retenidos',data:  $retenido);
         }
@@ -112,12 +112,17 @@ class fc_partida extends _modelo_parent {
             return $this->error->error(mensaje: 'Error registrar partida', data: $r_alta_bd);
         }
 
-        $traslado =  $this->acciones_conf_traslado(partida: $r_alta_bd);
+        $fc_partida = $this->registro(registro_id: $r_alta_bd->registro_id,retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener partida', data: $fc_partida);
+        }
+
+        $traslado =  $this->acciones_conf_traslado(fc_partida: $fc_partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al realizar acciones de conf. traslado', data: $traslado);
         }
 
-        $retenido =  $this->acciones_conf_retenido(partida: $r_alta_bd);
+        $retenido =  $this->acciones_conf_retenido(fc_partida: $fc_partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al realizar acciones de conf. retenido', data: $retenido);
         }
@@ -219,7 +224,7 @@ class fc_partida extends _modelo_parent {
         return $registro;
     }
 
-    private function maqueta_datos(array $configuracion,string $conf_descripcion, stdClass $partida): array
+    private function maqueta_datos(array $configuracion,string $conf_descripcion, stdClass $fc_partida): array
     {
         $traslado = array();
         $traslado['descripcion'] = $configuracion[0][$conf_descripcion];
@@ -227,7 +232,7 @@ class fc_partida extends _modelo_parent {
         $traslado['cat_sat_tipo_factor_id'] = $configuracion[0]['cat_sat_tipo_factor_id'];
         $traslado['cat_sat_factor_id'] = $configuracion[0]['cat_sat_factor_id'];
         $traslado['cat_sat_tipo_impuesto_id'] = $configuracion[0]['cat_sat_tipo_impuesto_id'];
-        $traslado['fc_partida_id'] = $partida->registro_id;
+        $traslado['fc_partida_id'] = $fc_partida->fc_partida_id;
 
         return $traslado;
     }
