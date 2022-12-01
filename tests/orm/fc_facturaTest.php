@@ -74,12 +74,41 @@ class fc_facturaTest extends test {
             exit;
         }
 
+        $del = (new base_test())->del_fc_traslado($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar traskado',$del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_fc_retenido($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar retenido',$del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_fc_conf_traslado($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar traskado',$del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_fc_conf_retenido($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar traskado',$del);
+            print_r($error);
+            exit;
+        }
+
         $del = (new base_test())->del_fc_producto($this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al eliminar producto',$del);
             print_r($error);
             exit;
         }
+
 
         $del = (new base_test())->del_fc_tipo_producto($this->link);
         if(errores::$error){

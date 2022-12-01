@@ -296,6 +296,24 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_conf_traslado(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_conf_traslado');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar fc_conf_traslado', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_conf_retenido(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_conf_retenido');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar fc_conf_retenido', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_producto(PDO $link): array
     {
         $del = $this->del($link, 'gamboamartin\\comercial\\models\\com_producto');
