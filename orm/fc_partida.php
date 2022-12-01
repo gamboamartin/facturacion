@@ -171,7 +171,7 @@ class fc_partida extends _modelo_parent {
        if(!isset($registro['codigo'])){
            $registro['codigo'] =  $partida["fc_partida_codigo"];
            if(errores::$error){
-               return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data: $registro);
+               return $this->error->error(mensaje: 'Error al obtener el codigo del registro',data: $registro);
            }
        }
 
