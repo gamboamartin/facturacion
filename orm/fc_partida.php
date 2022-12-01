@@ -1,7 +1,6 @@
 <?php
 namespace gamboamartin\facturacion\models;
 use base\orm\_modelo_parent;
-use base\orm\modelo;
 use gamboamartin\comercial\models\com_producto;
 use gamboamartin\errores\errores;
 use PDO;
@@ -11,8 +10,7 @@ class fc_partida extends _modelo_parent {
     public function __construct(PDO $link){
         $tabla = 'fc_partida';
         $columnas = array($tabla=>false,'fc_factura'=>$tabla, 'com_producto' => $tabla,
-            'cat_sat_producto' => 'com_producto','cat_sat_unidad' => 'com_producto',
-            'cat_sat_tipo_factor' => 'com_producto','cat_sat_factor' => 'com_producto');
+            'cat_sat_producto' => 'com_producto','cat_sat_unidad' => 'com_producto');
         $campos_obligatorios = array('codigo','com_producto_id');
 
         $campos_view['com_producto_id'] = array('type' => 'selects', 'model' => new com_producto($link));
@@ -32,6 +30,32 @@ class fc_partida extends _modelo_parent {
 
         $this->NAMESPACE = __NAMESPACE__;
     }
+
+    private function acciones_conf_traslado(stdClass $partida): array|stdClass
+    {
+        $conf_traslados = (new fc_conf_traslado($this->link))->get_configuraciones(com_producto_id: 1);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener conf. traslados',data:  $conf_traslados);
+        }
+
+        if ($conf_traslados->n_registros === 0){
+            return $conf_traslados;
+        }
+
+        $traslado = $this->maqueta_datos_traslado(conf_traslados: $conf_traslados->registros,partida: $partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maquetar datos traslados',data:  $traslado);
+        }
+
+        $alta_traslado = (new fc_traslado($this->link))->alta_registro(registro: $traslado);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al dar de alta traslados',data:  $alta_traslado);
+        }
+
+        return $alta_traslado;
+    }
+
+
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
@@ -61,6 +85,11 @@ class fc_partida extends _modelo_parent {
         $r_alta_bd =  parent::alta_bd();
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error registrar partida', data: $r_alta_bd);
+        }
+
+        $conf_traslado =  $this->acciones_conf_traslado(partida: $r_alta_bd);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al realizar acciones de conf. traslado', data: $conf_traslado);
         }
 
         return $r_alta_bd;
@@ -158,6 +187,19 @@ class fc_partida extends _modelo_parent {
             }
         }
         return $registro;
+    }
+
+    private function maqueta_datos_traslado(array $conf_traslados,stdClass $partida): array
+    {
+        $traslado = array();
+        $traslado['descripcion'] = $conf_traslados[0]['fc_conf_traslado_descripcion'];
+        $traslado['descripcion'] .= " ".$this->registro['descripcion'];
+        $traslado['cat_sat_tipo_factor_id'] = $conf_traslados[0]['cat_sat_tipo_factor_id'];
+        $traslado['cat_sat_factor_id'] = $conf_traslados[0]['cat_sat_factor_id'];
+        $traslado['cat_sat_tipo_impuesto_id'] = $conf_traslados[0]['cat_sat_tipo_impuesto_id'];
+        $traslado['fc_partida_id'] = $partida->registro_id;
+
+        return $traslado;
     }
 
    public function modifica_bd(array $registro, int $id, bool $reactiva = false,

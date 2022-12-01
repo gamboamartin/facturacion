@@ -85,6 +85,24 @@ class fc_conf_traslado extends _modelo_parent {
         return $registro;
     }
 
+    public function get_configuraciones(int $com_producto_id): array|stdClass|int
+    {
+        $filtro['fc_conf_traslado.status'] = 'activo';
+        $filtro['fc_conf_traslado.predeterminado'] = 'activo';
+        $filtro['com_producto.id'] = $com_producto_id;
+        $registro = $this->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al configuraciones de traslado',data:  $registro);
+        }
+
+        if ($registro->n_registros > 1){
+            return $this->error->error(mensaje: 'Error: Solo puede existir una conf. predeterminada para traslados',
+                data:  $registro);
+        }
+
+        return $registro;
+    }
+
     private function limpia_campos(array $registro, array $campos_limpiar): array
     {
         foreach ($campos_limpiar as $valor) {
