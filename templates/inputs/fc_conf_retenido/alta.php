@@ -3,7 +3,6 @@
 <?php echo $controlador->inputs->com_tipo_producto_id; ?>
 <?php echo $controlador->inputs->cat_sat_tipo_impuesto_id; ?>
 <?php echo $controlador->inputs->com_producto_id; ?>
-<?php echo $controlador->inputs->descripcion; ?>
 <?php echo $controlador->inputs->cat_sat_tipo_factor_id; ?>
 <?php echo $controlador->inputs->cat_sat_factor_id; ?>
 <?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>

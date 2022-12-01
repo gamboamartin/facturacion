@@ -1,6 +1,7 @@
 <?php
 namespace gamboamartin\facturacion\models;
 use base\orm\_modelo_parent;
+use base\orm\modelo;
 use gamboamartin\cat_sat\models\cat_sat_factor;
 use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
 use gamboamartin\cat_sat\models\cat_sat_tipo_impuesto;
@@ -22,7 +23,6 @@ class fc_conf_retenido extends _modelo_parent {
         $campos_view['cat_sat_tipo_factor_id'] = array('type' => 'selects', 'model' => new cat_sat_tipo_factor($link));
         $campos_view['cat_sat_factor_id'] = array('type' => 'selects', 'model' => new cat_sat_factor($link));
         $campos_view['cat_sat_tipo_impuesto_id'] = array('type' => 'selects', 'model' => new cat_sat_tipo_impuesto($link));
-        $campos_view['descripcion'] = array('type' => 'inputs');
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas, campos_view: $campos_view);
@@ -62,6 +62,27 @@ class fc_conf_retenido extends _modelo_parent {
         return $r_alta_bd;
     }
 
+    protected function campos_base(array $data, modelo $modelo, int $id = -1,
+                                   array $keys_integra_ds = array('codigo', 'descripcion')): array
+    {
+        if(!isset($data['descripcion'])){
+            $producto =  (new com_producto($this->link))->get_producto(com_producto_id: $data['com_producto_id']);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener producto',data:  $data);
+            }
+
+            $data['descripcion'] =  $data['codigo'];
+            $data['descripcion'] .=  " ".$producto['com_producto_descripcion'];
+        }
+
+        $data = parent::campos_base($data, $modelo, $id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
+        }
+
+        return $data;
+    }
+
     public function get_codigo_aleatorio(int $longitud = 6): string
     {
         $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -78,19 +99,13 @@ class fc_conf_retenido extends _modelo_parent {
     public function get_configuraciones(int $com_producto_id): array|stdClass|int
     {
         $filtro['fc_conf_retenido.status'] = 'activo';
-        $filtro['fc_conf_retenido.predeterminado'] = 'activo';
         $filtro['com_producto.id'] = $com_producto_id;
         $registro = $this->filtro_and(filtro: $filtro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al configuraciones de traslado',data:  $registro);
         }
 
-        if ($registro->n_registros > 1){
-            return $this->error->error(mensaje: 'Error: Solo puede existir una conf. predeterminada para traslados',
-                data:  $registro);
-        }
-
-        return $registro;
+        return $registro->registros;
     }
 
     public function get_conf_retenido(int $fc_conf_retenido_id): array|stdClass|int

@@ -68,7 +68,7 @@ class fc_conf_traslado extends _modelo_parent {
         if(!isset($data['descripcion'])){
             $producto =  (new com_producto($this->link))->get_producto(com_producto_id: $data['com_producto_id']);
             if(errores::$error){
-                return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $data);
+                return $this->error->error(mensaje: 'Error al obtener producto',data:  $data);
             }
 
             $data['descripcion'] =  $data['codigo'];
@@ -103,7 +103,7 @@ class fc_conf_traslado extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al obtener conf. traslado',data:  $registro);
         }
 
-        return $registro;
+        return $registro->registros;
     }
 
     public function get_configuraciones(int $com_producto_id): array|stdClass|int

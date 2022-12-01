@@ -136,10 +136,6 @@ class controlador_fc_conf_retenido extends system{
         $propiedades = array("label" => "Tipo Impuesto");
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
-        $identificador = "descripcion";
-        $propiedades = array("place_holder" => "Descripción","cols" => 12);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
         return $this->keys_selects;
     }
 

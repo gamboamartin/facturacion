@@ -99,11 +99,9 @@ class controlador_fc_conf_traslado extends system{
         $columns["cat_sat_tipo_factor_descripcion"]["titulo"] = "Tipo Factor";
         $columns["cat_sat_factor_factor"]["titulo"] = "Factor";
         $columns["cat_sat_tipo_impuesto_descripcion"]["titulo"] = "Tipo Impuesto";
-        $columns["fc_conf_traslado_descripcion"]["titulo"] = "Descripción";
 
-        $filtro = array("fc_conf_traslado.id","fc_conf_traslado.codigo","fc_conf_traslado.descripcion",
-            "com_producto.descripcion", "cat_sat_tipo_factor.descripcion","cat_sat_factor.factor",
-            "cat_sat_tipo_impuesto.descripcion");
+        $filtro = array("fc_conf_traslado.id","fc_conf_traslado.codigo", "com_producto.descripcion",
+            "cat_sat_tipo_factor.descripcion","cat_sat_factor.factor", "cat_sat_tipo_impuesto.descripcion");
 
         $datatables = new stdClass();
         $datatables->columns = $columns;
