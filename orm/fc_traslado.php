@@ -1,6 +1,6 @@
 <?php
 namespace gamboamartin\facturacion\models;
-use base\orm\modelo;
+use base\orm\_modelo_parent;
 use gamboamartin\cat_sat\models\cat_sat_factor;
 use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
 use gamboamartin\cat_sat\models\cat_sat_tipo_impuesto;
@@ -9,7 +9,7 @@ use gamboamartin\organigrama\models\org_sucursal;
 use PDO;
 use stdClass;
 
-class fc_traslado extends modelo{
+class fc_traslado extends _modelo_parent {
     public function __construct(PDO $link){
         $tabla = 'fc_traslado';
         $columnas = array($tabla=>false,'fc_partida'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla,
@@ -32,16 +32,23 @@ class fc_traslado extends modelo{
         $this->NAMESPACE = __NAMESPACE__;
     }
 
-    public function alta_bd(): array|stdClass
+    public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-        $validacion = $this->validaciones(data: $this->registro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
+        if(!isset($this->registro['codigo'])){
+            $this->registro['codigo'] =  $this->get_codigo_aleatorio();
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $this->registro);
+            }
         }
 
-        $this->registro = $this->init_campos_base(data: $this->registro);
+        $this->registro = $this->campos_base(data: $this->registro,modelo: $this);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
+        }
+
+        $this->registro = $this->validaciones(data: $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar foraneas',data: $this->registro);
         }
 
         $r_alta_bd =  parent::alta_bd();
@@ -50,6 +57,19 @@ class fc_traslado extends modelo{
         }
 
         return $r_alta_bd;
+    }
+
+    public function get_codigo_aleatorio(int $longitud = 6): string
+    {
+        $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $random_string = '';
+
+        for($i = 0; $i < $longitud; $i++) {
+            $random_character = $chars[mt_rand(0, strlen($chars) - 1)];
+            $random_string .= $random_character;
+        }
+
+        return $random_string;
     }
 
     public function get_traslado(int $fc_traslado_id): array|stdClass|int
@@ -62,33 +82,7 @@ class fc_traslado extends modelo{
         return $registro;
     }
 
-    private function init_campos_base(array $data): array
-    {
-        if(!isset($data['codigo'])){
-            $partida = (new fc_partida($this->link))->get_partida(fc_partida_id: $data["fc_partida_id"]);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener partida',data:  $partida);
-            }
-            $data['codigo'] =  $data['fc_partida_codigo'];
-        }
-
-        if(!isset($data['codigo_bis'])){
-            $data['codigo_bis'] =  $data['codigo'];
-        }
-
-        if(!isset($data['descripcion_select'])){
-            $ds = str_replace("_"," ",$data['descripcion']);
-            $ds = ucwords($ds);
-            $data['descripcion_select'] =  "{$data['codigo']} - {$ds}";
-        }
-
-        if(!isset($data['alias'])){
-            $data['alias'] = $data['codigo'];
-        }
-        return $data;
-    }
-
-    private function validaciones(array $data): bool|array
+    private function validaciones(array $data): array
     {
         $keys = array('descripcion','codigo');
         $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro:  $data);
@@ -102,19 +96,32 @@ class fc_traslado extends modelo{
             return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
         }
 
-        return true;
+        return $data;
     }
 
-    public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
+    public function modifica_bd(array $registro, int $id, bool $reactiva = false,
+                                array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-        $validacion = $this->validaciones(data: $registro);
+        $traslado = $this->get_traslado(fc_traslado_id: $id);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
+            return $this->error->error(mensaje: 'Error al obtener traslado',data: $traslado);
         }
 
-        $registro = $this->init_campos_base(data: $registro);
+        if(!isset($registro['codigo'])){
+            $registro['codigo'] =  $traslado["fc_traslado_codigo"];
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener el codigo del registro',data: $registro);
+            }
+        }
+
+        $registro = $this->campos_base(data: $registro,modelo: $this,id: $id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar campos base',data: $registro);
+        }
+
+        $registro = $this->validaciones(data: $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar foraneas',data: $registro);
         }
 
         $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
