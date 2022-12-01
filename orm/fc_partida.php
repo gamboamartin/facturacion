@@ -33,7 +33,8 @@ class fc_partida extends _modelo_parent {
 
     private function acciones_conf_traslado(stdClass $fc_partida): array|stdClass
     {
-        $conf_traslados = (new fc_conf_traslado($this->link))->get_configuraciones(com_producto_id: (int)$fc_partida->com_producto_id);
+        $conf_traslados = (new fc_conf_traslado($this->link))->get_configuraciones(
+            com_producto_id: $this->registro["com_producto_id"]);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener conf. traslados',data:  $conf_traslados);
         }
