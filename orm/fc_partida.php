@@ -191,6 +191,11 @@ class fc_partida extends _modelo_parent {
         return $data;
     }
 
+    /**
+     * Por mover a base
+     * @param int $longitud
+     * @return string
+     */
     public function get_codigo_aleatorio(int $longitud = 6): string
     {
         $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -214,6 +219,12 @@ class fc_partida extends _modelo_parent {
         return $registro;
     }
 
+    /**
+     * Por mover a base revbios si existe algo asi
+     * @param array $registro
+     * @param array $campos_limpiar
+     * @return array
+     */
     private function limpia_campos(array $registro, array $campos_limpiar): array
     {
         foreach ($campos_limpiar as $valor) {
