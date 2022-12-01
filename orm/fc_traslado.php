@@ -13,7 +13,7 @@ class fc_traslado extends _modelo_parent {
     public function __construct(PDO $link){
         $tabla = 'fc_traslado';
         $columnas = array($tabla=>false,'fc_partida'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla,
-            'cat_sat_tipo_impuesto'=>$tabla);
+            'cat_sat_tipo_impuesto'=>$tabla,'com_producto'=>'fc_partida');
         $campos_obligatorios = array('codigo','fc_partida_id');
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
@@ -82,23 +82,6 @@ class fc_traslado extends _modelo_parent {
         return $registro;
     }
 
-    private function validaciones(array $data): array
-    {
-        $keys = array('descripcion','codigo');
-        $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro:  $data);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
-        }
-
-        $keys = array('fc_partida_id', 'cat_sat_tipo_factor_id', 'cat_sat_factor_id', 'cat_sat_tipo_impuesto_id');
-        $valida = $this->validacion->valida_ids(keys: $keys, registro: $data);
-        if(errores::$error){
-            return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
-        }
-
-        return $data;
-    }
-
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,
                                 array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
@@ -130,5 +113,22 @@ class fc_traslado extends _modelo_parent {
         }
 
         return $r_modifica_bd;
+    }
+
+    private function validaciones(array $data): array
+    {
+        $keys = array('descripcion','codigo');
+        $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro:  $data);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
+        }
+
+        $keys = array('fc_partida_id', 'cat_sat_tipo_factor_id', 'cat_sat_factor_id', 'cat_sat_tipo_impuesto_id');
+        $valida = $this->validacion->valida_ids(keys: $keys, registro: $data);
+        if(errores::$error){
+            return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
+        }
+
+        return $data;
     }
 }
