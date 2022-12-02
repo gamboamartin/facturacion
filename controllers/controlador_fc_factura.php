@@ -12,6 +12,8 @@ use base\controller\controler;
 use config\generales;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_conf_retenido;
+use gamboamartin\facturacion\models\fc_conf_traslado;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\system\actions;
@@ -29,6 +31,8 @@ class controlador_fc_factura extends system{
 
     public array $keys_selects = array();
     public controlador_fc_partida $controlador_fc_partida;
+    public controlador_fc_conf_traslado $controlador_fc_conf_traslado;
+    public controlador_fc_conf_retenido $controlador_fc_conf_retenido;
 
     public string $rfc = '';
     public string $razon_social = '';
@@ -36,6 +40,10 @@ class controlador_fc_factura extends system{
     public string $link_fc_partida_modifica_bd = '';
     public string $link_fc_factura_partidas = '';
     public string $link_fc_factura_nueva_partida = '';
+    public string $link_fc_conf_traslado = '';
+    public string $link_fc_conf_retenido = '';
+    public string $link_fc_conf_traslado_alta_bd = '';
+    public string $link_fc_conf_retenido_alta_bd = '';
     public int $fc_factura_id = -1;
     public int $fc_partida_id = -1;
     public stdClass $partidas;
@@ -169,6 +177,8 @@ class controlador_fc_factura extends system{
     private function init_controladores(stdClass $paths_conf): controler
     {
         $this->controlador_fc_partida= new controlador_fc_partida(link:$this->link, paths_conf: $paths_conf);
+        $this->controlador_fc_conf_traslado= new controlador_fc_conf_traslado(link:$this->link, paths_conf: $paths_conf);
+        $this->controlador_fc_conf_retenido= new controlador_fc_conf_retenido(link:$this->link, paths_conf: $paths_conf);
 
         return $this;
     }
@@ -200,27 +210,39 @@ class controlador_fc_factura extends system{
 
         $link = $this->obj_link->get_link($this->seccion,"nueva_partida");
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener link partida alta',data:  $link);
+            return $this->errores->error(mensaje: 'Error al obtener link nueva_partida',data:  $link);
         }
         $this->link_fc_factura_nueva_partida = $link;
 
         $link = $this->obj_link->get_link($this->seccion,"alta_partida_bd");
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener link partida alta',data:  $link);
+            return $this->errores->error(mensaje: 'Error al obtener link alta_partida_bd',data:  $link);
         }
         $this->link_fc_partida_alta_bd = $link;
 
-        $link = $this->obj_link->get_link($this->seccion,"lista");
+        $link = $this->obj_link->get_link($this->seccion,"nueva_conf_traslado");
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener link partida alta',data:  $link);
+            return $this->errores->error(mensaje: 'Error al obtener link nueva_conf_traslado',data:  $link);
         }
-        $this->link_fc_partida_modifica_bd = $link;
+        $this->link_fc_conf_traslado = $link;
 
-        $link = $this->obj_link->get_link($this->seccion,"lista");
+        $link = $this->obj_link->get_link($this->seccion,"nueva_conf_retenido");
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener link partida alta',data:  $link);
+            return $this->errores->error(mensaje: 'Error al obtener link nueva_conf_retenido',data:  $link);
         }
-        $this->link_fc_factura_partidas = $link;
+        $this->link_fc_conf_retenido = $link;
+
+        $link = $this->obj_link->get_link($this->seccion,"nueva_conf_traslado_alta_bd");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener link nueva_conf_traslado_alta_bd',data:  $link);
+        }
+        $this->link_fc_conf_traslado_alta_bd = $link;
+
+        $link = $this->obj_link->get_link($this->seccion,"nueva_conf_retenido_alta_bd");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener link nueva_conf_retenido_alta_bd',data:  $link);
+        }
+        $this->link_fc_conf_retenido_alta_bd = $link;
 
         return $link;
     }
@@ -418,6 +440,72 @@ class controlador_fc_factura extends system{
         return $base->template;
     }
 
+    public function nueva_conf_traslado(bool $header, bool $ws = false): array|stdClass
+    {
+        $datatables = $this->controlador_fc_conf_traslado->init_datatable();
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al inicializar datatable', data: $datatables, header: $header, ws: $ws);
+        }
+
+        $datatables->columns["modifica"]["titulo"] = "Acciones";
+        $datatables->columns["modifica"]["type"] = "button";
+        $datatables->columns["modifica"]["campos"] = array("elimina_bd");
+
+        $table = $this->datatable_init(columns: $datatables->columns, filtro: $datatables->filtro,
+            identificador: "#fc_conf_traslado");
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al generar datatable', data: $table, header: $header, ws: $ws);
+        }
+
+        $alta = $this->controlador_fc_conf_traslado->alta(header: false);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
+        }
+
+        $this->inputs = $this->controlador_fc_conf_traslado->genera_inputs(
+            keys_selects:  $this->controlador_fc_conf_traslado->keys_selects);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al generar inputs', data: $this->inputs);
+            print_r($error);
+            die('Error');
+        }
+
+        return $this->inputs;
+    }
+
+    public function nueva_conf_retenido(bool $header, bool $ws = false): array|stdClass
+    {
+        $datatables = $this->controlador_fc_conf_retenido->init_datatable();
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al inicializar datatable', data: $datatables, header: $header, ws: $ws);
+        }
+
+        $datatables->columns["modifica"]["titulo"] = "Acciones";
+        $datatables->columns["modifica"]["type"] = "button";
+        $datatables->columns["modifica"]["campos"] = array("elimina_bd");
+
+        $table = $this->datatable_init(columns: $datatables->columns, filtro: $datatables->filtro,
+            identificador: "#fc_conf_retenido");
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al generar datatable', data: $table, header: $header, ws: $ws);
+        }
+
+        $alta = $this->controlador_fc_conf_retenido->alta(header: false);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
+        }
+
+        $this->inputs = $this->controlador_fc_conf_retenido->genera_inputs(
+            keys_selects:  $this->controlador_fc_conf_retenido->keys_selects);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al generar inputs', data: $this->inputs);
+            print_r($error);
+            die('Error');
+        }
+
+        return $this->inputs;
+    }
+
     public function nueva_partida(bool $header, bool $ws = false): array|stdClass
     {
         $datatables = $this->controlador_fc_partida->init_datatable();
@@ -480,6 +568,106 @@ class controlador_fc_factura extends system{
         }
 
         return $this->inputs;
+    }
+
+    public function nueva_conf_traslado_alta_bd(bool $header, bool $ws = false){
+
+        $this->link->beginTransaction();
+
+        $siguiente_view = (new actions())->init_alta_bd(siguiente_view: "nueva_conf_traslado");
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
+                header:  $header, ws: $ws);
+        }
+
+        if(isset($_POST['guarda'])){
+            unset($_POST['guarda']);
+        }
+        if(isset($_POST['btn_action_next'])){
+            unset($_POST['btn_action_next']);
+        }
+
+        $registro = $_POST;
+
+        $alta_conf_traslado = (new fc_conf_traslado($this->link))->alta_registro(registro:$registro);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al dar de alta conf_traslado',data:  $alta_conf_traslado,
+                header: $header,ws:$ws);
+        }
+
+        $this->link->commit();
+
+        if($header){
+
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: "nueva_conf_traslado");
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $alta_conf_traslado,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($alta_conf_traslado, JSON_THROW_ON_ERROR);
+            exit;
+        }
+
+        return $alta_conf_traslado;
+
+    }
+
+    public function nueva_conf_retenido_alta_bd(bool $header, bool $ws = false){
+
+        $this->link->beginTransaction();
+
+        $siguiente_view = (new actions())->init_alta_bd(siguiente_view: "nueva_conf_retenido");
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
+                header:  $header, ws: $ws);
+        }
+
+        if(isset($_POST['guarda'])){
+            unset($_POST['guarda']);
+        }
+        if(isset($_POST['btn_action_next'])){
+            unset($_POST['btn_action_next']);
+        }
+
+        $registro = $_POST;
+
+        $alta_conf_retenido = (new fc_conf_retenido($this->link))->alta_registro(registro:$registro);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al dar de alta conf_retenido',data:  $alta_conf_retenido,
+                header: $header,ws:$ws);
+        }
+
+        $this->link->commit();
+
+        if($header){
+
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: "nueva_conf_retenido");
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $alta_conf_retenido,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($alta_conf_retenido, JSON_THROW_ON_ERROR);
+            exit;
+        }
+
+        return $alta_conf_retenido;
+
     }
 
     public function alta_partida_bd(bool $header, bool $ws = false){
