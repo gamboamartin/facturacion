@@ -274,12 +274,6 @@ class fc_partida extends _modelo_parent {
            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $registro);
        }
 
-       $keys = array('descripcion','codigo');
-       $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro: $this->registro);
-       if(errores::$error){
-           return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
-       }
-
        $registro = $this->limpia_campos(registro: $registro,
            campos_limpiar: array('cat_sat_tipo_factor_id', 'cat_sat_factor_id','cat_sat_tipo_impuesto_id'));
        if (errores::$error) {
