@@ -44,9 +44,7 @@
                     <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
                         <h2>Partidas</h2>
                         <div class="controls">
-                            <a href="<?php echo $controlador->link_fc_conf_traslado; ?>" class="btn btn-primary btn-sm active" >Nueva conf. Traslado</a>
-                            <a href="<?php echo $controlador->link_fc_conf_retenido; ?>" class="btn btn-primary btn-sm active" >Nueva conf. Retenido</a>
-                            <a href="<?php echo $controlador->link_modifica; ?>" class="btn btn-primary btn-sm " ><b>Ir Factura</b></a><br>
+                            <a href="<?php echo $controlador->link_modifica; ?>" class="btn btn-link btn-sm " ><b>Ir Factura</b></a><br>
                         </div>
                     </div>
                     <div class="">

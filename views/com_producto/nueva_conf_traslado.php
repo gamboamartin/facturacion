@@ -1,4 +1,4 @@
-<?php /** @var gamboamartin\facturacion\controllers\controlador_fc_factura $controlador  controlador en ejecucion */ ?>
+<?php /** @var gamboamartin\facturacion\controllers\controlador_com_producto $controlador  controlador en ejecucion */ ?>
 <?php use config\views; ?>
 
 <main class="main section-color-primary">
@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="widget  widget-box box-container form-main widget-form-cart" id="form">
-                    <form method="post" action="<?php echo $controlador->link_fc_conf_retenido_alta_bd; ?>" class="form-additional">
+                    <form method="post" action="<?php echo $controlador->link_fc_conf_traslado_alta_bd; ?>" class="form-additional">
                         <?php include (new views())->ruta_templates."head/title.php"; ?>
                         <?php include (new views())->ruta_templates."head/subtitulo.php"; ?>
                         <?php include (new views())->ruta_templates."mensajes.php"; ?>
@@ -37,13 +37,13 @@
 
                 <div class="widget widget-box box-container widget-mylistings">
                     <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
-                        <h2>Configuraciones de Retenidos</h2>
+                        <h2>Configuraciones de Traslados</h2>
                         <div class="controls">
-                            <a href="<?php echo $controlador->link_fc_factura_nueva_partida; ?>" class="btn btn-primary btn-sm " ><b>Regresar</b></a><br>
+                            <a href="<?php echo $controlador->link_com_producto; ?>" class="btn btn-primary btn-sm " ><b>Regresar</b></a><br>
                         </div>
                     </div>
                     <div class="">
-                        <table id="fc_conf_retenido" class="table table-striped" >
+                        <table id="fc_conf_traslado" class="table table-striped" >
                         </table>
                     </div>
                 </div>

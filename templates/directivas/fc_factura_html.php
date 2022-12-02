@@ -575,8 +575,8 @@ class fc_factura_html extends html_controler {
 
         return $div;
     }
-
-    public function input_fecha(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
+    /*
+     public function input_fecha(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
     {
         $valida = $this->directivas->valida_cols(cols: $cols);
         if(errores::$error){
@@ -596,6 +596,8 @@ class fc_factura_html extends html_controler {
 
         return $div;
     }
+     */
+
 
     public function input_exportacion(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
     {
