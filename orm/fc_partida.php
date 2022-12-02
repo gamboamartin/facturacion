@@ -102,12 +102,6 @@ class fc_partida extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
         }
 
-        $keys = array('com_producto_id', 'fc_factura_id');
-        $valida = $this->validacion->valida_ids(keys: $keys, registro: $this->registro);
-        if(errores::$error){
-            return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
-        }
-
         $validacion = $this->validaciones(data: $this->registro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
@@ -280,9 +274,10 @@ class fc_partida extends _modelo_parent {
            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $registro);
        }
 
-       $validacion = $this->validaciones(data: $registro);
+       $keys = array('descripcion','codigo');
+       $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro:  $data);
        if(errores::$error){
-           return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
+           return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
        }
 
        $registro = $this->limpia_campos(registro: $registro,
@@ -333,6 +328,12 @@ class fc_partida extends _modelo_parent {
         $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro:  $data);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
+        }
+
+        $keys = array('com_producto_id', 'fc_factura_id');
+        $valida = $this->validacion->valida_ids(keys: $keys, registro: $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
         }
 
         $valida = $this->valida_cantidades($data);
