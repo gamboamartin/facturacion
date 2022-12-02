@@ -52,7 +52,7 @@
         "gamboa.martin/configuraciones": "dev-main",
         "gamboa.martin/documento": "dev-master",
         "gamboa.martin/js_base": "dev-master",
-        "gamboa.martin/cat_sat": "dev-main",
+        "gamboa.martin/cat_sat": "^1.0.0",
         "gamboa.martin/organigrama": "dev-main",
         "gamboa.martin/empleado": "dev-main",
         "gamboa.martin/im_registro_patronal": "dev-main",
