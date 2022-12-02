@@ -275,7 +275,7 @@ class fc_partida extends _modelo_parent {
        }
 
        $keys = array('descripcion','codigo');
-       $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro:  $data);
+       $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro: $this->registro);
        if(errores::$error){
            return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
        }
