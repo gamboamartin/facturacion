@@ -10,6 +10,96 @@ let txt_descuento = $("#descuento");
 let txt_subtotal = $("#subtotal");
 let txt_total = $("#total");
 
+
+let seccion = getParameterByName('seccion');
+let accion = getParameterByName('accion');
+
+url_data_table = url_data_table.replace(seccion,"fc_partida");
+url_data_table = url_data_table.replace(accion,"get_data");
+
+function format(d) {return (`<table class="table table-striped" > 
+<thead >
+    <tr>
+        <th rowspan="2" >Producto</th>
+        <th colspan="3" style="text-align:center;">Traslados</th>
+        <th colspan="3" style="text-align:center;">Retenciones</th>
+    </tr>
+    <tr>
+        <th>Tipo Impuesto</th>
+        <th>Factor</th>
+        <th>Importe</th>
+        <th>Tipo Impuesto</th>
+        <th>Factor</th>
+        <th>Importe</th>
+    </tr>
+</thead>
+<tbody>
+    <tr>
+        <th>${d.com_producto_descripcion}</th>
+        <th>${d.fc_traslado_tipo_impuesto}</th>
+        <th>${d.fc_traslado_factor}</th>
+        <th>${d.fc_partida_codigo}</th>
+        <th>${d.fc_retenido_tipo_impuesto}</th>
+        <th>${d.fc_retenido_factor}</th>
+        <th>${d.fc_partida_codigo}</th>
+    </tr>
+</tbody>
+</table>`);
+}
+
+var dt = $("#fc_partida").DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: url_data_table,
+        columns: [
+            {
+                class: 'details-control',
+                orderable: false,
+                data: null,
+                defaultContent: '',
+            },
+            { data: 'cat_sat_producto_codigo' },
+            { data: 'com_producto_codigo' },
+            { data: 'fc_partida_cantidad' },
+            { data: 'cat_sat_unidad_descripcion' },
+            { data: 'fc_partida_valor_unitario' },
+            { data: 'fc_partida_importe' },
+            { data: 'fc_partida_descuento' },
+            { data: 'cat_sat_obj_imp_descripcion' },
+        ],
+        order: [[1, 'asc']],
+    });
+
+var detailRows = [];
+
+$('#fc_partida tbody').on('click', 'tr td.details-control', function () {
+    var tr = $(this).closest('tr');
+    var row = dt.row(tr);
+    var idx = detailRows.indexOf(tr.attr('id'));
+
+    if (row.child.isShown()) {
+        tr.removeClass('details');
+        row.child.hide();
+
+        // Remove from the 'open' array
+        detailRows.splice(idx, 1);
+    } else {
+        tr.addClass('details');
+        row.child(format(row.data())).show();
+
+        // Add to the 'open' array
+        if (idx === -1) {
+            detailRows.push(tr.attr('id'));
+        }
+    }
+});
+
+dt.on('draw', function () {
+    detailRows.forEach(function(id, i) {
+        $('#' + id + ' td.details-control').trigger('click');
+    });
+});
+
 sl_com_producto.change(function () {
     let selected = $(this).find('option:selected');
     let descripcion = selected.data(`com_producto_descripcion`);

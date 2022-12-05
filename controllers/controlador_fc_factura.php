@@ -428,11 +428,7 @@ class controlador_fc_factura extends system{
         $datatables->columns["modifica"]["campos"] = array("elimina_bd");
         unset($datatables->columns["fc_factura_descripcion"]);
 
-        $table = $this->datatable_init(columns: $datatables->columns, filtro: $datatables->filtro,
-            identificador: "#fc_partida", data: array("fc_factura.id" => $this->registro_id));
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al generar datatable', data: $table, header: $header, ws: $ws);
-        }
+
 
         $this->controlador_fc_partida->modelo->campos_view['unidad'] = array('type' => 'inputs');
         $this->controlador_fc_partida->modelo->campos_view['impuesto'] = array('type' => 'inputs');

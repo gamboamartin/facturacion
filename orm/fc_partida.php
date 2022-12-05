@@ -10,8 +10,19 @@ class fc_partida extends _modelo_parent {
     public function __construct(PDO $link){
         $tabla = 'fc_partida';
         $columnas = array($tabla=>false,'fc_factura'=>$tabla, 'com_producto' => $tabla,
-            'cat_sat_producto' => 'com_producto','cat_sat_unidad' => 'com_producto');
+            'cat_sat_producto' => 'com_producto','cat_sat_unidad' => 'com_producto','cat_sat_obj_imp' => 'com_producto');
         $campos_obligatorios = array('codigo','com_producto_id');
+
+        $columnas_extra = array();
+        $columnas_extra['fc_partida_importe'] = "cantidad * valor_unitario";
+        $columnas_extra['fc_traslado_tipo_impuesto'] = "IFNULL ((SELECT ctp.descripcion FROM fc_traslado ft INNER JOIN 
+        cat_sat_tipo_impuesto ctp ON ft.cat_sat_tipo_impuesto_id = ctp.id  WHERE ft.fc_partida_id = 30 LIMIT 1),'')";
+        $columnas_extra['fc_traslado_factor'] = "IFNULL ((SELECT cf.factor FROM fc_traslado ft INNER JOIN 
+        cat_sat_factor cf ON ft.cat_sat_factor_id = cf.id  WHERE ft.fc_partida_id = 30 LIMIT 1),'')";
+        $columnas_extra['fc_retenido_tipo_impuesto'] = "IFNULL ((SELECT ctp.descripcion FROM fc_retenido fr INNER JOIN 
+        cat_sat_tipo_impuesto ctp ON fr.cat_sat_tipo_impuesto_id = ctp.id  WHERE fr.fc_partida_id = 30 LIMIT 1),'')";
+        $columnas_extra['fc_retenido_factor'] = "IFNULL ((SELECT cf.factor FROM fc_retenido fr INNER JOIN 
+        cat_sat_factor cf ON fr.cat_sat_factor_id = cf.id  WHERE fr.fc_partida_id = 30 LIMIT 1),'')";
 
         $campos_view['com_producto_id'] = array('type' => 'selects', 'model' => new com_producto($link));
         $campos_view['fc_factura_id'] = array('type' => 'selects', 'model' => new fc_factura($link));
@@ -25,8 +36,9 @@ class fc_partida extends _modelo_parent {
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 
-        parent::__construct(link: $link,tabla:  $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas, campos_view: $campos_view,no_duplicados: $no_duplicados,tipo_campos: array());
+        parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
+            columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
+            no_duplicados: $no_duplicados, tipo_campos: array());
 
         $this->NAMESPACE = __NAMESPACE__;
     }

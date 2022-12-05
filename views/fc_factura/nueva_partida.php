@@ -49,6 +49,20 @@
                     </div>
                     <div class="">
                         <table id="fc_partida" class="table table-striped" >
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Clav Prod. Serv.</th>
+                                <th>No Identificación</th>
+                                <th>Cantidad</th>
+                                <th>Unidad</th>
+                                <th>Valor Unitario</th>
+                                <th>Importe</th>
+                                <th>Descuento</th>
+                                <th>Objeto Impuesto</th>
+                            </tr>
+                            </thead>
+
                         </table>
                     </div>
                 </div>
