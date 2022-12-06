@@ -2,6 +2,8 @@
 namespace gamboamartin\facturacion\tests;
 use base\orm\modelo_base;
 
+use gamboamartin\comercial\models\com_sucursal;
+use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
@@ -27,9 +29,9 @@ class base_test{
         return $alta;
     }
 
-    public function alta_com_sucursal(PDO $link): array|\stdClass
+    public function alta_com_sucursal(PDO $link, int $id = 1): array|\stdClass
     {
-        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_sucursal($link);
+        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_sucursal(link: $link,id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -37,9 +39,9 @@ class base_test{
         return $alta;
     }
 
-    public function alta_com_tipo_cambio(PDO $link): array|\stdClass
+    public function alta_com_tipo_cambio(PDO $link, int $id): array|\stdClass
     {
-        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_tipo_cambio($link);
+        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_tipo_cambio(link: $link, id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -82,39 +84,45 @@ class base_test{
         return $alta;
     }
 
-    public function alta_fc_factura(PDO $link): array|\stdClass
+    public function alta_fc_factura(PDO $link, int $com_sucursal_id = 1, int $com_tipo_cambio_id = 1,
+                                    int $fc_csd_id = 1, int $id = 1): array|\stdClass
     {
 
-        $alta = $this->alta_com_cliente($link);
-        if(errores::$error){
-            return (new errores())->error('Error al insertar', $alta);
 
+        $existe = (new com_sucursal($link))->existe_by_id(registro_id: $com_sucursal_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_com_sucursal(link: $link, id: $com_sucursal_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+            }
         }
 
-        $alta = $this->alta_com_sucursal($link);
+        $existe = (new com_tipo_cambio($link))->existe_by_id(registro_id: $com_tipo_cambio_id);
         if(errores::$error){
-            return (new errores())->error('Error al insertar', $alta);
-
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
         }
-
-        $alta = $this->alta_com_tipo_cambio($link);
-        if(errores::$error){
-            return (new errores())->error('Error al insertar', $alta);
-
+        if(!$existe) {
+            $alta = $this->alta_com_tipo_cambio(link: $link, id: $com_tipo_cambio_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+            }
         }
 
         $registro = array();
-        $registro['id'] = 1;
+        $registro['id'] = $id;
         $registro['codigo'] = 1;
         $registro['descripcion'] = 1;
-        $registro['fc_csd_id'] = 1;
-        $registro['com_sucursal_id'] = 1;
+        $registro['fc_csd_id'] = $fc_csd_id;
+        $registro['com_sucursal_id'] = $com_sucursal_id;
         $registro['serie'] = 1;
         $registro['folio'] = 1;
         $registro['cat_sat_forma_pago_id'] = 1;
         $registro['cat_sat_metodo_pago_id'] = 1;
         $registro['cat_sat_moneda_id'] = 1;
-        $registro['com_tipo_cambio_id'] = 1;
+        $registro['com_tipo_cambio_id'] = $com_tipo_cambio_id;
         $registro['cat_sat_uso_cfdi_id'] = 1;
         $registro['cat_sat_tipo_de_comprobante_id'] = 1;
 
