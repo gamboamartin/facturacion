@@ -111,6 +111,17 @@ class base_test{
             }
         }
 
+        $existe = (new fc_csd($link))->existe_by_id(registro_id: $fc_csd_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_csd(link: $link, id: $fc_csd_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+            }
+        }
+
         $registro = array();
         $registro['id'] = $id;
         $registro['codigo'] = 1;
