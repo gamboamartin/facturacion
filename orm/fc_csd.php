@@ -12,7 +12,8 @@ class fc_csd extends _modelo_parent {
     public function __construct(PDO $link){
         $tabla = 'fc_csd';
         $columnas = array($tabla=>false,'org_sucursal'=>$tabla,'org_empresa'=>'org_sucursal',
-            'dp_calle_pertenece'=>'org_sucursal','cat_sat_regimen_fiscal'=>'org_empresa');
+            'dp_calle_pertenece'=>'org_sucursal','cat_sat_regimen_fiscal'=>'org_empresa',
+            'dp_colonia_postal'=>'dp_calle_pertenece');
         $campos_obligatorios = array('codigo','serie','org_sucursal_id','descripcion_select','alias','codigo_bis');
 
         $no_duplicados = array('serie','codigo','descripcion_select','alias','codigo_bis');
