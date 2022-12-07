@@ -14,15 +14,18 @@ class fc_partida extends _modelo_parent {
         $campos_obligatorios = array('codigo','com_producto_id');
 
         $columnas_extra = array();
-        $columnas_extra['fc_partida_importe'] = "cantidad * valor_unitario";
-        $columnas_extra['fc_traslado_tipo_impuesto'] = "IFNULL ((SELECT ctp.descripcion FROM fc_traslado ft INNER JOIN 
-        cat_sat_tipo_impuesto ctp ON ft.cat_sat_tipo_impuesto_id = ctp.id  WHERE ft.fc_partida_id = 30 LIMIT 1),'')";
-        $columnas_extra['fc_traslado_factor'] = "IFNULL ((SELECT cf.factor FROM fc_traslado ft INNER JOIN 
-        cat_sat_factor cf ON ft.cat_sat_factor_id = cf.id  WHERE ft.fc_partida_id = 30 LIMIT 1),'')";
-        $columnas_extra['fc_retenido_tipo_impuesto'] = "IFNULL ((SELECT ctp.descripcion FROM fc_retenido fr INNER JOIN 
-        cat_sat_tipo_impuesto ctp ON fr.cat_sat_tipo_impuesto_id = ctp.id  WHERE fr.fc_partida_id = 30 LIMIT 1),'')";
-        $columnas_extra['fc_retenido_factor'] = "IFNULL ((SELECT cf.factor FROM fc_retenido fr INNER JOIN 
-        cat_sat_factor cf ON fr.cat_sat_factor_id = cf.id  WHERE fr.fc_partida_id = 30 LIMIT 1),'')";
+
+        $sq_importes = (new _facturacion())->importes_base();
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al generar sq_importes',data:  $sq_importes);
+            print_r($error);
+            exit;
+        }
+
+        $columnas_extra['fc_partida_importe'] = $sq_importes->fc_partida_importe;
+        $columnas_extra['fc_partida_importe_con_descuento'] = $sq_importes->fc_partida_importe_con_descuento;
+
+
 
         $campos_view['com_producto_id'] = array('type' => 'selects', 'model' => new com_producto($link));
         $campos_view['fc_factura_id'] = array('type' => 'selects', 'model' => new fc_factura($link));
@@ -306,10 +309,24 @@ class fc_partida extends _modelo_parent {
             return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
         }
         $filtro['fc_factura.id'] = $fc_factura_id;
+
+        $hijo = array();
+        $hijo['fc_traslado']['filtros']['fc_partida.id'] = 'fc_partida_id';
+        $hijo['fc_traslado']['filtros_con_valor'] = array();
+        $hijo['fc_traslado']['nombre_estructura'] = 'fc_traslado';
+        $hijo['fc_traslado']['namespace_model'] = 'gamboamartin\\facturacion\\models';
+
+        $hijo['fc_retenido']['filtros']['fc_partida.id'] = 'fc_partida_id';
+        $hijo['fc_retenido']['filtros_con_valor'] = array();
+        $hijo['fc_retenido']['nombre_estructura'] = 'fc_retenido';
+        $hijo['fc_retenido']['namespace_model'] = 'gamboamartin\\facturacion\\models';
+
+
         $r_fc_partida = $this->filtro_and(filtro: $filtro,hijo: $hijo);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_partida);
         }
+
         return $r_fc_partida;
     }
 

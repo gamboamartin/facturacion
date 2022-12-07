@@ -481,16 +481,6 @@ class controlador_fc_factura extends system{
             die('Error');
         }
 
-        foreach ($partidas->registros as $key => $valor){
-
-            $partidas->registros[$key]['fc_traslado'] = (new fc_traslado($this->link))->get_traslados(
-                fc_partida_id: $valor['fc_partida_id']);
-            if (errores::$error) {
-                $error = $this->errores->error(mensaje: 'Error al obtener traslados de partida', data: $partidas);
-                print_r($error);
-                die('Error');
-            }
-        }
 
         $this->partidas = $partidas;
 

@@ -51,7 +51,7 @@
                         <table id="fc_partida" class="table table-striped" >
                             <thead>
                             <tr>
-                                <th></th>
+
                                 <th>Clav Prod. Serv.</th>
                                 <th>No Identificación</th>
                                 <th>Cantidad</th>
@@ -63,9 +63,13 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($controlador->partidas->registros as $partida){?>
+                            <?php foreach ($controlador->partidas->registros as $partida){
+                                $traslados = $partida['fc_traslado'];
+                                $retenciones = $partida['fc_retenido'];
+
+                                ?>
                                 <tr>
-                                    <td class="details-control"></td>
+
                                     <td><?php echo $partida['cat_sat_producto_codigo']; ?></td>
                                     <td><?php echo $partida['com_producto_codigo']; ?></td>
                                     <td><?php echo $partida['fc_partida_cantidad']; ?></td>
@@ -76,28 +80,85 @@
                                     <td><?php echo $partida['cat_sat_obj_imp_descripcion']; ?></td>
                                 </tr>
                                 <tr>
-                                    <td class="nested" colspan="9">
+                                    <td class="nested" colspan="8">
                                         <table class="table table-striped" >
                                             <thead >
                                                 <tr>
-                                                    <th colspan="8" >Producto</th>
-                                                </tr>
-                                                <tr>
-                                                    <th colspan="8" ><?php echo $partida['com_producto_descripcion']; ?></th>
-                                                </tr>
-                                                <tr>
-                                                    <th>Tipo Impuesto</th>
-                                                    <th>Factor</th>
-                                                    <th>Importe</th>
-                                                    <th>Tipo Impuesto</th>
-                                                    <th>Factor</th>
-                                                    <th>Importe</th>
+                                                    <th  >Producto</th>
                                                 </tr>
                                             </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td  ><?php echo $partida['com_producto_descripcion']; ?></td>
+                                            </tr>
+                                            </tbody>
                                         </table>
                                     </td>
                                 </tr>
 
+                                <tr>
+                                    <td class="nested" colspan="8">
+                                        <table class="table table-striped" >
+                                            <thead >
+                                            <tr>
+                                                <th colspan="4">Traslados</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Tipo Impuesto</th>
+                                                <th>Tipo Factor</th>
+                                                <th>Factor</th>
+                                                <th>Importe</th>
+
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <?php foreach ($traslados as $traslado){ ?>
+                                            <tr>
+
+                                                <td><?php echo $traslado['cat_sat_tipo_impuesto_descripcion']; ?></td>
+                                                <td><?php echo $traslado['cat_sat_tipo_factor_descripcion']; ?></td>
+                                                <td><?php echo $traslado['cat_sat_factor_factor']; ?></td>
+                                                <td><?php echo $traslado['fc_traslado_importe']; ?></td>
+
+                                            </tr>
+                                            <?php } ?>
+                                            </tbody>
+
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="nested" colspan="8">
+                                        <table class="table table-striped" >
+                                            <thead >
+                                            <tr>
+                                                <th colspan="4">Retenidos</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Tipo Impuesto</th>
+                                                <th>Tipo Factor</th>
+                                                <th>Factor</th>
+                                                <th>Importe</th>
+
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <?php foreach ($retenciones as $retenido){ ?>
+                                                <tr>
+
+                                                    <td><?php echo $retenido['cat_sat_tipo_impuesto_descripcion']; ?></td>
+                                                    <td><?php echo $retenido['cat_sat_tipo_factor_descripcion']; ?></td>
+                                                    <td><?php echo $retenido['cat_sat_factor_factor']; ?></td>
+                                                    <td><?php echo $retenido['fc_retenido_importe']; ?></td>
+
+                                                </tr>
+                                            <?php } ?>
+                                            </tbody>
+
+                                        </table>
+                                    </td>
+                                </tr>
 
                             <?php } ?>
                             </tbody>

@@ -27,8 +27,26 @@ class fc_retenido extends _modelo_parent {
         $campos_view['codigo'] = array('type' => 'inputs');
         $campos_view['descripcion'] = array('type' => 'inputs');
 
+        $sq_importes = (new _facturacion())->importes_base();
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al generar sq_importes',data:  $sq_importes);
+            print_r($error);
+            exit;
+        }
+        $fc_impuesto_importe = (new _facturacion())->fc_impuesto_importe(fc_partida_importe_con_descuento: $sq_importes->fc_partida_importe_con_descuento);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al generar fc_impuesto_importe',data:  $fc_impuesto_importe);
+            print_r($error);
+            exit;
+        }
+
+        $columnas_extra['fc_partida_importe'] = $sq_importes->fc_partida_importe;
+        $columnas_extra['fc_partida_importe_con_descuento'] = $sq_importes->fc_partida_importe_con_descuento;
+        $columnas_extra['fc_retenido_importe'] = $fc_impuesto_importe;
+
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas, campos_view: $campos_view, no_duplicados: $no_duplicados, tipo_campos: array());
+            columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
+            no_duplicados: $no_duplicados, tipo_campos: array());
 
         $this->NAMESPACE = __NAMESPACE__;
     }
