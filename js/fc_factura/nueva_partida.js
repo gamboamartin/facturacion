@@ -10,7 +10,7 @@ let txt_descuento = $("#descuento");
 let txt_subtotal = $("#subtotal");
 let txt_total = $("#total");
 
-
+/*
 let seccion = getParameterByName('seccion');
 let accion = getParameterByName('accion');
 
@@ -46,6 +46,7 @@ function format(d) {return (`<table class="table table-striped" >
 </tbody>
 </table>`);
 }
+
 
 var dt = $("#fc_partida").DataTable({
         processing: true,
@@ -99,6 +100,9 @@ dt.on('draw', function () {
         $('#' + id + ' td.details-control').trigger('click');
     });
 });
+
+
+ */
 
 sl_com_producto.change(function () {
     let selected = $(this).find('option:selected');

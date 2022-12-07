@@ -16,6 +16,7 @@ use gamboamartin\facturacion\models\fc_conf_retenido;
 use gamboamartin\facturacion\models\fc_conf_traslado;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
@@ -472,6 +473,26 @@ class controlador_fc_factura extends system{
             print_r($error);
             die('Error');
         }
+
+        $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
+            print_r($error);
+            die('Error');
+        }
+
+        foreach ($partidas->registros as $key => $valor){
+
+            $partidas->registros[$key]['fc_traslado'] = (new fc_traslado($this->link))->get_traslados(
+                fc_partida_id: $valor['fc_partida_id']);
+            if (errores::$error) {
+                $error = $this->errores->error(mensaje: 'Error al obtener traslados de partida', data: $partidas);
+                print_r($error);
+                die('Error');
+            }
+        }
+
+        $this->partidas = $partidas;
 
         return $this->inputs;
     }

@@ -82,6 +82,17 @@ class fc_traslado extends _modelo_parent {
         return $registro;
     }
 
+    public function get_traslados(int $fc_partida_id): array|stdClass|int
+    {
+        $filtro['fc_partida.id']  = $fc_partida_id;
+        $registro = $this->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener traslados',data:  $registro);
+        }
+
+        return $registro;
+    }
+
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,
                                 array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {

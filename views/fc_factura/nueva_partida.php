@@ -62,7 +62,45 @@
                                 <th>Objeto Impuesto</th>
                             </tr>
                             </thead>
+                            <tbody>
+                            <?php foreach ($controlador->partidas->registros as $partida){?>
+                                <tr>
+                                    <td class="details-control"></td>
+                                    <td><?php echo $partida['cat_sat_producto_codigo']; ?></td>
+                                    <td><?php echo $partida['com_producto_codigo']; ?></td>
+                                    <td><?php echo $partida['fc_partida_cantidad']; ?></td>
+                                    <td><?php echo $partida['cat_sat_unidad_descripcion']; ?></td>
+                                    <td><?php echo $partida['fc_partida_valor_unitario']; ?></td>
+                                    <td><?php echo $partida['fc_partida_importe']; ?></td>
+                                    <td><?php echo $partida['fc_partida_descuento']; ?></td>
+                                    <td><?php echo $partida['cat_sat_obj_imp_descripcion']; ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="nested" colspan="9">
+                                        <table class="table table-striped" >
+                                            <thead >
+                                                <tr>
+                                                    <th colspan="8" >Producto</th>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="8" ><?php echo $partida['com_producto_descripcion']; ?></th>
+                                                </tr>
+                                                <tr>
+                                                    <th>Tipo Impuesto</th>
+                                                    <th>Factor</th>
+                                                    <th>Importe</th>
+                                                    <th>Tipo Impuesto</th>
+                                                    <th>Factor</th>
+                                                    <th>Importe</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </td>
+                                </tr>
 
+
+                            <?php } ?>
+                            </tbody>
                         </table>
                     </div>
                 </div>
