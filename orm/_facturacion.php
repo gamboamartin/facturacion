@@ -13,7 +13,7 @@ class _facturacion {
 
     private function fc_partida_importe(): string
     {
-        return "(fc_partida.cantidad * fc_partida.valor_unitario)";
+        return "ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2)";
     }
 
     private function fc_partida_importe_con_descuento(): string
@@ -23,12 +23,12 @@ class _facturacion {
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar fc_partida_importe',data:  $fc_partida_importe);
         }
-        return "($fc_partida_importe - fc_partida.descuento)";
+        return "ROUND(($fc_partida_importe - ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
     }
 
     public function fc_impuesto_importe(string $fc_partida_importe_con_descuento): string
     {
-        return "$fc_partida_importe_con_descuento * cat_sat_factor.factor";
+        return "ROUND($fc_partida_importe_con_descuento * ROUND(IFNULL(cat_sat_factor.factor,0),2),2)";
     }
 
 
@@ -70,7 +70,7 @@ class _facturacion {
          * WHERE fc_traslado.fc_partida_id = fc_partida.id)
          */
 
-        return "(SELECT SUM($fc_impuesto_importe) FROM $tabla_impuesto $inner_join_cat_sat_factor $where)";
+        return "(SELECT ROUND(SUM($fc_impuesto_importe),2) FROM $tabla_impuesto $inner_join_cat_sat_factor $where)";
 
 
     }
