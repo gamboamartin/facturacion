@@ -400,11 +400,19 @@ class controlador_fc_factura extends system{
         $datatables->columns["modifica"]["campos"] = array("elimina_bd");
         unset($datatables->columns["fc_factura_descripcion"]);
 
-        $table = $this->datatable_init(columns: $datatables->columns, filtro: $datatables->filtro,
-            identificador: "#fc_partida", data: array("fc_factura.id" => $this->registro_id));
+
+
+
+        $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id);
         if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al generar datatable', data: $table, header: $header, ws: $ws);
+            $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
+            print_r($error);
+            die('Error');
         }
+
+
+        $this->partidas = $partidas;
+
 
         $base = $this->init_modifica();
         if(errores::$error){
@@ -474,15 +482,7 @@ class controlador_fc_factura extends system{
             die('Error');
         }
 
-        $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id);
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
-            print_r($error);
-            die('Error');
-        }
 
-
-        $this->partidas = $partidas;
 
         return $this->inputs;
     }
