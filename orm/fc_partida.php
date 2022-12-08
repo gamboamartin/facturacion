@@ -22,8 +22,25 @@ class fc_partida extends _modelo_parent {
             exit;
         }
 
+        $sq_importe_total_traslado = (new _facturacion())->impuesto_partida(tabla_impuesto: 'fc_traslado');
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al generar sq_importe_total_traslado',data:  $sq_importe_total_traslado);
+            print_r($error);
+            exit;
+        }
+        $sq_importe_total_retenido = (new _facturacion())->impuesto_partida(tabla_impuesto: 'fc_retenido');
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al generar sq_importe_total_retenido',data:  $sq_importe_total_retenido);
+            print_r($error);
+            exit;
+        }
+
         $columnas_extra['fc_partida_importe'] = $sq_importes->fc_partida_importe;
         $columnas_extra['fc_partida_importe_con_descuento'] = $sq_importes->fc_partida_importe_con_descuento;
+        $columnas_extra['fc_partida_importe_total_traslado'] = $sq_importe_total_traslado;
+        $columnas_extra['fc_partida_importe_total_retenido'] = $sq_importe_total_retenido;
+        $columnas_extra['fc_partida_importe_total'] = "$sq_importes->fc_partida_importe_con_descuento 
+        + $sq_importe_total_traslado - $sq_importe_total_retenido";
 
 
 
