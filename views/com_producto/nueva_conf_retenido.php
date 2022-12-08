@@ -39,7 +39,7 @@
                     <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
                         <h2>Configuraciones de Retenidos</h2>
                         <div class="controls">
-                            <a href="<?php echo $controlador->link_com_producto; ?>" class="btn btn-primary btn-sm " ><b>Regresar</b></a><br>
+                            <a href="<?php echo $controlador->link_lista; ?>" class="btn btn-primary btn-sm " ><b>Regresar</b></a><br>
                         </div>
                     </div>
                     <div class="">
