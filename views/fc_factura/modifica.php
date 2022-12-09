@@ -37,6 +37,41 @@
 
         </div>
     </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="widget  widget-box box-container form-main widget-form-cart" id="form">
+                    <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
+                        <h2>Partidas</h2>
+                    </div>
+                    <form method="post" action="<?php echo $controlador->link_fc_partida_alta_bd; ?>" class="form-additional">
+
+                        <?php echo $controlador->inputs->fc_factura_id; ?>
+                        <?php echo $controlador->inputs->com_producto_id; ?>
+                        <?php echo $controlador->inputs->unidad; ?>
+                        <?php echo $controlador->inputs->impuesto; ?>
+                        <?php echo $controlador->inputs->descripcion; ?>
+                        <?php echo $controlador->inputs->cantidad; ?>
+                        <?php echo $controlador->inputs->valor_unitario; ?>
+                        <?php echo $controlador->inputs->subtotal; ?>
+                        <?php echo $controlador->inputs->descuento; ?>
+                        <?php echo $controlador->inputs->total; ?>
+
+                        <div class="control-group btn-alta">
+                            <div class="controls">
+                                <button type="submit" class="btn btn-success" value="modifica" name="btn_action_next">Alta</button><br>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
     <div class="container">
         <div class="row">
             <div class="col-md-12">
@@ -44,9 +79,6 @@
                 <div class="widget widget-box box-container widget-mylistings">
                     <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
                         <h2>Partidas</h2>
-                        <div class="controls">
-                            <a href="<?php echo $controlador->link_fc_factura_nueva_partida; ?>" class="btn btn-info" >Nuevo Registro</a><br>
-                        </div>
                     </div>
                     <div class="">
                         <table id="fc_partida" class="table table-striped" >

@@ -391,18 +391,6 @@ class controlador_fc_factura extends system{
 
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
-        $datatables = $this->controlador_fc_partida->init_datatable();
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al inicializar datatable', data: $datatables, header: $header, ws: $ws);
-        }
-        $datatables->columns["modifica"]["titulo"] = "Acciones";
-        $datatables->columns["modifica"]["type"] = "button";
-        $datatables->columns["modifica"]["campos"] = array("elimina_bd");
-        unset($datatables->columns["fc_factura_descripcion"]);
-
-
-
-
         $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
@@ -410,15 +398,22 @@ class controlador_fc_factura extends system{
             die('Error');
         }
 
-
         $this->partidas = $partidas;
-
 
         $base = $this->init_modifica();
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
         }
+
+        $inputs = $this->nueva_partida_inicializa();
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al inicializar partida', data: $inputs);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->inputs = (object) array_merge((array)$this->inputs, (array)$inputs);
 
         return $base->template;
     }
@@ -427,22 +422,19 @@ class controlador_fc_factura extends system{
 
     public function nueva_partida(bool $header, bool $ws = false): array|stdClass
     {
-        $datatables = $this->controlador_fc_partida->init_datatable();
+        $this->inputs = $this->nueva_partida_inicializa();
         if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al inicializar datatable', data: $datatables, header: $header, ws: $ws);
+            $error = $this->errores->error(mensaje: 'Error al inicializar partida', data: $this->inputs);
+            print_r($error);
+            die('Error');
         }
 
-        $datatables->columns["modifica"]["titulo"] = "Acciones";
-        $datatables->columns["modifica"]["type"] = "button";
-        $datatables->columns["modifica"]["campos"] = array("elimina_bd");
-        unset($datatables->columns["fc_factura_descripcion"]);
+        return $this->inputs;
+    }
 
-
-
+    private function nueva_partida_inicializa(): array|stdClass{
         $this->controlador_fc_partida->modelo->campos_view['unidad'] = array('type' => 'inputs');
         $this->controlador_fc_partida->modelo->campos_view['impuesto'] = array('type' => 'inputs');
-        $this->controlador_fc_partida->modelo->campos_view['tipo_factor'] = array('type' => 'inputs');
-        $this->controlador_fc_partida->modelo->campos_view['factor'] = array('type' => 'inputs');
 
         $identificador = "unidad";
         $propiedades = array("place_holder" => "Unidad", "disabled" => true);
@@ -452,17 +444,11 @@ class controlador_fc_factura extends system{
         $propiedades = array("place_holder" => "Objeto del Impuesto", "disabled" => true);
         $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
-        $identificador = "tipo_factor";
-        $propiedades = array("place_holder" => "Tipo Factor", "disabled" => true);
-        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "factor";
-        $propiedades = array("place_holder" => "Factor", "disabled" => true);
-        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
         $alta = $this->controlador_fc_partida->alta(header: false);
         if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
+            $error = $this->errores->error(mensaje: 'Error al generar template', data: $this->inputs);
+            print_r($error);
+            die('Error');
         }
 
         $identificador = "fc_factura_id";
@@ -474,7 +460,7 @@ class controlador_fc_factura extends system{
         $propiedades = array("cols" => 12);
         $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
-        $this->inputs = $this->controlador_fc_partida->genera_inputs(
+        $inputs = $this->controlador_fc_partida->genera_inputs(
             keys_selects:  $this->controlador_fc_partida->keys_selects);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al generar inputs', data: $this->inputs);
@@ -482,9 +468,7 @@ class controlador_fc_factura extends system{
             die('Error');
         }
 
-
-
-        return $this->inputs;
+        return $inputs;
     }
 
 
