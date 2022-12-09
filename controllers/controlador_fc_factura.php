@@ -510,7 +510,7 @@ class controlador_fc_factura extends system{
 
         $this->link->beginTransaction();
 
-        $siguiente_view = (new actions())->init_alta_bd(siguiente_view: "nueva_partida");
+        $siguiente_view = (new actions())->init_alta_bd(siguiente_view: "modifica");
         if(errores::$error){
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
@@ -544,7 +544,7 @@ class controlador_fc_factura extends system{
         if($header){
 
             $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
-                seccion: $this->tabla, siguiente_view: "nueva_partida");
+                seccion: $this->tabla, siguiente_view: "modifica");
             if(errores::$error){
                 return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_alta_partida_bd,
                     header:  true, ws: $ws);

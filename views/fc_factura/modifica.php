@@ -38,7 +38,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="container partidas">
         <div class="row">
             <div class="col-lg-12">
                 <div class="widget  widget-box box-container form-main widget-form-cart" id="form">
