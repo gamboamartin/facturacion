@@ -406,6 +406,12 @@ class controlador_fc_factura extends system{
                 header: $header,ws:$ws);
         }
 
+
+
+        $identificador = "com_producto_id";
+        $propiedades = array("cols" => 12);
+        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
         $inputs = $this->nueva_partida_inicializa();
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al inicializar partida', data: $inputs);

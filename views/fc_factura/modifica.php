@@ -47,7 +47,6 @@
                     </div>
                     <form method="post" action="<?php echo $controlador->link_fc_partida_alta_bd; ?>" class="form-additional">
 
-                        <?php echo $controlador->inputs->fc_factura_id; ?>
                         <?php echo $controlador->inputs->com_producto_id; ?>
                         <?php echo $controlador->inputs->unidad; ?>
                         <?php echo $controlador->inputs->impuesto; ?>
