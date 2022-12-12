@@ -142,6 +142,79 @@ class controlador_fc_factura extends system{
         }
     }
 
+    public function genera_xml(bool $header, bool $ws = false){
+
+        $factura = $this->modelo->get_factura(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener fc_factura',data:  $factura, header: $header,ws:$ws);
+        }
+
+        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener partidas',data:  $partidas, header: $header,ws:$ws);
+        }
+
+        // $total = (new fc_factura($this->link))->t
+
+
+        $comprobante = array();
+        $comprobante['lugar_expedicion'] = $factura['dp_cp_descripcion'];
+        $comprobante['tipo_de_comprobante'] = $factura['cat_sat_tipo_de_comprobante_codigo'];
+        $comprobante['moneda'] = $factura['cat_sat_moneda_codigo'];
+        $comprobante['total'] = 22;
+        $comprobante['sub_total'] = 22;
+        $comprobante['exportacion'] = 22;
+        $comprobante['folio'] = 22;
+
+        $emisor = array();
+        $emisor['rfc'] = $factura['org_empresa_rfc'];
+
+        $receptor = array();
+        $receptor['rfc'] = $factura['com_cliente_rfc'];
+        $receptor['nombre'] = $factura['org_empresa_rfc'];
+        $receptor['domicilio_fiscal_receptor'] = $factura['org_empresa_rfc'];
+        $receptor['regimen_fiscal_receptor'] = $factura['org_empresa_rfc'];
+        $receptor['uso_cfdi'] = $factura['org_empresa_rfc'];
+
+        $conceptos = array();
+        $conceptos[0] = new stdClass();
+        $conceptos[0]->clave_prod_serv = 1;
+        $conceptos[0]->cantidad = 1;
+        $conceptos[0]->clave_unidad = 1;
+        $conceptos[0]->descripcion = 1;
+        $conceptos[0]->valor_unitario = 1;
+        $conceptos[0]->importe = 1;
+        $conceptos[0]->objeto_imp = 1;
+        $conceptos[0]->no_identificacion = 1;
+        $conceptos[0]->unidad = 1;
+        $conceptos[0]->impuestos = array();
+        $conceptos[0]->impuestos[0] = new stdClass();
+        $conceptos[0]->impuestos[0]->traslados = array();
+        $conceptos[0]->impuestos[0]->traslados[0] = new stdClass();
+        $conceptos[0]->impuestos[0]->traslados[0]->base = '0';
+        $conceptos[0]->impuestos[0]->traslados[0]->impuesto = '0';
+        $conceptos[0]->impuestos[0]->traslados[0]->tipo_factor = '0';
+        $conceptos[0]->impuestos[0]->traslados[0]->tasa_o_cuota = '0';
+        $conceptos[0]->impuestos[0]->traslados[0]->importe = '0';
+
+        $impuestos = new stdClass();
+        $impuestos->total_impuestos_trasladados = 1;
+        $impuestos->traslados = array();
+        $impuestos->traslados[0] = new stdClass();
+        $impuestos->traslados[0]->base = '0';
+        $impuestos->traslados[0]->impuesto = '0';
+        $impuestos->traslados[0]->tipo_factor = '0';
+        $impuestos->traslados[0]->tasa_o_cuota = '0';
+        $impuestos->traslados[0]->importe = '0';
+
+
+        $ingreso = (new cfdis())->ingreso(comprobante: $comprobante,conceptos:  $conceptos, emisor: $emisor,
+            impuestos: $impuestos,receptor:  $receptor);
+
+        print_r($ingreso);exit;
+
+    }
+
     private function get_tipo_comprobante(): array|int
     {
         if (generales::CAT_SAT_TIPO_DE_COMPROBANTE === ""){
@@ -424,8 +497,6 @@ class controlador_fc_factura extends system{
         return $base->template;
     }
 
-
-
     public function nueva_partida(bool $header, bool $ws = false): array|stdClass
     {
         $this->inputs = $this->nueva_partida_inicializa();
@@ -476,8 +547,6 @@ class controlador_fc_factura extends system{
 
         return $inputs;
     }
-
-
 
     public function productos(bool $header, bool $ws = false): array|stdClass
     {
@@ -572,47 +641,7 @@ class controlador_fc_factura extends system{
      * POR REVISAR
      */
 
-    public function genera_xml(bool $header, bool $ws = false){
-        $fc_factura = $this->modelo->registro(registro_id: $this->registro_id);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener fc_factura',data:  $fc_factura, header: $header,ws:$ws);
-        }
-        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener partidas',data:  $partidas, header: $header,ws:$ws);
-        }
 
-       // $total = (new fc_factura($this->link))->t
-
-        $comprobante = array();
-        $comprobante['lugar_expedicion'] = $fc_factura['dp_cp_descripcion'];
-        $comprobante['tipo_de_comprobante'] = $fc_factura['cat_sat_tipo_de_comprobante_codigo'];
-        $comprobante['moneda'] = $fc_factura['cat_sat_moneda_codigo'];
-
-
-
-        $emisor = array();
-        $emisor['rfc'] = $fc_factura['org_empresa_rfc'];
-        $receptor = array();
-        $receptor['rfc'] = $fc_factura['com_cliente_rfc'];
-
-
-        $conceptos = array();
-
-        $impuestos = array();
-
-
-        $cfdi = new cfdis();
-
-        $ingreso = $cfdi->ingreso(comprobante: $comprobante,conceptos:  $conceptos, emisor: $emisor,
-            impuestos: $impuestos,receptor:  $receptor);
-
-        print_r($ingreso);exit;
-
-
-
-
-    }
 
     public function partidas(bool $header, bool $ws = false): array|stdClass
     {
