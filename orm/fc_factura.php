@@ -303,7 +303,7 @@ class fc_factura extends modelo{
             $concepto->impuestos = array();
             $concepto->impuestos[0] = new stdClass();
             $concepto->impuestos[0]->traslados = array();
-            $concepto->impuestos[0]->retenidos = array();
+            $concepto->impuestos[0]->retenciones = array();
 
             foreach ($traslados->registros as $traslado){
                 $traslados_obj = new stdClass();
@@ -326,7 +326,7 @@ class fc_factura extends modelo{
                 $retenido_obj->importe = '1';
 
                 $imp_retenidos[] = $retenido_obj;
-                $concepto->impuestos[0]->retenidos[] = $retenido_obj;
+                $concepto->impuestos[0]->retenciones[] = $retenido_obj;
             }
 
             $conceptos[] = $concepto;
