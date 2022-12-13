@@ -298,7 +298,7 @@ class fc_factura extends modelo{
             $concepto->valor_unitario = $partida['fc_partida_valor_unitario'];
             $concepto->importe = $partida['fc_partida_importe'];
             $concepto->objeto_imp = $partida['cat_sat_obj_imp_codigo'];
-            $concepto->no_identificacion = 'POR REVISAR';
+            $concepto->no_identificacion = $partida['com_producto_codigo'];;
             $concepto->unidad = $partida['cat_sat_unidad_descripcion'];
             $concepto->impuestos = array();
             $concepto->impuestos[0] = new stdClass();

@@ -172,8 +172,11 @@ class controlador_fc_factura extends system{
 
         $impuestos = new stdClass();
         $impuestos->total_impuestos_trasladados = $factura['total_impuestos_trasladados'];
+        $impuestos->total_impuestos_retenidos = 'x';
         $impuestos->traslados = $factura['traslados'];
-        $impuestos->retenidos = $factura['retenidos'];
+        $impuestos->retenciones = $factura['retenidos'];
+
+       // var_dump($impuestos);exit;
 
         $ingreso = (new cfdis())->ingreso(comprobante: $comprobante,conceptos:  $conceptos, emisor: $emisor,
             impuestos: $impuestos,receptor:  $receptor);
@@ -181,7 +184,7 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al obtener xml',data:  $ingreso, header: $header,ws:$ws);
         }
 
-        unlink($ingreso);
+
         ob_clean();
         echo $ingreso;
         header('Content-Type: text/xml');
