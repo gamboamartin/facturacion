@@ -252,10 +252,70 @@ class fc_factura extends modelo{
 
     public function get_factura(int $fc_factura_id): array|stdClass|int
     {
-        $registro = $this->registro(registro_id: $fc_factura_id);
+        $hijo = array();
+        $hijo['fc_partida']['filtros'] = array();
+        $hijo['fc_partida']['filtros_con_valor'] = array('fc_factura.id'=> $fc_factura_id);
+        $hijo['fc_partida']['nombre_estructura'] = 'partidas';
+        $hijo['fc_partida']['namespace_model'] = 'gamboamartin\\facturacion\\models';
+        $registro = $this->registro(registro_id: $fc_factura_id,hijo: $hijo);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener factura',data:  $registro);
         }
+
+        $registro['fc_factura_sub_total'] = $this->get_factura_sub_total(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener el subtotal de la factura',data:  $registro);
+        }
+
+        $registro['fc_factura_total'] = $this->get_factura_total(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener el total de la factura',data:  $registro);
+        }
+
+        $conceptos = array();
+        $imp_traslados = array();
+
+        foreach ($registro['partidas'] as $key => $partida){
+
+            $traslados = (new fc_traslado($this->link))->get_traslados(fc_partida_id: $partida['fc_partida_id']);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener el traslados de la partida',data:  $traslados);
+            }
+
+            $registro['partidas'][$key]['traslados'] = $traslados->registros;
+
+            $concepto = new stdClass();
+            $concepto->clave_prod_serv = $partida['com_producto_id'];
+            $concepto->cantidad = $partida['fc_partida_cantidad'];
+            $concepto->clave_unidad = $partida['cat_sat_unidad_codigo'];
+            $concepto->descripcion = $partida['com_producto_descripcion'];
+            $concepto->valor_unitario = $partida['fc_partida_valor_unitario'];
+            $concepto->importe = $partida['fc_partida_importe'];
+            $concepto->objeto_imp = $partida['cat_sat_obj_imp_codigo'];
+            $concepto->no_identificacion = 'POR REVISAR';
+            $concepto->unidad = $partida['cat_sat_unidad_descripcion'];
+            $concepto->impuestos = array();
+            $concepto->impuestos[0] = new stdClass();
+            $concepto->impuestos[0]->traslados = array();
+
+            foreach ($traslados->registros as $traslado){
+                $traslados_obj = new stdClass();
+                $traslados_obj->base = '1';
+                $traslados_obj->impuesto = $traslado['cat_sat_tipo_impuesto_descripcion'];
+                $traslados_obj->tipo_factor = $traslado['cat_sat_tipo_factor_descripcion'];
+                $traslados_obj->tasa_o_cuota = $traslado['cat_sat_factor_factor'];
+                $traslados_obj->importe = '1';
+
+                $imp_traslados[] = $traslados_obj;
+                $concepto->impuestos[0]->traslados[] = $traslados_obj;
+            }
+
+            $conceptos[] = $concepto;
+        }
+
+        $registro['conceptos'] = $conceptos;
+        $registro['total_impuestos_trasladados'] = 1;
+        $registro['traslados'] = $imp_traslados;
 
         return $registro;
     }
