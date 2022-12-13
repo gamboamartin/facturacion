@@ -274,12 +274,18 @@ class fc_factura extends modelo{
 
         $conceptos = array();
         $imp_traslados = array();
+        $imp_retenidos = array();
 
         foreach ($registro['partidas'] as $key => $partida){
 
             $traslados = (new fc_traslado($this->link))->get_traslados(fc_partida_id: $partida['fc_partida_id']);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al obtener el traslados de la partida',data:  $traslados);
+            }
+
+            $retenidos = (new fc_retenido($this->link))->get_retenidos(fc_partida_id: $partida['fc_partida_id']);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida',data:  $retenidos);
             }
 
             $registro['partidas'][$key]['traslados'] = $traslados->registros;
@@ -297,6 +303,7 @@ class fc_factura extends modelo{
             $concepto->impuestos = array();
             $concepto->impuestos[0] = new stdClass();
             $concepto->impuestos[0]->traslados = array();
+            $concepto->impuestos[0]->retenidos = array();
 
             foreach ($traslados->registros as $traslado){
                 $traslados_obj = new stdClass();
@@ -310,12 +317,25 @@ class fc_factura extends modelo{
                 $concepto->impuestos[0]->traslados[] = $traslados_obj;
             }
 
+            foreach ($retenidos->registros as $retenido){
+                $retenido_obj = new stdClass();
+                $retenido_obj->base = '1';
+                $retenido_obj->impuesto = $retenido['cat_sat_tipo_impuesto_descripcion'];
+                $retenido_obj->tipo_factor = $retenido['cat_sat_tipo_factor_descripcion'];
+                $retenido_obj->tasa_o_cuota = $retenido['cat_sat_factor_factor'];
+                $retenido_obj->importe = '1';
+
+                $imp_retenidos[] = $retenido_obj;
+                $concepto->impuestos[0]->retenidos[] = $retenido_obj;
+            }
+
             $conceptos[] = $concepto;
         }
 
         $registro['conceptos'] = $conceptos;
         $registro['total_impuestos_trasladados'] = 1;
         $registro['traslados'] = $imp_traslados;
+        $registro['retenidos'] = $imp_retenidos;
 
         return $registro;
     }

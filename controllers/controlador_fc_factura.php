@@ -173,6 +173,7 @@ class controlador_fc_factura extends system{
         $impuestos = new stdClass();
         $impuestos->total_impuestos_trasladados = $factura['total_impuestos_trasladados'];
         $impuestos->traslados = $factura['traslados'];
+        $impuestos->retenidos = $factura['retenidos'];
 
         $ingreso = (new cfdis())->ingreso(comprobante: $comprobante,conceptos:  $conceptos, emisor: $emisor,
             impuestos: $impuestos,receptor:  $receptor);
