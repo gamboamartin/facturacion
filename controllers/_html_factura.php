@@ -10,7 +10,7 @@ class _html_factura{
     }
     public function thead_producto(): string
     {
-        return "<thead>
+        return "<thead style='font-size: 14px; vertical-align: middle; background-color: #74569E; color: #ffffff'>
                     <tr>
                         <th>Clav Prod. Serv.</th>
                         <th>No Identificación</th>
@@ -52,7 +52,7 @@ class _html_factura{
 
     public function data_impuesto(array $impuesto): string
     {
-        return "<tr>
+        return "<tr style='font-size: 12px;'>
                     <td>$impuesto[cat_sat_tipo_impuesto_descripcion]</td>
                     <td>$impuesto[cat_sat_tipo_factor_descripcion]</td>
                     <td>$impuesto[cat_sat_factor_factor]</td>
@@ -67,10 +67,10 @@ class _html_factura{
         }
         $html = "
             <tr>
-                <td class='nested' colspan='8'>
-                    <table class='table table-striped'>
-                        <thead>
-                            <tr>
+                <td class='nested' colspan='8' style='padding: 0;'>
+                    <table class='table table-striped' style='font-size: 14px; vertical-align: middle; margin-bottom: 0;'>
+                        <thead >
+                            <tr style='background-color: #dfe7f6; color: #2c58a0;'>
                                 <th colspan='4'>$tag_tipo_impuesto</th>
                             </tr>
                             $t_head_impuesto

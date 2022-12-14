@@ -89,13 +89,13 @@
 
 
                         ?>
-                        <table id="fc_partida" class="table table-striped" >
+                        <table id="fc_partida" class="table table-striped" style="font-size: 12px; border: 2px solid #e0e0e0; border-radius: 0.5rem !important;">
                             <?php echo $controlador->t_head_producto; ?>
                             <tbody>
                             <?php echo $partida['data_producto_html']; ?>
                             <tr>
-                                <td class="nested" colspan="8">
-                                    <table class="table table-striped" >
+                                <td class="nested" colspan="8" style="padding: 0;">
+                                    <table class="table table-striped" style='font-size: 14px; vertical-align: middle; background-color: #dfe7f6; color: #2c58a0; margin-bottom: 0; '>
                                         <thead><tr><th>Producto</th></tr></thead>
                                         <tbody>
                                             <tr><td><?php echo $partida['com_producto_descripcion']; ?></td></tr>
