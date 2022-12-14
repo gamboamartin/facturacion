@@ -450,6 +450,71 @@ class controlador_fc_factura extends system{
             die('Error');
         }
 
+        foreach ($partidas->registros as $indice=>$partida){
+
+            $data_producto_html = (new _html_factura())->data_producto(partida: $partida);
+            if (errores::$error) {
+                $error = $this->errores->error(mensaje: 'Error al generar html', data: $data_producto_html);
+                print_r($error);
+                die('Error');
+            }
+            $partidas->registros[$indice]['data_producto_html'] = $data_producto_html;
+
+            $impuesto_traslado_html_completo = '';
+            $aplica_traslado = false;
+            foreach($partida['fc_traslado'] as $impuesto){
+                $aplica_traslado = true;
+                $impuesto_traslado_html = (new _html_factura())->data_impuesto(impuesto: $impuesto);
+                if (errores::$error) {
+                    $error = $this->errores->error(mensaje: 'Error al generar html', data: $impuesto_traslado_html);
+                    print_r($error);
+                    die('Error');
+                }
+                $impuesto_traslado_html_completo.=$impuesto_traslado_html;
+
+            }
+            $impuesto_traslado_html = '';
+            if($aplica_traslado) {
+                $impuesto_traslado_html = (new _html_factura())->tr_impuestos_html(
+                    impuesto_traslado_html: $impuesto_traslado_html_completo, tag_tipo_impuesto: 'Traslados');
+                if (errores::$error) {
+                    $error = $this->errores->error(mensaje: 'Error al generar html', data: $impuesto_traslado_html);
+                    print_r($error);
+                    die('Error');
+                }
+            }
+
+
+            $partidas->registros[$indice]['impuesto_traslado_html'] = $impuesto_traslado_html;
+
+            $impuesto_retenido_html_completo = '';
+            $aplica_retenido = false;
+            foreach($partida['fc_retenido'] as $impuesto){
+                $aplica_retenido = true;
+                $impuesto_retenidos_html = (new _html_factura())->data_impuesto(impuesto: $impuesto);
+                if (errores::$error) {
+                    $error = $this->errores->error(mensaje: 'Error al generar html', data: $impuesto_retenidos_html);
+                    print_r($error);
+                    die('Error');
+                }
+                $impuesto_retenido_html_completo.=$impuesto_retenidos_html;
+
+            }
+            $impuesto_retenido_html = '';
+            if($aplica_retenido) {
+                $impuesto_retenido_html = (new _html_factura())->tr_impuestos_html(
+                    impuesto_traslado_html: $impuesto_retenido_html_completo, tag_tipo_impuesto: 'Retenciones');
+                if (errores::$error) {
+                    $error = $this->errores->error(mensaje: 'Error al generar html', data: $impuesto_retenido_html);
+                    print_r($error);
+                    die('Error');
+                }
+            }
+
+
+            $partidas->registros[$indice]['impuesto_retenido_html'] = $impuesto_retenido_html;
+        }
+
         $this->partidas = $partidas;
 
         $base = $this->init_modifica();
@@ -472,6 +537,17 @@ class controlador_fc_factura extends system{
         $this->inputs->partidas = $inputs;
 
         //$this->inputs = (object) array_merge((array)$this->inputs, (array)$inputs);
+
+        $t_head_producto = (new _html_factura())->thead_producto();
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al generar html', data: $t_head_producto);
+            print_r($error);
+            die('Error');
+        }
+        $this->t_head_producto = $t_head_producto;
+
+
+
 
         return $base->template;
     }
