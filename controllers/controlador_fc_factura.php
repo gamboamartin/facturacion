@@ -452,8 +452,6 @@ class controlador_fc_factura extends system{
                 header: $header,ws:$ws);
         }
 
-
-
         $identificador = "com_producto_id";
         $propiedades = array("cols" => 12);
         $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
@@ -465,7 +463,9 @@ class controlador_fc_factura extends system{
             die('Error');
         }
 
-        $this->inputs = (object) array_merge((array)$this->inputs, (array)$inputs);
+        $this->inputs->partidas = $inputs;
+
+        //$this->inputs = (object) array_merge((array)$this->inputs, (array)$inputs);
 
         return $base->template;
     }

@@ -47,15 +47,15 @@
                     </div>
                     <form method="post" action="<?php echo $controlador->link_fc_partida_alta_bd; ?>" class="form-additional">
 
-                        <?php echo $controlador->inputs->com_producto_id; ?>
-                        <?php echo $controlador->inputs->unidad; ?>
-                        <?php echo $controlador->inputs->impuesto; ?>
-                        <?php echo $controlador->inputs->descripcion; ?>
-                        <?php echo $controlador->inputs->cantidad; ?>
-                        <?php echo $controlador->inputs->valor_unitario; ?>
-                        <?php echo $controlador->inputs->subtotal; ?>
-                        <?php echo $controlador->inputs->descuento; ?>
-                        <?php echo $controlador->inputs->total; ?>
+                        <?php echo $controlador->inputs->partidas->com_producto_id; ?>
+                        <?php echo $controlador->inputs->partidas->unidad; ?>
+                        <?php echo $controlador->inputs->partidas->impuesto; ?>
+                        <?php echo $controlador->inputs->partidas->descripcion; ?>
+                        <?php echo $controlador->inputs->partidas->cantidad; ?>
+                        <?php echo $controlador->inputs->partidas->valor_unitario; ?>
+                        <?php echo $controlador->inputs->partidas->subtotal; ?>
+                        <?php echo $controlador->inputs->partidas->descuento; ?>
+                        <?php echo $controlador->inputs->partidas->total; ?>
 
                         <div class="control-group btn-alta">
                             <div class="controls">
