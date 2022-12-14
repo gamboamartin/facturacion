@@ -273,8 +273,6 @@ class fc_factura extends modelo{
         }
 
         $conceptos = array();
-        $imp_traslados = array();
-        $imp_retenidos = array();
 
         foreach ($registro['partidas'] as $key => $partida){
 
@@ -305,39 +303,45 @@ class fc_factura extends modelo{
             $concepto->impuestos[0]->traslados = array();
             $concepto->impuestos[0]->retenciones = array();
 
-            foreach ($traslados->registros as $traslado){
-                $traslados_obj = new stdClass();
-                $traslados_obj->base = '1';
-                $traslados_obj->impuesto = $traslado['cat_sat_tipo_impuesto_descripcion'];
-                $traslados_obj->tipo_factor = $traslado['cat_sat_tipo_factor_descripcion'];
-                $traslados_obj->tasa_o_cuota = $traslado['cat_sat_factor_factor'];
-                $traslados_obj->importe = '1';
-
-                $imp_traslados[] = $traslados_obj;
-                $concepto->impuestos[0]->traslados[] = $traslados_obj;
+            $impuestos = $this->maqueta_impuesto(impuestos: $traslados);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al maquetar traslados',data:  $impuestos);
             }
 
-            foreach ($retenidos->registros as $retenido){
-                $retenido_obj = new stdClass();
-                $retenido_obj->base = '1';
-                $retenido_obj->impuesto = $retenido['cat_sat_tipo_impuesto_descripcion'];
-                $retenido_obj->tipo_factor = $retenido['cat_sat_tipo_factor_descripcion'];
-                $retenido_obj->tasa_o_cuota = $retenido['cat_sat_factor_factor'];
-                $retenido_obj->importe = '1';
+            $registro['traslados'] = $impuestos;
+            $concepto->impuestos[0]->traslados = $impuestos;
 
-                $imp_retenidos[] = $retenido_obj;
-                $concepto->impuestos[0]->retenciones[] = $retenido_obj;
+            $impuestos = $this->maqueta_impuesto(impuestos: $retenidos);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al maquetar retenciones',data:  $impuestos);
             }
+
+            $registro['retenidos'] = $impuestos;
+            $concepto->impuestos[0]->retenciones = $impuestos;
 
             $conceptos[] = $concepto;
         }
 
         $registro['conceptos'] = $conceptos;
         $registro['total_impuestos_trasladados'] = 1;
-        $registro['traslados'] = $imp_traslados;
-        $registro['retenidos'] = $imp_retenidos;
 
         return $registro;
+    }
+
+    private function maqueta_impuesto(stdClass $impuestos): array{
+
+        $imp = array();
+
+        foreach ($impuestos->registros as $impuesto){
+            $impuesto_obj = new stdClass();
+            $impuesto_obj->base = $impuesto['fc_partida_cantidad'] * $impuesto['fc_partida_valor_unitario'] - $impuesto['fc_partida_descuento'];
+            $impuesto_obj->impuesto = $impuesto['cat_sat_tipo_impuesto_descripcion'];
+            $impuesto_obj->tipo_factor = $impuesto['cat_sat_tipo_factor_descripcion'];
+            $impuesto_obj->tasa_o_cuota = $impuesto['cat_sat_factor_factor'];
+            $impuesto_obj->importe = $impuesto_obj->base * $impuesto_obj->tasa_o_cuota;
+            $imp[] = $impuesto_obj;
+        }
+        return $imp;
     }
 
     public function get_factura_sub_total(int $fc_factura_id): float|array
