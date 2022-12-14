@@ -29,7 +29,11 @@
                         <?php echo $controlador->inputs->com_tipo_cambio_id; ?>
                         <?php echo $controlador->inputs->cat_sat_uso_cfdi_id; ?>
                         <?php include (new views())->ruta_templates.'botons/submit/modifica_bd.php';?>
-
+                        <div class="control-group btn-alta">
+                            <div class="controls">
+                                <a href="<?php echo $controlador->link_factura_genera_xml;?>" class="btn btn-success" >Genera XML</a><br>
+                            </div>
+                        </div>
                     </form>
                 </div>
 
