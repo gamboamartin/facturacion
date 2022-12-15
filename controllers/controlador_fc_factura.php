@@ -27,6 +27,7 @@ use gamboamartin\xml_cfdi_4\cfdis;
 use html\fc_partida_html;
 use html\fc_factura_html;
 use models\doc_documento;
+use models\doc_extension_permitido;
 use PDO;
 use stdClass;
 
@@ -233,10 +234,22 @@ class controlador_fc_factura extends system{
         $file_xml_st = $ruta_archivos_tmp.'/'.$this->registro_id.'.st.xml';
         file_put_contents($file_xml_st, $ingreso);
 
+        $filtro['doc_extension.descripcion'] = 'xml';
+        $existe = (new doc_extension_permitido($this->link))->filtro_and(filtro: $filtro,limit: 1);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al validar extension del documento', data: $existe,
+                header: $header, ws: $ws);
+        }
+
+        if ($existe->n_registros <= 0){
+            return $this->retorno_error(mensaje: 'Error la extension: xml no esta permitida', data: $existe,
+                header: $header, ws: $ws);
+        }
+
         $file['name'] = $file_xml_st;
         $file['tmp_name'] = $file_xml_st;
-        $documento['doc_tipo_documento_id'] = 1;
-        $documento['descripcion'] = 1;
+        $documento['doc_tipo_documento_id'] = $existe->registros[0]['doc_tipo_documento_id'];
+        $documento['descripcion'] = $ruta_archivos_tmp;
 
         $documento = (new doc_documento(link: $this->link))->alta_registro(registro: $documento, file: $file);
         if (errores::$error) {
@@ -252,7 +265,6 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al dar de alta factura documento', data: $fc_factura_documento,
                 header: $header, ws: $ws);
         }
-
 
 
         unlink($file_xml_st);
