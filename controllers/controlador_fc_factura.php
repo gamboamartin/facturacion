@@ -25,6 +25,7 @@ use gamboamartin\template\html;
 use gamboamartin\xml_cfdi_4\cfdis;
 use html\fc_partida_html;
 use html\fc_factura_html;
+use models\doc_documento;
 use PDO;
 use stdClass;
 
@@ -142,6 +143,45 @@ class controlador_fc_factura extends system{
         }
     }
 
+    private function ruta_archivos(): array|string
+    {
+        $ruta_archivos = (new generales())->path_base.'archivos';
+        if(!file_exists($ruta_archivos)){
+            mkdir($ruta_archivos,0777,true);
+        }
+        if(!file_exists($ruta_archivos)){
+            return $this->errores->error(mensaje: 'Error no existe '.$ruta_archivos, data: $ruta_archivos);
+        }
+        return $ruta_archivos;
+    }
+
+    private function ruta_archivos_tmp(string $ruta_archivos): array|string
+    {
+        $ruta_archivos_tmp = $ruta_archivos.'/tmp';
+
+        if(!file_exists($ruta_archivos_tmp)){
+            mkdir($ruta_archivos_tmp,0777,true);
+        }
+        if(!file_exists($ruta_archivos_tmp)){
+            return $this->errores->error(mensaje: 'Error no existe '.$ruta_archivos_tmp, data: $ruta_archivos_tmp);
+        }
+        return $ruta_archivos_tmp;
+    }
+
+    private function genera_ruta_archivo_tmp(): array|string
+    {
+        $ruta_archivos = $this->ruta_archivos();
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar ruta de archivos', data: $ruta_archivos);
+        }
+
+        $ruta_archivos_tmp = $this->ruta_archivos_tmp(ruta_archivos: $ruta_archivos);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar ruta de archivos', data: $ruta_archivos_tmp);
+        }
+        return $ruta_archivos_tmp;
+    }
+
     public function genera_xml(bool $header, bool $ws = false){
 
         $factura = $this->modelo->get_factura(fc_factura_id: $this->registro_id);
@@ -182,8 +222,28 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al obtener xml',data:  $ingreso, header: $header,ws:$ws);
         }
 
+        $ruta_archivos_tmp = $this->genera_ruta_archivo_tmp();
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al generar ruta de archivos', data: $ruta_archivos_tmp, header: $header, ws: $ws);
+        }
+
+        $documento = array();
+        $file = array();
+        $file_xml_st = $ruta_archivos_tmp.'/'.$this->registro_id.'.st.xml';
+        file_put_contents($file_xml_st, $ingreso);
+
+        $file['name'] = $file_xml_st;
+        $file['tmp_name'] = $file_xml_st;
+        $documento['doc_tipo_documento_id'] = 1;
+        $documento['descripcion'] = 1;
+
+        $documento = (new doc_documento(link: $this->link))->alta_registro(registro: $documento, file: $file);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al guardar xml', data: $documento, header: $header, ws: $ws);
+        }
+        unlink($file_xml_st);
         ob_clean();
-        echo $ingreso;
+        echo trim(file_get_contents($documento->registro['doc_documento_ruta_absoluta']));
         header('Content-Type: text/xml');
         exit;
     }
