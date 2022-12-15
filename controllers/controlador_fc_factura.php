@@ -15,6 +15,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_conf_retenido;
 use gamboamartin\facturacion\models\fc_conf_traslado;
 use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\system\actions;
@@ -241,6 +242,19 @@ class controlador_fc_factura extends system{
         if (errores::$error) {
             return $this->retorno_error(mensaje: 'Error al guardar xml', data: $documento, header: $header, ws: $ws);
         }
+
+        $fc_factura_documento = array();
+        $fc_factura_documento['fc_factura_id'] = $this->registro_id;
+        $fc_factura_documento['doc_documento_id'] = $documento->registro_id;
+
+        $fc_factura_documento = (new fc_factura_documento(link: $this->link))->alta_registro(registro: $fc_factura_documento);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al dar de alta factura documento', data: $fc_factura_documento,
+                header: $header, ws: $ws);
+        }
+
+
+
         unlink($file_xml_st);
         ob_clean();
         echo trim(file_get_contents($documento->registro['doc_documento_ruta_absoluta']));
