@@ -130,6 +130,7 @@ class base_test{
         $registro['com_sucursal_id'] = $com_sucursal_id;
         $registro['serie'] = 1;
         $registro['folio'] = 1;
+        $registro['exportacion'] = 1;
         $registro['cat_sat_forma_pago_id'] = 1;
         $registro['cat_sat_metodo_pago_id'] = 1;
         $registro['cat_sat_moneda_id'] = 1;

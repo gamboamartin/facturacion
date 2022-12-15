@@ -49,7 +49,7 @@ class fc_factura extends modelo{
 
         $campos_obligatorios = array('folio', 'fc_csd_id','cat_sat_forma_pago_id','cat_sat_metodo_pago_id',
             'cat_sat_moneda_id', 'com_tipo_cambio_id', 'cat_sat_uso_cfdi_id', 'cat_sat_tipo_de_comprobante_id',
-            'dp_calle_pertenece_id', 'cat_sat_regimen_fiscal_id', 'com_sucursal_id');
+            'dp_calle_pertenece_id', 'cat_sat_regimen_fiscal_id', 'com_sucursal_id','exportacion');
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 
