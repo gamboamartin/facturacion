@@ -170,7 +170,7 @@ class controlador_fc_factura extends system{
             return $this->errores->error(mensaje: 'Error al obtener emisor',data:  $emisor);
         }
 
-        $receptor = $this->emisor(factura: $factura);
+        $receptor = $this->receptor(factura: $factura);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener receptor',data:  $receptor);
         }
@@ -291,13 +291,13 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al validar si existe documento', data: $existe, header: $header, ws: $ws);
         }
 
-        if(!$existe){
+        $doc_tipo_documento_id = $this->doc_tipo_documento_id();
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al validar extension del documento', data: $doc_tipo_documento_id,
+                header: $header, ws: $ws);
+        }
 
-            $doc_tipo_documento_id = $this->doc_tipo_documento_id();
-            if (errores::$error) {
-                return $this->retorno_error(mensaje: 'Error al validar extension del documento', data: $doc_tipo_documento_id,
-                    header: $header, ws: $ws);
-            }
+        if(!$existe){
 
             $file['name'] = $file_xml_st;
             $file['tmp_name'] = $file_xml_st;
@@ -321,7 +321,6 @@ class controlador_fc_factura extends system{
             }
         }
         else{
-
             $r_fc_factura_documento = (new fc_factura_documento(link: $this->link))->filtro_and(filtro: array('fc_factura.id'=>$this->registro_id));
             if (errores::$error) {
                 return $this->retorno_error(mensaje: 'Error al obtener factura documento', data: $r_fc_factura_documento, header: $header, ws: $ws);
@@ -337,18 +336,21 @@ class controlador_fc_factura extends system{
 
             $doc_documento_id = $fc_factura_documento['doc_documento_id'];
 
-            
+            $registro['descripcion'] = $ruta_archivos_tmp;
+            $registro['doc_tipo_documento_id'] = $doc_tipo_documento_id;
+            $_FILES['name'] = $file_xml_st;
+            $_FILES['tmp_name'] = $file_xml_st;
 
-            $documento = (new doc_documento(link: $this->link))->alta_registro(registro: $documento, file: $file);
+            $documento = (new doc_documento(link: $this->link))->modifica_bd(registro: $registro, id: $doc_documento_id);
             if (errores::$error) {
-                return $this->retorno_error(mensaje: 'Error al guardar xml', data: $documento, header: $header, ws: $ws);
+                return $this->retorno_error(mensaje: 'Error al modificar documento', data: $documento, header: $header, ws: $ws);
             }
 
-
+            $documento->registro = (new doc_documento(link: $this->link))->registro(registro_id: $documento->registro_id);
+            if (errores::$error) {
+                return $this->retorno_error(mensaje: 'Error al obtener documento', data: $documento, header: $header, ws: $ws);
+            }
         }
-
-
-
 
         unlink($file_xml_st);
         ob_clean();
