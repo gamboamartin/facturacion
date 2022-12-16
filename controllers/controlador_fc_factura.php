@@ -645,7 +645,7 @@ class controlador_fc_factura extends system{
             $aplica_traslado = false;
             foreach($partida['fc_traslado'] as $impuesto){
                 $aplica_traslado = true;
-                $impuesto_traslado_html = (new _html_factura())->data_impuesto(impuesto: $impuesto);
+                $impuesto_traslado_html = (new _html_factura())->data_impuesto(impuesto: $impuesto,key: "fc_traslado_importe");
                 if (errores::$error) {
                     $error = $this->errores->error(mensaje: 'Error al generar html', data: $impuesto_traslado_html);
                     print_r($error);
@@ -672,7 +672,7 @@ class controlador_fc_factura extends system{
             $aplica_retenido = false;
             foreach($partida['fc_retenido'] as $impuesto){
                 $aplica_retenido = true;
-                $impuesto_retenidos_html = (new _html_factura())->data_impuesto(impuesto: $impuesto);
+                $impuesto_retenidos_html = (new _html_factura())->data_impuesto(impuesto: $impuesto,key: "fc_retenido_importe");
                 if (errores::$error) {
                     $error = $this->errores->error(mensaje: 'Error al generar html', data: $impuesto_retenidos_html);
                     print_r($error);

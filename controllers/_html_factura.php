@@ -20,6 +20,7 @@ class _html_factura{
                         <th>Importe</th>
                         <th>Descuento</th>
                         <th>Objeto Impuesto</th>
+                        <th>Acción</th>
                     </tr>
             </thead>";
     }
@@ -47,16 +48,17 @@ class _html_factura{
                 <td>$partida[fc_partida_importe]</td>
                 <td>$partida[fc_partida_descuento]</td>
                 <td>$partida[cat_sat_obj_imp_descripcion]</td>
+                <td><a href='$partida[elimina_bd]' class='btn btn-link' style='padding: 0; font-size: 12px;'>Eliminar</a></td>
             </tr>";
     }
 
-    public function data_impuesto(array $impuesto): string
+    public function data_impuesto(array $impuesto, string $key): string
     {
         return "<tr style='font-size: 12px;'>
                     <td>$impuesto[cat_sat_tipo_impuesto_descripcion]</td>
                     <td>$impuesto[cat_sat_tipo_factor_descripcion]</td>
                     <td>$impuesto[cat_sat_factor_factor]</td>
-                    <td>$impuesto[fc_traslado_importe]</td>
+                    <td>$impuesto[$key]</td>
                     </tr>";
     }
 
@@ -67,7 +69,7 @@ class _html_factura{
         }
         $html = "
             <tr>
-                <td class='nested' colspan='8' style='padding: 0;'>
+                <td class='nested' colspan='9' style='padding: 0;'>
                     <table class='table table-striped' style='font-size: 14px; vertical-align: middle; margin-bottom: 0;'>
                         <thead >
                             <tr style='background-color: #dfe7f6; color: #2c58a0;'>

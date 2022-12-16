@@ -94,7 +94,7 @@
                             <tbody>
                             <?php echo $partida['data_producto_html']; ?>
                             <tr>
-                                <td class="nested" colspan="8" style="padding: 0;">
+                                <td class="nested" colspan="9" style="padding: 0;">
                                     <table class="table table-striped" style='font-size: 14px; vertical-align: middle; background-color: #dfe7f6; color: #2c58a0; margin-bottom: 0; '>
                                         <thead><tr><th>Producto</th></tr></thead>
                                         <tbody>
