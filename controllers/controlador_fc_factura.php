@@ -9,6 +9,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
+use base\orm\modelo;
 use config\generales;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\errores\errores;
@@ -24,6 +25,7 @@ use gamboamartin\system\system;
 
 use gamboamartin\template\html;
 use gamboamartin\xml_cfdi_4\cfdis;
+use gamboamartin\xml_cfdi_4\timbra;
 use html\fc_partida_html;
 use html\fc_factura_html;
 use models\doc_documento;
@@ -201,123 +203,18 @@ class controlador_fc_factura extends system{
         }
     }
 
-    private function comprobante(array $factura): array
-    {
-        $comprobante = array();
-        $comprobante['lugar_expedicion'] = $factura['dp_cp_descripcion'];
-        $comprobante['tipo_de_comprobante'] = $factura['cat_sat_tipo_de_comprobante_codigo'];
-        $comprobante['moneda'] = $factura['cat_sat_moneda_codigo'];
-        $comprobante['sub_total'] = $factura['fc_factura_sub_total'];
-        $comprobante['total'] = $factura['fc_factura_total'];
-        $comprobante['exportacion'] = $factura['fc_factura_exportacion'];
-        $comprobante['folio'] = $factura['fc_factura_folio'];
-        return $comprobante;
-    }
-
-    private function data_factura(array $factura): array|stdClass
-    {
-        $comprobante = $this->comprobante(factura: $factura);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener comprobante',data:  $comprobante);
-        }
-
-        $emisor = $this->emisor(factura: $factura);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener emisor',data:  $emisor);
-        }
-
-        $receptor = $this->receptor(factura: $factura);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener receptor',data:  $receptor);
-        }
-
-
-        $conceptos = $factura['conceptos'];
-
-
-        $impuestos = $this->impuestos(factura: $factura);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener impuestos',data:  $impuestos);
-        }
-
-        $data = new stdClass();
-        $data->comprobante = $comprobante;
-        $data->emisor = $emisor;
-        $data->receptor = $receptor;
-        $data->conceptos = $conceptos;
-        $data->impuestos = $impuestos;
-        return $data;
-    }
-
-    private function doc_tipo_documento_id(){
-        $filtro['doc_extension.descripcion'] = 'xml';
-        $existe_extension = (new doc_extension_permitido($this->link))->existe(filtro: $filtro);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al validar extension del documento', data: $existe_extension);
-        }
-        if(!$existe_extension){
-            return $this->errores->error(mensaje: 'Error la extension: xml no esta permitida', data: $existe_extension);
-        }
-
-        $r_doc_extension_permitido = (new doc_extension_permitido($this->link))->filtro_and(filtro: $filtro, limit: 1);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al validar extension del documento', data: $r_doc_extension_permitido);
-        }
-        return $r_doc_extension_permitido->registros[0]['doc_tipo_documento_id'];
-    }
-
-    private function emisor(array $factura): array
-    {
-        $emisor = array();
-        $emisor['rfc'] = $factura['org_empresa_rfc'];
-        return $emisor;
-    }
-
-    private function ruta_archivos(): array|string
-    {
-        $ruta_archivos = (new generales())->path_base.'archivos';
-        if(!file_exists($ruta_archivos)){
-            mkdir($ruta_archivos,0777,true);
-        }
-        if(!file_exists($ruta_archivos)){
-            return $this->errores->error(mensaje: 'Error no existe '.$ruta_archivos, data: $ruta_archivos);
-        }
-        return $ruta_archivos;
-    }
-
-    private function ruta_archivos_tmp(string $ruta_archivos): array|string
-    {
-        $ruta_archivos_tmp = $ruta_archivos.'/tmp';
-
-        if(!file_exists($ruta_archivos_tmp)){
-            mkdir($ruta_archivos_tmp,0777,true);
-        }
-        if(!file_exists($ruta_archivos_tmp)){
-            return $this->errores->error(mensaje: 'Error no existe '.$ruta_archivos_tmp, data: $ruta_archivos_tmp);
-        }
-        return $ruta_archivos_tmp;
-    }
-
-    private function genera_ruta_archivo_tmp(): array|string
-    {
-        $ruta_archivos = $this->ruta_archivos();
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al generar ruta de archivos', data: $ruta_archivos);
-        }
-
-        $ruta_archivos_tmp = $this->ruta_archivos_tmp(ruta_archivos: $ruta_archivos);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al generar ruta de archivos', data: $ruta_archivos_tmp);
-        }
-        return $ruta_archivos_tmp;
-    }
-
     public function genera_xml(bool $header, bool $ws = false){
 
         $factura = (new fc_factura(link: $this->link))->genera_xml(fc_factura_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar XML',data:  $factura, header: $header,ws:$ws);
         }
+
+        unlink($factura->file_xml_st);
+        ob_clean();
+        echo trim(file_get_contents($factura->doc_documento_ruta_absoluta));
+        header('Content-Type: text/xml');
+        exit;
     }
 
     private function get_tipo_comprobante(): array|int
@@ -340,16 +237,6 @@ class controlador_fc_factura extends system{
         }
 
         return $tipo_comprobante->registros[0]['cat_sat_tipo_de_comprobante_id'];
-    }
-    
-    private function impuestos(array $factura): stdClass
-    {
-        $impuestos = new stdClass();
-        $impuestos->total_impuestos_trasladados = $factura['total_impuestos_trasladados'];
-        $impuestos->total_impuestos_retenidos = 'x';
-        $impuestos->traslados = $factura['traslados'];
-        $impuestos->retenciones = $factura['retenidos'];
-        return $impuestos;
     }
 
     private function init_configuraciones(): controler
@@ -778,25 +665,22 @@ class controlador_fc_factura extends system{
         return $this->inputs;
     }
 
-    private function receptor(array $factura): array
-    {
-        $receptor = array();
-        $receptor['rfc'] = $factura['com_cliente_rfc'];
-        $receptor['nombre'] = $factura['org_empresa_rfc'];
-        $receptor['domicilio_fiscal_receptor'] = $factura['org_empresa_rfc'];
-        $receptor['regimen_fiscal_receptor'] = $factura['org_empresa_rfc'];
-        $receptor['uso_cfdi'] = $factura['org_empresa_rfc'];
-        return $receptor;
-    }
-
     public function timbra_xml(bool $header, bool $ws = false): array|stdClass{
 
+        $factura = (new fc_factura(link: $this->link))->genera_xml(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar XML',data:  $factura, header: $header,ws:$ws);
+        }
 
+        $registro_relacion = file_get_contents($factura->doc_documento_ruta_absoluta);
 
+        $timbra = new timbra();
+        $xml_timbrado = $timbra->timbra(contenido_xml: $registro_relacion);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al timbrar XML', data: $xml_timbrado, header: $header, ws: $ws);
+        }
 
-
-        exit();
-        return [];
+        return $xml_timbrado;
     }
 
 

@@ -321,6 +321,8 @@ class fc_factura extends modelo{
     {
         $emisor = array();
         $emisor['rfc'] = $factura['org_empresa_rfc'];
+        $emisor['nombre'] = $factura['org_empresa_nombre_comercial'];
+        $emisor['regimen_fiscal'] = $factura['cat_sat_regimen_fiscal_descripcion'];
         return $emisor;
     }
 
@@ -338,7 +340,7 @@ class fc_factura extends modelo{
         return $ruta_archivos_tmp;
     }
 
-    public function genera_xml(int $fc_factura_id): array
+    public function genera_xml(int $fc_factura_id): array|stdClass
     {
         $factura = $this->get_factura(fc_factura_id: $fc_factura_id);
         if(errores::$error){
@@ -430,11 +432,11 @@ class fc_factura extends modelo{
             }
         }
 
-        unlink($file_xml_st);
-        ob_clean();
-        echo trim(file_get_contents($documento->registro['doc_documento_ruta_absoluta']));
-        header('Content-Type: text/xml');
-        exit;
+        $rutas = new stdClass();
+        $rutas->file_xml_st = $file_xml_st;
+        $rutas->doc_documento_ruta_absoluta = $documento->registro['doc_documento_ruta_absoluta'];
+
+        return $rutas;
     }
 
     public function get_factura(int $fc_factura_id): array|stdClass|int
@@ -762,7 +764,7 @@ class fc_factura extends modelo{
     {
         $receptor = array();
         $receptor['rfc'] = $factura['com_cliente_rfc'];
-        $receptor['nombre'] = $factura['org_empresa_rfc'];
+        $receptor['nombre'] = $factura['com_cliente_razon_social'];
         $receptor['domicilio_fiscal_receptor'] = $factura['org_empresa_rfc'];
         $receptor['regimen_fiscal_receptor'] = $factura['org_empresa_rfc'];
         $receptor['uso_cfdi'] = $factura['org_empresa_rfc'];
