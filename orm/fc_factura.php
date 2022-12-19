@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 
+use config\generales;
 use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
@@ -12,6 +13,9 @@ use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
+use gamboamartin\xml_cfdi_4\cfdis;
+use models\doc_documento;
+use models\doc_extension_permitido;
 use PDO;
 use stdClass;
 
@@ -110,6 +114,52 @@ class fc_factura extends modelo{
             return $this->error->error(mensaje: 'Error al obtener descuento',data: $descuento_nuevo);
         }
         return round($descuento+$descuento_nuevo,2);
+    }
+
+    private function comprobante(array $factura): array
+    {
+        $comprobante = array();
+        $comprobante['lugar_expedicion'] = $factura['dp_cp_descripcion'];
+        $comprobante['tipo_de_comprobante'] = $factura['cat_sat_tipo_de_comprobante_codigo'];
+        $comprobante['moneda'] = $factura['cat_sat_moneda_codigo'];
+        $comprobante['sub_total'] = $factura['fc_factura_sub_total'];
+        $comprobante['total'] = $factura['fc_factura_total'];
+        $comprobante['exportacion'] = $factura['fc_factura_exportacion'];
+        $comprobante['folio'] = $factura['fc_factura_folio'];
+        return $comprobante;
+    }
+
+    private function data_factura(array $factura): array|stdClass
+    {
+        $comprobante = $this->comprobante(factura: $factura);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener comprobante',data:  $comprobante);
+        }
+
+        $emisor = $this->emisor(factura: $factura);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener emisor',data:  $emisor);
+        }
+
+        $receptor = $this->receptor(factura: $factura);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener receptor',data:  $receptor);
+        }
+
+        $conceptos = $factura['conceptos'];
+
+        $impuestos = $this->impuestos(factura: $factura);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener impuestos',data:  $impuestos);
+        }
+
+        $data = new stdClass();
+        $data->comprobante = $comprobante;
+        $data->emisor = $emisor;
+        $data->receptor = $receptor;
+        $data->conceptos = $conceptos;
+        $data->impuestos = $impuestos;
+        return $data;
     }
 
     private function defaults_alta_bd(array $registro, stdClass $registro_csd): array
@@ -219,6 +269,23 @@ class fc_factura extends modelo{
 
     }
 
+    private function doc_tipo_documento_id(){
+        $filtro['doc_extension.descripcion'] = 'xml';
+        $existe_extension = (new doc_extension_permitido($this->link))->existe(filtro: $filtro);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al validar extension del documento', data: $existe_extension);
+        }
+        if(!$existe_extension){
+            return $this->errores->error(mensaje: 'Error la extension: xml no esta permitida', data: $existe_extension);
+        }
+
+        $r_doc_extension_permitido = (new doc_extension_permitido($this->link))->filtro_and(filtro: $filtro, limit: 1);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al validar extension del documento', data: $r_doc_extension_permitido);
+        }
+        return $r_doc_extension_permitido->registros[0]['doc_tipo_documento_id'];
+    }
+
     public function elimina_bd(int $id): array|stdClass
     {
 
@@ -248,6 +315,126 @@ class fc_factura extends modelo{
             return $this->error->error(mensaje: 'Error al eliminar partida',data:  $del);
         }
         return $del;
+    }
+
+    private function emisor(array $factura): array
+    {
+        $emisor = array();
+        $emisor['rfc'] = $factura['org_empresa_rfc'];
+        return $emisor;
+    }
+
+    private function genera_ruta_archivo_tmp(): array|string
+    {
+        $ruta_archivos = $this->ruta_archivos();
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar ruta de archivos',data:  $ruta_archivos);
+        }
+
+        $ruta_archivos_tmp = $this->ruta_archivos_tmp(ruta_archivos: $ruta_archivos);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar ruta de archivos', data: $ruta_archivos_tmp);
+        }
+        return $ruta_archivos_tmp;
+    }
+
+    public function genera_xml(int $fc_factura_id): array
+    {
+        $factura = $this->get_factura(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener factura',data:  $factura);
+        }
+
+        $data_factura = $this->data_factura(factura: $factura);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener datos de la factura',data:  $data_factura);
+        }
+
+        $ingreso = (new cfdis())->ingreso(comprobante: $data_factura->comprobante,conceptos:  $data_factura->conceptos,
+            emisor: $data_factura->emisor, impuestos: $data_factura->impuestos,receptor:  $data_factura->receptor);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar xml',data:  $ingreso);
+        }
+
+        $ruta_archivos_tmp = $this->genera_ruta_archivo_tmp();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener ruta de archivos',data:  $ruta_archivos_tmp);
+        }
+
+        $documento = array();
+        $file = array();
+        $file_xml_st = $ruta_archivos_tmp.'/'.$this->registro_id.'.st.xml';
+        file_put_contents($file_xml_st, $ingreso);
+
+        $existe = (new fc_factura_documento(link: $this->link))->existe(array('fc_factura.id'=>$this->registro_id));
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar si existe documento',data:  $existe);
+        }
+
+        $doc_tipo_documento_id = $this->doc_tipo_documento_id();
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar extension del documento',data:  $doc_tipo_documento_id);
+        }
+
+        if(!$existe){
+
+            $file['name'] = $file_xml_st;
+            $file['tmp_name'] = $file_xml_st;
+
+            $documento['doc_tipo_documento_id'] = $doc_tipo_documento_id;
+            $documento['descripcion'] = $ruta_archivos_tmp;
+
+            $documento = (new doc_documento(link: $this->link))->alta_registro(registro: $documento, file: $file);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al guardar xml',data:  $documento);
+            }
+
+            $fc_factura_documento = array();
+            $fc_factura_documento['fc_factura_id'] = $this->registro_id;
+            $fc_factura_documento['doc_documento_id'] = $documento->registro_id;
+
+            $fc_factura_documento = (new fc_factura_documento(link: $this->link))->alta_registro(registro: $fc_factura_documento);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al dar de alta factura documento',data:  $fc_factura_documento);
+            }
+        } else{
+            $r_fc_factura_documento = (new fc_factura_documento(link: $this->link))->filtro_and(
+                filtro: array('fc_factura.id'=>$this->registro_id));
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener factura documento',data:  $r_fc_factura_documento);
+            }
+
+            if($r_fc_factura_documento->n_registros > 1){
+                return $this->error->error(mensaje: 'Error solo debe existir una factura_documento',data:  $r_fc_factura_documento);
+            }
+            if($r_fc_factura_documento->n_registros === 0){
+                return $this->error->error(mensaje: 'Error  debe existir al menos una factura_documento',data:  $r_fc_factura_documento);
+            }
+            $fc_factura_documento = $r_fc_factura_documento->registros[0];
+
+            $doc_documento_id = $fc_factura_documento['doc_documento_id'];
+
+            $registro['descripcion'] = $ruta_archivos_tmp;
+            $registro['doc_tipo_documento_id'] = $doc_tipo_documento_id;
+            $_FILES['name'] = $file_xml_st;
+            $_FILES['tmp_name'] = $file_xml_st;
+
+            $documento = (new doc_documento(link: $this->link))->modifica_bd(registro: $registro, id: $doc_documento_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error  al modificar documento',data:  $r_fc_factura_documento);
+            }
+
+            $documento->registro = (new doc_documento(link: $this->link))->registro(registro_id: $documento->registro_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error  al obtener documento',data:  $documento);
+            }
+        }
+
+        unlink($file_xml_st);
+        ob_clean();
+        echo trim(file_get_contents($documento->registro['doc_documento_ruta_absoluta']));
+        header('Content-Type: text/xml');
+        exit;
     }
 
     public function get_factura(int $fc_factura_id): array|stdClass|int
@@ -522,6 +709,16 @@ class fc_factura extends modelo{
        return $registro;
     }
 
+    private function impuestos(array $factura): stdClass
+    {
+        $impuestos = new stdClass();
+        $impuestos->total_impuestos_trasladados = $factura['total_impuestos_trasladados'];
+        $impuestos->total_impuestos_retenidos = 'x';
+        $impuestos->traslados = $factura['traslados'];
+        $impuestos->retenciones = $factura['retenidos'];
+        return $impuestos;
+    }
+
     /**
      * Limpia los parametros de una factura
      * @param array $registro registro en proceso
@@ -559,6 +756,42 @@ class fc_factura extends modelo{
             unset($registro[$key]);
         }
         return $registro;
+    }
+
+    private function receptor(array $factura): array
+    {
+        $receptor = array();
+        $receptor['rfc'] = $factura['com_cliente_rfc'];
+        $receptor['nombre'] = $factura['org_empresa_rfc'];
+        $receptor['domicilio_fiscal_receptor'] = $factura['org_empresa_rfc'];
+        $receptor['regimen_fiscal_receptor'] = $factura['org_empresa_rfc'];
+        $receptor['uso_cfdi'] = $factura['org_empresa_rfc'];
+        return $receptor;
+    }
+
+    private function ruta_archivos(): array|string
+    {
+        $ruta_archivos = (new generales())->path_base.'archivos';
+        if(!file_exists($ruta_archivos)){
+            mkdir($ruta_archivos,0777,true);
+        }
+        if(!file_exists($ruta_archivos)){
+            return $this->error->error(mensaje: "Error no existe $ruta_archivos",data: $ruta_archivos);
+        }
+        return $ruta_archivos;
+    }
+
+    private function ruta_archivos_tmp(string $ruta_archivos): array|string
+    {
+        $ruta_archivos_tmp = $ruta_archivos.'/tmp';
+
+        if(!file_exists($ruta_archivos_tmp)){
+            mkdir($ruta_archivos_tmp,0777,true);
+        }
+        if(!file_exists($ruta_archivos_tmp)){
+            return $this->error->error(mensaje: "Error no existe $ruta_archivos_tmp",data: $ruta_archivos_tmp);
+        }
+        return $ruta_archivos_tmp;
     }
 
     /**

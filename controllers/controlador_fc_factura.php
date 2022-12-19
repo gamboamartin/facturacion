@@ -314,105 +314,10 @@ class controlador_fc_factura extends system{
 
     public function genera_xml(bool $header, bool $ws = false){
 
-        $factura = $this->modelo->get_factura(fc_factura_id: $this->registro_id);
+        $factura = (new fc_factura(link: $this->link))->genera_xml(fc_factura_id: $this->registro_id);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener fc_factura',data:  $factura, header: $header,ws:$ws);
+            return $this->retorno_error(mensaje: 'Error al generar XML',data:  $factura, header: $header,ws:$ws);
         }
-
-        $data_factura = $this->data_factura(factura: $factura);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener data_factura',data:  $data_factura, header: $header,ws:$ws);
-        }
-
-        $ingreso = (new cfdis())->ingreso(comprobante: $data_factura->comprobante,conceptos:  $data_factura->conceptos,
-            emisor: $data_factura->emisor, impuestos: $data_factura->impuestos,receptor:  $data_factura->receptor);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener xml',data:  $ingreso, header: $header,ws:$ws);
-        }
-
-
-        $ruta_archivos_tmp = $this->genera_ruta_archivo_tmp();
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al generar ruta de archivos', data: $ruta_archivos_tmp, header: $header, ws: $ws);
-        }
-
-        $documento = array();
-        $file = array();
-        $file_xml_st = $ruta_archivos_tmp.'/'.$this->registro_id.'.st.xml';
-        file_put_contents($file_xml_st, $ingreso);
-
-
-        $existe = (new fc_factura_documento(link: $this->link))->existe(array('fc_factura.id'=>$this->registro_id));
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al validar si existe documento', data: $existe, header: $header, ws: $ws);
-        }
-
-        $doc_tipo_documento_id = $this->doc_tipo_documento_id();
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al validar extension del documento', data: $doc_tipo_documento_id,
-                header: $header, ws: $ws);
-        }
-
-        if(!$existe){
-
-            $file['name'] = $file_xml_st;
-            $file['tmp_name'] = $file_xml_st;
-
-            $documento['doc_tipo_documento_id'] = $doc_tipo_documento_id;
-            $documento['descripcion'] = $ruta_archivos_tmp;
-
-            $documento = (new doc_documento(link: $this->link))->alta_registro(registro: $documento, file: $file);
-            if (errores::$error) {
-                return $this->retorno_error(mensaje: 'Error al guardar xml', data: $documento, header: $header, ws: $ws);
-            }
-
-            $fc_factura_documento = array();
-            $fc_factura_documento['fc_factura_id'] = $this->registro_id;
-            $fc_factura_documento['doc_documento_id'] = $documento->registro_id;
-
-            $fc_factura_documento = (new fc_factura_documento(link: $this->link))->alta_registro(registro: $fc_factura_documento);
-            if (errores::$error) {
-                return $this->retorno_error(mensaje: 'Error al dar de alta factura documento', data: $fc_factura_documento,
-                    header: $header, ws: $ws);
-            }
-        }
-        else{
-            $r_fc_factura_documento = (new fc_factura_documento(link: $this->link))->filtro_and(filtro: array('fc_factura.id'=>$this->registro_id));
-            if (errores::$error) {
-                return $this->retorno_error(mensaje: 'Error al obtener factura documento', data: $r_fc_factura_documento, header: $header, ws: $ws);
-            }
-
-            if($r_fc_factura_documento->n_registros > 1){
-                return $this->retorno_error(mensaje: 'Error solo debe existir una factura_documento', data: $r_fc_factura_documento, header: $header, ws: $ws);
-            }
-            if($r_fc_factura_documento->n_registros === 0){
-                return $this->retorno_error(mensaje: 'Error  debe existir al menos una factura_documento', data: $r_fc_factura_documento, header: $header, ws: $ws);
-            }
-            $fc_factura_documento = $r_fc_factura_documento->registros[0];
-
-            $doc_documento_id = $fc_factura_documento['doc_documento_id'];
-
-            $registro['descripcion'] = $ruta_archivos_tmp;
-            $registro['doc_tipo_documento_id'] = $doc_tipo_documento_id;
-            $_FILES['name'] = $file_xml_st;
-            $_FILES['tmp_name'] = $file_xml_st;
-
-            $documento = (new doc_documento(link: $this->link))->modifica_bd(registro: $registro, id: $doc_documento_id);
-            if (errores::$error) {
-                return $this->retorno_error(mensaje: 'Error al modificar documento', data: $documento, header: $header, ws: $ws);
-            }
-
-            $documento->registro = (new doc_documento(link: $this->link))->registro(registro_id: $documento->registro_id);
-            if (errores::$error) {
-                return $this->retorno_error(mensaje: 'Error al obtener documento', data: $documento, header: $header, ws: $ws);
-            }
-        }
-
-        unlink($file_xml_st);
-        ob_clean();
-        echo trim(file_get_contents($documento->registro['doc_documento_ruta_absoluta']));
-        header('Content-Type: text/xml');
-        exit;
     }
 
     private function get_tipo_comprobante(): array|int
@@ -885,6 +790,9 @@ class controlador_fc_factura extends system{
     }
 
     public function timbra_xml(bool $header, bool $ws = false): array|stdClass{
+
+
+
 
 
         exit();
