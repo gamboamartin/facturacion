@@ -523,10 +523,10 @@ class fc_factura extends modelo{
 
         foreach ($impuestos->registros as $impuesto){
             $impuesto_obj = new stdClass();
-            $impuesto_obj->base = $impuesto['fc_partida_cantidad'] * $impuesto['fc_partida_valor_unitario'] - $impuesto['fc_partida_descuento'];
-            $impuesto_obj->impuesto = $impuesto['cat_sat_tipo_impuesto_descripcion'];
+            $impuesto_obj->base = $impuesto['fc_partida_cantidad'] ;
+            $impuesto_obj->impuesto = $impuesto['cat_sat_tipo_impuesto_codigo'];
             $impuesto_obj->tipo_factor = $impuesto['cat_sat_tipo_factor_descripcion'];
-            $impuesto_obj->tasa_o_cuota = $impuesto['cat_sat_factor_factor'];
+            $impuesto_obj->tasa_o_cuota = number_format($impuesto['cat_sat_factor_factor'],6);
             $impuesto_obj->importe = $impuesto_obj->base * $impuesto_obj->tasa_o_cuota;
             $imp[] = $impuesto_obj;
         }
