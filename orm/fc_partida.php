@@ -173,7 +173,7 @@ class fc_partida extends _modelo_parent {
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener los registros', data: $data);
         }
-        return $data->fc_partida_cantidad * $data->fc_partida_valor_unitario;
+        return $data->fc_partida_cantidad * $data->fc_partida_valor_unitario - $data->fc_partida_descuento;
     }
 
     public function calculo_imp_trasladado(int $fc_partida_id){

@@ -123,9 +123,12 @@ class fc_factura extends modelo{
         $comprobante['tipo_de_comprobante'] = $factura['cat_sat_tipo_de_comprobante_codigo'];
         $comprobante['moneda'] = $factura['cat_sat_moneda_codigo'];
         $comprobante['sub_total'] = $factura['fc_factura_sub_total'];
-        $comprobante['total'] = $factura['fc_factura_total'];
+        $comprobante['total'] = number_format($factura['fc_factura_total'],2);
         $comprobante['exportacion'] = $factura['fc_factura_exportacion'];
         $comprobante['folio'] = $factura['fc_factura_folio'];
+        $comprobante['forma_pago'] = $factura['cat_sat_forma_pago_codigo'];
+        //$comprobante['descuento'] = $factura['fc_factura_descuento'];
+        $comprobante['metodo_pago'] = $factura['cat_sat_metodo_pago_codigo'];
         return $comprobante;
     }
 
@@ -456,6 +459,11 @@ class fc_factura extends modelo{
             return $this->error->error(mensaje: 'Error al obtener el subtotal de la factura',data:  $registro);
         }
 
+        $registro['fc_factura_descuento'] = $this->get_factura_descuento(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener el descuento de la factura',data:  $registro);
+        }
+
         $registro['fc_factura_total'] = $this->get_factura_total(fc_factura_id: $fc_factura_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener el total de la factura',data:  $registro);
@@ -642,9 +650,7 @@ class fc_factura extends modelo{
             return $this->error->error(mensaje: 'Error al obtener imp_retenidos',data:  $imp_retenidos);
         }
 
-
-
-        return $sub_total - $descuento - $imp_trasladados - $imp_retenidos;
+        return $sub_total + $imp_trasladados + $imp_retenidos;
     }
 
     /**
