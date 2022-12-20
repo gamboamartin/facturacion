@@ -463,6 +463,8 @@ class fc_factura extends modelo{
 
         $conceptos = array();
 
+        $total_impuestos_trasladados = 0.0;
+
         foreach ($registro['partidas'] as $key => $partida){
 
             $traslados = (new fc_traslado($this->link))->get_traslados(fc_partida_id: $partida['fc_partida_id']);
@@ -509,10 +511,14 @@ class fc_factura extends modelo{
             $concepto->impuestos[0]->retenciones = $impuestos;
 
             $conceptos[] = $concepto;
+
+            $total_impuestos_trasladados +=  round($partida['fc_partida_importe_total_traslado'],2);
+
         }
 
         $registro['conceptos'] = $conceptos;
-        $registro['total_impuestos_trasladados'] = 1;
+        $registro['total_impuestos_trasladados'] = number_format($total_impuestos_trasladados,2);
+        $registro['total_impuestos_retenidos'] = number_format($total_impuestos_trasladados,2);
 
         return $registro;
     }
@@ -522,12 +528,13 @@ class fc_factura extends modelo{
         $imp = array();
 
         foreach ($impuestos->registros as $impuesto){
+
             $impuesto_obj = new stdClass();
-            $impuesto_obj->base = $impuesto['fc_partida_cantidad'] ;
+            $impuesto_obj->base = number_format($impuesto['fc_partida_importe'] ,2);
             $impuesto_obj->impuesto = $impuesto['cat_sat_tipo_impuesto_codigo'];
             $impuesto_obj->tipo_factor = $impuesto['cat_sat_tipo_factor_descripcion'];
             $impuesto_obj->tasa_o_cuota = number_format($impuesto['cat_sat_factor_factor'],6);
-            $impuesto_obj->importe = $impuesto_obj->base * $impuesto_obj->tasa_o_cuota;
+            $impuesto_obj->importe = number_format($impuesto['fc_traslado_importe'], 2);
             $imp[] = $impuesto_obj;
         }
         return $imp;
@@ -715,11 +722,9 @@ class fc_factura extends modelo{
 
     private function impuestos(array $factura): stdClass
     {
-
-
         $impuestos = new stdClass();
         $impuestos->total_impuestos_trasladados = $factura['total_impuestos_trasladados'];
-        $impuestos->total_impuestos_retenidos = 'x';
+        $impuestos->total_impuestos_retenidos = $factura['total_impuestos_retenidos'];
         $impuestos->traslados = $factura['traslados'];
         $impuestos->retenciones = $factura['retenidos'];
         return $impuestos;
