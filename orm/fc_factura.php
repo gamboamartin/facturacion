@@ -478,12 +478,12 @@ class fc_factura extends modelo{
             $registro['partidas'][$key]['traslados'] = $traslados->registros;
 
             $concepto = new stdClass();
-            $concepto->clave_prod_serv = $partida['com_producto_id'];
+            $concepto->clave_prod_serv = $partida['cat_sat_producto_codigo'];
             $concepto->cantidad = $partida['fc_partida_cantidad'];
             $concepto->clave_unidad = $partida['cat_sat_unidad_codigo'];
-            $concepto->descripcion = $partida['com_producto_descripcion'];
-            $concepto->valor_unitario = $partida['fc_partida_valor_unitario'];
-            $concepto->importe = $partida['fc_partida_importe'];
+            $concepto->descripcion = $partida['cat_sat_producto_descripcion'];
+            $concepto->valor_unitario = number_format($partida['fc_partida_valor_unitario'], 2);;
+            $concepto->importe = number_format($partida['fc_partida_importe'], 2);
             $concepto->objeto_imp = $partida['cat_sat_obj_imp_codigo'];
             $concepto->no_identificacion = $partida['com_producto_codigo'];;
             $concepto->unidad = $partida['cat_sat_unidad_descripcion'];
@@ -635,6 +635,8 @@ class fc_factura extends modelo{
             return $this->error->error(mensaje: 'Error al obtener imp_retenidos',data:  $imp_retenidos);
         }
 
+
+
         return $sub_total - $descuento - $imp_trasladados - $imp_retenidos;
     }
 
@@ -713,6 +715,8 @@ class fc_factura extends modelo{
 
     private function impuestos(array $factura): stdClass
     {
+
+
         $impuestos = new stdClass();
         $impuestos->total_impuestos_trasladados = $factura['total_impuestos_trasladados'];
         $impuestos->total_impuestos_retenidos = 'x';

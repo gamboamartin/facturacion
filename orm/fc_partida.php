@@ -43,8 +43,6 @@ class fc_partida extends _modelo_parent {
         $columnas_extra['fc_partida_importe_total'] = "$sq_importes->fc_partida_importe_con_descuento 
         + $sq_importe_total_traslado - $sq_importe_total_retenido";
 
-
-
         $campos_view['com_producto_id'] = array('type' => 'selects', 'model' => new com_producto($link));
         $campos_view['fc_factura_id'] = array('type' => 'selects', 'model' => new fc_factura($link));
         $campos_view['codigo'] = array('type' => 'inputs');
