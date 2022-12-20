@@ -322,7 +322,7 @@ class fc_factura extends modelo{
         $emisor = array();
         $emisor['rfc'] = $factura['org_empresa_rfc'];
         $emisor['nombre'] = $factura['org_empresa_nombre_comercial'];
-        $emisor['regimen_fiscal'] = $factura['cat_sat_regimen_fiscal_descripcion'];
+        $emisor['regimen_fiscal'] = $factura['cat_sat_regimen_fiscal_codigo'];
         return $emisor;
     }
 
@@ -774,9 +774,9 @@ class fc_factura extends modelo{
         $receptor = array();
         $receptor['rfc'] = $factura['com_cliente_rfc'];
         $receptor['nombre'] = $factura['com_cliente_razon_social'];
-        $receptor['domicilio_fiscal_receptor'] = $factura['org_empresa_rfc'];
-        $receptor['regimen_fiscal_receptor'] = $factura['org_empresa_rfc'];
-        $receptor['uso_cfdi'] = $factura['org_empresa_rfc'];
+        $receptor['domicilio_fiscal_receptor'] = '91779';
+        $receptor['regimen_fiscal_receptor'] = $factura['cat_sat_regimen_fiscal_codigo'];
+        $receptor['uso_cfdi'] = $factura['cat_sat_uso_cfdi_codigo'];
         return $receptor;
     }
 
