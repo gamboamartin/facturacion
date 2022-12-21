@@ -329,7 +329,7 @@ class fc_factura extends modelo{
         return $emisor;
     }
 
-    private function genera_ruta_archivo_tmp(): array|string
+    public function genera_ruta_archivo_tmp(): array|string
     {
         $ruta_archivos = $this->ruta_archivos();
         if (errores::$error) {

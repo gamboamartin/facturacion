@@ -19,6 +19,7 @@ use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_traslado;
+use gamboamartin\plugins\files;
 use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
@@ -681,6 +682,21 @@ class controlador_fc_factura extends system{
         }
 
         file_put_contents(filename: $factura->doc_documento_ruta_absoluta,data: $xml_timbrado->xml_sellado);
+
+        $ruta_archivos_tmp = (new fc_factura(link: $this->link))->genera_ruta_archivo_tmp();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener ruta de archivos',data:  $ruta_archivos_tmp);
+        }
+
+        $ruta_qr = "$ruta_archivos_tmp/$this->registro_id.jpg";
+
+
+
+        $guarda_qr = (new files())->guarda_archivo_fisico(contenido_file: $xml_timbrado->qr_code,ruta_file: $ruta_qr);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al guardar QR', data: $guarda_qr,
+                header:  $header, ws: $ws);
+        }
 
         $this->link->beginTransaction();
 
