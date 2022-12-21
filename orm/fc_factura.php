@@ -325,7 +325,7 @@ class fc_factura extends modelo{
         $emisor = array();
         $emisor['rfc'] = $factura['org_empresa_rfc'];
         $emisor['nombre'] = $factura['org_empresa_nombre_comercial'];
-        $emisor['regimen_fiscal'] = $factura['cat_sat_regimen_fiscal_codigo'];
+        $emisor['regimen_fiscal'] = '601';
         return $emisor;
     }
 

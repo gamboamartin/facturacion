@@ -680,7 +680,35 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al timbrar XML', data: $xml_timbrado, header: $header, ws: $ws);
         }
 
-        return $xml_timbrado;
+        file_put_contents(filename: $factura->doc_documento_ruta_absoluta,data: $xml_timbrado->xml_sellado);
+
+        $this->link->beginTransaction();
+
+        $siguiente_view = (new actions())->init_alta_bd();
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
+                header:  $header, ws: $ws);
+        }
+
+        if($header){
+
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: "lista");
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error cambiar de view', data: $retorno,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($factura, JSON_THROW_ON_ERROR);
+            exit;
+        }
+
+        return $factura;
     }
 
 
