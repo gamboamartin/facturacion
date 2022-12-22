@@ -683,14 +683,12 @@ class controlador_fc_factura extends system{
 
         file_put_contents(filename: $factura->doc_documento_ruta_absoluta,data: $xml_timbrado->xml_sellado);
 
-        $ruta_archivos_tmp = (new fc_factura(link: $this->link))->genera_ruta_archivo_tmp();
+        $ruta_archivos = (new fc_factura(link: $this->link))->ruta_archivos();
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener ruta de archivos',data:  $ruta_archivos_tmp);
+            return $this->error->error(mensaje: 'Error al obtener ruta de archivos',data:  $ruta_archivos);
         }
 
-        $ruta_qr = "$ruta_archivos_tmp/$this->registro_id.jpg";
-
-
+        $ruta_qr = "$ruta_archivos/doc_documento/$this->registro_id.qr.jpg";
 
         $guarda_qr = (new files())->guarda_archivo_fisico(contenido_file: $xml_timbrado->qr_code,ruta_file: $ruta_qr);
         if(errores::$error){

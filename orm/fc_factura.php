@@ -786,7 +786,7 @@ class fc_factura extends modelo{
         return $receptor;
     }
 
-    private function ruta_archivos(): array|string
+    public function ruta_archivos(): array|string
     {
         $ruta_archivos = (new generales())->path_base.'archivos';
         if(!file_exists($ruta_archivos)){
