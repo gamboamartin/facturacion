@@ -272,14 +272,14 @@ class fc_factura extends modelo{
 
     }
 
-    private function doc_tipo_documento_id(){
-        $filtro['doc_extension.descripcion'] = 'xml';
+    private function doc_tipo_documento_id(string $extension){
+        $filtro['doc_extension.descripcion'] = $extension;
         $existe_extension = (new doc_extension_permitido($this->link))->existe(filtro: $filtro);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al validar extension del documento', data: $existe_extension);
         }
         if(!$existe_extension){
-            return $this->errores->error(mensaje: 'Error la extension: xml no esta permitida', data: $existe_extension);
+            return $this->errores->error(mensaje: "Error la extension: $extension no esta permitida", data: $existe_extension);
         }
 
         $r_doc_extension_permitido = (new doc_extension_permitido($this->link))->filtro_and(filtro: $filtro, limit: 1);
@@ -376,7 +376,7 @@ class fc_factura extends modelo{
             return $this->error->error(mensaje: 'Error al validar si existe documento',data:  $existe);
         }
 
-        $doc_tipo_documento_id = $this->doc_tipo_documento_id();
+        $doc_tipo_documento_id = $this->doc_tipo_documento_id(extension: "xml");
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar extension del documento',data:  $doc_tipo_documento_id);
         }
