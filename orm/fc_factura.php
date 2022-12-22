@@ -272,7 +272,7 @@ class fc_factura extends modelo{
 
     }
 
-    private function doc_tipo_documento_id(string $extension){
+    public function doc_tipo_documento_id(string $extension){
         $filtro['doc_extension.descripcion'] = $extension;
         $existe_extension = (new doc_extension_permitido($this->link))->existe(filtro: $filtro);
         if (errores::$error) {

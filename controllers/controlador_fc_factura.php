@@ -696,6 +696,22 @@ class controlador_fc_factura extends system{
                 header:  $header, ws: $ws);
         }
 
+        $doc_tipo_documento_id = (new fc_factura(link: $this->link))->doc_tipo_documento_id(extension: "jpg");
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar extension del documento',data:  $doc_tipo_documento_id);
+        }
+
+        $file['name'] = $guarda_qr;
+        $file['tmp_name'] = $guarda_qr;
+
+        $documento['doc_tipo_documento_id'] = $doc_tipo_documento_id;
+        $documento['descripcion'] = $ruta_qr;
+
+        $documento = (new doc_documento(link: $this->link))->alta_registro(registro: $documento, file: $file);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al guardar jpg',data:  $documento);
+        }
+
         $this->link->beginTransaction();
 
         $siguiente_view = (new actions())->init_alta_bd();
