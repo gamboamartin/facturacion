@@ -721,6 +721,14 @@ class controlador_fc_factura extends system{
             return $this->error->error(mensaje: 'Error al dar de alta factura documento',data:  $fc_factura_documento);
         }
 
+        $ruta_text = "$ruta_archivos/doc_documento/$this->registro_id.txt";
+
+        $guarda_qr = (new files())->guarda_archivo_fisico(contenido_file: $xml_timbrado->txt,ruta_file: $ruta_text);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al guardar txt', data: $guarda_qr,
+                header:  $header, ws: $ws);
+        }
+
         $this->link->beginTransaction();
 
         $siguiente_view = (new actions())->init_alta_bd();
