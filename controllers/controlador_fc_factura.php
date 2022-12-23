@@ -723,11 +723,29 @@ class controlador_fc_factura extends system{
 
         $ruta_text = "$ruta_archivos/doc_documento/$this->registro_id.txt";
 
-        $guarda_qr = (new files())->guarda_archivo_fisico(contenido_file: $xml_timbrado->txt,ruta_file: $ruta_text);
+        $guarda_txt = (new files())->guarda_archivo_fisico(contenido_file: $xml_timbrado->txt,ruta_file: $ruta_text);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al guardar txt', data: $guarda_qr,
+            return $this->retorno_error(mensaje: 'Error al guardar txt', data: $guarda_txt,
                 header:  $header, ws: $ws);
         }
+
+        $doc_tipo_documento_id = (new fc_factura(link: $this->link))->doc_tipo_documento_id(extension: "txt");
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar extension del documento',data:  $doc_tipo_documento_id);
+        }
+
+        $file['name'] = $guarda_txt;
+        $file['tmp_name'] = $guarda_txt;
+
+        $documento2['doc_tipo_documento_id'] = $doc_tipo_documento_id;
+        $documento2['descripcion'] = $ruta_text;
+
+        $documento2 = (new doc_documento(link: $this->link))->alta_registro(registro: $documento2, file: $file);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al guardar txt',data:  $documento2);
+        }
+
+
 
         $this->link->beginTransaction();
 
