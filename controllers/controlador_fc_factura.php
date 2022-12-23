@@ -745,7 +745,14 @@ class controlador_fc_factura extends system{
             return $this->error->error(mensaje: 'Error al guardar txt',data:  $documento2);
         }
 
+        $fc_factura_documento = array();
+        $fc_factura_documento['fc_factura_id'] = $this->registro_id;
+        $fc_factura_documento['doc_documento_id'] = $documento2->registro_id;
 
+        $fc_factura_documento = (new fc_factura_documento(link: $this->link))->alta_registro(registro: $fc_factura_documento);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al dar de alta factura documento',data:  $fc_factura_documento);
+        }
 
         $this->link->beginTransaction();
 
