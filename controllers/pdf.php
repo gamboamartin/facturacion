@@ -93,6 +93,7 @@ final class pdf {
         $body_td_8 = $this->html(etiqueta: "td", data: "Importe");
 
 
+
         $body_td_9 = $this->html(etiqueta: "td", data: "222222");
         $body_td_10 = $this->html(etiqueta: "td", data: "222222");
         $body_td_11 = $this->html(etiqueta: "td", data: "222222");
@@ -110,12 +111,16 @@ final class pdf {
         return $body_tr;
     }
 
+    private function concepto_impuestos(array $impuestos){
+
+    }
+
     private function concepto_numeros(array $concepto):string{
 
         $body_td_1 = $this->html(etiqueta: "td", data: "Número de pedimento",class: "color",propiedades: "colspan='2'");
         $body_td_2 = $this->html(etiqueta: "td", data: "Número de cuenta predial",class: "color",propiedades: "colspan='2'");
-        $body_td_3 = $this->html(etiqueta: "td", data: "  ",propiedades: "colspan='2'");
-        $body_td_4 = $this->html(etiqueta: "td", data: "  ",propiedades: "colspan='2'");
+        $body_td_3 = $this->html(etiqueta: "td", data: " 2 ",propiedades: "colspan='2'");
+        $body_td_4 = $this->html(etiqueta: "td", data: " 2 ",propiedades: "colspan='2'");
 
         $body_tr = $this->html(etiqueta: "tr", data: $body_td_1.$body_td_2);
         $body_tr .= $this->html(etiqueta: "tr", data: $body_td_3.$body_td_4);
@@ -171,12 +176,45 @@ final class pdf {
         $table = $this->html(etiqueta: "table", data: $head.$body,class: "conceptos");
 
         $this->pdf->WriteHTML($table);
-
-        $this->pdf->Output('ejemmplo'.'.pdf','D');
     }
 
     private function html(string $etiqueta, string $data, string $class = "", string $propiedades = ""): string{
         return "<$etiqueta class='$class' $propiedades>$data</$etiqueta>";
+    }
+
+    public function totales(string $moneda,string $subtotal,string $forma_pago,string $imp_trasladados,
+                            string $imp_retenidos,string $metodo_pago,string $total){
+
+        $body_td_1 = $this->html(etiqueta: "td", data: "Moneda:");
+        $body_td_2 = $this->html(etiqueta: "td", data: $moneda);
+        $body_td_3 = $this->html(etiqueta: "td", data: "Subtotal:");
+        $body_td_4 = $this->html(etiqueta: "td", data: $subtotal);
+
+        $body_td_5 = $this->html(etiqueta: "td", data: "Forma de pago:",propiedades: "rowspan='2'");
+        $body_td_6 = $this->html(etiqueta: "td", data: $forma_pago,propiedades: "rowspan='2'");
+        $body_td_7 = $this->html(etiqueta: "td", data: "Impuestos trasladados:");
+        $body_td_8 = $this->html(etiqueta: "td", data: $imp_trasladados);
+        $body_td_9 = $this->html(etiqueta: "td", data: "Impuestos retenidos");
+        $body_td_10 = $this->html(etiqueta: "td", data: $imp_retenidos);
+
+        $body_td_11 = $this->html(etiqueta: "td", data: "Método de pago:");
+        $body_td_12 = $this->html(etiqueta: "td", data: $metodo_pago);
+        $body_td_13 = $this->html(etiqueta: "td", data: "Total");
+        $body_td_14 = $this->html(etiqueta: "td", data: $total);
+
+
+        $body_tr_1 = $this->html(etiqueta: "tr", data: $body_td_1.$body_td_2.$body_td_3.$body_td_4);
+        $body_tr_2 = $this->html(etiqueta: "tr", data: $body_td_5.$body_td_6.$body_td_7.$body_td_8);
+        $body_tr_3 = $this->html(etiqueta: "tr", data: $body_td_9.$body_td_10);
+        $body_tr_4 = $this->html(etiqueta: "tr", data: $body_td_11.$body_td_12.$body_td_13.$body_td_14);
+
+        $body = $this->html(etiqueta: "tbody", data: $body_tr_1.$body_tr_2.$body_tr_3.$body_tr_4);
+
+        $table = $this->html(etiqueta: "table", data: $body);
+
+        $this->pdf->WriteHTML($table);
+
+        $this->pdf->Output('ejemmplo'.'.pdf','D');
     }
 
 }

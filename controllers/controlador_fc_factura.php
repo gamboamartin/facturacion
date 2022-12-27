@@ -228,6 +228,14 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al maquetar conceptos',data:  $pdf, header: $header,ws:$ws);
         }
 
+        $pdf->totales(moneda: $factura['org_empresa_rfc'],subtotal: $factura['org_empresa_rfc'],
+            forma_pago: $factura['org_empresa_rfc'],imp_trasladados: $factura['org_empresa_rfc'],
+            imp_retenidos: $factura['org_empresa_rfc'],metodo_pago: $factura['org_empresa_rfc'],
+            total: $factura['org_empresa_rfc']);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar totales',data:  $pdf, header: $header,ws:$ws);
+        }
+
         exit;
     }
 
