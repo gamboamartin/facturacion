@@ -1,0 +1,16 @@
+table{
+    font-size: 12px;
+}
+
+.conceptos, .conceptos   th, .conceptos   td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.conceptos   th{
+    background-color: darkgray;
+}
+
+.color {
+    background-color: darkgray;
+}

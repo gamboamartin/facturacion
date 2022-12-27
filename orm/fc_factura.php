@@ -520,7 +520,7 @@ class fc_factura extends modelo{
 
             $conceptos[] = $concepto;
 
-            $total_impuestos_trasladados +=  round($partida['fc_partida_importe_total_traslado'],2);
+            $total_impuestos_trasladados +=  ($partida['fc_partida_importe_total_traslado']);
 
         }
 
