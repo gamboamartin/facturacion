@@ -206,6 +206,15 @@ class controlador_fc_factura extends system{
 
     public function genera_pdf(bool $header, bool $ws = false){
         $pdf = new pdf();
+        $pdf->header(rfc_emisor: "FICL001206481",folio_fiscal: "DD6048CC-0D27-40C0-A770-3554D03597C1",
+            nombre_emisor: "LEONARDO JOSEPH FIGUEROA CISNEROS",csd: "00001000000513317794",
+            rfc_receptor: "ICT220322G82",cod_posta_fecha: "45580 2022-07-01 09:06:01",
+            nombre_receptor: "INMOBILIARIA Y CONSTRUCCION TIQUE",efecto: "Ingreso",cod_posta_receptor: "45010",
+            regimen_fiscal: "Régimen Simplificado de Confianza",regimen_fiscal_receptor: "General de Ley Personas Morales",
+            exportacion: "No aplica",cfdi: "Gastos en general");
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar header',data:  $pdf, header: $header,ws:$ws);
+        }
 
         exit;
     }
