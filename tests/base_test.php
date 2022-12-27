@@ -286,11 +286,26 @@ class base_test{
 
     public function del_fc_factura(PDO $link): array
     {
+
+        $del = $this->del_fc_factura_documento($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
         $del = $this->del_fc_partida($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_factura');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_factura_documento(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_factura_documento');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
