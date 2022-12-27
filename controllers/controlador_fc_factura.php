@@ -204,6 +204,12 @@ class controlador_fc_factura extends system{
         }
     }
 
+    public function genera_pdf(bool $header, bool $ws = false){
+        $pdf = new pdf();
+
+        exit;
+    }
+
     public function genera_xml(bool $header, bool $ws = false){
 
         $factura = (new fc_factura(link: $this->link))->genera_xml(fc_factura_id: $this->registro_id);
