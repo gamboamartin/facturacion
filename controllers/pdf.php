@@ -213,6 +213,21 @@ final class pdf {
         $table = $this->html(etiqueta: "table", data: $body);
 
         $this->pdf->WriteHTML($table);
+    }
+
+    public function sellos(string $sello_cfdi,string $sello_sat){
+
+        $sello = $this->html(etiqueta: "h2", data: "Sello digital del CFDI:");
+        $this->pdf->WriteHTML($sello);
+
+        $firma = $this->html(etiqueta: "p", data: $sello_cfdi);
+        $this->pdf->WriteHTML($firma);
+
+        $sello = $this->html(etiqueta: "h2", data: "Sello digital del SAT:");
+        $this->pdf->WriteHTML($sello);
+
+        $firma = $this->html(etiqueta: "p", data: $sello_sat);
+        $this->pdf->WriteHTML($firma);
 
         $this->pdf->Output('ejemmplo'.'.pdf','D');
     }

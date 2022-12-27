@@ -236,6 +236,11 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al maquetar totales',data:  $pdf, header: $header,ws:$ws);
         }
 
+        $pdf->sellos(sello_cfdi: $factura['org_empresa_rfc'],sello_sat: $factura['org_empresa_rfc']);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar sellos',data:  $pdf, header: $header,ws:$ws);
+        }
+
         exit;
     }
 
