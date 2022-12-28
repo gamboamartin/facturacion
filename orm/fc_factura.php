@@ -276,15 +276,15 @@ class fc_factura extends modelo{
         $filtro['doc_extension.descripcion'] = $extension;
         $existe_extension = (new doc_extension_permitido($this->link))->existe(filtro: $filtro);
         if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al validar extension del documento', data: $existe_extension);
+            return $this->error->error(mensaje: 'Error al validar extension del documento', data: $existe_extension);
         }
         if(!$existe_extension){
-            return $this->errores->error(mensaje: "Error la extension: $extension no esta permitida", data: $existe_extension);
+            return $this->error->error(mensaje: "Error la extension: $extension no esta permitida", data: $existe_extension);
         }
 
         $r_doc_extension_permitido = (new doc_extension_permitido($this->link))->filtro_and(filtro: $filtro, limit: 1);
         if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al validar extension del documento', data: $r_doc_extension_permitido);
+            return $this->error->error(mensaje: 'Error al validar extension del documento', data: $r_doc_extension_permitido);
         }
         return $r_doc_extension_permitido->registros[0]['doc_tipo_documento_id'];
     }
@@ -777,11 +777,16 @@ class fc_factura extends modelo{
 
     private function receptor(array $factura): array
     {
+        $com_sucursal = (new com_sucursal(link: $this->link))->registro(registro_id: $factura['com_sucursal_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener com_sucursal',data: $com_sucursal);
+        }
+
         $receptor = array();
-        $receptor['rfc'] = $factura['com_cliente_rfc'];
-        $receptor['nombre'] = $factura['com_cliente_razon_social'];
-        $receptor['domicilio_fiscal_receptor'] = '91779';
-        $receptor['regimen_fiscal_receptor'] = $factura['cat_sat_regimen_fiscal_codigo'];
+        $receptor['rfc'] = $com_sucursal['com_cliente_rfc'];
+        $receptor['nombre'] = $com_sucursal['com_cliente_razon_social'];
+        $receptor['domicilio_fiscal_receptor'] = $com_sucursal['dp_cp_descripcion']; //'91779'; dp_cp_descripcion de com_sucursal.dp_calle_pertenece hacia cp
+        $receptor['regimen_fiscal_receptor'] = $com_sucursal['cat_sat_regimen_fiscal_codigo']; //de com_cliente cat_sat_regimen_fiscal
         $receptor['uso_cfdi'] = $factura['cat_sat_uso_cfdi_codigo'];
         return $receptor;
     }
