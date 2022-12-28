@@ -14,7 +14,8 @@ final class pdf {
     public function __construct(){
         try {
             $temporales = (new generales())->path_base . "archivos/tmp/";
-            $this->pdf = new Mpdf(['tempDir' => $temporales,'mode' => 'utf-8', 'format' => [229, 279]]);
+            $this->pdf = new Mpdf(['tempDir' => $temporales,'mode' => 'utf-8', 'format' => [229, 279],
+                'margin_left' => 8, 'margin_right' => 8]);
         }
         catch (Throwable $e){
             $error = (new errores())->error('Error al generar objeto de pdf', $e);
@@ -22,7 +23,6 @@ final class pdf {
             die('Error');
         }
 
-        $this->pdf->SetFont('Arial');
         $this->pdf->simpleTables = false;
 
         $css = file_get_contents((new generales())->path_base."css/pdf.css");
@@ -30,52 +30,67 @@ final class pdf {
     }
 
     public function header(string $rfc_emisor,string $folio_fiscal, string $nombre_emisor,string $csd,
-                           string $rfc_receptor, string $cod_posta_fecha,string $nombre_receptor, string $efecto,
-                           string $cod_posta_receptor, string $regimen_fiscal,string $regimen_fiscal_receptor,
+                           string $rfc_receptor, string $cod_postal,string $fecha,
+                           string $nombre_receptor, string $efecto,
+                           string $cod_postal_receptor, string $regimen_fiscal,string $regimen_fiscal_receptor,
                            string $exportacion,string $cfdi){
 
-        $rfc_emisor = "<td style='font-weight: bold'>RFC emisor:</td><td style='text-align: left; padding-left: 5px'>$rfc_emisor</td>";
-        $folio_fiscal = "<td style='font-weight: bold'>Folio fiscal:</td><td>$folio_fiscal</td>";
-        $nombre_emisor = "<td style='font-weight: bold'>Nombre emisor:</td><td style='text-align: left; padding-left: 5px'>$nombre_emisor</td>";
-        $csd = "<td style='font-weight: bold'>No. de serie del CSD:</td><td>$csd</td>";
-        $rfc_receptor = "<td style='font-weight: bold'>RFC receptor:</td><td style='text-align: left; padding-left: 5px'>$rfc_receptor</td>";
-        $cod_posta_fecha = "<td style='font-weight: bold'>Código postal, fecha y hora de emisión:</td><td>$cod_posta_fecha</td>";
-        $nombre_receptor = "<td style='font-weight: bold'>Nombre receptor:</td><td style='text-align: left; padding-left: 5px'>$nombre_receptor</td>";
-        $efecto = "<td style='font-weight: bold'>Efecto de comprobante:</td><td>$efecto</td>";
-        $cod_posta_receptor = "<td style='font-weight: bold'>Código postal del receptor:</td><td style='text-align: left; padding-left: 5px'>$cod_posta_receptor</td>";
-        $regimen_fiscal = "<td style='font-weight: bold'>Régimen fiscal:</td><td>$regimen_fiscal</td>";
-        $regimen_fiscal_receptor = "<td style='font-weight: bold'>Régimen fiscal receptor:</td><td style='text-align: left; padding-left: 5px'>$regimen_fiscal_receptor</td>";
-        $exportacion = "<td style='font-weight: bold'>Exportación:</td><td>$exportacion</td>";
-        $cfdi = "<td style='font-weight: bold'>Uso CFDI:</td><td style='text-align: left; padding-left: 5px'>$cfdi</td>";
+        $body_td_1 = $this->html(etiqueta: "td", data: "RFC emisor:", class: "negrita");
+        $body_td_2 = $this->html(etiqueta: "td", data: $rfc_emisor);
+        $body_td_3 = $this->html(etiqueta: "td", data: "Folio fiscal:", class: "negrita");
+        $body_td_4 = $this->html(etiqueta: "td", data: $folio_fiscal);
+        $body_td_5 = $this->html(etiqueta: "td", data: "Nombre emisor:", class: "negrita");
+        $body_td_6 = $this->html(etiqueta: "td", data: $nombre_emisor);
+        $body_td_7 = $this->html(etiqueta: "td", data: "No. de serie del CSD:", class: "negrita");
+        $body_td_8 = $this->html(etiqueta: "td", data: $csd);
+        $body_td_9 = $this->html(etiqueta: "td", data: "RFC receptor:", class: "negrita");
+        $body_td_10 = $this->html(etiqueta: "td", data: $rfc_receptor);
+        $body_td_11 = $this->html(etiqueta: "td", data: "Código postal, fecha y hora de emisión:", class: "negrita");
+        $body_td_12 = $this->html(etiqueta: "td", data: "$cod_postal $fecha");
+        $body_td_13 = $this->html(etiqueta: "td", data: "Nombre receptor:", class: "negrita");
+        $body_td_14 = $this->html(etiqueta: "td", data: $nombre_receptor);
+        $body_td_15 = $this->html(etiqueta: "td", data: "Efecto de comprobante:", class: "negrita");
+        $body_td_16 = $this->html(etiqueta: "td", data: $efecto);
+        $body_td_17 = $this->html(etiqueta: "td", data: "Código postal del receptor:", class: "negrita");
+        $body_td_18 = $this->html(etiqueta: "td", data: $cod_postal_receptor);
+        $body_td_19 = $this->html(etiqueta: "td", data: "Régimen fiscal:", class: "negrita");
+        $body_td_20 = $this->html(etiqueta: "td", data: $regimen_fiscal);
+        $body_td_21 = $this->html(etiqueta: "td", data: "Régimen fiscal receptor:", class: "negrita");
+        $body_td_22 = $this->html(etiqueta: "td", data: $regimen_fiscal_receptor);
+        $body_td_23 = $this->html(etiqueta: "td", data: "Exportación:", class: "negrita");
+        $body_td_24 = $this->html(etiqueta: "td", data: $exportacion);
+        $body_td_25 = $this->html(etiqueta: "td", data: "Uso CFDI:", class: "negrita");
+        $body_td_26 = $this->html(etiqueta: "td", data: $cfdi);
 
-        $fila_1 = "<tr>$rfc_emisor $folio_fiscal</tr>";
-        $fila_2 = "<tr>$nombre_emisor $csd</tr>";
-        $fila_3 = "<tr>$rfc_receptor $cod_posta_fecha</tr>";
-        $fila_4 = "<tr>$nombre_receptor $efecto</tr>";
-        $fila_5 = "<tr>$cod_posta_receptor $regimen_fiscal</tr>";
-        $fila_6 = "<tr>$regimen_fiscal_receptor $exportacion</tr>";
-        $fila_7 = "<tr>$cfdi</tr>";
+        $body_tr_1 = $this->html(etiqueta: "tr", data: $body_td_1.$body_td_2.$body_td_3.$body_td_4);
+        $body_tr_2 = $this->html(etiqueta: "tr", data: $body_td_5.$body_td_6.$body_td_7.$body_td_8);
+        $body_tr_3 = $this->html(etiqueta: "tr", data: $body_td_9.$body_td_10.$body_td_11.$body_td_12);
+        $body_tr_4 = $this->html(etiqueta: "tr", data: $body_td_13.$body_td_14.$body_td_15.$body_td_16);
+        $body_tr_5 = $this->html(etiqueta: "tr", data: $body_td_17.$body_td_18.$body_td_19.$body_td_20);
+        $body_tr_6 = $this->html(etiqueta: "tr", data: $body_td_21.$body_td_22.$body_td_23.$body_td_24);
+        $body_tr_7 = $this->html(etiqueta: "tr", data: $body_td_25.$body_td_26);
 
-        $body = "<tbody>$fila_1$fila_2$fila_3,$fila_4,$fila_5,$fila_6,$fila_7</tbody>";
+        $body = $this->html(etiqueta: "tbody", data: $body_tr_1.$body_tr_2.$body_tr_3.$body_tr_4.$body_tr_5.$body_tr_6.
+            $body_tr_7);
 
-        $table = "<table style='width: 100%;font-size: 12px;'>$body</table>";
+        $table = $this->html(etiqueta: "table", data: $body);
 
-        $this->pdf->WriteHTML($table,2);
+        $this->pdf->WriteHTML($table);
     }
-
-
 
     private function concepto_datos(array $concepto):string{
 
-        $body_td_1 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_id']);
-        $body_td_2 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_id']);
-        $body_td_3 = $this->html(etiqueta: "td", data: $concepto['fc_partida_cantidad']);
-        $body_td_4 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_codigo']);
-        $body_td_5 = $this->html(etiqueta: "td", data: $concepto['fc_partida_cantidad']);
-        $body_td_6 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_descripcion'],propiedades: "colspan='2'");
-        $body_td_7 = $this->html(etiqueta: "td", data: $concepto['fc_partida_valor_unitario'],propiedades: "colspan='2'");
-        $body_td_8 = $this->html(etiqueta: "td", data: $concepto['fc_partida_descuento'],propiedades: "colspan='2'");
-        $body_td_9 = $this->html(etiqueta: "td", data: $concepto['cat_sat_obj_imp_descripcion']);
+        $class = "txt-center border";
+
+        $body_td_1 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_id'], class: $class);
+        $body_td_2 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_id'], class: $class);
+        $body_td_3 = $this->html(etiqueta: "td", data: $concepto['fc_partida_cantidad'], class: $class);
+        $body_td_4 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_codigo'], class: $class);
+        $body_td_5 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_descripcion'], class: $class);
+        $body_td_6 = $this->html(etiqueta: "td", data: $concepto['fc_partida_cantidad'], class: $class, propiedades: "colspan='2'");
+        $body_td_7 = $this->html(etiqueta: "td", data: $concepto['fc_partida_valor_unitario'], class: $class, propiedades: "colspan='2'");
+        $body_td_8 = $this->html(etiqueta: "td", data: $concepto['fc_partida_descuento'], class: $class, propiedades: "colspan='2'");
+        $body_td_9 = $this->html(etiqueta: "td", data: $concepto['cat_sat_obj_imp_descripcion'], class: $class);
 
         return $this->html(etiqueta: "tr", data: $body_td_1.$body_td_2.$body_td_3.$body_td_4.$body_td_5. $body_td_6.
             $body_td_7.$body_td_8.$body_td_9);
@@ -83,14 +98,15 @@ final class pdf {
 
     private function concepto_calculos(array $concepto):string{
 
-        $body_td_1 = $this->html(etiqueta: "td", data: "Descripción",class: "color",propiedades: "rowspan='2'");
-        $body_td_2 = $this->html(etiqueta: "td", data: "Descripción",propiedades: "colspan='4' rowspan='2'");
-        $body_td_3 = $this->html(etiqueta: "td", data: "Impuesto");
-        $body_td_4 = $this->html(etiqueta: "td", data: "Tipo",propiedades: "colspan='2'");
-        $body_td_5 = $this->html(etiqueta: "td", data: "Base");
-        $body_td_6 = $this->html(etiqueta: "td", data: "Tipo Factor");
-        $body_td_7 = $this->html(etiqueta: "td", data: "Tasa o Cuota");
-        $body_td_8 = $this->html(etiqueta: "td", data: "Importe");
+        $body_td_1 = $this->html(etiqueta: "td", data: "Descripción",class: "border color negrita",propiedades: "rowspan='2'");
+        $body_td_2 = $this->html(etiqueta: "td", data: $concepto['com_producto_descripcion'], class: "border",
+            propiedades: "colspan='4' rowspan='2'");
+        $body_td_3 = $this->html(etiqueta: "td", data: "Impuesto", class: "txt-center negrita");
+        $body_td_4 = $this->html(etiqueta: "td", data: "Tipo", class: "txt-center negrita", propiedades: "colspan='2'");
+        $body_td_5 = $this->html(etiqueta: "td", data: "Base", class: "txt-center negrita");
+        $body_td_6 = $this->html(etiqueta: "td", data: "Tipo Factor", class: "txt-center negrita");
+        $body_td_7 = $this->html(etiqueta: "td", data: "Tasa o Cuota", class: "txt-center negrita");
+        $body_td_8 = $this->html(etiqueta: "td", data: "Importe", class: "txt-center negrita");
 
 
 
@@ -117,10 +133,12 @@ final class pdf {
 
     private function concepto_numeros(array $concepto):string{
 
-        $body_td_1 = $this->html(etiqueta: "td", data: "Número de pedimento",class: "color",propiedades: "colspan='2'");
-        $body_td_2 = $this->html(etiqueta: "td", data: "Número de cuenta predial",class: "color",propiedades: "colspan='2'");
-        $body_td_3 = $this->html(etiqueta: "td", data: " 2 ",propiedades: "colspan='2'");
-        $body_td_4 = $this->html(etiqueta: "td", data: " 2 ",propiedades: "colspan='2'");
+        $class = "color border negrita txt-center";
+
+        $body_td_1 = $this->html(etiqueta: "td", data: "Número de pedimento",class: $class,propiedades: "colspan='2'");
+        $body_td_2 = $this->html(etiqueta: "td", data: "Número de cuenta predial",class: $class,propiedades: "colspan='2'");
+        $body_td_3 = $this->html(etiqueta: "td", data: " ",class: "txt-center border", propiedades: "colspan='2'");
+        $body_td_4 = $this->html(etiqueta: "td", data: "  ",class: "txt-center border",propiedades: "colspan='2'");
 
         $body_tr = $this->html(etiqueta: "tr", data: $body_td_1.$body_td_2);
         $body_tr .= $this->html(etiqueta: "tr", data: $body_td_3.$body_td_4);
@@ -129,18 +147,18 @@ final class pdf {
     }
 
     public function conceptos(array $conceptos){
-        $titulo = $this->html(etiqueta: "h1", data: "Conceptos");
+        $titulo = $this->html(etiqueta: "h1", data: "Conceptos",class: "negrita titulo");
         $this->pdf->WriteHTML($titulo);
 
-        $head_td_1 = $this->html(etiqueta: "th", data: "Clave del producto y/o servicio");
-        $head_td_2 = $this->html(etiqueta: "th", data: "No. identificación",);
-        $head_td_3 = $this->html(etiqueta: "th", data: "Cantidad");
-        $head_td_4 = $this->html(etiqueta: "th", data: "Clave de unidad");
-        $head_td_5 = $this->html(etiqueta: "th", data: "Unidad");
-        $head_td_6 = $this->html(etiqueta: "th", data: "Valor unitario",propiedades: "colspan='2'");
-        $head_td_7 = $this->html(etiqueta: "th", data: "Importe",propiedades: "colspan='2'");
-        $head_td_8 = $this->html(etiqueta: "th", data: "Descuento",propiedades: "colspan='2'");
-        $head_td_9 = $this->html(etiqueta: "th", data: "Objeto impuesto");
+        $head_td_1 = $this->html(etiqueta: "th", data: "Clave del producto y/o servicio", class: "negrita border color");
+        $head_td_2 = $this->html(etiqueta: "th", data: "No. identificación", class: "negrita border color");
+        $head_td_3 = $this->html(etiqueta: "th", data: "Cantidad", class: "negrita border color");
+        $head_td_4 = $this->html(etiqueta: "th", data: "Clave de unidad", class: "negrita border color");
+        $head_td_5 = $this->html(etiqueta: "th", data: "Unidad", class: "negrita border color");
+        $head_td_6 = $this->html(etiqueta: "th", data: "Valor unitario", class: "negrita border color", propiedades: "colspan='2'");
+        $head_td_7 = $this->html(etiqueta: "th", data: "Importe", class: "negrita border color", propiedades: "colspan='2'");
+        $head_td_8 = $this->html(etiqueta: "th", data: "Descuento", class: "negrita border color", propiedades: "colspan='2'");
+        $head_td_9 = $this->html(etiqueta: "th", data: "Objeto impuesto", class: "negrita border color");
 
         $head_tr_1 = $this->html(etiqueta: "tr", data: $head_td_1.$head_td_2.$head_td_3.$head_td_4.$head_td_5.
             $head_td_6.$head_td_7.$head_td_8.$head_td_9);
@@ -173,7 +191,7 @@ final class pdf {
         $head = $this->html(etiqueta: "thead", data: $head_tr_1);
         $body = $this->html(etiqueta: "tbody", data: $body_tr);
 
-        $table = $this->html(etiqueta: "table", data: $head.$body,class: "conceptos");
+        $table = $this->html(etiqueta: "table", data: $head.$body,class: "border");
 
         $this->pdf->WriteHTML($table);
     }
@@ -185,23 +203,22 @@ final class pdf {
     public function totales(string $moneda,string $subtotal,string $forma_pago,string $imp_trasladados,
                             string $imp_retenidos,string $metodo_pago,string $total){
 
-        $body_td_1 = $this->html(etiqueta: "td", data: "Moneda:");
+        $body_td_1 = $this->html(etiqueta: "td", data: "Moneda:",class: "negrita");
         $body_td_2 = $this->html(etiqueta: "td", data: $moneda);
-        $body_td_3 = $this->html(etiqueta: "td", data: "Subtotal:");
+        $body_td_3 = $this->html(etiqueta: "td", data: "Subtotal:",class: "negrita");
         $body_td_4 = $this->html(etiqueta: "td", data: $subtotal);
 
-        $body_td_5 = $this->html(etiqueta: "td", data: "Forma de pago:",propiedades: "rowspan='2'");
-        $body_td_6 = $this->html(etiqueta: "td", data: $forma_pago,propiedades: "rowspan='2'");
-        $body_td_7 = $this->html(etiqueta: "td", data: "Impuestos trasladados:");
+        $body_td_5 = $this->html(etiqueta: "td", data: "Forma de pago:", class: "negrita", propiedades: "rowspan='2'");
+        $body_td_6 = $this->html(etiqueta: "td", data: $forma_pago, propiedades: "rowspan='2'");
+        $body_td_7 = $this->html(etiqueta: "td", data: "Impuestos trasladados:",class: "negrita");
         $body_td_8 = $this->html(etiqueta: "td", data: $imp_trasladados);
-        $body_td_9 = $this->html(etiqueta: "td", data: "Impuestos retenidos");
+        $body_td_9 = $this->html(etiqueta: "td", data: "Impuestos retenidos",class: "negrita");
         $body_td_10 = $this->html(etiqueta: "td", data: $imp_retenidos);
 
-        $body_td_11 = $this->html(etiqueta: "td", data: "Método de pago:");
+        $body_td_11 = $this->html(etiqueta: "td", data: "Método de pago:",class: "negrita");
         $body_td_12 = $this->html(etiqueta: "td", data: $metodo_pago);
-        $body_td_13 = $this->html(etiqueta: "td", data: "Total");
+        $body_td_13 = $this->html(etiqueta: "td", data: "Total",class: "negrita");
         $body_td_14 = $this->html(etiqueta: "td", data: $total);
-
 
         $body_tr_1 = $this->html(etiqueta: "tr", data: $body_td_1.$body_td_2.$body_td_3.$body_td_4);
         $body_tr_2 = $this->html(etiqueta: "tr", data: $body_td_5.$body_td_6.$body_td_7.$body_td_8);
@@ -210,26 +227,28 @@ final class pdf {
 
         $body = $this->html(etiqueta: "tbody", data: $body_tr_1.$body_tr_2.$body_tr_3.$body_tr_4);
 
-        $table = $this->html(etiqueta: "table", data: $body);
+        $table = $this->html(etiqueta: "table", data: $body,class: "mt-2");
 
         $this->pdf->WriteHTML($table);
     }
 
     public function sellos(string $sello_cfdi,string $sello_sat){
 
-        $sello = $this->html(etiqueta: "h2", data: "Sello digital del CFDI:");
+        $sello = $this->html(etiqueta: "h2", data: "Sello digital del CFDI:",class: "negrita mt-5");
         $this->pdf->WriteHTML($sello);
 
         $firma = $this->html(etiqueta: "p", data: $sello_cfdi);
         $this->pdf->WriteHTML($firma);
 
-        $sello = $this->html(etiqueta: "h2", data: "Sello digital del SAT:");
+        $sello = $this->html(etiqueta: "h2", data: "Sello digital del SAT:",class: "negrita");
         $this->pdf->WriteHTML($sello);
 
         $firma = $this->html(etiqueta: "p", data: $sello_sat);
         $this->pdf->WriteHTML($firma);
+    }
 
-        $this->pdf->Output('ejemmplo'.'.pdf','D');
+    public function guardar(string $nombre_documento){
+        $this->pdf->Output($nombre_documento.'.pdf','D');
     }
 
 }

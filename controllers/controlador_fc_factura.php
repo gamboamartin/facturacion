@@ -11,7 +11,9 @@ namespace gamboamartin\facturacion\controllers;
 use base\controller\controler;
 use base\orm\modelo;
 use config\generales;
+use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
+use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_conf_retenido;
 use gamboamartin\facturacion\models\fc_conf_traslado;
@@ -211,14 +213,35 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $factura, header: $header,ws:$ws);
         }
 
+        $cp_receptor = (new dp_calle_pertenece($this->link))->registro(
+            $factura["com_cliente_dp_calle_pertenece_id"]);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener regimen fiscal emisor', data:  $cp_receptor,
+                header: $header,ws:$ws);
+        }
+
+        $rf_emisor = (new cat_sat_regimen_fiscal($this->link))->registro(
+            $factura["org_empresa_cat_sat_regimen_fiscal_id"]);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener regimen fiscal emisor', data:  $rf_emisor,
+                header: $header,ws:$ws);
+        }
+
+        $rf_receptor = (new cat_sat_regimen_fiscal($this->link))->registro(
+            $factura["com_cliente_cat_sat_regimen_fiscal_id"]);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener regimen fiscal receptor', data:  $rf_receptor,
+                header: $header,ws:$ws);
+        }
+
         $pdf = new pdf();
-        $pdf->header(rfc_emisor: $factura['org_empresa_rfc'],folio_fiscal: $factura['org_empresa_rfc'],
-            nombre_emisor: $factura['org_empresa_rfc'],csd: $factura['org_empresa_rfc'],
-            rfc_receptor: $factura['org_empresa_rfc'],cod_posta_fecha: $factura['org_empresa_rfc'],
-            nombre_receptor: $factura['org_empresa_rfc'],efecto: $factura['org_empresa_rfc'],
-            cod_posta_receptor: $factura['org_empresa_rfc'], regimen_fiscal: $factura['org_empresa_rfc'],
-            regimen_fiscal_receptor: $factura['org_empresa_rfc'],
-            exportacion: $factura['org_empresa_rfc'],cfdi: $factura['org_empresa_rfc']);
+        $pdf->header(rfc_emisor: $factura['org_empresa_rfc'],folio_fiscal: "POR REVISAR",
+            nombre_emisor: $factura['org_empresa_nombre_comercial'],csd: $factura['fc_csd_serie'],
+            rfc_receptor: $factura['com_cliente_rfc'],cod_postal: $factura['dp_cp_descripcion'], fecha: $factura['fc_factura_fecha'],
+            nombre_receptor: $factura['com_cliente_razon_social'],efecto: $factura['cat_sat_tipo_de_comprobante_descripcion'],
+            cod_postal_receptor: $cp_receptor['dp_cp_descripcion'], regimen_fiscal: $rf_emisor['cat_sat_regimen_fiscal_descripcion'],
+            regimen_fiscal_receptor: $rf_receptor['cat_sat_regimen_fiscal_descripcion'],
+            exportacion: $factura['fc_factura_exportacion'],cfdi: $factura['cat_sat_uso_cfdi_descripcion']);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar header',data:  $pdf, header: $header,ws:$ws);
         }
@@ -228,10 +251,10 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al maquetar conceptos',data:  $pdf, header: $header,ws:$ws);
         }
 
-        $pdf->totales(moneda: $factura['org_empresa_rfc'],subtotal: $factura['org_empresa_rfc'],
-            forma_pago: $factura['org_empresa_rfc'],imp_trasladados: $factura['org_empresa_rfc'],
-            imp_retenidos: $factura['org_empresa_rfc'],metodo_pago: $factura['org_empresa_rfc'],
-            total: $factura['org_empresa_rfc']);
+        $pdf->totales(moneda: $factura['cat_sat_moneda_descripcion'],subtotal: $factura['fc_factura_sub_total'],
+            forma_pago: $factura['cat_sat_forma_pago_descripcion'],imp_trasladados: $factura['total_impuestos_trasladados'],
+            imp_retenidos: $factura['total_impuestos_retenidos'],metodo_pago: $factura['cat_sat_metodo_pago_descripcion'],
+            total: $factura['fc_factura_total']);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar totales',data:  $pdf, header: $header,ws:$ws);
         }
@@ -239,6 +262,11 @@ class controlador_fc_factura extends system{
         $pdf->sellos(sello_cfdi: $factura['org_empresa_rfc'],sello_sat: $factura['org_empresa_rfc']);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar sellos',data:  $pdf, header: $header,ws:$ws);
+        }
+
+        $pdf->guardar(nombre_documento: "factura");
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $pdf, header: $header,ws:$ws);
         }
 
         exit;
