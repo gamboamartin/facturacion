@@ -51,7 +51,7 @@ class fc_cfdi_sellado extends _modelo_parent
                                   string $complemento_tfd_sl, string $complemento_tfd_fecha_timbrado,
                                   string $complemento_tfd_no_certificado_sat, string $complemento_tfd_rfc_prov_certif,
                                   string $complemento_tfd_sello_cfd, string $complemento_tfd_sello_sat, string $uuid,
-                                  string $complemento_tfd_tfd): array
+                                  string $complemento_tfd_tfd, string $cadena_complemento_sat): array
     {
         $data = array();
         $data['codigo'] = $codigo;
@@ -68,6 +68,7 @@ class fc_cfdi_sellado extends _modelo_parent
         $data['complemento_tfd_sello_sat'] = $complemento_tfd_sello_sat;
         $data['uuid'] = $uuid;
         $data['complemento_tfd_tfd'] = $complemento_tfd_tfd;
+        $data['cadena_complemento_sat'] = $cadena_complemento_sat;
 
         return $data;
     }

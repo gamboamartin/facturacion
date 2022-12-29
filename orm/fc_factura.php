@@ -996,7 +996,7 @@ class fc_factura extends modelo
             complemento_tfd_fecha_timbrado: $datos_xml['tfd']['FechaTimbrado'],
             complemento_tfd_no_certificado_sat: $datos_xml['tfd']['NoCertificadoSAT'], complemento_tfd_rfc_prov_certif: $datos_xml['tfd']['RfcProvCertif'],
             complemento_tfd_sello_cfd: $datos_xml['tfd']['SelloCFD'], complemento_tfd_sello_sat: $datos_xml['tfd']['SelloSAT'],
-            uuid: $datos_xml['tfd']['UUID'], complemento_tfd_tfd: "");
+            uuid: $datos_xml['tfd']['UUID'], complemento_tfd_tfd: "",cadena_complemento_sat: $xml_timbrado->txt);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al maquetar datos para cfdi sellado', data: $cfdi_sellado);
         }
