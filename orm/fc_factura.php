@@ -15,6 +15,7 @@ use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
+use gamboamartin\plugins\files;
 use gamboamartin\xml_cfdi_4\cfdis;
 use gamboamartin\xml_cfdi_4\timbra;
 use models\doc_documento;
@@ -791,14 +792,14 @@ class fc_factura extends modelo
         $receptor['rfc'] = $com_sucursal['com_cliente_rfc'];
         $receptor['nombre'] = $com_sucursal['com_cliente_razon_social'];
         $receptor['domicilio_fiscal_receptor'] = $com_sucursal['dp_cp_descripcion']; //'91779'; dp_cp_descripcion de com_sucursal.dp_calle_pertenece hacia cp
-        $receptor['regimen_fiscal_receptor'] = $com_sucursal['cat_sat_regimen_fiscal_codigo']; //de com_cliente cat_sat_regimen_fiscal
+        $receptor['regimen_fiscal_receptor'] = $com_sucursal['cat_sat_regimen_fiscal_codigo'];
         $receptor['uso_cfdi'] = $factura['cat_sat_uso_cfdi_codigo'];
         return $receptor;
     }
 
-    public function ruta_archivos(): array|string
+    public function ruta_archivos(string $directorio = ""): array|string
     {
-        $ruta_archivos = (new generales())->path_base . 'archivos';
+        $ruta_archivos = (new generales())->path_base ."archivos/$directorio";
         if (!file_exists($ruta_archivos)) {
             mkdir($ruta_archivos, 0777, true);
         }
@@ -935,10 +936,51 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al timbrar XML', data: $xml_timbrado);
         }
 
-        print_r($xml_timbrado); exit();
+        file_put_contents(filename: $xml->doc_documento_ruta_absoluta,data: $xml_timbrado->xml_sellado);
+
+        $alta_qr = $this->guarda_documento(directorio: "codigos_qr",extension: "jpg",contenido: $xml_timbrado->qr_code);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al guardar QR', data: $alta_qr);
+        }
+
+
+        print_r($alta_qr); exit();
 
 
         return $xml;
+    }
+
+    private function guarda_documento(string $directorio, string $extension, string $contenido): array|stdClass{
+        $ruta_archivos = $this->ruta_archivos(directorio: $directorio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener ruta de archivos',data:  $ruta_archivos);
+        }
+
+        $ruta_archivo = "$ruta_archivos/$this->registro_id.$extension";
+
+        $guarda_archivo = (new files())->guarda_archivo_fisico(contenido_file: $contenido,ruta_file: $ruta_archivo);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al guardar archivo', data: $guarda_archivo);
+        }
+
+        $tipo_documento = (new fc_factura(link: $this->link))->doc_tipo_documento_id(extension: $extension);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar extension del documento',data:  $tipo_documento);
+        }
+
+        $file['name'] = $guarda_archivo;
+        $file['tmp_name'] = $guarda_archivo;
+
+        $documento['doc_tipo_documento_id'] = $tipo_documento;
+        $documento['descripcion'] = "$this->registro_id.$extension";
+        $documento['descripcion_select'] = "$this->registro_id.$extension";
+
+        $documento = (new doc_documento(link: $this->link))->alta_registro(registro: $documento, file: $file);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al guardar jpg',data:  $documento);
+        }
+
+        return $documento;
     }
 
     /**
