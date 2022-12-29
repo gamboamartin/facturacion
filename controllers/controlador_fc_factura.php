@@ -733,173 +733,11 @@ class controlador_fc_factura extends system{
         return $this->inputs;
     }
 
-    private function cfdi_comprobante(string $path_xml){
-        $xml = simplexml_load_file($path_xml);
-        $ns = $xml->getNamespaces(true);
-        $xml->registerXPathNamespace('c', $ns['cfdi']);
-        $xml->registerXPathNamespace('t', $ns['tfd']);
-
-        $data = new stdClass();
-        foreach ($xml->xpath('//cfdi:Comprobante') as $cfdiComprobante){
-
-            //$data->xsi =
-
-        }
-
-
-    }
-
     public function timbra_xml(bool $header, bool $ws = false): array|stdClass{
 
         $timbre = (new fc_factura(link: $this->link))->timbra_xml(fc_factura_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al timbrar XML',data:  $timbre, header: $header,ws:$ws);
-        }
-
-        //$xml_string = file_get_contents($this->path_base.'archivos/doc_documento/3.668492133284.xml');
-
-        $xml = simplexml_load_file($this->path_base.'archivos/doc_documento/3.668492133284.xml');
-        $ns = $xml->getNamespaces(true);
-        $xml->registerXPathNamespace('c', $ns['cfdi']);
-        $xml->registerXPathNamespace('t', $ns['tfd']);
-
-        $xml_data = array();
-        $xml_data['cfdi_comprobante'] = array();
-        foreach ($xml->xpath('//cfdi:Comprobante') as $cfdiComprobante){
-            $data = (array)$cfdiComprobante->attributes();
-            $data = $data['@attributes'];
-
-            $xml_data['cfdi_comprobante'] = $data;
-
-        }
-        $xml_data['cfdi_emisor'] = array();
-        foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Emisor') as $Emisor){
-
-            $data = (array)$Emisor->attributes();
-            $data = $data['@attributes'];
-
-            $xml_data['cfdi_emisor'] = $data;
-
-        }
-
-        $xml_data['cfdi_receptor'] = array();
-        foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Receptor') as $Receptor){
-            $data = (array)$Receptor->attributes();
-            $data = $data['@attributes'];
-
-            $xml_data['cfdi_receptor'] = $data;
-
-        }
-
-        $xml_data['cfdi_conceptos'] = array();
-        foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Conceptos//cfdi:Concepto') as $Concepto){
-            $data = (array)$Concepto->attributes();
-            $data = $data['@attributes'];
-
-            $xml_data['cfdi_conceptos'][] = $data;
-
-        }
-
-
-
-        $xml_data['tfd'] = array();
-        foreach ($xml->xpath('//t:TimbreFiscalDigital') as $tfd) {
-            $data = (array)$tfd->attributes();
-            $data = $data['@attributes'];
-
-            $xml_data['tfd'] = $data;
-        }
-        print_r($xml_data);
-        exit;
-
-
-        $factura = (new fc_factura(link: $this->link))->genera_xml(fc_factura_id: $this->registro_id);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar XML',data:  $factura, header: $header,ws:$ws);
-        }
-
-
-
-        $registro_relacion = file_get_contents($factura->doc_documento_ruta_absoluta);
-
-
-        $timbra = new timbra();
-        $xml_timbrado = $timbra->timbra(contenido_xml: $registro_relacion);
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al timbrar XML', data: $xml_timbrado, header: $header, ws: $ws);
-        }
-
-        file_put_contents(filename: $factura->doc_documento_ruta_absoluta,data: $xml_timbrado->xml_sellado);
-
-        $ruta_archivos = (new fc_factura(link: $this->link))->ruta_archivos();
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener ruta de archivos',data:  $ruta_archivos, header: $header, ws: $ws);
-        }
-
-        $ruta_qr = "$ruta_archivos/doc_documento/$this->registro_id.qr.jpg";
-
-        $guarda_qr = (new files())->guarda_archivo_fisico(contenido_file: $xml_timbrado->qr_code,ruta_file: $ruta_qr);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al guardar QR', data: $guarda_qr,
-                header:  $header, ws: $ws);
-        }
-
-        $doc_tipo_documento_id = (new fc_factura(link: $this->link))->doc_tipo_documento_id(extension: "jpg");
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al validar extension del documento',data:  $doc_tipo_documento_id, header: $header, ws: $ws);
-        }
-
-        $file['name'] = $guarda_qr;
-        $file['tmp_name'] = $guarda_qr;
-
-        $documento['doc_tipo_documento_id'] = $doc_tipo_documento_id;
-        $documento['descripcion'] = $ruta_qr;
-
-        $documento = (new doc_documento(link: $this->link))->alta_registro(registro: $documento, file: $file);
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al guardar jpg',data:  $documento, header: $header, ws: $ws);
-        }
-
-        $fc_factura_documento = array();
-        $fc_factura_documento['fc_factura_id'] = $this->registro_id;
-        $fc_factura_documento['doc_documento_id'] = $documento->registro_id;
-
-        $fc_factura_documento = (new fc_factura_documento(link: $this->link))->alta_registro(registro: $fc_factura_documento);
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al dar de alta factura documento',data:  $fc_factura_documento, header: $header, ws: $ws);
-        }
-
-        $ruta_text = "$ruta_archivos/doc_documento/$this->registro_id.txt";
-
-        $guarda_txt = (new files())->guarda_archivo_fisico(contenido_file: $xml_timbrado->txt,ruta_file: $ruta_text);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al guardar txt', data: $guarda_txt,
-                header:  $header, ws: $ws);
-        }
-
-        $doc_tipo_documento_id = (new fc_factura(link: $this->link))->doc_tipo_documento_id(extension: "txt");
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al validar extension del documento',data:  $doc_tipo_documento_id, header: $header, ws: $ws);
-        }
-
-        $file['name'] = $guarda_txt;
-        $file['tmp_name'] = $guarda_txt;
-
-        $documento2['doc_tipo_documento_id'] = $doc_tipo_documento_id;
-        $documento2['descripcion'] = $ruta_text;
-
-        $documento2 = (new doc_documento(link: $this->link))->alta_registro(registro: $documento2, file: $file);
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al guardar txt',data:  $documento2, header: $header, ws: $ws);
-        }
-
-        $fc_factura_documento = array();
-        $fc_factura_documento['fc_factura_id'] = $this->registro_id;
-        $fc_factura_documento['doc_documento_id'] = $documento2->registro_id;
-
-        $fc_factura_documento = (new fc_factura_documento(link: $this->link))->alta_registro(registro: $fc_factura_documento);
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al dar de alta factura documento',data:  $fc_factura_documento, header: $header, ws: $ws);
         }
 
         $this->link->beginTransaction();
@@ -924,11 +762,11 @@ class controlador_fc_factura extends system{
         }
         if($ws){
             header('Content-Type: application/json');
-            echo json_encode($factura, JSON_THROW_ON_ERROR);
+            echo json_encode($timbre, JSON_THROW_ON_ERROR);
             exit;
         }
 
-        return $factura;
+        return $timbre;
     }
 
 
