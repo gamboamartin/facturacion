@@ -13,6 +13,7 @@ use base\orm\modelo;
 use config\generales;
 use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
+use gamboamartin\compresor\compresor;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
@@ -207,6 +208,23 @@ class controlador_fc_factura extends system{
         }
     }
 
+    public function exportar_documentos(bool $header, bool $ws = false){
+
+        $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $factura, header: $header,ws:$ws);
+        }
+
+        $link = (new generales())->path_base . "archivos/doc_documento/3.822868978788.xml";
+
+        $archivos = array();
+        $archivos[$link] = "3.822868978788.xml";
+
+        Compresor::descarga_zip_multiple(archivos: $archivos,name_zip: "archivos.zip");
+
+        exit;
+    }
+
     public function genera_pdf(bool $header, bool $ws = false){
 
         $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $this->registro_id);
@@ -242,8 +260,26 @@ class controlador_fc_factura extends system{
                 header: $header,ws:$ws);
         }
 
+        $folio_fiscal = "-----";
+        $sello_cfdi = "";
+        $sello_sat = "";
+        $complento = "---";
+        $rfc_proveedor = "-----";
+        $fecha_timbrado = "xxxx-xx-xx 00:00:00";
+        $no_certificado = "-----";
+
+        if ($cfdi_sellado->n_registros > 0) {
+            $folio_fiscal = $cfdi_sellado->registros[0]['fc_cfdi_sellado_uuid'];
+            $sello_cfdi = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_sello_cfd'];
+            $sello_sat = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_sello_sat'];
+            $complento = $cfdi_sellado->registros[0]['fc_cfdi_sellado_cadena_complemento_sat'];
+            $rfc_proveedor = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_rfc_prov_certif'];
+            $fecha_timbrado = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_fecha_timbrado'];
+            $no_certificado = $cfdi_sellado->registros[0]['fc_cfdi_sellado_comprobante_no_certificado'];
+        }
+
         $pdf = new pdf();
-        $pdf->header(rfc_emisor: $factura['org_empresa_rfc'],folio_fiscal: "POR REVISAR",
+        $pdf->header(rfc_emisor: $factura['org_empresa_rfc'],folio_fiscal: $folio_fiscal,
             nombre_emisor: $factura['org_empresa_nombre_comercial'],csd: $factura['fc_csd_serie'],
             rfc_receptor: $factura['com_cliente_rfc'],cod_postal: $factura['dp_cp_descripcion'], fecha: $factura['fc_factura_fecha'],
             nombre_receptor: $factura['com_cliente_razon_social'],efecto: $factura['cat_sat_tipo_de_comprobante_descripcion'],
@@ -267,29 +303,14 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al maquetar totales',data:  $pdf, header: $header,ws:$ws);
         }
 
-        $sello_cfdi = "";
-        $sello_sat = "";
-        $complento = "---";
-        $rfc_proveedor = "---";
-        $fecha_timbrado = "xxxx-xx-xx 00:00:20";
-        $no_certificado = "---";
-
-        if ($cfdi_sellado->n_registros > 0) {
-            $sello_cfdi = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_sello_cfd'];
-            $sello_sat = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_sello_sat'];
-            $complento = $cfdi_sellado->registros[0]['fc_cfdi_sellado_cadena_complemento_sat'];
-            $rfc_proveedor = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_rfc_prov_certif'];
-            $fecha_timbrado = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_fecha_timbrado'];
-            $no_certificado = $cfdi_sellado->registros[0]['fc_cfdi_sellado_comprobante_no_certificado'];
-        }
-
         $pdf->sellos(sello_cfdi: $sello_cfdi,sello_sat: $sello_sat);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar sellos',data:  $pdf, header: $header,ws:$ws);
         }
 
-        $pdf->complementos(complento: $complento,rfc_proveedor: $rfc_proveedor,fecha: $fecha_timbrado,
-            no_certificado: $no_certificado);
+        $link = (new generales())->path_base . "archivos/codigos_qr/6.jpg";
+        $pdf->complementos(ruta_documento: $link, complento: $complento,rfc_proveedor: $rfc_proveedor,
+            fecha: $fecha_timbrado, no_certificado: $no_certificado);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar complementos',data:  $pdf, header: $header,ws:$ws);
         }

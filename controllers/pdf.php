@@ -257,10 +257,9 @@ final class pdf
         $this->pdf->WriteHTML($firma);
     }
 
-    public function complementos(string $complento, string $rfc_proveedor, string $fecha, string $no_certificado)
+    public function complementos(string $ruta_documento,string $complento, string $rfc_proveedor, string $fecha, string $no_certificado)
     {
-        $link = (new generales())->path_base . "archivos/codigos_qr/6.jpg";
-        $qr = $this->html(etiqueta: "img", data: "", propiedades: 'src = "' . $link . '" width = "120"');
+        $qr = $this->html(etiqueta: "img", data: "", propiedades: 'src = "' . $ruta_documento . '" width = "120"');
         $this->pdf->WriteHTML($qr);
 
         $cadena_sat = $this->html(etiqueta: "h2", data: "Cadena Original del complemento de certificación digital del SAT:", class: "negrita");
