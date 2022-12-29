@@ -273,7 +273,6 @@ class controlador_fc_factura extends system{
     }
 
     public function genera_xml(bool $header, bool $ws = false){
-
         $factura = (new fc_factura(link: $this->link))->genera_xml(fc_factura_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar XML',data:  $factura, header: $header,ws:$ws);
@@ -751,6 +750,11 @@ class controlador_fc_factura extends system{
     }
 
     public function timbra_xml(bool $header, bool $ws = false): array|stdClass{
+
+        $timbre = (new fc_factura(link: $this->link))->timbra_xml(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al timbrar XML',data:  $timbre, header: $header,ws:$ws);
+        }
 
         //$xml_string = file_get_contents($this->path_base.'archivos/doc_documento/3.668492133284.xml');
 
