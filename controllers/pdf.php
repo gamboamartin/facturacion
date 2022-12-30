@@ -260,7 +260,10 @@ final class pdf
     public function complementos(string $ruta_documento,string $complento, string $rfc_proveedor, string $fecha, string $no_certificado)
     {
         $qr = $this->html(etiqueta: "img", data: "", propiedades: 'src = "' . $ruta_documento . '" width = "120"');
-        $this->pdf->WriteHTML($qr);
+
+        if ($ruta_documento !== ""){
+            $this->pdf->WriteHTML($qr);
+        }
 
         $cadena_sat = $this->html(etiqueta: "h2", data: "Cadena Original del complemento de certificación digital del SAT:", class: "negrita");
         $this->pdf->WriteFixedPosHTML($cadena_sat, 50, $this->pdf->y - 35,200,10);
