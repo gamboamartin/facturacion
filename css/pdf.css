@@ -4,6 +4,10 @@ body,h1,h2,table, th, td, p {
     font-weight: normal;
 }
 
+p {
+    font-size: 5pt;
+}
+
 table{
     width: 100%;
 }
@@ -61,5 +65,5 @@ img {
 }
 
 .color {
-    background-color: darkgray;
+    background-color: #c2c1c1;
 }

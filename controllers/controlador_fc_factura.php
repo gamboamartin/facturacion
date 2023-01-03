@@ -210,15 +210,14 @@ class controlador_fc_factura extends system{
 
     public function exportar_documentos(bool $header, bool $ws = false){
 
-        $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $this->registro_id);
+        $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(fc_factura_id: $this->registro_id,
+            tipo_documento: "xml");
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $factura, header: $header,ws:$ws);
+            return $this->retorno_error(mensaje: 'Error al obtener XML',data:  $ruta_xml, header: $header,ws:$ws);
         }
 
-        $link = (new generales())->path_base . "archivos/doc_documento/3.822868978788.xml";
-
         $archivos = array();
-        $archivos[$link] = "3.822868978788.xml";
+        $archivos[$ruta_xml] = "$this->registro_id.factura.xml";
 
         Compresor::descarga_zip_multiple(archivos: $archivos,name_zip: "archivos.zip");
 
@@ -230,6 +229,12 @@ class controlador_fc_factura extends system{
         $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $factura, header: $header,ws:$ws);
+        }
+
+        $ruta_qr = (new fc_factura_documento(link: $this->link))->get_factura_documento(fc_factura_id: $this->registro_id,
+            tipo_documento: "jpg");
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener QR',data:  $ruta_qr, header: $header,ws:$ws);
         }
 
         $filtro["fc_factura_id"] = $factura['fc_factura_id'];
@@ -308,8 +313,7 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al maquetar sellos',data:  $pdf, header: $header,ws:$ws);
         }
 
-        $link = (new generales())->path_base . "archivos/codigos_qr/6.jpg";
-        $pdf->complementos(ruta_documento: $link, complento: $complento,rfc_proveedor: $rfc_proveedor,
+        $pdf->complementos(ruta_documento: $ruta_qr, complento: $complento,rfc_proveedor: $rfc_proveedor,
             fecha: $fecha_timbrado, no_certificado: $no_certificado);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar complementos',data:  $pdf, header: $header,ws:$ws);

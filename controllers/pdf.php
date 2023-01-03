@@ -86,54 +86,61 @@ final class pdf
 
         $class = "txt-center border";
 
-        $body_td_1 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_id'], class: $class);
+        $body_td_1 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_codigo'], class: $class, propiedades: "colspan='2'");
         $body_td_2 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_id'], class: $class);
         $body_td_3 = $this->html(etiqueta: "td", data: $concepto['fc_partida_cantidad'], class: $class);
         $body_td_4 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_codigo'], class: $class);
         $body_td_5 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_descripcion'], class: $class);
-        $body_td_6 = $this->html(etiqueta: "td", data: $concepto['fc_partida_cantidad'], class: $class, propiedades: "colspan='2'");
-        $body_td_7 = $this->html(etiqueta: "td", data: $concepto['fc_partida_valor_unitario'], class: $class, propiedades: "colspan='2'");
-        $body_td_8 = $this->html(etiqueta: "td", data: $concepto['fc_partida_descuento'], class: $class, propiedades: "colspan='2'");
+        $body_td_6 = $this->html(etiqueta: "td", data: $concepto['fc_partida_cantidad'], class: $class);
+        $body_td_7 = $this->html(etiqueta: "td", data: $concepto['fc_partida_valor_unitario'], class: $class);
+        $body_td_8 = $this->html(etiqueta: "td", data: $concepto['fc_partida_descuento'], class: $class);
         $body_td_9 = $this->html(etiqueta: "td", data: $concepto['cat_sat_obj_imp_descripcion'], class: $class);
 
         return $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2 . $body_td_3 . $body_td_4 . $body_td_5 . $body_td_6 .
             $body_td_7 . $body_td_8 . $body_td_9);
     }
 
-    private function concepto_calculos(array $concepto): string
+    private function columnas_impuestos(): string
     {
-
-        $body_td_1 = $this->html(etiqueta: "td", data: "Descripción", class: "border color negrita", propiedades: "rowspan='2'");
-        $body_td_2 = $this->html(etiqueta: "td", data: $concepto['com_producto_descripcion'], class: "border",
-            propiedades: "colspan='4' rowspan='2'");
-        $body_td_3 = $this->html(etiqueta: "td", data: "Impuesto", class: "txt-center negrita");
+        $body_td_3 = $this->html(etiqueta: "td", data: "Impuesto", class: "txt-center negrita", propiedades: "colspan='2'");
         $body_td_4 = $this->html(etiqueta: "td", data: "Tipo", class: "txt-center negrita", propiedades: "colspan='2'");
         $body_td_5 = $this->html(etiqueta: "td", data: "Base", class: "txt-center negrita");
-        $body_td_6 = $this->html(etiqueta: "td", data: "Tipo Factor", class: "txt-center negrita");
-        $body_td_7 = $this->html(etiqueta: "td", data: "Tasa o Cuota", class: "txt-center negrita");
+        $body_td_6 = $this->html(etiqueta: "td", data: "Tipo Factor", class: "txt-center negrita", propiedades: "colspan='2'");
+        $body_td_7 = $this->html(etiqueta: "td", data: "Tasa o Cuota", class: "txt-center negrita", propiedades: "colspan='2'");
         $body_td_8 = $this->html(etiqueta: "td", data: "Importe", class: "txt-center negrita");
 
-
-        $body_td_9 = $this->html(etiqueta: "td", data: "222222");
-        $body_td_10 = $this->html(etiqueta: "td", data: "222222");
-        $body_td_11 = $this->html(etiqueta: "td", data: "222222");
-        $body_td_12 = $this->html(etiqueta: "td", data: "222222");
-        $body_td_13 = $this->html(etiqueta: "td", data: "222222");
-        $body_td_14 = $this->html(etiqueta: "td", data: "222222");
-        $body_td_15 = $this->html(etiqueta: "td", data: "222222");
-
-        $body_tr = $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2 . $body_td_3 . $body_td_4 . $body_td_5 .
+        return $this->html(etiqueta: "tr", data:  $body_td_3 . $body_td_4 . $body_td_5 .
             $body_td_6 . $body_td_7 . $body_td_8);
+    }
+
+    private function concepto_calculos(array $concepto): string
+    {
+        $body_tr = $this->columnas_impuestos();
+
+        $body_td_9 = $this->html(etiqueta: "td", data: "222222", class: "txt-center", propiedades: "colspan='2'");
+        $body_td_10 = $this->html(etiqueta: "td", data: "222222",  class: "txt-center",propiedades: "colspan='2'");
+        $body_td_11 = $this->html(etiqueta: "td", data: "222222", class: "txt-center");
+        $body_td_12 = $this->html(etiqueta: "td", data: "222222", class: "txt-center", propiedades: "colspan='2'");
+        $body_td_13 = $this->html(etiqueta: "td", data: "222222", class: "txt-center", propiedades: "colspan='2'");
+        $body_td_14 = $this->html(etiqueta: "td", data: "222222", class: "txt-center");
 
         $body_tr .= $this->html(etiqueta: "tr", data: $body_td_9 . $body_td_10 . $body_td_11 . $body_td_12 . $body_td_13 .
-            $body_td_14 . $body_td_15);
+            $body_td_14);
 
         return $body_tr;
     }
 
-    private function concepto_impuestos(array $impuestos)
+    private function concepto_producto(array $concepto): string
     {
 
+        $body_td_1 = $this->html(etiqueta: "td", data: "Descripción", class: "border color negrita", propiedades: "colspan='10'");
+        $body_td_2 = $this->html(etiqueta: "td", data: $concepto['com_producto_descripcion'], class: "border",
+            propiedades: "colspan='10'");
+
+        $body_tr_1 = $this->html(etiqueta: "tr", data: $body_td_1);
+        $body_tr_2 = $this->html(etiqueta: "tr", data: $body_td_2);
+
+        return $body_tr_1.$body_tr_2;
     }
 
     private function concepto_numeros(array $concepto): string
@@ -141,10 +148,10 @@ final class pdf
 
         $class = "color border negrita txt-center";
 
-        $body_td_1 = $this->html(etiqueta: "td", data: "Número de pedimento", class: $class, propiedades: "colspan='2'");
-        $body_td_2 = $this->html(etiqueta: "td", data: "Número de cuenta predial", class: $class, propiedades: "colspan='2'");
-        $body_td_3 = $this->html(etiqueta: "td", data: " ", class: "txt-center border", propiedades: "colspan='2'");
-        $body_td_4 = $this->html(etiqueta: "td", data: "  ", class: "txt-center border", propiedades: "colspan='2'");
+        $body_td_1 = $this->html(etiqueta: "td", data: "Número de pedimento", class: $class, propiedades: "colspan='4'");
+        $body_td_2 = $this->html(etiqueta: "td", data: "Número de cuenta predial", class: $class, propiedades: "colspan='6'");
+        $body_td_3 = $this->html(etiqueta: "td", data: " ", class: "txt-center border", propiedades: "colspan='4'");
+        $body_td_4 = $this->html(etiqueta: "td", data: "  ", class: "txt-center border", propiedades: "colspan='6'");
 
         $body_tr = $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2);
         $body_tr .= $this->html(etiqueta: "tr", data: $body_td_3 . $body_td_4);
@@ -157,14 +164,14 @@ final class pdf
         $titulo = $this->html(etiqueta: "h1", data: "Conceptos", class: "negrita titulo");
         $this->pdf->WriteHTML($titulo);
 
-        $head_td_1 = $this->html(etiqueta: "th", data: "Clave del producto y/o servicio", class: "negrita border color");
+        $head_td_1 = $this->html(etiqueta: "th", data: "Clave del producto y/o servicio", class: "negrita border color", propiedades: "colspan='2'");;
         $head_td_2 = $this->html(etiqueta: "th", data: "No. identificación", class: "negrita border color");
         $head_td_3 = $this->html(etiqueta: "th", data: "Cantidad", class: "negrita border color");
         $head_td_4 = $this->html(etiqueta: "th", data: "Clave de unidad", class: "negrita border color");
         $head_td_5 = $this->html(etiqueta: "th", data: "Unidad", class: "negrita border color");
-        $head_td_6 = $this->html(etiqueta: "th", data: "Valor unitario", class: "negrita border color", propiedades: "colspan='2'");
-        $head_td_7 = $this->html(etiqueta: "th", data: "Importe", class: "negrita border color", propiedades: "colspan='2'");
-        $head_td_8 = $this->html(etiqueta: "th", data: "Descuento", class: "negrita border color", propiedades: "colspan='2'");
+        $head_td_6 = $this->html(etiqueta: "th", data: "Valor unitario", class: "negrita border color");
+        $head_td_7 = $this->html(etiqueta: "th", data: "Importe", class: "negrita border color");
+        $head_td_8 = $this->html(etiqueta: "th", data: "Descuento", class: "negrita border color");
         $head_td_9 = $this->html(etiqueta: "th", data: "Objeto impuesto", class: "negrita border color");
 
         $head_tr_1 = $this->html(etiqueta: "tr", data: $head_td_1 . $head_td_2 . $head_td_3 . $head_td_4 . $head_td_5 .
@@ -174,6 +181,13 @@ final class pdf
 
         foreach ($conceptos as $concepto) {
             $body_tr .= $this->concepto_datos(concepto: $concepto);
+            if (errores::$error) {
+                $error = (new errores())->error('Error al maquetar concepto', $body_tr);
+                print_r($error);
+                die('Error');
+            }
+
+            $body_tr .= $this->concepto_producto(concepto: $concepto);
             if (errores::$error) {
                 $error = (new errores())->error('Error al maquetar concepto', $body_tr);
                 print_r($error);
@@ -260,7 +274,10 @@ final class pdf
     public function complementos(string $ruta_documento,string $complento, string $rfc_proveedor, string $fecha, string $no_certificado)
     {
         $qr = $this->html(etiqueta: "img", data: "", propiedades: 'src = "' . $ruta_documento . '" width = "120"');
-        $this->pdf->WriteHTML($qr);
+
+        if ($ruta_documento !== ""){
+            $this->pdf->WriteHTML($qr);
+        }
 
         $cadena_sat = $this->html(etiqueta: "h2", data: "Cadena Original del complemento de certificación digital del SAT:", class: "negrita");
         $this->pdf->WriteFixedPosHTML($cadena_sat, 50, $this->pdf->y - 35,200,10);
