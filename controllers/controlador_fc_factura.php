@@ -792,7 +792,6 @@ class controlador_fc_factura extends system{
         }
 
         $this->link->beginTransaction();
-
         $siguiente_view = (new actions())->init_alta_bd();
         if(errores::$error){
             $this->link->rollBack();
