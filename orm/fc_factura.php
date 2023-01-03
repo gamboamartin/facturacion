@@ -556,6 +556,7 @@ class fc_factura extends modelo
         return $imp;
     }
 
+
     public function get_factura_sub_total(int $fc_factura_id): float|array
     {
         $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
@@ -566,7 +567,7 @@ class fc_factura extends modelo
         $subtotal = 0.0;
 
         foreach ($partidas as $valor) {
-            $subtotal += (new fc_partida($this->link))->calculo_sub_total_partida($valor['fc_partida_id']);
+            $subtotal += (new fc_partida($this->link))->subtotal_partida($valor['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $subtotal);
             }
@@ -672,7 +673,9 @@ class fc_factura extends modelo
         if ($fc_factura_id <= 0) {
             return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
         }
+
         $filtro['fc_factura.id'] = $fc_factura_id;
+
         $r_fc_partida = (new fc_partida($this->link))->filtro_and(filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_partida);
@@ -993,7 +996,7 @@ class fc_factura extends modelo
             complemento_tfd_fecha_timbrado: $datos_xml['tfd']['FechaTimbrado'],
             complemento_tfd_no_certificado_sat: $datos_xml['tfd']['NoCertificadoSAT'], complemento_tfd_rfc_prov_certif: $datos_xml['tfd']['RfcProvCertif'],
             complemento_tfd_sello_cfd: $datos_xml['tfd']['SelloCFD'], complemento_tfd_sello_sat: $datos_xml['tfd']['SelloSAT'],
-            uuid: $datos_xml['tfd']['UUID'], complemento_tfd_tfd: "",cadena_complemento_sat: $xml_timbrado->txt);
+            uuid: $datos_xml['tfd']['UUID'], complemento_tfd_tfd: "", cadena_complemento_sat: $xml_timbrado->txt);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al maquetar datos para cfdi sellado', data: $cfdi_sellado);
         }

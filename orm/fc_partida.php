@@ -167,13 +167,22 @@ class fc_partida extends _modelo_parent {
         return $r_alta_bd;
     }
 
-    public function calculo_sub_total_partida(int $fc_partida_id): float| array
+
+
+
+    public function total_partida(int $fc_partida_id): float|array
     {
+        $subtotal = $this->subtotal_partida(fc_partida_id: $fc_partida_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al calcular el subtotal de la partida', data: $subtotal);
+        }
+
         $data = $this->registro(registro_id: $fc_partida_id, retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener los registros', data: $data);
+            return $this->error->error(mensaje: 'Error al obtener los registros de la partida', data: $data);
         }
-        return $data->fc_partida_cantidad * $data->fc_partida_valor_unitario - $data->fc_partida_descuento;
+
+        return $subtotal - $data->fc_partida_descuento;
     }
 
     public function calculo_imp_trasladado(int $fc_partida_id){
@@ -183,7 +192,7 @@ class fc_partida extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al obtener los registros', data: $traslado);
         }
 
-        $subtotal = $this->calculo_sub_total_partida(fc_partida_id: $fc_partida_id);
+        $subtotal = $this->subtotal_partida(fc_partida_id: $fc_partida_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener los registros', data: $subtotal);
         }
@@ -203,7 +212,7 @@ class fc_partida extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al obtener los registros', data: $retenido);
         }
 
-        $subtotal = $this->calculo_sub_total_partida(fc_partida_id: $fc_partida_id);
+        $subtotal = $this->subtotal_partida(fc_partida_id: $fc_partida_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener los registros', data: $subtotal);
         }
@@ -376,6 +385,10 @@ class fc_partida extends _modelo_parent {
         return $r_fc_partida;
     }
 
+
+
+
+
     private function valida_cantidades(array $data): bool|array
     {
         $keys = array('cantidad');
@@ -411,5 +424,29 @@ class fc_partida extends _modelo_parent {
         }
 
         return true;
+    }
+
+
+    // --- FUNCIONES PROBADAS  ---
+
+
+    /**
+     * Calcula el subtotal de una partida
+     * @param int $fc_partida_id Partida a validar
+     * @return float|array
+     * @version
+     */
+    public function subtotal_partida(int $fc_partida_id): float|array
+    {
+        if ($fc_partida_id <= 0) {
+            return $this->error->error(mensaje: 'Error el id de la partida es incorrecto', data: $fc_partida_id);
+        }
+
+        $data = $this->registro(registro_id: $fc_partida_id, retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener los registros de la partida', data: $data);
+        }
+
+        return round($data->fc_partida_cantidad * $data->fc_partida_valor_unitario, 2);
     }
 }
