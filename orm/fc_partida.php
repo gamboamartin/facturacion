@@ -167,24 +167,6 @@ class fc_partida extends _modelo_parent {
         return $r_alta_bd;
     }
 
-
-
-
-    public function total_partida(int $fc_partida_id): float|array
-    {
-        $subtotal = $this->subtotal_partida(fc_partida_id: $fc_partida_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al calcular el subtotal de la partida', data: $subtotal);
-        }
-
-        $data = $this->registro(registro_id: $fc_partida_id, retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener los registros de la partida', data: $data);
-        }
-
-        return $subtotal - $data->fc_partida_descuento;
-    }
-
     public function calculo_imp_trasladado(int $fc_partida_id){
         $filtro['fc_partida.id'] = $fc_partida_id;
         $traslado = (new fc_traslado($this->link))->filtro_and(filtro: $filtro);
@@ -434,7 +416,7 @@ class fc_partida extends _modelo_parent {
      * Calcula el subtotal de una partida
      * @param int $fc_partida_id Partida a validar
      * @return float|array
-     * @version
+     * @version 1.30.0
      */
     public function subtotal_partida(int $fc_partida_id): float|array
     {
@@ -448,5 +430,30 @@ class fc_partida extends _modelo_parent {
         }
 
         return round($data->fc_partida_cantidad * $data->fc_partida_valor_unitario, 2);
+    }
+
+    /**
+     * Calcula el total de una partida
+     * @param int $fc_partida_id Partida a validar
+     * @return float|array
+     * @version
+     */
+    public function total_partida(int $fc_partida_id): float|array
+    {
+        if ($fc_partida_id <= 0) {
+            return $this->error->error(mensaje: 'Error el id de la partida es incorrecto', data: $fc_partida_id);
+        }
+
+        $subtotal = $this->subtotal_partida(fc_partida_id: $fc_partida_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al calcular el subtotal de la partida', data: $subtotal);
+        }
+
+        $data = $this->registro(registro_id: $fc_partida_id, retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener los registros de la partida', data: $data);
+        }
+
+        return round($subtotal - $data->fc_partida_descuento, 2);
     }
 }
