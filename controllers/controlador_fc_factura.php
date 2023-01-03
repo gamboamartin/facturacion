@@ -33,8 +33,6 @@ use gamboamartin\xml_cfdi_4\cfdis;
 use gamboamartin\xml_cfdi_4\timbra;
 use html\fc_partida_html;
 use html\fc_factura_html;
-use models\doc_documento;
-use models\doc_extension_permitido;
 use PDO;
 use stdClass;
 

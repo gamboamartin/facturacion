@@ -14,12 +14,12 @@ use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
+use gamboamartin\documento\models\doc_documento;
+use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
 use gamboamartin\plugins\files;
 use gamboamartin\xml_cfdi_4\cfdis;
 use gamboamartin\xml_cfdi_4\timbra;
-use models\doc_documento;
-use models\doc_extension_permitido;
 use PDO;
 use stdClass;
 

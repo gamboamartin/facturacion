@@ -1,11 +1,10 @@
 <?php
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
+use gamboamartin\documento\models\doc_documento;
+use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
 use gamboamartin\plugins\files;
-use models\doc_documento;
-use models\doc_extension;
-use models\doc_extension_permitido;
 use PDO;
 use stdClass;
 

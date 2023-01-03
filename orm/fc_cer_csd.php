@@ -1,8 +1,8 @@
 <?php
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
+use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
-use models\doc_documento;
 use PDO;
 use stdClass;
 
