@@ -11,7 +11,12 @@ class _facturacion {
         $this->error = new errores();
     }
 
-    private function fc_partida_importe(): string
+    /**
+     * Genera SQL orientado al importe de una partida
+     * @return string
+     * @version 1.34.0
+     */
+    PUBLIC function fc_partida_importe(): string
     {
         return "ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2)";
     }
