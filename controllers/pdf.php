@@ -28,7 +28,7 @@ final class pdf
 
         $css = file_get_contents((new generales())->path_base . "css/pdf.css");
         $this->pdf->WriteHTML($css, 1);
-        $this->pdf->setFooter('{PAGENO}');
+
     }
 
     public function header(string $rfc_emisor, string $folio_fiscal, string $nombre_emisor, string $csd,
@@ -83,7 +83,6 @@ final class pdf
 
     private function concepto_datos(array $concepto): string
     {
-
         $class = "txt-center border";
 
         $body_td_1 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_codigo'], class: $class, propiedades: "colspan='2'");
@@ -217,7 +216,7 @@ final class pdf
         $this->pdf->WriteHTML($table);
     }
 
-    private function html(string $etiqueta, string $data, string $class = "", string $propiedades = ""): string
+    private function html(string $etiqueta, string $data = "", string $class = "", string $propiedades = ""): string
     {
         return "<$etiqueta class='$class' $propiedades>$data</$etiqueta>";
     }
@@ -305,4 +304,10 @@ final class pdf
         $this->pdf->Output($nombre_documento . '.pdf', 'D');
     }
 
+    public function footer(string $descripcion)
+    {
+        $footer = $this->html(etiqueta: "h2", data: $descripcion, class: "footer negrita");
+
+        $this->pdf->SetFooter($footer);
+    }
 }

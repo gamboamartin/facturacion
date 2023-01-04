@@ -317,6 +317,11 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al maquetar complementos',data:  $pdf, header: $header,ws:$ws);
         }
 
+        $pdf->footer(descripcion: "--- IVITEC ---");
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $pdf, header: $header,ws:$ws);
+        }
+
         $pdf->guardar(nombre_documento: "factura");
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $pdf, header: $header,ws:$ws);
