@@ -16,18 +16,23 @@ class _facturacion {
      * @return string
      * @version 1.34.0
      */
-    PUBLIC function fc_partida_importe(): string
+    private function fc_partida_importe(): string
     {
         return "ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2)";
     }
 
+    /**
+     * Genera SQL orientado al importe con descuento de una partida
+     * @return string
+     * @version 1.35.0
+     */
     private function fc_partida_importe_con_descuento(): string
     {
-
-        $fc_partida_importe = (new _facturacion())->fc_partida_importe();
+        $fc_partida_importe = $this->fc_partida_importe();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar fc_partida_importe',data:  $fc_partida_importe);
         }
+
         return "ROUND(($fc_partida_importe - ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
     }
 
