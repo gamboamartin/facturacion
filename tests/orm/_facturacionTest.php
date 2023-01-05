@@ -65,5 +65,29 @@ class _facturacionTest extends test
         $this->assertEquals($salida, $resultado);
         errores::$error = false;
     }
+
+    public function test_importes_base(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new _facturacion();
+
+        $fc_partida_importe = "ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ";
+        $fc_partida_importe .= "ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2)";
+
+        $fc_partida_importe_con_descuento = "ROUND((ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ";
+        $fc_partida_importe_con_descuento .= "ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2) - ";
+        $fc_partida_importe_con_descuento .= "ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
+
+        $resultado = (array)$modelo->importes_base();
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals($fc_partida_importe, $resultado['fc_partida_importe']);
+        $this->assertEquals($fc_partida_importe_con_descuento, $resultado['fc_partida_importe_con_descuento']);
+        errores::$error = false;
+    }
 }
 

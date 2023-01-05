@@ -12,7 +12,7 @@ class _facturacion {
     }
 
     /**
-     * Genera SQL orientado al importe de una partida
+     * Genera SQL para calcular el importe de una partida
      * @return string
      * @version 1.34.0
      */
@@ -22,7 +22,7 @@ class _facturacion {
     }
 
     /**
-     * Genera SQL orientado al importe con descuento de una partida
+     * Genera SQL para calcular el importe con descuento de una partida
      * @return string
      * @version 1.35.0
      */
@@ -36,18 +36,25 @@ class _facturacion {
         return "ROUND(($fc_partida_importe - ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
     }
 
+
     public function fc_impuesto_importe(string $fc_partida_importe_con_descuento): string
     {
         return "ROUND($fc_partida_importe_con_descuento * ROUND(IFNULL(cat_sat_factor.factor,0),2),2)";
     }
 
 
+    /**
+     * Obtiene SQL para calcular el importe e importe con descuento de una partida
+     * @return array|stdClass
+     * @version 1.36.0
+     */
     public function importes_base(): array|stdClass
     {
         $fc_partida_importe = $this->fc_partida_importe();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar fc_partida_importe',data:  $fc_partida_importe);
         }
+
         $fc_partida_importe_con_descuento = $this->fc_partida_importe_con_descuento();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar fc_partida_importe_con_descuento',data:  $fc_partida_importe_con_descuento);
