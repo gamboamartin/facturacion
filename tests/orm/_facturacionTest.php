@@ -66,7 +66,7 @@ class _facturacionTest extends test
         errores::$error = false;
     }
 
-    public function test_importes_base(): void
+    public function test_importes_base(): array
     {
         errores::$error = false;
         $_SESSION['grupo_id'] = 1;
@@ -78,8 +78,7 @@ class _facturacionTest extends test
         $fc_partida_importe = "ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ";
         $fc_partida_importe .= "ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2)";
 
-        $fc_partida_importe_con_descuento = "ROUND((ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ";
-        $fc_partida_importe_con_descuento .= "ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2) - ";
+        $fc_partida_importe_con_descuento = "ROUND(($fc_partida_importe - ";
         $fc_partida_importe_con_descuento .= "ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
 
         $resultado = (array)$modelo->importes_base();
@@ -87,6 +86,34 @@ class _facturacionTest extends test
         $this->assertNotTrue(errores::$error);
         $this->assertEquals($fc_partida_importe, $resultado['fc_partida_importe']);
         $this->assertEquals($fc_partida_importe_con_descuento, $resultado['fc_partida_importe_con_descuento']);
+        errores::$error = false;
+
+        return $resultado;
+    }
+
+    public function test_fc_impuesto_importe(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new _facturacion();
+
+        $importes_base = $this->test_importes_base();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al ejecutar test_importes_base', $importes_base);
+            print_r($error);
+            exit;
+        }
+
+        $salida = "ROUND(" . $importes_base['fc_partida_importe_con_descuento'];
+        $salida .= " * ROUND(IFNULL(cat_sat_factor.factor,0),2),2)";
+        $resultado = $modelo->fc_impuesto_importe(
+            fc_partida_importe_con_descuento: $importes_base['fc_partida_importe_con_descuento']);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals($salida, $resultado);
         errores::$error = false;
     }
 }
