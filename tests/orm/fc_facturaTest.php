@@ -3,7 +3,10 @@ namespace gamboamartin\facturacion\tests\orm;
 
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\tests\base_test;
+use gamboamartin\organigrama\models\org_empresa;
+use gamboamartin\organigrama\models\org_sucursal;
 use gamboamartin\test\liberator;
 use gamboamartin\test\test;
 use gamboamartin\facturacion\models\fc_factura;
@@ -127,6 +130,27 @@ class fc_facturaTest extends test {
         $del = (new base_test())->del_cat_sat_metodo_pago($this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al eliminar factura',$del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new fc_csd($this->link))->elimina_todo();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new org_sucursal($this->link))->elimina_todo();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new org_empresa($this->link))->elimina_todo();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
             print_r($error);
             exit;
         }

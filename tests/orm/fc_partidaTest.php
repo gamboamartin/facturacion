@@ -3,9 +3,13 @@
 namespace gamboamartin\facturacion\tests\orm;
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_csd;
+use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\facturacion\tests\base_test2;
+use gamboamartin\organigrama\models\org_empresa;
+use gamboamartin\organigrama\models\org_sucursal;
 use gamboamartin\test\test;
 use stdClass;
 
@@ -42,6 +46,42 @@ class fc_partidaTest extends test
         $this->assertEquals('<b><span style="color:red">Error el id de la partida es incorrecto</span></b>',
             $resultado['mensaje']);
         errores::$error = false;
+
+        $del = (new fc_partida($this->link))->elimina_todo();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new fc_factura($this->link))->elimina_todo();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new fc_csd($this->link))->elimina_todo();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new org_sucursal($this->link))->elimina_todo();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new org_empresa($this->link))->elimina_todo();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
 
         $fc_partida_id = (new base_test2())->alta_fc_partida(link: $this->link, id: 999);
         if (errores::$error) {
