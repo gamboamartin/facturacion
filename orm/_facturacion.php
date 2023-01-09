@@ -75,6 +75,12 @@ class _facturacion
         return $data;
     }
 
+    /**
+     * Obtiene SQL para calcular los impuestos de una partida en base al tipo de impuesto
+     * @param string $tabla_impuesto Tipo de impuesto a evaluar
+     * @return array|string
+     * @version 1.38.0
+     */
     public function impuesto_partida(string $tabla_impuesto): array|string
     {
         $fc_partida_importe_con_descuento = $this->fc_partida_importe_con_descuento();
@@ -82,6 +88,7 @@ class _facturacion
             return $this->error->error(mensaje: 'Error al generar fc_partida_importe_con_descuento',
                 data: $fc_partida_importe_con_descuento);
         }
+
         $fc_impuesto_importe = $this->fc_impuesto_importe($fc_partida_importe_con_descuento);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar fc_partida_importe_con_descuento',
@@ -91,16 +98,8 @@ class _facturacion
         $inner_join_cat_sat_factor = "INNER JOIN cat_sat_factor ON cat_sat_factor.id = $tabla_impuesto.cat_sat_factor_id";
         $where = "WHERE $tabla_impuesto.fc_partida_id = fc_partida.id";
 
-        /**
-         * (SELECT SUM(((fc_partida.cantidad * fc_partida.valor_unitario) - fc_partida.descuento) * cat_sat_factor.factor)
-         * FROM fc_traslado INNER JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado.cat_sat_factor_id
-         * WHERE fc_traslado.fc_partida_id = fc_partida.id)
-         */
 
         return "(SELECT ROUND(SUM($fc_impuesto_importe),2) FROM $tabla_impuesto $inner_join_cat_sat_factor $where)";
-
-
     }
-
 
 }

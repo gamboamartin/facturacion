@@ -43,7 +43,8 @@ class fc_partidaTest extends test
             $resultado['mensaje']);
         errores::$error = false;
 
-        $fc_partida_id = (new base_test2())->alta_fc_partida(link: $this->link, id: 999);
+        $fc_partida_id = (new base_test2())->alta_fc_partida(link: $this->link, id: 999, cantidad: 10,
+            valor_unitario: 5.57);
         if (errores::$error) {
             $error = (new errores())->error('Error al obtener id de la partida', $fc_partida_id);
             print_r($error);
@@ -53,7 +54,7 @@ class fc_partidaTest extends test
         $resultado = $modelo->subtotal_partida(fc_partida_id: $fc_partida_id);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals(1, $resultado);
+        $this->assertEquals(55.7, $resultado);
         errores::$error = false;
     }
 
@@ -75,7 +76,8 @@ class fc_partidaTest extends test
             $resultado['mensaje']);
         errores::$error = false;
 
-        $fc_partida_id = (new base_test2())->alta_fc_partida(link: $this->link, id: 999);
+        $fc_partida_id = (new base_test2())->alta_fc_partida(link: $this->link, id: 999,cantidad: 10,
+            valor_unitario: 5.57, descuento: 9.35);
         if (errores::$error) {
             $error = (new errores())->error('Error al obtener id de la partida', $fc_partida_id);
             print_r($error);
@@ -85,7 +87,7 @@ class fc_partidaTest extends test
         $resultado = $modelo->total_partida(fc_partida_id: $fc_partida_id);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals(1, $resultado);
+        $this->assertEquals(46.35, $resultado);
         errores::$error = false;
     }
 
