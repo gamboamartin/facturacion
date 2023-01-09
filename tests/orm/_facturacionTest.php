@@ -46,7 +46,7 @@ class _facturacionTest extends test
         errores::$error = false;
     }
 
-    public function test_fc_partida_importe_con_descuento(): void
+    public function test_fc_partida_importe_con_descuento(): string
     {
         errores::$error = false;
         $_SESSION['grupo_id'] = 1;
@@ -64,6 +64,8 @@ class _facturacionTest extends test
         $this->assertNotTrue(errores::$error);
         $this->assertEquals($salida, $resultado);
         errores::$error = false;
+
+        return $resultado;
     }
 
     public function test_importes_base(): array
@@ -91,7 +93,7 @@ class _facturacionTest extends test
         return $resultado;
     }
 
-    public function test_fc_impuesto_importe(): void
+    public function test_fc_impuesto_importe(): string
     {
         errores::$error = false;
         $_SESSION['grupo_id'] = 1;
@@ -115,6 +117,45 @@ class _facturacionTest extends test
         $this->assertNotTrue(errores::$error);
         $this->assertEquals($salida, $resultado);
         errores::$error = false;
+
+        return  $resultado;
     }
+
+    public function test_impuesto_partida(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new _facturacion();
+
+        $importe_con_descuento = $this->test_fc_partida_importe_con_descuento();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al ejecutar test_fc_partida_importe_con_descuento',
+                $importe_con_descuento);
+            print_r($error);
+            exit;
+        }
+
+        $impuesto_importe = $this->test_fc_impuesto_importe();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al ejecutar test_fc_impuesto_importe', $impuesto_importe);
+            print_r($error);
+            exit;
+        }
+
+        $tabla_impuesto = 'fc_traslado';
+
+        $inner_join_cat_sat_factor = "INNER JOIN cat_sat_factor ON cat_sat_factor.id = $tabla_impuesto.cat_sat_factor_id";
+        $where = "WHERE $tabla_impuesto.fc_partida_id = fc_partida.id";
+        $salida = "(SELECT ROUND(SUM($impuesto_importe),2) FROM $tabla_impuesto $inner_join_cat_sat_factor $where)";
+        $resultado = $modelo->impuesto_partida(tabla_impuesto: $tabla_impuesto);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals($salida, $resultado);
+        errores::$error = false;
+    }
+
 }
 

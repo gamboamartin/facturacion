@@ -22,7 +22,7 @@ class base_test2
     public function alta_com_producto(PDO $link, int $id): array|int
     {
         $del = $this->elimina_registro($link, 'gamboamartin\\comercial\\models\\com_producto', id: $id);
-        if(errores::$error){
+        if (errores::$error) {
             return (new errores())->error('Error al eliminar producto', $del);
         }
 
@@ -73,7 +73,6 @@ class base_test2
     }
 
 
-
     public function alta_org_sucursal(PDO $link, int $id): array|int
     {
         $existe = (new org_sucursal($link))->existe_by_id(registro_id: $id);
@@ -95,7 +94,7 @@ class base_test2
 
     public function alta_fc_csd(PDO $link, int $id = 1, string $codigo = '1', string $descripcion = '1'): array|int
     {
-        $del = $this->elimina_fc_csd(link: $link,id: $id,factura_id: 999);
+        $del = $this->elimina_fc_csd(link: $link, id: $id, factura_id: 999);
         if (errores::$error) {
             return (new errores())->error('Error al eliminar csd', $del);
         }
@@ -163,14 +162,15 @@ class base_test2
         return $alta->registro_id;
     }
 
-    public function alta_fc_partida(PDO $link, int $id = 1, float $descuento = 0): array|int
+    public function alta_fc_partida(PDO   $link, int $id = 1, int $cantidad = 1, float $valor_unitario = 1,
+                                    float $descuento = 0): array|int
     {
         $producto = $this->alta_com_producto(link: $link, id: 999);
         if (errores::$error) {
             return (new errores())->error('Error al insertar producto', $producto);
         }
 
-        $factura = $this->alta_fc_factura(link: $link,id: 999);
+        $factura = $this->alta_fc_factura(link: $link, id: 999);
         if (errores::$error) {
             return (new errores())->error('Error al insertar factura', $factura);
         }
@@ -180,8 +180,8 @@ class base_test2
         $registro['codigo'] = $id;
         $registro['descripcion'] = $id;
         $registro['codigo_bis'] = $id;
-        $registro['cantidad'] = 1;
-        $registro['valor_unitario'] = 1;
+        $registro['cantidad'] = $cantidad;
+        $registro['valor_unitario'] = $valor_unitario;
         $registro['fc_factura_id'] = $factura;
         $registro['com_producto_id'] = $producto;
         $registro['descuento'] = $descuento;
@@ -196,12 +196,12 @@ class base_test2
     public function elimina_fc_csd(PDO $link, int $id, int $factura_id): array
     {
         $del = $this->elimina_registro($link, 'gamboamartin\facturacion\models\fc_factura', id: $factura_id);
-        if(errores::$error){
+        if (errores::$error) {
             return (new errores())->error('Error al eliminar factura', $del);
         }
 
         $del = $this->elimina_registro($link, 'gamboamartin\\facturacion\\models\\fc_csd', id: $id);
-        if(errores::$error){
+        if (errores::$error) {
             return (new errores())->error('Error al eliminar csd', $del);
         }
 
@@ -210,12 +210,12 @@ class base_test2
 
     public function elimina_registro(PDO $link, string $name_model, int $id): array
     {
-        $entidad = explode("\\",$name_model)[3];
+        $entidad = explode("\\", $name_model)[3];
 
         $model = (new modelo_base($link))->genera_modelo(modelo: $name_model);
-        $del = $model->elimina_con_filtro_and(filtro: array($entidad.".id" => $id));
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al eliminar '.$name_model, data: $del);
+        $del = $model->elimina_con_filtro_and(filtro: array($entidad . ".id" => $id));
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al eliminar ' . $name_model, data: $del);
         }
 
         return $del;
