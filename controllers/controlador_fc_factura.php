@@ -9,7 +9,6 @@
 namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
-use base\orm\modelo;
 use config\generales;
 use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
@@ -17,20 +16,14 @@ use gamboamartin\compresor\compresor;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
-use gamboamartin\facturacion\models\fc_conf_retenido;
-use gamboamartin\facturacion\models\fc_conf_traslado;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_partida;
-use gamboamartin\facturacion\models\fc_traslado;
-use gamboamartin\plugins\files;
 use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 
 use gamboamartin\template\html;
-use gamboamartin\xml_cfdi_4\cfdis;
-use gamboamartin\xml_cfdi_4\timbra;
 use html\fc_partida_html;
 use html\fc_factura_html;
 use PDO;
