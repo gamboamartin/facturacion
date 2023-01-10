@@ -95,6 +95,8 @@ class controlador_fc_factura extends system{
             $this->fc_partida_id = $_GET['fc_partida_id'];
         }
 
+        $this->lista_get_data = true;
+
     }
 
     public function alta(bool $header, bool $ws = false): array|string

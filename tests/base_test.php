@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\tests;
 use base\orm\modelo_base;
 
+use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\errores\errores;
@@ -17,6 +18,15 @@ use PDO;
 class base_test{
 
 
+    public function alta_cat_sat_forma_pago(PDO $link, int $id): array|\stdClass
+    {
+        $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_forma_pago(link: $link, id: $id);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
 
 
     public function alta_com_cliente(PDO $link): array|\stdClass
@@ -84,8 +94,8 @@ class base_test{
         return $alta;
     }
 
-    public function alta_fc_factura(PDO $link, int $com_sucursal_id = 1, int $com_tipo_cambio_id = 1,
-                                    int $fc_csd_id = 1, int $id = 1): array|\stdClass
+    public function alta_fc_factura(PDO $link, int $cat_sat_forma_pago_id = 1, int $com_sucursal_id = 1,
+                                    int $com_tipo_cambio_id = 1, int $fc_csd_id = 1, int $id = 1): array|\stdClass
     {
 
 
@@ -122,6 +132,17 @@ class base_test{
             }
         }
 
+        $existe = (new cat_sat_forma_pago($link))->existe_by_id(registro_id: $cat_sat_forma_pago_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_forma_pago(link: $link, id: $cat_sat_forma_pago_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+            }
+        }
+
         $registro = array();
         $registro['id'] = $id;
         $registro['codigo'] = 1;
@@ -131,7 +152,7 @@ class base_test{
         $registro['serie'] = 1;
         $registro['folio'] = 1;
         $registro['exportacion'] = 1;
-        $registro['cat_sat_forma_pago_id'] = 1;
+        $registro['cat_sat_forma_pago_id'] = $cat_sat_forma_pago_id;
         $registro['cat_sat_metodo_pago_id'] = 1;
         $registro['cat_sat_moneda_id'] = 1;
         $registro['com_tipo_cambio_id'] = $com_tipo_cambio_id;
