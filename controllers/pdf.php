@@ -271,11 +271,26 @@ final class pdf
         return "<$etiqueta class='$class' $propiedades>$data</$etiqueta>";
     }
 
+    /**
+     * Limpia un monto para dejarlo como double
+     * @param int|float|string $monto Monto a ajustar
+     * @return array|string
+     * @version 2.12.0
+     */
     private function limpia_monto(int|float|string $monto): array|string
     {
         $monto = trim($monto);
+        if($monto === ''){
+            return $this->error->error(mensaje: 'Error monto esta vacio', data: $monto);
+        }
         $monto = str_replace(' ', '', $monto);
         $monto = str_replace('$', '', $monto);
+        $monto = str_replace(',', '', $monto);
+
+        if(!is_numeric($monto)){
+            return $this->error->error(mensaje: 'Error monto debe ser un numero', data: $monto);
+        }
+
         return str_replace(',', '', $monto);
     }
 
