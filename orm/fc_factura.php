@@ -604,19 +604,17 @@ class fc_factura extends modelo
      */
     public function get_factura_sub_total(int $fc_factura_id): float|array
     {
-        $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        $fc_partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
+            return $this->error->error(mensaje: 'Error al obtener partidas', data: $fc_partidas);
         }
 
-        $subtotal = 0.0;
-
-        foreach ($partidas as $valor) {
-            $subtotal += (new fc_partida($this->link))->subtotal_partida($valor['fc_partida_id']);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $subtotal);
-            }
+        $subtotal = $this->suma_sub_totales(fc_partidas: $fc_partidas);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener calculo ', data: $subtotal);
         }
+
+
         return $subtotal;
     }
 
@@ -916,6 +914,17 @@ class fc_factura extends modelo
 
     }
 
+    private function suma_sub_totales(array $fc_partidas){
+        $subtotal = 0.0;
+        foreach ($fc_partidas as $fc_partida) {
+            $subtotal = $this->suma_sub_total(fc_partida: $fc_partida,subtotal:  $subtotal);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $subtotal);
+            }
+        }
+        return $subtotal;
+    }
+
     /**
      * Calcula el subtotal de una partida
      * @param int $fc_partida_id Partida a verificar sub total
@@ -972,6 +981,22 @@ class fc_factura extends modelo
             $descuento += $descuento_partida;
         }
         return $descuento;
+    }
+
+    /**
+     * Suma un subtotal al previo
+     * @param array $fc_partida Partida a integrar
+     * @param float $subtotal subtotal previo
+     * @return array|float
+     */
+    private function suma_sub_total(array $fc_partida, float $subtotal): float|array
+    {
+        $st = (new fc_partida($this->link))->subtotal_partida($fc_partida['fc_partida_id']);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener calculo ', data: $st);
+        }
+        $subtotal += $st;
+        return $subtotal;
     }
 
     private function get_datos_xml(string $ruta_xml = ""): array
