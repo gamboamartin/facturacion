@@ -5,6 +5,7 @@ namespace gamboamartin\facturacion\controllers;
 use config\generales;
 use gamboamartin\errores\errores;
 use Mpdf\Mpdf;
+use NumberFormatter;
 use Throwable;
 
 final class pdf
@@ -93,14 +94,26 @@ final class pdf
     {
         $class = "txt-center border";
 
+        $fc_partida_descuento = $this->monto_moneda(monto: $concepto['fc_partida_descuento']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_descuento);
+        }
+
+        $fc_partida_valor_unitario = $this->monto_moneda(monto: $concepto['fc_partida_valor_unitario']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_valor_unitario);
+        }
+
+
+
         $body_td_1 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_codigo'], class: $class, propiedades: "colspan='2'");
         $body_td_2 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_id'], class: $class);
         $body_td_3 = $this->html(etiqueta: "td", data: $concepto['fc_partida_cantidad'], class: $class);
         $body_td_4 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_codigo'], class: $class);
         $body_td_5 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_descripcion'], class: $class);
         $body_td_6 = $this->html(etiqueta: "td", data: $concepto['fc_partida_cantidad'], class: $class);
-        $body_td_7 = $this->html(etiqueta: "td", data: $concepto['fc_partida_valor_unitario'], class: $class);
-        $body_td_8 = $this->html(etiqueta: "td", data: $concepto['fc_partida_descuento'], class: $class);
+        $body_td_7 = $this->html(etiqueta: "td", data: $fc_partida_valor_unitario, class: $class);
+        $body_td_8 = $this->html(etiqueta: "td", data: $fc_partida_descuento, class: $class);
         $body_td_9 = $this->html(etiqueta: "td", data: $concepto['cat_sat_obj_imp_descripcion'], class: $class);
 
         return $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2 . $body_td_3 . $body_td_4 . $body_td_5 . $body_td_6 .
@@ -258,9 +271,47 @@ final class pdf
         return "<$etiqueta class='$class' $propiedades>$data</$etiqueta>";
     }
 
+    private function limpia_monto(int|float|string $monto): array|string
+    {
+        $monto = trim($monto);
+        $monto = str_replace(' ', '', $monto);
+        $monto = str_replace('$', '', $monto);
+        return str_replace(',', '', $monto);
+    }
+
+    private function monto_moneda(int|float|string $monto){
+        $monto = $this->limpia_monto(monto: $monto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $monto);
+        }
+        $formatter = new NumberFormatter('es_MX',  NumberFormatter::CURRENCY);
+        return $formatter->formatCurrency($monto, 'MXN');
+    }
+
     public function totales(string $moneda, string $subtotal, string $forma_pago, string $imp_trasladados,
                             string $imp_retenidos, string $metodo_pago, string $total)
     {
+
+        $subtotal = $this->monto_moneda(monto: $subtotal);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $subtotal);
+        }
+
+        $imp_trasladados = $this->monto_moneda(monto: $imp_trasladados);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $imp_trasladados);
+        }
+
+        $imp_retenidos = $this->monto_moneda(monto: $imp_retenidos);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $imp_retenidos);
+        }
+
+        $total = $this->monto_moneda(monto: $total);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $total);
+        }
+
 
         $body_td_1 = $this->html(etiqueta: "td", data: "Moneda:", class: "negrita");
         $body_td_2 = $this->html(etiqueta: "td", data: $moneda);
