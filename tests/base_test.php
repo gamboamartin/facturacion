@@ -407,6 +407,12 @@ class base_test{
 
     public function del_fc_partida(PDO $link): array
     {
+
+        $del = $this->del_fc_traslado($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_partida');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);

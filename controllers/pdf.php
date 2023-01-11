@@ -113,25 +113,60 @@ final class pdf
 
         $class = "txt-center border";
 
-        $fc_partida_descuento = $this->monto_moneda(monto: $concepto['fc_partida_descuento']);
+        $fc_partida_valor_unitario = $this->limpia_monto(monto: $concepto['fc_partida_valor_unitario']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_valor_unitario);
+        }
+
+        $fc_partida_valor_unitario = (float)$fc_partida_valor_unitario;
+        $fc_partida_valor_unitario = round($fc_partida_valor_unitario,2);
+
+
+        $fc_partida_cantidad = $this->limpia_monto(monto: $concepto['fc_partida_cantidad']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_cantidad);
+        }
+        $fc_partida_cantidad = (float)$fc_partida_cantidad;
+        $fc_partida_cantidad = round($fc_partida_cantidad,2);
+
+
+        $fc_partida_descuento = $this->limpia_monto(monto: $concepto['fc_partida_descuento']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_descuento);
         }
 
-        $fc_partida_valor_unitario = $this->monto_moneda(monto: $concepto['fc_partida_valor_unitario']);
+        $fc_partida_descuento = (float)$fc_partida_descuento;
+        $fc_partida_descuento = round($fc_partida_descuento,2);
+
+
+        $fc_partida_importe = $fc_partida_valor_unitario * $fc_partida_cantidad;
+        $fc_partida_importe = round($fc_partida_importe,2);
+
+
+        $fc_partida_descuento = $this->monto_moneda(monto: $fc_partida_descuento);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_descuento);
+        }
+
+        $fc_partida_valor_unitario = $this->monto_moneda(monto: $fc_partida_valor_unitario);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_valor_unitario);
+        }
+
+        $fc_partida_importe = $this->monto_moneda(monto: $fc_partida_importe);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_importe);
         }
 
 
 
         $body_td_1 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_codigo'], class: $class, propiedades: "colspan='2'");
         $body_td_2 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_id'], class: $class);
-        $body_td_3 = $this->html(etiqueta: "td", data: $concepto['fc_partida_cantidad'], class: $class);
+        $body_td_3 = $this->html(etiqueta: "td", data: $fc_partida_cantidad, class: $class);
         $body_td_4 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_codigo'], class: $class);
         $body_td_5 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_descripcion'], class: $class);
-        $body_td_6 = $this->html(etiqueta: "td", data: $concepto['fc_partida_cantidad'], class: $class);
-        $body_td_7 = $this->html(etiqueta: "td", data: $fc_partida_valor_unitario, class: $class);
+        $body_td_6 = $this->html(etiqueta: "td", data: $fc_partida_valor_unitario, class: $class);
+        $body_td_7 = $this->html(etiqueta: "td", data: $fc_partida_importe, class: $class);
         $body_td_8 = $this->html(etiqueta: "td", data: $fc_partida_descuento, class: $class);
         $body_td_9 = $this->html(etiqueta: "td", data: $concepto['cat_sat_obj_imp_descripcion'], class: $class);
 
@@ -165,8 +200,42 @@ final class pdf
         $tasa_cuota = '';
         $importe = '';
         $aplica_traslado = false;
+
         if(isset($concepto['traslados']) && count($concepto['traslados'])>0){
             $aplica_traslado = true;
+            $impuesto = $concepto['traslados'][0]['cat_sat_tipo_impuesto_descripcion'];
+            $tipo = 'Traslado';
+            $fc_partida_valor_unitario = round($concepto['traslados'][0]['fc_partida_valor_unitario'],2);
+            $fc_partida_cantidad = round($concepto['traslados'][0]['fc_partida_cantidad'],2);
+            $fc_partida_descuento = round($concepto['traslados'][0]['fc_partida_descuento'],2);
+
+            $tasa_cuota = round($concepto['traslados'][0]['cat_sat_factor_factor'],2);
+
+            $base = $fc_partida_valor_unitario * $fc_partida_cantidad;
+            $base = round($base,2);
+
+            $base = $base - $fc_partida_descuento;
+            $base = round($base,2);
+
+            $importe = $base * $tasa_cuota;
+            $importe = round($importe,2);
+            $importe = $this->monto_moneda(monto: $importe);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al ajustar base',data:  $importe);
+            }
+
+
+            $base = $this->monto_moneda(monto: $base);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al ajustar base',data:  $base);
+            }
+
+
+
+            $tipo_factor = $concepto['traslados'][0]['cat_sat_tipo_factor_codigo'];
+
+
+            //print_r($concepto);exit;
         }
 
         if($aplica_traslado) {
