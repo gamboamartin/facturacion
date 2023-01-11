@@ -4,6 +4,7 @@ namespace gamboamartin\facturacion\controllers;
 
 use config\generales;
 use gamboamartin\errores\errores;
+use gamboamartin\validacion\validacion;
 use Mpdf\Mpdf;
 use NumberFormatter;
 use Throwable;
@@ -13,10 +14,12 @@ final class pdf
 
     public Mpdf $pdf;
     private errores $error;
+    private validacion $valida;
 
     public function __construct()
     {
         $this->error = new errores();
+        $this->valida = new validacion();
         try {
             $temporales = (new generales())->path_base . "archivos/tmp/";
             $this->pdf = new Mpdf(['tempDir' => $temporales, 'mode' => 'utf-8', 'format' => [229, 279],
@@ -90,8 +93,24 @@ final class pdf
         return $table;
     }
 
-    private function concepto_datos(array $concepto): string
+    private function concepto_datos(array $concepto): string|array
     {
+
+        $keys_no_ob = array('fc_partida_descuento');
+        foreach ($keys_no_ob as $key_no_ob){
+            if(isset($concepto[$key_no_ob])){
+                $concepto[$key_no_ob] = 0;
+            }
+        }
+
+        $keys = array('fc_partida_descuento','fc_partida_valor_unitario','cat_sat_producto_codigo',
+            'cat_sat_producto_id','fc_partida_cantidad','cat_sat_unidad_codigo','cat_sat_unidad_descripcion',
+            'fc_partida_cantidad','cat_sat_obj_imp_descripcion');
+        $valida = $this->valida->valida_existencia_keys(keys: $keys,registro:  $concepto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar concepto',data:  $valida);
+        }
+
         $class = "txt-center border";
 
         $fc_partida_descuento = $this->monto_moneda(monto: $concepto['fc_partida_descuento']);
@@ -229,12 +248,14 @@ final class pdf
         $body_tr = "";
 
         foreach ($conceptos as $concepto) {
-            $body_tr .= $this->concepto_datos(concepto: $concepto);
-            if (errores::$error) {
-                $error = (new errores())->error('Error al maquetar concepto', $body_tr);
-                print_r($error);
-                die('Error');
+
+            $concepto_pdf = $this->concepto_datos(concepto: $concepto);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al generar concepto',data:  $concepto_pdf);
             }
+
+            $body_tr .= $concepto_pdf;
+
 
             $body_tr .= $this->concepto_producto(concepto: $concepto);
             if (errores::$error) {

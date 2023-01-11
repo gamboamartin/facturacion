@@ -290,9 +290,9 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al maquetar header',data:  $pdf, header: $header,ws:$ws);
         }
 
-        $pdf->conceptos(conceptos: $factura['partidas']);
+        $rs = $pdf->conceptos(conceptos: $factura['partidas']);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al maquetar conceptos',data:  $pdf, header: $header,ws:$ws);
+            return $this->retorno_error(mensaje: 'Error al maquetar conceptos',data:  $rs, header: $header,ws:$ws);
         }
 
         $pdf->totales(moneda: $factura['cat_sat_moneda_descripcion'],subtotal: $factura['fc_factura_sub_total'],
