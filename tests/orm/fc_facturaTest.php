@@ -38,122 +38,22 @@ class fc_facturaTest extends test {
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
-        $del = (new base_test())->del_fc_retenido($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar retenido',$del);
-            print_r($error);
-            exit;
-        }
 
-        $del = (new base_test())->del_fc_traslado($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar traslado',$del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new base_test())->del_fc_partida($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar partida',$del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new base_test())->del_fc_factura($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar factura',$del);
-            print_r($error);
-            exit;
-        }
 
         $modelo = new fc_factura($this->link);
         $modelo = new liberator($modelo);
 
 
-        $del = (new base_test())->del_fc_factura($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar factura',$del);
-            print_r($error);
-            exit;
-        }
 
-        $del = (new base_test())->del_fc_traslado($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar traskado',$del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new base_test())->del_fc_retenido($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar retenido',$del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new base_test())->del_fc_conf_traslado($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar traskado',$del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new base_test())->del_fc_conf_retenido($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar traskado',$del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new base_test())->del_fc_producto($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar producto',$del);
-            print_r($error);
-            exit;
-        }
-
-
-        $del = (new base_test())->del_fc_tipo_producto($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar tipo_producto',$del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new base_test())->del_cat_sat_moneda($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar factura',$del);
-            print_r($error);
-            exit;
-        }
 
         $del = (new base_test())->del_cat_sat_metodo_pago($this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error al eliminar factura',$del);
+            $error = (new errores())->error('Error al eliminar',$del);
             print_r($error);
             exit;
         }
 
-        $del = (new fc_csd($this->link))->elimina_todo();
-        if (errores::$error) {
-            $error = (new errores())->error('Error al eliminar', $del);
-            print_r($error);
-            exit;
-        }
 
-        $del = (new org_sucursal($this->link))->elimina_todo();
-        if (errores::$error) {
-            $error = (new errores())->error('Error al eliminar', $del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new org_empresa($this->link))->elimina_todo();
-        if (errores::$error) {
-            $error = (new errores())->error('Error al eliminar', $del);
-            print_r($error);
-            exit;
-        }
 
         $alta = (new base_test())->alta_fc_partida($this->link);
         if(errores::$error){

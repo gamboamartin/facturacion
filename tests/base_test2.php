@@ -162,7 +162,7 @@ class base_test2
         return $alta->registro_id;
     }
 
-    
+
 
     public function elimina_fc_csd(PDO $link, int $id, int $factura_id): array
     {
