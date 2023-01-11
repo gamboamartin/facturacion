@@ -522,6 +522,19 @@ class fc_factura extends modelo
             $concepto->objeto_imp = $partida['cat_sat_obj_imp_codigo'];
             $concepto->no_identificacion = $partida['com_producto_codigo'];;
             $concepto->unidad = $partida['cat_sat_unidad_descripcion'];
+
+            $descuento = 0.0;
+            if(isset($partida['fc_partida_descuento'])){
+                $descuento = $partida['fc_partida_descuento'];
+            }
+
+            $descuento = $this->monto_dos_dec(monto: $descuento);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al maquetar descuento', data: $descuento);
+            }
+
+            $concepto->descuento = $descuento;
+
             $concepto->impuestos = array();
             $concepto->impuestos[0] = new stdClass();
             $concepto->impuestos[0]->traslados = array();
@@ -584,6 +597,11 @@ class fc_factura extends modelo
     }
 
 
+    /**
+     * Obtiene el subtotal de una factura
+     * @param int $fc_factura_id Factura a obtener info
+     * @return float|array
+     */
     public function get_factura_sub_total(int $fc_factura_id): float|array
     {
         $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
