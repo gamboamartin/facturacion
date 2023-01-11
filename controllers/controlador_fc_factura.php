@@ -225,10 +225,12 @@ class controlador_fc_factura extends system{
         }
 
         $ruta_qr = (new fc_factura_documento(link: $this->link))->get_factura_documento(fc_factura_id: $this->registro_id,
-            tipo_documento: "jpg");
+            tipo_documento: "qr_cfdi");
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener QR',data:  $ruta_qr, header: $header,ws:$ws);
         }
+
+        //var_dump($ruta_qr);exit;
 
         $filtro["fc_factura_id"] = $factura['fc_factura_id'];
         $cfdi_sellado = (new fc_cfdi_sellado($this->link))->filtro_and(filtro: $filtro);
@@ -301,15 +303,17 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al maquetar totales',data:  $pdf, header: $header,ws:$ws);
         }
 
-        $pdf->sellos(sello_cfdi: $sello_cfdi,sello_sat: $sello_sat);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al maquetar sellos',data:  $pdf, header: $header,ws:$ws);
-        }
+
 
         $pdf->complementos(ruta_documento: $ruta_qr, complento: $complento,rfc_proveedor: $rfc_proveedor,
             fecha: $fecha_timbrado, no_certificado: $no_certificado);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar complementos',data:  $pdf, header: $header,ws:$ws);
+        }
+
+        $pdf->sellos(sello_cfdi: $sello_cfdi,sello_sat: $sello_sat);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar sellos',data:  $pdf, header: $header,ws:$ws);
         }
 
         $pdf->footer(descripcion: "--- IVITEC ---");

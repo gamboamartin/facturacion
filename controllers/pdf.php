@@ -114,17 +114,33 @@ final class pdf
 
     private function concepto_calculos(array $concepto): string
     {
-        $body_tr = $this->columnas_impuestos();
 
-        $body_td_9 = $this->html(etiqueta: "td", data: "222222", class: "txt-center", propiedades: "colspan='2'");
-        $body_td_10 = $this->html(etiqueta: "td", data: "222222",  class: "txt-center",propiedades: "colspan='2'");
-        $body_td_11 = $this->html(etiqueta: "td", data: "222222", class: "txt-center");
-        $body_td_12 = $this->html(etiqueta: "td", data: "222222", class: "txt-center", propiedades: "colspan='2'");
-        $body_td_13 = $this->html(etiqueta: "td", data: "222222", class: "txt-center", propiedades: "colspan='2'");
-        $body_td_14 = $this->html(etiqueta: "td", data: "222222", class: "txt-center");
 
-        $body_tr .= $this->html(etiqueta: "tr", data: $body_td_9 . $body_td_10 . $body_td_11 . $body_td_12 . $body_td_13 .
-            $body_td_14);
+        $body_tr = '';
+
+        $impuesto = '';
+        $tipo = '';
+        $base = '';
+        $tipo_factor = '';
+        $tasa_cuota = '';
+        $importe = '';
+        $aplica_traslado = false;
+        if(isset($concepto['traslados']) && count($concepto['traslados'])>0){
+            $aplica_traslado = true;
+        }
+
+        if($aplica_traslado) {
+            $body_tr = $this->columnas_impuestos();
+            $body_td_9 = $this->html(etiqueta: "td", data: $impuesto, class: "txt-center", propiedades: "colspan='2'");
+            $body_td_10 = $this->html(etiqueta: "td", data: $tipo, class: "txt-center", propiedades: "colspan='2'");
+            $body_td_11 = $this->html(etiqueta: "td", data: $base, class: "txt-center");
+            $body_td_12 = $this->html(etiqueta: "td", data: $tipo_factor, class: "txt-center", propiedades: "colspan='2'");
+            $body_td_13 = $this->html(etiqueta: "td", data: $tasa_cuota, class: "txt-center", propiedades: "colspan='2'");
+            $body_td_14 = $this->html(etiqueta: "td", data: $importe, class: "txt-center");
+
+            $body_tr .= $this->html(etiqueta: "tr", data: $body_td_9 . $body_td_10 . $body_td_11 . $body_td_12 . $body_td_13 .
+                $body_td_14);
+        }
 
         return $body_tr;
     }
@@ -144,16 +160,29 @@ final class pdf
 
     private function concepto_numeros(array $concepto): string
     {
-
+        $body_tr = '';
+        $aplica_numero_pedimento = false;
+        $aplica_cuenta_predial = false;
         $class = "color border negrita txt-center";
 
-        $body_td_1 = $this->html(etiqueta: "td", data: "Número de pedimento", class: $class, propiedades: "colspan='4'");
-        $body_td_2 = $this->html(etiqueta: "td", data: "Número de cuenta predial", class: $class, propiedades: "colspan='6'");
-        $body_td_3 = $this->html(etiqueta: "td", data: " ", class: "txt-center border", propiedades: "colspan='4'");
-        $body_td_4 = $this->html(etiqueta: "td", data: "  ", class: "txt-center border", propiedades: "colspan='6'");
-
-        $body_tr = $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2);
-        $body_tr .= $this->html(etiqueta: "tr", data: $body_td_3 . $body_td_4);
+        if($aplica_numero_pedimento) {
+            $body_td_1 = $this->html(etiqueta: "td", data: "Número de pedimento", class: $class, propiedades: "colspan='4'");
+        }
+        if($aplica_cuenta_predial) {
+            $body_td_2 = $this->html(etiqueta: "td", data: "Número de cuenta predial", class: $class, propiedades: "colspan='6'");
+        }
+        if($aplica_numero_pedimento) {
+            $body_td_3 = $this->html(etiqueta: "td", data: " ", class: "txt-center border", propiedades: "colspan='4'");
+        }
+        if($aplica_cuenta_predial) {
+            $body_td_4 = $this->html(etiqueta: "td", data: "  ", class: "txt-center border", propiedades: "colspan='6'");
+        }
+        if($aplica_numero_pedimento) {
+            $body_tr = $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2);
+        }
+        if($aplica_cuenta_predial) {
+            $body_tr .= $this->html(etiqueta: "tr", data: $body_td_3 . $body_td_4);
+        }
 
         return $body_tr;
     }
@@ -257,6 +286,7 @@ final class pdf
     public function sellos(string $sello_cfdi, string $sello_sat)
     {
 
+       // $this->pdf->WriteHTML("<br><br><br><br>");
         $sello = $this->html(etiqueta: "h2", data: "Sello digital del CFDI:", class: "negrita mt-5");
         $this->pdf->WriteHTML($sello);
 
@@ -272,6 +302,8 @@ final class pdf
 
     public function complementos(string $ruta_documento,string $complento, string $rfc_proveedor, string $fecha, string $no_certificado)
     {
+        //$ruta_documento = '';
+
         $qr = $this->html(etiqueta: "img", data: "", propiedades: 'src = "' . $ruta_documento . '" width = "120"');
 
         if ($ruta_documento !== ""){
@@ -301,7 +333,7 @@ final class pdf
 
     public function guardar(string $nombre_documento)
     {
-        $this->pdf->Output($nombre_documento . '.pdf', 'D');
+        $this->pdf->Output($nombre_documento . '.pdf','I');
     }
 
     public function footer(string $descripcion)

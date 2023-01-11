@@ -409,7 +409,8 @@ class fc_factura extends modelo
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al dar de alta factura documento', data: $fc_factura_documento);
             }
-        } else {
+        }
+        else {
             $r_fc_factura_documento = (new fc_factura_documento(link: $this->link))->filtro_and(
                 filtro: array('fc_factura.id' => $this->registro_id));
             if (errores::$error) {
@@ -435,6 +436,7 @@ class fc_factura extends modelo
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error  al modificar documento', data: $r_fc_factura_documento);
             }
+
 
             $documento->registro = (new doc_documento(link: $this->link))->registro(registro_id: $documento->registro_id);
             if (errores::$error) {
@@ -958,6 +960,11 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error: la factura ya ha sido timbrada', data: $timbrada);
         }
 
+        $fc_factura = $this->registro(registro_id: $fc_factura_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
+        }
+
         $xml = $this->genera_xml(fc_factura_id: $fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar XML', data: $xml);
@@ -967,7 +974,8 @@ class fc_factura extends modelo
 
         $xml_timbrado = (new timbra())->timbra(contenido_xml: $xml_contenido);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al timbrar XML', data: $xml_timbrado);
+
+            return $this->error->error(mensaje: 'Error al timbrar XML', data: $xml_timbrado,params: array($fc_factura));
         }
 
         file_put_contents(filename: $xml->doc_documento_ruta_absoluta, data: $xml_timbrado->xml_sellado);
