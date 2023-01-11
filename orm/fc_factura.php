@@ -124,16 +124,32 @@ class fc_factura extends modelo
 
     private function comprobante(array $factura): array
     {
+
+
+        $fc_factura_sub_total = $this->monto_dos_dec(monto: $factura['fc_factura_sub_total']);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al limpiar monto', data: $fc_factura_sub_total);
+        }
+        $fc_factura_total = $this->monto_dos_dec(monto: $factura['fc_factura_total']);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al limpiar monto', data: $fc_factura_total);
+        }
+        $fc_factura_descuento = $this->monto_dos_dec(monto: $factura['fc_factura_descuento']);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al limpiar monto', data: $fc_factura_descuento);
+        }
+
+
         $comprobante = array();
         $comprobante['lugar_expedicion'] = $factura['dp_cp_descripcion'];
         $comprobante['tipo_de_comprobante'] = $factura['cat_sat_tipo_de_comprobante_codigo'];
         $comprobante['moneda'] = $factura['cat_sat_moneda_codigo'];
-        $comprobante['sub_total'] = $factura['fc_factura_sub_total'];
-        $comprobante['total'] = number_format($factura['fc_factura_total'], 2);
+        $comprobante['sub_total'] = $fc_factura_sub_total;
+        $comprobante['total'] = $fc_factura_total;
         $comprobante['exportacion'] = $factura['fc_factura_exportacion'];
         $comprobante['folio'] = $factura['fc_factura_folio'];
         $comprobante['forma_pago'] = $factura['cat_sat_forma_pago_codigo'];
-        //$comprobante['descuento'] = $factura['fc_factura_descuento'];
+        $comprobante['descuento'] = $fc_factura_descuento;
         $comprobante['metodo_pago'] = $factura['cat_sat_metodo_pago_codigo'];
         return $comprobante;
     }
@@ -558,6 +574,15 @@ class fc_factura extends modelo
         return $imp;
     }
 
+    private function monto_dos_dec(string|int|float $monto){
+        $monto = $this->limpia_monto(monto: $monto);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al limpiar monto', data: $monto);
+        }
+        $monto = round($monto,2);
+        return number_format($monto,2,'.','');
+    }
+
 
     public function get_factura_sub_total(int $fc_factura_id): float|array
     {
@@ -765,6 +790,19 @@ class fc_factura extends modelo
         }
 
         return $registro;
+    }
+
+    /**
+     * Limpia un monto para dejarlo double
+     * @param string|int|float $monto Monto a limpiar
+     * @return array|string
+     */
+    private function limpia_monto(string|int|float $monto): array|string
+    {
+        $monto = trim($monto);
+        $monto = str_replace(' ', '', $monto);
+        $monto = str_replace(',', '', $monto);
+        return str_replace('$', '', $monto);
     }
 
     /**

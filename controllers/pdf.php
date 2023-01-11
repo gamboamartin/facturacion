@@ -315,7 +315,13 @@ final class pdf
         return str_replace(',', '', $monto);
     }
 
-    private function monto_moneda(int|float|string $monto){
+    /**
+     * Ajusta un monto a dor formato moneda mx
+     * @param int|float|string $monto Monto a formatear
+     * @return array|false|string
+     */
+    private function monto_moneda(int|float|string $monto): bool|array|string
+    {
         $monto = $this->limpia_monto(monto: $monto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $monto);
