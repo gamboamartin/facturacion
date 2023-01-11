@@ -162,36 +162,7 @@ class base_test2
         return $alta->registro_id;
     }
 
-    public function alta_fc_partida(PDO   $link, int $id = 1, int $cantidad = 1, float $valor_unitario = 1,
-                                    float $descuento = 0): array|int
-    {
-        $producto = $this->alta_com_producto(link: $link, id: 999);
-        if (errores::$error) {
-            return (new errores())->error('Error al insertar producto', $producto);
-        }
-
-        $factura = $this->alta_fc_factura(link: $link, id: 999);
-        if (errores::$error) {
-            return (new errores())->error('Error al insertar factura', $factura);
-        }
-
-        $registro = array();
-        $registro['id'] = $id;
-        $registro['codigo'] = $id;
-        $registro['descripcion'] = $id;
-        $registro['codigo_bis'] = $id;
-        $registro['cantidad'] = $cantidad;
-        $registro['valor_unitario'] = $valor_unitario;
-        $registro['fc_factura_id'] = $factura;
-        $registro['com_producto_id'] = $producto;
-        $registro['descuento'] = $descuento;
-        $alta = (new fc_partida($link))->alta_registro($registro);
-        if (errores::$error) {
-            return (new errores())->error(mensaje: 'Error al insertar partida', data: $alta);
-        }
-
-        return $alta->registro_id;
-    }
+    
 
     public function elimina_fc_csd(PDO $link, int $id, int $factura_id): array
     {

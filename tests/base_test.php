@@ -169,8 +169,8 @@ class base_test{
         return $alta;
     }
 
-    public function alta_fc_partida(PDO $link, string $codigo = '1', string $descripcion = '1',
-                                    float $descuento = 0, int $id = 1): array|\stdClass
+    public function alta_fc_partida(PDO $link, string $codigo = '1', float $cantidad = 1, string $descripcion = '1',
+                                    float $descuento = 0, int $id = 1, float $valor_unitario = 1): array|\stdClass
     {
         $alta = $this->alta_fc_factura($link);
         if(errores::$error){
@@ -182,8 +182,8 @@ class base_test{
         $registro['id'] = $id;
         $registro['codigo'] = $codigo;
         $registro['descripcion'] = $descripcion;
-        $registro['cantidad'] = 1;
-        $registro['valor_unitario'] = 1;
+        $registro['cantidad'] = $cantidad;
+        $registro['valor_unitario'] = $valor_unitario;
         $registro['fc_factura_id'] = 1;
         $registro['com_producto_id'] = 1;
         $registro['codigo_bis'] = 1;
