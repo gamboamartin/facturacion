@@ -11,9 +11,11 @@ final class pdf
 {
 
     public Mpdf $pdf;
+    private errores $error;
 
     public function __construct()
     {
+        $this->error = new errores();
         try {
             $temporales = (new generales())->path_base . "archivos/tmp/";
             $this->pdf = new Mpdf(['tempDir' => $temporales, 'mode' => 'utf-8', 'format' => [229, 279],
@@ -35,7 +37,7 @@ final class pdf
                            string $rfc_receptor, string $cod_postal, string $fecha,
                            string $nombre_receptor, string $efecto,
                            string $cod_postal_receptor, string $regimen_fiscal, string $regimen_fiscal_receptor,
-                           string $exportacion, string $cfdi)
+                           string $exportacion, string $cfdi): string|array
     {
 
         $body_td_1 = $this->html(etiqueta: "td", data: "RFC emisor:", class: "negrita");
@@ -78,7 +80,13 @@ final class pdf
 
         $table = $this->html(etiqueta: "table", data: $body);
 
-        $this->pdf->WriteHTML($table);
+        try {
+            $this->pdf->WriteHTML($table);
+        }
+        catch (Throwable $e){
+            return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
+        }
+        return $table;
     }
 
     private function concepto_datos(array $concepto): string
