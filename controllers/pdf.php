@@ -388,9 +388,14 @@ final class pdf
      * Ajusta un monto a dor formato moneda mx
      * @param int|float|string $monto Monto a formatear
      * @return array|false|string
+     * @version 2.18.0
      */
     private function monto_moneda(int|float|string $monto): bool|array|string
     {
+        $monto = trim($monto);
+        if($monto === ''){
+            return $this->error->error(mensaje: 'Error monto esta vacio', data: $monto);
+        }
         $monto = $this->limpia_monto(monto: $monto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $monto);
