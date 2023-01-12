@@ -517,6 +517,7 @@ class fc_factura extends modelo
                 return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida', data: $retenidos);
             }
 
+
             $registro['partidas'][$key]['traslados'] = $traslados->registros;
 
             $concepto = new stdClass();
@@ -548,7 +549,7 @@ class fc_factura extends modelo
             $concepto->impuestos[0]->retenciones = array();
 
 
-            $impuestos = $this->maqueta_impuesto(impuestos: $traslados);
+            $impuestos = $this->maqueta_impuesto(impuestos: $traslados, key_importe_impuesto: 'fc_traslado_importe');
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar traslados', data: $impuestos);
             }
@@ -599,7 +600,7 @@ class fc_factura extends modelo
                 $key_ret_gl = $ret['cat_sat_tipo_factor_id'].'.'.$ret['cat_sat_factor_id'].'.'.$ret['cat_sat_tipo_impuesto_id'];
 
                 if(!isset($ret_global[$key_ret_gl])) {
-                    
+
                     $data_imp = $this->init_globales(global_nodo:$ret_global, impuesto: $ret, key: $key_ret_gl, key_importe:'fc_retenido_importe');
                     if(errores::$error){
                         return $this->error->error(mensaje: 'Error al inicializar global impuesto', data: $data_imp);
@@ -637,7 +638,7 @@ class fc_factura extends modelo
 
             $concepto->impuestos[0]->traslados = $impuestos;
 
-            $impuestos = $this->maqueta_impuesto(impuestos: $retenidos);
+            $impuestos = $this->maqueta_impuesto(impuestos: $retenidos,  key_importe_impuesto: 'fc_retenido_importe');
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar retenciones', data: $impuestos);
             }
@@ -684,7 +685,7 @@ class fc_factura extends modelo
 
     }
 
-    private function maqueta_impuesto(stdClass $impuestos): array
+    private function maqueta_impuesto(stdClass $impuestos, string $key_importe_impuesto): array
     {
         $imp = array();
 
@@ -695,7 +696,7 @@ class fc_factura extends modelo
             $impuesto_obj->impuesto = $impuesto['cat_sat_tipo_impuesto_codigo'];
             $impuesto_obj->tipo_factor = $impuesto['cat_sat_tipo_factor_descripcion'];
             $impuesto_obj->tasa_o_cuota = number_format($impuesto['cat_sat_factor_factor'], 6,'.','');
-            $impuesto_obj->importe = number_format($impuesto['fc_traslado_importe'], 2,'.','');
+            $impuesto_obj->importe = number_format($impuesto[$key_importe_impuesto], 2,'.','');
             $imp[] = $impuesto_obj;
         }
 
@@ -817,7 +818,7 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener imp_retenidos', data: $imp_retenidos);
         }
 
-        return $sub_total + $imp_trasladados + $imp_retenidos;
+        return $sub_total + $imp_trasladados - $imp_retenidos;
     }
 
     /**

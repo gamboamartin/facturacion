@@ -47,7 +47,7 @@ class _facturacion
      */
     public function fc_impuesto_importe(string $fc_partida_importe_con_descuento): string
     {
-        return "ROUND($fc_partida_importe_con_descuento * ROUND(IFNULL(cat_sat_factor.factor,0),2),2)";
+        return "ROUND($fc_partida_importe_con_descuento * ROUND(IFNULL(cat_sat_factor.factor,0),4),2)";
     }
 
     /**

@@ -110,7 +110,7 @@ class _facturacionTest extends test
         }
 
         $salida = "ROUND(" . $importes_base['fc_partida_importe_con_descuento'];
-        $salida .= " * ROUND(IFNULL(cat_sat_factor.factor,0),2),2)";
+        $salida .= " * ROUND(IFNULL(cat_sat_factor.factor,0),4),2)";
         $resultado = $modelo->fc_impuesto_importe(
             fc_partida_importe_con_descuento: $importes_base['fc_partida_importe_con_descuento']);
         $this->assertIsString($resultado);
