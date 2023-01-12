@@ -178,6 +178,7 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener impuestos', data: $impuestos);
         }
 
+
         $data = new stdClass();
         $data->comprobante = $comprobante;
         $data->emisor = $emisor;
@@ -373,10 +374,13 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
         }
 
+
         $data_factura = $this->data_factura(factura: $factura);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
         }
+
+
 
         $ingreso = (new cfdis())->ingreso(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
             emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor);
@@ -497,7 +501,10 @@ class fc_factura extends modelo
         $conceptos = array();
 
         $total_impuestos_trasladados = 0.0;
+        $total_impuestos_retenidos = 0.0;
 
+        $trs_global= array();
+        $ret_global= array();
         foreach ($registro['partidas'] as $key => $partida) {
 
             $traslados = (new fc_traslado($this->link))->get_traslados(fc_partida_id: $partida['fc_partida_id']);
@@ -540,12 +547,93 @@ class fc_factura extends modelo
             $concepto->impuestos[0]->traslados = array();
             $concepto->impuestos[0]->retenciones = array();
 
+
             $impuestos = $this->maqueta_impuesto(impuestos: $traslados);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar traslados', data: $impuestos);
             }
 
-            $registro['traslados'] = $impuestos;
+            foreach ($traslados->registros as $trl){
+
+                $key_tg_gl = $trl['cat_sat_tipo_factor_id'].'.'.$trl['cat_sat_factor_id'].'.'.$trl['cat_sat_tipo_impuesto_id'];
+
+                if(!isset($trs_global[$key_tg_gl])) {
+                    $trs_global[$key_tg_gl] = new stdClass();
+                    $base = round($trl['fc_partida_importe'],2);
+                    $importe = round($trl['fc_traslado_importe'],2);
+                    $cat_sat_factor_factor = round($trl['cat_sat_factor_factor'],6);
+
+                    $base = number_format($base,2,'.','');
+                    $importe = number_format($importe,2,'.','');
+                    $cat_sat_factor_factor = number_format($cat_sat_factor_factor,6,'.','');
+
+                    $trs_global[$key_tg_gl]->base = $base;
+                    $trs_global[$key_tg_gl]->tipo_factor = $trl['cat_sat_tipo_factor_descripcion'];
+                    $trs_global[$key_tg_gl]->tasa_o_cuota = $cat_sat_factor_factor;
+                    $trs_global[$key_tg_gl]->impuesto = $trl['cat_sat_tipo_impuesto_codigo'];
+                    $trs_global[$key_tg_gl]->importe = $importe;
+                }
+                else{
+
+                    $base = round($trl['fc_partida_importe'],2);
+                    $base_ac = round($trs_global[$key_tg_gl]->base+ $base,2);
+
+                    $importe = round($trl['fc_traslado_importe'],2);
+                    $importe_ac = round($trs_global[$key_tg_gl]->importe+ $importe,2);
+
+                    $base_ac = number_format($base_ac,2,'.','');
+                    $importe_ac = number_format($importe_ac,2,'.','');
+
+                    $trs_global[$key_tg_gl]->base = $base_ac;
+                    $trs_global[$key_tg_gl]->importe = $importe_ac;
+
+                }
+
+
+            }
+
+
+            foreach ($retenidos->registros as $ret){
+
+                $key_ret_gl = $ret['cat_sat_tipo_factor_id'].'.'.$ret['cat_sat_factor_id'].'.'.$ret['cat_sat_tipo_impuesto_id'];
+
+                if(!isset($ret_global[$key_ret_gl])) {
+                    $ret_global[$key_ret_gl] = new stdClass();
+                    $base = round($ret['fc_partida_importe'],2);
+                    $importe = round($ret['fc_retenido_importe'],2);
+                    $cat_sat_factor_factor = round($ret['cat_sat_factor_factor'],6);
+
+                    $base = number_format($base,2,'.','');
+                    $importe = number_format($importe,2,'.','');
+                    $cat_sat_factor_factor = number_format($cat_sat_factor_factor,6,'.','');
+
+                    $ret_global[$key_ret_gl]->base = $base;
+                    $ret_global[$key_ret_gl]->tipo_factor = $ret['cat_sat_tipo_factor_descripcion'];
+                    $ret_global[$key_ret_gl]->tasa_o_cuota = $cat_sat_factor_factor;
+                    $ret_global[$key_ret_gl]->impuesto = $ret['cat_sat_tipo_impuesto_codigo'];
+                    $ret_global[$key_ret_gl]->importe = $importe;
+                }
+                else{
+
+                    $base = round($ret['fc_partida_importe'],2);
+                    $base_ac = round($ret_global[$key_ret_gl]->base+ $base,2);
+
+                    $importe = round($ret['fc_retenido_importe'],2);
+                    $importe_ac = round($ret_global[$key_ret_gl]->importe+ $importe,2);
+
+                    $base_ac = number_format($base_ac,2,'.','');
+                    $importe_ac = number_format($importe_ac,2,'.','');
+
+                    $ret_global[$key_ret_gl]->base = $base_ac;
+                    $ret_global[$key_ret_gl]->importe = $importe_ac;
+
+                }
+
+
+            }
+
+
+
             $concepto->impuestos[0]->traslados = $impuestos;
 
             $impuestos = $this->maqueta_impuesto(impuestos: $retenidos);
@@ -553,37 +641,41 @@ class fc_factura extends modelo
                 return $this->error->error(mensaje: 'Error al maquetar retenciones', data: $impuestos);
             }
 
-            $registro['retenidos'] = $impuestos;
             $concepto->impuestos[0]->retenciones = $impuestos;
 
             $conceptos[] = $concepto;
 
             $total_impuestos_trasladados += ($partida['fc_partida_importe_total_traslado']);
+            $total_impuestos_retenidos += ($partida['fc_partida_importe_total_retenido']);
 
         }
 
+
+        $registro['traslados'] = $trs_global;
+        $registro['retenidos'] = $ret_global;
+
         $registro['conceptos'] = $conceptos;
         $registro['total_impuestos_trasladados'] = number_format($total_impuestos_trasladados, 2);
-        $registro['total_impuestos_retenidos'] = number_format($total_impuestos_trasladados, 2);
+        $registro['total_impuestos_retenidos'] = number_format($total_impuestos_retenidos, 2);
 
         return $registro;
     }
 
     private function maqueta_impuesto(stdClass $impuestos): array
     {
-
         $imp = array();
 
         foreach ($impuestos->registros as $impuesto) {
 
             $impuesto_obj = new stdClass();
-            $impuesto_obj->base = number_format($impuesto['fc_partida_importe'], 2);
+            $impuesto_obj->base = number_format($impuesto['fc_partida_importe'], 2,'.','');
             $impuesto_obj->impuesto = $impuesto['cat_sat_tipo_impuesto_codigo'];
             $impuesto_obj->tipo_factor = $impuesto['cat_sat_tipo_factor_descripcion'];
-            $impuesto_obj->tasa_o_cuota = number_format($impuesto['cat_sat_factor_factor'], 6);
-            $impuesto_obj->importe = number_format($impuesto['fc_traslado_importe'], 2);
+            $impuesto_obj->tasa_o_cuota = number_format($impuesto['cat_sat_factor_factor'], 6,'.','');
+            $impuesto_obj->importe = number_format($impuesto['fc_traslado_importe'], 2,'.','');
             $imp[] = $impuesto_obj;
         }
+
         return $imp;
     }
 
