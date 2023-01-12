@@ -38,6 +38,12 @@ final class pdf
 
     }
 
+    /**
+     * Valida si aplica o no la integracion de un impuesto en una partida
+     * @param array $concepto Concepto a validar
+     * @param string $tipo_impuesto Tipo de impuesto a integrar
+     * @return bool
+     */
     private function aplica_impuesto(array $concepto, string $tipo_impuesto): bool
     {
         $aplica = false;
@@ -694,7 +700,7 @@ final class pdf
 
     public function guardar(string $nombre_documento)
     {
-        $this->pdf->Output($nombre_documento . '.pdf','I');
+        $this->pdf->Output($nombre_documento . '.pdf','D');
     }
 
     public function footer(string $descripcion)
