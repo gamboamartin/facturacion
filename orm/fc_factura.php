@@ -1080,15 +1080,23 @@ class fc_factura extends modelo
      * @param array $fc_partida Partida a integrar
      * @param float $subtotal subtotal previo
      * @return array|float
+     * @version 2.20.0
      */
     private function suma_sub_total(array $fc_partida, float $subtotal): float|array
     {
+        $subtotal = round($subtotal,2);
+        $keys = array('fc_partida_id');
+        $valida = $this->validacion->valida_ids(keys: $keys, registro: $fc_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar fc_partida ', data: $valida);
+        }
+
         $st = (new fc_partida($this->link))->subtotal_partida($fc_partida['fc_partida_id']);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener calculo ', data: $st);
         }
-        $subtotal += $st;
-        return $subtotal;
+        $subtotal += round($st,2);
+        return round($subtotal,2);
     }
 
     private function get_datos_xml(string $ruta_xml = ""): array
