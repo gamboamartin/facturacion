@@ -558,20 +558,21 @@ class fc_factura extends modelo
                 $key_tg_gl = $trl['cat_sat_tipo_factor_id'].'.'.$trl['cat_sat_factor_id'].'.'.$trl['cat_sat_tipo_impuesto_id'];
 
                 if(!isset($trs_global[$key_tg_gl])) {
-                    $trs_global[$key_tg_gl] = new stdClass();
-                    $base = round($trl['fc_partida_importe'],2);
-                    $importe = round($trl['fc_traslado_importe'],2);
-                    $cat_sat_factor_factor = round($trl['cat_sat_factor_factor'],6);
 
-                    $base = number_format($base,2,'.','');
-                    $importe = number_format($importe,2,'.','');
-                    $cat_sat_factor_factor = number_format($cat_sat_factor_factor,6,'.','');
 
-                    $trs_global[$key_tg_gl]->base = $base;
+                    $data_imp = $this->init_globales(global_nodo:$trs_global, impuesto: $trl, key: $key_tg_gl, key_importe:'fc_traslado_importe');
+                    if(errores::$error){
+                        return $this->error->error(mensaje: 'Error al inicializar global impuesto', data: $data_imp);
+                    }
+
+                    $trs_global = $data_imp->global_nodo;
+
+
+                    $trs_global[$key_tg_gl]->base = $data_imp->base;
                     $trs_global[$key_tg_gl]->tipo_factor = $trl['cat_sat_tipo_factor_descripcion'];
-                    $trs_global[$key_tg_gl]->tasa_o_cuota = $cat_sat_factor_factor;
+                    $trs_global[$key_tg_gl]->tasa_o_cuota = $data_imp->cat_sat_factor_factor;
                     $trs_global[$key_tg_gl]->impuesto = $trl['cat_sat_tipo_impuesto_codigo'];
-                    $trs_global[$key_tg_gl]->importe = $importe;
+                    $trs_global[$key_tg_gl]->importe = $data_imp->importe;
                 }
                 else{
 
@@ -598,20 +599,20 @@ class fc_factura extends modelo
                 $key_ret_gl = $ret['cat_sat_tipo_factor_id'].'.'.$ret['cat_sat_factor_id'].'.'.$ret['cat_sat_tipo_impuesto_id'];
 
                 if(!isset($ret_global[$key_ret_gl])) {
-                    $ret_global[$key_ret_gl] = new stdClass();
-                    $base = round($ret['fc_partida_importe'],2);
-                    $importe = round($ret['fc_retenido_importe'],2);
-                    $cat_sat_factor_factor = round($ret['cat_sat_factor_factor'],6);
+                    
+                    $data_imp = $this->init_globales(global_nodo:$ret_global, impuesto: $ret, key: $key_ret_gl, key_importe:'fc_retenido_importe');
+                    if(errores::$error){
+                        return $this->error->error(mensaje: 'Error al inicializar global impuesto', data: $data_imp);
+                    }
 
-                    $base = number_format($base,2,'.','');
-                    $importe = number_format($importe,2,'.','');
-                    $cat_sat_factor_factor = number_format($cat_sat_factor_factor,6,'.','');
+                    $ret_global = $data_imp->global_nodo;
 
-                    $ret_global[$key_ret_gl]->base = $base;
+
+                    $ret_global[$key_ret_gl]->base = $data_imp->base;
                     $ret_global[$key_ret_gl]->tipo_factor = $ret['cat_sat_tipo_factor_descripcion'];
-                    $ret_global[$key_ret_gl]->tasa_o_cuota = $cat_sat_factor_factor;
+                    $ret_global[$key_ret_gl]->tasa_o_cuota = $data_imp->cat_sat_factor_factor;
                     $ret_global[$key_ret_gl]->impuesto = $ret['cat_sat_tipo_impuesto_codigo'];
-                    $ret_global[$key_ret_gl]->importe = $importe;
+                    $ret_global[$key_ret_gl]->importe = $data_imp->importe;
                 }
                 else{
 
@@ -659,6 +660,28 @@ class fc_factura extends modelo
         $registro['total_impuestos_retenidos'] = number_format($total_impuestos_retenidos, 2);
 
         return $registro;
+    }
+
+    private function init_globales(array $global_nodo, array $impuesto, string $key, string $key_importe): stdClass
+    {
+        $global_nodo[$key] = new stdClass();
+        $base = round($impuesto['fc_partida_importe'],2);
+        $importe = round($impuesto[$key_importe],2);
+        $cat_sat_factor_factor = round($impuesto['cat_sat_factor_factor'],6);
+
+
+        $base = number_format($base,2,'.','');
+        $importe = number_format($importe,2,'.','');
+        $cat_sat_factor_factor = number_format($cat_sat_factor_factor,6,'.','');
+
+
+        $data  = new stdClass();
+        $data->global_nodo = $global_nodo;
+        $data->base = $base;
+        $data->importe = $importe;
+        $data->cat_sat_factor_factor = $cat_sat_factor_factor;
+        return $data;
+
     }
 
     private function maqueta_impuesto(stdClass $impuestos): array
