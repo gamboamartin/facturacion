@@ -560,6 +560,7 @@ class fc_factura extends modelo
 
 
             $registro['partidas'][$key]['traslados'] = $traslados->registros;
+            $registro['partidas'][$key]['retenidos'] = $retenidos->registros;
 
             $concepto = new stdClass();
             $concepto->clave_prod_serv = $partida['cat_sat_producto_codigo'];
@@ -1049,7 +1050,13 @@ class fc_factura extends modelo
 
     }
 
-    private function suma_sub_totales(array $fc_partidas){
+    /**
+     * Suma los subtotales acumulando por partida
+     * @param array $fc_partidas Partidas de una factura
+     * @return array|float
+     */
+    private function suma_sub_totales(array $fc_partidas): float|array
+    {
         $subtotal = 0.0;
         foreach ($fc_partidas as $fc_partida) {
             $subtotal = $this->suma_sub_total(fc_partida: $fc_partida,subtotal:  $subtotal);

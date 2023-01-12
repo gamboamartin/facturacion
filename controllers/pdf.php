@@ -7,6 +7,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\validacion\validacion;
 use Mpdf\Mpdf;
 use NumberFormatter;
+use stdClass;
 use Throwable;
 
 final class pdf
@@ -35,6 +36,41 @@ final class pdf
         $css = file_get_contents((new generales())->path_base . "css/pdf.css");
         $this->pdf->WriteHTML($css, 1);
 
+    }
+
+    private function aplica_impuesto(array $concepto, string $tipo_impuesto): bool
+    {
+        $aplica = false;
+        if(isset($concepto[$tipo_impuesto]) && count($concepto[$tipo_impuesto])>0) {
+            $aplica = true;
+        }
+        return $aplica;
+    }
+
+    private function aplica_cualquier_impuesto(array $concepto){
+        $aplica_cualquier_impuesto = false;
+        $aplica_traslado = $this->aplica_impuesto(concepto: $concepto, tipo_impuesto: 'traslados');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error validar aplica impuesto',data:  $aplica_traslado);
+        }
+        $aplica_retencion = $this->aplica_impuesto(concepto: $concepto, tipo_impuesto: 'retenidos');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error validar aplica impuesto',data:  $aplica_retencion);
+        }
+
+        if($aplica_retencion || $aplica_traslado) {
+            $aplica_cualquier_impuesto = true;
+        }
+        return $aplica_cualquier_impuesto;
+    }
+
+    private function base(float $fc_partida_cantidad, float $fc_partida_descuento, float $fc_partida_valor_unitario): float
+    {
+        $base = $fc_partida_valor_unitario * $fc_partida_cantidad;
+        $base = round($base,2);
+
+        $base = $base - $fc_partida_descuento;
+        return round($base,2);
     }
 
     public function header(string $rfc_emisor, string $folio_fiscal, string $nombre_emisor, string $csd,
@@ -187,69 +223,37 @@ final class pdf
             $body_td_6 . $body_td_7 . $body_td_8);
     }
 
+    private function columnas_impuestos_base(array $concepto){
+        $html = '';
+        $aplica_cualquier_impuesto = $this->aplica_cualquier_impuesto(concepto: $concepto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error validar aplica impuesto',data:  $aplica_cualquier_impuesto);
+        }
+
+        if($aplica_cualquier_impuesto) {
+            $html = $this->columnas_impuestos();
+        }
+        return $html;
+    }
+
     private function concepto_calculos(array $concepto): string
     {
 
-
-        $body_tr = '';
-
-        $impuesto = '';
-        $tipo = '';
-        $base = '';
-        $tipo_factor = '';
-        $tasa_cuota = '';
-        $importe = '';
-        $aplica_traslado = false;
-
-        if(isset($concepto['traslados']) && count($concepto['traslados'])>0){
-            $aplica_traslado = true;
-            $impuesto = $concepto['traslados'][0]['cat_sat_tipo_impuesto_descripcion'];
-            $tipo = 'Traslado';
-            $fc_partida_valor_unitario = round($concepto['traslados'][0]['fc_partida_valor_unitario'],2);
-            $fc_partida_cantidad = round($concepto['traslados'][0]['fc_partida_cantidad'],2);
-            $fc_partida_descuento = round($concepto['traslados'][0]['fc_partida_descuento'],2);
-
-            $tasa_cuota = round($concepto['traslados'][0]['cat_sat_factor_factor'],2);
-
-            $base = $fc_partida_valor_unitario * $fc_partida_cantidad;
-            $base = round($base,2);
-
-            $base = $base - $fc_partida_descuento;
-            $base = round($base,2);
-
-            $importe = $base * $tasa_cuota;
-            $importe = round($importe,2);
-            $importe = $this->monto_moneda(monto: $importe);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al ajustar base',data:  $importe);
-            }
-
-
-            $base = $this->monto_moneda(monto: $base);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al ajustar base',data:  $base);
-            }
-
-
-
-            $tipo_factor = $concepto['traslados'][0]['cat_sat_tipo_factor_codigo'];
-
-
-            //print_r($concepto);exit;
+        $body_tr = $columns_imp = $this->columnas_impuestos_base(concepto: $concepto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar columns_imp',data:  $columns_imp);
         }
-
-        if($aplica_traslado) {
-            $body_tr = $this->columnas_impuestos();
-            $body_td_9 = $this->html(etiqueta: "td", data: $impuesto, class: "txt-center", propiedades: "colspan='2'");
-            $body_td_10 = $this->html(etiqueta: "td", data: $tipo, class: "txt-center", propiedades: "colspan='2'");
-            $body_td_11 = $this->html(etiqueta: "td", data: $base, class: "txt-center");
-            $body_td_12 = $this->html(etiqueta: "td", data: $tipo_factor, class: "txt-center", propiedades: "colspan='2'");
-            $body_td_13 = $this->html(etiqueta: "td", data: $tasa_cuota, class: "txt-center", propiedades: "colspan='2'");
-            $body_td_14 = $this->html(etiqueta: "td", data: $importe, class: "txt-center");
-
-            $body_tr .= $this->html(etiqueta: "tr", data: $body_td_9 . $body_td_10 . $body_td_11 . $body_td_12 . $body_td_13 .
-                $body_td_14);
+        $tr = $this->integra_impuesto(concepto: $concepto,tipo_impuesto:  'traslados');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar tr',data:  $tr);
         }
+        $body_tr.= $tr;
+        $tr = $this->integra_impuesto(concepto: $concepto,tipo_impuesto:  'retenidos');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar tr',data:  $tr);
+        }
+        $body_tr.= $tr;
+
 
         return $body_tr;
     }
@@ -318,6 +322,7 @@ final class pdf
 
         foreach ($conceptos as $concepto) {
 
+
             $concepto_pdf = $this->concepto_datos(concepto: $concepto);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al generar concepto',data:  $concepto_pdf);
@@ -356,9 +361,142 @@ final class pdf
         $this->pdf->WriteHTML($table);
     }
 
+    private function data_impuestos(array $concepto, string $tipo_impuesto){
+        $base_imp = $this->init_impuesto(concepto: $concepto, tipo_impuesto: $tipo_impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener impuesto base',data:  $base_imp);
+        }
+
+        $base = $this->base(fc_partida_cantidad: $base_imp->fc_partida_cantidad, fc_partida_descuento: $base_imp->fc_partida_descuento,
+            fc_partida_valor_unitario:  $base_imp->fc_partida_valor_unitario);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al ajustar base',data:  $base);
+        }
+
+        $importe = $this->importe_moneda(base: $base,tasa_cuota:  $base_imp->tasa_cuota);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al ajustar base',data:  $importe);
+        }
+
+
+        $base = $this->monto_moneda(monto: $base);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al ajustar base',data:  $base);
+        }
+
+        $base_imp->base = $base;
+        $base_imp->importe = $importe;
+
+        return $base_imp;
+    }
+
     private function html(string $etiqueta, string $data = "", string $class = "", string $propiedades = ""): string
     {
         return "<$etiqueta class='$class' $propiedades>$data</$etiqueta>";
+    }
+
+    private function init_impuesto(array $concepto, string $tipo_impuesto){
+        $impuesto = $this->impuesto(concepto: $concepto, tipo_impuesto: $tipo_impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener impuesto base',data:  $impuesto);
+        }
+        $tipo = $tipo_impuesto;
+        if($tipo_impuesto === 'traslados') {
+            $tipo = 'Traslado';
+        }
+        if($tipo_impuesto === 'retenidos') {
+            $tipo = 'Retenciones';
+        }
+        $fc_partida_valor_unitario = round($concepto[$tipo_impuesto][0]['fc_partida_valor_unitario'],2);
+        $fc_partida_cantidad = round($concepto[$tipo_impuesto][0]['fc_partida_cantidad'],2);
+        $fc_partida_descuento = round($concepto[$tipo_impuesto][0]['fc_partida_descuento'],2);
+        $tasa_cuota = round($concepto[$tipo_impuesto][0]['cat_sat_factor_factor'],6);
+        $tipo_factor = $concepto[$tipo_impuesto][0]['cat_sat_tipo_factor_codigo'];
+
+        $data = new stdClass();
+        $data->impuesto = $impuesto;
+        $data->tipo = $tipo;
+        $data->fc_partida_valor_unitario = $fc_partida_valor_unitario;
+        $data->fc_partida_cantidad = $fc_partida_cantidad;
+        $data->fc_partida_descuento = $fc_partida_descuento;
+        $data->tasa_cuota = $tasa_cuota;
+        $data->tipo_factor = $tipo_factor;
+        return $data;
+    }
+
+    private function importe_moneda(float $base, float $tasa_cuota){
+        $importe = $base * $tasa_cuota;
+        $importe = round($importe,2);
+        $importe = $this->monto_moneda(monto: $importe);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al ajustar base',data:  $importe);
+        }
+        return $importe;
+    }
+
+    private function impuesto(array $concepto, string $tipo_impuesto){
+        return $concepto[$tipo_impuesto][0]['cat_sat_tipo_impuesto_descripcion'];
+    }
+
+    private function impuestos_concepto(string $base, string $importe, string $impuesto, string $tasa_cuota, string $tipo, string $tipo_factor){
+
+        $td_impuesto = $this->td_centrado_cl_2(data: $impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar td', data: $td_impuesto);
+        }
+
+        $td_tipo = $this->td_centrado_cl_2(data: $tipo);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar td', data: $td_tipo);
+        }
+
+
+        $td_base = $this->td_centrado(data: $base);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar td', data: $td_base);
+        }
+
+
+        $td_tipo_factor = $this->td_centrado_cl_2(data: $tipo_factor);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar td', data: $td_tipo_factor);
+        }
+
+        $td_tasa_cuota = $this->td_centrado_cl_2(data: $tasa_cuota);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar td', data: $td_tasa_cuota);
+        }
+
+        $td_importe = $this->td_centrado(data: $importe);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar td', data: $td_importe);
+        }
+
+        $data = new stdClass();
+        $data->td_impuesto = $td_impuesto;
+        $data->td_tipo = $td_tipo;
+        $data->td_base = $td_base;
+        $data->td_tipo_factor = $td_tipo_factor;
+        $data->td_tasa_cuota = $td_tasa_cuota;
+        $data->td_importe = $td_importe;
+
+        return $data;
+
+    }
+
+    private function integra_impuesto(array $concepto, string $tipo_impuesto){
+        $tr = '';
+        $aplica = $this->aplica_impuesto(concepto: $concepto, tipo_impuesto: $tipo_impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error validar aplica impuesto',data:  $aplica);
+        }
+        if($aplica){
+            $tr = $this->tr_impuestos_concepto(concepto: $concepto,tipo_impuesto:  $tipo_impuesto);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al generar tr',data:  $tr);
+            }
+        }
+        return $tr;
     }
 
     /**
@@ -402,6 +540,22 @@ final class pdf
         }
         $formatter = new NumberFormatter('es_MX',  NumberFormatter::CURRENCY);
         return $formatter->formatCurrency($monto, 'MXN');
+    }
+
+    private function td_centrado(string $data){
+        $td = $this->html(etiqueta: "td", data: $data, class: "txt-center");
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maqueta td', data: $td);
+        }
+        return $td;
+    }
+
+    private function td_centrado_cl_2(string $data){
+        $td = $this->html(etiqueta: "td", data: $data, class: "txt-center", propiedades: "colspan='2'");
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maqueta td', data: $td);
+        }
+        return $td;
     }
 
     public function totales(string $moneda, string $subtotal, string $forma_pago, string $imp_trasladados,
@@ -456,6 +610,38 @@ final class pdf
         $table = $this->html(etiqueta: "table", data: $body, class: "mt-2");
 
         $this->pdf->WriteHTML($table);
+    }
+
+    private function tr_impuestos(string $base, string $importe, string $impuesto, string $tasa_cuota, string $tipo, string $tipo_factor){
+        $tds = $this->impuestos_concepto(base: $base,importe:  $importe,impuesto:  $impuesto,tasa_cuota:  $tasa_cuota,tipo:  $tipo, tipo_factor: $tipo_factor);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar tds',data:  $tds);
+        }
+
+
+        $tr = $this->html(etiqueta: "tr", data: $tds->td_impuesto . $tds->td_tipo . $tds->td_base . $tds->td_tipo_factor . $tds->td_tasa_cuota .
+            $tds->td_importe);
+
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar tr',data:  $tr);
+        }
+        return $tr;
+    }
+
+    private function tr_impuestos_concepto(array $concepto, string $tipo_impuesto){
+        $data_impuestos = $this->data_impuestos(concepto: $concepto, tipo_impuesto: $tipo_impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al ajustar datos de impuestos',data:  $data_impuestos);
+        }
+
+
+        $tr = $this->tr_impuestos(base: $data_impuestos->base,importe:  $data_impuestos->importe,impuesto:  $data_impuestos->impuesto,
+            tasa_cuota:  $data_impuestos->tasa_cuota,tipo:  $data_impuestos->tipo,tipo_factor:  $data_impuestos->tipo_factor);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar tr',data:  $tr);
+        }
+        return $tr;
+
     }
 
     public function sellos(string $sello_cfdi, string $sello_sat)

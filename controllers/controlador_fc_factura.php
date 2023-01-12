@@ -224,13 +224,14 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $factura, header: $header,ws:$ws);
         }
 
+
+
         $ruta_qr = (new fc_factura_documento(link: $this->link))->get_factura_documento(fc_factura_id: $this->registro_id,
             tipo_documento: "qr_cfdi");
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener QR',data:  $ruta_qr, header: $header,ws:$ws);
         }
 
-        //var_dump($ruta_qr);exit;
 
         $filtro["fc_factura_id"] = $factura['fc_factura_id'];
         $cfdi_sellado = (new fc_cfdi_sellado($this->link))->filtro_and(filtro: $filtro);
