@@ -44,7 +44,7 @@ class base_test{
     {
         $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_moneda(link: $link, codigo: 'MXN', id: $id);
         if(errores::$error){
-            return (new errores())->error('Error al insertar', $alta);
+            return (new errores())->error('Error al insertar moneda', $alta);
 
         }
         return $alta;
@@ -92,7 +92,7 @@ class base_test{
         if(!$existe) {
             $alta = $this->alta_org_sucursal(link: $link, id: $org_sucursal_id);
             if (errores::$error) {
-                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+                return (new errores())->error(mensaje: 'Error al insertar sucursal', data: $alta);
             }
         }
 
@@ -117,19 +117,19 @@ class base_test{
     }
 
     public function alta_fc_factura(PDO $link, int $cat_sat_forma_pago_id = 1, int $cat_sat_metodo_pago_id = 2,
-                                    int $cat_sat_moneda_id = 2, int $com_sucursal_id = 1, int $com_tipo_cambio_id = 1,
+                                    int $cat_sat_moneda_id = 999, int $com_sucursal_id = 1, int $com_tipo_cambio_id = 1,
                                     int $fc_csd_id = 1, int $id = 1): array|\stdClass
     {
 
 
         $existe = (new com_sucursal($link))->existe_by_id(registro_id: $com_sucursal_id);
         if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+            return (new errores())->error(mensaje: 'Error al verificar si existe factuea', data: $existe);
         }
         if(!$existe) {
             $alta = $this->alta_com_sucursal(link: $link, id: $com_sucursal_id);
             if (errores::$error) {
-                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+                return (new errores())->error(mensaje: 'Error al insertar sucursal', data: $alta);
             }
         }
 
@@ -151,7 +151,7 @@ class base_test{
         if(!$existe) {
             $alta = $this->alta_fc_csd(link: $link, id: $fc_csd_id);
             if (errores::$error) {
-                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+                return (new errores())->error(mensaje: 'Error al insertar csd', data: $alta);
             }
         }
 
@@ -177,15 +177,20 @@ class base_test{
             }
         }
 
-        $existe = (new cat_sat_moneda($link))->existe_by_id(registro_id: $cat_sat_moneda_id);
+        $existe = (new cat_sat_moneda($link))->filtro_and(filtro: array("cat_sat_moneda.codigo" => "MXN"));
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
         }
-        if(!$existe) {
+
+        if($existe->n_registros == 0) {
             $alta = $this->alta_cat_sat_moneda(link: $link, id: $cat_sat_moneda_id);
             if (errores::$error) {
-                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+                return (new errores())->error(mensaje: 'Error al insertar moneda', data: $alta);
             }
+
+            $cat_sat_moneda_id = $alta->registro_id;
+        } else {
+            $cat_sat_moneda_id = $existe->registros[0]['cat_sat_moneda_id'];
         }
 
         $registro = array();
@@ -219,8 +224,7 @@ class base_test{
     {
         $alta = $this->alta_fc_factura($link);
         if(errores::$error){
-            return (new errores())->error('Error al insertar', $alta);
-
+            return (new errores())->error('Error al insertar factura', $alta);
         }
 
         $registro = array();
@@ -249,7 +253,7 @@ class base_test{
 
         $alta = (new \gamboamartin\organigrama\tests\base_test())->alta_org_sucursal(link: $link, id: $id);
         if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            return (new errores())->error(mensaje: 'Error al insertar sucursal', data: $alta);
 
         }
         return $alta;
