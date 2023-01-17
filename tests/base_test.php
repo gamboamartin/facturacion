@@ -220,11 +220,19 @@ class base_test{
     }
 
     public function alta_fc_partida(PDO $link, string $codigo = '1', float $cantidad = 1, string $descripcion = '1',
-                                    float $descuento = 0, int $id = 1, float $valor_unitario = 1): array|\stdClass
+                                    float $descuento = 0, int $fc_factura_id = 1, int $id = 1,
+                                    float $valor_unitario = 1): array|\stdClass
     {
-        $alta = $this->alta_fc_factura($link);
+
+        $existe = (new fc_factura($link))->existe_by_id(registro_id: $fc_factura_id);
         if(errores::$error){
-            return (new errores())->error('Error al insertar factura', $alta);
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_factura($link);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar factura', $alta);
+            }
         }
 
         $registro = array();
@@ -233,7 +241,7 @@ class base_test{
         $registro['descripcion'] = $descripcion;
         $registro['cantidad'] = $cantidad;
         $registro['valor_unitario'] = $valor_unitario;
-        $registro['fc_factura_id'] = 1;
+        $registro['fc_factura_id'] = $fc_factura_id;
         $registro['com_producto_id'] = 1;
         $registro['codigo_bis'] = 1;
         $registro['descuento'] = $descuento;
@@ -478,6 +486,21 @@ class base_test{
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_retenido');
         if(errores::$error){
             return (new errores())->error('Error al eliminar retenido', $del);
+        }
+        return $del;
+    }
+
+    public function del_org_empresa(PDO $link): array|\stdClass
+    {
+        $del = $this->del_fc_csd($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = (new \gamboamartin\organigrama\tests\base_test())->del_org_empresa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
         }
         return $del;
     }
