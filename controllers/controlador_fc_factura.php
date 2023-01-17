@@ -381,6 +381,11 @@ class controlador_fc_factura extends system{
         return $this;
     }
 
+    /**
+     * Inicializa los elementos de la lista get data
+     * @return stdClass
+     *
+     */
     public function init_datatable(): stdClass
     {
         $columns["fc_factura_id"]["titulo"] = "Id";
