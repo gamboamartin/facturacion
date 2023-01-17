@@ -409,7 +409,30 @@ class fc_partida extends _modelo_parent {
     }
 
 
+
+
     // --- FUNCIONES PROBADAS  ---
+
+    /**
+     * Obtiene las partidas de una factura
+     * @param int $fc_factura_id Factura a validar
+     * @return array
+     * @version 1.30.0
+     */
+    public function get_partidas(int $fc_factura_id): array
+    {
+        if ($fc_factura_id <= 0) {
+            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
+        }
+
+        $filtro['fc_factura.id'] = $fc_factura_id;
+        $r_fc_partida = $this->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_partida);
+        }
+
+        return $r_fc_partida->registros;
+    }
 
 
     /**
@@ -436,7 +459,7 @@ class fc_partida extends _modelo_parent {
      * Calcula el total de una partida
      * @param int $fc_partida_id Partida a validar
      * @return float|array
-     * @version
+     * @version v1.31.0
      */
     public function total_partida(int $fc_partida_id): float|array
     {

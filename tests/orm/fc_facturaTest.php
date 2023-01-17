@@ -57,7 +57,7 @@ class fc_facturaTest extends test {
 
         $alta = (new base_test())->alta_fc_partida($this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error al insertar',$alta);
+            $error = (new errores())->error('Error al insertar partida',$alta);
             print_r($error);
             exit;
         }
