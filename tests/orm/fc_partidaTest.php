@@ -30,6 +30,59 @@ class fc_partidaTest extends test
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_get_partida(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida($this->link);
+        //$modelo = new liberator($modelo);
+
+        $fc_partida_id = -1;
+        $resultado = $modelo->get_partida(fc_partida_id: $fc_partida_id);
+        $this->assertIsArray($resultado);
+        $this->assertTrue(errores::$error);
+        $this->assertEquals('<b><span style="color:red">Error $fc_partida_id debe ser mayor a 0</span></b>',
+            $resultado['mensaje']);
+        errores::$error = false;
+
+        $del = (new fc_partida($this->link))->elimina_todo();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new fc_factura($this->link))->elimina_todo();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new fc_csd($this->link))->elimina_todo();
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $fc_partida = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 10, id: 999,
+            valor_unitario: 5.57);
+        if (errores::$error) {
+            $error = (new errores())->error('Error al obtener id de la partida', $fc_partida);
+            print_r($error);
+            exit;
+        }
+
+        $resultado = $modelo->get_partida(fc_partida_id: $fc_partida->registro_id);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        errores::$error = false;
+    }
+
     public function test_get_partidas(): void
     {
         errores::$error = false;

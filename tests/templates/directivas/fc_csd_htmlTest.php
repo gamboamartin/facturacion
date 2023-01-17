@@ -48,7 +48,7 @@ class fc_csd_htmlTest extends test {
         $resultado = $html->input_serie($cols, $row_upd, $value_vacio);
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals("<div class='control-group col-sm-1'><label class='control-label' for='serie'>Serie</label><div class='controls'><input type='text' name='serie' value='' class='form-control'  required id='serie' placeholder='Serie' /></div></div>", $resultado);
+        $this->assertEquals("<div class='control-group col-sm-1'><label class='control-label' for='serie'>Serie</label><div class='controls'><input type='text' name='serie' value='' class='form-control' required id='serie' placeholder='Serie' title='Serie' /></div></div>", $resultado);
         errores::$error = false;
 
 
