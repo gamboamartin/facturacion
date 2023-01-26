@@ -384,7 +384,7 @@ class controlador_fc_factura extends system{
     /**
      * Inicializa los elementos de la lista get data
      * @return stdClass
-     *
+     * @version 4.3.0
      */
     final public function init_datatable(): stdClass
     {
