@@ -7,4 +7,4 @@
  *
  */
 namespace gamboamartin\facturacion\controllers;
-final class controlador_adm_menu extends \gamboamartin\acl\controllers\controlador_adm_menu {}
+class controlador_adm_seccion extends \gamboamartin\acl\controllers\controlador_adm_seccion {}
