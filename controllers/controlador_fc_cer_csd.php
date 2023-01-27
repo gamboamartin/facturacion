@@ -90,6 +90,10 @@ class controlador_fc_cer_csd extends system{
         return $this;
     }
 
+    /**
+     * Integra los elementos de view para datatables
+     * @return stdClass
+     */
     public function init_datatable(): stdClass
     {
         $columns["fc_cer_csd_id"]["titulo"] = "Id";
