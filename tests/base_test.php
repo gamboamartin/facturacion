@@ -356,6 +356,16 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_cer_csd(PDO $link): array
+    {
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_cer_csd');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_cfdi_sellado(PDO $link): array
     {
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_cfdi_sellado');
@@ -370,6 +380,18 @@ class base_test{
 
 
         $del = (new base_test())->del_fc_factura($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new base_test())->del_fc_cer_csd($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new base_test())->del_fc_key_csd($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
 
@@ -410,6 +432,16 @@ class base_test{
     public function del_fc_factura_documento(PDO $link): array
     {
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_factura_documento');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_key_csd(PDO $link): array
+    {
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_key_csd');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
