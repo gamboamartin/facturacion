@@ -36,15 +36,18 @@ class fc_key_csd extends modelo{
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
         }
 
-        $this->registro = $this->asigna_documento(data: $this->registro);
+        $registro= $this->asigna_documento(data: $this->registro);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al asignar documento',data: $this->registro);
+            return $this->error->error(mensaje: 'Error al asignar documento',data: $registro);
         }
 
-        $this->registro = $this->init_campos_base(data: $this->registro);
+
+        $registro = $this->init_campos_base(data: $registro);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
+            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $registro);
         }
+
+        $this->registro = $registro;
 
         $r_alta_bd = parent::alta_bd();
         if(errores::$error){
@@ -56,6 +59,7 @@ class fc_key_csd extends modelo{
 
     public function alta_documento(string $documento): array|stdClass
     {
+
         if (!array_key_exists($documento,$_FILES)){
             return $this->error->error(mensaje: "Error no existe: $documento", data: $documento);
         }
@@ -101,7 +105,7 @@ class fc_key_csd extends modelo{
     {
         $alta_documento = $this->alta_documento(documento: "documento");
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al dar de alta documento',data: $this->registro);
+            return $this->error->error(mensaje: 'Error al dar de alta documento',data: $alta_documento);
         }
 
         $data['doc_documento_id'] = $alta_documento->registro_id;

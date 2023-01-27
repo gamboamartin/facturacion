@@ -40,6 +40,11 @@ class controlador_com_producto extends  \gamboamartin\comercial\controllers\cont
         }
     }
 
+    /**
+     * Integra los controladores de configuracion de impuestos
+     * @param stdClass $paths_conf Rutas de configuracion
+     * @return controler
+     */
     private function init_controladores(stdClass $paths_conf): controler
     {
         $this->controlador_fc_conf_traslado= new controlador_fc_conf_traslado(link:$this->link, paths_conf: $paths_conf);
