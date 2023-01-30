@@ -365,6 +365,10 @@ class controlador_fc_factura extends system{
         return $tipo_comprobante->registros[0]['cat_sat_tipo_de_comprobante_id'];
     }
 
+    /**
+     * Inicializa las configuraciones de views para facturas
+     * @return controler
+     */
     private function init_configuraciones(): controler
     {
         $this->seccion_titulo = 'Facturas';
