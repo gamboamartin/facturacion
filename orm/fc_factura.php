@@ -948,8 +948,9 @@ class fc_factura extends modelo
      * Limpia un monto para dejarlo double
      * @param string|int|float $monto Monto a limpiar
      * @return array|string
+     * @version 4.7.0
      */
-    private function limpia_monto(string|int|float $monto): array|string
+    PUBLIC function limpia_monto(string|int|float $monto): array|string
     {
         $monto = trim($monto);
         $monto = str_replace(' ', '', $monto);
