@@ -723,6 +723,12 @@ class fc_factura extends modelo
         return $imp;
     }
 
+    /**
+     * Aplica formato a un monto ingresado
+     * @param string|int|float $monto Monto a dar formato
+     * @return string
+     * @version 4.9.0
+     */
     private function monto_dos_dec(string|int|float $monto){
         $monto = $this->limpia_monto(monto: $monto);
         if (errores::$error) {
@@ -950,7 +956,7 @@ class fc_factura extends modelo
      * @return array|string
      * @version 4.7.0
      */
-    PUBLIC function limpia_monto(string|int|float $monto): array|string
+    private function limpia_monto(string|int|float $monto): array|string
     {
         $monto = trim($monto);
         $monto = str_replace(' ', '', $monto);

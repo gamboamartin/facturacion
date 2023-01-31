@@ -209,7 +209,7 @@ class fc_facturaTest extends test {
         $_GET['session_id'] = '1';
 
         $modelo = new fc_factura($this->link);
-        //$modelo = new liberator($modelo);
+        $modelo = new liberator($modelo);
 
         $monto = "$1";
         $resultado = $modelo->limpia_monto(monto: $monto);
@@ -248,6 +248,35 @@ class fc_facturaTest extends test {
         $this->assertEmpty($resultado);
         errores::$error = false;
     }
+
+    public function test_monto_dos_dec(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_factura($this->link);
+        $modelo = new liberator($modelo);
+
+        $monto = "$1";
+        $resultado = $modelo->monto_dos_dec(monto: $monto);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("1.00",$resultado);
+        errores::$error = false;
+
+        $monto = 2;
+        $resultado = $modelo->monto_dos_dec(monto: $monto);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("2.00",$resultado);
+        errores::$error = false;
+    }
+
 
     public function test_sub_total(): void
     {
