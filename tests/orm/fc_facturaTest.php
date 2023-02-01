@@ -5,6 +5,7 @@ namespace gamboamartin\facturacion\tests\orm;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\tests\base_test;
+use gamboamartin\facturacion\tests\base_test2;
 use gamboamartin\organigrama\models\org_empresa;
 use gamboamartin\organigrama\models\org_sucursal;
 use gamboamartin\test\liberator;
@@ -82,6 +83,46 @@ class fc_facturaTest extends test {
 
 
 
+        errores::$error = false;
+    }
+
+    public function test_comprobante(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_factura($this->link);
+        $modelo = new liberator($modelo);
+
+        $resultado = $modelo->comprobante(factura: array());
+        $this->assertIsArray($resultado);
+        $this->assertTrue(errores::$error);
+        $this->assertEquals("Error la factura pasada no tiene registros",$resultado['mensaje_limpio']);
+        errores::$error = false;
+
+        $fc_factura_id = (new base_test2())->alta_fc_factura(link: $this->link,id: 999);
+        if(errores::$error){
+            $error = (new errores())->error('Error al dar de alta factura',$fc_factura_id);
+            print_r($error);
+            exit;
+        }
+
+        $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            $error = (new errores())->error('Error al obtener factura',$factura);
+            print_r($error);
+            exit;
+        }
+
+        $resultado = $modelo->comprobante(factura: $factura);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(10,count($resultado));
         errores::$error = false;
     }
 

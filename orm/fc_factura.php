@@ -163,9 +163,18 @@ class fc_factura extends modelo
         return $imp_global;
     }
 
+
+    /**
+     * Maqueta datos para un comprobante de factura
+     * @param array $factura Factura a obtener datos
+     * @return array
+     * @version 4.10.0
+     */
     private function comprobante(array $factura): array
     {
-
+        if(count($factura) === 0){
+            return $this->error->error(mensaje: 'Error la factura pasada no tiene registros', data: $factura);
+        }
 
         $fc_factura_sub_total = $this->monto_dos_dec(monto: $factura['fc_factura_sub_total']);
         if (errores::$error) {
