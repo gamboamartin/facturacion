@@ -32,7 +32,7 @@ class fc_csd extends _modelo_parent {
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-        $this->registro = $this->campos_base(data: $this->registro,modelo: $this);
+        $this->registro = $this->campos_base_temp(data: $this->registro,modelo: $this);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
         }
@@ -50,7 +50,7 @@ class fc_csd extends _modelo_parent {
         return $r_alta_bd;
     }
 
-    protected function campos_base(array $data, modelo $modelo, int $id = -1,
+    protected function campos_base_temp(array $data, modelo $modelo, int $id = -1,
                                    array $keys_integra_ds = array('codigo', 'descripcion')): array
     {
         if(isset($data['status'])){
@@ -101,7 +101,7 @@ class fc_csd extends _modelo_parent {
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,
                                 array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-        $registro = $this->campos_base(data: $registro,modelo: $this,id: $id);
+        $registro = $this->campos_base_temp(data: $registro,modelo: $this,id: $id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar campos base',data: $registro);
         }
