@@ -752,6 +752,7 @@ class fc_factura extends modelo
      * Obtiene el subtotal de una factura
      * @param int $fc_factura_id Factura a obtener info
      * @return float|array
+     * @version 4.11.0
      */
     public function get_factura_sub_total(int $fc_factura_id): float|array
     {
