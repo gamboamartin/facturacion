@@ -30,6 +30,30 @@ class fc_partidaTest extends test
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_calculo_imp_trasladado(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida($this->link);
+
+        $fc_partida_id = (new base_test2())->alta_fc_partida(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al dar de alta factura',$fc_partida_id);
+            print_r($error);
+            exit;
+        }
+
+        $resultado = $modelo->calculo_imp_trasladado(fc_partida_id: $fc_partida_id);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(0,$resultado);
+        errores::$error = false;
+    }
+
     public function test_get_partida(): void
     {
         errores::$error = false;

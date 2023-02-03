@@ -466,7 +466,7 @@ class fc_factura extends modelo
             $documento['doc_tipo_documento_id'] = $doc_tipo_documento_id;
             $documento['descripcion'] = $ruta_archivos_tmp;
 
-            $documento = (new doc_documento(link: $this->link))->alta_registro(registro: $documento, file: $file);
+            $documento = (new doc_documento(link: $this->link))->alta_documento(registro: $documento, file: $file);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al guardar xml', data: $documento);
             }
@@ -831,6 +831,8 @@ class fc_factura extends modelo
 
         return $descuento;
     }
+
+
 
     public function get_factura_total(int $fc_factura_id): float|array
     {
@@ -1291,7 +1293,7 @@ class fc_factura extends modelo
         $documento['descripcion'] = "$this->registro_id.$extension";
         $documento['descripcion_select'] = "$this->registro_id.$extension";
 
-        $documento = (new doc_documento(link: $this->link))->alta_registro(registro: $documento, file: $file);
+        $documento = (new doc_documento(link: $this->link))->alta_documento(registro: $documento, file: $file);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al guardar jpg', data: $documento);
         }

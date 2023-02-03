@@ -4,6 +4,7 @@ namespace gamboamartin\facturacion\tests;
 
 use base\orm\modelo_base;
 
+use gamboamartin\comercial\models\com_producto;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\errores\errores;
@@ -162,7 +163,55 @@ class base_test2
         return $alta->registro_id;
     }
 
+    public function alta_fc_partida(PDO $link, int $id = 999, string $codigo = "999", string $descripcion = "999",
+                                                   int $fc_factura_id = 999, int $com_producto_id = 999): array|int
+    {
+        $existe = (new fc_partida($link))->existe_by_id(registro_id: $id);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al verificar si existe partida', data: $existe);
+        }
 
+        if ($existe) {
+            return $id;
+        }
+
+        $fc_factura_id = $this->alta_fc_factura(link: $link, id: $fc_factura_id);
+        if (errores::$error) {
+            return (new errores())->error('Error al insertar factura', $fc_factura_id);
+        }
+
+        $existe = (new com_producto($link))->existe_by_id(registro_id: $com_producto_id);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al verificar si existe producto', data: $existe);
+        }
+
+        if (!$existe) {
+            $com_producto_id = (new \gamboamartin\comercial\test\base_test())->alta_com_producto(link: $link, id: $com_producto_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $com_producto_id);
+            }
+        }
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['codigo'] = $codigo;
+        $registro['descripcion'] = $descripcion;
+        $registro['descripcion_select'] = $descripcion;
+        $registro['alias'] = $codigo;
+        $registro['codigo_bis'] = $codigo;
+        $registro['fc_factura_id'] = $fc_factura_id;
+        $registro['com_producto_id'] = $com_producto_id->registro_id;
+        $registro['cantidad'] = 10;
+        $registro['valor_unitario'] = 5;
+        $registro['descuento'] = 15;
+
+        $alta = (new fc_partida($link))->alta_registro($registro);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar partida', data: $alta);
+        }
+
+        return $alta->registro_id;
+    }
 
     public function elimina_fc_csd(PDO $link, int $id, int $factura_id): array
     {

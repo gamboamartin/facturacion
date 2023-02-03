@@ -171,7 +171,13 @@ class fc_partida extends _modelo_parent
         return $r_alta_bd;
     }
 
-    public function calculo_imp_trasladado(int $fc_partida_id)
+    /**
+     * Calcula los impuestos trasladados de una partida
+     * @param int $fc_partida_id Partida a calcular
+     * @return float|array
+     * @version 4.11.0
+     */
+    public function calculo_imp_trasladado(int $fc_partida_id):float
     {
         $filtro['fc_partida.id'] = $fc_partida_id;
         $traslado = (new fc_traslado($this->link))->filtro_and(filtro: $filtro);
