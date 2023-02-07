@@ -770,6 +770,12 @@ class fc_factura extends modelo
         return $subtotal;
     }
 
+    /**
+     * Calcula los impuestos trasladados de una factura
+     * @param int $fc_factura_id Factura a calcular
+     * @return float|array
+     * @version 4.14.0
+     */
     public function get_factura_imp_trasladados(int $fc_factura_id): float|array
     {
         $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);

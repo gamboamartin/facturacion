@@ -194,6 +194,30 @@ class fc_facturaTest extends test {
         errores::$error = false;
     }
 
+    public function test_get_factura_imp_trasladados(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_factura($this->link);
+
+        $fc_factura_id = (new base_test2())->alta_fc_factura(link: $this->link,id: 999);
+        if(errores::$error){
+            $error = (new errores())->error('Error al dar de alta factura',$fc_factura_id);
+            print_r($error);
+            exit;
+        }
+
+        $resultado = $modelo->get_factura_imp_trasladados($fc_factura_id);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(0,$resultado);
+        errores::$error = false;
+    }
+
     public function test_get_factura_sub_total(): void
     {
         errores::$error = false;
