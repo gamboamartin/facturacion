@@ -44,19 +44,6 @@ class fc_factura_documento extends _modelo_parent {
         return $r_alta_bd;
     }
 
-    public function get_codigo_aleatorio(int $longitud = 6): string
-    {
-        $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $random_string = '';
-
-        for($i = 0; $i < $longitud; $i++) {
-            $random_character = $chars[mt_rand(0, strlen($chars) - 1)];
-            $random_string .= $random_character;
-        }
-
-        return $random_string;
-    }
-
     public function get_factura_documento(int $fc_factura_id, string $tipo_documento): array|string{
 
         $documento = $this->get_factura_documentos(fc_factura_id: $fc_factura_id,tipo_documento: $tipo_documento);

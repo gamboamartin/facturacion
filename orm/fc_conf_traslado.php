@@ -83,19 +83,6 @@ class fc_conf_traslado extends _modelo_parent {
         return $data;
     }
 
-    public function get_codigo_aleatorio(int $longitud = 6): string
-    {
-        $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $random_string = '';
-
-        for($i = 0; $i < $longitud; $i++) {
-            $random_character = $chars[mt_rand(0, strlen($chars) - 1)];
-            $random_string .= $random_character;
-        }
-
-        return $random_string;
-    }
-
     public function get_conf_traslado(int $fc_conf_traslado_id): array|stdClass|int
     {
         $registro = $this->registro(registro_id: $fc_conf_traslado_id);
