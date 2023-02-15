@@ -30,6 +30,26 @@ class controlador_fc_facturaTest extends test {
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_init_configuraciones(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $ctl = new controlador_fc_factura(link: $this->link, paths_conf: $this->paths_conf);
+        $ctl = new liberator($ctl);
+
+        $resultado = $ctl->init_configuraciones();
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        errores::$error = false;
+    }
+
     public function test_init_datatable(): void
     {
         errores::$error = false;
