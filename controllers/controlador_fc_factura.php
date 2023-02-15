@@ -9,7 +9,6 @@
 namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
-use config\generales;
 use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\compresor\compresor;
@@ -344,21 +343,15 @@ class controlador_fc_factura extends system{
 
     private function get_tipo_comprobante(): array|int
     {
-        if (generales::CAT_SAT_TIPO_DE_COMPROBANTE === ""){
-            return $this->errores->error(mensaje: 'Error CAT_SAT_TIPO_DE_COMPROBANTE no puede estar vacio',data:  $this);
-        }
-
-        $filtro['cat_sat_tipo_de_comprobante.descripcion'] = generales::CAT_SAT_TIPO_DE_COMPROBANTE;
-        $tipo_comprobante = (new cat_sat_tipo_de_comprobante($this->link))->filtro_and(filtro: $filtro);
+        $valida = $this->valida_tipo_de_comprobante();
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener tipo de comprobante',data:  $this);
+            return $this->errores->error(mensaje: 'Error al validar tipo de comprobante',data:  $valida);
         }
 
-        if ($tipo_comprobante->n_registros === 0){
-            $tipo_comprobante = (new cat_sat_tipo_de_comprobante($this->link))->get_tipo_comprobante_predeterminado();
-            if(errores::$error){
-                return $this->errores->error(mensaje: 'Error al obtener tipo de comprobante predeterminado',data:  $this);
-            }
+        $tipo_comprobante = $this->tipo_de_comprobante_predeterminado();
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener tipo de comprobante predeterminado',
+                data:  $tipo_comprobante);
         }
 
         return $tipo_comprobante->registros[0]['cat_sat_tipo_de_comprobante_id'];
@@ -377,6 +370,11 @@ class controlador_fc_factura extends system{
         return $this;
     }
 
+    /**
+     * Inicializa los controladores default
+     * @param stdClass $paths_conf Rutas de archivos de configuracion
+     * @return controler
+     */
     private function init_controladores(stdClass $paths_conf): controler
     {
         $this->controlador_fc_partida= new controlador_fc_partida(link:$this->link, paths_conf: $paths_conf);
@@ -835,6 +833,24 @@ class controlador_fc_factura extends system{
         return $timbre;
     }
 
+    private function tipo_de_comprobante_predeterminado(): array|stdClass
+    {
+        $filtro['cat_sat_tipo_de_comprobante.descripcion'] = $this->conf_generales->CAT_SAT_TIPO_DE_COMPROBANTE;
+        $tipo_comprobante = (new cat_sat_tipo_de_comprobante($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener tipo de comprobante',data:  $this->conf_generales);
+        }
+
+        if ($tipo_comprobante->n_registros === 0){
+            $tipo_comprobante = (new cat_sat_tipo_de_comprobante($this->link))->get_tipo_comprobante_predeterminado();
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error al obtener tipo de comprobante predeterminado',
+                    data:  $tipo_comprobante);
+            }
+        }
+        return $tipo_comprobante;
+    }
+
 
 
 
@@ -1139,6 +1155,19 @@ class controlador_fc_factura extends system{
         $data->data_partida = $data_partida;
 
         return $data;
+    }
+
+    private function valida_tipo_de_comprobante(): bool|array
+    {
+        if(!isset($this->conf_generales->CAT_SAT_TIPO_DE_COMPROBANTE)){
+            return $this->errores->error(mensaje: 'Error CAT_SAT_TIPO_DE_COMPROBANTE debe existir en generales',
+                data:  $this->conf_generales);
+        }
+        if ($this->conf_generales->CAT_SAT_TIPO_DE_COMPROBANTE === ""){
+            return $this->errores->error(mensaje: 'Error CAT_SAT_TIPO_DE_COMPROBANTE no puede estar vacio',
+                data:  $this->conf_generales);
+        }
+        return true;
     }
 
 
