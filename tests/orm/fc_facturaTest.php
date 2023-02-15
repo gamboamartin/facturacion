@@ -105,14 +105,21 @@ class fc_facturaTest extends test {
         $this->assertEquals("Error la factura pasada no tiene registros",$resultado['mensaje_limpio']);
         errores::$error = false;
 
-        $fc_factura_id = (new base_test2())->alta_fc_factura(link: $this->link,id: 999);
+        $del = (new base_test())->del_fc_factura(link: $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error al dar de alta factura',$fc_factura_id);
+            $error = (new errores())->error('Error al eliminar',$del);
             print_r($error);
             exit;
         }
 
-        $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $fc_factura_id);
+        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link, codigo: '999', id: 999);
+        if(errores::$error){
+            $error = (new errores())->error('Error al dar de alta factura',$alta_fc_factura);
+            print_r($error);
+            exit;
+        }
+
+        $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $alta_fc_factura->registro_id);
         if(errores::$error){
             $error = (new errores())->error('Error al obtener factura',$factura);
             print_r($error);
@@ -204,14 +211,21 @@ class fc_facturaTest extends test {
 
         $modelo = new fc_factura($this->link);
 
-        $fc_factura_id = (new base_test2())->alta_fc_factura(link: $this->link,id: 999);
+        $del = (new base_test())->del_fc_factura(link: $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error al dar de alta factura',$fc_factura_id);
+            $error = (new errores())->error('Error al eliminar',$del);
             print_r($error);
             exit;
         }
 
-        $resultado = $modelo->get_factura_imp_trasladados($fc_factura_id);
+        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link,id: 999);
+        if(errores::$error){
+            $error = (new errores())->error('Error al dar de alta factura',$alta_fc_factura);
+            print_r($error);
+            exit;
+        }
+
+        $resultado = $modelo->get_factura_imp_trasladados($alta_fc_factura->registro_id);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0,$resultado);
@@ -230,14 +244,21 @@ class fc_facturaTest extends test {
 
         $modelo = new fc_factura($this->link);
 
-        $fc_factura_id = (new base_test2())->alta_fc_factura(link: $this->link,id: 999);
+        $del = (new base_test())->del_fc_factura(link: $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error al dar de alta factura',$fc_factura_id);
+            $error = (new errores())->error('Error al eliminar',$del);
             print_r($error);
             exit;
         }
 
-        $resultado = $modelo->get_factura_sub_total(fc_factura_id: $fc_factura_id);
+        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link,id: 999);
+        if(errores::$error){
+            $error = (new errores())->error('Error al dar de alta factura',$alta_fc_factura);
+            print_r($error);
+            exit;
+        }
+
+        $resultado = $modelo->get_factura_sub_total(fc_factura_id: $alta_fc_factura->registro_id);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0,$resultado);
@@ -381,6 +402,21 @@ class fc_facturaTest extends test {
 
         $modelo = new fc_factura($this->link);
         //$modelo = new liberator($modelo);
+
+        $del = (new base_test())->del_fc_factura(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al del', $del);
+            print_r($error);
+            exit;
+        }
+
+
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar', $alta);
+            print_r($error);
+            exit;
+        }
 
         $fc_partida_id = 1;
         $resultado = $modelo->sub_total($fc_partida_id);

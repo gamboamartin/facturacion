@@ -117,14 +117,14 @@ class base_test{
     }
 
     public function alta_fc_factura(PDO $link, int $cat_sat_forma_pago_id = 1, int $cat_sat_metodo_pago_id = 2,
-                                    int $cat_sat_moneda_id = 999, int $com_sucursal_id = 1, int $com_tipo_cambio_id = 1,
-                                    int $fc_csd_id = 1, int $id = 1): array|\stdClass
+                                    int $cat_sat_moneda_id = 999, string $codigo = '1', int $com_sucursal_id = 1,
+                                    int $com_tipo_cambio_id = 1, int $fc_csd_id = 1, int $id = 1): array|\stdClass
     {
 
 
         $existe = (new com_sucursal($link))->existe_by_id(registro_id: $com_sucursal_id);
         if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al verificar si existe factuea', data: $existe);
+            return (new errores())->error(mensaje: 'Error al verificar si existe factura', data: $existe);
         }
         if(!$existe) {
             $alta = $this->alta_com_sucursal(link: $link, id: $com_sucursal_id);
@@ -195,7 +195,7 @@ class base_test{
 
         $registro = array();
         $registro['id'] = $id;
-        $registro['codigo'] = 1;
+        $registro['codigo'] = $codigo;
         $registro['descripcion'] = 1;
         $registro['fc_csd_id'] = $fc_csd_id;
         $registro['com_sucursal_id'] = $com_sucursal_id;

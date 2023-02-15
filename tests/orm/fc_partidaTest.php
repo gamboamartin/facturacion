@@ -40,14 +40,22 @@ class fc_partidaTest extends test
 
         $modelo = new fc_partida($this->link);
 
-        $fc_partida_id = (new base_test2())->alta_fc_partida(link: $this->link);
+        $del = (new base_test())->del_fc_factura(link: $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error al dar de alta factura',$fc_partida_id);
+            $error = (new errores())->error('Error al del', $del);
             print_r($error);
             exit;
         }
 
-        $resultado = $modelo->calculo_imp_trasladado(fc_partida_id: $fc_partida_id);
+
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar', $alta);
+            print_r($error);
+            exit;
+        }
+
+        $resultado = $modelo->calculo_imp_trasladado(fc_partida_id: $alta->registro_id);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0,$resultado);
