@@ -12,12 +12,24 @@ use base\controller\controler;
 use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\compresor\compresor;
+use gamboamartin\direccion_postal\models\dp_calle;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
+use gamboamartin\direccion_postal\models\dp_colonia;
+use gamboamartin\direccion_postal\models\dp_colonia_postal;
+use gamboamartin\direccion_postal\models\dp_cp;
+use gamboamartin\direccion_postal\models\dp_estado;
+use gamboamartin\direccion_postal\models\dp_municipio;
+use gamboamartin\direccion_postal\models\dp_pais;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
+use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\organigrama\models\org_empresa;
+use gamboamartin\organigrama\models\org_sucursal;
+use gamboamartin\organigrama\models\org_tipo_empresa;
+use gamboamartin\organigrama\models\org_tipo_sucursal;
 use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
@@ -99,6 +111,147 @@ class controlador_fc_factura extends system{
 
     public function alta(bool $header, bool $ws = false): array|string
     {
+
+        $tiene_rows = (new org_tipo_sucursal(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar org_tipo_sucursal',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar org_tipo_sucursal',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new org_tipo_empresa(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar org_tipo_empresa',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar org_tipo_empresa',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new dp_colonia(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_colonia',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_colonia',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new dp_pais(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_pais',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_pais',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new dp_estado(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_estado',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_estado',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new dp_municipio(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_municipio',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_municipio',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new dp_cp(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_cp',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_cp',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new dp_colonia_postal(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_colonia_postal',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_colonia_postal',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new dp_calle(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_calle',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_calle',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new dp_calle_pertenece(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_calle_pertenece',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar dp_calle_pertenece',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new cat_sat_regimen_fiscal(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar cat_sat_regimen_fiscal',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar cat_sat_regimen_fiscal',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new org_empresa(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar org_empresa',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar org_empresa',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new org_sucursal(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar org_sucursal',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar org_sucursal',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
+        $tiene_rows = (new fc_csd(link: $this->link))->tiene_registros();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al verificar fc_csd',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+        if(!$tiene_rows){
+            return $this->retorno_error(mensaje: 'Error al verificar fc_csd',
+                data:  $tiene_rows, header: $header,ws:$ws);
+        }
+
         $r_alta =  parent::alta(header: false);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);
