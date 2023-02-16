@@ -118,6 +118,11 @@ class controlador_fc_factura extends system{
         $this->parents_verifica[] = (new dp_calle_pertenece(link: $this->link));
         $this->parents_verifica[] = (new cat_sat_tipo_de_comprobante(link: $this->link));
         $this->parents_verifica[] = (new cat_sat_uso_cfdi(link: $this->link));
+        $this->parents_verifica[] = (new com_tipo_cambio(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_moneda(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_metodo_pago(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_forma_pago(link: $this->link));
+        $this->parents_verifica[] = (new fc_csd(link: $this->link));
 
     }
 

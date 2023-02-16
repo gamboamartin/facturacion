@@ -13,6 +13,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_cer_csd;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_key_csd;
+use gamboamartin\organigrama\models\org_sucursal;
 use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
@@ -76,6 +77,8 @@ class controlador_fc_csd extends system{
             print_r($error);
             die('Error');
         }
+
+        $this->parents_verifica[] = new org_sucursal(link: $this->link);
     }
 
     public function alta(bool $header, bool $ws = false): array|string
