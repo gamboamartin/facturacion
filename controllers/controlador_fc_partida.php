@@ -23,7 +23,7 @@ use stdClass;
 
 class controlador_fc_partida extends system{
 
-    public array $keys_selects = array();
+    public array|stdClass $keys_selects = array();
     public controlador_fc_traslado $controlador_fc_traslado;
     public string $link_fc_traslado_alta_bd = '';
 
@@ -94,16 +94,7 @@ class controlador_fc_partida extends system{
         return $r_alta;
     }
 
-    public function asignar_propiedad(string $identificador, mixed $propiedades)
-    {
-        if (!array_key_exists($identificador,$this->keys_selects)){
-            $this->keys_selects[$identificador] = new stdClass();
-        }
 
-        foreach ($propiedades as $key => $value){
-            $this->keys_selects[$identificador]->$key = $value;
-        }
-    }
 
     private function init_configuraciones(): controler
     {

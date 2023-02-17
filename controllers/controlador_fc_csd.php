@@ -25,7 +25,7 @@ use stdClass;
 
 class controlador_fc_csd extends system{
 
-    public array $keys_selects = array();
+    public array|stdClass $keys_selects = array();
     public controlador_fc_key_csd $controlador_fc_key_csd;
     public controlador_fc_cer_csd $controlador_fc_cer_csd;
 
@@ -79,6 +79,7 @@ class controlador_fc_csd extends system{
         }
 
         $this->parents_verifica[] = new org_sucursal(link: $this->link);
+        $this->verifica_parents_alta = true;
     }
 
     public function alta(bool $header, bool $ws = false): array|string
@@ -102,16 +103,7 @@ class controlador_fc_csd extends system{
         return $r_alta;
     }
 
-    public function asignar_propiedad(string $identificador, mixed $propiedades)
-    {
-        if (!array_key_exists($identificador,$this->keys_selects)){
-            $this->keys_selects[$identificador] = new stdClass();
-        }
 
-        foreach ($propiedades as $key => $value){
-            $this->keys_selects[$identificador]->$key = $value;
-        }
-    }
 
     public function get_csd(bool $header, bool $ws = true): array|stdClass
     {

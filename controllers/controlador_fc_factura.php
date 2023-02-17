@@ -47,7 +47,7 @@ use stdClass;
 
 class controlador_fc_factura extends system{
 
-    public array $keys_selects = array();
+    public array|stdClass $keys_selects = array();
     public controlador_fc_partida $controlador_fc_partida;
     public controlador_com_producto $controlador_com_producto;
 
@@ -123,6 +123,8 @@ class controlador_fc_factura extends system{
         $this->parents_verifica[] = (new cat_sat_metodo_pago(link: $this->link));
         $this->parents_verifica[] = (new cat_sat_forma_pago(link: $this->link));
         $this->parents_verifica[] = (new fc_csd(link: $this->link));
+
+        $this->verifica_parents_alta = true;
 
     }
 
@@ -218,16 +220,7 @@ class controlador_fc_factura extends system{
 
     }
 
-    public function asignar_propiedad(string $identificador, mixed $propiedades)
-    {
-        if (!array_key_exists($identificador,$this->keys_selects)){
-            $this->keys_selects[$identificador] = new stdClass();
-        }
 
-        foreach ($propiedades as $key => $value){
-            $this->keys_selects[$identificador]->$key = $value;
-        }
-    }
 
     public function exportar_documentos(bool $header, bool $ws = false){
 

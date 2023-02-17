@@ -19,7 +19,7 @@ use stdClass;
 
 class controlador_fc_factura_documento extends system{
 
-    public array $keys_selects = array();
+    public array|stdClass $keys_selects = array();
 
     public function __construct(PDO $link, html $html = new html(), stdClass $paths_conf = new stdClass()){
         $modelo = new fc_factura_documento(link: $link);
