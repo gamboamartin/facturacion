@@ -18,24 +18,13 @@ use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\compresor\compresor;
-use gamboamartin\direccion_postal\models\dp_calle;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
-use gamboamartin\direccion_postal\models\dp_colonia;
-use gamboamartin\direccion_postal\models\dp_colonia_postal;
-use gamboamartin\direccion_postal\models\dp_cp;
-use gamboamartin\direccion_postal\models\dp_estado;
-use gamboamartin\direccion_postal\models\dp_municipio;
-use gamboamartin\direccion_postal\models\dp_pais;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_partida;
-use gamboamartin\organigrama\models\org_empresa;
-use gamboamartin\organigrama\models\org_sucursal;
-use gamboamartin\organigrama\models\org_tipo_empresa;
-use gamboamartin\organigrama\models\org_tipo_sucursal;
 use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
@@ -397,6 +386,7 @@ class controlador_fc_factura extends system{
      * Inicializa los controladores default
      * @param stdClass $paths_conf Rutas de archivos de configuracion
      * @return controler
+     * @version 4.25.0
      */
     private function init_controladores(stdClass $paths_conf): controler
     {
