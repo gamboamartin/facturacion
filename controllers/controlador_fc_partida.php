@@ -16,7 +16,7 @@ use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 
-use gamboamartin\template_1\html;
+use gamboamartin\template\html;
 use html\fc_partida_html;
 use PDO;
 use stdClass;
