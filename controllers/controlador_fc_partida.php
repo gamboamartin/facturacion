@@ -96,7 +96,8 @@ class controlador_fc_partida extends _ctl_base{
     protected function campos_view(): array
     {
         $keys = new stdClass();
-        $keys->inputs = array('codigo', 'descripcion', 'cantidad', 'valor_unitario', 'descuento', 'subtotal', 'total');
+        $keys->inputs = array('codigo', 'descripcion', 'cantidad', 'valor_unitario', 'descuento', 'subtotal', 'total',
+            'unidad', 'impuesto');
         $keys->selects = array();
 
         $init_data = array();
@@ -240,6 +241,20 @@ class controlador_fc_partida extends _ctl_base{
             return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
         }
         $keys_selects['total']->disabled = true;
+
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6, key: 'unidad',
+            keys_selects: $keys_selects, place_holder: 'Unidad');
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
+        }
+        $keys_selects['unidad']->disabled = true;
+
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6, key: 'impuesto',
+            keys_selects: $keys_selects, place_holder: 'Objeto del Impuesto');
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
+        }
+        $keys_selects['impuesto']->disabled = true;
 
         return $keys_selects;
     }

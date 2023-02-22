@@ -740,40 +740,29 @@ class controlador_fc_factura extends system{
     }
 
     private function nueva_partida_inicializa(): array|stdClass{
-        $this->controlador_fc_partida->modelo->campos_view['unidad'] = array('type' => 'inputs');
-        $this->controlador_fc_partida->modelo->campos_view['impuesto'] = array('type' => 'inputs');
 
-        $identificador = "unidad";
-        $propiedades = array("place_holder" => "Unidad", "disabled" => true);
-        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "impuesto";
-        $propiedades = array("place_holder" => "Objeto del Impuesto", "disabled" => true);
-        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $alta = $this->controlador_fc_partida->alta(header: false);
+        $r_template = $this->controlador_fc_partida->alta(header: false);
         if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al generar template', data: $this->inputs);
-            print_r($error);
-            die('Error');
+            return $this->errores->error(mensaje: 'Error al obtener template', data: $r_template);
         }
 
-        $identificador = "fc_factura_id";
-        $propiedades = array("id_selected" => $this->registro_id, "disabled" => true,
-            "filtro" => array('fc_factura.id' => $this->registro_id));
-        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "descripcion";
-        $propiedades = array("cols" => 12);
-        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $inputs = $this->controlador_fc_partida->genera_inputs(
-            keys_selects:  $this->controlador_fc_partida->keys_selects);
+        $keys_selects = $this->controlador_fc_partida->init_selects_inputs();
         if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al generar inputs', data: $this->inputs);
-            print_r($error);
-            die('Error');
+            return $this->errores->error(mensaje: 'Error al inicializar selects', data: $keys_selects);
         }
+
+        $keys_selects['fc_factura_id']->id_selected = $this->registro_id;
+        $keys_selects['fc_factura_id']->filtro = array("fc_factura.id" => $this->registro_id);
+        $keys_selects['fc_factura_id']->disabled = true;
+        $keys_selects['fc_factura_id']->cols = 12;
+        $keys_selects['com_producto_id']->cols = 12;
+
+        $inputs = $this->controlador_fc_partida->inputs(keys_selects: $keys_selects);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener inputs', data: $inputs);
+        }
+
+
 
         return $inputs;
     }
