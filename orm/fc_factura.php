@@ -67,6 +67,8 @@ class fc_factura extends modelo
             columnas: $columnas, campos_view: $campos_view, no_duplicados: $no_duplicados, tipo_campos: array());
 
         $this->NAMESPACE = __NAMESPACE__;
+
+        $this->etiqueta = 'Factura';
     }
 
     private function acumulado_global_imp(array $global_imp, array $impuesto, string $key_gl, string $key_importe): stdClass

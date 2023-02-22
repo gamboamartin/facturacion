@@ -64,6 +64,8 @@ class fc_partida extends _modelo_parent
             no_duplicados: $no_duplicados, tipo_campos: array());
 
         $this->NAMESPACE = __NAMESPACE__;
+
+        $this->etiqueta = 'Partida';
     }
 
     private function acciones_conf_traslado(stdClass $fc_partida): array|stdClass

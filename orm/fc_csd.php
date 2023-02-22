@@ -28,6 +28,8 @@ class fc_csd extends _modelo_parent {
 
         $this->NAMESPACE = __NAMESPACE__;
 
+        $this->etiqueta = 'CSD';
+
     }
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass

@@ -49,6 +49,8 @@ class fc_retenido extends _modelo_parent {
             no_duplicados: $no_duplicados, tipo_campos: array());
 
         $this->NAMESPACE = __NAMESPACE__;
+
+        $this->etiqueta = 'Retencion';
     }
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass

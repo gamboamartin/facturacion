@@ -28,6 +28,7 @@ class fc_conf_traslado extends _modelo_parent {
             columnas: $columnas, campos_view: $campos_view);
 
         $this->NAMESPACE = __NAMESPACE__;
+        $this->etiqueta = 'Configuracion Traslado';
     }
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass

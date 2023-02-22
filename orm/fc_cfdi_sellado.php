@@ -20,6 +20,7 @@ class fc_cfdi_sellado extends _modelo_parent
             columnas: $columnas);
 
         $this->NAMESPACE = __NAMESPACE__;
+        $this->etiqueta = 'CFDI Sellado';
     }
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass

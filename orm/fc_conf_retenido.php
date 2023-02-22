@@ -28,6 +28,8 @@ class fc_conf_retenido extends _modelo_parent {
             columnas: $columnas, campos_view: $campos_view);
 
         $this->NAMESPACE = __NAMESPACE__;
+
+        $this->etiqueta = 'Configuracion Retencion';
     }
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass

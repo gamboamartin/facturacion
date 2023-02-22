@@ -24,6 +24,8 @@ class fc_cer_csd extends modelo{
             columnas: $columnas, campos_view: $campos_view, no_duplicados: $no_duplicados,tipo_campos: array());
 
         $this->NAMESPACE = __NAMESPACE__;
+
+        $this->etiqueta = 'Cert CSD';
     }
 
     public function alta_bd(): array|stdClass
