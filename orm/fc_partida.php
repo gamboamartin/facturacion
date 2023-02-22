@@ -47,20 +47,15 @@ class fc_partida extends _modelo_parent
         $columnas_extra['fc_partida_importe_total'] = "$sq_importes->fc_partida_importe_con_descuento 
         + $sq_importe_total_traslado - $sq_importe_total_retenido";
 
-        $campos_view['com_producto_id'] = array('type' => 'selects', 'model' => new com_producto($link));
-        $campos_view['fc_factura_id'] = array('type' => 'selects', 'model' => new fc_factura($link));
-        $campos_view['codigo'] = array('type' => 'inputs');
-        $campos_view['descripcion'] = array('type' => 'inputs');
-        $campos_view['cantidad'] = array('type' => 'inputs');
-        $campos_view['valor_unitario'] = array('type' => 'inputs');
-        $campos_view['descuento'] = array('type' => 'inputs');
-        $campos_view['subtotal'] = array('type' => 'inputs');
-        $campos_view['total'] = array('type' => 'inputs');
+        $columnas_extra['fc_partida_n_traslados'] = "(SELECT COUNT(*) FROM fc_traslado 
+        WHERE fc_traslado.fc_partida_id = fc_partida.id)";
+        $columnas_extra['fc_partida_n_retenidos'] = "(SELECT COUNT(*) FROM fc_retenido 
+        WHERE fc_retenido.fc_partida_id = fc_partida.id)";
 
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
+            columnas: $columnas,  columnas_extra: $columnas_extra,
             no_duplicados: $no_duplicados, tipo_campos: array());
 
         $this->NAMESPACE = __NAMESPACE__;

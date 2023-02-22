@@ -12,60 +12,54 @@ use base\controller\controler;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_traslado;
+use gamboamartin\system\_ctl_base;
 use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
-use gamboamartin\system\system;
 
 use gamboamartin\template\html;
 use html\fc_partida_html;
 use PDO;
 use stdClass;
 
-class controlador_fc_partida extends system{
+class controlador_fc_partida extends _ctl_base{
 
-    public array|stdClass $keys_selects = array();
     public controlador_fc_traslado $controlador_fc_traslado;
     public string $link_fc_traslado_alta_bd = '';
 
-    public function __construct(PDO $link, html $html = new html(), stdClass $paths_conf = new stdClass()){
+    public function __construct(PDO      $link, html $html = new \gamboamartin\template_1\html(),
+                                stdClass $paths_conf = new stdClass())
+    {
         $modelo = new fc_partida(link: $link);
         $html_ = new fc_partida_html(html: $html);
-        $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
+        $obj_link = new links_menu(link: $link, registro_id: $this->registro_id);
 
         $datatables = $this->init_datatable();
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar datatable',data: $datatables);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al inicializar datatable', data: $datatables);
             print_r($error);
             die('Error');
         }
 
-        parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, datatables: $datatables,
+        parent::__construct(html: $html_, link: $link, modelo: $modelo, obj_link: $obj_link, datatables: $datatables,
             paths_conf: $paths_conf);
 
         $configuraciones = $this->init_configuraciones();
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar configuraciones',data: $configuraciones);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al inicializar configuraciones', data: $configuraciones);
             print_r($error);
             die('Error');
         }
 
-        $controladores = $this->init_controladores(paths_conf: $paths_conf);
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
+        $init_controladores = $this->init_controladores(paths_conf: $paths_conf);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al inicializar controladores', data: $init_controladores);
             print_r($error);
             die('Error');
         }
 
-        $links = $this->init_links();
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar links',data:  $links);
-            print_r($error);
-            die('Error');
-        }
-
-        $inputs = $this->init_inputs();
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar inputs',data:  $inputs);
+        $init_links = $this->init_links();
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al inicializar links', data: $init_links);
             print_r($error);
             die('Error');
         }
@@ -73,9 +67,15 @@ class controlador_fc_partida extends system{
 
     public function alta(bool $header, bool $ws = false): array|string
     {
-        $r_alta =  parent::alta(header: false);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);
+        $r_alta = $this->init_alta();
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al inicializar alta', data: $r_alta, header: $header, ws: $ws);
+        }
+
+        $keys_selects = $this->init_selects_inputs();
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al inicializar selects', data: $keys_selects, header: $header,
+                ws: $ws);
         }
 
         $this->row_upd->cantidad = 0;
@@ -84,17 +84,32 @@ class controlador_fc_partida extends system{
         $this->row_upd->subtotal = 0;
         $this->row_upd->total = 0;
 
-        $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);
-            print_r($error);
-            die('Error');
+        $inputs = $this->inputs(keys_selects: $keys_selects);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener inputs', data: $inputs, header: $header, ws: $ws);
         }
 
         return $r_alta;
     }
 
+    protected function campos_view(): array
+    {
+        $keys = new stdClass();
+        $keys->inputs = array('codigo', 'descripcion', 'cantidad', 'valor_unitario', 'descuento', 'subtotal', 'total');
+        $keys->selects = array();
 
+        $init_data = array();
+        $init_data['com_producto'] = "gamboamartin\\comercial";
+        $init_data['fc_factura'] = "gamboamartin\\facturacion";
+
+        $campos_view = $this->campos_view_base(init_data: $init_data, keys: $keys);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al inicializar campo view', data: $campos_view);
+        }
+
+        return $campos_view;
+    }
 
     private function init_configuraciones(): controler
     {
@@ -106,20 +121,23 @@ class controlador_fc_partida extends system{
 
     private function init_controladores(stdClass $paths_conf): controler
     {
-        $this->controlador_fc_traslado = new controlador_fc_traslado(link:$this->link, paths_conf: $paths_conf);
+        $this->controlador_fc_traslado = new controlador_fc_traslado(link: $this->link,
+            paths_conf: $paths_conf);
 
         return $this;
     }
 
-    public function init_datatable(): stdClass
+    private function init_datatable(): stdClass
     {
         $columns["fc_partida_id"]["titulo"] = "Id";
-        $columns["com_producto_codigo"]["titulo"] = "Código Producto";
+        $columns["com_producto_codigo"]["titulo"] = "Cod Producto";
         $columns["com_producto_descripcion"]["titulo"] = "Producto";
         $columns["fc_factura_descripcion"]["titulo"] = "Factura";
         $columns["fc_partida_cantidad"]["titulo"] = "Cantidad";
         $columns["fc_partida_valor_unitario"]["titulo"] = "Valor Unitario";
         $columns["fc_partida_descuento"]["titulo"] = "Descuento";
+        $columns["fc_partida_n_traslados"]["titulo"] = "# Traslados";
+        $columns["fc_partida_n_retenidos"]["titulo"] = "# Retenidos";
 
         $filtro = array("fc_partida.id","fc_partida.codigo","fc_factura.descripcion","com_producto.descripcion",
             "fc_partida.cantidad","fc_partida.valor_unitario","fc_partida.descuento");
@@ -133,102 +151,128 @@ class controlador_fc_partida extends system{
 
     private function init_links(): array|string
     {
-        $this->obj_link->genera_links($this);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al generar links para partida',data:  $this->obj_link);
+        $this->link_fc_traslado_alta_bd = $this->obj_link->link_con_id(accion: 'nuevo_traslado_bd', link: $this->link,
+            registro_id: $this->registro_id, seccion: "fc_partida");
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener link',
+                data: $this->link_fc_traslado_alta_bd);
+            print_r($error);
+            exit;
         }
 
-        $link = $this->obj_link->get_link(seccion: $this->seccion, accion: "nuevo_traslado_bd");
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener link: nuevo_traslado_bd',data:  $link);
-        }
-        $this->link_fc_traslado_alta_bd = $link;
-
-        return $link;
+        return $this->link_fc_traslado_alta_bd;
     }
 
-    private function init_inputs(): array
+    /**
+     * Integra los selects
+     * @param array $keys_selects Key de selcta integrar
+     * @param string $key key a validar
+     * @param string $label Etiqueta a mostrar
+     * @param int $id_selected  selected
+     * @param int $cols cols css
+     * @param bool $con_registros Intrega valores
+     * @param array $filtro Filtro de datos
+     * @return array
+     */
+    private function init_selects(array $keys_selects, string $key, string $label, int $id_selected = -1, int $cols = 6,
+                                  bool  $con_registros = true, array $filtro = array()): array
     {
-        $identificador = "com_producto_id";
-        $propiedades = array("label" => "Producto", "extra_params_keys" => array("com_producto_codigo",
-            "com_producto_descripcion","cat_sat_unidad_descripcion","cat_sat_obj_imp_descripcion"));
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        $keys_selects = $this->key_select(cols: $cols, con_registros: $con_registros, filtro: $filtro, key: $key,
+            keys_selects: $keys_selects, id_selected: $id_selected, label: $label);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
+        }
 
-        $identificador = "fc_factura_id";
-        $propiedades = array("label" => "Factura");
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "codigo";
-        $propiedades = array("place_holder" => "Código","cols" => 4);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "descripcion";
-        $propiedades = array("place_holder" => "Descripción","cols" => 12);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "cantidad";
-        $propiedades = array("place_holder" => "Cantidad" );
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "valor_unitario";
-        $propiedades = array("place_holder" => "Valor Unitario" );
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "descuento";
-        $propiedades = array("place_holder" => "Descuento" ,"cols" => 4);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "subtotal";
-        $propiedades = array("place_holder" => "Subtotal" ,"cols" => 4,"disabled" => true);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "total";
-            $propiedades = array("place_holder" => "Total" ,"cols" => 4,"disabled" => true);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        return $this->keys_selects;
+        return $keys_selects;
     }
 
-    private function init_modifica(): array|stdClass
+    public function init_selects_inputs(): array
     {
-        $r_modifica =  parent::modifica(header: false);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
+        $keys_selects = $this->init_selects(keys_selects: array(), key: "com_producto_id", label: "Producto");
+        $keys_selects['com_producto_id']->extra_params_keys = array("com_producto_codigo", "com_producto_descripcion",
+            "cat_sat_unidad_descripcion","cat_sat_obj_imp_descripcion");
+
+        return $this->init_selects(keys_selects: $keys_selects, key: "fc_factura_id", label: "Factura");
+    }
+
+    protected function key_selects_txt(array $keys_selects): array
+    {
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 4, key: 'codigo',
+            keys_selects: $keys_selects, place_holder: 'Código');
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
         }
 
-        $this->row_upd->subtotal = $this->row_upd->cantidad * $this->row_upd->valor_unitario;
-        $this->row_upd->total = $this->row_upd->subtotal - $this->row_upd->descuento;
-
-        $identificador = "fc_factura_id";
-        $propiedades = array("id_selected" => $this->row_upd->fc_factura_id);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "com_producto_id";
-        $propiedades = array("id_selected" => $this->row_upd->com_producto_id);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 12, key: 'descripcion',
+            keys_selects: $keys_selects, place_holder: 'Descripción');
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
         }
 
-        $data = new stdClass();
-        $data->template = $r_modifica;
-        $data->inputs = $inputs;
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6, key: 'cantidad',
+            keys_selects: $keys_selects, place_holder: 'Cantidad');
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
+        }
 
-        return $data;
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6, key: 'valor_unitario',
+            keys_selects: $keys_selects, place_holder: 'Valor Unitario');
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
+        }
+
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 4, key: 'descuento',
+            keys_selects: $keys_selects, place_holder: 'Descuento');
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
+        }
+
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 4, key: 'subtotal',
+            keys_selects: $keys_selects, place_holder: 'Subtotal');
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
+        }
+        $keys_selects['subtotal']->disabled = true;
+
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 4, key: 'total',
+            keys_selects: $keys_selects, place_holder: 'Total');
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
+        }
+        $keys_selects['total']->disabled = true;
+
+        return $keys_selects;
     }
 
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
-        $base = $this->init_modifica();
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
-                header: $header,ws:$ws);
+        $r_modifica = $this->init_modifica();
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar salida de template', data: $r_modifica, header: $header, ws: $ws);
         }
 
-        return $base->template;
+        $keys_selects = $this->init_selects_inputs();
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al inicializar selects', data: $keys_selects, header: $header,
+                ws: $ws);
+        }
+
+        $keys_selects['com_producto_id']->id_selected = $this->registro['com_producto_id'];
+        $keys_selects['fc_factura_id']->id_selected = $this->registro['fc_factura_id'];
+
+        $this->row_upd->subtotal = $this->row_upd->cantidad * $this->row_upd->valor_unitario;
+        $this->row_upd->total = $this->row_upd->subtotal - $this->row_upd->descuento;
+
+        $base = $this->base_upd(keys_selects: $keys_selects, params: array(), params_ajustados: array());
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al integrar base', data: $base, header: $header, ws: $ws);
+        }
+
+        return $r_modifica;
     }
+
+
 
     public function nuevo_traslado(bool $header, bool $ws = false): array|stdClass
     {
