@@ -864,15 +864,9 @@ class controlador_fc_factura extends system{
         return $tipo_comprobante;
     }
 
-
-
-
-
     /*
      * POR REVISAR
      */
-
-
 
     public function partidas(bool $header, bool $ws = false): array|stdClass
     {
