@@ -10,7 +10,7 @@ class _html_factura{
     }
     public function thead_producto(): string
     {
-        return "<thead style='font-size: 14px; vertical-align: middle; background-color: #74569E; color: #ffffff'>
+        return "<thead class='head-principal' style='font-size: 14px; vertical-align: middle; background-color: #74569E; color: #ffffff'>
                     <tr>
                         <th>Clav Prod. Serv.</th>
                         <th>No Identificación</th>
