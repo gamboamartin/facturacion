@@ -55,25 +55,25 @@ class controlador_com_producto extends  \gamboamartin\comercial\controllers\cont
 
     private function init_links(): array|string
     {
-        $this->obj_link->genera_links($this);
+        $this->obj_link->genera_links(controler: $this);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar links para productos',data:  $this->obj_link);
         }
 
-        $link = $this->obj_link->get_link($this->seccion,"productos");
+        $link = $this->obj_link->get_link(seccion: $this->seccion,accion: "productos");
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener link productos',data:  $link);
         }
 
         $this->link_com_producto = $link;
 
-        $link = $this->obj_link->get_link($this->seccion,"nueva_conf_traslado_alta_bd");
+        $link = $this->obj_link->get_link(seccion: $this->seccion,accion: "nueva_conf_traslado_alta_bd");
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener link nueva_conf_traslado_alta_bd',data:  $link);
         }
         $this->link_fc_conf_traslado_alta_bd = $link;
 
-        $link = $this->obj_link->get_link($this->seccion,"nueva_conf_retenido_alta_bd");
+        $link = $this->obj_link->get_link(seccion: $this->seccion,accion: "nueva_conf_retenido_alta_bd");
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener link nueva_conf_retenido_alta_bd',data:  $link);
         }
