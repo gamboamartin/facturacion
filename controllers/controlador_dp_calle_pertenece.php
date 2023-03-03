@@ -15,8 +15,10 @@ class controlador_dp_calle_pertenece extends \controllers\controlador_dp_calle_p
     public function __construct(PDO $link, stdClass $paths_conf = new stdClass())
     {
         parent::__construct(link: $link,paths_conf:  $paths_conf);
-        $this->childrens_data['org_sucursal']['title'] = 'Sucursal';
+        $this->childrens_data['org_sucursal']['title'] = 'Sucursal Emp';
         $this->childrens_data['org_empresa']['title'] = 'Empresa';
+        $this->childrens_data['com_cliente']['title'] = 'Cliente';
+        $this->childrens_data['com_sucursal']['title'] = 'Sucursal Cte';
     }
 
 }

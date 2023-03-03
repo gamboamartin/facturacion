@@ -80,6 +80,8 @@ class controlador_fc_csd extends system{
 
         $this->parents_verifica[] = new org_sucursal(link: $this->link);
         $this->verifica_parents_alta = true;
+
+        $this->childrens_data['fc_factura']['title'] = 'Factura';
     }
 
     public function alta(bool $header, bool $ws = false): array|string
