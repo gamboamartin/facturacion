@@ -9,16 +9,17 @@
 namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
+use gamboamartin\cat_sat\models\cat_sat_factor;
+use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
+use gamboamartin\cat_sat\models\cat_sat_tipo_impuesto;
 use gamboamartin\comercial\models\com_producto;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_conf_retenido;
-use gamboamartin\facturacion\models\fc_conf_traslado;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 
 use gamboamartin\template\html;
 use html\fc_conf_retenido_html;
-use html\fc_conf_traslado_html;
 use PDO;
 use stdClass;
 
@@ -55,6 +56,15 @@ class controlador_fc_conf_retenido extends system{
             print_r($error);
             die('Error');
         }
+
+        $this->parents_verifica[] = (new com_producto(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_tipo_factor(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_factor(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_tipo_impuesto(link: $this->link));
+
+        $this->verifica_parents_alta = true;
+
+
     }
 
     public function alta(bool $header, bool $ws = false): array|string
