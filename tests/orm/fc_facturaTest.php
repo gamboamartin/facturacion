@@ -53,6 +53,12 @@ class fc_facturaTest extends test {
             print_r($error);
             exit;
         }
+        $del = (new base_test())->del_cat_sat_forma_pago($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
 
         $del = (new base_test())->del_org_empresa($this->link);
         if(errores::$error){
