@@ -45,6 +45,7 @@ class controlador_com_producto extends  \gamboamartin\comercial\controllers\cont
 
 
         $this->childrens_data['fc_conf_retenido']['title'] = 'Confs Retenciones';
+        $this->childrens_data['fc_conf_traslado']['title'] = 'Confs Traslados';
 
     }
 

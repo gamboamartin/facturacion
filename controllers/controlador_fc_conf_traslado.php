@@ -9,6 +9,9 @@
 namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
+use gamboamartin\cat_sat\models\cat_sat_factor;
+use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
+use gamboamartin\cat_sat\models\cat_sat_tipo_impuesto;
 use gamboamartin\comercial\models\com_producto;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_conf_traslado;
@@ -53,6 +56,14 @@ class controlador_fc_conf_traslado extends system{
             print_r($error);
             die('Error');
         }
+
+        $this->parents_verifica[] = (new com_producto(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_tipo_factor(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_factor(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_tipo_impuesto(link: $this->link));
+
+        $this->verifica_parents_alta = true;
+
     }
 
     public function alta(bool $header, bool $ws = false): array|string

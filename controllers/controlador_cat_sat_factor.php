@@ -18,5 +18,6 @@ class controlador_cat_sat_factor extends \gamboamartin\cat_sat\controllers\contr
         parent::__construct(link: $link,html:  $html,paths_conf:  $paths_conf);
 
         $this->childrens_data['fc_conf_retenido']['title'] = 'Conf Retenido';
+        $this->childrens_data['fc_conf_traslado']['title'] = 'Conf Traslado';
     }
 }
