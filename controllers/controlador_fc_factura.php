@@ -421,7 +421,7 @@ class controlador_fc_factura extends system{
 
     private function init_links(): array|string
     {
-        $this->obj_link->genera_links($this);
+        $this->obj_link->genera_links(controler: $this);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar links para partida',data:  $this->obj_link);
         }
