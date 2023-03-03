@@ -5,6 +5,7 @@ let asigna_productos = (com_tipo_producto_id = '') => {
     let url = get_url("com_producto","get_productos", {com_tipo_producto_id: com_tipo_producto_id});
 
     get_data(url, function (data) {
+
         sl_com_producto.empty();
 
         integra_new_option(sl_com_producto,'Seleccione un producto','-1');
