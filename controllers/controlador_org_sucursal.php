@@ -8,4 +8,15 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
-class controlador_org_sucursal extends \gamboamartin\organigrama\controllers\controlador_org_sucursal {}
+use gamboamartin\template\html;
+use PDO;
+use stdClass;
+
+class controlador_org_sucursal extends \gamboamartin\organigrama\controllers\controlador_org_sucursal {
+    public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(), stdClass $paths_conf = new stdClass())
+    {
+        parent::__construct(link: $link,html:  $html, paths_conf: $paths_conf);
+        $this->childrens_data['fc_csd']['title'] = 'CSD';
+
+    }
+}

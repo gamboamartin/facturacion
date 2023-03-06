@@ -92,6 +92,10 @@ class controlador_fc_conf_traslado extends system{
         return $this;
     }
 
+    /**
+     * Inicializa los elementos de listas
+     * @return stdClass
+     */
     public function init_datatable(): stdClass
     {
         $columns["fc_conf_traslado_id"]["titulo"] = "Id";

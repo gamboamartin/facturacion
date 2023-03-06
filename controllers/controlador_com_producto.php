@@ -2,9 +2,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
-use gamboamartin\cat_sat\models\cat_sat_factor;
-use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
-use gamboamartin\cat_sat\models\cat_sat_tipo_impuesto;
+
 use gamboamartin\comercial\models\com_producto;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_conf_retenido;
@@ -46,6 +44,7 @@ class controlador_com_producto extends  \gamboamartin\comercial\controllers\cont
 
         $this->childrens_data['fc_conf_retenido']['title'] = 'Confs Retenciones';
         $this->childrens_data['fc_conf_traslado']['title'] = 'Confs Traslados';
+
 
     }
 
