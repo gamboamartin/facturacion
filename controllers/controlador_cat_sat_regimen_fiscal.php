@@ -19,6 +19,7 @@ class controlador_cat_sat_regimen_fiscal extends \gamboamartin\cat_sat\controlle
         parent::__construct(link: $link,html:  $html,paths_conf:  $paths_conf);
 
         $this->childrens_data['com_cliente']['title'] = 'Clientes';
+        $this->childrens_data['org_empresa']['title'] = 'Empresas';
 
     }
 }
