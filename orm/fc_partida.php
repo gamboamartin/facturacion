@@ -5,7 +5,9 @@ namespace gamboamartin\facturacion\models;
 use base\orm\_modelo_parent;
 use gamboamartin\comercial\models\com_producto;
 use gamboamartin\errores\errores;
+use gamboamartin\system\html_controler;
 use gamboamartin\system\links_menu;
+use gamboamartin\template\html;
 use PDO;
 use stdClass;
 
@@ -310,7 +312,7 @@ class fc_partida extends _modelo_parent
         return $r_modifica_bd;
     }
 
-    public function partidas(int $fc_factura_id, $hijo = array()): array|stdClass
+    public function partidas(int $fc_factura_id, html_controler $html, $hijo = array()): array|stdClass
     {
         if ($fc_factura_id <= 0) {
             return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
@@ -336,13 +338,28 @@ class fc_partida extends _modelo_parent
 
         foreach ($r_fc_partida->registros as $indice => $partida) {
 
-            $link_elimina_partida = (new links_menu(link: $this->link, registro_id: $this->registro_id))->
+            /*$link_elimina_partida = (new links_menu(link: $this->link, registro_id: $this->registro_id))->
             link_con_id(accion: 'elimina_bd', link: $this->link, registro_id: $partida['fc_partida_id'], seccion: 'fc_partida');
             if (errores::$error) {
                 $error = $this->error->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_partida);
                 print_r($error);
                 die('Error');
+            }*/
+
+            $params = array();
+            $params['seccion_retorno'] = 'fc_factura';
+            $params['accion_retorno'] = 'modifica';
+            $params['id_retorno'] = $fc_factura_id;
+            $link_elimina_partida = $html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
+                registro_id: $partida['fc_partida_id'], seccion: 'fc_partida', style: 'danger',icon: 'bi bi-trash',
+                muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
+            if (errores::$error) {
+                $error = $this->error->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_partida);
+                print_r($error);
+                die('Error');
             }
+
+
             $r_fc_partida->registros[$indice]['elimina_bd'] = $link_elimina_partida;
         }
         return $r_fc_partida;

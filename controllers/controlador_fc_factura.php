@@ -59,6 +59,7 @@ class controlador_fc_factura extends system{
         $html_ = new fc_factura_html(html: $html);
         $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
+
         $datatables = $this->init_datatable();
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al inicializar datatable',data: $datatables);
@@ -145,6 +146,7 @@ class controlador_fc_factura extends system{
         $this->row_upd->impuestos_trasladados = 0;
         $this->row_upd->impuestos_retenidos = 0;
         $this->row_upd->total = 0;
+        $this->row_upd->exportacion = '01';
 
         $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
         if(errores::$error){
@@ -621,7 +623,7 @@ class controlador_fc_factura extends system{
 
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
-        $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id);
+        $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id,html: $this->html);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
             print_r($error);

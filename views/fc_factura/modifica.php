@@ -98,7 +98,7 @@
                                     <table class="table table-striped" style='font-size: 14px; vertical-align: middle; background-color: #dfe7f6; color: #2c58a0; margin-bottom: 0; '>
                                         <thead><tr><th>Producto</th></tr></thead>
                                         <tbody>
-                                            <tr><td><?php echo $partida['com_producto_descripcion']; ?></td></tr>
+                                            <tr><td><?php echo $partida['fc_partida_descripcion']; ?></td></tr>
                                         </tbody>
                                     </table>
                                 </td>

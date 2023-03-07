@@ -48,7 +48,7 @@ class _html_factura{
                 <td>$partida[fc_partida_importe]</td>
                 <td>$partida[fc_partida_descuento]</td>
                 <td>$partida[cat_sat_obj_imp_descripcion]</td>
-                <td><a href='$partida[elimina_bd]' class='btn btn-link' style='padding: 0; font-size: 12px;'>Eliminar</a></td>
+                <td>$partida[elimina_bd]</td>
             </tr>";
     }
 

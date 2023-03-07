@@ -577,7 +577,7 @@ class fc_factura extends modelo
             $concepto->clave_prod_serv = $partida['cat_sat_producto_codigo'];
             $concepto->cantidad = $partida['fc_partida_cantidad'];
             $concepto->clave_unidad = $partida['cat_sat_unidad_codigo'];
-            $concepto->descripcion = $partida['cat_sat_producto_descripcion'];
+            $concepto->descripcion = $partida['fc_partida_descripcion'];
             $concepto->valor_unitario = number_format($partida['fc_partida_valor_unitario'], 2);;
             $concepto->importe = number_format($partida['fc_partida_importe'], 2);
             $concepto->objeto_imp = $partida['cat_sat_obj_imp_codigo'];
