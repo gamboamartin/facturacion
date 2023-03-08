@@ -2,6 +2,7 @@
 
 namespace gamboamartin\facturacion\models;
 
+use base\orm\_defaults;
 use base\orm\modelo;
 
 use config\generales;
@@ -13,10 +14,14 @@ use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
+use gamboamartin\comercial\models\com_tipo_cliente;
+use gamboamartin\comercial\models\com_tipo_sucursal;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
+use gamboamartin\direccion_postal\models\dp_pais;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
+use gamboamartin\organigrama\models\org_tipo_sucursal;
 use gamboamartin\plugins\files;
 use gamboamartin\xml_cfdi_4\cfdis;
 use gamboamartin\xml_cfdi_4\timbra;
@@ -69,6 +74,73 @@ class fc_factura extends modelo
         $this->NAMESPACE = __NAMESPACE__;
 
         $this->etiqueta = 'Factura';
+
+
+        $catalago = array();
+        $catalago[] = array('codigo' =>'MEX', 'descripcion' => 'MEXICO');
+
+
+        $entidad = new dp_pais(link: $this->link);
+
+        $r_alta_bd = (new _defaults())->alta_defaults(catalago: $catalago,entidad:  $entidad);
+        if (errores::$error) {
+            $error = $this->error->error(mensaje: 'Error al insertar', data: $r_alta_bd);
+            print_r($error);
+            exit;
+        }
+
+        $catalago = array();
+        $catalago[] = array('codigo' =>'MATRIZ', 'descripcion' => 'MATRIZ');
+
+
+        $entidad = new com_tipo_sucursal(link: $this->link);
+
+        $r_alta_bd = (new _defaults())->alta_defaults(catalago: $catalago,entidad:  $entidad);
+        if (errores::$error) {
+            $error = $this->error->error(mensaje: 'Error al insertar', data: $r_alta_bd);
+            print_r($error);
+            exit;
+        }
+
+        $catalago = array();
+        $catalago[] = array('codigo' =>'DEFAULT', 'descripcion' => 'DEFAULT');
+
+
+        $entidad = new com_tipo_cliente(link: $this->link);
+
+        $r_alta_bd = (new _defaults())->alta_defaults(catalago: $catalago,entidad:  $entidad);
+        if (errores::$error) {
+            $error = $this->error->error(mensaje: 'Error al insertar', data: $r_alta_bd);
+            print_r($error);
+            exit;
+        }
+
+        $codigo = 'MEX';
+        $r_dp_pais = (new dp_pais(link: $this->link))->registro_by_codigo(codigo: $codigo);
+        if(errores::$error){
+            $error = $this->error->error(mensaje: 'Error al obtener pais', data: $r_dp_pais);
+            print_r($error);
+            exit;
+        }
+        $dp_pais = $r_dp_pais->registros[0];
+        $dp_pais_id = $dp_pais['dp_pais_id'];
+
+        $catalago = array();
+        $catalago[] = array('codigo' =>'MXN', 'descripcion' => 'Peso mexicano','dp_pais_id'=>$dp_pais_id);
+
+        $entidad = new cat_sat_moneda(link: $this->link);
+
+        $r_alta_bd = (new _defaults())->alta_defaults(catalago: $catalago,entidad:  $entidad);
+        if (errores::$error) {
+            $error = $this->error->error(mensaje: 'Error al insertar', data: $r_alta_bd);
+            print_r($error);
+            exit;
+        }
+
+
+
+
+
     }
 
     private function acumulado_global_imp(array $global_imp, array $impuesto, string $key_gl, string $key_importe): stdClass
@@ -127,6 +199,9 @@ class fc_factura extends modelo
 
         return $r_alta_bd;
     }
+
+
+
 
     /**
      * Carga un descuento nuevo a un descuento previo
@@ -404,6 +479,10 @@ class fc_factura extends modelo
         $emisor['regimen_fiscal'] = '601';
         return $emisor;
     }
+
+
+
+
 
     public function genera_ruta_archivo_tmp(): array|string
     {
@@ -699,6 +778,8 @@ class fc_factura extends modelo
         return $global_nodo;
     }
 
+
+
     private function integra_ac_impuesto(array $global_imp, array $impuesto, string $key_gl, string $key_importe){
         if(!isset($global_imp[$key_gl])) {
             $global_imp = $this->init_imp_global(global_nodo: $global_imp, impuesto: $impuesto, key_gl: $key_gl, key_importe: $key_importe);
@@ -756,7 +837,7 @@ class fc_factura extends modelo
      * @return float|array
      * @version 4.11.0
      */
-    public function get_factura_sub_total(int $fc_factura_id): float|array
+    final public function get_factura_sub_total(int $fc_factura_id): float|array
     {
         $fc_partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
         if (errores::$error) {
