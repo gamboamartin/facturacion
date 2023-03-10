@@ -76,69 +76,6 @@ class fc_factura extends modelo
         $this->etiqueta = 'Factura';
 
 
-        $catalago = array();
-        $catalago[] = array('codigo' =>'MEX', 'descripcion' => 'MEXICO');
-
-
-        $entidad = new dp_pais(link: $this->link);
-
-        $r_alta_bd = (new _defaults())->alta_defaults(catalago: $catalago,entidad:  $entidad);
-        if (errores::$error) {
-            $error = $this->error->error(mensaje: 'Error al insertar', data: $r_alta_bd);
-            print_r($error);
-            exit;
-        }
-
-        $catalago = array();
-        $catalago[] = array('codigo' =>'MATRIZ', 'descripcion' => 'MATRIZ');
-
-
-        $entidad = new com_tipo_sucursal(link: $this->link);
-
-        $r_alta_bd = (new _defaults())->alta_defaults(catalago: $catalago,entidad:  $entidad);
-        if (errores::$error) {
-            $error = $this->error->error(mensaje: 'Error al insertar', data: $r_alta_bd);
-            print_r($error);
-            exit;
-        }
-
-        $catalago = array();
-        $catalago[] = array('codigo' =>'DEFAULT', 'descripcion' => 'DEFAULT');
-
-
-        $entidad = new com_tipo_cliente(link: $this->link);
-
-        $r_alta_bd = (new _defaults())->alta_defaults(catalago: $catalago,entidad:  $entidad);
-        if (errores::$error) {
-            $error = $this->error->error(mensaje: 'Error al insertar', data: $r_alta_bd);
-            print_r($error);
-            exit;
-        }
-
-        $codigo = 'MEX';
-        $r_dp_pais = (new dp_pais(link: $this->link))->registro_by_codigo(codigo: $codigo);
-        if(errores::$error){
-            $error = $this->error->error(mensaje: 'Error al obtener pais', data: $r_dp_pais);
-            print_r($error);
-            exit;
-        }
-        $dp_pais = $r_dp_pais->registros[0];
-        $dp_pais_id = $dp_pais['dp_pais_id'];
-
-        $catalago = array();
-        $catalago[] = array('codigo' =>'MXN', 'descripcion' => 'Peso mexicano','dp_pais_id'=>$dp_pais_id);
-
-        $entidad = new cat_sat_moneda(link: $this->link);
-
-        $r_alta_bd = (new _defaults())->alta_defaults(catalago: $catalago,entidad:  $entidad);
-        if (errores::$error) {
-            $error = $this->error->error(mensaje: 'Error al insertar', data: $r_alta_bd);
-            print_r($error);
-            exit;
-        }
-
-
-
 
 
     }
@@ -473,10 +410,11 @@ class fc_factura extends modelo
 
     private function emisor(array $factura): array
     {
+
         $emisor = array();
         $emisor['rfc'] = $factura['org_empresa_rfc'];
-        $emisor['nombre'] = $factura['org_empresa_nombre_comercial'];
-        $emisor['regimen_fiscal'] = '601';
+        $emisor['nombre'] = $factura['org_empresa_razon_social'];
+        $emisor['regimen_fiscal'] = $factura['cat_sat_regimen_fiscal_codigo'];
         return $emisor;
     }
 
