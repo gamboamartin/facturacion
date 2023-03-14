@@ -31,6 +31,7 @@ let asigna_grupos = (cat_sat_division_producto_id = '') => {
     let url = get_url("cat_sat_grupo_producto","get_grupos", {cat_sat_division_producto_id: cat_sat_division_producto_id});
 
     get_data(url, function (data) {
+        console.log(data);
         sl_cat_sat_grupo_producto.empty();
         sl_cat_sat_clase_producto.empty();
 

@@ -9,7 +9,7 @@ use stdClass;
 
 class fc_cfdi_sellado extends _modelo_parent
 {
-    public function __construct(PDO $link) 
+    public function __construct(PDO $link)
     {
         $tabla = 'fc_cfdi_sellado';
         $columnas = array($tabla => false, 'fc_factura' => $tabla);
