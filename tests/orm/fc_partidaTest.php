@@ -40,7 +40,16 @@ class fc_partidaTest extends test
 
         $modelo = new fc_partida($this->link);
 
+
+
         $del = (new base_test())->del_fc_factura(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al del', $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_fc_conf_traslado(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al del', $del);
             print_r($error);
@@ -58,7 +67,7 @@ class fc_partidaTest extends test
         $resultado = $modelo->calculo_imp_trasladado(fc_partida_id: $alta->registro_id);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals(0,$resultado);
+        $this->assertEquals(0.0,$resultado);
         errores::$error = false;
     }
 
@@ -80,26 +89,13 @@ class fc_partidaTest extends test
             $resultado['mensaje']);
         errores::$error = false;
 
-        $del = (new fc_partida($this->link))->elimina_todo();
+        $del = (new base_test())->del_fc_factura(link: $this->link);
         if (errores::$error) {
             $error = (new errores())->error('Error al eliminar', $del);
             print_r($error);
             exit;
         }
 
-        $del = (new fc_factura($this->link))->elimina_todo();
-        if (errores::$error) {
-            $error = (new errores())->error('Error al eliminar', $del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new fc_csd($this->link))->elimina_todo();
-        if (errores::$error) {
-            $error = (new errores())->error('Error al eliminar', $del);
-            print_r($error);
-            exit;
-        }
 
         $fc_partida = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 10, id: 999,
             valor_unitario: 5.57);
@@ -158,28 +154,14 @@ class fc_partidaTest extends test
             $resultado['mensaje']);
         errores::$error = false;
 
-        $del = (new fc_partida($this->link))->elimina_todo();
+
+
+        $del = (new base_test())->del_fc_factura(link: $this->link);
         if (errores::$error) {
             $error = (new errores())->error('Error al eliminar', $del);
             print_r($error);
             exit;
         }
-
-        $del = (new fc_factura($this->link))->elimina_todo();
-        if (errores::$error) {
-            $error = (new errores())->error('Error al eliminar', $del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new fc_csd($this->link))->elimina_todo();
-        if (errores::$error) {
-            $error = (new errores())->error('Error al eliminar', $del);
-            print_r($error);
-            exit;
-        }
-
-
 
 
         $fc_partida = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 10, id: 999,

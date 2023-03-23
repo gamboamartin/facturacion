@@ -883,7 +883,7 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener imp_retenidos', data: $imp_retenidos);
         }
 
-        return $sub_total + $imp_trasladados - $imp_retenidos;
+        return round($sub_total + $imp_trasladados - $imp_retenidos,4);
     }
 
     /**
@@ -1191,8 +1191,8 @@ class fc_factura extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener calculo ', data: $st);
         }
-        $subtotal += round($st,2);
-        return round($subtotal,2);
+        $subtotal += round($st,4);
+        return round($subtotal,4);
     }
 
     private function get_datos_xml(string $ruta_xml = ""): array

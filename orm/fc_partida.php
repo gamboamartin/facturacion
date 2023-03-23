@@ -191,7 +191,7 @@ class fc_partida extends _modelo_parent
 
 
         if ((int)$traslado->n_registros > 0) {
-            return $subtotal * (float)$traslado->registros[0]['cat_sat_factor_factor'];
+            return round($subtotal * (float)$traslado->registros[0]['cat_sat_factor_factor'],2);
         }
 
         return 0;
@@ -211,7 +211,7 @@ class fc_partida extends _modelo_parent
         }
 
         if ((int)$retenido->n_registros > 0) {
-            return $subtotal * (float)$retenido->registros[0]['cat_sat_factor_factor'];
+            return round($subtotal * (float)$retenido->registros[0]['cat_sat_factor_factor'],4);
         }
 
         return 0;
@@ -467,7 +467,7 @@ class fc_partida extends _modelo_parent
             return $this->error->error(mensaje: 'Error al obtener los registros de la partida', data: $data);
         }
 
-        return round($data->fc_partida_cantidad * $data->fc_partida_valor_unitario, 2);
+        return round($data->fc_partida_cantidad * $data->fc_partida_valor_unitario, 4);
     }
 
     /**
