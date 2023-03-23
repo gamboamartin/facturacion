@@ -48,10 +48,12 @@ class fc_factura_documento extends _modelo_parent {
 
     public function get_factura_documento(int $fc_factura_id, string $tipo_documento): array|string{
 
+
         $documento = $this->get_factura_documentos(fc_factura_id: $fc_factura_id,tipo_documento: $tipo_documento);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener documento', data: $documento);
         }
+
 
         $ruta_archivo = "";
 
@@ -70,6 +72,7 @@ class fc_factura_documento extends _modelo_parent {
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener documento', data: $documento);
         }
+
 
         return $documento;
     }

@@ -702,10 +702,27 @@ final class pdf
         $this->pdf->WriteFixedPosHTML($table, 50, $this->pdf->y - 15,170,20);
     }
 
-    public function guardar(string $nombre_documento)
+    public function guardar(string $nombre_documento, bool $descarga, bool $guarda)
     {
-        $this->pdf->Output($nombre_documento . '.pdf','D');
-        //$this->pdf->Output( );
+
+        if($descarga) {
+            $this->pdf->Output($nombre_documento . '.pdf', 'D');
+            return $nombre_documento;
+        }
+        if($guarda){
+            $path_base = (new generales())->path_base;
+            $path_base_archivos = $path_base.'archivos';
+            if(!file_exists($path_base_archivos)){
+                mkdir($path_base_archivos);
+            }
+            $nombre_documento = $path_base_archivos.'/'.$nombre_documento.'.pdf';
+
+
+            $this->pdf->Output($nombre_documento, 'F');
+            return $nombre_documento;
+        }
+
+        $this->pdf->Output( );
     }
 
     public function footer(string $descripcion)
