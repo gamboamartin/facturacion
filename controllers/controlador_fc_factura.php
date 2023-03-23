@@ -148,12 +148,22 @@ class controlador_fc_factura extends system{
         $this->row_upd->total = 0;
         $this->row_upd->exportacion = '01';
 
+
         $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);
             print_r($error);
             die('Error');
         }
+
+        $observaciones = $this->html->directivas->input_text(disabled: false,name:  'observaciones',
+            place_holder: 'Observaciones',required:  'false',row_upd:  new stdClass(),value_vacio:  false);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al generar observaciones',data:  $observaciones);
+            print_r($error);
+            die('Error');
+        }
+        $this->inputs->observaciones = $observaciones;
 
         return $r_alta;
     }
@@ -778,7 +788,14 @@ class controlador_fc_factura extends system{
         $this->t_head_producto = $t_head_producto;
 
 
-
+        $observaciones = $this->html->directivas->input_text(disabled: false,name:  'observaciones',
+            place_holder: 'Observaciones',required:  'false',row_upd: $this->row_upd,value_vacio:  false);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al generar observaciones',data:  $observaciones);
+            print_r($error);
+            die('Error');
+        }
+        $this->inputs->observaciones = $observaciones;
 
         return $base->template;
     }
