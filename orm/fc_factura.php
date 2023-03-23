@@ -2,7 +2,7 @@
 
 namespace gamboamartin\facturacion\models;
 
-use base\orm\_defaults;
+
 use base\orm\modelo;
 
 use config\generales;
@@ -14,14 +14,10 @@ use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
-use gamboamartin\comercial\models\com_tipo_cliente;
-use gamboamartin\comercial\models\com_tipo_sucursal;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
-use gamboamartin\direccion_postal\models\dp_pais;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
-use gamboamartin\organigrama\models\org_tipo_sucursal;
 use gamboamartin\plugins\files;
 use gamboamartin\xml_cfdi_4\cfdis;
 use gamboamartin\xml_cfdi_4\timbra;
@@ -74,6 +70,8 @@ class fc_factura extends modelo
         $this->NAMESPACE = __NAMESPACE__;
 
         $this->etiqueta = 'Factura';
+
+
 
 
 
