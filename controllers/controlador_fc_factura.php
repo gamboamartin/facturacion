@@ -301,7 +301,8 @@ class controlador_fc_factura extends system{
             nombre_receptor: $factura['com_cliente_razon_social'],efecto: $factura['cat_sat_tipo_de_comprobante_descripcion'],
             cod_postal_receptor: $cp_receptor['dp_cp_descripcion'], regimen_fiscal: $rf_emisor['cat_sat_regimen_fiscal_descripcion'],
             regimen_fiscal_receptor: $rf_receptor['cat_sat_regimen_fiscal_descripcion'],
-            exportacion: $factura['fc_factura_exportacion'],cfdi: $factura['cat_sat_uso_cfdi_descripcion']);
+            exportacion: $factura['fc_factura_exportacion'],cfdi: $factura['cat_sat_uso_cfdi_descripcion'],
+            observaciones: $factura['fc_factura_observaciones']);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar header',data:  $pdf, header: $header,ws:$ws);
         }

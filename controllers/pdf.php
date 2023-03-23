@@ -83,7 +83,7 @@ final class pdf
                            string $rfc_receptor, string $cod_postal, string $fecha,
                            string $nombre_receptor, string $efecto,
                            string $cod_postal_receptor, string $regimen_fiscal, string $regimen_fiscal_receptor,
-                           string $exportacion, string $cfdi): string|array
+                           string $exportacion, string $cfdi, string $observaciones): string|array
     {
 
         $body_td_1 = $this->html(etiqueta: "td", data: "RFC emisor:", class: "negrita");
@@ -113,6 +113,9 @@ final class pdf
         $body_td_25 = $this->html(etiqueta: "td", data: "Uso CFDI:", class: "negrita");
         $body_td_26 = $this->html(etiqueta: "td", data: $cfdi);
 
+        $body_td_tag_observaciones = $this->html(etiqueta: "td",data: "Observaciones:", class: "negrita" );
+        $body_td_observaciones = $this->html(etiqueta: "td",data: $observaciones );
+
         $body_tr_1 = $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2 . $body_td_3 . $body_td_4);
         $body_tr_2 = $this->html(etiqueta: "tr", data: $body_td_5 . $body_td_6 . $body_td_7 . $body_td_8);
         $body_tr_3 = $this->html(etiqueta: "tr", data: $body_td_9 . $body_td_10 . $body_td_11 . $body_td_12);
@@ -120,6 +123,7 @@ final class pdf
         $body_tr_5 = $this->html(etiqueta: "tr", data: $body_td_17 . $body_td_18 . $body_td_19 . $body_td_20);
         $body_tr_6 = $this->html(etiqueta: "tr", data: $body_td_21 . $body_td_22 . $body_td_23 . $body_td_24);
         $body_tr_7 = $this->html(etiqueta: "tr", data: $body_td_25 . $body_td_26);
+        $body_tr_7 = $this->html(etiqueta: "tr", data: $body_td_tag_observaciones. $body_td_observaciones);
 
         $body = $this->html(etiqueta: "tbody", data: $body_tr_1 . $body_tr_2 . $body_tr_3 . $body_tr_4 . $body_tr_5 . $body_tr_6 .
             $body_tr_7);
@@ -701,6 +705,7 @@ final class pdf
     public function guardar(string $nombre_documento)
     {
         $this->pdf->Output($nombre_documento . '.pdf','D');
+        //$this->pdf->Output( );
     }
 
     public function footer(string $descripcion)
