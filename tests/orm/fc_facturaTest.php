@@ -537,6 +537,45 @@ class fc_facturaTest extends test {
         errores::$error = false;
     }
 
+    public function test_suma_sub_totales(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+
+        $modelo = new fc_factura($this->link);
+        $modelo = new liberator($modelo);
+
+        $del = (new base_test())->del_fc_factura($this->link,);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_partida($this->link,);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+        $fc_partidas = array();
+        $fc_partidas[0]['fc_partida_id'] = 1;
+
+        $resultado = $modelo->suma_sub_totales($fc_partidas);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(1.0,$resultado);
+        errores::$error = false;
+
+    }
+
     public function test_total(): void
     {
         errores::$error = false;

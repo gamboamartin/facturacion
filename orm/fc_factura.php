@@ -840,7 +840,7 @@ class fc_factura extends modelo
      * @return float|array
      * @version 0.119.26
      */
-    public function get_factura_descuento(int $fc_factura_id): float|array
+    final public function get_factura_descuento(int $fc_factura_id): float|array
     {
         if ($fc_factura_id <= 0) {
             return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
@@ -1100,11 +1100,21 @@ class fc_factura extends modelo
      * Suma los subtotales acumulando por partida
      * @param array $fc_partidas Partidas de una factura
      * @return array|float
+     * @version 5.7.1
      */
     private function suma_sub_totales(array $fc_partidas): float|array
     {
         $subtotal = 0.0;
         foreach ($fc_partidas as $fc_partida) {
+            if(!is_array($fc_partida)){
+                return $this->error->error(mensaje: 'Error fc_partida debe ser un array', data: $fc_partida);
+            }
+            $keys = array('fc_partida_id');
+            $valida = $this->validacion->valida_ids(keys: $keys, registro: $fc_partida);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al validar fc_partida ', data: $valida);
+            }
+
             $subtotal = $this->suma_sub_total(fc_partida: $fc_partida,subtotal:  $subtotal);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $subtotal);
@@ -1180,7 +1190,8 @@ class fc_factura extends modelo
      */
     private function suma_sub_total(array $fc_partida, float $subtotal): float|array
     {
-        $subtotal = round($subtotal,2);
+        $subtotal = round($subtotal,4);
+
         $keys = array('fc_partida_id');
         $valida = $this->validacion->valida_ids(keys: $keys, registro: $fc_partida);
         if (errores::$error) {

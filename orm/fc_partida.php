@@ -456,7 +456,7 @@ class fc_partida extends _modelo_parent
      * @return float|array
      * @version 1.30.0
      */
-    public function subtotal_partida(int $fc_partida_id): float|array
+    final public function subtotal_partida(int $fc_partida_id): float|array
     {
         if ($fc_partida_id <= 0) {
             return $this->error->error(mensaje: 'Error el id de la partida es incorrecto', data: $fc_partida_id);
