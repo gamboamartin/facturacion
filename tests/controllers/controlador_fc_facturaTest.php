@@ -89,17 +89,15 @@ class controlador_fc_facturaTest extends test {
 
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals('Id',$resultado->columns['fc_factura_id']['titulo']);
-        $this->assertEquals('Serie',$resultado->columns['fc_factura_serie']['titulo']);
-        $this->assertEquals('Folio',$resultado->columns['fc_factura_folio']['titulo']);
+        //$this->assertEquals('Id',$resultado->columns['fc_factura_id']['titulo']);
+        //$this->assertEquals('Serie',$resultado->columns['fc_factura_serie']['titulo']);
+        $this->assertEquals('Fol',$resultado->columns['fc_factura_folio']['titulo']);
         $this->assertEquals('RFC',$resultado->columns['org_empresa_rfc']['titulo']);
-        $this->assertEquals('Cliente',$resultado->columns['com_cliente_rfc']['titulo']);
-        $this->assertEquals('fc_factura.id',$resultado->filtro[0]);
-        $this->assertEquals('fc_factura.serie',$resultado->filtro[1]);
-        $this->assertEquals('fc_factura.folio',$resultado->filtro[2]);
-        $this->assertEquals('org_empresa.rfc',$resultado->filtro[3]);
-        $this->assertEquals('com_cliente.rfc',$resultado->filtro[4]);
-        $this->assertEquals('fc_factura.fecha',$resultado->filtro[5]);
+        $this->assertEquals('Cte',$resultado->columns['com_cliente_rfc']['titulo']);
+        $this->assertEquals('fc_factura.folio',$resultado->filtro[0]);
+        $this->assertEquals('org_empresa.rfc',$resultado->filtro[1]);
+        $this->assertEquals('com_cliente.rfc',$resultado->filtro[2]);
+        $this->assertEquals('fc_factura.fecha',$resultado->filtro[3]);
 
 
         errores::$error = false;

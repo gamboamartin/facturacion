@@ -469,14 +469,14 @@ class controlador_fc_factura extends system{
      */
     final public function init_datatable(): stdClass
     {
-        $columns["fc_factura_id"]["titulo"] = "Id";
-        $columns["fc_factura_serie"]["titulo"] = "Serie";
-        $columns["fc_factura_folio"]["titulo"] = "Folio";
-        $columns["org_empresa_rfc"]["titulo"] = "RFC";
-        $columns["com_cliente_rfc"]["titulo"] = "Cliente";
-        $columns["fc_factura_fecha"]["titulo"] = "Fecha";
 
-        $filtro = array("fc_factura.id","fc_factura.serie","fc_factura.folio","org_empresa.rfc",
+        $columns["fc_factura_folio"]["titulo"] = "Fol";
+        $columns["org_empresa_rfc"]["titulo"] = "RFC";
+        $columns["com_cliente_rfc"]["titulo"] = "Cte";
+        $columns["fc_factura_fecha"]["titulo"] = "Fecha";
+        $columns["fc_factura_total"]["titulo"] = "Total";
+
+        $filtro = array("fc_factura.folio","org_empresa.rfc",
             "com_cliente.rfc",'fc_factura.fecha');
 
         $datatables = new stdClass();

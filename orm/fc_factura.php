@@ -64,8 +64,50 @@ class fc_factura extends modelo
 
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
+        $fc_partida_cantidad = ' ROUND( IFNULL( fc_partida.cantidad,0 ),2) ';
+        $fc_partida_valor_unitario = ' ROUND( IFNULL( fc_partida.valor_unitario,0),2) ';
+        $fc_partida_descuento = ' ROUND( IFNULL(fc_partida.descuento,0 ),2 )';
+
+        $fc_partida_sub_total_base = "ROUND( $fc_partida_cantidad * $fc_partida_valor_unitario, 2 ) ";
+
+        $fc_partida_subtotal = "ROUND($fc_partida_sub_total_base-$fc_partida_descuento,2)";
+
+        $fc_ligue_partida_factura = " fc_partida.fc_factura_id = fc_factura.id ";
+
+        $fc_partida_subtotal_sum = "SELECT SUM(ROUND($fc_partida_subtotal,2)) FROM fc_partida WHERE $fc_ligue_partida_factura";
+
+
+
+        $fc_factura_sub_total_base = "ROUND((SELECT SUM( $fc_partida_sub_total_base) FROM fc_partida WHERE $fc_ligue_partida_factura),2)";
+        $fc_factura_descuento = "ROUND((SELECT SUM( $fc_partida_descuento ) FROM fc_partida WHERE $fc_ligue_partida_factura),2)";
+        $fc_factura_sub_total = "($fc_factura_sub_total_base - $fc_factura_descuento)";
+
+        $fc_factura_traslados = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * cat_sat_factor.factor ) FROM fc_traslado 
+                LEFT JOIN fc_partida ON fc_partida.id = fc_traslado.fc_partida_id 
+                LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado.cat_sat_factor_id 
+                WHERE $fc_ligue_partida_factura ), 2),0)";
+
+        $fc_factura_retenciones = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * cat_sat_factor.factor ) FROM fc_retenido 
+                LEFT JOIN fc_partida ON fc_partida.id = fc_retenido.fc_partida_id 
+                LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido.cat_sat_factor_id 
+                WHERE $fc_ligue_partida_factura ),2),2)";
+
+        $fc_factura_total = "ROUND($fc_factura_sub_total+$fc_factura_traslados-$fc_factura_retenciones,2)";
+
+
+
+        $columnas_extra['fc_factura_sub_total_base'] = "$fc_factura_sub_total_base";
+        $columnas_extra['fc_factura_descuento'] = "$fc_factura_descuento";
+        $columnas_extra['fc_factura_sub_total'] = "$fc_factura_sub_total";
+        $columnas_extra['fc_factura_traslados'] = "$fc_factura_traslados";
+        $columnas_extra['fc_factura_retenciones'] = "$fc_factura_retenciones";
+        $columnas_extra['fc_factura_total'] = "$fc_factura_total";
+
+
+
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas, campos_view: $campos_view, no_duplicados: $no_duplicados, tipo_campos: array());
+            columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
+            no_duplicados: $no_duplicados, tipo_campos: array());
 
         $this->NAMESPACE = __NAMESPACE__;
 
