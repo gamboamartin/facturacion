@@ -313,7 +313,7 @@ class fc_facturaTest extends test {
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(4851.6,$resultado);
-        
+
 
         errores::$error = false;
     }

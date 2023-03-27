@@ -829,20 +829,13 @@ class fc_factura extends modelo
      * Obtiene el subtotal de una factura
      * @param int $fc_factura_id Factura a obtener info
      * @return float|array
+     * @version 6.2.0
      */
     final public function get_factura_sub_total(int $fc_factura_id): float|array
     {
-
-       /* $fc_partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas', data: $fc_partidas);
+        if ($fc_factura_id <= 0) {
+            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
         }
-
-        $subtotal = $this->suma_sub_totales(fc_partidas: $fc_partidas);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener calculo ', data: $subtotal);
-        }*/
-
         $fc_factura = $this->registro(registro_id: $fc_factura_id, columnas: array('fc_factura_sub_total'),
             retorno_obj: true);
         if (errores::$error) {
@@ -907,21 +900,20 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
         }
 
-        $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        $fc_factura = $this->registro(registro_id: $fc_factura_id, columnas: array('fc_factura_descuento'),
+            retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
         }
+        return round($fc_factura->fc_factura_descuento,2);
 
-        $descuento = $this->suma_descuento_partida(partidas: $partidas);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al cargar descuentos', data: $descuento);
-        }
-
-        return $descuento;
     }
 
     final public function get_factura_total(int $fc_factura_id): float|array
     {
+        if ($fc_factura_id <= 0) {
+            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
+        }
         $fc_factura = $this->registro(registro_id: $fc_factura_id, columnas: array('fc_factura_total'),
             retorno_obj: true);
         if (errores::$error) {
