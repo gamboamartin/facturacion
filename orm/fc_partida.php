@@ -11,7 +11,7 @@ use gamboamartin\template\html;
 use PDO;
 use stdClass;
 
-class fc_partida extends _modelo_parent
+class fc_partida extends _base
 {
     public function __construct(PDO $link)
     {
@@ -124,21 +124,20 @@ class fc_partida extends _modelo_parent
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-        if (!isset($this->registro['codigo'])) {
-            $this->registro['codigo'] = $this->get_codigo_aleatorio();
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al generar codigo aleatorio', data: $this->registro);
-            }
-        }
 
-        $this->registro = $this->campos_base(data: $this->registro, modelo: $this);
+        $registro = $this->init_alta_bd();
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al inicializar campos base', data: $this->registro);
+            return $this->error->error(mensaje: 'Error al inicializar campos base', data: $registro);
         }
 
         $validacion = $this->validaciones(data: $this->registro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar datos', data: $validacion);
+        }
+        $data_predial = array();
+        if(isset($this->registro['cuenta_predial'])){
+            $data_predial['cuenta_predial'] = $this->registro['cuenta_predial'];
+            unset($this->registro['cuenta_predial']);
         }
 
         $this->registro = $this->limpia_campos(registro: $this->registro,
@@ -165,6 +164,20 @@ class fc_partida extends _modelo_parent
         $retenido = $this->acciones_conf_retenido(fc_partida: $fc_partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al realizar acciones de conf. retenido', data: $retenido);
+        }
+
+        if(count($data_predial)>0){
+
+            if($fc_partida->com_producto_aplica_predial === 'activo'){
+                $data_predial['fc_partida_id'] = $fc_partida->fc_partida_id;
+
+                $r_fc_cuenta_predial = (new fc_cuenta_predial(link: $this->link))->alta_registro(registro: $data_predial);
+                if (errores::$error) {
+                    return $this->error->error(mensaje: 'Error al insertar predial', data: $r_fc_cuenta_predial);
+                }
+
+            }
+
         }
 
         return $r_alta_bd;
@@ -384,6 +397,7 @@ class fc_partida extends _modelo_parent
     private function validaciones(array $data): bool|array
     {
         $keys = array('descripcion', 'codigo');
+
         $valida = $this->validacion->valida_existencia_keys(keys: $keys, registro: $data);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
@@ -399,6 +413,22 @@ class fc_partida extends _modelo_parent
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error validar cantidades', data: $valida);
         }
+
+        $com_producto = (new com_producto(link: $this->link))->registro(
+            registro_id: $this->registro['com_producto_id'], retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener com_producto', data: $com_producto);
+        }
+        if($com_producto->com_producto_aplica_predial === 'activo'){
+            $keys = array('cuenta_predial');
+
+            $valida = $this->validacion->valida_existencia_keys(keys: $keys, registro: $data);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
+            }
+        }
+
+
 
         return true;
     }

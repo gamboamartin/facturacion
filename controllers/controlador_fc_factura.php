@@ -52,11 +52,13 @@ class controlador_fc_factura extends system{
     public int $fc_factura_id = -1;
     public int $fc_partida_id = -1;
     public stdClass $partidas;
+    private fc_factura_html $html_fc;
 
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass()){
         $modelo = new fc_factura(link: $link);
         $html_ = new fc_factura_html(html: $html);
+        $this->html_fc = $html_;
         $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
 
@@ -156,8 +158,7 @@ class controlador_fc_factura extends system{
             die('Error');
         }
 
-        $observaciones = $this->html->directivas->input_text(disabled: false,name:  'observaciones',
-            place_holder: 'Observaciones',required:  'false',row_upd:  new stdClass(),value_vacio:  false);
+        $observaciones = $this->html_fc->input_observaciones(cols: 12,row_upd: new stdClass(),value_vacio: false);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar observaciones',data:  $observaciones);
             print_r($error);
@@ -185,6 +186,7 @@ class controlador_fc_factura extends system{
         if(isset($_POST['btn_action_next'])){
             unset($_POST['btn_action_next']);
         }
+
 
         $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $this->registro_id);
         if(errores::$error){
@@ -789,8 +791,7 @@ class controlador_fc_factura extends system{
         $this->t_head_producto = $t_head_producto;
 
 
-        $observaciones = $this->html->directivas->input_text(disabled: false,name:  'observaciones',
-            place_holder: 'Observaciones',required:  'false',row_upd: $this->row_upd,value_vacio:  false);
+        $observaciones = $this->html_fc->input_observaciones(cols: 12, row_upd: $this->row_upd, value_vacio: false);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar observaciones',data:  $observaciones);
             print_r($error);
@@ -1160,8 +1161,8 @@ class controlador_fc_factura extends system{
 
         if($header){
             $params = array('fc_partida_id'=>$this->fc_partida_id);
-            $retorno = (new actions())->retorno_alta_bd(registro_id:$this->registro_id,seccion: $this->tabla,
-                siguiente_view: $siguiente_view, params:$params );
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: $siguiente_view, params: $params);
             if(errores::$error){
                 return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_modifica_bd,
                     header:  true, ws: $ws);

@@ -18,6 +18,7 @@ let txt_valor_unitario = $("#valor_unitario");
 let txt_descuento = $(".partidas #descuento");
 let txt_subtotal = $(".partidas #subtotal");
 let txt_total = $(".partidas #total");
+let txt_cuenta_predial = $("#cuenta_predial");
 
 sl_fc_csd.change(function () {
     let selected = $(this).find('option:selected');
@@ -50,6 +51,12 @@ sl_com_producto.change(function () {
     let impuesto = selected.data(`cat_sat_obj_imp_descripcion`);
     let tipo_factor = selected.data(`cat_sat_tipo_factor_descripcion`);
     let factor = selected.data(`cat_sat_factor_factor`);
+    let aplica_predial = selected.data('com_producto_aplica_predial');
+
+    txt_cuenta_predial.prop( "disabled", true );
+    if(aplica_predial === 'activo'){
+        txt_cuenta_predial.prop( "disabled", false );
+    }
 
     txt_descripcion.val(descripcion);
     txt_unidad.val(unidad);

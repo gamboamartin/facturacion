@@ -11,7 +11,7 @@ use gamboamartin\errores\errores;
 use PDO;
 use stdClass;
 
-class fc_conf_traslado extends _modelo_parent {
+class fc_conf_traslado extends _base {
     public function __construct(PDO $link){
         $tabla = 'fc_conf_traslado';
         $columnas = array($tabla=>false,'com_producto' => $tabla,'cat_sat_tipo_factor' => $tabla,'cat_sat_factor' => $tabla,
@@ -33,16 +33,9 @@ class fc_conf_traslado extends _modelo_parent {
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-        if(!isset($this->registro['codigo'])){
-            $this->registro['codigo'] =  $this->get_codigo_aleatorio();
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $this->registro);
-            }
-        }
-
-        $this->registro = $this->campos_base(data: $this->registro,modelo: $this);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
+        $registro = $this->init_alta_bd();
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al inicializar campos base', data: $registro);
         }
 
         $this->registro = $this->validaciones(data: $this->registro);

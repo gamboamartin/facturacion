@@ -575,15 +575,17 @@ class fc_factura_html extends html_controler {
 
         return $div;
     }
-    /*
-     public function input_fecha(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
+
+
+
+    public function input_exportacion(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
     {
         $valida = $this->directivas->valida_cols(cols: $cols);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
         }
 
-        $html =$this->directivas->fecha_required(disabled: $disabled,name: 'fecha',place_holder: 'Fecha',
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'exportacion',place_holder: 'Exportacion',
             row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
@@ -596,18 +598,18 @@ class fc_factura_html extends html_controler {
 
         return $div;
     }
-     */
 
-
-    public function input_exportacion(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
+    public function input_observaciones(int $cols, stdClass $row_upd, bool $value_vacio): array|string
     {
-        $valida = $this->directivas->valida_cols(cols: $cols);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
+        if($cols<=0){
+            return $this->error->error(mensaje: 'Error cold debe ser mayor a 0', data: $cols);
+        }
+        if($cols>=13){
+            return $this->error->error(mensaje: 'Error cold debe ser menor o igual a  12', data: $cols);
         }
 
-        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'exportacion',place_holder: 'Exportacion',
-            row_upd: $row_upd, value_vacio: $value_vacio);
+        $html =$this->directivas->input_text(disabled: false,name: 'observaciones',
+            place_holder: 'Observaciones',required: false,row_upd: $row_upd, value_vacio: $value_vacio);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input', data: $html);
         }

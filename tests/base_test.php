@@ -2,12 +2,16 @@
 namespace gamboamartin\facturacion\tests;
 use base\orm\modelo_base;
 
+use gamboamartin\cat_sat\models\cat_sat_factor;
 use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
+use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_conf_retenido;
+use gamboamartin\facturacion\models\fc_conf_traslado;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
@@ -19,6 +23,15 @@ use PDO;
 
 class base_test{
 
+    public function alta_cat_sat_factor(PDO $link, string $codigo = '16', float $factor = .16, int $id = 1): array|\stdClass
+    {
+        $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_factor(link: $link, codigo: $codigo, factor: $factor, id: $id);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
 
     public function alta_cat_sat_forma_pago(PDO $link, int $id): array|\stdClass
     {
@@ -50,6 +63,17 @@ class base_test{
         return $alta;
     }
 
+    public function alta_cat_sat_tipo_factor(PDO $link, string $descripcion = 'Tasa', int $id = 1): array|\stdClass
+    {
+        $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_tipo_factor(link: $link,
+            descripcion: $descripcion, id: $id);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
+
 
     public function alta_com_cliente(PDO $link): array|\stdClass
     {
@@ -63,6 +87,7 @@ class base_test{
 
     public function alta_com_sucursal(PDO $link, int $id = 1): array|\stdClass
     {
+
         $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_sucursal(link: $link,id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
@@ -76,6 +101,99 @@ class base_test{
         $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_tipo_cambio(link: $link, id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_conf_retenido(PDO $link, string $cat_sat_factor_codigo = '1.25',
+                                          float $cat_sat_factor_factor = .0125, int $cat_sat_factor_id = 2,
+                                          int $cat_sat_tipo_factor_id = 1, int $cat_sat_tipo_impuesto_id = 1,
+                                          int $com_producto_id = 1, int $id = 1): array|\stdClass
+    {
+
+
+        $existe = (new cat_sat_tipo_factor($link))->existe_by_id(registro_id: $cat_sat_tipo_factor_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_tipo_factor(link: $link, id: $cat_sat_tipo_factor_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+        $existe = (new cat_sat_factor($link))->existe_by_id(registro_id: $cat_sat_factor_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_factor(link: $link, codigo: $cat_sat_factor_codigo,
+                factor: $cat_sat_factor_factor, id: $cat_sat_factor_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['com_producto_id'] = $com_producto_id;
+        $registro['cat_sat_tipo_factor_id'] = $cat_sat_tipo_factor_id;
+        $registro['cat_sat_factor_id'] = $cat_sat_factor_id;
+        $registro['cat_sat_tipo_impuesto_id'] = $cat_sat_tipo_impuesto_id;
+
+
+        $alta = (new fc_conf_retenido($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_conf_traslado(PDO $link, string $cat_sat_factor_codigo = '16',
+                                          float $cat_sat_factor_factor = .16, int $cat_sat_factor_id = 1,
+                                          int $cat_sat_tipo_factor_id = 1, int $cat_sat_tipo_impuesto_id = 1,
+                                          int $com_producto_id = 1, int $id = 1): array|\stdClass
+    {
+
+
+        $existe = (new cat_sat_tipo_factor($link))->existe_by_id(registro_id: $cat_sat_tipo_factor_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_tipo_factor(link: $link, id: $cat_sat_tipo_factor_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+        $existe = (new cat_sat_factor($link))->existe_by_id(registro_id: $cat_sat_factor_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_factor(link: $link, codigo: $cat_sat_factor_codigo, factor: $cat_sat_factor_factor, id: $cat_sat_factor_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['com_producto_id'] = $com_producto_id;
+        $registro['cat_sat_tipo_factor_id'] = $cat_sat_tipo_factor_id;
+        $registro['cat_sat_factor_id'] = $cat_sat_factor_id;
+        $registro['cat_sat_tipo_impuesto_id'] = $cat_sat_tipo_impuesto_id;
+
+
+        $alta = (new fc_conf_traslado($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
 
         }
         return $alta;
@@ -280,6 +398,29 @@ class base_test{
         return $del;
     }
 
+    public function del_cat_sat_factor(PDO $link): array|\stdClass
+    {
+
+        $del = (new base_test())->del_fc_conf_traslado($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new base_test())->del_fc_conf_retenido($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new \gamboamartin\cat_sat\tests\base_test())->del_cat_sat_factor($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
     public function del_cat_sat_forma_pago(PDO $link): array|\stdClass
     {
 
@@ -331,6 +472,23 @@ class base_test{
         }
 
         $del = (new \gamboamartin\cat_sat\tests\base_test())->del_cat_sat_moneda($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
+    public function del_cat_sat_tipo_factor(PDO $link): array|\stdClass
+    {
+
+        $del = (new base_test())->del_fc_conf_traslado($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new \gamboamartin\cat_sat\tests\base_test())->del_cat_sat_tipo_factor($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
 

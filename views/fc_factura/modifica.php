@@ -55,12 +55,14 @@
                         <?php echo $controlador->inputs->partidas->com_producto_id; ?>
                         <?php echo $controlador->inputs->partidas->unidad; ?>
                         <?php echo $controlador->inputs->partidas->impuesto; ?>
+                        <?php echo $controlador->inputs->partidas->cuenta_predial; ?>
                         <?php echo $controlador->inputs->partidas->descripcion; ?>
                         <?php echo $controlador->inputs->partidas->cantidad; ?>
                         <?php echo $controlador->inputs->partidas->valor_unitario; ?>
                         <?php echo $controlador->inputs->partidas->subtotal; ?>
                         <?php echo $controlador->inputs->partidas->descuento; ?>
                         <?php echo $controlador->inputs->partidas->total; ?>
+
 
                         <div class="control-group btn-alta">
                             <div class="controls">

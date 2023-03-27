@@ -68,29 +68,29 @@ class fc_factura extends modelo
         $fc_partida_valor_unitario = ' ROUND( IFNULL( fc_partida.valor_unitario,0),2) ';
         $fc_partida_descuento = ' ROUND( IFNULL(fc_partida.descuento,0 ),2 )';
 
-        $fc_partida_sub_total_base = "ROUND( $fc_partida_cantidad * $fc_partida_valor_unitario, 2 ) ";
+        $fc_partida_sub_total_base = "ROUND( $fc_partida_cantidad * $fc_partida_valor_unitario, 4 ) ";
 
-        $fc_partida_subtotal = "ROUND($fc_partida_sub_total_base-$fc_partida_descuento,2)";
+        $fc_partida_subtotal = "ROUND($fc_partida_sub_total_base-$fc_partida_descuento,4)";
 
         $fc_ligue_partida_factura = " fc_partida.fc_factura_id = fc_factura.id ";
 
-        $fc_partida_subtotal_sum = "SELECT SUM(ROUND($fc_partida_subtotal,2)) FROM fc_partida WHERE $fc_ligue_partida_factura";
+        $fc_partida_subtotal_sum = "SELECT SUM(ROUND($fc_partida_subtotal,4)) FROM fc_partida WHERE $fc_ligue_partida_factura";
 
 
 
-        $fc_factura_sub_total_base = "ROUND((SELECT SUM( $fc_partida_sub_total_base) FROM fc_partida WHERE $fc_ligue_partida_factura),2)";
-        $fc_factura_descuento = "ROUND((SELECT SUM( $fc_partida_descuento ) FROM fc_partida WHERE $fc_ligue_partida_factura),2)";
+        $fc_factura_sub_total_base = "ROUND((SELECT SUM( $fc_partida_sub_total_base) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
+        $fc_factura_descuento = "ROUND((SELECT SUM( $fc_partida_descuento ) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
         $fc_factura_sub_total = "($fc_factura_sub_total_base - $fc_factura_descuento)";
 
         $fc_factura_traslados = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * cat_sat_factor.factor ) FROM fc_traslado 
                 LEFT JOIN fc_partida ON fc_partida.id = fc_traslado.fc_partida_id 
                 LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado.cat_sat_factor_id 
-                WHERE $fc_ligue_partida_factura ), 2),0)";
+                WHERE $fc_ligue_partida_factura ), 4),4)";
 
         $fc_factura_retenciones = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * cat_sat_factor.factor ) FROM fc_retenido 
                 LEFT JOIN fc_partida ON fc_partida.id = fc_retenido.fc_partida_id 
                 LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido.cat_sat_factor_id 
-                WHERE $fc_ligue_partida_factura ),2),2)";
+                WHERE $fc_ligue_partida_factura ),4),4)";
 
         $fc_factura_total = "ROUND($fc_factura_sub_total+$fc_factura_traslados-$fc_factura_retenciones,2)";
 
@@ -915,31 +915,14 @@ class fc_factura extends modelo
         return $descuento;
     }
 
-
-
-    public function get_factura_total(int $fc_factura_id): float|array
+    final public function get_factura_total(int $fc_factura_id): float|array
     {
-        $sub_total = $this->get_factura_sub_total(fc_factura_id: $fc_factura_id);
+        $fc_factura = $this->registro(registro_id: $fc_factura_id, columnas: array('fc_factura_total'),
+            retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener sub_total', data: $sub_total);
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
         }
-
-        $descuento = $this->get_factura_descuento(fc_factura_id: $fc_factura_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener descuento', data: $descuento);
-        }
-
-        $imp_trasladados = $this->get_factura_imp_trasladados(fc_factura_id: $fc_factura_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener imp_trasladados', data: $imp_trasladados);
-        }
-
-        $imp_retenidos = $this->get_factura_imp_retenidos(fc_factura_id: $fc_factura_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener imp_retenidos', data: $imp_retenidos);
-        }
-
-        return round($sub_total + $imp_trasladados - $imp_retenidos,4);
+        return round($fc_factura->fc_factura_total,2);
     }
 
     /**
