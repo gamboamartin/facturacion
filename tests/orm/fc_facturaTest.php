@@ -284,6 +284,12 @@ class fc_facturaTest extends test {
             print_r($error);
             exit;
         }
+        $del = (new base_test())->del_cat_sat_factor(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
 
         $alta = (new base_test())->alta_fc_conf_traslado(link: $this->link);
         if(errores::$error){
@@ -306,6 +312,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
+
         /**
          * CRITICA
          */
@@ -313,6 +320,39 @@ class fc_facturaTest extends test {
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(4851.6,$resultado);
+
+        $del = (new base_test())->del_org_empresa(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
+
+        $del = (new base_test())->del_cat_sat_tipo_factor(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
+
+        /**
+         * CRITICA
+         */
+
+        $alta = (new base_test())->alta_fc_factura(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        $resultado = $modelo->get_factura_sub_total(1);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(0.0, $resultado);
+
 
 
         errores::$error = false;

@@ -74,7 +74,7 @@ class fc_factura extends modelo
 
         $fc_ligue_partida_factura = " fc_partida.fc_factura_id = fc_factura.id ";
 
-        $fc_partida_subtotal_sum = "SELECT SUM(ROUND($fc_partida_subtotal,4)) FROM fc_partida WHERE $fc_ligue_partida_factura";
+        $fc_partida_subtotal_sum = "SELECT SUM(ROUND(IFNULL($fc_partida_subtotal,0),4)) FROM fc_partida WHERE $fc_ligue_partida_factura";
 
 
 
@@ -82,26 +82,26 @@ class fc_factura extends modelo
         $fc_factura_descuento = "ROUND((SELECT SUM( $fc_partida_descuento ) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
         $fc_factura_sub_total = "($fc_factura_sub_total_base - $fc_factura_descuento)";
 
-        $fc_factura_traslados = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * cat_sat_factor.factor ) FROM fc_traslado 
+        $fc_factura_traslados = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * IFNULL(cat_sat_factor.factor,0) ) FROM fc_traslado 
                 LEFT JOIN fc_partida ON fc_partida.id = fc_traslado.fc_partida_id 
                 LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado.cat_sat_factor_id 
                 WHERE $fc_ligue_partida_factura ), 4),4)";
 
-        $fc_factura_retenciones = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * cat_sat_factor.factor ) FROM fc_retenido 
+        $fc_factura_retenciones = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * IFNULL(cat_sat_factor.factor,0) ) FROM fc_retenido 
                 LEFT JOIN fc_partida ON fc_partida.id = fc_retenido.fc_partida_id 
                 LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido.cat_sat_factor_id 
                 WHERE $fc_ligue_partida_factura ),4),4)";
 
-        $fc_factura_total = "ROUND($fc_factura_sub_total+$fc_factura_traslados-$fc_factura_retenciones,2)";
+        $fc_factura_total = "ROUND(IFNULL($fc_factura_sub_total,0)+IFNULL($fc_factura_traslados,0)-IFNULL($fc_factura_retenciones,0),2)";
 
 
 
-        $columnas_extra['fc_factura_sub_total_base'] = "$fc_factura_sub_total_base";
-        $columnas_extra['fc_factura_descuento'] = "$fc_factura_descuento";
-        $columnas_extra['fc_factura_sub_total'] = "$fc_factura_sub_total";
-        $columnas_extra['fc_factura_traslados'] = "$fc_factura_traslados";
-        $columnas_extra['fc_factura_retenciones'] = "$fc_factura_retenciones";
-        $columnas_extra['fc_factura_total'] = "$fc_factura_total";
+        $columnas_extra['fc_factura_sub_total_base'] = "IFNULL($fc_factura_sub_total_base,0)";
+        $columnas_extra['fc_factura_descuento'] = "IFNULL($fc_factura_descuento,0)";
+        $columnas_extra['fc_factura_sub_total'] = "IFNULL($fc_factura_sub_total,0)";
+        $columnas_extra['fc_factura_traslados'] = "IFNULL($fc_factura_traslados,0)";
+        $columnas_extra['fc_factura_retenciones'] = "IFNULL($fc_factura_retenciones,0)";
+        $columnas_extra['fc_factura_total'] = "IFNULL($fc_factura_total,0)";
 
 
 
@@ -829,7 +829,6 @@ class fc_factura extends modelo
      * Obtiene el subtotal de una factura
      * @param int $fc_factura_id Factura a obtener info
      * @return float|array
-     * @version 6.2.0
      */
     final public function get_factura_sub_total(int $fc_factura_id): float|array
     {
@@ -841,6 +840,7 @@ class fc_factura extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
         }
+
         return round($fc_factura->fc_factura_sub_total,2);
 
 
