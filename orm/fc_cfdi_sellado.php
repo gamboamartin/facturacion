@@ -47,6 +47,13 @@ class fc_cfdi_sellado extends _modelo_parent
         return $r_alta_bd;
     }
 
+    final public function elimina_bd(int $id): array|stdClass
+    {
+        errores::$error = true;
+        return $this->error->error(mensaje: 'Error este registro no puede ser eliminado',data: $id);
+
+    }
+
     public function maqueta_datos(string $codigo, string $descripcion, int $fc_factura_id, string $comprobante_sello,
                                   string $comprobante_certificado, string $comprobante_no_certificado,
                                   string $complemento_tfd_sl, string $complemento_tfd_fecha_timbrado,
@@ -78,29 +85,8 @@ class fc_cfdi_sellado extends _modelo_parent
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,
                                 array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-        if (!isset($registro['codigo'])) {
-            $registro['codigo'] = $registro["comprobante_no_certificado"];
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener el codigo del registro', data: $registro);
-            }
-        }
-
-        $registro = $this->campos_base(data: $registro, modelo: $this, id: $id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al inicializar campos base', data: $registro);
-        }
-
-        $registro = $this->validaciones(data: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar foraneas', data: $registro);
-        }
-
-        $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al modificar cfdi sellado', data: $r_modifica_bd);
-        }
-
-        return $r_modifica_bd;
+        errores::$error = true;
+        return $this->error->error(mensaje: 'Error este registro no puede ser eliminado',data: $id);
     }
 
     private function validaciones(array $data): array

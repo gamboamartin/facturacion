@@ -487,6 +487,11 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
 
         }
+        $del = (new base_test())->del_fc_conf_retenido($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
 
         $del = (new \gamboamartin\cat_sat\tests\base_test())->del_cat_sat_tipo_factor($link);
         if(errores::$error){
@@ -700,6 +705,21 @@ class base_test{
         }
 
         $del = (new \gamboamartin\organigrama\tests\base_test())->del_org_empresa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
+    public function del_org_sucursal(PDO $link): array|\stdClass
+    {
+        $del = $this->del_fc_csd($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = (new \gamboamartin\organigrama\tests\base_test())->del_org_sucursal($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
 

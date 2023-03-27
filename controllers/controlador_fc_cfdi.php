@@ -19,7 +19,7 @@ use stdClass;
 
 class controlador_fc_cfdi extends system{
 
-    public array $keys_selects = array();
+    public stdClass|array $keys_selects = array();
 
     public function __construct(PDO $link, html $html = new html(), stdClass $paths_conf = new stdClass()){
         $modelo = new fc_cfdi(link: $link);

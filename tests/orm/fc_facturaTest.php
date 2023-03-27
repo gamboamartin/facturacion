@@ -250,7 +250,7 @@ class fc_facturaTest extends test {
 
         $modelo = new fc_factura($this->link);
 
-        $del = (new base_test())->del_fc_factura(link: $this->link);
+        $del = (new base_test())->del_org_sucursal(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al eliminar',$del);
             print_r($error);
@@ -268,6 +268,53 @@ class fc_facturaTest extends test {
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0,$resultado);
+
+
+        $del = (new base_test())->del_org_empresa(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
+
+        $del = (new base_test())->del_cat_sat_tipo_factor(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_conf_traslado(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_conf_retenido(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 2, valor_unitario: 2425.8);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        /**
+         * CRITICA
+         */
+        $resultado = $modelo->get_factura_sub_total(1);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(4851.6,$resultado);
+        
+
         errores::$error = false;
     }
 

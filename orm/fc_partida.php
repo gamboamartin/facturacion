@@ -419,6 +419,13 @@ class fc_partida extends _base
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener com_producto', data: $com_producto);
         }
+
+        $keys = array('com_producto_aplica_predial');
+        $valida = $this->validacion->valida_statuses(keys: $keys,registro:  $com_producto);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar com_producto', data: $valida);
+        }
+
         if($com_producto->com_producto_aplica_predial === 'activo'){
             $keys = array('cuenta_predial');
 
