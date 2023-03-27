@@ -19,6 +19,7 @@ use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
 use gamboamartin\plugins\files;
+use gamboamartin\proceso\models\pr_etapa_proceso;
 use gamboamartin\xml_cfdi_4\cfdis;
 use gamboamartin\xml_cfdi_4\timbra;
 use PDO;
@@ -107,7 +108,7 @@ class fc_factura extends modelo
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
-            no_duplicados: $no_duplicados, tipo_campos: array());
+            no_duplicados: $no_duplicados);
 
         $this->NAMESPACE = __NAMESPACE__;
 
@@ -173,6 +174,31 @@ class fc_factura extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al dar de alta accion', data: $r_alta_bd);
         }
+
+        $filtro['adm_accion.descripcion'] = __FUNCTION__;
+        $filtro['adm_seccion.descripcion'] = $this->tabla;
+
+        $r_pr_etapa_proceso = (new pr_etapa_proceso(link: $this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener conf de etapa', data: $r_pr_etapa_proceso);
+        }
+
+        if($r_pr_etapa_proceso->n_registros > 1){
+            return $this->error->error(mensaje: 'Error de integridad conf de etapa', data: $r_pr_etapa_proceso);
+        }
+
+        if($r_pr_etapa_proceso->n_registros === 1){
+            $pr_etapa_proceso = $r_pr_etapa_proceso->registros[0];
+            $fc_factura_etapa_ins['pr_etapa_proceso_id'] = $pr_etapa_proceso['pr_etapa_proceso_id'];
+            $fc_factura_etapa_ins['fc_factura_id'] = $r_alta_bd->registro_id;
+            $fc_factura_etapa_ins['fecha'] = date('Y-m-d');
+            $r_alta_factura_etapa = (new fc_factura_etapa(link: $this->link))->alta_registro(registro: $fc_factura_etapa_ins);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al insertar fc_factura_etapa', data: $r_alta_factura_etapa);
+            }
+
+        }
+
 
         return $r_alta_bd;
     }

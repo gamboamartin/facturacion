@@ -597,6 +597,11 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
         }
 
+        $del = $this->del_fc_factura_etapa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_factura');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
@@ -617,6 +622,15 @@ class base_test{
     {
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_key_csd');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_factura_etapa(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_factura_etapa');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
