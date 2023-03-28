@@ -23,6 +23,7 @@ use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_partida_html;
+use gamboamartin\facturacion\models\fc_cancelacion;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
@@ -32,6 +33,8 @@ use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template\html;
+use html\cat_sat_motivo_cancelacion_html;
+use JsonException;
 use PDO;
 use stdClass;
 
@@ -48,6 +51,8 @@ class controlador_fc_factura extends system{
     public string $link_fc_factura_partidas = '';
     public string $link_fc_factura_nueva_partida = '';
     public string $link_com_producto = '';
+
+    public string $link_factura_cancela = '';
     public string $link_factura_genera_xml = '';
     public int $fc_factura_id = -1;
     public int $fc_partida_id = -1;
@@ -223,6 +228,74 @@ class controlador_fc_factura extends system{
         }
 
         return $r_alta_partida_bd;
+
+    }
+
+    public function cancela(bool $header, bool $ws = false){
+        $filtro['fc_factura.id'] = $this->registro_id;
+        $columns_ds = array('fc_factura_folio','com_cliente_rfc','fc_factura_total','fc_factura_fecha');
+        $fc_factura_id = $this->html_fc->select_fc_factura_id(cols: 12, con_registros: true,
+            id_selected: $this->registro_id, link: $this->link, columns_ds: $columns_ds, disabled: true,
+            filtro: $filtro);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $fc_factura_id, header: $header,ws:$ws);
+        }
+
+        $cat_sat_motivo_cancelacion_id =
+            (new cat_sat_motivo_cancelacion_html(html: $this->html_base))->select_cat_sat_motivo_cancelacion_id(
+                cols: 12, con_registros: true, id_selected: -1, link: $this->link);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener cat_sat_motivo_cancelacion_id',
+                data:  $cat_sat_motivo_cancelacion_id, header: $header,ws:$ws);
+        }
+
+        $link_factura_cancela = $this->obj_link->link_con_id(accion: 'cancela_bd',link: $this->link,registro_id: $this->registro_id,seccion: $this->tabla);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener link_factura_cancela',
+                data:  $link_factura_cancela, header: $header,ws:$ws);
+        }
+
+
+        $this->link_factura_cancela = $link_factura_cancela;
+
+
+        $this->inputs = new stdClass();
+        $this->inputs->fc_factura_id = $fc_factura_id;
+        $this->inputs->cat_sat_motivo_cancelacion_id = $cat_sat_motivo_cancelacion_id;
+
+
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function cancela_bd(bool $header, bool $ws = false): array|stdClass
+    {
+
+        $r_fc_cancelacion = (new fc_factura(link: $this->link))->cancela_bd(
+            cat_sat_motivo_cancelacion_id: $_POST['cat_sat_motivo_cancelacion_id'], fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al cancelar factura',data:  $r_fc_cancelacion, header: $header,ws:$ws);
+        }
+
+        if($header){
+
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: "lista");
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_cancelacion,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($r_fc_cancelacion, JSON_THROW_ON_ERROR);
+            exit;
+        }
+
+        return $r_fc_cancelacion;
 
     }
 

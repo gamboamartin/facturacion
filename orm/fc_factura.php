@@ -188,6 +188,23 @@ class fc_factura extends modelo
     }
 
 
+    /**
+     * Cancela una factura
+     * @param int $cat_sat_motivo_cancelacion_id Motivo de cancelacion
+     * @param int $fc_factura_id Factura a cancelar
+     * @return array|stdClass
+     */
+    final public function cancela_bd(int $cat_sat_motivo_cancelacion_id, int $fc_factura_id): array|stdClass
+    {
+        $fc_cancelacion_ins['fc_factura_id'] = $fc_factura_id;
+        $fc_cancelacion_ins['cat_sat_motivo_cancelacion_id'] = $cat_sat_motivo_cancelacion_id;
+
+        $r_fc_cancelacion = (new fc_cancelacion(link: $this->link))->alta_registro(registro: $fc_cancelacion_ins);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al cancelar factura',data:  $r_fc_cancelacion);
+        }
+        return $r_fc_cancelacion;
+    }
 
 
     /**
