@@ -8,12 +8,12 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
+use gamboamartin\facturacion\html\fc_cfdi_html;
 use gamboamartin\facturacion\models\fc_cfdi;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 
 use gamboamartin\template_1\html;
-use html\fc_cfdi_html;
 use PDO;
 use stdClass;
 

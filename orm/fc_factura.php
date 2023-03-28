@@ -19,7 +19,7 @@ use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
 use gamboamartin\plugins\files;
-use gamboamartin\proceso\models\pr_etapa_proceso;
+use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\xml_cfdi_4\cfdis;
 use gamboamartin\xml_cfdi_4\timbra;
 use PDO;
@@ -27,6 +27,7 @@ use stdClass;
 
 class fc_factura extends modelo
 {
+    private modelo $modelo_etapa;
     public function __construct(PDO $link)
     {
         $tabla = 'fc_factura';
@@ -114,8 +115,8 @@ class fc_factura extends modelo
 
         $this->etiqueta = 'Factura';
 
-
-
+        $modelo_etapa = new fc_factura_etapa(link: $this->link);
+        $this->modelo_etapa = $modelo_etapa;
 
 
 
@@ -175,28 +176,11 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al dar de alta accion', data: $r_alta_bd);
         }
 
-        $filtro['adm_accion.descripcion'] = __FUNCTION__;
-        $filtro['adm_seccion.descripcion'] = $this->tabla;
 
-        $r_pr_etapa_proceso = (new pr_etapa_proceso(link: $this->link))->filtro_and(filtro: $filtro);
+        $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
+            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $r_alta_bd->registro_id);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener conf de etapa', data: $r_pr_etapa_proceso);
-        }
-
-        if($r_pr_etapa_proceso->n_registros > 1){
-            return $this->error->error(mensaje: 'Error de integridad conf de etapa', data: $r_pr_etapa_proceso);
-        }
-
-        if($r_pr_etapa_proceso->n_registros === 1){
-            $pr_etapa_proceso = $r_pr_etapa_proceso->registros[0];
-            $fc_factura_etapa_ins['pr_etapa_proceso_id'] = $pr_etapa_proceso['pr_etapa_proceso_id'];
-            $fc_factura_etapa_ins['fc_factura_id'] = $r_alta_bd->registro_id;
-            $fc_factura_etapa_ins['fecha'] = date('Y-m-d');
-            $r_alta_factura_etapa = (new fc_factura_etapa(link: $this->link))->alta_registro(registro: $fc_factura_etapa_ins);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al insertar fc_factura_etapa', data: $r_alta_factura_etapa);
-            }
-
+            return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
         }
 
 
@@ -1362,6 +1346,12 @@ class fc_factura extends modelo
         $alta = (new fc_cfdi_sellado($this->link))->alta_registro(registro: $cfdi_sellado);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al dar de alta cfdi sellado', data: $alta);
+        }
+
+        $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
+            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
         }
 
         return $cfdi_sellado;

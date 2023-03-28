@@ -17,8 +17,7 @@
           "config\\": "config/",
           "gamboamartin\\facturacion\\tests\\": "tests",
           "links\\": "links/",
-          "html\\": "templates/directivas/"
-
+          "gamboamartin\\facturacion\\html\\": "templates/directivas"
         }
     },
     "require": {

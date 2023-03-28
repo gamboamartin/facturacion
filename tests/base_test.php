@@ -531,6 +531,15 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_cancelacion(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_cancelacion');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_cer_csd(PDO $link): array
     {
 
@@ -598,6 +607,11 @@ class base_test{
         }
 
         $del = $this->del_fc_factura_etapa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = $this->del_fc_cancelacion($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }

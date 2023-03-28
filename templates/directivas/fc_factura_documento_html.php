@@ -1,14 +1,12 @@
 <?php
-namespace html;
+namespace gamboamartin\facturacion\html;
 
 
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\controllers\controlador_fc_csd;
-use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\system\html_controler;
 use PDO;
-use stdClass;
+
 
 
 class fc_factura_documento_html extends html_controler {

@@ -21,6 +21,8 @@ use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\compresor\compresor;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\html\fc_factura_html;
+use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
@@ -30,8 +32,6 @@ use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template\html;
-use html\fc_partida_html;
-use html\fc_factura_html;
 use PDO;
 use stdClass;
 

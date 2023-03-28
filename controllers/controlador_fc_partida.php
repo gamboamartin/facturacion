@@ -10,6 +10,7 @@ namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\system\_ctl_base;
@@ -17,7 +18,6 @@ use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 
 use gamboamartin\template\html;
-use html\fc_partida_html;
 use PDO;
 use stdClass;
 

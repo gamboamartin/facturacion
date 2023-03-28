@@ -1,5 +1,5 @@
 <?php
-namespace html;
+namespace gamboamartin\facturacion\html;
 
 use gamboamartin\system\html_controler;
 

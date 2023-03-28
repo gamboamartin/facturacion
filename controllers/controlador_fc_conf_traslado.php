@@ -14,12 +14,13 @@ use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
 use gamboamartin\cat_sat\models\cat_sat_tipo_impuesto;
 use gamboamartin\comercial\models\com_producto;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\html\fc_conf_traslado_html;
 use gamboamartin\facturacion\models\fc_conf_traslado;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 
 use gamboamartin\template\html;
-use html\fc_conf_traslado_html;
+
 use PDO;
 use stdClass;
 

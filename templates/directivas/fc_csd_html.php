@@ -1,10 +1,11 @@
 <?php
-namespace html;
+namespace gamboamartin\facturacion\html;
 
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_fc_csd;
 use gamboamartin\facturacion\models\fc_csd;
+use gamboamartin\organigrama\html\org_sucursal_html;
 use gamboamartin\system\html_controler;
 use PDO;
 use stdClass;
@@ -32,7 +33,7 @@ class fc_csd_html extends html_controler {
 
     public function genera_inputs_alta(controlador_fc_csd $controler, array $keys_selects, PDO $link): array|stdClass
     {
-        $inputs = $this->init_alta2(row_upd: $controler->row_upd, modelo: $controler->modelo, link: $link,
+        $inputs = $this->init_alta2(row_upd: $controler->row_upd, modelo: $controler->modelo,
             keys_selects:  $keys_selects);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
@@ -62,7 +63,7 @@ class fc_csd_html extends html_controler {
 
     protected function init_alta(array $keys_selects, PDO $link): array|stdClass
     {
-        $selects = $this->selects_alta(link: $link, keys_selects: $keys_selects);
+        $selects = $this->selects_alta(keys_selects: $keys_selects, link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar selects',data:  $selects);
         }

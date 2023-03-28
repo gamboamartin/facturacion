@@ -1,9 +1,7 @@
 <?php
-namespace html;
+namespace gamboamartin\facturacion\html;
 
 
-use gamboamartin\errores\errores;
-use gamboamartin\facturacion\controllers\controlador_fc_cfdi;
 use gamboamartin\system\html_controler;
 
 use PDO;

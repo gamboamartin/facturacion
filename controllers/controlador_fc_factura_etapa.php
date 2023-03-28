@@ -10,12 +10,12 @@ namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\html\fc_factura_etapa_html;
 use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\system\_ctl_base;
 use gamboamartin\system\links_menu;
 
 use gamboamartin\template\html;
-use html\fc_factura_etapa_html;
 use PDO;
 use stdClass;
 
