@@ -209,7 +209,7 @@ class fc_factura extends modelo
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
         }
-        
+
         return $r_fc_cancelacion;
     }
 
@@ -736,6 +736,24 @@ class fc_factura extends modelo
 
             $concepto->impuestos[0]->retenciones = $impuestos;
 
+            if(isset($partida['com_producto_aplica_predial']) && $partida['com_producto_aplica_predial'] === 'activo'){
+                $r_fc_cuenta_predial = (new fc_cuenta_predial(link: $this->link))->filtro_and(filtro: array('fc_factura.id'=>$fc_factura_id));
+                if (errores::$error) {
+                    return $this->error->error(mensaje: 'Error al obtener cuenta predial', data: $r_fc_cuenta_predial);
+                }
+                if($r_fc_cuenta_predial->n_registros === 0){
+                    return $this->error->error(mensaje: 'Error no existe predial asignado', data: $r_fc_cuenta_predial);
+                }
+                if($r_fc_cuenta_predial->n_registros > 1){
+                    return $this->error->error(mensaje: 'Error de integridad en predial', data: $r_fc_cuenta_predial);
+                }
+                $fc_cuenta_predial_numero = $r_fc_cuenta_predial->registros[0]['fc_cuenta_predial_descripcion'];
+
+                $concepto->cuenta_predial = $fc_cuenta_predial_numero;
+
+            }
+
+
             $conceptos[] = $concepto;
 
             $total_impuestos_trasladados += ($partida['fc_partida_importe_total_traslado']);
@@ -863,6 +881,7 @@ class fc_factura extends modelo
      * Obtiene el subtotal de una factura
      * @param int $fc_factura_id Factura a obtener info
      * @return float|array
+     * @version 6.7.0
      */
     final public function get_factura_sub_total(int $fc_factura_id): float|array
     {
