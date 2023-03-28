@@ -203,6 +203,13 @@ class fc_factura extends modelo
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al cancelar factura',data:  $r_fc_cancelacion);
         }
+
+        $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
+            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
+        }
+        
         return $r_fc_cancelacion;
     }
 
