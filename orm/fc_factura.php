@@ -946,6 +946,7 @@ class fc_factura extends modelo
      * Obtiene el total de descuento de una factura
      * @param int $fc_factura_id Identificador de factura
      * @return float|array
+     * @version 6.10.0
      */
     final public function get_factura_descuento(int $fc_factura_id): float|array
     {
@@ -962,6 +963,11 @@ class fc_factura extends modelo
 
     }
 
+    /**
+     * Obtiene el total de una factura
+     * @param int $fc_factura_id Factura a obtener total
+     * @return float|array
+     */
     final public function get_factura_total(int $fc_factura_id): float|array
     {
         if ($fc_factura_id <= 0) {
