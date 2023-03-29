@@ -7,13 +7,13 @@ use PDO;
 use stdClass;
 
 
-class fc_cer_csd extends modelo{
+class fc_key_pem extends modelo{
     public function __construct(PDO $link){
-        $tabla = 'fc_cer_csd';
-        $columnas = array($tabla=>false,'fc_csd'=>$tabla,'doc_documento'=>$tabla);
-        $campos_obligatorios = array('codigo');
+        $tabla = 'fc_key_pem';
+        $columnas = array($tabla=>false,'fc_key_csd'=>$tabla,'doc_documento'=>$tabla,'fc_csd'=>'fc_key_csd');
+        $campos_obligatorios = array('fc_key_csd_id');
 
-        $campos_view['fc_csd_id'] = array('type' => 'selects', 'model' => new fc_csd($link));
+        $campos_view['fc_key_csd_id'] = array('type' => 'selects', 'model' => new fc_key_csd($link));
         $campos_view['doc_documento_id'] = array('type' => 'selects', 'model' => new doc_documento($link));
         $campos_view['documento'] = array('type' => 'files');
         $campos_view['codigo'] = array('type' => 'inputs');
@@ -25,7 +25,7 @@ class fc_cer_csd extends modelo{
 
         $this->NAMESPACE = __NAMESPACE__;
 
-        $this->etiqueta = 'Cert CSD';
+        $this->etiqueta = 'Cert PEM CSD';
     }
 
     public function alta_bd(): array|stdClass
@@ -65,9 +65,9 @@ class fc_cer_csd extends modelo{
         return $data;
     }
 
-    public function get_cer_csd(int $fc_cer_csd_id): array|stdClass|int
+    public function get_key_csd(int $fc_key_csd_id): array|stdClass|int
     {
-        $registro = $this->registro(registro_id: $fc_cer_csd_id);
+        $registro = $this->registro(registro_id: $fc_key_csd_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener Cer CSD',data:  $registro);
         }
@@ -77,9 +77,9 @@ class fc_cer_csd extends modelo{
 
     private function init_campos_base(array $data): array
     {
-        $csd = (new fc_csd($this->link))->get_csd(fc_csd_id: $data["fc_csd_id"]);
+        $key_csd = (new fc_key_csd($this->link))->get_key_csd(fc_key_csd_id: $data["fc_key_csd_id"]);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener CSD',data:  $csd);
+            return $this->error->error(mensaje: 'Error al obtener cer_csd',data:  $key_csd);
         }
 
         $documento = (new doc_documento($this->link))->registro(registro_id: $data["doc_documento_id"]);
@@ -88,7 +88,7 @@ class fc_cer_csd extends modelo{
         }
 
         if(!isset($data['codigo'])){
-            $data['codigo'] =  $data['fc_csd_codigo'];
+            $data['codigo'] =  $data['fc_key_codigo'];
             $data['codigo'] .=  $documento['doc_documento_codigo'];
         }
 
@@ -119,7 +119,7 @@ class fc_cer_csd extends modelo{
             return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
         }
 
-        $keys = array('fc_csd_id');
+        $keys = array('fc_key_csd_id');
         $valida = $this->validacion->valida_ids(keys: $keys, registro: $data);
         if(errores::$error){
             return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);

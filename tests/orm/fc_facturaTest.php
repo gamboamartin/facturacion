@@ -40,11 +40,8 @@ class fc_facturaTest extends test {
         $_GET['session_id'] = '1';
 
 
-
         $modelo = new fc_factura($this->link);
         $modelo = new liberator($modelo);
-
-
 
 
         $del = (new base_test())->del_cat_sat_metodo_pago($this->link);
@@ -60,7 +57,15 @@ class fc_facturaTest extends test {
             exit;
         }
 
+
         $del = (new base_test())->del_org_empresa($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_com_producto($this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al eliminar',$del);
             print_r($error);

@@ -351,13 +351,6 @@ class fc_partida extends _base
 
         foreach ($r_fc_partida->registros as $indice => $partida) {
 
-            /*$link_elimina_partida = (new links_menu(link: $this->link, registro_id: $this->registro_id))->
-            link_con_id(accion: 'elimina_bd', link: $this->link, registro_id: $partida['fc_partida_id'], seccion: 'fc_partida');
-            if (errores::$error) {
-                $error = $this->error->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_partida);
-                print_r($error);
-                die('Error');
-            }*/
 
             $params = array();
             $params['seccion_retorno'] = 'fc_factura';

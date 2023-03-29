@@ -7,6 +7,7 @@ use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
 use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
+use gamboamartin\comercial\models\com_producto;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\errores\errores;
@@ -78,6 +79,16 @@ class base_test{
     public function alta_com_cliente(PDO $link): array|\stdClass
     {
         $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_cliente($link);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_com_producto(PDO $link, int $id): array|\stdClass
+    {
+        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_producto(link: $link, id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -337,9 +348,9 @@ class base_test{
         return $alta;
     }
 
-    public function alta_fc_partida(PDO $link, string $codigo = '1', float $cantidad = 1, string $descripcion = '1',
-                                    float $descuento = 0, int $fc_factura_id = 1, int $id = 1,
-                                    float $valor_unitario = 1): array|\stdClass
+    public function alta_fc_partida(PDO $link, string $codigo = '1', float $cantidad = 1, int $com_producto_id = 1,
+                                    string $descripcion = '1', float $descuento = 0, int $fc_factura_id = 1,
+                                    int $id = 1, float $valor_unitario = 1): array|\stdClass
     {
 
         $existe = (new fc_factura($link))->existe_by_id(registro_id: $fc_factura_id);
@@ -353,6 +364,17 @@ class base_test{
             }
         }
 
+        $existe = (new com_producto($link))->existe_by_id(registro_id: $com_producto_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_com_producto(link: $link,id: $com_producto_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar com_producto', $alta);
+            }
+        }
+
         $registro = array();
         $registro['id'] = $id;
         $registro['codigo'] = $codigo;
@@ -360,7 +382,7 @@ class base_test{
         $registro['cantidad'] = $cantidad;
         $registro['valor_unitario'] = $valor_unitario;
         $registro['fc_factura_id'] = $fc_factura_id;
-        $registro['com_producto_id'] = 1;
+        $registro['com_producto_id'] = $com_producto_id;
         $registro['codigo_bis'] = 1;
         $registro['descuento'] = $descuento;
 
@@ -519,6 +541,29 @@ class base_test{
         return $del;
     }
 
+    public function del_com_producto(PDO $link): array|\stdClass
+    {
+        $del = (new base_test())->del_fc_conf_retenido($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        $del = (new base_test())->del_fc_conf_traslado($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new \gamboamartin\comercial\test\base_test())->del_com_producto($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
+
+
     public function del_com_tipo_cambio(PDO $link): array|\stdClass
     {
 
@@ -542,8 +587,23 @@ class base_test{
 
     public function del_fc_cer_csd(PDO $link): array
     {
+        $del = (new base_test())->del_fc_cer_pem($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_cer_csd');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_cer_pem(PDO $link): array
+    {
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_cer_pem');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
@@ -634,8 +694,22 @@ class base_test{
 
     public function del_fc_key_csd(PDO $link): array
     {
+        $del = $this->del_fc_key_pem($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_key_csd');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_key_pem(PDO $link): array
+    {
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_key_pem');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
@@ -660,6 +734,10 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
         }
         $del = $this->del_fc_retenido($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        $del = $this->del_fc_cuenta_predial($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
@@ -694,6 +772,15 @@ class base_test{
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_conf_retenido');
         if(errores::$error){
             return (new errores())->error('Error al eliminar fc_conf_retenido', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_cuenta_predial(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_cuenta_predial');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar retenido', $del);
         }
         return $del;
     }
