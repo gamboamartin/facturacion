@@ -6,6 +6,7 @@ namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 
 use config\generales;
+use config\pac;
 use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
@@ -22,6 +23,7 @@ use gamboamartin\plugins\files;
 use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\xml_cfdi_4\cfdis;
 use gamboamartin\xml_cfdi_4\timbra;
+use gamboamartin\xml_cfdi_4\xml;
 use PDO;
 use stdClass;
 
@@ -289,6 +291,14 @@ class fc_factura extends modelo
         $comprobante['forma_pago'] = $factura['cat_sat_forma_pago_codigo'];
         $comprobante['descuento'] = $fc_factura_descuento;
         $comprobante['metodo_pago'] = $factura['cat_sat_metodo_pago_codigo'];
+
+        if(isset($factura['fc_csd_no_certificado'])){
+            if(trim($factura['fc_csd_no_certificado']) === ''){
+                $comprobante['no_certificado'] = $factura['fc_csd_no_certificado'];
+            }
+
+        }
+
         return $comprobante;
     }
 
@@ -526,7 +536,7 @@ class fc_factura extends modelo
         return $ruta_archivos_tmp;
     }
 
-    public function genera_xml(int $fc_factura_id): array|stdClass
+    public function genera_xml(int $fc_factura_id, string $tipo): array|stdClass
     {
         $factura = $this->get_factura(fc_factura_id: $fc_factura_id);
         if (errores::$error) {
@@ -540,12 +550,21 @@ class fc_factura extends modelo
         }
 
 
-
-        $ingreso = (new cfdis())->ingreso(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
-            emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al generar xml', data: $ingreso);
+        if($tipo === 'xml') {
+            $ingreso = (new cfdis())->ingreso(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
+                emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al generar xml', data: $ingreso);
+            }
         }
+        else{
+            $ingreso = (new cfdis())->ingreso_json(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
+                emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al generar xml', data: $ingreso);
+            }
+        }
+
 
         $ruta_archivos_tmp = $this->genera_ruta_archivo_tmp();
         if (errores::$error) {
@@ -1334,6 +1353,8 @@ class fc_factura extends modelo
 
     public function timbra_xml(int $fc_factura_id): array|stdClass
     {
+
+        $tipo = (new pac())->tipo;
         $timbrada = (new fc_cfdi_sellado($this->link))->existe(filtro: array('fc_factura.id' => $fc_factura_id));
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar si la factura esta timbrado', data: $timbrada);
@@ -1348,18 +1369,52 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
         }
 
-        $xml = $this->genera_xml(fc_factura_id: $fc_factura_id);
+        $xml = $this->genera_xml(fc_factura_id: $fc_factura_id, tipo: $tipo);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar XML', data: $xml);
         }
 
         $xml_contenido = file_get_contents($xml->doc_documento_ruta_absoluta);
 
-        $xml_timbrado = (new timbra())->timbra(contenido_xml: $xml_contenido);
-        if (errores::$error) {
+        $filtro_files['fc_csd.id'] = $fc_factura['fc_csd_id'];
 
+        $r_fc_key_pem = (new fc_key_pem(link: $this->link))->filtro_and(filtro: $filtro_files);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener key', data: $r_fc_key_pem);
+        }
+
+        $ruta_key_pem = '';
+        if((int)$r_fc_key_pem->n_registros === 1){
+            $ruta_key_pem = $r_fc_key_pem->registros[0]['doc_documento_ruta_absoluta'];
+        }
+
+        $r_fc_cer_pem = (new fc_cer_pem(link: $this->link))->filtro_and(filtro: $filtro_files);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener cer', data: $r_fc_cer_pem);
+        }
+        $ruta_cer_pem = '';
+        if((int)$r_fc_cer_pem->n_registros === 1){
+            $ruta_cer_pem = $r_fc_cer_pem->registros[0]['doc_documento_ruta_absoluta'];
+        }
+
+        $factura = $this->get_factura(fc_factura_id: $fc_factura_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
+        }
+
+
+        $data_factura = $this->data_factura(factura: $factura);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
+        }
+
+        $pac_prov = (new pac())->pac_prov;
+        $xml_timbrado = (new timbra())->timbra(contenido_xml: $xml_contenido, id_comprobante: '',
+            ruta_cer_pem: $ruta_cer_pem, ruta_key_pem: $ruta_key_pem, pac_prov: $pac_prov);
+        if (errores::$error) {
             return $this->error->error(mensaje: 'Error al timbrar XML', data: $xml_timbrado,params: array($fc_factura));
         }
+
 
         file_put_contents(filename: $xml->doc_documento_ruta_absoluta, data: $xml_timbrado->xml_sellado);
 

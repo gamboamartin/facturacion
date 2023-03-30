@@ -9,6 +9,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
+use config\pac;
 use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
@@ -482,7 +483,10 @@ class controlador_fc_factura extends system{
     }
 
     public function genera_xml(bool $header, bool $ws = false){
-        $factura = (new fc_factura(link: $this->link))->genera_xml(fc_factura_id: $this->registro_id);
+
+        $tipo = (new pac())->tipo;
+
+        $factura = (new fc_factura(link: $this->link))->genera_xml(fc_factura_id: $this->registro_id, tipo: $tipo);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar XML',data:  $factura, header: $header,ws:$ws);
         }
@@ -490,7 +494,13 @@ class controlador_fc_factura extends system{
         unlink($factura->file_xml_st);
         ob_clean();
         echo trim(file_get_contents($factura->doc_documento_ruta_absoluta));
-        header('Content-Type: text/xml');
+        if($tipo === 'json'){
+            header('Content-Type: application/json');
+        }
+        else{
+            header('Content-Type: text/xml');
+        }
+
         exit;
     }
 
