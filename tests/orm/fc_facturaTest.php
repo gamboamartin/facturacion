@@ -72,8 +72,6 @@ class fc_facturaTest extends test {
             exit;
         }
 
-
-
         $alta = (new base_test())->alta_fc_partida($this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar partida',$alta);
@@ -89,8 +87,6 @@ class fc_facturaTest extends test {
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(11,$resultado);
-
-
 
 
 

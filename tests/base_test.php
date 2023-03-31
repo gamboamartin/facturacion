@@ -235,6 +235,7 @@ class base_test{
         $registro['descripcion_select'] = 1;
         $registro['alias'] = 1;
         $registro['codigo_bis'] = 1;
+        $registro['no_certificado'] = 010101;
 
 
         $alta = (new fc_csd($link))->alta_registro($registro);

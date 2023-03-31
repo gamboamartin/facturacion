@@ -14,7 +14,8 @@ class fc_csd extends _modelo_parent {
         $columnas = array($tabla=>false,'org_sucursal'=>$tabla,'org_empresa'=>'org_sucursal',
             'dp_calle_pertenece'=>'org_sucursal','cat_sat_regimen_fiscal'=>'org_empresa',
             'dp_colonia_postal'=>'dp_calle_pertenece');
-        $campos_obligatorios = array('codigo','serie','org_sucursal_id','descripcion_select','alias','codigo_bis');
+        $campos_obligatorios = array('codigo','serie','org_sucursal_id','descripcion_select','alias','codigo_bis',
+            'no_certificado');
 
         $no_duplicados = array('serie','codigo','descripcion_select','alias','codigo_bis');
 
@@ -22,6 +23,7 @@ class fc_csd extends _modelo_parent {
         $campos_view['codigo'] = array('type' => 'inputs');
         $campos_view['descripcion'] = array('type' => 'inputs');
         $campos_view['serie'] = array('type' => 'inputs');
+        $campos_view['no_certificado'] = array('type' => 'inputs');
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas, campos_view: $campos_view, no_duplicados: $no_duplicados, tipo_campos: array());

@@ -553,6 +553,11 @@ class fc_factura extends modelo
         return $del;
     }
 
+    /**
+     * Obtiene el emisor de una factura
+     * @param array $factura Factura a integrar
+     * @return array
+     */
     private function emisor(array $factura): array
     {
 
