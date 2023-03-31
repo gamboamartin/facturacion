@@ -143,6 +143,7 @@ class fc_factura extends modelo
         $fc_factura_total = "ROUND(IFNULL($fc_factura_sub_total,0)+IFNULL($fc_factura_traslados,0)-IFNULL($fc_factura_retenciones,0),2)";
 
 
+        $fc_factura_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_factura_id = fc_factura.id)";
 
         $columnas_extra['fc_factura_sub_total_base'] = "IFNULL($fc_factura_sub_total_base,0)";
         $columnas_extra['fc_factura_descuento'] = "IFNULL($fc_factura_descuento,0)";
@@ -150,6 +151,7 @@ class fc_factura extends modelo
         $columnas_extra['fc_factura_traslados'] = "IFNULL($fc_factura_traslados,0)";
         $columnas_extra['fc_factura_retenciones'] = "IFNULL($fc_factura_retenciones,0)";
         $columnas_extra['fc_factura_total'] = "IFNULL($fc_factura_total,0)";
+        $columnas_extra['fc_factura_uuid'] = "$fc_factura_uuid";
 
 
 
@@ -1453,7 +1455,12 @@ class fc_factura extends modelo
 
         file_put_contents(filename: $xml->doc_documento_ruta_absoluta, data: $xml_timbrado->xml_sellado);
 
-        $alta_qr = $this->guarda_documento(directorio: "codigos_qr", extension: "jpg", contenido: $xml_timbrado->qr_code,
+        $qr_code = $xml_timbrado->qr_code;
+        if((new pac())->base_64_qr){
+            $qr_code = base64_decode($qr_code);
+        }
+
+        $alta_qr = $this->guarda_documento(directorio: "codigos_qr", extension: "jpg", contenido: $qr_code,
             fc_factura_id: $fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al guardar QR', data: $alta_qr);

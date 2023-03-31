@@ -504,6 +504,16 @@ class controlador_fc_factura extends system{
         exit;
     }
 
+    public function get_factura_pac(bool $header, bool $ws = false){
+        $fc_factura = $this->modelo->registro(registro_id: $this->registro_id);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener fc_factura', data:  $fc_factura);
+        }
+
+
+
+    }
+
     private function get_tipo_comprobante(): array|int
     {
         $valida = $this->valida_tipo_de_comprobante();
@@ -560,6 +570,7 @@ class controlador_fc_factura extends system{
         $columns["com_cliente_rfc"]["titulo"] = "Cte";
         $columns["fc_factura_fecha"]["titulo"] = "Fecha";
         $columns["fc_factura_total"]["titulo"] = "Total";
+        $columns["fc_factura_uuid"]["titulo"] = "UUID";
 
         $filtro = array("fc_factura.folio","org_empresa.rfc",
             "com_cliente.rfc",'fc_factura.fecha');
