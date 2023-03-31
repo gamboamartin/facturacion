@@ -86,15 +86,59 @@ class fc_factura extends modelo
         $fc_factura_descuento = "ROUND((SELECT SUM( $fc_partida_descuento ) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
         $fc_factura_sub_total = "($fc_factura_sub_total_base - $fc_factura_descuento)";
 
-        $fc_factura_traslados = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * IFNULL(cat_sat_factor.factor,0) ) FROM fc_traslado 
+        /*$fc_factura_traslados = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * IFNULL(cat_sat_factor.factor,0) ) FROM fc_traslado
                 LEFT JOIN fc_partida ON fc_partida.id = fc_traslado.fc_partida_id 
                 LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado.cat_sat_factor_id 
-                WHERE $fc_ligue_partida_factura ), 4),4)";
+                WHERE $fc_ligue_partida_factura ), 0),4)";*/
 
-        $fc_factura_retenciones = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * IFNULL(cat_sat_factor.factor,0) ) FROM fc_retenido 
+        $fc_partida_operacion = "IFNULL(fc_partida_operacion.cantidad,0) * IFNULL(fc_partida_operacion.valor_unitario,0) - IFNULL(fc_partida_operacion.descuento,0)";
+        $where_pc_partida_operacion = "fc_partida_operacion.fc_factura_id = fc_factura.id AND fc_partida_operacion.id = fc_partida.id";
+
+        $fc_factura_traslados = "(
+	SELECT
+		SUM((
+			SELECT
+				ROUND(SUM( $fc_partida_operacion ),4) 
+			FROM
+				fc_partida AS fc_partida_operacion LEFT JOIN fc_traslado ON fc_traslado.fc_partida_id = fc_partida_operacion.id
+				
+			WHERE
+				$where_pc_partida_operacion
+				) * cat_sat_factor.factor 
+		) 
+	FROM
+		fc_traslado
+		LEFT JOIN fc_partida ON fc_partida.id = fc_traslado.fc_partida_id
+		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado.cat_sat_factor_id 
+	WHERE
+		fc_partida.fc_factura_id = fc_factura.id 
+	)";
+
+        /*$fc_factura_retenciones = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * IFNULL(cat_sat_factor.factor,0) ) FROM fc_retenido
                 LEFT JOIN fc_partida ON fc_partida.id = fc_retenido.fc_partida_id 
                 LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido.cat_sat_factor_id 
-                WHERE $fc_ligue_partida_factura ),4),4)";
+                WHERE $fc_ligue_partida_factura ),0),4)";
+        */
+
+        $fc_factura_retenciones = "(
+	SELECT
+		SUM((
+			SELECT
+				ROUND(SUM( $fc_partida_operacion ),4) 
+			FROM
+				fc_partida AS fc_partida_operacion LEFT JOIN fc_retenido ON fc_retenido.fc_partida_id = fc_partida_operacion.id
+				
+			WHERE
+				$where_pc_partida_operacion
+				) * cat_sat_factor.factor 
+		) 
+	FROM
+		fc_retenido
+		LEFT JOIN fc_partida ON fc_partida.id = fc_retenido.fc_partida_id
+		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido.cat_sat_factor_id 
+	WHERE
+		fc_partida.fc_factura_id = fc_factura.id 
+	)";
 
         $fc_factura_total = "ROUND(IFNULL($fc_factura_sub_total,0)+IFNULL($fc_factura_traslados,0)-IFNULL($fc_factura_retenciones,0),2)";
 
@@ -280,6 +324,7 @@ class fc_factura extends modelo
         }
 
 
+
         $comprobante = array();
         $comprobante['lugar_expedicion'] = $factura['dp_cp_descripcion'];
         $comprobante['tipo_de_comprobante'] = $factura['cat_sat_tipo_de_comprobante_codigo'];
@@ -293,7 +338,7 @@ class fc_factura extends modelo
         $comprobante['metodo_pago'] = $factura['cat_sat_metodo_pago_codigo'];
 
         if(isset($factura['fc_csd_no_certificado'])){
-            if(trim($factura['fc_csd_no_certificado']) === ''){
+            if(trim($factura['fc_csd_no_certificado']) !== ''){
                 $comprobante['no_certificado'] = $factura['fc_csd_no_certificado'];
             }
 
@@ -543,7 +588,6 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
         }
 
-
         $data_factura = $this->data_factura(factura: $factura);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
@@ -661,20 +705,6 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener factura', data: $registro);
         }
 
-        $registro['fc_factura_sub_total'] = $this->get_factura_sub_total(fc_factura_id: $fc_factura_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener el subtotal de la factura', data: $registro);
-        }
-
-        $registro['fc_factura_descuento'] = $this->get_factura_descuento(fc_factura_id: $fc_factura_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener el descuento de la factura', data: $registro);
-        }
-
-        $registro['fc_factura_total'] = $this->get_factura_total(fc_factura_id: $fc_factura_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener el total de la factura', data: $registro);
-        }
 
         $conceptos = array();
 

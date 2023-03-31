@@ -123,9 +123,16 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link, codigo: '999', id: 999);
+        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link, codigo: '1', id: 1);
         if(errores::$error){
             $error = (new errores())->error('Error al dar de alta factura',$alta_fc_factura);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, fc_factura_id: 1);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
             exit;
         }
@@ -138,9 +145,10 @@ class fc_facturaTest extends test {
         }
 
         $resultado = $modelo->comprobante(factura: $factura);
+
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals(10,count($resultado));
+        $this->assertEquals(11,count($resultado));
         errores::$error = false;
     }
 
