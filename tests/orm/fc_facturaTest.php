@@ -789,6 +789,59 @@ class fc_facturaTest extends test {
         errores::$error = false;
     }
 
+    public function test_ultimo_folio(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_factura($this->link);
+        //$modelo = new liberator($modelo);
+
+        $del = (new base_test())->del_cat_sat_moneda($this->link,);
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_cat_sat_metodo_pago($this->link,);
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_org_empresa($this->link,);
+        if (errores::$error) {
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, fc_factura_folio: '1-1');
+        if(errores::$error){
+            $error = (new errores())->error('error al insertar', $alta);
+            print_r($error);
+            exit;
+        }
+
+        $fc_csd_id = 1;
+
+        $resultado = $modelo->ultimo_folio($fc_csd_id);
+
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('1-000002', $resultado);
+        errores::$error = false;
+
+
+    }
+
 
 }
 

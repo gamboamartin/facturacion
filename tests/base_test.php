@@ -248,7 +248,8 @@ class base_test{
 
     public function alta_fc_factura(PDO $link, int $cat_sat_forma_pago_id = 1, int $cat_sat_metodo_pago_id = 2,
                                     int $cat_sat_moneda_id = 999, string $codigo = '1', int $com_sucursal_id = 1,
-                                    int $com_tipo_cambio_id = 1, int $fc_csd_id = 1, int $id = 1): array|\stdClass
+                                    int $com_tipo_cambio_id = 1, int $fc_csd_id = 1, string $folio = 'A-000001',
+                                    int $id = 1): array|\stdClass
     {
 
 
@@ -330,7 +331,7 @@ class base_test{
         $registro['fc_csd_id'] = $fc_csd_id;
         $registro['com_sucursal_id'] = $com_sucursal_id;
         $registro['serie'] = 1;
-        $registro['folio'] = 1;
+        $registro['folio'] = $folio;
         $registro['exportacion'] = 1;
         $registro['cat_sat_forma_pago_id'] = $cat_sat_forma_pago_id;
         $registro['cat_sat_metodo_pago_id'] = $cat_sat_metodo_pago_id;
@@ -350,7 +351,8 @@ class base_test{
     }
 
     public function alta_fc_partida(PDO $link, string $codigo = '1', float $cantidad = 1, int $com_producto_id = 1,
-                                    string $descripcion = '1', float $descuento = 0, int $fc_factura_id = 1,
+                                    string $descripcion = '1', float $descuento = 0,
+                                    string $fc_factura_folio = 'A-000001', int $fc_factura_id = 1,
                                     int $id = 1, float $valor_unitario = 1): array|\stdClass
     {
 
@@ -359,7 +361,7 @@ class base_test{
             return (new errores())->error('Error al validar si existe', $existe);
         }
         if(!$existe) {
-            $alta = $this->alta_fc_factura($link);
+            $alta = $this->alta_fc_factura(link: $link, folio: $fc_factura_folio);
             if (errores::$error) {
                 return (new errores())->error('Error al insertar factura', $alta);
             }

@@ -1101,6 +1101,14 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
         }
 
+        if(!isset($registro['folio'])){
+            $folio = $this->ultimo_folio(fc_csd_id: $registro['fc_csd_id']);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener csd', data: $folio);
+            }
+            $registro['folio'] = $folio;
+        }
+
 
         $registro = $this->defaults_alta_bd(registro: $registro, registro_csd: $registro_csd);
         if (errores::$error) {
@@ -1574,6 +1582,51 @@ class fc_factura extends modelo
         }
 
         return $total;
+
+    }
+
+    final public function ultimo_folio(int $fc_csd_id){
+        $filtro['fc_csd.id'] = $fc_csd_id;
+        $r_fc_factura = $this->filtro_and(filtro: $filtro, limit: 1,order: array('fc_factura.folio'=>'DESC'));
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $r_fc_factura);
+        }
+
+        $fc_csd = (new fc_csd(link: $this->link))->registro(registro_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener csd', data: $fc_csd);
+        }
+
+        $fc_csd_serie = $fc_csd['fc_csd_serie'];
+
+        $number_folio = 1;
+        if((int)$r_fc_factura->n_registros > 0){
+            $fc_factura = $r_fc_factura->registros[0];
+
+            $fc_factura_folio = $fc_factura['fc_factura_folio'];
+            $data_explode = $fc_csd_serie.'-';
+            $fc_factura_folio_explode = explode($data_explode, $fc_factura_folio);
+            if(isset($fc_factura_folio_explode[1])){
+                if(is_numeric($fc_factura_folio_explode[1])){
+                    $number_folio = (int)$fc_factura_folio_explode[1] + 1;
+                }
+            }
+        }
+
+        $long_nf = strlen($number_folio);
+
+        $n_ceros = 6;
+
+        $i = $long_nf;
+        $folio_str = '';
+        while($i<$n_ceros){
+            $folio_str.='0';
+            $i++;
+        }
+        $folio_str.=$number_folio;
+
+
+        return $fc_csd_serie.'-'.$folio_str;
 
     }
 }
