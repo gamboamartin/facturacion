@@ -55,6 +55,7 @@ class controlador_fc_factura extends system{
 
     public string $link_factura_cancela = '';
     public string $link_factura_genera_xml = '';
+    public string $link_factura_timbra_xml = '';
     public int $fc_factura_id = -1;
     public int $fc_partida_id = -1;
     public stdClass $partidas;
@@ -606,6 +607,12 @@ class controlador_fc_factura extends system{
             return $this->errores->error(mensaje: 'Error al obtener link genera_xml',data:  $link);
         }
         $this->link_factura_genera_xml = $link;
+
+        $link = $this->obj_link->get_link($this->seccion,"timbra_xml");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener link genera_xml',data:  $link);
+        }
+        $this->link_factura_timbra_xml = $link;
 
         $this->link_com_producto = $this->controlador_com_producto->link_com_producto;
 
