@@ -1095,7 +1095,7 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
         }
 
-        
+
         if(!isset($registro['folio'])){
             $folio = $this->ultimo_folio(fc_csd_id: $registro['fc_csd_id']);
             if (errores::$error) {
