@@ -656,7 +656,7 @@ class controlador_fc_factura extends system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "folio";
-        $propiedades = array("place_holder" => "Folio");
+        $propiedades = array("place_holder" => "Folio", 'required'=>false);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "exportacion";

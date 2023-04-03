@@ -1095,12 +1095,7 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
         }
 
-        $keys = array('serie', 'folio');
-        $valida = $this->validacion->valida_existencia_keys(keys: $keys, registro: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
-        }
-
+        
         if(!isset($registro['folio'])){
             $folio = $this->ultimo_folio(fc_csd_id: $registro['fc_csd_id']);
             if (errores::$error) {
@@ -1109,11 +1104,17 @@ class fc_factura extends modelo
             $registro['folio'] = $folio;
         }
 
+        $keys = array('serie', 'folio');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys, registro: $registro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
+        }
 
         $registro = $this->defaults_alta_bd(registro: $registro, registro_csd: $registro_csd);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al inicializar registro', data: $registro);
         }
+
 
         return $registro;
     }
@@ -1591,6 +1592,7 @@ class fc_factura extends modelo
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener factura', data: $r_fc_factura);
         }
+
 
         $fc_csd = (new fc_csd(link: $this->link))->registro(registro_id: $fc_csd_id);
         if(errores::$error){
