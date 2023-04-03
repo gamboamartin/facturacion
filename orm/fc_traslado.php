@@ -89,8 +89,9 @@ class fc_traslado extends _base {
      * Obtiene los impuestos trasladados de una partida
      * @param int $fc_partida_id Partida
      * @return array|stdClass|int
+     * @version 6.18.0
      */
-    public function get_traslados(int $fc_partida_id): array|stdClass|int
+    final public function get_traslados(int $fc_partida_id): array|stdClass|int
     {
         $filtro['fc_partida.id']  = $fc_partida_id;
         $registro = $this->filtro_and(filtro: $filtro);

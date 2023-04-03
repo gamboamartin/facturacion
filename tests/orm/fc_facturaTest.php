@@ -144,7 +144,7 @@ class fc_facturaTest extends test {
 
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals(11,count($resultado));
+        $this->assertEquals(12,count($resultado));
         errores::$error = false;
     }
 

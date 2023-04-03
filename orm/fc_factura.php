@@ -338,6 +338,7 @@ class fc_factura extends modelo
         $comprobante['forma_pago'] = $factura['cat_sat_forma_pago_codigo'];
         $comprobante['descuento'] = $fc_factura_descuento;
         $comprobante['metodo_pago'] = $factura['cat_sat_metodo_pago_codigo'];
+        $comprobante['fecha'] = $factura['fc_factura_fecha'];
 
         if(isset($factura['fc_csd_no_certificado'])){
             if(trim($factura['fc_csd_no_certificado']) !== ''){
