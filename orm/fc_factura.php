@@ -1104,6 +1104,12 @@ class fc_factura extends modelo
             $registro['folio'] = $folio;
         }
 
+        if(!isset($registro['serie'])){
+            $serie = $registro_csd->fc_csd_serie;
+
+            $registro['serie'] = $serie;
+        }
+
         $keys = array('serie', 'folio');
         $valida = $this->validacion->valida_existencia_keys(keys: $keys, registro: $registro);
         if (errores::$error) {

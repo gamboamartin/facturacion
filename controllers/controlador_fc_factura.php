@@ -664,7 +664,7 @@ class controlador_fc_factura extends system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "serie";
-        $propiedades = array("place_holder" => "Serie");
+        $propiedades = array("place_holder" => "Serie", 'required'=>false,'disabled'=>true);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "subtotal";
