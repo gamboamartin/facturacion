@@ -262,6 +262,71 @@ class fc_partida extends _base
         return $r_elimina_bd;
     }
 
+    private function hijo_retenido(array $hijo): array
+    {
+        $hijo['fc_retenido']['filtros']['fc_partida.id'] = 'fc_partida_id';
+        $hijo['fc_retenido']['filtros_con_valor'] = array();
+        $hijo['fc_retenido']['nombre_estructura'] = 'fc_retenido';
+        $hijo['fc_retenido']['namespace_model'] = 'gamboamartin\\facturacion\\models';
+        return $hijo;
+    }
+
+    private function hijo_traslado(array $hijo): array
+    {
+        $hijo['fc_traslado']['filtros']['fc_partida.id'] = 'fc_partida_id';
+        $hijo['fc_traslado']['filtros_con_valor'] = array();
+        $hijo['fc_traslado']['nombre_estructura'] = 'fc_traslado';
+        $hijo['fc_traslado']['namespace_model'] = 'gamboamartin\\facturacion\\models';
+        return $hijo;
+    }
+
+    private function hijos_partida(){
+        $hijo = array();
+
+        $hijo = $this->hijo_traslado(hijo: $hijo);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al integrar hijo', data: $hijo);
+        }
+        $hijo = $this->hijo_retenido(hijo: $hijo);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al integrar hijo', data: $hijo);
+        }
+        return $hijo;
+    }
+
+    private function integra_button_partida(int $fc_factura_id, html_controler $html, int $indice,
+                                            array $partida, stdClass $r_fc_partida){
+        $params = $this->params_button_partida(fc_factura_id: $fc_factura_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener params', data: $params);
+        }
+        $link_elimina_partida = $html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
+            registro_id: $partida['fc_partida_id'], seccion: 'fc_partida', style: 'danger',icon: 'bi bi-trash',
+            muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_partida);
+        }
+        $r_fc_partida->registros[$indice]['elimina_bd'] = $link_elimina_partida;
+        return $r_fc_partida;
+    }
+
+    private function integra_buttons_partida(int $fc_factura_id, array $filtro, array $hijo,
+                                             html_controler $html){
+        $r_fc_partida = $this->filtro_and(filtro: $filtro, hijo: $hijo);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_partida);
+        }
+
+        foreach ($r_fc_partida->registros as $indice => $partida) {
+            $r_fc_partida = $this->integra_button_partida(fc_factura_id: $fc_factura_id,html:  $html, indice: $indice,
+                partida:  $partida,r_fc_partida:  $r_fc_partida);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al generar link elimina_bd para partida', data: $r_fc_partida);
+            }
+        }
+        return $r_fc_partida;
+    }
+
     /**
      * Por mover a base revbios si existe algo asi
      * @param array $registro
@@ -325,49 +390,33 @@ class fc_partida extends _base
         return $r_modifica_bd;
     }
 
+    private function params_button_partida(int $fc_factura_id): array
+    {
+        $params = array();
+        $params['seccion_retorno'] = 'fc_factura';
+        $params['accion_retorno'] = 'modifica';
+        $params['id_retorno'] = $fc_factura_id;
+        return $params;
+    }
+
     public function partidas(int $fc_factura_id, html_controler $html, $hijo = array()): array|stdClass
     {
         if ($fc_factura_id <= 0) {
             return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
         }
+
         $filtro['fc_factura.id'] = $fc_factura_id;
-
-        $hijo = array();
-        $hijo['fc_traslado']['filtros']['fc_partida.id'] = 'fc_partida_id';
-        $hijo['fc_traslado']['filtros_con_valor'] = array();
-        $hijo['fc_traslado']['nombre_estructura'] = 'fc_traslado';
-        $hijo['fc_traslado']['namespace_model'] = 'gamboamartin\\facturacion\\models';
-
-        $hijo['fc_retenido']['filtros']['fc_partida.id'] = 'fc_partida_id';
-        $hijo['fc_retenido']['filtros_con_valor'] = array();
-        $hijo['fc_retenido']['nombre_estructura'] = 'fc_retenido';
-        $hijo['fc_retenido']['namespace_model'] = 'gamboamartin\\facturacion\\models';
-
-
-        $r_fc_partida = $this->filtro_and(filtro: $filtro, hijo: $hijo);
+        $hijo = $this->hijos_partida();
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_partida);
+            return $this->error->error(mensaje: 'Error al integrar hijo', data: $hijo);
         }
 
-        foreach ($r_fc_partida->registros as $indice => $partida) {
-
-
-            $params = array();
-            $params['seccion_retorno'] = 'fc_factura';
-            $params['accion_retorno'] = 'modifica';
-            $params['id_retorno'] = $fc_factura_id;
-            $link_elimina_partida = $html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
-                registro_id: $partida['fc_partida_id'], seccion: 'fc_partida', style: 'danger',icon: 'bi bi-trash',
-                muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
-            if (errores::$error) {
-                $error = $this->error->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_partida);
-                print_r($error);
-                die('Error');
-            }
-
-
-            $r_fc_partida->registros[$indice]['elimina_bd'] = $link_elimina_partida;
+        $r_fc_partida = $this->integra_buttons_partida(fc_factura_id: $fc_factura_id,filtro:  $filtro,
+            hijo:  $hijo,html:  $html);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar link elimina_bd para partida', data: $r_fc_partida);
         }
+
         return $r_fc_partida;
     }
 

@@ -30,7 +30,7 @@
                         <?php echo $controlador->inputs->cat_sat_uso_cfdi_id; ?>
                         <?php echo $controlador->inputs->observaciones; ?>
                         <?php include (new views())->ruta_templates.'botons/submit/modifica_bd.php';?>
-                        
+
                         <div class="control-group btn-modifica">
                             <div class="controls">
                                 <a href="<?php echo $controlador->link_factura_timbra_xml;?>" class="btn btn-success" >Timbra XML</a><br>

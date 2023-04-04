@@ -736,9 +736,10 @@ class controlador_fc_factura extends system{
         $propiedades = array("id_selected" => $this->row_upd->cat_sat_uso_cfdi_id);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
+
         $identificador = "cat_sat_tipo_de_comprobante_id";
         $propiedades = array("id_selected" => $this->row_upd->cat_sat_tipo_de_comprobante_id,
-            "filtro" => array('cat_sat_tipo_de_comprobante.id' => $this->row_upd->cat_sat_uso_cfdi_id));
+            "filtro" => array('cat_sat_tipo_de_comprobante.id' => $this->row_upd->cat_sat_tipo_de_comprobante_id));
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $sub_total = (new fc_factura($this->link))->get_factura_sub_total(fc_factura_id: $this->registro_id);
