@@ -572,9 +572,10 @@ class controlador_fc_factura extends system{
         $columns["fc_factura_fecha"]["titulo"] = "Fecha";
         $columns["fc_factura_total"]["titulo"] = "Total";
         $columns["fc_factura_uuid"]["titulo"] = "UUID";
+        $columns["fc_factura_etapa"]["titulo"] = "Estatus";
 
         $filtro = array("fc_factura.folio","org_empresa.rfc",
-            "com_cliente.rfc",'fc_factura.fecha');
+            "com_cliente.rfc",'fc_factura.fecha','fc_factura_etapa');
 
         $datatables = new stdClass();
         $datatables->columns = $columns;

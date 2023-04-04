@@ -74,25 +74,24 @@ class fc_factura extends modelo
 
         $fc_partida_sub_total_base = "ROUND( $fc_partida_cantidad * $fc_partida_valor_unitario, 4 ) ";
 
-        $fc_partida_subtotal = "ROUND($fc_partida_sub_total_base-$fc_partida_descuento,4)";
 
         $fc_ligue_partida_factura = " fc_partida.fc_factura_id = fc_factura.id ";
-
-        $fc_partida_subtotal_sum = "SELECT SUM(ROUND(IFNULL($fc_partida_subtotal,0),4)) FROM fc_partida WHERE $fc_ligue_partida_factura";
-
 
 
         $fc_factura_sub_total_base = "ROUND((SELECT SUM( $fc_partida_sub_total_base) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
         $fc_factura_descuento = "ROUND((SELECT SUM( $fc_partida_descuento ) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
         $fc_factura_sub_total = "($fc_factura_sub_total_base - $fc_factura_descuento)";
 
-        /*$fc_factura_traslados = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * IFNULL(cat_sat_factor.factor,0) ) FROM fc_traslado
-                LEFT JOIN fc_partida ON fc_partida.id = fc_traslado.fc_partida_id 
-                LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado.cat_sat_factor_id 
-                WHERE $fc_ligue_partida_factura ), 0),4)";*/
 
         $fc_partida_operacion = "IFNULL(fc_partida_operacion.cantidad,0) * IFNULL(fc_partida_operacion.valor_unitario,0) - IFNULL(fc_partida_operacion.descuento,0)";
         $where_pc_partida_operacion = "fc_partida_operacion.fc_factura_id = fc_factura.id AND fc_partida_operacion.id = fc_partida.id";
+
+        $from_impuesto = $this->from_impuesto(tipo_impuesto: 'fc_traslado');
+        if(errores::$error){
+            $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
+            print_r($error);
+            exit;
+        }
 
         $fc_factura_traslados = "(
 	SELECT
@@ -100,8 +99,7 @@ class fc_factura extends modelo
 			SELECT
 				ROUND(SUM( $fc_partida_operacion ),4) 
 			FROM
-				fc_partida AS fc_partida_operacion LEFT JOIN fc_traslado ON fc_traslado.fc_partida_id = fc_partida_operacion.id
-				
+				$from_impuesto
 			WHERE
 				$where_pc_partida_operacion
 				) * cat_sat_factor.factor 
@@ -114,11 +112,13 @@ class fc_factura extends modelo
 		fc_partida.fc_factura_id = fc_factura.id 
 	)";
 
-        /*$fc_factura_retenciones = "ROUND( IFNULL((SELECT SUM(($fc_partida_subtotal_sum) * IFNULL(cat_sat_factor.factor,0) ) FROM fc_retenido
-                LEFT JOIN fc_partida ON fc_partida.id = fc_retenido.fc_partida_id 
-                LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido.cat_sat_factor_id 
-                WHERE $fc_ligue_partida_factura ),0),4)";
-        */
+        $from_impuesto = $this->from_impuesto(tipo_impuesto: 'fc_retenido');
+        if(errores::$error){
+            $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
+            print_r($error);
+            exit;
+        }
+
 
         $fc_factura_retenciones = "(
 	SELECT
@@ -126,8 +126,7 @@ class fc_factura extends modelo
 			SELECT
 				ROUND(SUM( $fc_partida_operacion ),4) 
 			FROM
-				fc_partida AS fc_partida_operacion LEFT JOIN fc_retenido ON fc_retenido.fc_partida_id = fc_partida_operacion.id
-				
+				$from_impuesto
 			WHERE
 				$where_pc_partida_operacion
 				) * cat_sat_factor.factor 
@@ -145,6 +144,11 @@ class fc_factura extends modelo
 
         $fc_factura_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_factura_id = fc_factura.id)";
 
+        $fc_factura_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa 
+            LEFT JOIN pr_etapa_proceso ON pr_etapa_proceso.pr_etapa_id = pr_etapa.id 
+            LEFT JOIN fc_factura_etapa ON fc_factura_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
+            WHERE fc_factura_etapa.fc_factura_id = fc_factura.id ORDER BY fc_factura_etapa.id DESC LIMIT 1)";
+
         $columnas_extra['fc_factura_sub_total_base'] = "IFNULL($fc_factura_sub_total_base,0)";
         $columnas_extra['fc_factura_descuento'] = "IFNULL($fc_factura_descuento,0)";
         $columnas_extra['fc_factura_sub_total'] = "IFNULL($fc_factura_sub_total,0)";
@@ -152,6 +156,7 @@ class fc_factura extends modelo
         $columnas_extra['fc_factura_retenciones'] = "IFNULL($fc_factura_retenciones,0)";
         $columnas_extra['fc_factura_total'] = "IFNULL($fc_factura_total,0)";
         $columnas_extra['fc_factura_uuid'] = "$fc_factura_uuid";
+        $columnas_extra['fc_factura_etapa'] = "$fc_factura_etapa";
 
 
 
@@ -569,6 +574,11 @@ class fc_factura extends modelo
         $emisor['nombre'] = $factura['org_empresa_razon_social'];
         $emisor['regimen_fiscal'] = $factura['cat_sat_regimen_fiscal_codigo'];
         return $emisor;
+    }
+
+    private function from_impuesto(string $tipo_impuesto): string
+    {
+        return "fc_partida AS fc_partida_operacion LEFT JOIN $tipo_impuesto ON $tipo_impuesto.fc_partida_id = fc_partida_operacion.id";
     }
 
 
