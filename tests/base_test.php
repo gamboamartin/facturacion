@@ -679,6 +679,15 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
         }
 
+        $del = $this->del_fc_relacion($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        $del = $this->del_fc_factura_relacionada($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_factura');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
@@ -728,6 +737,15 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_factura_relacionada(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_factura_relacionada');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
 
     public function del_fc_partida(PDO $link): array
     {
@@ -746,6 +764,15 @@ class base_test{
         }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_partida');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_relacion(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_relacion');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }

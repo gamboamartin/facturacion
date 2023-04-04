@@ -1,21 +1,21 @@
 <?php
 namespace gamboamartin\facturacion\html;
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\models\fc_relacion;
+use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\system\html_controler;
 use PDO;
 
-class fc_relacion_html extends html_controler {
+class fc_factura_relacionada_html extends html_controler {
 
-    public function select_fc_relacion_id(int $cols, bool $con_registros, int $id_selected, PDO $link,
+    public function select_fc_factura_relacionada_id(int $cols, bool $con_registros, int $id_selected, PDO $link,
                                          array $columns_ds = array('fc_factura_descripcion_select'),
                                          bool $disabled = false, array $filtro = array(),
                                          array $registros = array()): array|string
     {
-        $modelo = new fc_relacion(link: $link);
+        $modelo = new fc_factura_relacionada(link: $link);
 
         $select = $this->select_catalogo(cols: $cols, con_registros: $con_registros, id_selected: $id_selected,
-            modelo: $modelo, columns_ds: $columns_ds, disabled: $disabled, filtro: $filtro, label: 'Relacion',
+            modelo: $modelo, columns_ds: $columns_ds, disabled: $disabled, filtro: $filtro, label: 'Factura Relacionada',
             registros: $registros, required: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select', data: $select);

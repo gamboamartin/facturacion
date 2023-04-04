@@ -155,7 +155,7 @@ class fc_factura extends modelo
         $columnas_extra['fc_factura_traslados'] = "IFNULL($fc_factura_traslados,0)";
         $columnas_extra['fc_factura_retenciones'] = "IFNULL($fc_factura_retenciones,0)";
         $columnas_extra['fc_factura_total'] = "IFNULL($fc_factura_total,0)";
-        $columnas_extra['fc_factura_uuid'] = "$fc_factura_uuid";
+        $columnas_extra['fc_factura_uuid'] = "IFNULL($fc_factura_uuid,'SIN UUID')";
         $columnas_extra['fc_factura_etapa'] = "$fc_factura_etapa";
 
 
