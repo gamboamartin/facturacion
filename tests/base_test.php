@@ -679,11 +679,13 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
         }
 
-        $del = $this->del_fc_relacion($link);
+
+        $del = $this->del_fc_factura_relacionada($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
-        $del = $this->del_fc_factura_relacionada($link);
+
+        $del = $this->del_fc_relacion($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }

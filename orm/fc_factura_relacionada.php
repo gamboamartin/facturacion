@@ -18,6 +18,10 @@ class fc_factura_relacionada extends _modelo_parent_sin_codigo
 
         $columnas_extra = array();
 
+        $fc_factura_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') 
+            FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_factura_id = fc_factura.id)";
+        $columnas_extra['fc_factura_uuid'] = "IFNULL($fc_factura_uuid,'SIN UUID')";
+
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas,  columnas_extra: $columnas_extra);

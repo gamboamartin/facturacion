@@ -51,5 +51,41 @@ class fc_relacion extends _modelo_parent_sin_codigo
         return $r_alta_bd;
     }
 
+    final public function get_relaciones(int $fc_factura_id){
+        $filtro = array();
+        $filtro['fc_factura.id'] = $fc_factura_id;
+
+        $r_fc_relacion = $this->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_relacion);
+        }
+        $fc_relaciones = $r_fc_relacion->registros;
+
+        $relacionados = array();
+        foreach ($fc_relaciones as $fc_relacion){
+            $filtro = array();
+            $filtro['fc_relacion.id'] = $fc_relacion['fc_relacion_id'];
+            $cat_sat_tipo_relacion_codigo = $fc_relacion['cat_sat_tipo_relacion_codigo'];
+            $relacionados[$cat_sat_tipo_relacion_codigo] = array();
+            $r_fc_factura_relacionada = (new fc_factura_relacionada(link: $this->link))->filtro_and(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener r_fc_factura_relacionada', data: $r_fc_factura_relacionada);
+            }
+
+            $fc_facturas_relacionadas = $r_fc_factura_relacionada->registros;
+            foreach ($fc_facturas_relacionadas as $fc_factura_relacionada){
+                $keys = array('fc_factura_uuid');
+                $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro: $fc_factura_relacionada);
+                if(errores::$error){
+                    return $this->error->error(mensaje: 'Error al validar fc_factura_relacionada', data: $valida);
+                }
+                $relacionados[$cat_sat_tipo_relacion_codigo][] = $fc_factura_relacionada['fc_factura_uuid'];
+            }
+
+        }
+        return $relacionados;
+
+    }
+
 
 }

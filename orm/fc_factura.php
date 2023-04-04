@@ -386,6 +386,7 @@ class fc_factura extends modelo
         $data->receptor = $receptor;
         $data->conceptos = $conceptos;
         $data->impuestos = $impuestos;
+        $data->relacionados = $factura['relacionados'];
         return $data;
     }
 
@@ -614,14 +615,16 @@ class fc_factura extends modelo
 
         if($tipo === 'xml') {
             $ingreso = (new cfdis())->ingreso(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
-                emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor);
+                emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor,
+                relacionados: $data_factura->relacionados);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al generar xml', data: $ingreso);
             }
         }
         else{
             $ingreso = (new cfdis())->ingreso_json(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
-                emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor);
+                emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor,
+                relacionados: $data_factura->relacionados);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al generar xml', data: $ingreso);
             }
@@ -723,6 +726,11 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener factura', data: $registro);
         }
 
+        $relacionados = (new fc_relacion(link: $this->link))->get_relaciones(fc_factura_id: $fc_factura_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relacionados);
+        }
+
 
         $conceptos = array();
 
@@ -742,6 +750,8 @@ class fc_factura extends modelo
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida', data: $retenidos);
             }
+
+
 
 
             $registro['partidas'][$key]['traslados'] = $traslados->registros;
@@ -835,6 +845,7 @@ class fc_factura extends modelo
         $registro['conceptos'] = $conceptos;
         $registro['total_impuestos_trasladados'] = number_format($total_impuestos_trasladados, 2);
         $registro['total_impuestos_retenidos'] = number_format($total_impuestos_retenidos, 2);
+        $registro['relacionados'] = $relacionados;
 
         return $registro;
     }
@@ -1437,7 +1448,10 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al generar XML', data: $xml);
         }
 
+
+
         $xml_contenido = file_get_contents($xml->doc_documento_ruta_absoluta);
+
 
         $filtro_files['fc_csd.id'] = $fc_factura['fc_csd_id'];
 
@@ -1470,6 +1484,7 @@ class fc_factura extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
         }
+
 
         $pac_prov = (new pac())->pac_prov;
         $xml_timbrado = (new timbra())->timbra(contenido_xml: $xml_contenido, id_comprobante: '',
