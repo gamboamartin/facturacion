@@ -12,6 +12,8 @@ use base\controller\controler;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_relacion_html;
+use gamboamartin\facturacion\models\fc_conf_etapa_rel;
+use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\system\_ctl_base;
 use gamboamartin\system\links_menu;
@@ -60,10 +62,30 @@ class controlador_fc_relacion extends _ctl_base{
             die('Error');
         }
 
-        $filtro = array();
+        $fc_configuraciones_etapa_rel = (new fc_conf_etapa_rel(link: $this->link))->registros_activos();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al obtener fc_conf_etapa_rel', data: $fc_configuraciones_etapa_rel);
+            print_r($error);
+            die('Error');
+        }
+
+        $in = array();
+        $in['llave'] = 'fc_factura_etapa';
+        foreach ($fc_configuraciones_etapa_rel as $fc_configuracion_etapa_rel){
+            $in['values'][] = $fc_configuracion_etapa_rel['pr_etapa_descripcion'];
+        }
+
+        $r_fc_factura = (new fc_factura(link: $this->link))->filtro_and(in: $in);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener facturas', data: $r_fc_factura);
+            print_r($error);
+            die('Error');
+        }
+
+        $facturas = $r_fc_factura->registros;
 
         $fc_factura_id = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols: 12,
-            con_registros: true, id_selected: -1, link: $this->link, filtro: $filtro);
+            con_registros: true, id_selected: -1, link: $this->link, registros: $facturas);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al generar input', data: $fc_factura_id);
             print_r($error);
