@@ -69,6 +69,11 @@ class controlador_fc_relacion extends _ctl_base{
             die('Error');
         }
 
+        $fc_factura_id_get = -1;
+        if(isset($_GET['fc_factura_id'])){
+            $fc_factura_id_get = $_GET['fc_factura_id'];
+        }
+
 
         $facturas = (new fc_factura(link: $this->link))->registros_activos();
         if (errores::$error) {
@@ -76,6 +81,8 @@ class controlador_fc_relacion extends _ctl_base{
             print_r($error);
             die('Error');
         }
+
+
 
         foreach ($facturas as $indice=>$factura){
             $aplica_relacion = false;
@@ -88,6 +95,9 @@ class controlador_fc_relacion extends _ctl_base{
             if(!$aplica_relacion){
                 unset($facturas[$indice]);
             }
+            if((int)$factura['fc_factura_id'] !== (int)$fc_factura_id_get && $fc_factura_id_get >0){
+                unset($facturas[$indice]);
+            }
         }
 
         $con_registros = true;
@@ -96,8 +106,9 @@ class controlador_fc_relacion extends _ctl_base{
         }
 
 
+
         $fc_factura_id = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols: 12,
-            con_registros: $con_registros, id_selected: -1, link: $this->link, registros: $facturas);
+            con_registros: $con_registros, id_selected: $fc_factura_id_get, link: $this->link, registros: $facturas);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al generar input', data: $fc_factura_id);
             print_r($error);
@@ -188,6 +199,8 @@ class controlador_fc_relacion extends _ctl_base{
         if(count($facturas) === 0){
             $con_registros = false;
         }
+
+
 
 
         $fc_factura_id = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols: 12,
