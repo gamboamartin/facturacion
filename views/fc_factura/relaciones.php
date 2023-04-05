@@ -63,6 +63,7 @@
                             <tr>
                                 <th>Cod Relacion: <?php echo $fc_relacion['cat_sat_tipo_relacion_codigo'] ?></th>
                                 <th>Relacion: <?php echo $fc_relacion['cat_sat_tipo_relacion_descripcion'] ?></th>
+                                <th><?php echo $fc_relacion['elimina_bd'] ?></th>
                             </tr>
                             </thead>
                             <tbody>

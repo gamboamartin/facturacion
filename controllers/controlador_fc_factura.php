@@ -1719,6 +1719,20 @@ class controlador_fc_factura extends system{
 
                 }
 
+            $params = $this->params_button_partida(fc_factura_id: $this->registro_id);
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al generar params', data: $params);
+            }
+
+            $link_elimina_rel = $this->html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
+                registro_id: $relacion['fc_relacion_id'],
+                seccion: 'fc_relacion', style: 'danger',icon: 'bi bi-trash',
+                muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_rel);
+            }
+            $relaciones[$indice]['elimina_bd'] = $link_elimina_rel;
+
 
         }
 
@@ -1727,7 +1741,7 @@ class controlador_fc_factura extends system{
 
         $button_fc_factura_modifica =  $this->html->button_href(accion: 'modifica', etiqueta: 'Ir a Factura',
             registro_id: $this->registro_id,
-            seccion: 'fc_factura', style: 'warning', params: $params);
+            seccion: 'fc_factura', style: 'warning', params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_modifica);
         }
