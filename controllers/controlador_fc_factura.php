@@ -442,6 +442,18 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al maquetar header',data:  $pdf, header: $header,ws:$ws);
         }
 
+        $relacionadas = (new fc_factura(link: $this->link))->get_data_relaciones(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener relacionadas',data:  $relacionadas, header: $header,ws:$ws);
+        }
+
+        $rs = $pdf->data_relacionados(relacionadas: $relacionadas);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar relacionadas',data:  $rs, header: $header,ws:$ws);
+        }
+
+
+
         $rs = $pdf->conceptos(conceptos: $factura['partidas']);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar conceptos',data:  $rs, header: $header,ws:$ws);
@@ -1015,6 +1027,16 @@ class controlador_fc_factura extends system{
             observaciones: $factura['fc_factura_observaciones']);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al maquetar header',data:  $pdf);
+        }
+
+        $relacionadas = (new fc_factura(link: $this->link))->get_data_relaciones(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener relacionadas',data:  $relacionadas);
+        }
+
+        $rs = $pdf->data_relacionados(relacionadas: $relacionadas);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al maquetar relacionadas',data:  $rs);
         }
 
         $rs = $pdf->conceptos(conceptos: $factura['partidas']);

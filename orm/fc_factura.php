@@ -714,6 +714,24 @@ class fc_factura extends modelo
         return $rutas;
     }
 
+    final public function  get_data_relaciones(int $fc_factura_id){
+
+        $relaciones = (new fc_relacion(link: $this->link))->relaciones(fc_factura_id: $fc_factura_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
+        }
+
+        foreach ($relaciones as $indice=>$fc_relacion){
+            $relacionadas = (new fc_relacion(link: $this->link))->facturas_relacionadas(fc_relacion: $fc_relacion);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener relacionadas', data: $relacionadas);
+            }
+            $relaciones[$indice]['fc_facturas_relacionadas'] = $relacionadas;
+        }
+        return $relaciones;
+
+    }
+
     public function get_factura(int $fc_factura_id): array|stdClass|int
     {
         $hijo = array();
@@ -730,6 +748,7 @@ class fc_factura extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relacionados);
         }
+
 
 
         $conceptos = array();

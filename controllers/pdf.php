@@ -79,6 +79,55 @@ final class pdf
         return round($base,2);
     }
 
+    final public function data_relacionados(array $relacionadas){
+
+        if(count($relacionadas)>0) {
+            $body_td_title = $this->html(etiqueta: "td", data: "Facturas Relacionadas", class: "negrita");
+            $body_tr_title = $this->html(etiqueta: "tr", data: $body_td_title);
+            $body_title = $this->html(etiqueta: "tbody", data: $body_tr_title);
+            $table_title = $this->html(etiqueta: "table", data: $body_title);
+
+            try {
+                $this->pdf->WriteHTML($table_title);
+            } catch (Throwable $e) {
+                return $this->error->error(mensaje: 'Error al generar pdf', data: $e);
+            }
+        }
+
+        foreach ($relacionadas as $relacion) {
+            $body_td_tr = $this->html(etiqueta: "td", data: "Tipo Relacion: $relacion[cat_sat_tipo_relacion_codigo] $relacion[cat_sat_tipo_relacion_descripcion]", class: "negrita");
+            $body_tr_tr = $this->html(etiqueta: "tr", data: $body_td_tr);
+            $body_tr = $this->html(etiqueta: "tbody", data: $body_tr_tr );
+            $table_tr = $this->html(etiqueta: "table", data: $body_tr);
+            try {
+                $this->pdf->WriteHTML($table_tr);
+            }
+            catch (Throwable $e){
+                return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
+            }
+
+            foreach ($relacion['fc_facturas_relacionadas'] as $relacionada){
+                $body_td_uuid = $this->html(etiqueta: "td", data: "UUID: $relacionada[fc_factura_uuid]");
+                $body_tr_uuid = $this->html(etiqueta: "tr", data: $body_td_uuid);
+                $body_uuid = $this->html(etiqueta: "tbody", data: $body_tr_uuid );
+                $table_uuid = $this->html(etiqueta: "table", data: $body_uuid);
+                try {
+                    $this->pdf->WriteHTML($table_uuid);
+                }
+                catch (Throwable $e){
+                    return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
+                }
+            }
+
+        }
+
+
+
+
+
+
+    }
+
     public function header(string $rfc_emisor, string $folio_fiscal, string $nombre_emisor, string $csd,
                            string $rfc_receptor, string $cod_postal, string $fecha,
                            string $nombre_receptor, string $efecto,
@@ -123,10 +172,10 @@ final class pdf
         $body_tr_5 = $this->html(etiqueta: "tr", data: $body_td_17 . $body_td_18 . $body_td_19 . $body_td_20);
         $body_tr_6 = $this->html(etiqueta: "tr", data: $body_td_21 . $body_td_22 . $body_td_23 . $body_td_24);
         $body_tr_7 = $this->html(etiqueta: "tr", data: $body_td_25 . $body_td_26);
-        $body_tr_7 = $this->html(etiqueta: "tr", data: $body_td_tag_observaciones. $body_td_observaciones);
+        $body_tr_8 = $this->html(etiqueta: "tr", data: $body_td_tag_observaciones. $body_td_observaciones);
 
         $body = $this->html(etiqueta: "tbody", data: $body_tr_1 . $body_tr_2 . $body_tr_3 . $body_tr_4 . $body_tr_5 . $body_tr_6 .
-            $body_tr_7);
+            $body_tr_7. $body_tr_8);
 
         $table = $this->html(etiqueta: "table", data: $body);
 

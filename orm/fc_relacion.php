@@ -51,7 +51,7 @@ class fc_relacion extends _modelo_parent_sin_codigo
         return $r_alta_bd;
     }
 
-    private function facturas_relacionadas(array $fc_relacion){
+    final public function facturas_relacionadas(array $fc_relacion){
         $filtro = array();
         $filtro['fc_relacion.id'] = $fc_relacion['fc_relacion_id'];
         $r_fc_factura_relacionada = (new fc_factura_relacionada(link: $this->link))->filtro_and(filtro: $filtro);
@@ -61,6 +61,7 @@ class fc_relacion extends _modelo_parent_sin_codigo
 
         return $r_fc_factura_relacionada->registros;
     }
+
 
     private function genera_relacionado(array $fc_relacion, array $relacionados){
         $cat_sat_tipo_relacion_codigo = $fc_relacion['cat_sat_tipo_relacion_codigo'];
@@ -118,7 +119,7 @@ class fc_relacion extends _modelo_parent_sin_codigo
         return $relacionados;
     }
 
-    private function relaciones(int $fc_factura_id){
+    final public function relaciones(int $fc_factura_id){
         $filtro = array();
         $filtro['fc_factura.id'] = $fc_factura_id;
 
