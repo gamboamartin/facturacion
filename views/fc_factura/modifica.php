@@ -31,16 +31,18 @@
                         <?php echo $controlador->inputs->observaciones; ?>
                         <?php include (new views())->ruta_templates.'botons/submit/modifica_bd.php';?>
 
-                        <div class="control-group btn-modifica">
-                            <div class="controls">
-                                <a href="<?php echo $controlador->link_factura_timbra_xml;?>" class="btn btn-success" >Timbra XML</a><br>
-                            </div>
-                        </div>
                     </form>
                 </div>
 
             </div>
 
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="col-md-12 buttons-form">
+            <?php echo $controlador->button_fc_factura_relaciones; ?>
+            <?php echo $controlador->button_fc_factura_timbra; ?>
         </div>
     </div>
 
@@ -120,6 +122,14 @@
 
                 </div>
             </div>
+        </div>
+
+        <div class="container">
+            <div class="col-md-12 buttons-form">
+                <?php echo $controlador->button_fc_factura_relaciones; ?>
+                <?php echo $controlador->button_fc_factura_timbra; ?>
+            </div>
+
         </div>
 
         <div class="col-md-12 buttons-form">

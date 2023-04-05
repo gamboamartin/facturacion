@@ -29,12 +29,15 @@ use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
+use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template\html;
 use html\cat_sat_motivo_cancelacion_html;
+use html\cat_sat_tipo_relacion_html;
 use JsonException;
 use PDO;
 use stdClass;
@@ -45,22 +48,30 @@ class controlador_fc_factura extends system{
     public controlador_fc_partida $controlador_fc_partida;
     public controlador_com_producto $controlador_com_producto;
 
+    public string $button_fc_factura_modifica = '';
+    public string $button_fc_factura_relaciones = '';
+    public string $button_fc_factura_timbra = '';
+
     public string $rfc = '';
     public string $razon_social = '';
     public string $link_fc_partida_alta_bd = '';
     public string $link_fc_partida_modifica_bd = '';
     public string $link_fc_factura_partidas = '';
     public string $link_fc_factura_nueva_partida = '';
+    public string $link_fc_relacion_alta_bd = '';
     public string $link_com_producto = '';
 
     public string $link_factura_cancela = '';
     public string $link_factura_genera_xml = '';
     public string $link_factura_timbra_xml = '';
+    public string $link_fc_factura_relacionada_alta_bd = '';
     public int $fc_factura_id = -1;
     public int $fc_partida_id = -1;
     public stdClass $partidas;
     private fc_factura_html $html_fc;
 
+    public array $relaciones = array();
+    public array$facturas_cliente = array();
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass()){
         $modelo = new fc_factura(link: $link);
@@ -127,6 +138,8 @@ class controlador_fc_factura extends system{
 
 
         $this->verifica_parents_alta = true;
+
+
 
     }
 
@@ -233,6 +246,23 @@ class controlador_fc_factura extends system{
 
     }
 
+    private function base_data_partida(int $fc_partida_id): array|stdClass
+    {
+        $data = $this->data_partida(fc_partida_id: $fc_partida_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al cargar datos de partida', data: $data);
+        }
+
+        $htmls = $this->htmls_partida();
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener htmls',data:  $htmls);
+        }
+        $data_return = new stdClass();
+        $data_return->data = $data;
+        $data_return->htmls = $htmls;
+        return $data_return;
+    }
+
     public function cancela(bool $header, bool $ws = false){
         $filtro['fc_factura.id'] = $this->registro_id;
         $columns_ds = array('fc_factura_folio','com_cliente_rfc','fc_factura_total','fc_factura_fecha');
@@ -301,6 +331,19 @@ class controlador_fc_factura extends system{
 
     }
 
+    private function data_partida(int $fc_partida_id): array|stdClass
+    {
+        $data_partida = (new fc_partida($this->link))->data_partida_obj(fc_partida_id: $fc_partida_id);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener partida',data:  $data_partida);
+        }
+
+        $data = new stdClass();
+        $data->data_partida = $data_partida;
+
+        return $data;
+    }
+
     public function descarga_xml(bool $header, bool $ws = false){
         $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(fc_factura_id: $this->registro_id,
             tipo_documento: "xml_sin_timbrar");
@@ -363,6 +406,73 @@ class controlador_fc_factura extends system{
 
 
         exit;
+    }
+
+    public function fc_relacion_alta_bd(bool $header, bool $ws = false){
+        $fc_relacion_ins['fc_factura_id'] = $this->registro_id;
+        $fc_relacion_ins['cat_sat_tipo_relacion_id'] = $_POST['cat_sat_tipo_relacion_id'];
+        $r_fc_relacion = (new fc_relacion(link: $this->link))->alta_registro(registro: $fc_relacion_ins);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al insertar relacion',data:  $r_fc_relacion, header: $header,ws:$ws);
+        }
+
+        if($header){
+            $params = array();
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: 'relaciones', params: $params);
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_relacion,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($r_fc_relacion, JSON_THROW_ON_ERROR);
+            exit;
+        }
+
+        return $r_fc_relacion;
+
+
+
+    }
+
+    public function fc_factura_relacionada_alta_bd(bool $header, bool $ws = false){
+
+        $fc_facturas_id = $_POST['fc_facturas_id'];
+        $alta = array();
+        foreach ($fc_facturas_id as $fc_relacion_id=>$fc_factura_id){
+            $fc_factura_relacionada_ins['fc_relacion_id'] = $fc_relacion_id;
+            $fc_factura_relacionada_ins['fc_factura_id'] = $fc_factura_id;
+            $r_fc_factura_relacionada = (new fc_factura_relacionada(link: $this->link))->alta_registro(registro: $fc_factura_relacionada_ins);
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_factura_relacionada,
+                    header:  true, ws: $ws);
+            }
+            $alta[] = $r_fc_factura_relacionada;
+        }
+
+        if($header){
+            $params = array();
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: 'relaciones', params: $params);
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $alta,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($alta, JSON_THROW_ON_ERROR);
+            exit;
+        }
+
+        return $alta;
+
     }
 
     public function genera_pdf(bool $header, bool $ws = false){
@@ -543,6 +653,16 @@ class controlador_fc_factura extends system{
         return $tipo_comprobante->registros[0]['cat_sat_tipo_de_comprobante_id'];
     }
 
+    private function htmls_partida(): stdClass
+    {
+        $fc_partida_html = (new fc_partida_html(html: $this->html_base));
+
+        $data = new stdClass();
+        $data->fc_partida = $fc_partida_html;
+
+        return $data;
+    }
+
     /**
      * Inicializa las configuraciones de views para facturas
      * @return controler
@@ -714,7 +834,7 @@ class controlador_fc_factura extends system{
         return $this->keys_selects;
     }
 
-    private function init_modifica(): array|stdClass
+    private function init_modifica(array $params = array()): array|stdClass
     {
         $r_modifica =  parent::modifica(header: false);
         if(errores::$error){
@@ -723,37 +843,111 @@ class controlador_fc_factura extends system{
 
         $identificador = "fc_csd_id";
         $propiedades = array("id_selected" => $this->row_upd->fc_csd_id);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        if(isset($params[$identificador])){
+            foreach ($params[$identificador] as $key=>$param){
+                $propiedades[$key] = $param;
+            }
+        }
+
+        $prop = $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
+        }
 
         $identificador = "com_sucursal_id";
         $propiedades = array("id_selected" => $this->row_upd->com_sucursal_id);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(isset($params[$identificador])){
+            foreach ($params[$identificador] as $key=>$param){
+                $propiedades[$key] = $param;
+            }
+        }
+        $prop =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
+        }
 
         $identificador = "cat_sat_forma_pago_id";
+
         $propiedades = array("id_selected" => $this->row_upd->cat_sat_forma_pago_id);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(isset($params[$identificador])){
+            foreach ($params[$identificador] as $key=>$param){
+                $propiedades[$key] = $param;
+            }
+        }
+        $prop =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
+        }
 
         $identificador = "cat_sat_metodo_pago_id";
+
         $propiedades = array("id_selected" => $this->row_upd->cat_sat_metodo_pago_id);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(isset($params[$identificador])){
+            foreach ($params[$identificador] as $key=>$param){
+                $propiedades[$key] = $param;
+            }
+        }
+        $prop = $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
+        }
 
         $identificador = "cat_sat_moneda_id";
+
         $propiedades = array("id_selected" => $this->row_upd->cat_sat_moneda_id);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(isset($params[$identificador])){
+            foreach ($params[$identificador] as $key=>$param){
+                $propiedades[$key] = $param;
+            }
+        }
+        $prop =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
+        }
 
         $identificador = "com_tipo_cambio_id";
+
         $propiedades = array("id_selected" => $this->row_upd->com_tipo_cambio_id);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(isset($params[$identificador])){
+            foreach ($params[$identificador] as $key=>$param){
+                $propiedades[$key] = $param;
+            }
+        }
+        $prop =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
+        }
 
         $identificador = "cat_sat_uso_cfdi_id";
+
         $propiedades = array("id_selected" => $this->row_upd->cat_sat_uso_cfdi_id);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(isset($params[$identificador])){
+            foreach ($params[$identificador] as $key=>$param){
+                $propiedades[$key] = $param;
+            }
+        }
+        $prop =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
+        }
 
 
         $identificador = "cat_sat_tipo_de_comprobante_id";
+
         $propiedades = array("id_selected" => $this->row_upd->cat_sat_tipo_de_comprobante_id,
             "filtro" => array('cat_sat_tipo_de_comprobante.id' => $this->row_upd->cat_sat_tipo_de_comprobante_id));
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        if(isset($params[$identificador])){
+            foreach ($params[$identificador] as $key=>$param){
+                $propiedades[$key] = $param;
+            }
+        }
+
+        $prop =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
+        }
 
         $sub_total = (new fc_factura($this->link))->get_factura_sub_total(fc_factura_id: $this->registro_id);
         if(errores::$error){
@@ -798,6 +992,77 @@ class controlador_fc_factura extends system{
         $data->inputs = $inputs;
 
         return $data;
+    }
+
+    private function inputs_partida(fc_partida_html $html, stdClass $fc_partida,
+                                    stdClass         $params = new stdClass()): array|stdClass{
+        $partida_codigo_disabled = $params->partida_codigo->disabled ?? true;
+        $fc_partida_codigo = $html->input_codigo(cols: 4,row_upd:  $fc_partida, value_vacio: false,
+            disabled: $partida_codigo_disabled);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener partida_codigo select',data:  $fc_partida_codigo);
+        }
+
+        $partida_codigo_bis_disabled = $params->partida_codigo_bis->disabled ?? true;
+        $fc_partida_codigo_bis = $html->input_codigo_bis(cols: 4,row_upd:  $fc_partida, value_vacio: false,
+            disabled: $partida_codigo_bis_disabled);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener partida_codigo_bis',
+                data:  $fc_partida_codigo_bis);
+        }
+
+        $partida_descripcion_disabled = $params->partida_descripcion->disabled ?? true;
+        $fc_partida_descripcion = $html->input_descripcion(cols: 12,row_upd:  $fc_partida, value_vacio: false,
+            disabled: $partida_descripcion_disabled);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener descripcion',data:  $fc_partida_descripcion);
+        }
+
+        $partida_cantidad_disabled = $params->partida_cantidad->disabled ?? true;
+        $fc_partida_cantidad = $html->input_cantidad(cols: 4, row_upd:  $fc_partida,
+            value_vacio: false, disabled: $partida_cantidad_disabled);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener $fc_partida_cantidad',data:  $fc_partida_cantidad);
+        }
+
+        $partida_valor_unitario_disabled = $params->partida_valor_unitario->disabled ?? true;
+        $fc_partida_valor_unitario = $html->input_valor_unitario(cols: 4, row_upd:  $fc_partida,
+            value_vacio: false, disabled: $partida_valor_unitario_disabled);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener $fc_partida_valor_unitario',data:  $fc_partida_valor_unitario);
+        }
+
+        $partida_descuento_disabled = $params->partida_descuento->disabled ?? true;
+        $fc_partida_descuento = $html->input_descuento(cols: 4, row_upd:  $fc_partida,
+            value_vacio: false, disabled: $partida_descuento_disabled);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener $fc_partida_descuento',data:  $fc_partida_descuento);
+        }
+
+        $factura_id_disabled = $params->fc_factura_id->disabled ?? true;
+        $fc_factura_id = $html->input_id(cols: 12,row_upd:  $fc_partida, value_vacio: false,
+            disabled: $factura_id_disabled,place_holder: 'ID factura');
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener sucursal_id select',data:  $fc_factura_id);
+        }
+
+        $com_producto_id_disabled = $params->com_producto_id->disabled ?? true;
+        $com_producto_id = $html->input_id(cols: 4,row_upd:  $fc_partida, value_vacio: false,
+            disabled: $com_producto_id_disabled,place_holder: 'ID Producto');
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener sucursal_id select',data:  $com_producto_id);
+        }
+
+        $this->inputs->fc_factura_id = $fc_factura_id;
+        $this->inputs->com_producto_id = $com_producto_id;
+        $this->inputs->codigo = $fc_partida_codigo;
+        $this->inputs->codigo_bis = $fc_partida_codigo_bis;
+        $this->inputs->descripcion = $fc_partida_descripcion;
+        $this->inputs->cantidad = $fc_partida_cantidad;
+        $this->inputs->valor_unitario = $fc_partida_valor_unitario;
+        $this->inputs->descuento = $fc_partida_descuento;
+
+        return $this->inputs;
     }
 
     public function modifica(bool $header, bool $ws = false): array|stdClass
@@ -895,7 +1160,6 @@ class controlador_fc_factura extends system{
 
         $this->inputs->partidas = $inputs;
 
-        //$this->inputs = (object) array_merge((array)$this->inputs, (array)$inputs);
 
         $t_head_producto = (new _html_factura())->thead_producto();
         if (errores::$error) {
@@ -913,6 +1177,24 @@ class controlador_fc_factura extends system{
             die('Error');
         }
         $this->inputs->observaciones = $observaciones;
+
+        $button_fc_factura_relaciones =  $this->html->button_href(accion: 'relaciones', etiqueta: 'Relaciones',
+            registro_id: $this->registro_id,
+            seccion: 'fc_factura', style: 'warning', params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_relaciones);
+        }
+
+        $this->button_fc_factura_relaciones = $button_fc_factura_relaciones;
+
+        $button_fc_factura_timbra =  $this->html->button_href(accion: 'timbra_xml', etiqueta: 'Timbra',
+            registro_id: $this->registro_id,
+            seccion: 'fc_factura', style: 'danger', params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_relaciones);
+        }
+
+        $this->button_fc_factura_timbra = $button_fc_factura_timbra;
 
         return $base->template;
     }
@@ -1165,6 +1447,15 @@ class controlador_fc_factura extends system{
         return $tipo_comprobante;
     }
 
+    private function params_button_partida(int $fc_factura_id): array
+    {
+        $params = array();
+        $params['seccion_retorno'] = 'fc_factura';
+        $params['accion_retorno'] = 'relaciones';
+        $params['id_retorno'] = $fc_factura_id;
+        return $params;
+    }
+
     /*
      * POR REVISAR
      */
@@ -1190,19 +1481,11 @@ class controlador_fc_factura extends system{
         }
 
 
-        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->fc_factura_id);
+        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->fc_factura_id, html: $this->html);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
         }
 
-        foreach ($partidas->registros as $indice=>$partida){
-            $partida = $this->data_partida_btn(partida:$partida);
-            if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al asignar botones',data:  $partida, header: $header,ws:$ws);
-            }
-            $partidas->registros[$indice] = $partida;
-
-        }
 
         $this->partidas = $partidas;
         $this->number_active = 6;
@@ -1238,18 +1521,9 @@ class controlador_fc_factura extends system{
                 header: $header,ws:$ws);
         }
 
-        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->fc_factura_id);
+        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->fc_factura_id,html: $this->html);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
-        }
-
-        foreach ($partidas->registros as $indice=>$partida){
-            $partida = $this->data_partida_btn(partida:$partida);
-            if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al asignar botones',data:  $partida, header: $header,ws:$ws);
-            }
-            $partidas->registros[$indice] = $partida;
-
         }
 
         $this->partidas = $partidas;
@@ -1304,6 +1578,168 @@ class controlador_fc_factura extends system{
 
     }
 
+    public function relaciones(bool $header, bool $ws = false){
+        $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id,html: $this->html);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
+            print_r($error);
+            die('Error');
+        }
+
+        $row_upd = $this->modelo->registro(registro_id: $this->registro_id, retorno_obj: true);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener factura', data: $row_upd);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->partidas = $partidas;
+
+
+        $params = array();
+
+        $params['fc_csd_id']['filtro']['fc_csd.id'] = $row_upd->fc_csd_id;
+        $params['fc_csd_id']['disabled'] = true;
+
+        $params['com_sucursal_id']['filtro']['com_sucursal.id'] = $row_upd->com_sucursal_id;
+        $params['com_sucursal_id']['disabled'] = true;
+
+        $params['cat_sat_tipo_de_comprobante_id']['filtro']['cat_sat_tipo_de_comprobante.id'] = $row_upd->cat_sat_tipo_de_comprobante_id;
+        $params['cat_sat_tipo_de_comprobante_id']['disabled'] = true;
+
+        $params['cat_sat_forma_pago_id']['filtro']['cat_sat_forma_pago.id'] = $row_upd->cat_sat_forma_pago_id;
+        $params['cat_sat_forma_pago_id']['disabled'] = true;
+
+        $params['cat_sat_metodo_pago_id']['filtro']['cat_sat_metodo_pago.id'] = $row_upd->cat_sat_metodo_pago_id;
+        $params['cat_sat_metodo_pago_id']['disabled'] = true;
+
+        $params['cat_sat_moneda_id']['filtro']['cat_sat_moneda.id'] = $row_upd->cat_sat_moneda_id;
+        $params['cat_sat_moneda_id']['disabled'] = true;
+
+        $params['com_tipo_cambio_id']['filtro']['com_tipo_cambio.id'] = $row_upd->com_tipo_cambio_id;
+        $params['com_tipo_cambio_id']['disabled'] = true;
+
+        $params['cat_sat_uso_cfdi_id']['filtro']['cat_sat_uso_cfdi.id'] = $row_upd->cat_sat_uso_cfdi_id;
+        $params['cat_sat_uso_cfdi_id']['disabled'] = true;
+
+        $base = $this->init_modifica(params: $params);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
+                header: $header,ws:$ws);
+        }
+
+        $cat_sat_tipo_relacion_id = (new cat_sat_tipo_relacion_html(html: $this->html_base))
+            ->select_cat_sat_tipo_relacion_id(cols: 12,con_registros: true,id_selected: -1,link:  $this->link,
+                required: true);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener cat_sat_tipo_relacion_id',
+                data: $cat_sat_tipo_relacion_id);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->inputs->cat_sat_tipo_relacion_id = $cat_sat_tipo_relacion_id;
+
+
+        $link = $this->obj_link->link_con_id(accion: 'fc_relacion_alta_bd',link:  $this->link, registro_id: $this->registro_id, seccion: $this->tabla);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener link', data: $link);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->link_fc_relacion_alta_bd = $link;
+
+        $link = $this->obj_link->link_con_id(accion: 'fc_factura_relacionada_alta_bd',link:  $this->link, registro_id: $this->registro_id, seccion: $this->tabla);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener link', data: $link);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->link_fc_factura_relacionada_alta_bd = $link;
+
+        $relaciones = (new fc_factura(link: $this->link))->get_data_relaciones(fc_factura_id: $this->registro_id);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
+            print_r($error);
+            die('Error');
+        }
+
+
+        $filtro = array();
+        $filtro['com_cliente.id'] = $row_upd->com_cliente_id;
+        $filtro['org_empresa.id'] = $row_upd->org_empresa_id;
+        $r_fc_factura = (new fc_factura(link: $this->link))->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener facturas', data: $r_fc_factura);
+            print_r($error);
+            die('Error');
+        }
+        $facturas_cliente = $r_fc_factura->registros;
+
+        foreach ($relaciones as $indice=>$relacion){
+            $facturas_cliente_ = array();
+            foreach ($facturas_cliente as $factura_cliente){
+                $existe_factura_rel = false;
+                foreach ($relacion['fc_facturas_relacionadas'] as $fc_factura_relacionada){
+
+                    if($factura_cliente['fc_factura_id'] === $fc_factura_relacionada['fc_factura_id']){
+                        $existe_factura_rel = true;
+                        break;
+                    }
+                }
+                if(!$existe_factura_rel){
+                    $facturas_cliente_[] = $factura_cliente;
+                }
+            }
+
+            $relaciones[$indice]['fc_facturas'] = $facturas_cliente_;
+
+        }
+
+
+        foreach ($relaciones as $indice=>$relacion){
+
+                foreach ($relacion['fc_facturas_relacionadas'] as $indice_fr=>$fc_factura_relacionada){
+
+                    $params = $this->params_button_partida(fc_factura_id: $this->registro_id);
+                    if (errores::$error) {
+                        return $this->errores->error(mensaje: 'Error al generar params', data: $params);
+                    }
+
+                    $link_elimina_rel = $this->html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
+                        registro_id: $fc_factura_relacionada['fc_factura_relacionada_id'],
+                        seccion: 'fc_factura_relacionada', style: 'danger',icon: 'bi bi-trash',
+                        muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
+                    if (errores::$error) {
+                        return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_rel);
+                    }
+                    $relaciones[$indice]['fc_facturas_relacionadas'][$indice_fr]['elimina_bd'] = $link_elimina_rel;
+
+                }
+
+
+        }
+
+        $this->relaciones = $relaciones;
+
+
+        $button_fc_factura_modifica =  $this->html->button_href(accion: 'modifica', etiqueta: 'Ir a Factura',
+            registro_id: $this->registro_id,
+            seccion: 'fc_factura', style: 'warning', params: $params);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_modifica);
+        }
+
+        $this->button_fc_factura_modifica = $button_fc_factura_modifica;
+
+
+
+
+        return $base->template;
+    }
+
     private function select_fc_factura_id(): array|string
     {
         $select = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols:12,con_registros: true,
@@ -1351,118 +1787,6 @@ class controlador_fc_factura extends system{
         }
 
         return $inputs_partida;
-    }
-
-    private function inputs_partida(fc_partida_html $html, stdClass $fc_partida,
-                                    stdClass         $params = new stdClass()): array|stdClass{
-        $partida_codigo_disabled = $params->partida_codigo->disabled ?? true;
-        $fc_partida_codigo = $html->input_codigo(cols: 4,row_upd:  $fc_partida, value_vacio: false,
-            disabled: $partida_codigo_disabled);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener partida_codigo select',data:  $fc_partida_codigo);
-        }
-
-        $partida_codigo_bis_disabled = $params->partida_codigo_bis->disabled ?? true;
-        $fc_partida_codigo_bis = $html->input_codigo_bis(cols: 4,row_upd:  $fc_partida, value_vacio: false,
-            disabled: $partida_codigo_bis_disabled);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener partida_codigo_bis',
-                data:  $fc_partida_codigo_bis);
-        }
-
-        $partida_descripcion_disabled = $params->partida_descripcion->disabled ?? true;
-        $fc_partida_descripcion = $html->input_descripcion(cols: 12,row_upd:  $fc_partida, value_vacio: false,
-            disabled: $partida_descripcion_disabled);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener descripcion',data:  $fc_partida_descripcion);
-        }
-
-        $partida_cantidad_disabled = $params->partida_cantidad->disabled ?? true;
-        $fc_partida_cantidad = $html->input_cantidad(cols: 4, row_upd:  $fc_partida,
-            value_vacio: false, disabled: $partida_cantidad_disabled);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener $fc_partida_cantidad',data:  $fc_partida_cantidad);
-        }
-
-        $partida_valor_unitario_disabled = $params->partida_valor_unitario->disabled ?? true;
-        $fc_partida_valor_unitario = $html->input_valor_unitario(cols: 4, row_upd:  $fc_partida,
-            value_vacio: false, disabled: $partida_valor_unitario_disabled);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener $fc_partida_valor_unitario',data:  $fc_partida_valor_unitario);
-        }
-
-        $partida_descuento_disabled = $params->partida_descuento->disabled ?? true;
-        $fc_partida_descuento = $html->input_descuento(cols: 4, row_upd:  $fc_partida,
-            value_vacio: false, disabled: $partida_descuento_disabled);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener $fc_partida_descuento',data:  $fc_partida_descuento);
-        }
-
-        $factura_id_disabled = $params->fc_factura_id->disabled ?? true;
-        $fc_factura_id = $html->input_id(cols: 12,row_upd:  $fc_partida, value_vacio: false,
-            disabled: $factura_id_disabled,place_holder: 'ID factura');
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener sucursal_id select',data:  $fc_factura_id);
-        }
-        
-        $com_producto_id_disabled = $params->com_producto_id->disabled ?? true;
-        $com_producto_id = $html->input_id(cols: 4,row_upd:  $fc_partida, value_vacio: false,
-            disabled: $com_producto_id_disabled,place_holder: 'ID Producto');
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener sucursal_id select',data:  $com_producto_id);
-        }
-
-        $this->inputs->fc_factura_id = $fc_factura_id;
-        $this->inputs->com_producto_id = $com_producto_id;
-        $this->inputs->codigo = $fc_partida_codigo;
-        $this->inputs->codigo_bis = $fc_partida_codigo_bis;
-        $this->inputs->descripcion = $fc_partida_descripcion;
-        $this->inputs->cantidad = $fc_partida_cantidad;
-        $this->inputs->valor_unitario = $fc_partida_valor_unitario;
-        $this->inputs->descuento = $fc_partida_descuento;
-
-        return $this->inputs;
-    }
-
-    private function base_data_partida(int $fc_partida_id): array|stdClass
-    {
-        $data = $this->data_partida(fc_partida_id: $fc_partida_id);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al cargar datos de partida', data: $data);
-        }
-
-        $htmls = $this->htmls_partida();
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener htmls',data:  $htmls);
-        }
-        $data_return = new stdClass();
-        $data_return->data = $data;
-        $data_return->htmls = $htmls;
-        return $data_return;
-    }
-
-
-    private function htmls_partida(): stdClass
-    {
-        $fc_partida_html = (new fc_partida_html(html: $this->html_base));
-
-        $data = new stdClass();
-        $data->fc_partida = $fc_partida_html;
-        
-        return $data;
-    }
-
-    private function data_partida(int $fc_partida_id): array|stdClass
-    {
-        $data_partida = (new fc_partida($this->link))->data_partida_obj(fc_partida_id: $fc_partida_id);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener partida',data:  $data_partida);
-        }
-
-        $data = new stdClass();
-        $data->data_partida = $data_partida;
-
-        return $data;
     }
 
     private function valida_tipo_de_comprobante(): bool|array
