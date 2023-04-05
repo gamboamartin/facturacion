@@ -51,7 +51,74 @@ class fc_relacion extends _modelo_parent_sin_codigo
         return $r_alta_bd;
     }
 
+    private function facturas_relacionadas(array $fc_relacion){
+        $filtro = array();
+        $filtro['fc_relacion.id'] = $fc_relacion['fc_relacion_id'];
+        $r_fc_factura_relacionada = (new fc_factura_relacionada(link: $this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener r_fc_factura_relacionada', data: $r_fc_factura_relacionada);
+        }
+
+        return $r_fc_factura_relacionada->registros;
+    }
+
+    private function genera_relacionado(array $fc_relacion, array $relacionados){
+        $cat_sat_tipo_relacion_codigo = $fc_relacion['cat_sat_tipo_relacion_codigo'];
+        $relacionados[$cat_sat_tipo_relacion_codigo] = array();
+
+        $fc_facturas_relacionadas = $this->facturas_relacionadas(fc_relacion: $fc_relacion);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_facturas_relacionadas', data: $fc_facturas_relacionadas);
+        }
+
+        $relacionados = $this->integra_relacionados(cat_sat_tipo_relacion_codigo: $cat_sat_tipo_relacion_codigo,
+            fc_facturas_relacionadas: $fc_facturas_relacionadas, relacionados: $relacionados);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar relacionado', data: $relacionados);
+        }
+        return $relacionados;
+    }
+
     final public function get_relaciones(int $fc_factura_id){
+
+
+        $fc_relaciones = $this->relaciones(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_relaciones', data: $fc_relaciones);
+        }
+        $relacionados = $this->relacionados(fc_relaciones: $fc_relaciones);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar relacionado', data: $relacionados);
+        }
+
+        return $relacionados;
+
+    }
+
+    private function integra_relacionado(string $cat_sat_tipo_relacion_codigo, array $fc_factura_relacionada,
+                                         array $relacionados){
+        $keys = array('fc_factura_uuid');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro: $fc_factura_relacionada);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar fc_factura_relacionada', data: $valida);
+        }
+        $relacionados[$cat_sat_tipo_relacion_codigo][] = $fc_factura_relacionada['fc_factura_uuid'];
+        return $relacionados;
+    }
+
+    private function integra_relacionados(string $cat_sat_tipo_relacion_codigo, array $fc_facturas_relacionadas,
+                                          array $relacionados){
+        foreach ($fc_facturas_relacionadas as $fc_factura_relacionada){
+            $relacionados = $this->integra_relacionado(cat_sat_tipo_relacion_codigo: $cat_sat_tipo_relacion_codigo,
+                fc_factura_relacionada: $fc_factura_relacionada, relacionados: $relacionados);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al integrar relacionado', data: $relacionados);
+            }
+        }
+        return $relacionados;
+    }
+
+    private function relaciones(int $fc_factura_id){
         $filtro = array();
         $filtro['fc_factura.id'] = $fc_factura_id;
 
@@ -59,32 +126,18 @@ class fc_relacion extends _modelo_parent_sin_codigo
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_relacion);
         }
-        $fc_relaciones = $r_fc_relacion->registros;
+        return $r_fc_relacion->registros;
+    }
 
+    private function relacionados(array $fc_relaciones){
         $relacionados = array();
         foreach ($fc_relaciones as $fc_relacion){
-            $filtro = array();
-            $filtro['fc_relacion.id'] = $fc_relacion['fc_relacion_id'];
-            $cat_sat_tipo_relacion_codigo = $fc_relacion['cat_sat_tipo_relacion_codigo'];
-            $relacionados[$cat_sat_tipo_relacion_codigo] = array();
-            $r_fc_factura_relacionada = (new fc_factura_relacionada(link: $this->link))->filtro_and(filtro: $filtro);
+            $relacionados = $this->genera_relacionado(fc_relacion: $fc_relacion,relacionados:  $relacionados);
             if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener r_fc_factura_relacionada', data: $r_fc_factura_relacionada);
+                return $this->error->error(mensaje: 'Error al integrar relacionado', data: $relacionados);
             }
-
-            $fc_facturas_relacionadas = $r_fc_factura_relacionada->registros;
-            foreach ($fc_facturas_relacionadas as $fc_factura_relacionada){
-                $keys = array('fc_factura_uuid');
-                $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro: $fc_factura_relacionada);
-                if(errores::$error){
-                    return $this->error->error(mensaje: 'Error al validar fc_factura_relacionada', data: $valida);
-                }
-                $relacionados[$cat_sat_tipo_relacion_codigo][] = $fc_factura_relacionada['fc_factura_uuid'];
-            }
-
         }
         return $relacionados;
-
     }
 
 

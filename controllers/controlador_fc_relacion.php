@@ -200,9 +200,6 @@ class controlador_fc_relacion extends _ctl_base{
             $con_registros = false;
         }
 
-
-
-
         $fc_factura_id = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols: 12,
             con_registros: $con_registros, id_selected: $this->row_upd->fc_factura_id, link: $this->link,
             disabled: true, registros: $facturas);
@@ -213,7 +210,7 @@ class controlador_fc_relacion extends _ctl_base{
         }
 
         $cat_sat_tipo_relacion_id = (new cat_sat_tipo_relacion_html(html: $this->html_base))->select_cat_sat_tipo_relacion_id(cols: 12,
-            con_registros: true, id_selected: $this->row_upd->cat_sat_tipo_relacion_id, link: $this->link);
+            con_registros: true, id_selected: $this->row_upd->cat_sat_tipo_relacion_id, link: $this->link, disabled: true);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al generar input', data: $cat_sat_tipo_relacion_id);
             print_r($error);
