@@ -125,14 +125,44 @@
             </div>
         </div>
 
-        <div class="container">
-            <div class="col-md-12 buttons-form">
-                <?php echo $controlador->button_fc_factura_correo; ?>
-                <?php echo $controlador->button_fc_factura_relaciones; ?>
-                <?php echo $controlador->button_fc_factura_timbra; ?>
-            </div>
 
+        <div class="row">
+            <div class="col-md-12">
+                <div class="widget widget-box box-container widget-mylistings">
+                    <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
+                        <h2>Correos</h2>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Correo</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($controlador->registros['fc_emails'] as $fc_email){ ?>
+                            <tr>
+                                <td><?php echo $fc_email['fc_email_id']; ?></td>
+                                <td><?php echo $fc_email['com_email_cte_descripcion']; ?></td>
+                            </tr>
+                            <?php } ?>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
         </div>
+
+
+        
+        <div class="col-md-12 buttons-form">
+            <?php echo $controlador->button_fc_factura_correo; ?>
+            <?php echo $controlador->button_fc_factura_relaciones; ?>
+            <?php echo $controlador->button_fc_factura_timbra; ?>
+        </div>
+
 
         <div class="col-md-12 buttons-form">
             <?php

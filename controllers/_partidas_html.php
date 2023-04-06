@@ -41,7 +41,7 @@ class _partidas_html{
         return $impuesto_html;
     }
 
-    PUBLIC function genera_partidas_html(int $fc_factura_id, html_controler $html, PDO $link): array|stdClass
+    final function genera_partidas_html(int $fc_factura_id, html_controler $html, PDO $link): array|stdClass
     {
         $partidas  = (new fc_partida($link))->partidas(fc_factura_id: $fc_factura_id,html: $html);
         if (errores::$error) {

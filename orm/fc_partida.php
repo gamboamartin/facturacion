@@ -271,6 +271,11 @@ class fc_partida extends _base
         return $hijo;
     }
 
+    /**
+     * Maqueta el elemento para un children de factura
+     * @param array $hijo Hijo a maquetar
+     * @return array
+     */
     private function hijo_traslado(array $hijo): array
     {
         $hijo['fc_traslado']['filtros']['fc_partida.id'] = 'fc_partida_id';

@@ -1271,6 +1271,16 @@ class controlador_fc_factura extends system{
 
         $this->button_fc_factura_correo = $button_fc_factura_correo;
 
+        $filtro = array();
+        $filtro['fc_factura.id'] = $this->registro_id;
+        $r_fc_email = (new fc_email(link: $this->link))->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener emails', data: $r_fc_email);
+        }
+
+        $this->registros['fc_emails'] = $r_fc_email->registros;
+
+
         return $base->template;
     }
 
