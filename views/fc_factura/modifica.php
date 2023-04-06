@@ -41,6 +41,7 @@
 
     <div class="container">
         <div class="col-md-12 buttons-form">
+            <?php echo $controlador->button_fc_factura_correo; ?>
             <?php echo $controlador->button_fc_factura_relaciones; ?>
             <?php echo $controlador->button_fc_factura_timbra; ?>
         </div>
@@ -126,6 +127,7 @@
 
         <div class="container">
             <div class="col-md-12 buttons-form">
+                <?php echo $controlador->button_fc_factura_correo; ?>
                 <?php echo $controlador->button_fc_factura_relaciones; ?>
                 <?php echo $controlador->button_fc_factura_timbra; ?>
             </div>

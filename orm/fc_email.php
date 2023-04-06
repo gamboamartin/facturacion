@@ -32,10 +32,36 @@ class fc_email extends _modelo_parent_sin_codigo
 
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
+
+        $keys = array('fc_factura_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $valida);
+        }
+
+
+
         $fc_factura = (new fc_factura(link: $this->link))->registro(registro_id: $this->registro['fc_factura_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener factura',data:  $fc_factura);
         }
+
+
+        if(!isset($this->registro['com_email_cte_id'])){
+            if(isset($this->registro['descripcion'])){
+                $com_email_cte_ins['descripcion'] = $this->registro['descripcion'];
+                $com_email_cte_ins['com_cliente_id'] = $fc_factura['com_cliente_id'];
+                $r_alta_com_email_cte = (new com_email_cte(link: $this->link))->alta_registro(registro: $com_email_cte_ins);
+                if(errores::$error){
+                    return $this->error->error(mensaje: 'Error al insertar email',data:  $r_alta_com_email_cte);
+                }
+                $com_email_cte_id = $r_alta_com_email_cte->registro_id;
+                $this->registro['com_email_cte_id'] = $com_email_cte_id;
+                unset($this->registro['descripcion']);
+            }
+
+        }
+
         $com_email_cte = (new com_email_cte(link: $this->link))->registro(registro_id: $this->registro['com_email_cte_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener factura',data:  $com_email_cte);

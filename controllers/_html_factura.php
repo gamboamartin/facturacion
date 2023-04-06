@@ -62,7 +62,7 @@ class _html_factura{
                     </tr>";
     }
 
-    public function tr_impuestos_html(string $impuesto_traslado_html, string $tag_tipo_impuesto){
+    public function tr_impuestos_html(string $impuesto_html, string $tag_tipo_impuesto){
         $t_head_impuesto = $this->thead_impuesto();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar t head', data: $t_head_impuesto);
@@ -78,7 +78,7 @@ class _html_factura{
                             $t_head_impuesto
                         </thead>
                         <tbody>
-                            $impuesto_traslado_html
+                            $impuesto_html
                         </tbody>
                     </table>
                 </td>

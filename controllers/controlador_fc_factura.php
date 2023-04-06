@@ -27,6 +27,7 @@ use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\fc_cancelacion;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_csd;
+use gamboamartin\facturacion\models\fc_email;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
@@ -38,6 +39,8 @@ use gamboamartin\system\system;
 use gamboamartin\template\html;
 use html\cat_sat_motivo_cancelacion_html;
 use html\cat_sat_tipo_relacion_html;
+use html\com_cliente_html;
+use html\com_email_cte_html;
 use JsonException;
 use PDO;
 use stdClass;
@@ -58,12 +61,15 @@ class controlador_fc_factura extends system{
     public string $link_fc_partida_modifica_bd = '';
     public string $link_fc_factura_partidas = '';
     public string $link_fc_factura_nueva_partida = '';
+
+    public string $link_fc_email_alta_bd = '';
     public string $link_fc_relacion_alta_bd = '';
     public string $link_com_producto = '';
 
     public string $link_factura_cancela = '';
     public string $link_factura_genera_xml = '';
     public string $link_factura_timbra_xml = '';
+    public string $button_fc_factura_correo = '';
     public string $link_fc_factura_relacionada_alta_bd = '';
     public int $fc_factura_id = -1;
     public int $fc_partida_id = -1;
@@ -138,6 +144,15 @@ class controlador_fc_factura extends system{
 
 
         $this->verifica_parents_alta = true;
+
+
+        $link_fc_email_alta_bd = $this->obj_link->link_alta_bd(link: $this->link, seccion: 'fc_email');
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al obtener link',data:  $this->link_fc_email_alta_bd);
+            print_r($error);
+            exit;
+        }
+        $this->link_fc_email_alta_bd  = $link_fc_email_alta_bd;
 
 
 
@@ -246,6 +261,9 @@ class controlador_fc_factura extends system{
 
     }
 
+
+
+
     private function base_data_partida(int $fc_partida_id): array|stdClass
     {
         $data = $this->data_partida(fc_partida_id: $fc_partida_id);
@@ -331,6 +349,116 @@ class controlador_fc_factura extends system{
 
     }
 
+    public function correo(bool $header, bool $ws = false){
+
+        $row_upd = $this->modelo->registro(registro_id: $this->registro_id, columnas_en_bruto: true, retorno_obj: true);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener registro', data: $row_upd);
+        }
+
+
+        $this->inputs = new stdClass();
+        $fc_factura_id = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols: 12,
+            con_registros: true, id_selected: $this->registro_id, link: $this->link,
+            disabled: true, filtro: array('fc_factura.id'=>$this->registro_id));
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $fc_factura_id);
+        }
+
+        $this->inputs->fc_factura_id = $fc_factura_id;
+
+        $fc_factura_folio = (new fc_factura_html(html: $this->html_base))->input_folio(cols: 12,row_upd: $row_upd,
+            value_vacio: false, disabled: true);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $fc_factura_folio);
+        }
+
+        $this->inputs->fc_factura_folio = $fc_factura_folio;
+
+
+        $com_cliente_razon_social= (new com_cliente_html(html: $this->html_base))->input_razon_social(cols: 12,
+            row_upd: $row_upd, value_vacio: false, disabled: true);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $com_cliente_razon_social);
+        }
+
+        $this->inputs->com_cliente_razon_social = $com_cliente_razon_social;
+
+        $com_email_cte_descripcion= (new com_email_cte_html(html: $this->html_base))->input_email(cols: 12,
+            row_upd:  new stdClass(),value_vacio:  false, name: 'descripcion');
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $com_email_cte_descripcion);
+        }
+
+        $this->inputs->com_email_cte_descripcion = $com_email_cte_descripcion;
+
+
+        $com_email_cte_id= (new com_email_cte_html(html: $this->html_base))->select_com_email_cte_id(cols: 12,
+            con_registros:  true,id_selected:  -1, link: $this->link);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $com_email_cte_descripcion);
+        }
+
+        $this->inputs->com_email_cte_id = $com_email_cte_id;
+
+        $hidden_row_id = $this->html->hidden(name: 'fc_factura_id',value:  $this->registro_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $hidden_row_id);
+        }
+
+        $hidden_seccion_retorno = $this->html->hidden(name: 'seccion_retorno',value:  $this->tabla);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $hidden_seccion_retorno);
+        }
+        $hidden_id_retorno = $this->html->hidden(name: 'id_retorno',value:  $this->registro_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $hidden_id_retorno);
+        }
+
+        $this->inputs->hidden_row_id = $hidden_row_id;
+        $this->inputs->hidden_seccion_retorno = $hidden_seccion_retorno;
+        $this->inputs->hidden_id_retorno = $hidden_id_retorno;
+
+        $filtro['fc_factura.id'] = $this->registro_id;
+
+        $r_fc_email = (new fc_email(link: $this->link))->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener correos', data: $r_fc_email);
+        }
+
+        $emails_facturas = $r_fc_email->registros;
+
+        foreach ($emails_facturas as $indice=>$email_factura){
+            $params = $this->params_button_partida(accion_retorno: 'correo', fc_factura_id: $this->registro_id);
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al generar params', data: $params);
+            }
+
+            $link_elimina = $this->html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
+                registro_id: $email_factura['fc_email_id'],
+                seccion: 'fc_email', style: 'danger',icon: 'bi bi-trash',
+                muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina);
+            }
+            $emails_facturas[$indice]['elimina_bd'] = $link_elimina;
+        }
+
+
+        $this->registros['emails_facturas'] = $emails_facturas;
+
+
+        $button_fc_factura_modifica =  $this->html->button_href(accion: 'modifica', etiqueta: 'Ir a Factura',
+            registro_id: $this->registro_id,
+            seccion: 'fc_factura', style: 'warning', params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_modifica);
+        }
+
+        $this->button_fc_factura_modifica = $button_fc_factura_modifica;
+        return $this->inputs;
+    }
+
     private function data_partida(int $fc_partida_id): array|stdClass
     {
         $data_partida = (new fc_partida($this->link))->data_partida_obj(fc_partida_id: $fc_partida_id);
@@ -374,8 +502,6 @@ class controlador_fc_factura extends system{
         }
 
     }
-
-
 
     public function exportar_documentos(bool $header, bool $ws = false){
 
@@ -474,6 +600,8 @@ class controlador_fc_factura extends system{
         return $alta;
 
     }
+
+
 
     public function genera_pdf(bool $header, bool $ws = false){
 
@@ -662,6 +790,8 @@ class controlador_fc_factura extends system{
 
         return $data;
     }
+
+
 
     /**
      * Inicializa las configuraciones de views para facturas
@@ -1067,76 +1197,12 @@ class controlador_fc_factura extends system{
 
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
-        $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id,html: $this->html);
+
+        $partidas = (new _partidas_html())->genera_partidas_html(fc_factura_id: $this->registro_id,html: $this->html,link: $this->link);
         if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
+            $error = $this->errores->error(mensaje: 'Error al generar html', data: $partidas);
             print_r($error);
             die('Error');
-        }
-
-        foreach ($partidas->registros as $indice=>$partida){
-
-            $data_producto_html = (new _html_factura())->data_producto(partida: $partida);
-            if (errores::$error) {
-                $error = $this->errores->error(mensaje: 'Error al generar html', data: $data_producto_html);
-                print_r($error);
-                die('Error');
-            }
-            $partidas->registros[$indice]['data_producto_html'] = $data_producto_html;
-
-            $impuesto_traslado_html_completo = '';
-            $aplica_traslado = false;
-            foreach($partida['fc_traslado'] as $impuesto){
-                $aplica_traslado = true;
-                $impuesto_traslado_html = (new _html_factura())->data_impuesto(impuesto: $impuesto,key: "fc_traslado_importe");
-                if (errores::$error) {
-                    $error = $this->errores->error(mensaje: 'Error al generar html', data: $impuesto_traslado_html);
-                    print_r($error);
-                    die('Error');
-                }
-                $impuesto_traslado_html_completo.=$impuesto_traslado_html;
-
-            }
-            $impuesto_traslado_html = '';
-            if($aplica_traslado) {
-                $impuesto_traslado_html = (new _html_factura())->tr_impuestos_html(
-                    impuesto_traslado_html: $impuesto_traslado_html_completo, tag_tipo_impuesto: 'Traslados');
-                if (errores::$error) {
-                    $error = $this->errores->error(mensaje: 'Error al generar html', data: $impuesto_traslado_html);
-                    print_r($error);
-                    die('Error');
-                }
-            }
-
-
-            $partidas->registros[$indice]['impuesto_traslado_html'] = $impuesto_traslado_html;
-
-            $impuesto_retenido_html_completo = '';
-            $aplica_retenido = false;
-            foreach($partida['fc_retenido'] as $impuesto){
-                $aplica_retenido = true;
-                $impuesto_retenidos_html = (new _html_factura())->data_impuesto(impuesto: $impuesto,key: "fc_retenido_importe");
-                if (errores::$error) {
-                    $error = $this->errores->error(mensaje: 'Error al generar html', data: $impuesto_retenidos_html);
-                    print_r($error);
-                    die('Error');
-                }
-                $impuesto_retenido_html_completo.=$impuesto_retenidos_html;
-
-            }
-            $impuesto_retenido_html = '';
-            if($aplica_retenido) {
-                $impuesto_retenido_html = (new _html_factura())->tr_impuestos_html(
-                    impuesto_traslado_html: $impuesto_retenido_html_completo, tag_tipo_impuesto: 'Retenciones');
-                if (errores::$error) {
-                    $error = $this->errores->error(mensaje: 'Error al generar html', data: $impuesto_retenido_html);
-                    print_r($error);
-                    die('Error');
-                }
-            }
-
-
-            $partidas->registros[$indice]['impuesto_retenido_html'] = $impuesto_retenido_html;
         }
 
         $this->partidas = $partidas;
@@ -1196,8 +1262,18 @@ class controlador_fc_factura extends system{
 
         $this->button_fc_factura_timbra = $button_fc_factura_timbra;
 
+        $button_fc_factura_correo =  $this->html->button_href(accion: 'correo', etiqueta: 'Correos',
+            registro_id: $this->registro_id,
+            seccion: 'fc_factura', style: 'success', params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_correo);
+        }
+
+        $this->button_fc_factura_correo = $button_fc_factura_correo;
+
         return $base->template;
     }
+
 
     public function nueva_partida(bool $header, bool $ws = false): array|stdClass
     {
@@ -1238,6 +1314,8 @@ class controlador_fc_factura extends system{
 
         return $inputs;
     }
+
+
 
     private function pdf(int $fc_factura_id, bool $descarga, bool $guarda){
         $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $fc_factura_id);
@@ -1447,11 +1525,11 @@ class controlador_fc_factura extends system{
         return $tipo_comprobante;
     }
 
-    private function params_button_partida(int $fc_factura_id): array
+    private function params_button_partida(string $accion_retorno, int $fc_factura_id): array
     {
         $params = array();
         $params['seccion_retorno'] = 'fc_factura';
-        $params['accion_retorno'] = 'relaciones';
+        $params['accion_retorno'] = $accion_retorno;
         $params['id_retorno'] = $fc_factura_id;
         return $params;
     }
@@ -1703,7 +1781,7 @@ class controlador_fc_factura extends system{
 
                 foreach ($relacion['fc_facturas_relacionadas'] as $indice_fr=>$fc_factura_relacionada){
 
-                    $params = $this->params_button_partida(fc_factura_id: $this->registro_id);
+                    $params = $this->params_button_partida(accion_retorno: 'relaciones', fc_factura_id: $this->registro_id);
                     if (errores::$error) {
                         return $this->errores->error(mensaje: 'Error al generar params', data: $params);
                     }
@@ -1719,7 +1797,7 @@ class controlador_fc_factura extends system{
 
                 }
 
-            $params = $this->params_button_partida(fc_factura_id: $this->registro_id);
+            $params = $this->params_button_partida(accion_retorno: 'relaciones', fc_factura_id: $this->registro_id);
             if (errores::$error) {
                 return $this->errores->error(mensaje: 'Error al generar params', data: $params);
             }

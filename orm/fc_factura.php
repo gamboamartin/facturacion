@@ -13,6 +13,7 @@ use gamboamartin\cat_sat\models\cat_sat_moneda;
 use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
+use gamboamartin\comercial\models\com_email_cte;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
@@ -228,6 +229,27 @@ class fc_factura extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al dar de alta accion', data: $r_alta_bd);
         }
+
+        $fc_factura = $this->registro(registro_id: $r_alta_bd->registro_id, retorno_obj: true);
+
+        $filtro = array();
+        $filtro['com_cliente.id'] = $fc_factura->com_cliente_id;
+
+        $r_com_email_cte = (new com_email_cte(link: $this->link))->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener correos', data: $r_com_email_cte);
+        }
+
+        $com_emails_ctes = $r_com_email_cte->registros;
+        foreach ($com_emails_ctes as $com_email_cte){
+            $fc_email_ins['fc_factura_id'] = $fc_factura->fc_factura_id;
+            $fc_email_ins['com_email_cte_id'] = $com_email_cte['com_email_cte_id'];
+            $r_alta_fc_email = (new fc_email(link: $this->link))->alta_registro(registro: $fc_email_ins);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);
+            }
+        }
+
 
 
         $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
