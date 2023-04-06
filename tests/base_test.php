@@ -703,6 +703,15 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_email(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_email');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_factura(PDO $link): array
     {
 
@@ -738,6 +747,10 @@ class base_test{
         }
 
         $del = $this->del_fc_relacion($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        $del = $this->del_fc_email($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
@@ -781,6 +794,7 @@ class base_test{
         }
         return $del;
     }
+
 
     public function del_fc_factura_etapa(PDO $link): array
     {
