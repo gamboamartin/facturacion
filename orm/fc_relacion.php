@@ -138,6 +138,7 @@ class fc_relacion extends _modelo_parent_sin_codigo
      * Obtiene las relaciones de una factura
      * @param int $fc_factura_id Factura a obtener datos
      * @return array
+     * @version 6.33.0
      */
     final public function relaciones(int $fc_factura_id): array
     {

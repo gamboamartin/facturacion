@@ -7,6 +7,7 @@ use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
 use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
+use gamboamartin\cat_sat\models\cat_sat_tipo_relacion;
 use gamboamartin\comercial\models\com_producto;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
@@ -18,6 +19,7 @@ use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
 
 
+use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\organigrama\models\org_sucursal;
 use PDO;
 
@@ -68,6 +70,16 @@ class base_test{
     {
         $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_tipo_factor(link: $link,
             descripcion: $descripcion, id: $id);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_cat_sat_tipo_relacion(PDO $link, int $id = 1): array|\stdClass
+    {
+        $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_tipo_relacion(link: $link, id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -391,6 +403,46 @@ class base_test{
 
 
         $alta = (new fc_partida($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_relacion(PDO $link, int $cat_sat_tipo_relacion_id = 1, int $fc_factura_id = 1,
+                                    int $id = 1): array|\stdClass
+    {
+
+        $existe = (new cat_sat_tipo_relacion($link))->existe_by_id(registro_id: $cat_sat_tipo_relacion_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_tipo_relacion(link: $link, id: $cat_sat_tipo_relacion_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar factura', $alta);
+            }
+        }
+
+        $existe = (new fc_factura($link))->existe_by_id(registro_id: $fc_factura_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_com_producto(link: $link,id: $fc_factura_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar com_producto', $alta);
+            }
+        }
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['cat_sat_tipo_relacion_id'] = $cat_sat_tipo_relacion_id;
+        $registro['fc_factura_id'] = $fc_factura_id;
+
+
+        $alta = (new fc_relacion($link))->alta_registro($registro);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
 
