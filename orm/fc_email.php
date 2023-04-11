@@ -3,7 +3,6 @@
 namespace gamboamartin\facturacion\models;
 
 use base\orm\_modelo_parent_sin_codigo;
-use gamboamartin\comercial\models\com_email_cte;
 use gamboamartin\errores\errores;
 use PDO;
 use stdClass;

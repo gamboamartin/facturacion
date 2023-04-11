@@ -352,7 +352,8 @@ class controlador_fc_factura extends system{
 
     }
 
-    public function correo(bool $header, bool $ws = false){
+    public function correo(bool $header, bool $ws = false): array|stdClass
+    {
 
         $row_upd = $this->modelo->registro(registro_id: $this->registro_id, columnas_en_bruto: true, retorno_obj: true);
         if (errores::$error) {
@@ -503,6 +504,11 @@ class controlador_fc_factura extends system{
         }else{
             echo 'The file does not exist.';
         }
+
+    }
+
+    public function envia_factura(bool $header, bool $ws = false){
+        //$mensajes
 
     }
 
@@ -1196,12 +1202,33 @@ class controlador_fc_factura extends system{
 
     public function inserta_notificacion(bool $header, bool $ws = false){
 
+        $this->link->beginTransaction();
         $notificaciones = (new fc_factura(link: $this->link))->inserta_notificacion(fc_factura_id: $this->registro_id);
         if (errores::$error) {
+            $this->link->rollBack();
             $error = $this->errores->error(mensaje: 'Error al insertar notificaciones', data: $notificaciones);
             print_r($error);
             die('Error');
         }
+        $this->link->commit();
+
+        if($header){
+
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: "lista");
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error cambiar de view', data: $retorno,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($notificaciones, JSON_THROW_ON_ERROR);
+            exit;
+        }
+        return $notificaciones;
 
     }
 

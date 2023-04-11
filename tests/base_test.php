@@ -587,6 +587,10 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
 
         }
+        $del = (new base_test())->del_fc_receptor_email($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
 
         $del = (new \gamboamartin\comercial\test\base_test())->del_com_cliente($link);
         if(errores::$error){
@@ -832,6 +836,16 @@ class base_test{
         }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_partida');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_receptor_email(PDO $link): array
+    {
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_receptor_email');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }

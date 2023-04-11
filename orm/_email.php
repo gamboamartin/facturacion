@@ -90,8 +90,8 @@ class _email{
        return $r_fc_factura_documento->registros;
     }
 
-    private function existe_receptor(array $fc_email, PDO $link){
-        $com_email_cte_descripcion = $fc_email['com_email_cte_descripcion'];
+    private function existe_receptor(array $com_email_cte, PDO $link){
+        $com_email_cte_descripcion = $com_email_cte['com_email_cte_descripcion'];
         $filtro = array();
         $filtro['not_receptor.email'] = $com_email_cte_descripcion;
         $existe_not_receptor = (new not_receptor(link: $link))->existe(filtro: $filtro);
@@ -145,19 +145,19 @@ class _email{
         return $not_mensaje_ins;
     }
 
-    private function get_not_receptor_id(array $fc_email, PDO $link){
-        $existe_not_receptor = $this->existe_receptor(fc_email:  $fc_email,link: $link);
+    final public function get_not_receptor_id(array $com_email_cte, PDO $link){
+        $existe_not_receptor = $this->existe_receptor(com_email_cte:  $com_email_cte,link: $link);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener receptor', data: $existe_not_receptor);
         }
         if(!$existe_not_receptor){
-            $not_receptor_id = $this->inserta_receptor(fc_email: $fc_email,link:  $link);
+            $not_receptor_id = $this->inserta_receptor(com_email_cte: $com_email_cte,link:  $link);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al insertar receptor', data: $not_receptor_id);
             }
         }
         else{
-            $not_receptor_id = $this->not_receptor_id(fc_email: $fc_email, link: $link);
+            $not_receptor_id = $this->not_receptor_id(com_email_cte: $com_email_cte, link: $link);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener receptor', data: $not_receptor_id);
             }
@@ -206,8 +206,8 @@ class _email{
         return $r_not_mensaje->registro_id;
     }
 
-    private function inserta_receptor(array $fc_email, PDO $link){
-        $not_receptor_ins['email'] = $fc_email['com_email_cte_descripcion'];
+    private function inserta_receptor(array $com_email_cte, PDO $link){
+        $not_receptor_ins['email'] = $com_email_cte['com_email_cte_descripcion'];
         $r_not_receptor = (new not_receptor(link: $link))->alta_registro(registro: $not_receptor_ins);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar receptor', data: $r_not_receptor);
@@ -215,8 +215,8 @@ class _email{
         return $r_not_receptor->registro_id;
     }
 
-    private function inserta_rel_mensaje(array $fc_email, PDO $link, int $not_mensaje_id){
-        $not_receptor_id = $this->get_not_receptor_id(fc_email: $fc_email,link:  $link);
+    private function inserta_rel_mensaje(array $com_email_cte, PDO $link, int $not_mensaje_id){
+        $not_receptor_id = $this->get_not_receptor_id(com_email_cte: $com_email_cte,link:  $link);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener receptor', data: $not_receptor_id);
         }
@@ -237,7 +237,7 @@ class _email{
             return $this->error->error(mensaje: 'Error al obtener receptores de correo', data: $fc_emails);
         }
         foreach ($fc_emails as $fc_email){
-            $r_not_rel_mensaje = $this->inserta_rel_mensaje(fc_email: $fc_email,link:  $link,not_mensaje_id:  $not_mensaje_id);
+            $r_not_rel_mensaje = $this->inserta_rel_mensaje(com_email_cte: $fc_email,link:  $link,not_mensaje_id:  $not_mensaje_id);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al insertar relacion de mensaje', data: $r_not_rel_mensaje);
             }
@@ -285,8 +285,8 @@ class _email{
         return $not_mensaje_ins;
     }
 
-    private function not_receptor_id(array $fc_email, PDO $link){
-        $com_email_cte_descripcion = $fc_email['com_email_cte_descripcion'];
+    private function not_receptor_id(array $com_email_cte, PDO $link){
+        $com_email_cte_descripcion = $com_email_cte['com_email_cte_descripcion'];
         $filtro = array();
         $filtro['not_receptor.email'] = $com_email_cte_descripcion;
         $r_not_receptor = (new not_receptor(link: $link))->filtro_and(filtro: $filtro);
