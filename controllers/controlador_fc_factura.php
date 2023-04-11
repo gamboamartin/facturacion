@@ -32,6 +32,7 @@ use gamboamartin\facturacion\models\fc_email;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
+use gamboamartin\facturacion\models\fc_notificacion;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\notificaciones\models\not_adjunto;
@@ -508,7 +509,32 @@ class controlador_fc_factura extends system{
     }
 
     public function envia_factura(bool $header, bool $ws = false){
-        //$mensajes
+
+        $this->link->beginTransaction();
+        $notifica = (new fc_factura(link: $this->link))->envia_factura(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al enviar notificacion',data:  $notifica, header: $header,ws:$ws);
+        }
+        $this->link->commit();
+
+        if($header){
+
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: "lista");
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error cambiar de view', data: $retorno,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($notifica, JSON_THROW_ON_ERROR);
+            exit;
+        }
+        return $notifica;
 
     }
 
@@ -1554,23 +1580,7 @@ class controlador_fc_factura extends system{
         return $timbre;
     }
 
-    private function tipo_de_comprobante_predeterminado(): array|stdClass
-    {
-        $filtro['cat_sat_tipo_de_comprobante.descripcion'] = $this->conf_generales->CAT_SAT_TIPO_DE_COMPROBANTE;
-        $tipo_comprobante = (new cat_sat_tipo_de_comprobante($this->link))->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener tipo de comprobante',data:  $this->conf_generales);
-        }
 
-        if ($tipo_comprobante->n_registros === 0){
-            $tipo_comprobante = (new cat_sat_tipo_de_comprobante($this->link))->get_tipo_comprobante_predeterminado();
-            if(errores::$error){
-                return $this->errores->error(mensaje: 'Error al obtener tipo de comprobante predeterminado',
-                    data:  $tipo_comprobante);
-            }
-        }
-        return $tipo_comprobante;
-    }
 
     private function params_button_partida(string $accion_retorno, int $fc_factura_id): array
     {
@@ -1890,6 +1900,24 @@ class controlador_fc_factura extends system{
         $this->inputs->select->fc_factura_id = $select;
 
         return $select;
+    }
+
+    private function tipo_de_comprobante_predeterminado(): array|stdClass
+    {
+        $filtro['cat_sat_tipo_de_comprobante.descripcion'] = $this->conf_generales->CAT_SAT_TIPO_DE_COMPROBANTE;
+        $tipo_comprobante = (new cat_sat_tipo_de_comprobante($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener tipo de comprobante',data:  $this->conf_generales);
+        }
+
+        if ($tipo_comprobante->n_registros === 0){
+            $tipo_comprobante = (new cat_sat_tipo_de_comprobante($this->link))->get_tipo_comprobante_predeterminado();
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error al obtener tipo de comprobante predeterminado',
+                    data:  $tipo_comprobante);
+            }
+        }
+        return $tipo_comprobante;
     }
 
     public function ve_partida(bool $header, bool $ws = false): array|stdClass

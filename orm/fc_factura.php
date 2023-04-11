@@ -599,6 +599,14 @@ class fc_factura extends modelo
         return $emisor;
     }
 
+    final public function envia_factura(int $fc_factura_id){
+        $notifica = (new _email())->envia_factura(fc_factura_id: $fc_factura_id,link:  $this->link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al enviar notificacion',data:  $notifica);
+        }
+        return $notifica;
+    }
+
     private function from_impuesto(string $tipo_impuesto): string
     {
         return "fc_partida AS fc_partida_operacion LEFT JOIN $tipo_impuesto ON $tipo_impuesto.fc_partida_id = fc_partida_operacion.id";

@@ -106,6 +106,27 @@ class _email{
        return $r_fc_factura_documento->registros;
     }
 
+    final public function envia_factura(int $fc_factura_id, PDO $link){
+        $fc_notificaciones = $this->get_notificaciones(fc_factura_id: $fc_factura_id,link:  $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener r_fc_notificacion',data:  $fc_notificaciones);
+        }
+        $n_notificaciones_enviadas = 0;
+        foreach ($fc_notificaciones as $fc_notificacion){
+            $notifica = $this->notifica(fc_notificacion:  $fc_notificacion,link: $link);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al enviar notificacion',data:  $notifica);
+            }
+            if(!is_bool($notifica) && $notifica!==false){
+                $n_notificaciones_enviadas++;
+            }
+        }
+        if($n_notificaciones_enviadas === 0){
+            return $this->error->error(mensaje: 'Error no existen notificaciones por enviar',data:  $n_notificaciones_enviadas);
+        }
+        return $fc_notificaciones;
+    }
+
     private function existe_receptor(array $com_email_cte, PDO $link){
         $com_email_cte_descripcion = $com_email_cte['com_email_cte_descripcion'];
         $filtro = array();
@@ -181,6 +202,25 @@ class _email{
         return $not_receptor_id;
     }
 
+    /**
+     * Obtiene las notificaciones de una factura
+     * @param int $fc_factura_id Factura a obtener notificaciones
+     * @param PDO $link Conexion a la base de datos
+     * @return array
+     */
+    private function get_notificaciones(int $fc_factura_id, PDO $link): array
+    {
+        $filtro['fc_factura.id'] = $fc_factura_id;
+        $r_fc_notificacion = (new fc_notificacion(link: $link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener r_fc_notificacion',data:  $r_fc_notificacion);
+        }
+        if($r_fc_notificacion->n_registros === 0){
+            return $this->error->error(mensaje: 'Error no hay notificaciones asignadas',data:  $r_fc_notificacion);
+        }
+        return $r_fc_notificacion->registros;
+    }
+
     private function inserta_adjunto(array $doc, stdClass $row_entidad, int $not_mensaje_id, PDO $link){
         $not_adjunto_ins['not_mensaje_id'] = $not_mensaje_id;
         $not_adjunto_ins['doc_documento_id'] = $doc['doc_documento_id'];
@@ -220,7 +260,7 @@ class _email{
         }
 
         $fc_notificacion_ins['fc_factura_id'] = $row_entidad->fc_factura_id;
-        $fc_notificacion_ins['not_mensaje_id'] = $row_entidad->registro_id;
+        $fc_notificacion_ins['not_mensaje_id'] = $r_not_mensaje->registro_id;
 
         $r_fc_notificacion = (new fc_notificacion(link: $link))->alta_registro(registro: $fc_notificacion_ins);
         if (errores::$error) {
@@ -332,5 +372,24 @@ class _email{
             return $this->error->error(mensaje: 'Error no existe receptor', data: $r_not_receptor);
         }
         return $r_not_receptor->registros[0]['not_receptor_id'];
+    }
+
+    private function notifica(array $fc_notificacion, PDO $link){
+        $not_mensaje = (new not_mensaje(link: $link))->registro(registro_id: $fc_notificacion['not_mensaje_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener mensaje',data:  $not_mensaje);
+        }
+        /**
+         * crear data conf para validar ENVIADO
+         */
+        if($not_mensaje['not_mensaje_etapa'] === 'ENVIADO'){
+            return false;
+        }
+
+        $notifica = (new not_mensaje(link: $link))->envia_mensaje($fc_notificacion['not_mensaje_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al notificar',data:  $notifica);
+        }
+        return $notifica;
     }
 }
