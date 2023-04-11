@@ -337,6 +337,12 @@ class _email{
         return $docs;
     }
 
+    /**
+     * Integra el mensaje de envio de una factura
+     * @param string $asunto Asunto de correo
+     * @param stdClass $row_entidad Registro a integrar datos
+     * @return string
+     */
     private function mensaje(string $asunto, stdClass $row_entidad): string
     {
         return "Buen día se envia $asunto por un Total de: $row_entidad->fc_factura_total";

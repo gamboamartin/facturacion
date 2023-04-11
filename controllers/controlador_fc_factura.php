@@ -510,6 +510,40 @@ class controlador_fc_factura extends system{
 
     }
 
+    public function envia_cfdi(bool $header, bool $ws = false){
+        $genera_pdf = $this->genera_pdf(header: false);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $genera_pdf, header: $header,ws:$ws);
+        }
+        $inserta_notificacion = (new fc_factura(link: $this->link))->inserta_notificacion(registro_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al insertar notificacion',data:  $inserta_notificacion, header: $header,ws:$ws);
+        }
+        $envia_notificacion = (new fc_factura(link: $this->link))->envia_factura(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al enviar notificacion',data:  $envia_notificacion, header: $header,ws:$ws);
+        }
+        if($header){
+
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: "lista");
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error cambiar de view', data: $retorno,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($envia_notificacion, JSON_THROW_ON_ERROR);
+            exit;
+        }
+        return $envia_notificacion;
+
+
+    }
+
     public function envia_factura(bool $header, bool $ws = false){
 
         $this->link->beginTransaction();
@@ -691,8 +725,11 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al al insertar factura_doc',data:  $r_fc_factura_documento, header: $header,ws:$ws);
         }
 
+        if($header){
 
-        exit;
+        }
+        return $r_fc_factura_documento;
+
     }
 
     public function genera_xml(bool $header, bool $ws = false){
