@@ -24,6 +24,7 @@ use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_partida_html;
+use gamboamartin\facturacion\models\_email;
 use gamboamartin\facturacion\models\fc_cancelacion;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_csd;
@@ -33,6 +34,11 @@ use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
+use gamboamartin\notificaciones\models\not_adjunto;
+use gamboamartin\notificaciones\models\not_emisor;
+use gamboamartin\notificaciones\models\not_mensaje;
+use gamboamartin\notificaciones\models\not_receptor;
+use gamboamartin\notificaciones\models\not_rel_mensaje;
 use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
@@ -260,9 +266,6 @@ class controlador_fc_factura extends system{
         return $r_alta_partida_bd;
 
     }
-
-
-
 
     private function base_data_partida(int $fc_partida_id): array|stdClass
     {
@@ -601,8 +604,6 @@ class controlador_fc_factura extends system{
 
     }
 
-
-
     public function genera_pdf(bool $header, bool $ws = false){
 
         $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $this->registro_id);
@@ -790,8 +791,6 @@ class controlador_fc_factura extends system{
 
         return $data;
     }
-
-
 
     /**
      * Inicializa las configuraciones de views para facturas
@@ -1193,6 +1192,17 @@ class controlador_fc_factura extends system{
         $this->inputs->descuento = $fc_partida_descuento;
 
         return $this->inputs;
+    }
+
+    public function inserta_notificacion(bool $header, bool $ws = false){
+
+        $notificaciones = (new fc_factura(link: $this->link))->inserta_notificacion(fc_factura_id: $this->registro_id);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al insertar notificaciones', data: $notificaciones);
+            print_r($error);
+            die('Error');
+        }
+
     }
 
     public function modifica(bool $header, bool $ws = false): array|stdClass

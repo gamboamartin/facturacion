@@ -12,7 +12,8 @@ use stdClass;
 class fc_factura_documento extends _modelo_parent {
     public function __construct(PDO $link){
         $tabla = 'fc_factura_documento';
-        $columnas = array($tabla=>false,'fc_factura'=>$tabla,'doc_documento'=>$tabla, 'doc_tipo_documento' => 'doc_documento');
+        $columnas = array($tabla=>false,'fc_factura'=>$tabla,'doc_documento'=>$tabla,
+            'doc_tipo_documento' => 'doc_documento','doc_extension'=>'doc_documento');
         $campos_obligatorios = array();
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios, columnas: $columnas);

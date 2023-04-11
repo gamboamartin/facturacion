@@ -605,9 +605,6 @@ class fc_factura extends modelo
     }
 
 
-
-
-
     public function genera_ruta_archivo_tmp(): array|string
     {
         $ruta_archivos = $this->ruta_archivos();
@@ -944,7 +941,13 @@ class fc_factura extends modelo
     }
 
 
-
+    final public function inserta_notificacion(int $fc_factura_id){
+        $notificaciones = (new _email())->crear_notificaciones(fc_factura_id: $fc_factura_id,link:  $this->link);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar notificaciones', data: $notificaciones);
+        }
+        return $notificaciones;
+    }
     private function integra_ac_impuesto(array $global_imp, array $impuesto, string $key_gl, string $key_importe){
         if(!isset($global_imp[$key_gl])) {
             $global_imp = $this->init_imp_global(global_nodo: $global_imp, impuesto: $impuesto, key_gl: $key_gl, key_importe: $key_importe);
