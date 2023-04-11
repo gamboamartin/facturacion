@@ -1203,7 +1203,7 @@ class controlador_fc_factura extends system{
     public function inserta_notificacion(bool $header, bool $ws = false){
 
         $this->link->beginTransaction();
-        $notificaciones = (new fc_factura(link: $this->link))->inserta_notificacion(fc_factura_id: $this->registro_id);
+        $notificaciones = (new fc_factura(link: $this->link))->inserta_notificacion(registro_id: $this->registro_id);
         if (errores::$error) {
             $this->link->rollBack();
             $error = $this->errores->error(mensaje: 'Error al insertar notificaciones', data: $notificaciones);

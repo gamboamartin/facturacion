@@ -6,67 +6,83 @@ use gamboamartin\notificaciones\models\not_emisor;
 use gamboamartin\notificaciones\models\not_mensaje;
 use gamboamartin\notificaciones\models\not_receptor;
 use gamboamartin\notificaciones\models\not_rel_mensaje;
+use gamboamartin\validacion\validacion;
 use PDO;
 use stdClass;
 
 class _email{
     private errores $error;
+    private validacion $validacion;
 
     public function __construct()
     {
         $this->error = new errores();
+        $this->validacion = new validacion();
     }
 
     /**
      * Genera el asunto de un mensaje para notificaciones
-     * @param stdClass $fc_factura Factura a enviar
-     * @return string
+     * @param stdClass $row_entidad Registro de la entidad a integrar asunto
+     * @param string $uuid Identificador del SAT
+     * @return string|array
+     * @version 7.4.0
      */
-    private function asunto(stdClass $fc_factura): string
+    private function asunto(stdClass $row_entidad, string $uuid): string|array
     {
-        $asunto = "Factura de $fc_factura->org_empresa_razon_social RFC: $fc_factura->org_empresa_rfc Folio: ";
-        $asunto .= "$fc_factura->fc_factura_uuid";
+        $keys = array('org_empresa_razon_social','org_empresa_rfc');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row_entidad);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar row_entidad',data:  $valida);
+        }
+        $uuid = trim($uuid);
+        if($uuid === ''){
+            return $this->error->error(mensaje: 'Error uuid esta vacio',data:  $uuid);
+        }
+
+        $asunto = "Factura de $row_entidad->org_empresa_razon_social RFC: $row_entidad->org_empresa_rfc Folio: ";
+        $asunto .= "$uuid";
         return $asunto;
     }
 
-    final public function crear_notificaciones(int $fc_factura_id, PDO $link){
-        $fc_factura = (new fc_factura(link: $link))->registro(registro_id: $fc_factura_id, retorno_obj: true);
+    final public function crear_notificaciones(int $registro_id, PDO $link){
+        $row_entidad = (new fc_factura(link: $link))->registro(registro_id: $registro_id, retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $row_entidad);
         }
+        $uuid = $row_entidad->fc_factura_uuid;
 
-        $not_mensaje_id = $this->inserta_mensaje(fc_factura: $fc_factura,link:  $link);
+        $not_mensaje_id = $this->inserta_mensaje(link: $link, row_entidad: $row_entidad, uuid: $uuid);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar mensaje', data: $not_mensaje_id);
         }
 
-        $r_not_rel_mensaje = $this->inserta_rels_mesajes(fc_factura_id: $fc_factura_id,link:  $link, not_mensaje_id:  $not_mensaje_id);
+        $r_not_rel_mensaje = $this->inserta_rels_mesajes(registro_id: $registro_id,link:  $link, not_mensaje_id:  $not_mensaje_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar relacion de mensaje', data: $r_not_rel_mensaje);
         }
 
 
-        $r_not_adjunto = $this->inserta_adjuntos(fc_factura: $fc_factura,fc_factura_id:  $fc_factura_id,link:  $link,not_mensaje_id:  $not_mensaje_id);
+        $r_not_adjunto = $this->inserta_adjuntos(row_entidad: $row_entidad,registro_id:  $registro_id,link:  $link,not_mensaje_id:  $not_mensaje_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar adjunto', data: $r_not_adjunto);
         }
 
         $data = new stdClass();
-        $data->fc_factura = $fc_factura;
+        $data->row_entidad = $row_entidad;
         $data->not_mensaje_id = $not_mensaje_id;
         $data->r_not_rel_mensaje = $r_not_rel_mensaje;
         $data->r_not_adjunto = $r_not_adjunto;
         return $data;
     }
 
-    private function data_email(stdClass $fc_factura){
-        $asunto = $this->asunto(fc_factura: $fc_factura);
+    private function data_email(stdClass $row_entidad, string $uuid){
+        $asunto = $this->asunto(row_entidad: $row_entidad, uuid: $uuid);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar asunto', data: $asunto);
 
         }
 
-        $mensaje = $this->mensaje(asunto: $asunto,fc_factura: $fc_factura);
+        $mensaje = $this->mensaje(asunto: $asunto,row_entidad: $row_entidad);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar asunto', data: $asunto);
         }
@@ -78,9 +94,9 @@ class _email{
         return $data;
     }
 
-    private function documentos(int $fc_factura_id, PDO $link){
+    private function documentos(int $registro_id, PDO $link){
         $filtro = array();
-        $filtro['fc_factura.id'] = $fc_factura_id;
+        $filtro['fc_factura.id'] = $registro_id;
 
         $r_fc_factura_documento = (new fc_factura_documento(link: $link))->filtro_and(filtro: $filtro);
         if (errores::$error) {
@@ -114,8 +130,8 @@ class _email{
         return $r_fc_email->registros;
     }
 
-    private function genera_documentos(int $fc_factura_id, PDO $link){
-        $fc_factura_documentos = $this->documentos(fc_factura_id: $fc_factura_id,link:  $link);
+    private function genera_documentos(int $registro_id, PDO $link){
+        $fc_factura_documentos = $this->documentos(registro_id: $registro_id,link:  $link);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener documentos', data: $fc_factura_documentos);
         }
@@ -127,8 +143,8 @@ class _email{
         return $docs;
     }
 
-    private function genera_not_mensaje_ins(stdClass $fc_factura, PDO $link){
-        $data_mensaje = $this->data_email(fc_factura: $fc_factura);
+    private function genera_not_mensaje_ins( PDO $link, stdClass $row_entidad, string $uuid){
+        $data_mensaje = $this->data_email(row_entidad: $row_entidad, uuid: $uuid);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar asunto', data: $data_mensaje);
         }
@@ -165,10 +181,10 @@ class _email{
         return $not_receptor_id;
     }
 
-    private function inserta_adjunto(array $doc, stdClass $fc_factura, int $not_mensaje_id, PDO $link){
+    private function inserta_adjunto(array $doc, stdClass $row_entidad, int $not_mensaje_id, PDO $link){
         $not_adjunto_ins['not_mensaje_id'] = $not_mensaje_id;
         $not_adjunto_ins['doc_documento_id'] = $doc['doc_documento_id'];
-        $not_adjunto_ins['descripcion'] = $fc_factura->fc_factura_folio.'.'.date('YmdHis').'.'.$doc['doc_extension_descripcion'];
+        $not_adjunto_ins['descripcion'] = $row_entidad->fc_factura_folio.'.'.date('YmdHis').'.'.$doc['doc_extension_descripcion'];
         $r_not_adjunto = (new not_adjunto(link: $link))->alta_registro(registro: $not_adjunto_ins);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar adjunto', data: $r_not_adjunto);
@@ -176,14 +192,14 @@ class _email{
         return $r_not_adjunto;
     }
 
-    private function inserta_adjuntos(stdClass $fc_factura, int $fc_factura_id, PDO $link,  int $not_mensaje_id){
+    private function inserta_adjuntos(stdClass $row_entidad, int $registro_id, PDO $link,  int $not_mensaje_id){
         $adjuntos = array();
-        $docs = $this->genera_documentos(fc_factura_id: $fc_factura_id,link:  $link);
+        $docs = $this->genera_documentos(registro_id: $registro_id,link:  $link);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener documentos', data: $docs);
         }
         foreach ($docs as $doc){
-            $r_not_adjunto = $this->inserta_adjunto(doc: $doc,fc_factura:  $fc_factura,not_mensaje_id:  $not_mensaje_id,link:  $link);
+            $r_not_adjunto = $this->inserta_adjunto(doc: $doc,row_entidad:  $row_entidad,not_mensaje_id:  $not_mensaje_id,link:  $link);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al insertar adjunto', data: $r_not_adjunto);
             }
@@ -192,8 +208,8 @@ class _email{
         return $adjuntos;
     }
 
-    private function inserta_mensaje(stdClass $fc_factura, PDO $link){
-        $not_mensaje_ins = $this->genera_not_mensaje_ins(fc_factura: $fc_factura,link:  $link);
+    private function inserta_mensaje(PDO $link, stdClass $row_entidad, string $uuid){
+        $not_mensaje_ins = $this->genera_not_mensaje_ins(link: $link, row_entidad: $row_entidad, uuid: $uuid);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener emisor', data: $not_mensaje_ins);
         }
@@ -202,6 +218,15 @@ class _email{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar mensaje', data: $r_not_mensaje);
         }
+
+        $fc_notificacion_ins['fc_factura_id'] = $row_entidad->fc_factura_id;
+        $fc_notificacion_ins['not_mensaje_id'] = $row_entidad->registro_id;
+
+        $r_fc_notificacion = (new fc_notificacion(link: $link))->alta_registro(registro: $fc_notificacion_ins);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar fc_notificacion_ins', data: $r_fc_notificacion);
+        }
+
 
         return $r_not_mensaje->registro_id;
     }
@@ -237,9 +262,9 @@ class _email{
         return $r_not_rel_mensaje;
     }
 
-    private function inserta_rels_mesajes(int $fc_factura_id, PDO $link, int $not_mensaje_id){
+    private function inserta_rels_mesajes(int $registro_id, PDO $link, int $not_mensaje_id){
         $rels = array();
-        $fc_emails = $this->fc_emails(fc_factura_id: $fc_factura_id ,link:  $link);
+        $fc_emails = $this->fc_emails(fc_factura_id: $registro_id ,link:  $link);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener receptores de correo', data: $fc_emails);
         }
@@ -268,9 +293,9 @@ class _email{
         return $docs;
     }
 
-    private function mensaje(string $asunto, stdClass $fc_factura): string
+    private function mensaje(string $asunto, stdClass $row_entidad): string
     {
-        return "Buen día se envia $asunto por un Total de: $fc_factura->fc_factura_sub_total";
+        return "Buen día se envia $asunto por un Total de: $row_entidad->fc_factura_sub_total";
     }
 
     private function not_emisor(PDO $link){

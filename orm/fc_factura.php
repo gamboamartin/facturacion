@@ -941,8 +941,8 @@ class fc_factura extends modelo
     }
 
 
-    final public function inserta_notificacion(int $fc_factura_id){
-        $notificaciones = (new _email())->crear_notificaciones(fc_factura_id: $fc_factura_id,link:  $this->link);
+    final public function inserta_notificacion(int $registro_id){
+        $notificaciones = (new _email())->crear_notificaciones(registro_id: $registro_id,link:  $this->link);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar notificaciones', data: $notificaciones);
         }
