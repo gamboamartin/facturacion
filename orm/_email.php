@@ -151,11 +151,13 @@ class _email{
         return $r_fc_email->registros;
     }
 
-    private function genera_documentos(int $registro_id, PDO $link){
+    private function genera_documentos(PDO $link, int $registro_id, stdClass $row_entidad){
+
         $fc_factura_documentos = $this->documentos(registro_id: $registro_id,link:  $link);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener documentos', data: $fc_factura_documentos);
         }
+
 
         $docs = $this->maqueta_documentos(fc_factura_documentos: $fc_factura_documentos);
         if (errores::$error) {
@@ -234,7 +236,7 @@ class _email{
 
     private function inserta_adjuntos(stdClass $row_entidad, int $registro_id, PDO $link,  int $not_mensaje_id){
         $adjuntos = array();
-        $docs = $this->genera_documentos(registro_id: $registro_id,link:  $link);
+        $docs = $this->genera_documentos(link: $link, registro_id: $registro_id, row_entidad: $row_entidad);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener documentos', data: $docs);
         }
@@ -327,7 +329,9 @@ class _email{
              */
             if($fc_factura_documento['doc_tipo_documento_descripcion'] === 'xml_sin_timbrar'){
                 $docs[] = $fc_factura_documento;
-                break;
+            }
+            if($fc_factura_documento['doc_tipo_documento_descripcion'] === 'CFDI PDF'){
+                $docs[] = $fc_factura_documento;
             }
         }
         return $docs;
@@ -335,7 +339,7 @@ class _email{
 
     private function mensaje(string $asunto, stdClass $row_entidad): string
     {
-        return "Buen día se envia $asunto por un Total de: $row_entidad->fc_factura_sub_total";
+        return "Buen día se envia $asunto por un Total de: $row_entidad->fc_factura_total";
     }
 
     private function not_emisor(PDO $link){
