@@ -465,6 +465,12 @@ class fc_factura extends modelo
         return $registro;
     }
 
+    /**
+     * Inicializa los datos del emisor para alta
+     * @param array $registro Registro en proceso
+     * @param stdClass $registro_csd Registro de tipo CSD
+     * @return array
+     */
     private function default_alta_emisor_data(array $registro, stdClass $registro_csd): array
     {
         $registro['dp_calle_pertenece_id'] = $registro_csd->dp_calle_pertenece_id;
