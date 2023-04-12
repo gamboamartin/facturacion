@@ -192,6 +192,112 @@ class fc_facturaTest extends test {
         errores::$error = false;
     }
 
+    public function test_get_factura(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo = new fc_factura($this->link);
+        //$modelo = new liberator($modelo);
+
+        $del = (new base_test())->del_org_empresa(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
+
+        $del = (new base_test())->del_cat_sat_factor(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_conf_traslado(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_conf_retenido(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 2, valor_unitario: 2425.8);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        /**
+         * CRITICA
+         */
+        $resultado = $modelo->get_factura(1);
+
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(5567.21, $resultado['fc_factura_total']);
+
+        $del = (new base_test())->del_fc_partida(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, codigo: 1, cantidad: 1, id: 1, valor_unitario: 2830.0);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, codigo: 2, cantidad: 1, id: 2, valor_unitario: 380);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, codigo: 3, cantidad: 1, id: 3, valor_unitario: 190);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, codigo: 4, cantidad: 1, id: 4, valor_unitario: 1699);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        /**
+         * CRITICA
+         */
+        $resultado = $modelo->get_factura(1);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(5099, $resultado['fc_factura_sub_total_base']);
+        $this->assertEquals(5099, $resultado['fc_factura_sub_total']);
+        $this->assertEquals(815.84, $resultado['fc_factura_traslados']);
+        $this->assertEquals(63.74, round($resultado['fc_factura_retenciones'],2));
+        $this->assertEquals(5851.09, $resultado['fc_factura_total']);
+
+
+        errores::$error = false;
+    }
     public function test_get_factura_descuento(): void
     {
         errores::$error = false;

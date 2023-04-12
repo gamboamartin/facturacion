@@ -758,7 +758,12 @@ class fc_factura extends modelo
 
     }
 
-    public function get_factura(int $fc_factura_id): array|stdClass|int
+    /**
+     *
+     * @param int $fc_factura_id
+     * @return array|stdClass|int
+     */
+    final public function get_factura(int $fc_factura_id): array|stdClass|int
     {
         $hijo = array();
         $hijo['fc_partida']['filtros'] = array();
@@ -883,8 +888,8 @@ class fc_factura extends modelo
 
         }
 
-        $registro['fc_factura_total'] = $registro['fc_factura_sub_total']
-            + $total_impuestos_trasladados-$total_impuestos_retenidos;
+        $registro['fc_factura_total'] = round($registro['fc_factura_sub_total']
+            + $total_impuestos_trasladados - $total_impuestos_retenidos,2);
         $registro['traslados'] = $trs_global;
         $registro['retenidos'] = $ret_global;
 

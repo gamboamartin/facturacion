@@ -398,7 +398,7 @@ class base_test{
         $registro['valor_unitario'] = $valor_unitario;
         $registro['fc_factura_id'] = $fc_factura_id;
         $registro['com_producto_id'] = $com_producto_id;
-        $registro['codigo_bis'] = 1;
+        $registro['codigo_bis'] = $codigo;
         $registro['descuento'] = $descuento;
 
 

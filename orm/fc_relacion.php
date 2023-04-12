@@ -70,6 +70,7 @@ class fc_relacion extends _modelo_parent_sin_codigo
      * Obtiene las facturas relacionadas
      * @param array $fc_relacion Relacion Base
      * @return array
+     * @version
      */
     final public function facturas_relacionadas(array $fc_relacion): array
     {
