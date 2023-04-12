@@ -72,7 +72,7 @@ class fc_factura extends modelo
         $fc_partida_valor_unitario = ' ROUND( IFNULL( fc_partida.valor_unitario,0),2) ';
         $fc_partida_descuento = ' ROUND( IFNULL(fc_partida.descuento,0 ),2 )';
 
-        $fc_partida_sub_total_base = "ROUND( $fc_partida_cantidad * $fc_partida_valor_unitario, 4 ) ";
+        $fc_partida_sub_total_base = "ROUND( $fc_partida_cantidad * $fc_partida_valor_unitario, 2 ) ";
 
 
         $fc_ligue_partida_factura = " fc_partida.fc_factura_id = fc_factura.id ";
@@ -139,7 +139,7 @@ class fc_factura extends modelo
 		fc_partida.fc_factura_id = fc_factura.id 
 	)";
 
-        $fc_factura_total = "ROUND(IFNULL($fc_factura_sub_total,0)+IFNULL($fc_factura_traslados,0)-IFNULL($fc_factura_retenciones,0),2)";
+        $fc_factura_total = "ROUND(IFNULL($fc_factura_sub_total,0)+IFNULL(ROUND($fc_factura_traslados,2),0)-IFNULL(ROUND($fc_factura_retenciones,2),0),2)";
 
 
         $fc_factura_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_factura_id = fc_factura.id)";
@@ -639,7 +639,6 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
         }
 
-
         if($tipo === 'xml') {
             $ingreso = (new cfdis())->ingreso(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
                 emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor,
@@ -884,7 +883,8 @@ class fc_factura extends modelo
 
         }
 
-
+        $registro['fc_factura_total'] = $registro['fc_factura_sub_total']
+            + $total_impuestos_trasladados-$total_impuestos_retenidos;
         $registro['traslados'] = $trs_global;
         $registro['retenidos'] = $ret_global;
 

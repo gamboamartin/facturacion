@@ -224,7 +224,7 @@ class fc_partida extends _base
         }
 
         if ((int)$retenido->n_registros > 0) {
-            return round($subtotal * (float)$retenido->registros[0]['cat_sat_factor_factor'],4);
+            return round($subtotal * (float)$retenido->registros[0]['cat_sat_factor_factor'],2);
         }
 
         return 0;
