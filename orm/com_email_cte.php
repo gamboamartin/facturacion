@@ -19,13 +19,25 @@ class com_email_cte extends \gamboamartin\comercial\models\com_email_cte {
         }
 
         $not_receptor_id = (new _email())->get_not_receptor_id(com_email_cte: $com_email_cte, link: $this->link);
-
-        $fc_receptor_email_ins['com_email_cte_id'] = $com_email_cte_id;
-        $fc_receptor_email_ins['not_receptor_id'] = $not_receptor_id;
-
-        $r_fc_receptor_email = (new fc_receptor_email(link: $this->link))->alta_registro(registro: $fc_receptor_email_ins);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al insertar relacion',data:  $r_fc_receptor_email);
+            return $this->error->error(mensaje: 'Error al obtener not_receptor_id',data:  $not_receptor_id);
+        }
+
+        $filtro['com_email_cte.id'] = $com_email_cte_id;
+        $filtro['not_receptor.id'] = $not_receptor_id;
+        $existe_receptor_email = (new fc_receptor_email(link: $this->link))->existe(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si existe',data:  $existe_receptor_email);
+        }
+        if(!$existe_receptor_email) {
+
+            $fc_receptor_email_ins['com_email_cte_id'] = $com_email_cte_id;
+            $fc_receptor_email_ins['not_receptor_id'] = $not_receptor_id;
+
+            $r_fc_receptor_email = (new fc_receptor_email(link: $this->link))->alta_registro(registro: $fc_receptor_email_ins);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al insertar relacion', data: $r_fc_receptor_email);
+            }
         }
 
         return $r_alta_bd;

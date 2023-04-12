@@ -281,11 +281,21 @@ class _email{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar receptor', data: $r_not_receptor);
         }
-        $fc_receptor_email_ins['not_receptor_id'] = $r_not_receptor->registro_id;
-        $fc_receptor_email_ins['com_email_cte_id'] = $com_email_cte['com_email_cte_id'];
-        $r_fc_receptor_email = (new fc_receptor_email(link: $link))->alta_registro(registro: $fc_receptor_email_ins);
+
+        $filtro['not_receptor.id'] = $r_not_receptor->registro_id;
+        $filtro['com_email_cte.id'] = $com_email_cte['com_email_cte_id'];
+        $existe_fc_receptor_email = (new fc_receptor_email(link: $link))->existe(filtro: $filtro);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al insertar fc_receptor_email_ins', data: $r_fc_receptor_email);
+            return $this->error->error(mensaje: 'Error al validar si existe', data: $existe_fc_receptor_email);
+        }
+        if(!$existe_fc_receptor_email) {
+
+            $fc_receptor_email_ins['not_receptor_id'] = $r_not_receptor->registro_id;
+            $fc_receptor_email_ins['com_email_cte_id'] = $com_email_cte['com_email_cte_id'];
+            $r_fc_receptor_email = (new fc_receptor_email(link: $link))->alta_registro(registro: $fc_receptor_email_ins);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al insertar fc_receptor_email_ins', data: $r_fc_receptor_email);
+            }
         }
 
         return $r_not_receptor->registro_id;
