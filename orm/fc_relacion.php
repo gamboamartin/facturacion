@@ -66,7 +66,13 @@ class fc_relacion extends _modelo_parent_sin_codigo
 
     }
 
-    final public function facturas_relacionadas(array $fc_relacion){
+    /**
+     * Obtiene las facturas relacionadas
+     * @param array $fc_relacion Relacion Base
+     * @return array
+     */
+    final public function facturas_relacionadas(array $fc_relacion): array
+    {
         $filtro = array();
         $filtro['fc_relacion.id'] = $fc_relacion['fc_relacion_id'];
         $r_fc_factura_relacionada = (new fc_factura_relacionada(link: $this->link))->filtro_and(filtro: $filtro);

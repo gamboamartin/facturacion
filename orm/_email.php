@@ -120,6 +120,8 @@ class _email{
             if(!is_bool($notifica) && $notifica!==false){
                 $n_notificaciones_enviadas++;
             }
+
+
         }
         if($n_notificaciones_enviadas === 0){
             return $this->error->error(mensaje: 'Error no existen notificaciones por enviar',data:  $n_notificaciones_enviadas);
@@ -389,9 +391,16 @@ class _email{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener mensaje',data:  $not_mensaje);
         }
+
         /**
          * crear data conf para validar ENVIADO
          */
+        if(is_null($not_mensaje['not_mensaje_etapa'])){
+            return false;
+        }
+        if(trim($not_mensaje['not_mensaje_etapa']) === ''){
+            return false;
+        }
         if($not_mensaje['not_mensaje_etapa'] === 'ENVIADO'){
             return false;
         }

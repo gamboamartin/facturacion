@@ -25,23 +25,15 @@ use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_partida_html;
-use gamboamartin\facturacion\models\_email;
 use gamboamartin\facturacion\models\_pdf;
-use gamboamartin\facturacion\models\fc_cancelacion;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_email;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
-use gamboamartin\facturacion\models\fc_notificacion;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
-use gamboamartin\notificaciones\models\not_adjunto;
-use gamboamartin\notificaciones\models\not_emisor;
-use gamboamartin\notificaciones\models\not_mensaje;
-use gamboamartin\notificaciones\models\not_receptor;
-use gamboamartin\notificaciones\models\not_rel_mensaje;
 use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
@@ -511,18 +503,22 @@ class controlador_fc_factura extends system{
     }
 
     public function envia_cfdi(bool $header, bool $ws = false){
+
         $genera_pdf = $this->genera_pdf(header: false);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $genera_pdf, header: $header,ws:$ws);
         }
+
         $inserta_notificacion = (new fc_factura(link: $this->link))->inserta_notificacion(registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al insertar notificacion',data:  $inserta_notificacion, header: $header,ws:$ws);
         }
+
         $envia_notificacion = (new fc_factura(link: $this->link))->envia_factura(fc_factura_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al enviar notificacion',data:  $envia_notificacion, header: $header,ws:$ws);
         }
+        print_r($envia_notificacion);exit;
         if($header){
 
             $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
