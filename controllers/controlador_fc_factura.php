@@ -518,7 +518,7 @@ class controlador_fc_factura extends system{
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al enviar notificacion',data:  $envia_notificacion, header: $header,ws:$ws);
         }
-        print_r($envia_notificacion);exit;
+
         if($header){
 
             $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
