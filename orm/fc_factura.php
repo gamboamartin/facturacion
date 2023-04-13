@@ -230,27 +230,14 @@ class fc_factura extends modelo
         }
 
         $fc_factura = $this->registro(registro_id: $r_alta_bd->registro_id, retorno_obj: true);
-
-        $filtro = array();
-        $filtro['com_cliente.id'] = $fc_factura->com_cliente_id;
-
-        $r_com_email_cte = (new com_email_cte(link: $this->link))->filtro_and(filtro: $filtro);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener correos', data: $r_com_email_cte);
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $r_alta_bd);
         }
-
-        $com_emails_ctes = $r_com_email_cte->registros;
-        foreach ($com_emails_ctes as $com_email_cte){
-            $fc_email_ins['fc_factura_id'] = $fc_factura->fc_factura_id;
-            $fc_email_ins['com_email_cte_id'] = $com_email_cte['com_email_cte_id'];
-            $fc_email_ins['status'] = $com_email_cte['com_email_cte_status'];
-            $r_alta_fc_email = (new fc_email(link: $this->link))->alta_registro(registro: $fc_email_ins);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);
-            }
+        
+        $r_alta_fc_email = $this->inserta_fc_emails(fc_factura: $fc_factura);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);
         }
-
-
 
         $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
             modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $r_alta_bd->registro_id,
@@ -325,6 +312,19 @@ class fc_factura extends modelo
         $imp_global[$key_gl]->importe = $data_imp->importe;
 
         return $imp_global;
+    }
+
+    private function com_emails_ctes(stdClass $fc_factura){
+        $filtro = array();
+        $filtro['com_cliente.id'] = $fc_factura->com_cliente_id;
+        $filtro['com_email_cte.status'] = 'activo';
+
+        $r_com_email_cte = (new com_email_cte(link: $this->link))->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener correos', data: $r_com_email_cte);
+        }
+
+        return $r_com_email_cte->registros;
     }
 
 
@@ -632,6 +632,14 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener r_fc_factura_etapa', data: $r_fc_factura_etapa);
         }
         return $r_fc_factura_etapa->registros;
+    }
+
+    private function fc_email_ins(array $com_email_cte, stdClass $fc_factura): array
+    {
+        $fc_email_ins['fc_factura_id'] = $fc_factura->fc_factura_id;
+        $fc_email_ins['com_email_cte_id'] = $com_email_cte['com_email_cte_id'];
+        $fc_email_ins['status'] = $com_email_cte['com_email_cte_status'];
+        return $fc_email_ins;
     }
 
     private function from_impuesto(string $tipo_impuesto): string
@@ -984,6 +992,33 @@ class fc_factura extends modelo
         return $global_nodo;
     }
 
+    private function inserta_fc_email(array $com_email_cte, stdClass $fc_factura){
+        $fc_email_ins = $this->fc_email_ins(com_email_cte: $com_email_cte,fc_factura:  $fc_factura);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener fc_email_ins', data: $fc_email_ins);
+        }
+
+        $r_alta_fc_email = (new fc_email(link: $this->link))->alta_registro(registro: $fc_email_ins);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);
+        }
+        return $r_alta_fc_email;
+    }
+
+    private function inserta_fc_emails(stdClass $fc_factura){
+        $com_emails_ctes = $this->com_emails_ctes(fc_factura: $fc_factura);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener correos', data: $com_emails_ctes);
+        }
+
+        foreach ($com_emails_ctes as $com_email_cte){
+            $r_alta_fc_email = $this->inserta_fc_email(com_email_cte: $com_email_cte,fc_factura:  $fc_factura);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);
+            }
+        }
+        return $com_emails_ctes;
+    }
 
     final public function inserta_notificacion(int $registro_id){
         $notificaciones = (new _email())->crear_notificaciones(registro_id: $registro_id,link:  $this->link);
