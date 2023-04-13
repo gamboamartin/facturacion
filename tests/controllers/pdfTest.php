@@ -29,6 +29,33 @@ class pdfTest extends test {
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_concepto_producto(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+
+        $pdf = new pdf($this->link);
+        $pdf = new liberator($pdf);
+
+        $concepto = array();
+        $concepto['fc_partida_descripcion'] = 'A';
+        $resultado = $pdf->concepto_producto($concepto);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("<tr class='' ><td class='border color negrita' colspan='10'>Descripción</td></tr><tr class='' ><td class='border' colspan='10'>A</td></tr>",$resultado);
+
+
+        errores::$error = false;
+
+    }
+
     public function test_limpia_monto(): void
     {
         errores::$error = false;

@@ -317,15 +317,33 @@ final class pdf
         return $body_tr;
     }
 
-    private function concepto_producto(array $concepto): string
+    private function concepto_producto(array $concepto): string|array
     {
 
+        $keys = array('fc_partida_descripcion');
+        $valida = $this->valida->valida_existencia_keys(keys: $keys,registro:  $concepto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar concepto', data: $valida);
+        }
+
         $body_td_1 = $this->html(etiqueta: "td", data: "Descripción", class: "border color negrita", propiedades: "colspan='10'");
-        $body_td_2 = $this->html(etiqueta: "td", data: $concepto['com_producto_descripcion'], class: "border",
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al genera dato', data: $body_td_1);
+        }
+        $body_td_2 = $this->html(etiqueta: "td", data: $concepto['fc_partida_descripcion'], class: "border",
             propiedades: "colspan='10'");
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al genera dato', data: $body_td_1);
+        }
 
         $body_tr_1 = $this->html(etiqueta: "tr", data: $body_td_1);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al genera dato', data: $body_td_1);
+        }
         $body_tr_2 = $this->html(etiqueta: "tr", data: $body_td_2);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al genera dato', data: $body_td_1);
+        }
 
         return $body_tr_1.$body_tr_2;
     }
