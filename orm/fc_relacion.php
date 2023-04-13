@@ -86,10 +86,15 @@ class fc_relacion extends _modelo_parent_sin_codigo
      * Obtiene las facturas relacionadas
      * @param array $fc_relacion Relacion Base
      * @return array
-     * @version
+     * @version 7.19.3
      */
     final public function facturas_relacionadas(array $fc_relacion): array
     {
+        $keys = array('fc_relacion_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $fc_relacion);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar $fc_relacion', data: $valida);
+        }
         $filtro = array();
         $filtro['fc_relacion.id'] = $fc_relacion['fc_relacion_id'];
         $r_fc_factura_relacionada = (new fc_factura_relacionada(link: $this->link))->filtro_and(filtro: $filtro);

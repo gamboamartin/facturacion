@@ -45,19 +45,23 @@ class fc_factura_relacionada extends _modelo_parent_sin_codigo
     public function alta_bd(array $keys_integra_ds = array('descripcion','fc_relacion_id','fc_factura_id')): array|stdClass
     {
 
-        $fc_relacion = $this->registro(registro_id: $this->registro['fc_relacion_id'], retorno_obj: true);
+        $keys = array('fc_relacion_id','fc_factura_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $this->registro);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_relacion);
+            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
         }
+
+        $fc_relacion = (new fc_relacion(link: $this->link))->registro(registro_id: $this->registro['fc_relacion_id'], retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener fc_factura_relacionada', data: $fc_relacion);
+        }
+
         $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $fc_relacion->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
 
-        $fc_relacion = (new fc_relacion(link: $this->link))->registro(registro_id: $this->registro['fc_relacion_id'], retorno_obj: true);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener fc_relacion',data:  $fc_relacion);
-        }
+
         $fc_factura = (new fc_factura(link: $this->link))->registro(registro_id: $this->registro['fc_factura_id'], retorno_obj: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_factura',data:  $fc_factura);
