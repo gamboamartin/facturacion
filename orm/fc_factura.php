@@ -175,35 +175,6 @@ class fc_factura extends modelo
 
     }
 
-    private function acumulado_global_imp(array $global_imp, array $impuesto, string $key_gl, string $key_importe): stdClass
-    {
-        $base = round($impuesto['fc_partida_importe'],2);
-        $base_ac = round($global_imp[$key_gl]->base+ $base,2);
-
-        $importe = round($impuesto[$key_importe],2);
-        $importe_ac = round($global_imp[$key_gl]->importe+ $importe,2);
-
-        $base_ac = number_format($base_ac,2,'.','');
-        $importe_ac = number_format($importe_ac,2,'.','');
-
-        $data = new stdClass();
-        $data->base_ac = $base_ac;
-        $data->importe_ac = $importe_ac;
-
-        return $data;
-
-    }
-
-    private function acumulado_global_impuesto(array $global_imp, array $impuesto, string $key_gl, string $key_importe){
-        $acumulado = $this->acumulado_global_imp(global_imp: $global_imp, impuesto: $impuesto, key_gl: $key_gl, key_importe: $key_importe);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $acumulado);
-        }
-
-        $global_imp[$key_gl]->base = $acumulado->base_ac;
-        $global_imp[$key_gl]->importe = $acumulado->importe_ac;
-        return $global_imp;
-    }
 
     /**
      * @return array|stdClass
@@ -233,8 +204,8 @@ class fc_factura extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $r_alta_bd);
         }
-        
-        $r_alta_fc_email = $this->inserta_fc_emails(fc_factura: $fc_factura);
+
+        $r_alta_fc_email = (new _email())->inserta_fc_emails(fc_factura: $fc_factura, link: $this->link);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);
         }
@@ -301,30 +272,6 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener descuento', data: $descuento_nuevo);
         }
         return round($descuento + $descuento_nuevo, 2);
-    }
-
-    private function carga_global(stdClass $data_imp, array $impuesto, array $imp_global, string $key_gl): array
-    {
-        $imp_global[$key_gl]->base = $data_imp->base;
-        $imp_global[$key_gl]->tipo_factor = $impuesto['cat_sat_tipo_factor_descripcion'];
-        $imp_global[$key_gl]->tasa_o_cuota = $data_imp->cat_sat_factor_factor;
-        $imp_global[$key_gl]->impuesto = $impuesto['cat_sat_tipo_impuesto_codigo'];
-        $imp_global[$key_gl]->importe = $data_imp->importe;
-
-        return $imp_global;
-    }
-
-    private function com_emails_ctes(stdClass $fc_factura){
-        $filtro = array();
-        $filtro['com_cliente.id'] = $fc_factura->com_cliente_id;
-        $filtro['com_email_cte.status'] = 'activo';
-
-        $r_com_email_cte = (new com_email_cte(link: $this->link))->filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener correos', data: $r_com_email_cte);
-        }
-
-        return $r_com_email_cte->registros;
     }
 
 
@@ -397,7 +344,7 @@ class fc_factura extends modelo
 
         $conceptos = $factura['conceptos'];
 
-        $impuestos = $this->impuestos(factura: $factura);
+        $impuestos = (new _impuestos())->impuestos(factura: $factura);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener impuestos', data: $impuestos);
         }
@@ -634,13 +581,7 @@ class fc_factura extends modelo
         return $r_fc_factura_etapa->registros;
     }
 
-    private function fc_email_ins(array $com_email_cte, stdClass $fc_factura): array
-    {
-        $fc_email_ins['fc_factura_id'] = $fc_factura->fc_factura_id;
-        $fc_email_ins['com_email_cte_id'] = $com_email_cte['com_email_cte_id'];
-        $fc_email_ins['status'] = $com_email_cte['com_email_cte_status'];
-        return $fc_email_ins;
-    }
+
 
     private function from_impuesto(string $tipo_impuesto): string
     {
@@ -875,19 +816,19 @@ class fc_factura extends modelo
             $concepto->impuestos[0]->retenciones = array();
 
 
-            $impuestos = $this->maqueta_impuesto(impuestos: $traslados, key_importe_impuesto: 'fc_traslado_importe');
+            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $traslados, key_importe_impuesto: 'fc_traslado_importe');
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar traslados', data: $impuestos);
             }
 
 
 
-            $trs_global = $this->impuestos_globales(impuestos: $traslados, global_imp: $trs_global, key_importe: 'fc_traslado_importe');
+            $trs_global = (new _impuestos())->impuestos_globales(impuestos: $traslados, global_imp: $trs_global, key_importe: 'fc_traslado_importe');
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $trs_global);
             }
 
-            $ret_global = $this->impuestos_globales(impuestos: $retenidos, global_imp: $ret_global, key_importe: 'fc_retenido_importe');
+            $ret_global = (new _impuestos())->impuestos_globales(impuestos: $retenidos, global_imp: $ret_global, key_importe: 'fc_retenido_importe');
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $ret_global);
             }
@@ -895,7 +836,7 @@ class fc_factura extends modelo
 
             $concepto->impuestos[0]->traslados = $impuestos;
 
-            $impuestos = $this->maqueta_impuesto(impuestos: $retenidos,  key_importe_impuesto: 'fc_retenido_importe');
+            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $retenidos,  key_importe_impuesto: 'fc_retenido_importe');
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar retenciones', data: $impuestos);
             }
@@ -940,85 +881,6 @@ class fc_factura extends modelo
         return $registro;
     }
 
-    private function impuestos_globales(stdClass $impuestos, array $global_imp, string $key_importe){
-        foreach ($impuestos->registros as $impuesto){
-
-            $key_gl = $impuesto['cat_sat_tipo_factor_id'].'.'.$impuesto['cat_sat_factor_id'].'.'.$impuesto['cat_sat_tipo_impuesto_id'];
-
-            $global_imp = $this->integra_ac_impuesto(global_imp: $global_imp, impuesto: $impuesto, key_gl: $key_gl, key_importe: $key_importe);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $global_imp);
-            }
-
-        }
-        return $global_imp;
-    }
-
-    private function init_globales(array $global_nodo, array $impuesto, string $key, string $key_importe): stdClass
-    {
-        $global_nodo[$key] = new stdClass();
-        $base = round($impuesto['fc_partida_importe'],2);
-        $importe = round($impuesto[$key_importe],2);
-        $cat_sat_factor_factor = round($impuesto['cat_sat_factor_factor'],6);
-
-
-        $base = number_format($base,2,'.','');
-        $importe = number_format($importe,2,'.','');
-        $cat_sat_factor_factor = number_format($cat_sat_factor_factor,6,'.','');
-
-
-        $data  = new stdClass();
-        $data->global_nodo = $global_nodo;
-        $data->base = $base;
-        $data->importe = $importe;
-        $data->cat_sat_factor_factor = $cat_sat_factor_factor;
-        return $data;
-
-    }
-
-    private function init_imp_global(array $global_nodo, array $impuesto, string $key_gl, string $key_importe){
-        $data_imp = $this->init_globales(global_nodo:$global_nodo, impuesto: $impuesto, key: $key_gl, key_importe:$key_importe);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar global impuesto', data: $data_imp);
-        }
-
-        $global_nodo = $data_imp->global_nodo;
-
-        $global_nodo = $this->carga_global(data_imp: $data_imp,impuesto:  $impuesto, imp_global: $global_nodo, key_gl: $key_gl);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar global impuesto', data: $global_nodo);
-        }
-
-        return $global_nodo;
-    }
-
-    private function inserta_fc_email(array $com_email_cte, stdClass $fc_factura){
-        $fc_email_ins = $this->fc_email_ins(com_email_cte: $com_email_cte,fc_factura:  $fc_factura);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener fc_email_ins', data: $fc_email_ins);
-        }
-
-        $r_alta_fc_email = (new fc_email(link: $this->link))->alta_registro(registro: $fc_email_ins);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);
-        }
-        return $r_alta_fc_email;
-    }
-
-    private function inserta_fc_emails(stdClass $fc_factura){
-        $com_emails_ctes = $this->com_emails_ctes(fc_factura: $fc_factura);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener correos', data: $com_emails_ctes);
-        }
-
-        foreach ($com_emails_ctes as $com_email_cte){
-            $r_alta_fc_email = $this->inserta_fc_email(com_email_cte: $com_email_cte,fc_factura:  $fc_factura);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);
-            }
-        }
-        return $com_emails_ctes;
-    }
 
     final public function inserta_notificacion(int $registro_id){
         $notificaciones = (new _email())->crear_notificaciones(registro_id: $registro_id,link:  $this->link);
@@ -1027,40 +889,9 @@ class fc_factura extends modelo
         }
         return $notificaciones;
     }
-    private function integra_ac_impuesto(array $global_imp, array $impuesto, string $key_gl, string $key_importe){
-        if(!isset($global_imp[$key_gl])) {
-            $global_imp = $this->init_imp_global(global_nodo: $global_imp, impuesto: $impuesto, key_gl: $key_gl, key_importe: $key_importe);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al inicializar global impuesto', data: $global_imp);
-            }
 
-        }
-        else{
-            $global_imp = $this->acumulado_global_impuesto(global_imp: $global_imp, impuesto: $impuesto, key_gl: $key_gl, key_importe: $key_importe);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $global_imp);
-            }
-        }
-        return $global_imp;
-    }
 
-    private function maqueta_impuesto(stdClass $impuestos, string $key_importe_impuesto): array
-    {
-        $imp = array();
 
-        foreach ($impuestos->registros as $impuesto) {
-
-            $impuesto_obj = new stdClass();
-            $impuesto_obj->base = number_format($impuesto['fc_partida_importe'], 2,'.','');
-            $impuesto_obj->impuesto = $impuesto['cat_sat_tipo_impuesto_codigo'];
-            $impuesto_obj->tipo_factor = $impuesto['cat_sat_tipo_factor_descripcion'];
-            $impuesto_obj->tasa_o_cuota = number_format($impuesto['cat_sat_factor_factor'], 6,'.','');
-            $impuesto_obj->importe = number_format($impuesto[$key_importe_impuesto], 2,'.','');
-            $imp[] = $impuesto_obj;
-        }
-
-        return $imp;
-    }
 
     final public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
@@ -1283,15 +1114,7 @@ class fc_factura extends modelo
         return $registro;
     }
 
-    private function impuestos(array $factura): stdClass
-    {
-        $impuestos = new stdClass();
-        $impuestos->total_impuestos_trasladados = $factura['total_impuestos_trasladados'];
-        $impuestos->total_impuestos_retenidos = $factura['total_impuestos_retenidos'];
-        $impuestos->traslados = $factura['traslados'];
-        $impuestos->retenciones = $factura['retenidos'];
-        return $impuestos;
-    }
+
 
     /**
      * Limpia los parametros de una factura
