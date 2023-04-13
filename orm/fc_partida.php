@@ -125,6 +125,12 @@ class fc_partida extends _base
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
 
+
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $this->registro['fc_factura_id']);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
+        }
+
         $registro = $this->init_alta_bd();
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al inicializar campos base', data: $registro);
@@ -245,6 +251,16 @@ class fc_partida extends _base
 
     public function elimina_bd(int $id): array|stdClass
     {
+        $fc_partida = $this->registro(registro_id: $id, retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener fc_partida', data: $fc_partida);
+        }
+
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $fc_partida->fc_factura_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
+        }
+
         $filtro['fc_partida.id'] = $id;
         $r_fc_retenido = (new fc_retenido(link: $this->link))->elimina_con_filtro_and(filtro: $filtro);
         if (errores::$error) {
@@ -364,9 +380,15 @@ class fc_partida extends _base
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,
                                 array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
+
         $partida = $this->get_partida(fc_partida_id: $id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partida', data: $partida);
+        }
+
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $partida->fc_factura_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
 
         if (!isset($registro['codigo'])) {

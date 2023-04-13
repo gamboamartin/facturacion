@@ -32,4 +32,5 @@ class fc_cfdi extends modelo{
 
         $this->etiqueta = 'CFDI';
     }
+
 }
