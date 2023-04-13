@@ -243,6 +243,7 @@ class fc_factura extends modelo
         foreach ($com_emails_ctes as $com_email_cte){
             $fc_email_ins['fc_factura_id'] = $fc_factura->fc_factura_id;
             $fc_email_ins['com_email_cte_id'] = $com_email_cte['com_email_cte_id'];
+            $fc_email_ins['status'] = $com_email_cte['com_email_cte_status'];
             $r_alta_fc_email = (new fc_email(link: $this->link))->alta_registro(registro: $fc_email_ins);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);

@@ -279,6 +279,48 @@ class controlador_fc_factura extends system{
         return $data_return;
     }
 
+    private function button_elimina_correo(int $fc_email_id, int $fc_factura_id): array|string
+    {
+        $params = $this->params_button_partida(accion_retorno: 'correo', fc_factura_id: $fc_factura_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar params', data: $params);
+        }
+
+        $link_elimina = $this->html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar', registro_id: $fc_email_id,
+            seccion: 'fc_email', style: 'danger',icon: 'bi bi-trash', muestra_icono_btn: true,
+            muestra_titulo_btn: false, params: $params);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina);
+        }
+        return $link_elimina;
+    }
+    private function button_status_correo(int $fc_email_id, int $fc_factura_id): array|string
+    {
+        $params = $this->params_button_partida(accion_retorno: 'correo', fc_factura_id: $fc_factura_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar params', data: $params);
+        }
+
+        $fc_email = (new fc_email(link: $this->link))->registro(registro_id: $fc_email_id, retorno_obj: true);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener fc_email', data: $fc_email);
+        }
+
+        $style = 'success';
+        if($fc_email->fc_email_status === 'inactivo'){
+            $style = 'danger';
+        }
+
+
+        $link_status = $this->html->button_href(accion: 'status', etiqueta: 'Status', registro_id: $fc_email_id,
+            seccion: 'fc_email', style: $style,icon: 'bi bi-file-diff', muestra_icono_btn: true,
+            muestra_titulo_btn: false, params: $params);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_status);
+        }
+        return $link_status;
+    }
+
     public function cancela(bool $header, bool $ws = false){
         $filtro['fc_factura.id'] = $this->registro_id;
         $columns_ds = array('fc_factura_folio','com_cliente_rfc','fc_factura_total','fc_factura_fecha');
@@ -428,19 +470,18 @@ class controlador_fc_factura extends system{
         $emails_facturas = $r_fc_email->registros;
 
         foreach ($emails_facturas as $indice=>$email_factura){
-            $params = $this->params_button_partida(accion_retorno: 'correo', fc_factura_id: $this->registro_id);
-            if (errores::$error) {
-                return $this->errores->error(mensaje: 'Error al generar params', data: $params);
-            }
 
-            $link_elimina = $this->html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
-                registro_id: $email_factura['fc_email_id'],
-                seccion: 'fc_email', style: 'danger',icon: 'bi bi-trash',
-                muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
+            $link_elimina = $this->button_elimina_correo(fc_email_id: $email_factura['fc_email_id'], fc_factura_id: $this->registro_id);
             if (errores::$error) {
                 return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina);
             }
             $emails_facturas[$indice]['elimina_bd'] = $link_elimina;
+
+            $link_status = $this->button_status_correo(fc_email_id: $email_factura['fc_email_id'], fc_factura_id: $this->registro_id);
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina);
+            }
+            $emails_facturas[$indice]['status'] = $link_status;
         }
 
 

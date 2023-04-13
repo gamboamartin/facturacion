@@ -58,4 +58,6 @@ class com_email_cte extends \gamboamartin\comercial\models\com_email_cte {
         return $r_elimina_bd;
     }
 
+
+
 }

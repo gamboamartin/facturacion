@@ -142,6 +142,7 @@ class _email{
 
     private function fc_emails(int $fc_factura_id, PDO $link){
         $filtro['fc_factura.id'] = $fc_factura_id;
+        $filtro['fc_email.status'] = 'activo';
         $r_fc_email = (new fc_email(link: $link))->filtro_and(filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener receptores de correo', data: $r_fc_email);

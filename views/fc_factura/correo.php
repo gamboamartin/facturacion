@@ -57,6 +57,7 @@
                             <td><?php echo $fc_email['fc_email_id'] ?></td>
                             <td><?php echo $fc_email['com_email_cte_descripcion'] ?></td>
                             <td><?php echo $fc_email['elimina_bd'] ?></td>
+                            <td><?php echo $fc_email['status'] ?></td>
                         </tr>
                         <?php } ?>
                         </tbody>
