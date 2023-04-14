@@ -50,6 +50,14 @@ class _comprobanteTest extends test
         $this->assertEquals("Error la factura pasada no tiene registros",$resultado['mensaje_limpio']);
         errores::$error = false;
 
+
+        $del = (new base_test())->del_org_empresa(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
         $del = (new base_test())->del_fc_factura(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al eliminar',$del);
@@ -57,7 +65,7 @@ class _comprobanteTest extends test
             exit;
         }
 
-        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link, codigo: '1', id: 1);
+        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al dar de alta factura',$alta_fc_factura);
             print_r($error);

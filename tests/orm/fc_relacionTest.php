@@ -80,7 +80,7 @@ class fc_relacionTest extends test
         $resultado = $modelo->facturas_relacionadas($fc_relacion);
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
-        
+
         errores::$error = false;
     }
 

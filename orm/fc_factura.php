@@ -13,7 +13,6 @@ use gamboamartin\cat_sat\models\cat_sat_moneda;
 use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
-use gamboamartin\comercial\models\com_email_cte;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
@@ -160,6 +159,7 @@ class fc_factura extends modelo
 
 
 
+
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
             no_duplicados: $no_duplicados);
@@ -191,6 +191,10 @@ class fc_factura extends modelo
         $registro = $this->init_data_alta_bd(registro: $this->registro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al inicializar registro', data: $registro);
+        }
+
+        if(!isset($registro['fecha'])){
+            $registro['fecha'] = date('Y-m-d');
         }
 
         $this->registro = $registro;

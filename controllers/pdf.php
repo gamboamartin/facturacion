@@ -743,9 +743,25 @@ final class pdf
         //$ruta_documento = '';
 
         $qr = $this->html(etiqueta: "img", data: "", propiedades: 'src = "' . $ruta_documento . '" width = "120"');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar data', data: $qr);
+        }
+
+        $escribe_qr = true;
 
         if ($ruta_documento !== ""){
+            if(!file_exists($ruta_documento)) {
+                $escribe_qr = false;
+            }
+        }
+        else{
+            $escribe_qr = false;
+        }
+        if($escribe_qr){
             $this->pdf->WriteHTML($qr);
+        }
+        else{
+            $this->pdf->WriteHTML('<div class="" width = "120" height="120"></div>');
         }
 
         $cadena_sat = $this->html(etiqueta: "h2", data: "Cadena Original del complemento de certificación digital del SAT:", class: "negrita");
