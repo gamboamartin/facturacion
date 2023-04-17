@@ -96,20 +96,12 @@
 
 
                         ?>
-                        <table id="fc_partida" class="table table-striped" style="font-size: 12px; border: 2px solid #e0e0e0; border-radius: 0.5rem !important;">
+                        <table id="fc_partida" class="table table-striped" style="font-size: 12px;">
                             <?php echo $controlador->t_head_producto; ?>
                             <tbody>
                             <?php echo $partida['data_producto_html']; ?>
-                            <tr>
-                                <td class="nested" colspan="9" style="padding: 0;">
-                                    <table class="table table-striped" style='font-size: 14px; vertical-align: middle; background-color: #dfe7f6; color: #2c58a0; margin-bottom: 0; '>
-                                        <thead><tr><th>Producto</th></tr></thead>
-                                        <tbody>
-                                            <tr><td><?php echo $partida['fc_partida_descripcion']; ?></td></tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
+
+                            <?php echo $partida['descripcion_html']; ?>
 
                             <?php echo $partida['impuesto_traslado_html']; ?>
                             <?php echo $partida['impuesto_retenido_html']; ?>

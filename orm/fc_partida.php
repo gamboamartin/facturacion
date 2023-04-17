@@ -417,7 +417,7 @@ class fc_partida extends _base
         return $r_modifica_bd;
     }
 
-    private function params_button_partida(int $fc_factura_id): array
+    final public function params_button_partida(int $fc_factura_id): array
     {
         $params = array();
         $params['seccion_retorno'] = 'fc_factura';
