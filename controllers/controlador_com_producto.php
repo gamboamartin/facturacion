@@ -3,8 +3,8 @@ namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
 
-use gamboamartin\comercial\models\com_producto;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\com_producto;
 use gamboamartin\facturacion\models\fc_conf_retenido;
 use gamboamartin\facturacion\models\fc_conf_traslado;
 use gamboamartin\system\actions;
@@ -24,7 +24,9 @@ class controlador_com_producto extends  \gamboamartin\comercial\controllers\cont
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass())
     {
-        parent::__construct($link, $html, $paths_conf);
+        parent::__construct(link: $link,html:  $html,paths_conf:  $paths_conf);
+
+        $this->modelo = new com_producto(link: $this->link);
 
         $controladores = $this->init_controladores(paths_conf: $paths_conf);
         if(errores::$error){
@@ -39,7 +41,6 @@ class controlador_com_producto extends  \gamboamartin\comercial\controllers\cont
             print_r($error);
             die('Error');
         }
-
 
 
         $this->childrens_data['fc_conf_retenido']['title'] = 'Confs Retenciones';
