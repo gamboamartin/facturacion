@@ -104,12 +104,6 @@ class controlador_fc_factura extends system{
             die('Error');
         }
 
-        $controladores = $this->init_controladores(paths_conf: $paths_conf);
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
-            print_r($error);
-            die('Error');
-        }
 
         $links = $this->init_links();
         if(errores::$error){
@@ -155,7 +149,7 @@ class controlador_fc_factura extends system{
         }
         $this->link_fc_email_alta_bd  = $link_fc_email_alta_bd;
 
-
+        $this->lista_get_data = true;
 
     }
 
@@ -940,6 +934,9 @@ class controlador_fc_factura extends system{
 
     private function init_links(): array|string
     {
+
+
+
         $this->obj_link->genera_links(controler: $this);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar links para partida',data:  $this->obj_link);
@@ -969,7 +966,7 @@ class controlador_fc_factura extends system{
         }
         $this->link_factura_timbra_xml = $link;
 
-        $this->link_com_producto = $this->controlador_com_producto->link_com_producto;
+        //$this->link_com_producto = $this->controlador_com_producto->link_com_producto;
 
         return $link;
     }
@@ -1335,6 +1332,13 @@ class controlador_fc_factura extends system{
 
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
+
+        $controladores = $this->init_controladores(paths_conf: $this->paths_conf);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
+            print_r($error);
+            die('Error');
+        }
 
         $partidas = (new _partidas_html())->genera_partidas_html(fc_factura_id: $this->registro_id,html: $this->html,link: $this->link);
         if (errores::$error) {

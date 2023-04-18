@@ -97,12 +97,11 @@ class controlador_fc_conf_retenido extends system{
     public function init_datatable(): stdClass
     {
         $columns["fc_conf_retenido_id"]["titulo"] = "Id";
-        $columns["fc_conf_retenido_codigo"]["titulo"] = "Código";
         $columns["com_producto_descripcion"]["titulo"] = "Producto";
         $columns["cat_sat_tipo_factor_descripcion"]["titulo"] = "Tipo Factor";
         $columns["cat_sat_factor_factor"]["titulo"] = "Factor";
         $columns["cat_sat_tipo_impuesto_descripcion"]["titulo"] = "Tipo Impuesto";
-        $columns["fc_conf_retenido_descripcion"]["titulo"] = "Descripción";
+
 
         $filtro = array("fc_conf_retenido.id","fc_conf_retenido.codigo","fc_conf_retenido.descripcion",
             "com_producto.descripcion", "cat_sat_tipo_factor.descripcion","cat_sat_factor.factor",

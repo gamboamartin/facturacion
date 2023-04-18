@@ -28,12 +28,12 @@ class controlador_com_producto extends  \gamboamartin\comercial\controllers\cont
 
         $this->modelo = new com_producto(link: $this->link);
 
-        $controladores = $this->init_controladores(paths_conf: $paths_conf);
+        /*$controladores = $this->init_controladores(paths_conf: $paths_conf);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
             print_r($error);
             die('Error');
-        }
+        }*/
 
         $links = $this->init_links();
         if(errores::$error){
@@ -46,7 +46,7 @@ class controlador_com_producto extends  \gamboamartin\comercial\controllers\cont
         $this->childrens_data['fc_conf_retenido']['title'] = 'Confs Retenciones';
         $this->childrens_data['fc_conf_traslado']['title'] = 'Confs Traslados';
 
-
+        $this->lista_get_data = true;
     }
 
     /**
@@ -93,6 +93,13 @@ class controlador_com_producto extends  \gamboamartin\comercial\controllers\cont
 
     public function nueva_conf_traslado(bool $header, bool $ws = false): array|stdClass
     {
+
+        $controladores = $this->init_controladores(paths_conf: $this->paths_conf);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al inicializar controladores', data: $controladores,
+                header: $header, ws: $ws);
+        }
+
         $datatables = $this->controlador_fc_conf_traslado->init_datatable();
         if (errores::$error) {
             return $this->retorno_error(mensaje: 'Error al inicializar datatable', data: $datatables, header: $header, ws: $ws);
@@ -140,6 +147,13 @@ class controlador_com_producto extends  \gamboamartin\comercial\controllers\cont
 
     public function nueva_conf_retenido(bool $header, bool $ws = false): array|stdClass
     {
+
+        $controladores = $this->init_controladores(paths_conf: $this->paths_conf);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al inicializar controladores', data: $controladores,
+                header: $header, ws: $ws);
+        }
+
         $datatables = $this->controlador_fc_conf_retenido->init_datatable();
         if (errores::$error) {
             return $this->retorno_error(mensaje: 'Error al inicializar datatable', data: $datatables, header: $header, ws: $ws);
