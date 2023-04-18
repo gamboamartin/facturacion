@@ -194,11 +194,15 @@ class controlador_fc_csd extends system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "serie";
-        $propiedades = array("place_holder" => "Serie", "cols" => 6);
+        $propiedades = array("place_holder" => "Serie", "cols" => 4);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "no_certificado";
-        $propiedades = array("place_holder" => "No Certificado", "cols" => 6);
+        $propiedades = array("place_holder" => "No Certificado", "cols" => 4);
+        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        $identificador = "password";
+        $propiedades = array("place_holder" => "Password", "cols" => 4);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         return $this->keys_selects;

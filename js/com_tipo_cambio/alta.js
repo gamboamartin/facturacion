@@ -36,7 +36,7 @@ function adm_asigna_monedas(dp_pais_id = ''){
         }
         integra_new_option("#cat_sat_moneda_id",'Seleccione una Moneda','-1');
         $.each(data.registros, function( index, cat_sat_moneda ) {
-
+            console.log(cat_sat_moneda);
             integra_new_option("#cat_sat_moneda_id",cat_sat_moneda.cat_sat_moneda_codigo+' '+cat_sat_moneda.cat_sat_moneda_descripcion,cat_sat_moneda.cat_sat_moneda_id);
         });
         sl_cat_sat_moneda_id.val(cat_sat_moneda_id);
