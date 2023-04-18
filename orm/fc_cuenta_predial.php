@@ -31,5 +31,21 @@ class fc_cuenta_predial extends _modelo_parent_sin_codigo {
         }
         return $r_alta_bd;
     }
+    final public function cuenta_predial(int $fc_partida_id){
+        $filtro['fc_partida.id'] = $fc_partida_id;
+        $r_fc_cuenta_predial = $this->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_cuenta_predial',data:  $r_fc_cuenta_predial);
+        }
+        if($r_fc_cuenta_predial->n_registros>1){
+            return $this->error->error(mensaje: 'Error solo puede haber una cuenta',data:  $r_fc_cuenta_predial);
+        }
+        $fc_cuenta_predial = array();
+        if($r_fc_cuenta_predial->n_registros === 1){
+            $fc_cuenta_predial = $r_fc_cuenta_predial->registros[0];
+        }
+        return $fc_cuenta_predial;
+    }
+
 
 }

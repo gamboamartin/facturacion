@@ -4,9 +4,11 @@ namespace gamboamartin\facturacion\controllers;
 
 use config\generales;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\validacion\validacion;
 use Mpdf\Mpdf;
 use NumberFormatter;
+use PDO;
 use stdClass;
 use Throwable;
 
@@ -348,11 +350,16 @@ final class pdf
         return $body_tr_1.$body_tr_2;
     }
 
-    private function concepto_numeros(array $concepto): string
+    private function concepto_numeros(array $concepto, PDO $link): string|array
     {
         $body_tr = '';
         $aplica_numero_pedimento = false;
         $aplica_cuenta_predial = false;
+
+        if($concepto['com_producto_aplica_predial'] === 'activo'){
+            $aplica_cuenta_predial = true;
+        }
+
         $class = "color border negrita txt-center";
 
         if($aplica_numero_pedimento) {
@@ -365,35 +372,43 @@ final class pdf
             $body_td_3 = $this->html(etiqueta: "td", data: " ", class: "txt-center border", propiedades: "colspan='4'");
         }
         if($aplica_cuenta_predial) {
-            $body_td_4 = $this->html(etiqueta: "td", data: "  ", class: "txt-center border", propiedades: "colspan='6'");
+
+            $cuenta_predial = (new fc_cuenta_predial(link: $link))->cuenta_predial(fc_partida_id: $concepto['fc_partida_id']);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener predial', data: $cuenta_predial);
+            }
+
+            $body_td_4 = $this->html(etiqueta: "td", data: "$cuenta_predial[fc_cuenta_predial_descripcion]", class: "txt-center border", propiedades: "colspan='6'");
         }
         if($aplica_numero_pedimento) {
             $body_tr = $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2);
         }
         if($aplica_cuenta_predial) {
-            $body_tr .= $this->html(etiqueta: "tr", data: $body_td_3 . $body_td_4);
+            $body_tr .= $this->html(etiqueta: "tr", data: $body_td_2 . $body_td_4);
         }
 
         return $body_tr;
     }
 
-    public function conceptos(array $conceptos)
+    public function conceptos(array $conceptos, PDO $link)
     {
         $titulo = $this->html(etiqueta: "h1", data: "Conceptos", class: "negrita titulo");
         $this->pdf->WriteHTML($titulo);
 
-        $head_td_1 = $this->html(etiqueta: "th", data: "Clave del producto y/o servicio", class: "negrita border color", propiedades: "colspan='2'");;
-        $head_td_2 = $this->html(etiqueta: "th", data: "No. identificación", class: "negrita border color");
-        $head_td_3 = $this->html(etiqueta: "th", data: "Cantidad", class: "negrita border color");
-        $head_td_4 = $this->html(etiqueta: "th", data: "Clave de unidad", class: "negrita border color");
-        $head_td_5 = $this->html(etiqueta: "th", data: "Unidad", class: "negrita border color");
-        $head_td_6 = $this->html(etiqueta: "th", data: "Valor unitario", class: "negrita border color");
-        $head_td_7 = $this->html(etiqueta: "th", data: "Importe", class: "negrita border color");
-        $head_td_8 = $this->html(etiqueta: "th", data: "Descuento", class: "negrita border color");
-        $head_td_9 = $this->html(etiqueta: "th", data: "Objeto impuesto", class: "negrita border color");
+        $head_td_clave_prod_serv = $this->html(etiqueta: "th",
+            data: "Clave del producto y/o servicio", class: "negrita border color", propiedades: "colspan='2'");;
+        $head_td_no_identificacion = $this->html(etiqueta: "th", data: "No. identificación", class: "negrita border color");
+        $head_td_cantidad = $this->html(etiqueta: "th", data: "Cantidad", class: "negrita border color");
+        $head_td_cve_unidad = $this->html(etiqueta: "th", data: "Clave de unidad", class: "negrita border color");
+        $head_td_unidad = $this->html(etiqueta: "th", data: "Unidad", class: "negrita border color");
+        $head_td_valor_unitario = $this->html(etiqueta: "th", data: "Valor unitario", class: "negrita border color");
+        $head_td_importe = $this->html(etiqueta: "th", data: "Importe", class: "negrita border color");
+        $head_td_descuento = $this->html(etiqueta: "th", data: "Descuento", class: "negrita border color");
+        $head_td_obj_imp = $this->html(etiqueta: "th", data: "Objeto impuesto", class: "negrita border color");
 
-        $head_tr_1 = $this->html(etiqueta: "tr", data: $head_td_1 . $head_td_2 . $head_td_3 . $head_td_4 . $head_td_5 .
-            $head_td_6 . $head_td_7 . $head_td_8 . $head_td_9);
+        $head_tr_1 = $this->html(etiqueta: "tr", data: $head_td_clave_prod_serv . $head_td_no_identificacion
+            . $head_td_cantidad . $head_td_cve_unidad . $head_td_unidad . $head_td_valor_unitario .
+            $head_td_importe . $head_td_descuento . $head_td_obj_imp);
 
         $body_tr = "";
 
@@ -422,7 +437,7 @@ final class pdf
                 die('Error');
             }
 
-            $body_tr .= $this->concepto_numeros(concepto: $concepto);
+            $body_tr .= $this->concepto_numeros(concepto: $concepto, link: $link);
             if (errores::$error) {
                 $error = (new errores())->error('Error al maquetar concepto', $body_tr);
                 print_r($error);
