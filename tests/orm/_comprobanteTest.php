@@ -58,6 +58,13 @@ class _comprobanteTest extends test
             exit;
         }
 
+        $del = (new base_test())->del_com_producto(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
         $del = (new base_test())->del_fc_factura(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al eliminar',$del);
