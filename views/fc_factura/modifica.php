@@ -66,6 +66,7 @@
                         <?php echo $controlador->inputs->partidas->subtotal; ?>
                         <?php echo $controlador->inputs->partidas->descuento; ?>
                         <?php echo $controlador->inputs->partidas->total; ?>
+                        <?php echo $controlador->inputs->partidas->cat_sat_conf_imps_id; ?>
 
 
                         <div class="control-group btn-alta">

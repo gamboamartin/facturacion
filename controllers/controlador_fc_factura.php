@@ -38,6 +38,7 @@ use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template\html;
+use html\cat_sat_conf_imps_html;
 use html\cat_sat_motivo_cancelacion_html;
 use html\cat_sat_tipo_relacion_html;
 use html\com_cliente_html;
@@ -1359,6 +1360,10 @@ class controlador_fc_factura extends system{
         $propiedades = array("cols" => 12);
         $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
+        $identificador = "cat_sat_conf_imps_id";
+        $propiedades = array("cols" => 12);
+        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
         $inputs = $this->nueva_partida_inicializa();
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al inicializar partida', data: $inputs);
@@ -1367,6 +1372,16 @@ class controlador_fc_factura extends system{
         }
 
         $this->inputs->partidas = $inputs;
+
+        $cat_sat_conf_imps_id = (new cat_sat_conf_imps_html(html: $this->html_base))->select_cat_sat_conf_imps_id(
+            cols: 12,con_registros:  true,id_selected: -1,link: $this->link);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al inicializar input', data: $cat_sat_conf_imps_id);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->inputs->partidas->cat_sat_conf_imps_id = $cat_sat_conf_imps_id;
 
 
         $t_head_producto = (new _html_factura())->thead_producto();
@@ -1456,6 +1471,7 @@ class controlador_fc_factura extends system{
         $keys_selects['fc_factura_id']->disabled = true;
         $keys_selects['fc_factura_id']->cols = 12;
         $keys_selects['com_producto_id']->cols = 12;
+        $keys_selects['cat_sat_conf_imps_id']->cols = 12;
 
         $inputs = $this->controlador_fc_partida->inputs(keys_selects: $keys_selects);
         if (errores::$error) {
@@ -1466,46 +1482,6 @@ class controlador_fc_factura extends system{
 
         return $inputs;
     }
-
-
-
-
-
-    public function timbra_xml(bool $header, bool $ws = false): array|stdClass{
-
-        $timbre = (new fc_factura(link: $this->link))->timbra_xml(fc_factura_id: $this->registro_id);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al timbrar XML',data:  $timbre, header: $header,ws:$ws);
-        }
-
-        $this->link->beginTransaction();
-        $siguiente_view = (new actions())->init_alta_bd();
-        if(errores::$error){
-            $this->link->rollBack();
-            return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
-                header:  $header, ws: $ws);
-        }
-
-        if($header){
-
-            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
-                seccion: $this->tabla, siguiente_view: "lista");
-            if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error cambiar de view', data: $retorno,
-                    header:  true, ws: $ws);
-            }
-            header('Location:'.$retorno);
-            exit;
-        }
-        if($ws){
-            header('Content-Type: application/json');
-            echo json_encode($timbre, JSON_THROW_ON_ERROR);
-            exit;
-        }
-
-        return $timbre;
-    }
-
 
 
     private function params_button_partida(string $accion_retorno, int $fc_factura_id): array
@@ -1826,6 +1802,41 @@ class controlador_fc_factura extends system{
         $this->inputs->select->fc_factura_id = $select;
 
         return $select;
+    }
+
+    public function timbra_xml(bool $header, bool $ws = false): array|stdClass{
+
+        $timbre = (new fc_factura(link: $this->link))->timbra_xml(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al timbrar XML',data:  $timbre, header: $header,ws:$ws);
+        }
+
+        $this->link->beginTransaction();
+        $siguiente_view = (new actions())->init_alta_bd();
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
+                header:  $header, ws: $ws);
+        }
+
+        if($header){
+
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: "lista");
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error cambiar de view', data: $retorno,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($timbre, JSON_THROW_ON_ERROR);
+            exit;
+        }
+
+        return $timbre;
     }
 
     private function tipo_de_comprobante_predeterminado(): array|stdClass

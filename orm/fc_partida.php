@@ -3,6 +3,7 @@
 namespace gamboamartin\facturacion\models;
 
 use base\orm\_modelo_parent;
+use gamboamartin\cat_sat\models\cat_sat_conf_imps;
 use gamboamartin\comercial\models\com_producto;
 use gamboamartin\errores\errores;
 use gamboamartin\system\html_controler;
@@ -65,12 +66,23 @@ class fc_partida extends _base
         $this->etiqueta = 'Partida';
     }
 
-    private function acciones_conf_traslado(stdClass $fc_partida): array|stdClass
+    private function acciones_conf_traslado(bool $aplica_cat_sat_conf_imps, int $cat_sat_conf_imps_id,
+                                            stdClass $fc_partida): array|stdClass
     {
         $conf_traslados = (new fc_conf_traslado($this->link))->get_configuraciones(
             com_producto_id: $this->registro["com_producto_id"]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener conf. traslados', data: $conf_traslados);
+        }
+        $conf_descripcion = 'fc_conf_traslado_descripcion';
+        if($aplica_cat_sat_conf_imps){
+            $conf_traslados->registros = (new cat_sat_conf_imps(link: $this->link))->get_traslados(
+                cat_sat_conf_imps_id: $cat_sat_conf_imps_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener conf. traslados', data: $conf_traslados);
+            }
+            $conf_traslados->n_registros = count($conf_traslados->registros);
+            $conf_descripcion = 'cat_sat_traslado_conf_descripcion';
         }
 
         if ($conf_traslados->n_registros === 0) {
@@ -79,7 +91,7 @@ class fc_partida extends _base
 
         foreach ($conf_traslados->registros as $configuracion) {
             $traslado = $this->maqueta_datos(configuracion: $configuracion,
-                conf_descripcion: "fc_conf_traslado_descripcion", fc_partida: $fc_partida);
+                conf_descripcion: $conf_descripcion, fc_partida: $fc_partida);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar datos traslados', data: $traslado);
             }
@@ -93,12 +105,24 @@ class fc_partida extends _base
         return $conf_traslados;
     }
 
-    private function acciones_conf_retenido(stdClass $fc_partida): array|stdClass
+    private function acciones_conf_retenido(bool $aplica_cat_sat_conf_imps, int $cat_sat_conf_imps_id,
+                                            stdClass $fc_partida): array|stdClass
     {
         $conf_retenidos = (new fc_conf_retenido($this->link))->get_configuraciones(
             com_producto_id: $this->registro["com_producto_id"]);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener conf. traslados', data: $conf_retenidos);
+            return $this->error->error(mensaje: 'Error al obtener conf. retenciones', data: $conf_retenidos);
+        }
+        $conf_descripcion = 'fc_conf_retenido_descripcion';
+        if($aplica_cat_sat_conf_imps){
+            $conf_retenidos->registros = (new cat_sat_conf_imps(link: $this->link))->get_retenciones(
+                cat_sat_conf_imps_id: $cat_sat_conf_imps_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener conf. retenciones', data: $conf_retenidos);
+            }
+            $conf_retenidos->registros = $conf_retenidos->registros;
+            $conf_retenidos->n_registros = count($conf_retenidos->registros);
+            $conf_descripcion = 'cat_sat_retencion_conf_descripcion';
         }
 
         if ($conf_retenidos->n_registros === 0) {
@@ -107,7 +131,7 @@ class fc_partida extends _base
 
         foreach ($conf_retenidos->registros as $configuracion) {
             $retenido = $this->maqueta_datos(configuracion: $configuracion,
-                conf_descripcion: "fc_conf_retenido_descripcion", fc_partida: $fc_partida);
+                conf_descripcion: $conf_descripcion, fc_partida: $fc_partida);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar datos retenidos', data: $retenido);
             }
@@ -146,11 +170,20 @@ class fc_partida extends _base
             unset($this->registro['cuenta_predial']);
         }
 
+
         $this->registro = $this->limpia_campos(registro: $this->registro,
             campos_limpiar: array('cat_sat_tipo_factor_id', 'cat_sat_factor_id', 'cat_sat_tipo_impuesto_id'));
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al limpiar campos', data: $this->registro);
         }
+
+        $aplica_cat_sat_conf_imps = false;
+        $cat_sat_conf_imps_id = -1;
+        if(isset($this->registro['cat_sat_conf_imps_id']) && $this->registro['cat_sat_conf_imps_id']>0){
+            $cat_sat_conf_imps_id = $this->registro['cat_sat_conf_imps_id'];
+            $aplica_cat_sat_conf_imps = true;
+        }
+
 
         $r_alta_bd = parent::alta_bd();
         if (errores::$error) {
@@ -162,15 +195,19 @@ class fc_partida extends _base
             return $this->error->error(mensaje: 'Error obtener partida', data: $fc_partida);
         }
 
-        $traslado = $this->acciones_conf_traslado(fc_partida: $fc_partida);
+
+        $traslado = $this->acciones_conf_traslado(aplica_cat_sat_conf_imps: $aplica_cat_sat_conf_imps,
+            cat_sat_conf_imps_id: $cat_sat_conf_imps_id, fc_partida: $fc_partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al realizar acciones de conf. traslado', data: $traslado);
         }
 
-        $retenido = $this->acciones_conf_retenido(fc_partida: $fc_partida);
+        $retenido = $this->acciones_conf_retenido(aplica_cat_sat_conf_imps: $aplica_cat_sat_conf_imps,
+            cat_sat_conf_imps_id: $cat_sat_conf_imps_id,fc_partida: $fc_partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al realizar acciones de conf. retenido', data: $retenido);
         }
+
 
         if(count($data_predial)>0){
 
