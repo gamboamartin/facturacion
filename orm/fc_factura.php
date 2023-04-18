@@ -279,8 +279,6 @@ class fc_factura extends modelo
     }
 
 
-
-
     private function data_factura(array $factura): array|stdClass
     {
         $comprobante = (new _comprobante())->comprobante(factura: $factura);
@@ -575,6 +573,7 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
         }
 
+
         if($tipo === 'xml') {
             $ingreso = (new cfdis())->ingreso(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
                 emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor,
@@ -829,6 +828,14 @@ class fc_factura extends modelo
         $registro['traslados'] = $trs_global;
         $registro['retenidos'] = $ret_global;
 
+        foreach ($registro['traslados'] as $indice=>$value){
+            if($value->tipo_factor === 'Exento'){
+                unset($registro['traslados'][$indice]->tasa_o_cuota);
+                unset($registro['traslados'][$indice]->importe);
+            }
+        }
+
+
         $registro['conceptos'] = $conceptos;
         $registro['total_impuestos_trasladados'] = number_format($total_impuestos_trasladados, 2);
         $registro['total_impuestos_retenidos'] = number_format($total_impuestos_retenidos, 2);
@@ -846,9 +853,6 @@ class fc_factura extends modelo
         return $notificaciones;
     }
 
-
-
-
     final public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
         $permite_transaccion = $this->verifica_permite_transaccion(fc_factura_id: $id);
@@ -861,9 +865,6 @@ class fc_factura extends modelo
         }
         return $r_modifica_bd;
     }
-
-
-
 
     /**
      * Obtiene el subtotal de una factura
@@ -1402,6 +1403,7 @@ class fc_factura extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
         }
+
 
 
         $pac_prov = (new pac())->pac_prov;
