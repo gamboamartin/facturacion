@@ -66,17 +66,9 @@ class controlador_fc_csd extends system{
         }
 
 
-
-        $links = $this->init_links();
+        $init_ctl = (new _fc_base())->init_base_fc(controler: $this);
         if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar links',data:  $links);
-            print_r($error);
-            die('Error');
-        }
-
-        $inputs = $this->init_inputs();
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar inputs',data:  $inputs);
+            $error = $this->errores->error(mensaje: 'Error al inicializar',data:  $init_ctl);
             print_r($error);
             die('Error');
         }

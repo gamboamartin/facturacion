@@ -89,19 +89,14 @@ class controlador_fc_factura extends _base_system {
         parent::__construct(html_: $html_, link: $link,modelo:  $modelo, paths_conf: $paths_conf);
 
 
-        $links = $this->init_links();
+
+        $init_ctl = (new _fc_base())->init_base_fc(controler: $this);
         if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar links',data:  $links);
+            $error = $this->errores->error(mensaje: 'Error al inicializar',data:  $init_ctl);
             print_r($error);
             die('Error');
         }
 
-        $inputs = $this->init_inputs();
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar inputs',data:  $inputs);
-            print_r($error);
-            die('Error');
-        }
 
         if(isset($_GET['fc_partida_id'])){
             $this->fc_partida_id = $_GET['fc_partida_id'];
@@ -113,12 +108,13 @@ class controlador_fc_factura extends _base_system {
         $this->verifica_parents_alta = true;
 
 
-
     }
 
     public function alta(bool $header, bool $ws = false): array|string
     {
-
+        /**
+         * REFACTORIZAR
+         */
         $parents = $this->parents();
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al obtener parents',data:  $parents);
@@ -1470,6 +1466,10 @@ class controlador_fc_factura extends _base_system {
         return $params;
     }
 
+    /**
+     * Integra los parents de manera ordenada para su peticion
+     * @return array
+     */
     private function parents(): array
     {
         $this->parents_verifica[] = (new com_sucursal(link: $this->link));
