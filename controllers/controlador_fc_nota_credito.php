@@ -193,27 +193,16 @@ class controlador_fc_nota_credito extends system{
         }
         $identificador = "com_sucursal_id";
 
-        $csd = (new fc_csd_id($this->link))->get_csd($this->row_upd->dp_calle_pertenece_id);
+        $csd = (new fc_csd($this->link))->get_csd($this->row_upd->fc_csd_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener csd',data:  $csd);
         }
-        $identificador = "com_sucursal_id";
-        $propiedades = array("id_selected" => $this->row_upd->com_sucursal_id);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
 
         $identificador = "dp_calle_pertenece_id";
-        $propiedades = array("id_selected" => $csd['com_tipo_producto_id']);
+        $propiedades = array("id_selected" => $csd['dp_calle_pertenece_id']);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "com_sucursal_id";
-        $propiedades = array("id_selected" => $csd['com_tipo_producto_id']);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-        $identificador = "com_tipo_producto_id";
-        $propiedades = array("id_selected" => $csd['com_tipo_producto_id']);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
-
+        
         $identificador = "com_sucursal_id";
         $propiedades = array("id_selected" => $this->row_upd->com_sucursal_id);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
