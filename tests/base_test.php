@@ -492,7 +492,6 @@ class base_test{
     public function alta_org_sucursal(PDO $link, int $id = 1): array|\stdClass
     {
 
-
         $alta = (new \gamboamartin\organigrama\tests\base_test())->alta_org_sucursal(link: $link, id: $id);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar sucursal', data: $alta);

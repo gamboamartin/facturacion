@@ -89,7 +89,6 @@ class fc_factura_documento extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al obtener documento', data: $documento);
         }
 
-
         $ruta_archivo = "";
 
         if ($documento->n_registros > 0){

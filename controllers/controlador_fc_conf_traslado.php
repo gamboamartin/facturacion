@@ -100,7 +100,6 @@ class controlador_fc_conf_traslado extends system{
     public function init_datatable(): stdClass
     {
         $columns["fc_conf_traslado_id"]["titulo"] = "Id";
-        $columns["fc_conf_traslado_codigo"]["titulo"] = "Código";
         $columns["com_producto_descripcion"]["titulo"] = "Producto";
         $columns["cat_sat_tipo_factor_descripcion"]["titulo"] = "Tipo Factor";
         $columns["cat_sat_factor_factor"]["titulo"] = "Factor";

@@ -32,6 +32,7 @@ class _html_factura{
     <th>Tipo Factor</th>
     <th>Factor</th>
     <th>Importe</th>
+    <th>Elimina</th>
 </tr>";
     }
 
@@ -52,13 +53,14 @@ class _html_factura{
             </tr>";
     }
 
-    public function data_impuesto(array $impuesto, string $key): string
+    public function data_impuesto(string $button_del, array $impuesto, string $key): string
     {
         return "<tr style='font-size: 12px;'>
                     <td>$impuesto[cat_sat_tipo_impuesto_descripcion]</td>
                     <td>$impuesto[cat_sat_tipo_factor_descripcion]</td>
                     <td>$impuesto[cat_sat_factor_factor]</td>
                     <td>$impuesto[$key]</td>
+                    <td>$button_del</td>
                     </tr>";
     }
 
@@ -70,10 +72,10 @@ class _html_factura{
         $html = "
             <tr>
                 <td class='nested' colspan='9' style='padding: 0;'>
-                    <table class='table table-striped' style='font-size: 14px; vertical-align: middle; margin-bottom: 0;'>
+                    <table class='table table-striped' style='font-size: 14px;'>
                         <thead >
-                            <tr style='background-color: #dfe7f6; color: #2c58a0;'>
-                                <th colspan='4'>$tag_tipo_impuesto</th>
+                            <tr>
+                                <th colspan='5'>$tag_tipo_impuesto</th>
                             </tr>
                             $t_head_impuesto
                         </thead>

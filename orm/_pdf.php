@@ -94,7 +94,7 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al maquetar relacionadas',data:  $rs);
         }
 
-        $rs = $pdf->conceptos(conceptos: $factura['partidas']);
+        $rs = $pdf->conceptos(conceptos: $factura['partidas'], link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar conceptos',data:  $rs);
         }

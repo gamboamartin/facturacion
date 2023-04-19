@@ -24,6 +24,7 @@ class fc_csd extends _modelo_parent {
         $campos_view['descripcion'] = array('type' => 'inputs');
         $campos_view['serie'] = array('type' => 'inputs');
         $campos_view['no_certificado'] = array('type' => 'inputs');
+        $campos_view['password'] = array('type' => 'passwords');
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas, campos_view: $campos_view, no_duplicados: $no_duplicados, tipo_campos: array());

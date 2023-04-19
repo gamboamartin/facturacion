@@ -38,6 +38,7 @@ use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template\html;
+use html\cat_sat_conf_imps_html;
 use html\cat_sat_motivo_cancelacion_html;
 use html\cat_sat_tipo_relacion_html;
 use html\com_cliente_html;
@@ -104,12 +105,6 @@ class controlador_fc_factura extends system{
             die('Error');
         }
 
-        $controladores = $this->init_controladores(paths_conf: $paths_conf);
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
-            print_r($error);
-            die('Error');
-        }
 
         $links = $this->init_links();
         if(errores::$error){
@@ -155,7 +150,7 @@ class controlador_fc_factura extends system{
         }
         $this->link_fc_email_alta_bd  = $link_fc_email_alta_bd;
 
-
+        $this->lista_get_data = true;
 
     }
 
@@ -639,7 +634,8 @@ class controlador_fc_factura extends system{
             return $this->retorno_error(mensaje: 'Error al obtener XML',data:  $ruta_xml, header: $header,ws:$ws);
         }
 
-        $ruta_pdf = $this->pdf($this->registro_id, false, true);
+
+        $ruta_pdf = (new _pdf())->pdf(descarga: false,fc_factura_id: $this->registro_id,guarda: true,link:  $this->link);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar PDF',data:  $ruta_pdf, header: $header,ws:$ws);
         }
@@ -939,6 +935,9 @@ class controlador_fc_factura extends system{
 
     private function init_links(): array|string
     {
+
+
+
         $this->obj_link->genera_links(controler: $this);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar links para partida',data:  $this->obj_link);
@@ -968,7 +967,7 @@ class controlador_fc_factura extends system{
         }
         $this->link_factura_timbra_xml = $link;
 
-        $this->link_com_producto = $this->controlador_com_producto->link_com_producto;
+        //$this->link_com_producto = $this->controlador_com_producto->link_com_producto;
 
         return $link;
     }
@@ -1335,6 +1334,13 @@ class controlador_fc_factura extends system{
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
 
+        $controladores = $this->init_controladores(paths_conf: $this->paths_conf);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
+            print_r($error);
+            die('Error');
+        }
+
         $partidas = (new _partidas_html())->genera_partidas_html(fc_factura_id: $this->registro_id,html: $this->html,link: $this->link);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al generar html', data: $partidas);
@@ -1354,6 +1360,10 @@ class controlador_fc_factura extends system{
         $propiedades = array("cols" => 12);
         $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
+        $identificador = "cat_sat_conf_imps_id";
+        $propiedades = array("cols" => 12);
+        $this->controlador_fc_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
         $inputs = $this->nueva_partida_inicializa();
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al inicializar partida', data: $inputs);
@@ -1362,6 +1372,16 @@ class controlador_fc_factura extends system{
         }
 
         $this->inputs->partidas = $inputs;
+
+        $cat_sat_conf_imps_id = (new cat_sat_conf_imps_html(html: $this->html_base))->select_cat_sat_conf_imps_id(
+            cols: 12,con_registros:  true,id_selected: -1,link: $this->link);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al inicializar input', data: $cat_sat_conf_imps_id);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->inputs->partidas->cat_sat_conf_imps_id = $cat_sat_conf_imps_id;
 
 
         $t_head_producto = (new _html_factura())->thead_producto();
@@ -1451,6 +1471,7 @@ class controlador_fc_factura extends system{
         $keys_selects['fc_factura_id']->disabled = true;
         $keys_selects['fc_factura_id']->cols = 12;
         $keys_selects['com_producto_id']->cols = 12;
+        $keys_selects['cat_sat_conf_imps_id']->cols = 12;
 
         $inputs = $this->controlador_fc_partida->inputs(keys_selects: $keys_selects);
         if (errores::$error) {
@@ -1461,199 +1482,6 @@ class controlador_fc_factura extends system{
 
         return $inputs;
     }
-
-
-
-    private function pdf(int $fc_factura_id, bool $descarga, bool $guarda){
-        $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $fc_factura_id);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener factura',data:  $factura);
-        }
-
-        $ruta_qr = (new fc_factura_documento(link: $this->link))->get_factura_documento(fc_factura_id: $fc_factura_id,
-            tipo_documento: "qr_cfdi");
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener QR',data:  $ruta_qr);
-        }
-
-
-        $filtro["fc_factura_id"] = $factura['fc_factura_id'];
-        $cfdi_sellado = (new fc_cfdi_sellado($this->link))->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener cfdi_sellado', data:  $cfdi_sellado);
-        }
-
-        $cp_receptor = (new dp_calle_pertenece($this->link))->registro(
-            $factura["com_cliente_dp_calle_pertenece_id"]);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener regimen fiscal emisor', data:  $cp_receptor);
-        }
-
-        $rf_emisor = (new cat_sat_regimen_fiscal($this->link))->registro(
-            $factura["org_empresa_cat_sat_regimen_fiscal_id"]);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener regimen fiscal emisor', data:  $rf_emisor);
-        }
-
-        $rf_receptor = (new cat_sat_regimen_fiscal($this->link))->registro(
-            $factura["com_cliente_cat_sat_regimen_fiscal_id"]);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener regimen fiscal receptor', data:  $rf_receptor);
-        }
-
-        $folio_fiscal = "-----";
-        $sello_cfdi = "";
-        $sello_sat = "";
-        $complento = "---";
-        $rfc_proveedor = "-----";
-        $fecha_timbrado = "xxxx-xx-xx 00:00:00";
-        $no_certificado = "-----";
-
-        if ($cfdi_sellado->n_registros > 0) {
-            $folio_fiscal = $cfdi_sellado->registros[0]['fc_cfdi_sellado_uuid'];
-            $sello_cfdi = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_sello_cfd'];
-            $sello_sat = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_sello_sat'];
-            $complento = $cfdi_sellado->registros[0]['fc_cfdi_sellado_cadena_complemento_sat'];
-            $rfc_proveedor = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_rfc_prov_certif'];
-            $fecha_timbrado = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_fecha_timbrado'];
-            $no_certificado = $cfdi_sellado->registros[0]['fc_cfdi_sellado_comprobante_no_certificado'];
-        }
-
-        if(!isset($factura['fc_factura_observaciones'])){
-            $factura['fc_factura_observaciones'] = '';
-        }
-
-        $pdf = new pdf();
-        $pdf->header(rfc_emisor: $factura['org_empresa_rfc'],folio_fiscal: $folio_fiscal,
-            nombre_emisor: $factura['org_empresa_razon_social'],csd: $factura['fc_csd_serie'],
-            rfc_receptor: $factura['com_cliente_rfc'],cod_postal: $factura['dp_cp_descripcion'], fecha: $factura['fc_factura_fecha'],
-            nombre_receptor: $factura['com_cliente_razon_social'],efecto: $factura['cat_sat_tipo_de_comprobante_descripcion'],
-            cod_postal_receptor: $cp_receptor['dp_cp_descripcion'], regimen_fiscal: $rf_emisor['cat_sat_regimen_fiscal_descripcion'],
-            regimen_fiscal_receptor: $rf_receptor['cat_sat_regimen_fiscal_descripcion'],
-            exportacion: $factura['fc_factura_exportacion'],cfdi: $factura['cat_sat_uso_cfdi_descripcion'],
-            observaciones: $factura['fc_factura_observaciones']);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al maquetar header',data:  $pdf);
-        }
-
-        $relacionadas = (new fc_factura(link: $this->link))->get_data_relaciones(fc_factura_id: $this->registro_id);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener relacionadas',data:  $relacionadas);
-        }
-
-        $rs = $pdf->data_relacionados(relacionadas: $relacionadas);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al maquetar relacionadas',data:  $rs);
-        }
-
-        $rs = $pdf->conceptos(conceptos: $factura['partidas']);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al maquetar conceptos',data:  $rs);
-        }
-
-        $pdf->totales(moneda: $factura['cat_sat_moneda_descripcion'],subtotal: $factura['fc_factura_sub_total'],
-            forma_pago: $factura['cat_sat_forma_pago_descripcion'],imp_trasladados: $factura['total_impuestos_trasladados'],
-            imp_retenidos: $factura['total_impuestos_retenidos'],metodo_pago: $factura['cat_sat_metodo_pago_descripcion'],
-            total: $factura['fc_factura_total']);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al maquetar totales',data:  $pdf);
-        }
-
-
-
-        $pdf->complementos(ruta_documento: $ruta_qr, complento: $complento,rfc_proveedor: $rfc_proveedor,
-            fecha: $fecha_timbrado, no_certificado: $no_certificado);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al maquetar complementos',data:  $pdf);
-        }
-
-        $pdf->sellos(sello_cfdi: $sello_cfdi,sello_sat: $sello_sat);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al maquetar sellos',data:  $pdf);
-        }
-
-        $pdf->footer(descripcion: "--- IVITEC ---");
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al generar pdf',data:  $pdf);
-        }
-
-        $nombre_documento = $factura['fc_factura_serie'].$factura['fc_factura_folio'];
-
-        $nombre_documento = $pdf->guardar(nombre_documento: $nombre_documento, descarga: $descarga, guarda: $guarda);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al generar pdf',data:  $pdf);
-        }
-        return $nombre_documento;
-    }
-
-    public function productos(bool $header, bool $ws = false): array|stdClass
-    {
-        $datatables = $this->controlador_com_producto->init_datatable();
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al inicializar datatable', data: $datatables, header: $header, ws: $ws);
-        }
-
-        $datatables->columns["nueva_conf_traslado"]["titulo"] = "Acciones";
-        $datatables->columns["nueva_conf_traslado"]["type"] = "button";
-        $datatables->columns["nueva_conf_traslado"]["campos"] = array("nueva_conf_retenido");
-
-        $table = $this->datatable_init(columns: $datatables->columns, filtro: $datatables->filtro,
-            identificador: "#com_producto");
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al generar datatable', data: $table, header: $header, ws: $ws);
-        }
-
-        $alta = $this->controlador_com_producto->alta(header: false);
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
-        }
-
-        $this->inputs = $this->controlador_com_producto->genera_inputs(
-            keys_selects:  $this->controlador_com_producto->keys_selects);
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al generar inputs', data: $this->inputs);
-            print_r($error);
-            die('Error');
-        }
-
-        return $this->inputs;
-    }
-
-    public function timbra_xml(bool $header, bool $ws = false): array|stdClass{
-
-        $timbre = (new fc_factura(link: $this->link))->timbra_xml(fc_factura_id: $this->registro_id);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al timbrar XML',data:  $timbre, header: $header,ws:$ws);
-        }
-
-        $this->link->beginTransaction();
-        $siguiente_view = (new actions())->init_alta_bd();
-        if(errores::$error){
-            $this->link->rollBack();
-            return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
-                header:  $header, ws: $ws);
-        }
-
-        if($header){
-
-            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
-                seccion: $this->tabla, siguiente_view: "lista");
-            if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error cambiar de view', data: $retorno,
-                    header:  true, ws: $ws);
-            }
-            header('Location:'.$retorno);
-            exit;
-        }
-        if($ws){
-            header('Content-Type: application/json');
-            echo json_encode($timbre, JSON_THROW_ON_ERROR);
-            exit;
-        }
-
-        return $timbre;
-    }
-
 
 
     private function params_button_partida(string $accion_retorno, int $fc_factura_id): array
@@ -1974,6 +1802,41 @@ class controlador_fc_factura extends system{
         $this->inputs->select->fc_factura_id = $select;
 
         return $select;
+    }
+
+    public function timbra_xml(bool $header, bool $ws = false): array|stdClass{
+
+        $timbre = (new fc_factura(link: $this->link))->timbra_xml(fc_factura_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al timbrar XML',data:  $timbre, header: $header,ws:$ws);
+        }
+
+        $this->link->beginTransaction();
+        $siguiente_view = (new actions())->init_alta_bd();
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
+                header:  $header, ws: $ws);
+        }
+
+        if($header){
+
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: "lista");
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error cambiar de view', data: $retorno,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($timbre, JSON_THROW_ON_ERROR);
+            exit;
+        }
+
+        return $timbre;
     }
 
     private function tipo_de_comprobante_predeterminado(): array|stdClass

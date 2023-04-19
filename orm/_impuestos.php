@@ -49,6 +49,9 @@ class _impuestos{
         $imp_global[$key_gl]->impuesto = $impuesto['cat_sat_tipo_impuesto_codigo'];
         $imp_global[$key_gl]->importe = $data_imp->importe;
 
+
+
+
         return $imp_global;
     }
 
@@ -143,6 +146,12 @@ class _impuestos{
             $impuesto_obj->tipo_factor = $impuesto['cat_sat_tipo_factor_descripcion'];
             $impuesto_obj->tasa_o_cuota = number_format($impuesto['cat_sat_factor_factor'], 6,'.','');
             $impuesto_obj->importe = number_format($impuesto[$key_importe_impuesto], 2,'.','');
+
+            if($impuesto['cat_sat_tipo_factor_codigo'] === 'Exento'){
+                unset($impuesto->tasa_o_cuota);
+                unset($impuesto->importe);
+            }
+
             $imp[] = $impuesto_obj;
         }
 

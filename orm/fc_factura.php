@@ -13,7 +13,6 @@ use gamboamartin\cat_sat\models\cat_sat_moneda;
 use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
-use gamboamartin\comercial\models\com_email_cte;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
@@ -160,6 +159,7 @@ class fc_factura extends modelo
 
 
 
+
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
             no_duplicados: $no_duplicados);
@@ -191,6 +191,10 @@ class fc_factura extends modelo
         $registro = $this->init_data_alta_bd(registro: $this->registro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al inicializar registro', data: $registro);
+        }
+
+        if(!isset($registro['fecha'])){
+            $registro['fecha'] = date('Y-m-d');
         }
 
         $this->registro = $registro;
@@ -273,8 +277,6 @@ class fc_factura extends modelo
         }
         return round($descuento + $descuento_nuevo, 2);
     }
-
-
 
 
     private function data_factura(array $factura): array|stdClass
@@ -571,6 +573,7 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
         }
 
+
         if($tipo === 'xml') {
             $ingreso = (new cfdis())->ingreso(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
                 emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor,
@@ -825,6 +828,14 @@ class fc_factura extends modelo
         $registro['traslados'] = $trs_global;
         $registro['retenidos'] = $ret_global;
 
+        foreach ($registro['traslados'] as $indice=>$value){
+            if($value->tipo_factor === 'Exento'){
+                unset($registro['traslados'][$indice]->tasa_o_cuota);
+                unset($registro['traslados'][$indice]->importe);
+            }
+        }
+
+
         $registro['conceptos'] = $conceptos;
         $registro['total_impuestos_trasladados'] = number_format($total_impuestos_trasladados, 2);
         $registro['total_impuestos_retenidos'] = number_format($total_impuestos_retenidos, 2);
@@ -842,9 +853,6 @@ class fc_factura extends modelo
         return $notificaciones;
     }
 
-
-
-
     final public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
         $permite_transaccion = $this->verifica_permite_transaccion(fc_factura_id: $id);
@@ -857,9 +865,6 @@ class fc_factura extends modelo
         }
         return $r_modifica_bd;
     }
-
-
-
 
     /**
      * Obtiene el subtotal de una factura
@@ -1398,6 +1403,7 @@ class fc_factura extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
         }
+
 
 
         $pac_prov = (new pac())->pac_prov;

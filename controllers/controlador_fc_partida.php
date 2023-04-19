@@ -201,10 +201,26 @@ class controlador_fc_partida extends _ctl_base{
     public function init_selects_inputs(): array
     {
         $keys_selects = $this->init_selects(keys_selects: array(), key: "com_producto_id", label: "Producto");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
+        }
         $keys_selects['com_producto_id']->extra_params_keys = array("com_producto_codigo", "com_producto_descripcion",
-            "cat_sat_unidad_descripcion","cat_sat_obj_imp_descripcion",'com_producto_aplica_predial');
+            "cat_sat_unidad_descripcion","cat_sat_obj_imp_descripcion",'com_producto_aplica_predial',
+            'cat_sat_conf_imps_id');
 
-        return $this->init_selects(keys_selects: $keys_selects, key: "fc_factura_id", label: "Factura");
+        $keys_selects = $this->init_selects(keys_selects: $keys_selects, key: "fc_factura_id", label: "Factura");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
+        }
+
+        $keys_selects = $this->init_selects(keys_selects: $keys_selects, key: "cat_sat_conf_imps_id", label: "Conf Imps");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
+        }
+
+
+
+        return $keys_selects;
     }
 
     protected function key_selects_txt(array $keys_selects): array
@@ -293,6 +309,7 @@ class controlador_fc_partida extends _ctl_base{
 
         $keys_selects['com_producto_id']->id_selected = $this->registro['com_producto_id'];
         $keys_selects['fc_factura_id']->id_selected = $this->registro['fc_factura_id'];
+        $keys_selects['cat_sat_conf_imps_id']->id_selected = -1;
 
         $this->row_upd->subtotal = $this->row_upd->cantidad * $this->row_upd->valor_unitario;
         $this->row_upd->total = $this->row_upd->subtotal - $this->row_upd->descuento;
