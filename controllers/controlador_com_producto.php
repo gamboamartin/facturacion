@@ -62,7 +62,7 @@ class controlador_com_producto extends  \gamboamartin\comercial\controllers\cont
         return $this;
     }
 
-    private function init_links(): array|string
+    public function init_links(): array|string
     {
         $this->obj_link->genera_links(controler: $this);
         if(errores::$error){

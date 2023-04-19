@@ -40,6 +40,7 @@ class fc_factura extends modelo
             'dp_municipio' => 'dp_cp', 'dp_estado' => 'dp_municipio', 'dp_pais' => 'dp_estado', 'org_sucursal' => 'fc_csd',
             'org_empresa' => 'org_sucursal');
 
+
         $campos_view['fc_csd_id'] = array('type' => 'selects', 'model' => new fc_csd($link));
         $campos_view['cat_sat_forma_pago_id'] = array('type' => 'selects', 'model' => new cat_sat_forma_pago($link));
         $campos_view['cat_sat_metodo_pago_id'] = array('type' => 'selects', 'model' => new cat_sat_metodo_pago($link));
@@ -50,6 +51,7 @@ class fc_factura extends modelo
         $campos_view['dp_calle_pertenece_id'] = array('type' => 'selects', 'model' => new dp_calle_pertenece($link));
         $campos_view['cat_sat_regimen_fiscal_id'] = array('type' => 'selects', 'model' => new cat_sat_regimen_fiscal($link));
         $campos_view['com_sucursal_id'] = array('type' => 'selects', 'model' => new com_sucursal($link));
+
         $campos_view['folio'] = array('type' => 'inputs');
         $campos_view['serie'] = array('type' => 'inputs');
         $campos_view['version'] = array('type' => 'inputs');

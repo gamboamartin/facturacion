@@ -21,7 +21,7 @@ use gamboamartin\template\html;
 use PDO;
 use stdClass;
 
-class controlador_fc_factura_relacionada extends _ctl_base{
+class controlador_fc_factura_relacionada extends _base {
 
 
     public function __construct(PDO      $link, html $html = new \gamboamartin\template_1\html(),
@@ -29,24 +29,7 @@ class controlador_fc_factura_relacionada extends _ctl_base{
     {
         $modelo = new fc_factura_relacionada(link: $link);
         $html_ = new fc_factura_relacionada_html(html: $html);
-        $obj_link = new links_menu(link: $link, registro_id: $this->registro_id);
-
-        $datatables = $this->init_datatable();
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al inicializar datatable', data: $datatables);
-            print_r($error);
-            die('Error');
-        }
-
-        parent::__construct(html: $html_, link: $link, modelo: $modelo, obj_link: $obj_link, datatables: $datatables,
-            paths_conf: $paths_conf);
-
-        $configuraciones = $this->init_configuraciones();
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al inicializar configuraciones', data: $configuraciones);
-            print_r($error);
-            die('Error');
-        }
+        parent::__construct(html_: $html_,link:  $link,modelo:  $modelo, paths_conf: $paths_conf);
 
 
     }

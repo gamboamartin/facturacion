@@ -47,7 +47,7 @@ use JsonException;
 use PDO;
 use stdClass;
 
-class controlador_fc_factura extends system{
+class controlador_fc_factura extends _base_system {
 
     public array|stdClass $keys_selects = array();
     public controlador_fc_partida $controlador_fc_partida;
@@ -85,25 +85,8 @@ class controlador_fc_factura extends system{
         $modelo = new fc_factura(link: $link);
         $html_ = new fc_factura_html(html: $html);
         $this->html_fc = $html_;
-        $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
-
-        $datatables = $this->init_datatable();
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar datatable',data: $datatables);
-            print_r($error);
-            die('Error');
-        }
-
-        parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, datatables: $datatables,
-            paths_conf: $paths_conf);
-
-        $configuraciones = $this->init_configuraciones();
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar configuraciones',data: $configuraciones);
-            print_r($error);
-            die('Error');
-        }
+        parent::__construct(html_: $html_, link: $link,modelo:  $modelo, paths_conf: $paths_conf);
 
 
         $links = $this->init_links();
@@ -126,36 +109,22 @@ class controlador_fc_factura extends system{
 
         $this->lista_get_data = true;
 
-        $this->parents_verifica[] = (new com_sucursal(link: $this->link));
-        $this->parents_verifica[] = (new cat_sat_regimen_fiscal(link: $this->link));
-        $this->parents_verifica[] = (new dp_calle_pertenece(link: $this->link));
-        $this->parents_verifica[] = (new cat_sat_tipo_de_comprobante(link: $this->link));
-        $this->parents_verifica[] = (new cat_sat_uso_cfdi(link: $this->link));
-        $this->parents_verifica[] = (new com_tipo_cambio(link: $this->link));
-        $this->parents_verifica[] = (new cat_sat_moneda(link: $this->link));
-        $this->parents_verifica[] = (new cat_sat_metodo_pago(link: $this->link));
-        $this->parents_verifica[] = (new cat_sat_forma_pago(link: $this->link));
-        $this->parents_verifica[] = (new fc_csd(link: $this->link));
-        $this->parents_verifica[] = (new com_producto(link: $this->link));
-
 
         $this->verifica_parents_alta = true;
 
 
-        $link_fc_email_alta_bd = $this->obj_link->link_alta_bd(link: $this->link, seccion: 'fc_email');
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al obtener link',data:  $this->link_fc_email_alta_bd);
-            print_r($error);
-            exit;
-        }
-        $this->link_fc_email_alta_bd  = $link_fc_email_alta_bd;
-
-        $this->lista_get_data = true;
 
     }
 
     public function alta(bool $header, bool $ws = false): array|string
     {
+
+        $parents = $this->parents();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al obtener parents',data:  $parents);
+            print_r($error);
+            exit;
+        }
 
         $r_alta =  parent::alta(header: false);
         if(errores::$error){
@@ -196,6 +165,8 @@ class controlador_fc_factura extends system{
             die('Error');
         }
         $this->inputs->observaciones = $observaciones;
+
+
 
         return $r_alta;
     }
@@ -933,7 +904,7 @@ class controlador_fc_factura extends system{
         return $existe_factura_documento;
     }
 
-    private function init_links(): array|string
+    public function init_links(): array|string
     {
 
 
@@ -967,12 +938,18 @@ class controlador_fc_factura extends system{
         }
         $this->link_factura_timbra_xml = $link;
 
-        //$this->link_com_producto = $this->controlador_com_producto->link_com_producto;
+        $link_fc_email_alta_bd = $this->obj_link->link_alta_bd(link: $this->link, seccion: 'fc_email');
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al obtener link',data:  $this->link_fc_email_alta_bd);
+            print_r($error);
+            exit;
+        }
+        $this->link_fc_email_alta_bd  = $link_fc_email_alta_bd;
 
         return $link;
     }
 
-    private function init_inputs(): array
+    public function init_inputs(): array
     {
         $identificador = "fc_csd_id";
         $propiedades = array("label" => "Empresa", "cols" => 12,"extra_params_keys"=>array("fc_csd_serie"));
@@ -1491,6 +1468,22 @@ class controlador_fc_factura extends system{
         $params['accion_retorno'] = $accion_retorno;
         $params['id_retorno'] = $fc_factura_id;
         return $params;
+    }
+
+    private function parents(): array
+    {
+        $this->parents_verifica[] = (new com_sucursal(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_regimen_fiscal(link: $this->link));
+        $this->parents_verifica[] = (new dp_calle_pertenece(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_tipo_de_comprobante(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_uso_cfdi(link: $this->link));
+        $this->parents_verifica[] = (new com_tipo_cambio(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_moneda(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_metodo_pago(link: $this->link));
+        $this->parents_verifica[] = (new cat_sat_forma_pago(link: $this->link));
+        $this->parents_verifica[] = (new fc_csd(link: $this->link));
+        $this->parents_verifica[] = (new com_producto(link: $this->link));
+        return $this->parents_verifica;
     }
 
     /*

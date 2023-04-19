@@ -19,7 +19,7 @@ use gamboamartin\template\html;
 use PDO;
 use stdClass;
 
-class controlador_fc_traslado extends system{
+class controlador_fc_traslado extends _base_system_conf {
 
     public array|stdClass $keys_selects = array();
 
@@ -27,24 +27,7 @@ class controlador_fc_traslado extends system{
                                 stdClass $paths_conf = new stdClass()){
         $modelo = new fc_traslado(link: $link);
         $html_ = new fc_traslado_html(html: $html);
-        $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
-
-        $datatables = $this->init_datatable();
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar datatable',data: $datatables);
-            print_r($error);
-            die('Error');
-        }
-
-        parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, datatables: $datatables,
-            paths_conf: $paths_conf);
-
-        $configuraciones = $this->init_configuraciones();
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar configuraciones',data: $configuraciones);
-            print_r($error);
-            die('Error');
-        }
+        parent::__construct(html_: $html_, link: $link,modelo:  $modelo, paths_conf: $paths_conf);
 
         $inputs = $this->init_inputs();
         if(errores::$error){
@@ -54,22 +37,6 @@ class controlador_fc_traslado extends system{
         }
     }
 
-    public function alta(bool $header, bool $ws = false): array|string
-    {
-        $r_alta =  parent::alta(header: false);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);
-        }
-
-        $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);
-            print_r($error);
-            die('Error');
-        }
-
-        return $r_alta;
-    }
 
 
 

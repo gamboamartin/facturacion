@@ -21,7 +21,7 @@ use gamboamartin\template\html;
 use PDO;
 use stdClass;
 
-class controlador_fc_partida extends _ctl_base{
+class controlador_fc_partida extends _base {
 
     public controlador_fc_traslado $controlador_fc_traslado;
     public string $link_fc_traslado_alta_bd = '';
@@ -31,24 +31,8 @@ class controlador_fc_partida extends _ctl_base{
     {
         $modelo = new fc_partida(link: $link);
         $html_ = new fc_partida_html(html: $html);
-        $obj_link = new links_menu(link: $link, registro_id: $this->registro_id);
 
-        $datatables = $this->init_datatable();
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al inicializar datatable', data: $datatables);
-            print_r($error);
-            die('Error');
-        }
-
-        parent::__construct(html: $html_, link: $link, modelo: $modelo, obj_link: $obj_link, datatables: $datatables,
-            paths_conf: $paths_conf);
-
-        $configuraciones = $this->init_configuraciones();
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al inicializar configuraciones', data: $configuraciones);
-            print_r($error);
-            die('Error');
-        }
+        parent::__construct(html_: $html_,link:  $link,modelo:  $modelo, paths_conf: $paths_conf);
 
         $init_controladores = $this->init_controladores(paths_conf: $paths_conf);
         if (errores::$error) {
@@ -161,7 +145,7 @@ class controlador_fc_partida extends _ctl_base{
         return $datatables;
     }
 
-    private function init_links(): array|string
+    public function init_links(): array|string
     {
         $this->link_fc_traslado_alta_bd = $this->obj_link->link_con_id(accion: 'nuevo_traslado_bd', link: $this->link,
             registro_id: $this->registro_id, seccion: "fc_partida");

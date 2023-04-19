@@ -65,6 +65,8 @@ class controlador_fc_csd extends system{
             die('Error');
         }
 
+
+
         $links = $this->init_links();
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al inicializar links',data:  $links);
@@ -153,7 +155,7 @@ class controlador_fc_csd extends system{
         return $datatables;
     }
 
-    private function init_links(): array|string
+    public function init_links(): array|string
     {
         $this->obj_link->genera_links($this);
         if(errores::$error){
@@ -187,7 +189,7 @@ class controlador_fc_csd extends system{
         return $link;
     }
 
-    private function init_inputs(): array
+    public function init_inputs(): array
     {
         $identificador = "org_sucursal_id";
         $propiedades = array("label" => "Sucursal","cols" => 12);

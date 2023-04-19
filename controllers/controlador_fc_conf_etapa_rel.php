@@ -13,14 +13,12 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_conf_etapa_rel_html;
 use gamboamartin\facturacion\models\fc_conf_etapa_rel;
 use gamboamartin\proceso\html\pr_etapa_proceso_html;
-use gamboamartin\system\_ctl_base;
-use gamboamartin\system\links_menu;
 
 use gamboamartin\template\html;
 use PDO;
 use stdClass;
 
-class controlador_fc_conf_etapa_rel extends _ctl_base{
+class controlador_fc_conf_etapa_rel extends _base {
 
 
     public function __construct(PDO      $link, html $html = new \gamboamartin\template_1\html(),
@@ -28,25 +26,8 @@ class controlador_fc_conf_etapa_rel extends _ctl_base{
     {
         $modelo = new fc_conf_etapa_rel(link: $link);
         $html_ = new fc_conf_etapa_rel_html(html: $html);
-        $obj_link = new links_menu(link: $link, registro_id: $this->registro_id);
 
-        $datatables = $this->init_datatable();
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al inicializar datatable', data: $datatables);
-            print_r($error);
-            die('Error');
-        }
-
-        parent::__construct(html: $html_, link: $link, modelo: $modelo, obj_link: $obj_link, datatables: $datatables,
-            paths_conf: $paths_conf);
-
-        $configuraciones = $this->init_configuraciones();
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al inicializar configuraciones', data: $configuraciones);
-            print_r($error);
-            die('Error');
-        }
-
+        parent::__construct(html_: $html_,link:  $link,modelo:  $modelo, paths_conf: $paths_conf);
 
     }
 
