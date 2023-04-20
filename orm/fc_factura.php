@@ -529,7 +529,13 @@ class fc_factura extends modelo
         return $notifica;
     }
 
-    private function etapas(int $fc_factura_id){
+    /**
+     * Obtiene las etapas de una factura
+     * @param int $fc_factura_id Factura a verificar etapas
+     * @return array
+     */
+    private function etapas(int $fc_factura_id): array
+    {
         $filtro['fc_factura.id'] =  $fc_factura_id;
         $r_fc_factura_etapa = (new fc_factura_etapa(link: $this->link))->filtro_and(filtro: $filtro);
         if (errores::$error) {
