@@ -1,6 +1,7 @@
 <?php
 namespace gamboamartin\facturacion\models;
 use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
+use gamboamartin\comercial\models\com_tmp_cte_dp;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\pdf;
@@ -12,7 +13,7 @@ class _pdf{
     public function __construct(){
         $this->error = new errores();
     }
-    final public function pdf( bool $descarga, int $fc_factura_id, bool $guarda, PDO $link){
+    final public function pdf( bool $descarga, int $fc_factura_id, bool $guarda, PDO $link):array|string|bool{
         $factura = (new fc_factura($link))->get_factura(fc_factura_id: $fc_factura_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener factura',data:  $factura);
@@ -36,6 +37,24 @@ class _pdf{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener regimen fiscal emisor', data:  $cp_receptor);
         }
+
+        $cod_postal_receptor = $cp_receptor['dp_cp_descripcion'];
+
+        $filtro = array();
+        $filtro["com_tmp_cte_dp.com_cliente_id"] = $factura['com_cliente_id'];
+        $existe_cp_tmp = (new com_tmp_cte_dp(link: $link))->existe(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si existe', data:  $existe_cp_tmp);
+        }
+        if($existe_cp_tmp){
+            $r_com_tmp_cte_dp = (new com_tmp_cte_dp(link: $link))->filtro_and(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar si existe', data:  $r_com_tmp_cte_dp);
+            }
+            $cod_postal_receptor = $r_com_tmp_cte_dp->registros[0]['com_tmp_cte_dp_dp_cp'];
+        }
+
+
 
         $rf_emisor = (new cat_sat_regimen_fiscal($link))->registro(
             $factura["org_empresa_cat_sat_regimen_fiscal_id"]);
@@ -76,7 +95,7 @@ class _pdf{
             nombre_emisor: $factura['org_empresa_razon_social'],csd: $factura['fc_csd_serie'],
             rfc_receptor: $factura['com_cliente_rfc'],cod_postal: $factura['dp_cp_descripcion'], fecha: $factura['fc_factura_fecha'],
             nombre_receptor: $factura['com_cliente_razon_social'],efecto: $factura['cat_sat_tipo_de_comprobante_descripcion'],
-            cod_postal_receptor: $cp_receptor['dp_cp_descripcion'], regimen_fiscal: $rf_emisor['cat_sat_regimen_fiscal_descripcion'],
+            cod_postal_receptor: $cod_postal_receptor, regimen_fiscal: $rf_emisor['cat_sat_regimen_fiscal_descripcion'],
             regimen_fiscal_receptor: $rf_receptor['cat_sat_regimen_fiscal_descripcion'],
             exportacion: $factura['fc_factura_exportacion'],cfdi: $factura['cat_sat_uso_cfdi_descripcion'],
             observaciones: $factura['fc_factura_observaciones']);

@@ -15,6 +15,7 @@ use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
+use gamboamartin\comercial\models\com_tmp_cte_dp;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
@@ -1122,10 +1123,29 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al obtener com_sucursal', data: $com_sucursal);
         }
 
+        $domicilio_fiscal_receptor = $com_sucursal['dp_cp_descripcion'];
+        $com_cliente_id = $com_sucursal['com_cliente_id'];
+        $filtro['com_tmp_cte_dp.com_cliente_id'] = $com_cliente_id;
+
+        $existe_tmp_dp = (new com_tmp_cte_dp(link: $this->link))->existe(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar si existe', data: $existe_tmp_dp);
+        }
+
+        if($existe_tmp_dp){
+            $r_tmp_dp = (new com_tmp_cte_dp(link: $this->link))->filtro_and(filtro: $filtro);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al validar si existe', data: $r_tmp_dp);
+            }
+            $domicilio_fiscal_receptor = $r_tmp_dp->registros[0]['com_tmp_cte_dp_dp_cp'];
+        }
+
+
+
         $receptor = array();
         $receptor['rfc'] = $com_sucursal['com_cliente_rfc'];
         $receptor['nombre'] = $com_sucursal['com_cliente_razon_social'];
-        $receptor['domicilio_fiscal_receptor'] = $com_sucursal['dp_cp_descripcion']; //'91779'; dp_cp_descripcion de com_sucursal.dp_calle_pertenece hacia cp
+        $receptor['domicilio_fiscal_receptor'] = $domicilio_fiscal_receptor; //'91779'; dp_cp_descripcion de com_sucursal.dp_calle_pertenece hacia cp
         $receptor['regimen_fiscal_receptor'] = $com_sucursal['cat_sat_regimen_fiscal_codigo'];
         $receptor['uso_cfdi'] = $factura['cat_sat_uso_cfdi_codigo'];
         return $receptor;
