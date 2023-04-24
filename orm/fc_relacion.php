@@ -140,7 +140,7 @@ class fc_relacion extends _modelo_parent_sin_codigo
     }
 
     /**
-     * 
+     *
      * @param string $cat_sat_tipo_relacion_codigo
      * @param array $fc_factura_relacionada
      * @param array $relacionados

@@ -217,11 +217,9 @@ final class pdf
     private function concepto_datos(array $concepto): string|array
     {
 
-        $keys_no_ob = array('fc_partida_descuento');
-        foreach ($keys_no_ob as $key_no_ob){
-            if(isset($concepto[$key_no_ob])){
-                $concepto[$key_no_ob] = 0;
-            }
+        $concepto = $this->keys_no_ob(concepto: $concepto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar concepto',data:  $concepto);
         }
 
         $keys = array('fc_partida_descuento','fc_partida_valor_unitario','cat_sat_producto_codigo',
@@ -234,34 +232,25 @@ final class pdf
 
         $class = "txt-center border";
 
-        $fc_partida_valor_unitario = $this->limpia_monto(monto: $concepto['fc_partida_valor_unitario']);
+        $fc_partida_valor_unitario = $this->fc_partida_double(concepto: $concepto,key: 'fc_partida_valor_unitario');
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_valor_unitario);
+            return $this->error->error(mensaje: 'Error al obtener fc_partida_valor_unitario',data:  $fc_partida_valor_unitario);
         }
 
-        $fc_partida_valor_unitario = (float)$fc_partida_valor_unitario;
-        $fc_partida_valor_unitario = round($fc_partida_valor_unitario,2);
-
-
-        $fc_partida_cantidad = $this->limpia_monto(monto: $concepto['fc_partida_cantidad']);
+        $fc_partida_cantidad = $this->fc_partida_double(concepto: $concepto, key: 'fc_partida_cantidad');
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_cantidad);
+            return $this->error->error(mensaje: 'Error al obtener fc_partida_cantidad',data:  $fc_partida_cantidad);
         }
-        $fc_partida_cantidad = (float)$fc_partida_cantidad;
-        $fc_partida_cantidad = round($fc_partida_cantidad,2);
 
-
-        $fc_partida_descuento = $this->limpia_monto(monto: $concepto['fc_partida_descuento']);
+        $fc_partida_descuento = $this->fc_partida_double(concepto: $concepto,key: 'fc_partida_descuento');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_descuento);
         }
 
-        $fc_partida_descuento = (float)$fc_partida_descuento;
-        $fc_partida_descuento = round($fc_partida_descuento,2);
-
-
-        $fc_partida_importe = $fc_partida_valor_unitario * $fc_partida_cantidad;
-        $fc_partida_importe = round($fc_partida_importe,2);
+        $fc_partida_importe = $this->fc_partida_double(concepto: $concepto,key: 'fc_partida_importe');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_importe);
+        }
 
 
         $fc_partida_descuento = $this->monto_moneda(monto: $fc_partida_descuento);
@@ -282,7 +271,7 @@ final class pdf
 
 
         $body_td_1 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_codigo'], class: $class, propiedades: "colspan='2'");
-        $body_td_2 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_id'], class: $class);
+        $body_td_2 = $this->html(etiqueta: "td", data: $concepto['com_producto_codigo'], class: $class);
         $body_td_3 = $this->html(etiqueta: "td", data: $fc_partida_cantidad, class: $class);
         $body_td_4 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_codigo'], class: $class);
         $body_td_5 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_descripcion'], class: $class);
@@ -506,6 +495,30 @@ final class pdf
         return $base_imp;
     }
 
+    private function fc_partida_double(array $concepto, string $key){
+        $fc_monto = $this->limpia_monto(monto: $concepto[$key]);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_monto);
+        }
+        $fc_monto = (float)$fc_monto;
+        return round($fc_monto,2);
+    }
+
+    private function fc_partida_cantidad(array $concepto){
+        $fc_partida_cantidad = $this->fc_partida_double(concepto: $concepto,key:  'fc_partida_cantidad');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_cantidad);
+        }
+    }
+
+    private function fc_partida_valor_unitario(array $concepto){
+        $fc_partida_valor_unitario = $this->fc_partida_double(concepto: $concepto,key:  'fc_partida_valor_unitario');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_valor_unitario);
+        }
+        return $fc_partida_valor_unitario;
+    }
+
     private function html(string $etiqueta, string $data = "", string $class = "", string $propiedades = ""): string
     {
         return "<$etiqueta class='$class' $propiedades>$data</$etiqueta>";
@@ -613,6 +626,19 @@ final class pdf
             }
         }
         return $tr;
+    }
+
+    private function keys_no_ob(array $concepto): array
+    {
+        $keys_no_ob = array('fc_partida_descuento');
+        foreach ($keys_no_ob as $key_no_ob){
+
+            if(isset($concepto[$key_no_ob])){
+                $concepto[$key_no_ob] = 0;
+            }
+
+        }
+        return $concepto;
     }
 
     /**
