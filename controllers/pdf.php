@@ -36,7 +36,14 @@ final class pdf
         $this->pdf->simpleTables = false;
 
         $css = file_get_contents((new generales())->path_base . "css/pdf.css");
-        $this->pdf->WriteHTML($css, 1);
+        try {
+            $this->pdf->WriteHTML($css, 1);
+        }
+        catch (Throwable $e){
+            $error = (new errores())->error('Error al generar objeto css', $e);
+            print_r($error);
+            die('Error');
+        }
 
     }
 
@@ -124,17 +131,13 @@ final class pdf
         }
 
 
-
-
-
-
     }
 
-    public function header(string $rfc_emisor, string $folio_fiscal, string $nombre_emisor, string $csd,
-                           string $rfc_receptor, string $cod_postal, string $fecha,
-                           string $nombre_receptor, string $efecto,
-                           string $cod_postal_receptor, string $regimen_fiscal, string $regimen_fiscal_receptor,
-                           string $exportacion, string $cfdi, string $observaciones, string $ruta_logo): string|array
+    public function header(string $cfdi, string $cod_postal, string $cod_postal_receptor, string $csd, string $efecto,
+                           string $exportacion, string $fecha, string $folio, string $folio_fiscal,
+                           string $nombre_emisor, string $nombre_receptor,  string $observaciones,
+                           string $regimen_fiscal, string $regimen_fiscal_receptor, string $rfc_emisor,
+                           string $rfc_receptor, string $ruta_logo): string|array
     {
 
 
@@ -149,10 +152,12 @@ final class pdf
             }
         }
 
-        $body_td_1 = $this->html(etiqueta: "td", data: "RFC emisor:", class: "negrita");
-        $body_td_2 = $this->html(etiqueta: "td", data: $rfc_emisor);
-        $body_td_3 = $this->html(etiqueta: "td", data: "Folio fiscal:", class: "negrita");
-        $body_td_4 = $this->html(etiqueta: "td", data: $folio_fiscal);
+        $body_td_rfc_emisor = $this->html(etiqueta: "td", data: "RFC emisor:", class: "negrita");
+        $body_td_rfc_emisor_data = $this->html(etiqueta: "td", data: $rfc_emisor);
+        $body_td_folio_fiscal = $this->html(etiqueta: "td", data: "Folio fiscal:", class: "negrita");
+        $body_td_folio_fiscal_data = $this->html(etiqueta: "td", data: $folio_fiscal);
+
+
         $body_td_5 = $this->html(etiqueta: "td", data: "Nombre emisor:", class: "negrita");
         $body_td_6 = $this->html(etiqueta: "td", data: $nombre_emisor);
         $body_td_7 = $this->html(etiqueta: "td", data: "No. de serie del CSD:", class: "negrita");
@@ -173,20 +178,25 @@ final class pdf
         $body_td_22 = $this->html(etiqueta: "td", data: $regimen_fiscal_receptor);
         $body_td_23 = $this->html(etiqueta: "td", data: "Exportación:", class: "negrita");
         $body_td_24 = $this->html(etiqueta: "td", data: $exportacion);
-        $body_td_25 = $this->html(etiqueta: "td", data: "Uso CFDI:", class: "negrita");
-        $body_td_26 = $this->html(etiqueta: "td", data: $cfdi);
+
+        $body_td_uso_cfdi = $this->html(etiqueta: "td", data: "Uso CFDI:", class: "negrita");
+        $body_td_uso_cfdi_data = $this->html(etiqueta: "td", data: $cfdi);
+
+        $body_td_folio = $this->html(etiqueta: "td", data: "Folio:", class: "negrita");
+        $body_td_folio_data = $this->html(etiqueta: "td", data: $folio);
 
         $body_td_tag_observaciones = $this->html(etiqueta: "td",data: "Observaciones:", class: "negrita" );
         $body_td_observaciones = $this->html(etiqueta: "td",data: $observaciones );
 
 
-        $body_tr_1 = $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2 . $body_td_3 . $body_td_4);
+        $body_tr_1 = $this->html(etiqueta: "tr", data: $body_td_rfc_emisor . $body_td_rfc_emisor_data .
+            $body_td_folio_fiscal . $body_td_folio_fiscal_data);
         $body_tr_2 = $this->html(etiqueta: "tr", data: $body_td_5 . $body_td_6 . $body_td_7 . $body_td_8);
         $body_tr_3 = $this->html(etiqueta: "tr", data: $body_td_9 . $body_td_10 . $body_td_11 . $body_td_12);
         $body_tr_4 = $this->html(etiqueta: "tr", data: $body_td_13 . $body_td_14 . $body_td_15 . $body_td_16);
         $body_tr_5 = $this->html(etiqueta: "tr", data: $body_td_17 . $body_td_18 . $body_td_19 . $body_td_20);
         $body_tr_6 = $this->html(etiqueta: "tr", data: $body_td_21 . $body_td_22 . $body_td_23 . $body_td_24);
-        $body_tr_7 = $this->html(etiqueta: "tr", data: $body_td_25 . $body_td_26);
+        $body_tr_7 = $this->html(etiqueta: "tr", data: $body_td_uso_cfdi . $body_td_uso_cfdi_data. $body_td_folio. $body_td_folio_data);
         $body_tr_8 = $this->html(etiqueta: "tr", data: $body_td_tag_observaciones. $body_td_observaciones);
 
         $body = $this->html(etiqueta: "tbody", data:  $body_tr_1 . $body_tr_2 . $body_tr_3 . $body_tr_4 .

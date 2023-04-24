@@ -173,14 +173,16 @@ class _pdf{
         }
 
         $pdf = new pdf();
-        $pdf->header(rfc_emisor: $factura['org_empresa_rfc'],folio_fiscal: $data->folio_fiscal,
-            nombre_emisor: $factura['org_empresa_razon_social'],csd: $factura['fc_csd_serie'],
-            rfc_receptor: $factura['com_cliente_rfc'],cod_postal: $factura['dp_cp_descripcion'], fecha: $factura['fc_factura_fecha'],
-            nombre_receptor: $factura['com_cliente_razon_social'],efecto: $factura['cat_sat_tipo_de_comprobante_descripcion'],
-            cod_postal_receptor: $cod_postal_receptor, regimen_fiscal: $rf_emisor['cat_sat_regimen_fiscal_descripcion'],
+        $pdf->header(cfdi: $factura['cat_sat_uso_cfdi_descripcion'], cod_postal: $factura['dp_cp_descripcion'],
+            cod_postal_receptor: $cod_postal_receptor, csd: $factura['fc_csd_serie'],
+            efecto: $factura['cat_sat_tipo_de_comprobante_descripcion'],
+            exportacion: $factura['fc_factura_exportacion'], fecha: $factura['fc_factura_fecha'],
+            folio: $factura['fc_factura_folio'], folio_fiscal: $data->folio_fiscal,
+            nombre_emisor: $factura['org_empresa_razon_social'], nombre_receptor: $factura['com_cliente_razon_social'],
+            observaciones: $factura['fc_factura_observaciones'],
+            regimen_fiscal: $rf_emisor['cat_sat_regimen_fiscal_descripcion'],
             regimen_fiscal_receptor: $rf_receptor['cat_sat_regimen_fiscal_descripcion'],
-            exportacion: $factura['fc_factura_exportacion'],cfdi: $factura['cat_sat_uso_cfdi_descripcion'],
-            observaciones: $factura['fc_factura_observaciones'], ruta_logo: $ruta_logo);
+            rfc_emisor: $factura['org_empresa_rfc'], rfc_receptor: $factura['com_cliente_rfc'], ruta_logo: $ruta_logo);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar header',data:  $pdf);
         }
