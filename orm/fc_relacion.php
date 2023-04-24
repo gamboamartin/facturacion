@@ -139,8 +139,17 @@ class fc_relacion extends _modelo_parent_sin_codigo
 
     }
 
+    /**
+     * 
+     * @param string $cat_sat_tipo_relacion_codigo
+     * @param array $fc_factura_relacionada
+     * @param array $relacionados
+     * @return array
+     */
     private function integra_relacionado(string $cat_sat_tipo_relacion_codigo, array $fc_factura_relacionada,
-                                         array $relacionados){
+                                         array $relacionados): array
+    {
+        $cat_sat_tipo_relacion_codigo = trim($cat_sat_tipo_relacion_codigo);
         $keys = array('fc_factura_uuid');
         $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro: $fc_factura_relacionada);
         if(errores::$error){
