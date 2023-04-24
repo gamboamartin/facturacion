@@ -5,7 +5,10 @@ use gamboamartin\comercial\models\com_tmp_cte_dp;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\pdf;
+use gamboamartin\organigrama\models\org_empresa;
+use gamboamartin\organigrama\models\org_logo;
 use PDO;
+use stdClass;
 
 class _pdf{
     private errores $error;
@@ -13,31 +16,16 @@ class _pdf{
     public function __construct(){
         $this->error = new errores();
     }
-    final public function pdf( bool $descarga, int $fc_factura_id, bool $guarda, PDO $link):array|string|bool{
-        $factura = (new fc_factura($link))->get_factura(fc_factura_id: $fc_factura_id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener factura',data:  $factura);
-        }
 
-        $ruta_qr = (new fc_factura_documento(link: $link))->get_factura_documento(fc_factura_id: $fc_factura_id,
-            tipo_documento: "qr_cfdi");
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener QR',data:  $ruta_qr);
-        }
-
-
-        $filtro["fc_factura_id"] = $factura['fc_factura_id'];
-        $cfdi_sellado = (new fc_cfdi_sellado($link))->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener cfdi_sellado', data:  $cfdi_sellado);
-        }
-
-        $cp_receptor = (new dp_calle_pertenece($link))->registro(
-            $factura["com_cliente_dp_calle_pertenece_id"]);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener regimen fiscal emisor', data:  $cp_receptor);
-        }
-
+    /**
+     * Obtiene el cp de un receptor
+     * @param array $cp_receptor
+     * @param array $factura
+     * @param PDO $link
+     * @return array|string
+     */
+    private function cod_postal_receptor(array $cp_receptor, array $factura, PDO $link): array|string
+    {
         $cod_postal_receptor = $cp_receptor['dp_cp_descripcion'];
 
         $filtro = array();
@@ -53,7 +41,111 @@ class _pdf{
             }
             $cod_postal_receptor = $r_com_tmp_cte_dp->registros[0]['com_tmp_cte_dp_dp_cp'];
         }
+        return $cod_postal_receptor;
+    }
 
+    private function data_factura(stdClass $cfdi_sellado){
+        $data = $this->data_init_limpio();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al asignar datos', data:  $data);
+        }
+
+        if ($cfdi_sellado->n_registros > 0) {
+
+            $data = $this->data_init(cfdi_sellado: $cfdi_sellado);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al asignar datos', data:  $data);
+            }
+
+        }
+        return $data;
+    }
+
+    private function data_init(stdClass $cfdi_sellado): stdClass
+    {
+        $folio_fiscal = $cfdi_sellado->registros[0]['fc_cfdi_sellado_uuid'];
+        $sello_cfdi = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_sello_cfd'];
+        $sello_sat = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_sello_sat'];
+        $complento = $cfdi_sellado->registros[0]['fc_cfdi_sellado_cadena_complemento_sat'];
+        $rfc_proveedor = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_rfc_prov_certif'];
+        $fecha_timbrado = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_fecha_timbrado'];
+        $no_certificado = $cfdi_sellado->registros[0]['fc_cfdi_sellado_comprobante_no_certificado'];
+
+        $data = new stdClass();
+        $data->folio_fiscal = $folio_fiscal;
+        $data->sello_cfdi = $sello_cfdi;
+        $data->sello_sat = $sello_sat;
+        $data->complento = $complento;
+        $data->rfc_proveedor = $rfc_proveedor;
+        $data->fecha_timbrado = $fecha_timbrado;
+        $data->no_certificado = $no_certificado;
+
+        return $data;
+
+    }
+
+    private function data_init_limpio(): stdClass
+    {
+        $folio_fiscal = "-----";
+        $sello_cfdi = "";
+        $sello_sat = "";
+        $complento = "---";
+        $rfc_proveedor = "-----";
+        $fecha_timbrado = "xxxx-xx-xx 00:00:00";
+        $no_certificado = "-----";
+
+        $data = new stdClass();
+        $data->folio_fiscal = $folio_fiscal;
+        $data->sello_cfdi = $sello_cfdi;
+        $data->sello_sat = $sello_sat;
+        $data->complento = $complento;
+        $data->rfc_proveedor = $rfc_proveedor;
+        $data->fecha_timbrado = $fecha_timbrado;
+        $data->no_certificado = $no_certificado;
+
+        return $data;
+
+    }
+    final public function pdf( bool $descarga, int $fc_factura_id, bool $guarda, PDO $link):array|string|bool{
+        $factura = (new fc_factura($link))->get_factura(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener factura',data:  $factura);
+        }
+
+        $ruta_qr = (new fc_factura_documento(link: $link))->get_factura_documento(fc_factura_id: $fc_factura_id,
+            tipo_documento: "qr_cfdi");
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener QR',data:  $ruta_qr);
+        }
+
+        $filtro = array();
+        $filtro['org_empresa.id'] = $factura['org_empresa_id'];
+        $r_org_logo = (new org_logo(link: $link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener Logo',data:  $r_org_logo);
+        }
+        $ruta_logo = '';
+        if($r_org_logo->n_registros > 0) {
+            $ruta_logo = $r_org_logo->registros[0]['doc_documento_ruta_absoluta'];
+        }
+
+        $filtro = array();
+        $filtro["fc_factura_id"] = $factura['fc_factura_id'];
+        $cfdi_sellado = (new fc_cfdi_sellado($link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener cfdi_sellado', data:  $cfdi_sellado);
+        }
+
+        $cp_receptor = (new dp_calle_pertenece($link))->registro(
+            $factura["com_cliente_dp_calle_pertenece_id"]);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener regimen fiscal emisor', data:  $cp_receptor);
+        }
+
+        $cod_postal_receptor = $this->cod_postal_receptor(cp_receptor: $cp_receptor,factura:  $factura,link:  $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener cod rec', data:  $cod_postal_receptor);
+        }
 
 
         $rf_emisor = (new cat_sat_regimen_fiscal($link))->registro(
@@ -68,37 +160,27 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al obtener regimen fiscal receptor', data:  $rf_receptor);
         }
 
-        $folio_fiscal = "-----";
-        $sello_cfdi = "";
-        $sello_sat = "";
-        $complento = "---";
-        $rfc_proveedor = "-----";
-        $fecha_timbrado = "xxxx-xx-xx 00:00:00";
-        $no_certificado = "-----";
 
-        if ($cfdi_sellado->n_registros > 0) {
-            $folio_fiscal = $cfdi_sellado->registros[0]['fc_cfdi_sellado_uuid'];
-            $sello_cfdi = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_sello_cfd'];
-            $sello_sat = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_sello_sat'];
-            $complento = $cfdi_sellado->registros[0]['fc_cfdi_sellado_cadena_complemento_sat'];
-            $rfc_proveedor = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_rfc_prov_certif'];
-            $fecha_timbrado = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_fecha_timbrado'];
-            $no_certificado = $cfdi_sellado->registros[0]['fc_cfdi_sellado_comprobante_no_certificado'];
+        $data = $this->data_factura(cfdi_sellado: $cfdi_sellado);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al asignar datos', data:  $data);
         }
+
+
 
         if(!isset($factura['fc_factura_observaciones'])){
             $factura['fc_factura_observaciones'] = '';
         }
 
         $pdf = new pdf();
-        $pdf->header(rfc_emisor: $factura['org_empresa_rfc'],folio_fiscal: $folio_fiscal,
+        $pdf->header(rfc_emisor: $factura['org_empresa_rfc'],folio_fiscal: $data->folio_fiscal,
             nombre_emisor: $factura['org_empresa_razon_social'],csd: $factura['fc_csd_serie'],
             rfc_receptor: $factura['com_cliente_rfc'],cod_postal: $factura['dp_cp_descripcion'], fecha: $factura['fc_factura_fecha'],
             nombre_receptor: $factura['com_cliente_razon_social'],efecto: $factura['cat_sat_tipo_de_comprobante_descripcion'],
             cod_postal_receptor: $cod_postal_receptor, regimen_fiscal: $rf_emisor['cat_sat_regimen_fiscal_descripcion'],
             regimen_fiscal_receptor: $rf_receptor['cat_sat_regimen_fiscal_descripcion'],
             exportacion: $factura['fc_factura_exportacion'],cfdi: $factura['cat_sat_uso_cfdi_descripcion'],
-            observaciones: $factura['fc_factura_observaciones']);
+            observaciones: $factura['fc_factura_observaciones'], ruta_logo: $ruta_logo);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar header',data:  $pdf);
         }
@@ -128,18 +210,18 @@ class _pdf{
 
 
 
-        $pdf->complementos(ruta_documento: $ruta_qr, complento: $complento,rfc_proveedor: $rfc_proveedor,
-            fecha: $fecha_timbrado, no_certificado: $no_certificado);
+        $pdf->complementos(ruta_documento: $ruta_qr, complento: $data->complento,rfc_proveedor: $data->rfc_proveedor,
+            fecha: $data->fecha_timbrado, no_certificado: $data->no_certificado);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar complementos',data:  $pdf);
         }
 
-        $pdf->sellos(sello_cfdi: $sello_cfdi,sello_sat: $sello_sat);
+        $pdf->sellos(sello_cfdi: $data->sello_cfdi,sello_sat: $data->sello_sat);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar sellos',data:  $pdf);
         }
 
-        $pdf->footer(descripcion: "--- IVITEC ---");
+        $pdf->footer(descripcion: "efacturacion.com.mx");
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar pdf',data:  $pdf);
         }

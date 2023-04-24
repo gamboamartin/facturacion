@@ -134,8 +134,18 @@ final class pdf
                            string $rfc_receptor, string $cod_postal, string $fecha,
                            string $nombre_receptor, string $efecto,
                            string $cod_postal_receptor, string $regimen_fiscal, string $regimen_fiscal_receptor,
-                           string $exportacion, string $cfdi, string $observaciones): string|array
+                           string $exportacion, string $cfdi, string $observaciones, string $ruta_logo): string|array
     {
+
+
+        if($ruta_logo!=='') {
+            if(file_exists($ruta_logo)){
+                $logo = $this->html(etiqueta: "img", data: "", propiedades: 'src = "' . $ruta_logo . '" width = "120"');
+                if (errores::$error) {
+                    return $this->error->error(mensaje: 'Error al generar data', data: $ruta_logo);
+                }
+            }
+        }
 
         $body_td_1 = $this->html(etiqueta: "td", data: "RFC emisor:", class: "negrita");
         $body_td_2 = $this->html(etiqueta: "td", data: $rfc_emisor);
@@ -167,6 +177,7 @@ final class pdf
         $body_td_tag_observaciones = $this->html(etiqueta: "td",data: "Observaciones:", class: "negrita" );
         $body_td_observaciones = $this->html(etiqueta: "td",data: $observaciones );
 
+
         $body_tr_1 = $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2 . $body_td_3 . $body_td_4);
         $body_tr_2 = $this->html(etiqueta: "tr", data: $body_td_5 . $body_td_6 . $body_td_7 . $body_td_8);
         $body_tr_3 = $this->html(etiqueta: "tr", data: $body_td_9 . $body_td_10 . $body_td_11 . $body_td_12);
@@ -176,13 +187,14 @@ final class pdf
         $body_tr_7 = $this->html(etiqueta: "tr", data: $body_td_25 . $body_td_26);
         $body_tr_8 = $this->html(etiqueta: "tr", data: $body_td_tag_observaciones. $body_td_observaciones);
 
-        $body = $this->html(etiqueta: "tbody", data: $body_tr_1 . $body_tr_2 . $body_tr_3 . $body_tr_4 . $body_tr_5 . $body_tr_6 .
-            $body_tr_7. $body_tr_8);
+        $body = $this->html(etiqueta: "tbody", data:  $body_tr_1 . $body_tr_2 . $body_tr_3 . $body_tr_4 .
+            $body_tr_5 . $body_tr_6 . $body_tr_7. $body_tr_8);
 
         $table = $this->html(etiqueta: "table", data: $body);
 
         try {
-            $this->pdf->WriteHTML($table);
+            $this->pdf->WriteHTML($logo. $table);
+            //$this->pdf->SetHeader($ruta_logo.$table);
         }
         catch (Throwable $e){
             return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
