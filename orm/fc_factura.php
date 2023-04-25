@@ -16,6 +16,7 @@ use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\comercial\models\com_tmp_cte_dp;
+use gamboamartin\comercial\models\com_tmp_prod_cs;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
@@ -743,6 +744,19 @@ class fc_factura extends modelo
             $retenidos = (new fc_retenido($this->link))->get_retenidos(fc_partida_id: $partida['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida', data: $retenidos);
+            }
+
+            $filtro['com_producto.id'] = $partida['com_producto_id'];
+            $existe_tmp = (new com_tmp_prod_cs(link: $this->link))->existe(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar si existe existe_tmp', data: $existe_tmp);
+            }
+            if($existe_tmp){
+                $r_com_tmp_prod_cs = (new com_tmp_prod_cs(link: $this->link))->filtro_and(filtro: $filtro);
+                if(errores::$error){
+                    return $this->error->error(mensaje: 'Error al obtener producto', data: $r_com_tmp_prod_cs);
+                }
+                $partida['cat_sat_producto_codigo'] = $r_com_tmp_prod_cs->registros[0]['com_tmp_prod_cs_cat_sat_producto'];
             }
 
 

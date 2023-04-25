@@ -3,6 +3,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use config\generales;
+use gamboamartin\comercial\models\com_tmp_prod_cs;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\validacion\validacion;
@@ -214,7 +215,7 @@ final class pdf
         return $table;
     }
 
-    private function concepto_datos(array $concepto): string|array
+    private function concepto_datos(array $concepto, PDO $link): string|array
     {
 
         $concepto = $this->keys_no_ob(concepto: $concepto);
@@ -268,6 +269,20 @@ final class pdf
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_importe);
         }
 
+        $filtro['com_producto.id'] = $concepto['com_producto_id'];
+        $existe_tmp = (new com_tmp_prod_cs(link: $link))->existe(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si existe existe_tmp', data: $existe_tmp);
+        }
+        if($existe_tmp){
+            $r_com_tmp_prod_cs = (new com_tmp_prod_cs(link: $link))->filtro_and(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener producto', data: $r_com_tmp_prod_cs);
+            }
+            $concepto['cat_sat_producto_codigo'] = $r_com_tmp_prod_cs->registros[0]['com_tmp_prod_cs_cat_sat_producto'];
+        }
+
+        //print_r($concepto);exit;
 
 
         $body_td_1 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_codigo'], class: $class, propiedades: "colspan='2'");
@@ -406,8 +421,12 @@ final class pdf
     public function conceptos(array $conceptos, PDO $link)
     {
         $titulo = $this->html(etiqueta: "h1", data: "Conceptos", class: "negrita titulo");
-        $this->pdf->WriteHTML($titulo);
-
+        try {
+            $this->pdf->WriteHTML($titulo);
+        }
+        catch (Throwable $e){
+            return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
+        }
         $head_td_clave_prod_serv = $this->html(etiqueta: "th",
             data: "Clave del producto y/o servicio", class: "negrita border color", propiedades: "colspan='2'");;
         $head_td_no_identificacion = $this->html(etiqueta: "th", data: "No. identificación", class: "negrita border color");
@@ -428,7 +447,7 @@ final class pdf
         foreach ($conceptos as $concepto) {
 
 
-            $concepto_pdf = $this->concepto_datos(concepto: $concepto);
+            $concepto_pdf = $this->concepto_datos(concepto: $concepto, link: $link);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al generar concepto',data:  $concepto_pdf);
             }
@@ -519,6 +538,14 @@ final class pdf
         return $fc_partida_valor_unitario;
     }
 
+    /**
+     * Integra un html para para pdf
+     * @param string $etiqueta
+     * @param string $data
+     * @param string $class
+     * @param string $propiedades
+     * @return string
+     */
     private function html(string $etiqueta, string $data = "", string $class = "", string $propiedades = ""): string
     {
         return "<$etiqueta class='$class' $propiedades>$data</$etiqueta>";
