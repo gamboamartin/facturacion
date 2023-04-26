@@ -28,9 +28,9 @@ use gamboamartin\xml_cfdi_4\timbra;
 use PDO;
 use stdClass;
 
-class fc_factura extends modelo
+class fc_factura extends _transacciones_fc
 {
-    private modelo $modelo_etapa;
+
     public function __construct(PDO $link)
     {
         $tabla = 'fc_factura';
@@ -175,6 +175,8 @@ class fc_factura extends modelo
         $modelo_etapa = new fc_factura_etapa(link: $this->link);
         $this->modelo_etapa = $modelo_etapa;
 
+        $modelo_email = new fc_email(link: $this->link);
+        $this->modelo_email = $modelo_email;
 
 
     }
@@ -208,12 +210,13 @@ class fc_factura extends modelo
             return $this->error->error(mensaje: 'Error al dar de alta accion', data: $r_alta_bd);
         }
 
-        $fc_factura = $this->registro(registro_id: $r_alta_bd->registro_id, retorno_obj: true);
+        $registro_fc = $this->registro(registro_id: $r_alta_bd->registro_id, retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $r_alta_bd);
         }
 
-        $r_alta_fc_email = (new _email())->inserta_fc_emails(fc_factura: $fc_factura, link: $this->link);
+        $r_alta_fc_email = (new _email())->inserta_fc_emails(key_fc_id: 'fc_factura_id',
+            modelo_email: $this->modelo_email, link: $this->link, registro_fc: $registro_fc);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);
         }
@@ -318,71 +321,8 @@ class fc_factura extends modelo
         return $data;
     }
 
-    private function defaults_alta_bd(array $registro, stdClass $registro_csd): array
-    {
 
-        $keys = array('com_sucursal_id');
-        $valida = $this->validacion->valida_ids(keys: $keys, registro: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
-        }
 
-        $keys = array('serie', 'folio');
-        $valida = $this->validacion->valida_existencia_keys(keys: $keys, registro: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
-        }
-
-        $registro_com_sucursal = (new com_sucursal($this->link))->registro(
-            registro_id: $registro['com_sucursal_id'], retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener sucursal', data: $registro_com_sucursal);
-        }
-        if (!isset($registro['codigo'])) {
-            $registro['codigo'] = $registro['serie'] . ' ' . $registro['folio'];
-        }
-        if (!isset($registro['codigo_bis'])) {
-            $registro['codigo_bis'] = $registro['serie'] . ' ' . $registro['folio'];
-        }
-        if (!isset($registro['descripcion'])) {
-            $descripcion = $this->descripcion_select_default(registro: $registro, registro_csd: $registro_csd,
-                registro_com_sucursal: $registro_com_sucursal);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error generar descripcion', data: $descripcion);
-            }
-            $registro['descripcion'] = $descripcion;
-        }
-        if (!isset($registro['descripcion_select'])) {
-            $descripcion_select = $this->descripcion_select_default(registro: $registro, registro_csd: $registro_csd,
-                registro_com_sucursal: $registro_com_sucursal);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error generar descripcion', data: $descripcion_select);
-            }
-            $registro['descripcion_select'] = $descripcion_select;
-        }
-        if (!isset($registro['alias'])) {
-            $registro['alias'] = $registro['descripcion_select'];
-        }
-
-        $hora = date('h:i:s');
-        if (isset($registro['fecha'])) {
-            $registro['fecha'] = $registro['fecha'] . ' ' . $hora;
-        }
-        return $registro;
-    }
-
-    /**
-     * Inicializa los datos del emisor para alta
-     * @param array $registro Registro en proceso
-     * @param stdClass $registro_csd Registro de tipo CSD
-     * @return array
-     */
-    private function default_alta_emisor_data(array $registro, stdClass $registro_csd): array
-    {
-        $registro['dp_calle_pertenece_id'] = $registro_csd->dp_calle_pertenece_id;
-        $registro['cat_sat_regimen_fiscal_id'] = $registro_csd->cat_sat_regimen_fiscal_id;
-        return $registro;
-    }
 
     /**
      */
@@ -399,14 +339,6 @@ class fc_factura extends modelo
         return $dels;
     }
 
-    private function descripcion_select_default(array    $registro, stdClass $registro_csd,
-                                                stdClass $registro_com_sucursal): string
-    {
-        $descripcion_select = $registro['folio'] . ' ';
-        $descripcion_select .= $registro_csd->org_empresa_razon_social . ' ';
-        $descripcion_select .= $registro_com_sucursal->com_cliente_razon_social;
-        return $descripcion_select;
-    }
 
     /**
      * Obtiene y redondea un descuento de una partida
@@ -1015,114 +947,9 @@ class fc_factura extends modelo
         return $r_fc_partida->registros;
     }
 
-    /**
-     * Inicializa los datos de un registro
-     * @param array $registro
-     * @return array
-     */
-    private function init_data_alta_bd(array $registro): array
-    {
-        $keys = array('fc_csd_id');
-        $valida = $this->validacion->valida_ids(keys: $keys, registro: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
-        }
-        $registro_csd = (new fc_csd($this->link))->registro(registro_id: $registro['fc_csd_id'], retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener fc csd', data: $registro_csd);
-        }
-
-
-        $registro = $this->limpia_alta_factura(registro: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al limpiar keys', data: $registro);
-        }
-
-
-        $registro = $this->default_alta_emisor_data(registro: $registro, registro_csd: $registro_csd);
-
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al limpiar keys', data: $registro);
-        }
-
-        $keys = array('com_sucursal_id');
-        $valida = $this->validacion->valida_ids(keys: $keys, registro: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
-        }
-
-
-        if(!isset($registro['folio'])){
-            $folio = $this->ultimo_folio(fc_csd_id: $registro['fc_csd_id']);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener csd', data: $folio);
-            }
-            $registro['folio'] = $folio;
-        }
-
-        if(!isset($registro['serie'])){
-            $serie = $registro_csd->fc_csd_serie;
-
-            $registro['serie'] = $serie;
-        }
-
-        $keys = array('serie', 'folio');
-        $valida = $this->validacion->valida_existencia_keys(keys: $keys, registro: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
-        }
-
-        $registro = $this->defaults_alta_bd(registro: $registro, registro_csd: $registro_csd);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al inicializar registro', data: $registro);
-        }
-
-
-        return $registro;
-    }
 
 
 
-    /**
-     * Limpia los parametros de una factura
-     * @param array $registro registro en proceso
-     * @return array
-     * @version 0.127.26
-     */
-    private function limpia_alta_factura(array $registro): array
-    {
-
-        $keys = array('descuento', 'subtotal', 'total', 'impuestos_trasladados', 'impuestos_retenidos');
-        foreach ($keys as $key) {
-            $registro = $this->limpia_si_existe(key: $key, registro: $registro);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al limpiar key', data: $registro);
-            }
-        }
-
-        return $registro;
-    }
-
-
-
-    /**
-     * Limpia un key de un registro si es que existe
-     * @param string $key Key a limpiar
-     * @param array $registro Registro para aplicacion de limpieza
-     * @return array
-     * @version 0.115.26
-     */
-    private function limpia_si_existe(string $key, array $registro): array
-    {
-        $key = trim($key);
-        if ($key === '') {
-            return $this->error->error(mensaje: 'Error key esta vacio', data: $key);
-        }
-        if (isset($registro[$key])) {
-            unset($registro[$key]);
-        }
-        return $registro;
-    }
 
     private function permite_transaccion(int $fc_factura_id){
         $fc_factura_etapas = $this->etapas(fc_factura_id: $fc_factura_id);
@@ -1577,52 +1404,6 @@ class fc_factura extends modelo
         }
 
         return $total;
-
-    }
-
-    final public function ultimo_folio(int $fc_csd_id){
-        $filtro['fc_csd.id'] = $fc_csd_id;
-        $r_fc_factura = $this->filtro_and(filtro: $filtro, limit: 1,order: array('fc_factura.folio'=>'DESC'));
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener factura', data: $r_fc_factura);
-        }
-
-
-        $fc_csd = (new fc_csd(link: $this->link))->registro(registro_id: $fc_csd_id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener csd', data: $fc_csd);
-        }
-
-        $fc_csd_serie = $fc_csd['fc_csd_serie'];
-
-        $number_folio = 1;
-        if((int)$r_fc_factura->n_registros > 0){
-            $fc_factura = $r_fc_factura->registros[0];
-
-            $fc_factura_folio = $fc_factura['fc_factura_folio'];
-            $data_explode = $fc_csd_serie.'-';
-            $fc_factura_folio_explode = explode($data_explode, $fc_factura_folio);
-            if(isset($fc_factura_folio_explode[1])){
-                if(is_numeric($fc_factura_folio_explode[1])){
-                    $number_folio = (int)$fc_factura_folio_explode[1] + 1;
-                }
-            }
-        }
-
-        $long_nf = strlen($number_folio);
-
-        $n_ceros = 6;
-
-        $i = $long_nf;
-        $folio_str = '';
-        while($i<$n_ceros){
-            $folio_str.='0';
-            $i++;
-        }
-        $folio_str.=$number_folio;
-
-
-        return $fc_csd_serie.'-'.$folio_str;
 
     }
 

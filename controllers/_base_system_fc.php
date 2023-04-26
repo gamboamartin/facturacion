@@ -124,24 +124,33 @@ class _base_system_fc extends _base_system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "cat_sat_forma_pago_id";
-        $propiedades = array("label" => "Forma Pago", 'id_selected'=>$this->data_selected_alta['cat_sat_forma_pago_id']['id'],
+        $propiedades = array("label" => "Forma Pago",
+            'id_selected'=>$this->data_selected_alta['cat_sat_forma_pago_id']['id'],
             'filtro'=>$this->data_selected_alta['cat_sat_forma_pago_id']['filtro']);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "cat_sat_metodo_pago_id";
-        $propiedades = array("label" => "Metodo Pago");
+        $propiedades = array("label" => "Metodo Pago",
+            'id_selected'=>$this->data_selected_alta['cat_sat_metodo_pago_id']['id'],
+            'filtro'=>$this->data_selected_alta['cat_sat_metodo_pago_id']['filtro']);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "cat_sat_moneda_id";
-        $propiedades = array("label" => "Moneda");
+        $propiedades = array("label" => "Moneda",
+            'id_selected'=>$this->data_selected_alta['cat_sat_moneda_id']['id'],
+            'filtro'=>$this->data_selected_alta['cat_sat_moneda_id']['filtro']);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "com_tipo_cambio_id";
-        $propiedades = array("label" => "Tipo Cambio");
+        $propiedades = array("label" => "Tipo Cambio",
+            'id_selected'=>$this->data_selected_alta['com_tipo_cambio_id']['id'],
+            'filtro'=>$this->data_selected_alta['com_tipo_cambio_id']['filtro']);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "cat_sat_uso_cfdi_id";
-        $propiedades = array("label" => "Uso CFDI");
+        $propiedades = array("label" => "Uso CFDI",
+            'id_selected'=>$this->data_selected_alta['cat_sat_uso_cfdi_id']['id'],
+            'filtro'=>$this->data_selected_alta['cat_sat_uso_cfdi_id']['filtro']);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "cat_sat_tipo_de_comprobante_id";

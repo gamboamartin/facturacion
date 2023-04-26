@@ -80,6 +80,18 @@ class controlador_fc_factura extends _base_system_fc {
         $this->data_selected_alta['cat_sat_forma_pago_id']['id'] = -1;
         $this->data_selected_alta['cat_sat_forma_pago_id']['filtro'] = array();
 
+        $this->data_selected_alta['cat_sat_metodo_pago_id']['id'] = -1;
+        $this->data_selected_alta['cat_sat_metodo_pago_id']['filtro'] = array();
+
+        $this->data_selected_alta['cat_sat_moneda_id']['id'] = -1;
+        $this->data_selected_alta['cat_sat_moneda_id']['filtro'] = array();
+
+        $this->data_selected_alta['com_tipo_cambio_id']['id'] = -1;
+        $this->data_selected_alta['com_tipo_cambio_id']['filtro'] = array();
+
+        $this->data_selected_alta['cat_sat_uso_cfdi_id']['id'] = -1;
+        $this->data_selected_alta['cat_sat_uso_cfdi_id']['filtro'] = array();
+
         $init_ctl = (new _fc_base())->init_base_fc(controler: $this);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al inicializar',data:  $init_ctl);

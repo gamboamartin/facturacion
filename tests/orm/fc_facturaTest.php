@@ -807,7 +807,7 @@ class fc_facturaTest extends test {
         $_GET['session_id'] = '1';
 
         $modelo = new fc_factura($this->link);
-        //$modelo = new liberator($modelo);
+        $modelo = new liberator($modelo);
 
         $del = (new base_test())->del_cat_sat_moneda($this->link,);
         if (errores::$error) {

@@ -1,5 +1,6 @@
 <?php
 namespace gamboamartin\facturacion\models;
+use base\orm\modelo;
 use gamboamartin\errores\errores;
 use gamboamartin\notificaciones\models\not_adjunto;
 use gamboamartin\notificaciones\models\not_emisor;
@@ -44,9 +45,9 @@ class _email{
         return $asunto;
     }
 
-    private function com_emails_ctes(stdClass $fc_factura, PDO $link){
+    private function com_emails_ctes(stdClass $registro_fc, PDO $link){
         $filtro = array();
-        $filtro['com_cliente.id'] = $fc_factura->com_cliente_id;
+        $filtro['com_cliente.id'] = $registro_fc->com_cliente_id;
         $filtro['com_email_cte.status'] = 'activo';
 
         $r_com_email_cte = (new com_email_cte(link: $link))->filtro_and(filtro: $filtro);
@@ -153,12 +154,30 @@ class _email{
         return $existe_not_receptor;
     }
 
-    private function fc_email_ins(array $com_email_cte, stdClass $fc_factura): array
+    private function fc_email_ins(array $com_email_cte, string $key_fc_id, stdClass $registro_fc): array
     {
-        $fc_email_ins['fc_factura_id'] = $fc_factura->fc_factura_id;
-        $fc_email_ins['com_email_cte_id'] = $com_email_cte['com_email_cte_id'];
-        $fc_email_ins['status'] = $com_email_cte['com_email_cte_status'];
-        return $fc_email_ins;
+        $keys = array($key_fc_id);
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $registro_fc);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
+        }
+
+        $keys = array('com_email_cte_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $com_email_cte);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar factura', data: $valida);
+        }
+
+        $keys = array('com_email_cte_status');
+        $valida = $this->validacion->valida_statuses(keys: $keys,registro:  $com_email_cte);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar factura', data: $valida);
+        }
+
+        $fc_email[$key_fc_id] = $registro_fc->$key_fc_id;
+        $fc_email['com_email_cte_id'] = $com_email_cte['com_email_cte_id'];
+        $fc_email['status'] = $com_email_cte['com_email_cte_status'];
+        return $fc_email;
     }
 
     private function fc_emails(int $fc_factura_id, PDO $link){
@@ -274,27 +293,29 @@ class _email{
         return $adjuntos;
     }
 
-    private function inserta_fc_email(array $com_email_cte, stdClass $fc_factura, PDO $link){
-        $fc_email_ins = $this->fc_email_ins(com_email_cte: $com_email_cte,fc_factura:  $fc_factura);
+    private function inserta_fc_email(array $com_email_cte, string $key_fc_id,modelo $modelo_email, stdClass $registro_fc){
+        $fc_email_ins = $this->fc_email_ins(com_email_cte: $com_email_cte, key_fc_id: $key_fc_id,
+            registro_fc: $registro_fc);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener fc_email_ins', data: $fc_email_ins);
         }
 
-        $r_alta_fc_email = (new fc_email(link: $link))->alta_registro(registro: $fc_email_ins);
+        $r_alta_fc_email = $modelo_email->alta_registro(registro: $fc_email_ins);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);
         }
         return $r_alta_fc_email;
     }
 
-    final public function inserta_fc_emails(stdClass $fc_factura, PDO $link){
-        $com_emails_ctes = $this->com_emails_ctes(fc_factura: $fc_factura, link: $link);
+    final public function inserta_fc_emails( string $key_fc_id, modelo $modelo_email, PDO $link, stdClass $registro_fc){
+        $com_emails_ctes = $this->com_emails_ctes(registro_fc: $registro_fc, link: $link);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener correos', data: $com_emails_ctes);
         }
 
         foreach ($com_emails_ctes as $com_email_cte){
-            $r_alta_fc_email = $this->inserta_fc_email(com_email_cte: $com_email_cte,fc_factura:  $fc_factura, link: $link);
+            $r_alta_fc_email = $this->inserta_fc_email(com_email_cte: $com_email_cte, key_fc_id: $key_fc_id,
+                modelo_email: $modelo_email, registro_fc: $registro_fc);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);
             }

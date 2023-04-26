@@ -109,10 +109,10 @@ class base_test{
         return $alta;
     }
 
-    public function alta_com_sucursal(PDO $link, int $id = 1): array|\stdClass
+    public function alta_com_sucursal(PDO $link, int $cat_sat_moneda_id = 161, int $id = 1): array|\stdClass
     {
 
-        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_sucursal(link: $link,id: $id);
+        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_sucursal(link: $link, id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
