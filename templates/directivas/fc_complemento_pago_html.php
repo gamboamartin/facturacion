@@ -30,7 +30,7 @@ use PDO;
 use stdClass;
 
 
-class fc_factura_html extends _base_fc_html {
+class fc_complemento_pago_html extends _base_fc_html {
 
     /**
      * Asigna diferentes inputs de paquetes cat_sat, comercial, dirección postal, organigrama
@@ -295,7 +295,7 @@ class fc_factura_html extends _base_fc_html {
         }
         $selects->com_producto_id = $select;
 
-        $select = (new fc_factura_html(html:$this->html_base))->select_fc_factura_id(
+        $select = (new fc_complemento_pago_html(html:$this->html_base))->select_fc_factura_id(
             cols: 12, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
@@ -337,7 +337,7 @@ class fc_factura_html extends _base_fc_html {
         }
         $selects->com_producto_id = $select;
 
-        $select = (new fc_factura_html(html:$this->html_base))->select_fc_factura_id(
+        $select = (new fc_complemento_pago_html(html:$this->html_base))->select_fc_factura_id(
             cols: 12, con_registros:true, id_selected:$row_upd->fc_factura_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);

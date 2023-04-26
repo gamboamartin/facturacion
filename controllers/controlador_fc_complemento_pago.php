@@ -13,9 +13,11 @@ use config\pac;
 use gamboamartin\compresor\compresor;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\html\fc_complemento_pago_html;
 use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\_pdf;
+use gamboamartin\facturacion\models\fc_complemento_pago;
 use gamboamartin\facturacion\models\fc_email;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
@@ -33,7 +35,7 @@ use JsonException;
 use PDO;
 use stdClass;
 
-class controlador_fc_factura extends _base_system_fc {
+class controlador_fc_complemento_pago extends _base_system_fc {
 
     public array|stdClass $keys_selects = array();
     public controlador_fc_partida $controlador_fc_partida;
@@ -63,22 +65,20 @@ class controlador_fc_factura extends _base_system_fc {
     public int $fc_partida_id = -1;
     public stdClass $partidas;
 
-
     public array $relaciones = array();
     public array$facturas_cliente = array();
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass()){
-        $modelo = new fc_factura(link: $link);
+        $modelo = new fc_complemento_pago(link: $link);
         $this->modelo = $modelo;
-        $this->cat_sat_tipo_de_comprobante = 'Ingreso';
-        $html_ = new fc_factura_html(html: $html);
+        $this->cat_sat_tipo_de_comprobante = 'Pago';
+        $html_ = new fc_complemento_pago_html(html: $html);
         $this->html_fc = $html_;
 
         parent::__construct(html_: $html_, link: $link,modelo:  $modelo, paths_conf: $paths_conf);
 
-
-        $this->data_selected_alta['cat_sat_forma_pago_id']['id'] = -1;
-        $this->data_selected_alta['cat_sat_forma_pago_id']['filtro'] = array();
+        $this->data_selected_alta['cat_sat_forma_pago_id']['id'] = 99;
+        $this->data_selected_alta['cat_sat_forma_pago_id']['filtro'] = array('cat_sat_forma_pago.id'=>99);
 
         $init_ctl = (new _fc_base())->init_base_fc(controler: $this);
         if(errores::$error){
@@ -101,7 +101,6 @@ class controlador_fc_factura extends _base_system_fc {
 
 
     }
-
 
 
     public function alta_partida_bd(bool $header, bool $ws = false){
@@ -724,6 +723,7 @@ class controlador_fc_factura extends _base_system_fc {
     }
 
 
+
     private function htmls_partida(): stdClass
     {
         $fc_partida_html = (new fc_partida_html(html: $this->html_base));
@@ -777,11 +777,6 @@ class controlador_fc_factura extends _base_system_fc {
         return $this;
     }
 
-    /**
-     * Inicializa los elementos de la lista get data
-     * @return stdClass
-     * @version 4.3.0
-     */
 
 
     private function init_factura_documento(int $fc_factura_id): bool|array
@@ -847,7 +842,6 @@ class controlador_fc_factura extends _base_system_fc {
 
         return $link;
     }
-
 
 
     private function init_modifica(array $params = array()): array|stdClass
@@ -1290,6 +1284,7 @@ class controlador_fc_factura extends _base_system_fc {
     }
 
 
+
     /*
      * POR REVISAR
      */
@@ -1535,23 +1530,23 @@ class controlador_fc_factura extends _base_system_fc {
 
         foreach ($relaciones as $indice=>$relacion){
 
-                foreach ($relacion['fc_facturas_relacionadas'] as $indice_fr=>$fc_factura_relacionada){
+            foreach ($relacion['fc_facturas_relacionadas'] as $indice_fr=>$fc_factura_relacionada){
 
-                    $params = $this->params_button_partida(accion_retorno: 'relaciones', fc_factura_id: $this->registro_id);
-                    if (errores::$error) {
-                        return $this->errores->error(mensaje: 'Error al generar params', data: $params);
-                    }
-
-                    $link_elimina_rel = $this->html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
-                        registro_id: $fc_factura_relacionada['fc_factura_relacionada_id'],
-                        seccion: 'fc_factura_relacionada', style: 'danger',icon: 'bi bi-trash',
-                        muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
-                    if (errores::$error) {
-                        return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_rel);
-                    }
-                    $relaciones[$indice]['fc_facturas_relacionadas'][$indice_fr]['elimina_bd'] = $link_elimina_rel;
-
+                $params = $this->params_button_partida(accion_retorno: 'relaciones', fc_factura_id: $this->registro_id);
+                if (errores::$error) {
+                    return $this->errores->error(mensaje: 'Error al generar params', data: $params);
                 }
+
+                $link_elimina_rel = $this->html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
+                    registro_id: $fc_factura_relacionada['fc_factura_relacionada_id'],
+                    seccion: 'fc_factura_relacionada', style: 'danger',icon: 'bi bi-trash',
+                    muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
+                if (errores::$error) {
+                    return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_rel);
+                }
+                $relaciones[$indice]['fc_facturas_relacionadas'][$indice_fr]['elimina_bd'] = $link_elimina_rel;
+
+            }
 
             $params = $this->params_button_partida(accion_retorno: 'relaciones', fc_factura_id: $this->registro_id);
             if (errores::$error) {
@@ -1637,6 +1632,7 @@ class controlador_fc_factura extends _base_system_fc {
     }
 
 
+
     public function ve_partida(bool $header, bool $ws = false): array|stdClass
     {
 
@@ -1672,6 +1668,7 @@ class controlador_fc_factura extends _base_system_fc {
 
         return $inputs_partida;
     }
+
 
 
 

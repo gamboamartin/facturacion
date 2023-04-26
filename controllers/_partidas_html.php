@@ -152,7 +152,7 @@ class _partidas_html{
     private function partida_html(html_controler $html_controler, PDO $link, int $indice, array $partida,
                                   stdClass $partidas): array|stdClass
     {
-        $data_producto_html = (new _html_factura())->data_producto(partida: $partida);
+        $data_producto_html = (new _html_factura())->data_producto(link: $link, partida: $partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar html', data: $data_producto_html);
         }

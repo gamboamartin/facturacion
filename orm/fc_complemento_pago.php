@@ -16,7 +16,6 @@ use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\comercial\models\com_tmp_cte_dp;
-use gamboamartin\comercial\models\com_tmp_prod_cs;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
@@ -28,12 +27,12 @@ use gamboamartin\xml_cfdi_4\timbra;
 use PDO;
 use stdClass;
 
-class fc_factura extends modelo
+class fc_complemento_pago extends modelo
 {
     private modelo $modelo_etapa;
     public function __construct(PDO $link)
     {
-        $tabla = 'fc_factura';
+        $tabla = 'fc_complemento_pago';
         $columnas = array($tabla => false, 'fc_csd' => $tabla, 'cat_sat_forma_pago' => $tabla, 'cat_sat_metodo_pago' => $tabla,
             'cat_sat_moneda' => $tabla, 'com_tipo_cambio' => $tabla, 'cat_sat_uso_cfdi' => $tabla,
             'cat_sat_tipo_de_comprobante' => $tabla, 'cat_sat_regimen_fiscal' => $tabla, 'com_sucursal' => $tabla,
@@ -71,32 +70,32 @@ class fc_factura extends modelo
 
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
-        $fc_partida_cantidad = ' ROUND( IFNULL( fc_partida.cantidad,0 ),2) ';
+        //$fc_partida_cantidad = ' ROUND( IFNULL( fc_partida.cantidad,0 ),2) ';
         $fc_partida_valor_unitario = ' ROUND( IFNULL( fc_partida.valor_unitario,0),2) ';
-        $fc_partida_descuento = ' ROUND( IFNULL(fc_partida.descuento,0 ),2 )';
+        //$fc_partida_descuento = ' ROUND( IFNULL(fc_partida.descuento,0 ),2 )';
 
-        $fc_partida_sub_total_base = "ROUND( $fc_partida_cantidad * $fc_partida_valor_unitario, 2 ) ";
+        //$fc_partida_sub_total_base = "ROUND( $fc_partida_cantidad * $fc_partida_valor_unitario, 2 ) ";
 
 
         $fc_ligue_partida_factura = " fc_partida.fc_factura_id = fc_factura.id ";
 
 
-        $fc_factura_sub_total_base = "ROUND((SELECT SUM( $fc_partida_sub_total_base) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
-        $fc_factura_descuento = "ROUND((SELECT SUM( $fc_partida_descuento ) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
-        $fc_factura_sub_total = "($fc_factura_sub_total_base - $fc_factura_descuento)";
+        //$fc_factura_sub_total_base = "ROUND((SELECT SUM( $fc_partida_sub_total_base) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
+        //$fc_factura_descuento = "ROUND((SELECT SUM( $fc_partida_descuento ) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
+        //$fc_factura_sub_total = "($fc_factura_sub_total_base - $fc_factura_descuento)";
 
 
-        $fc_partida_operacion = "IFNULL(fc_partida_operacion.cantidad,0) * IFNULL(fc_partida_operacion.valor_unitario,0) - IFNULL(fc_partida_operacion.descuento,0)";
+        //$fc_partida_operacion = "IFNULL(fc_partida_operacion.cantidad,0) * IFNULL(fc_partida_operacion.valor_unitario,0) - IFNULL(fc_partida_operacion.descuento,0)";
         $where_pc_partida_operacion = "fc_partida_operacion.fc_factura_id = fc_factura.id AND fc_partida_operacion.id = fc_partida.id";
 
-        $from_impuesto = $this->from_impuesto(tipo_impuesto: 'fc_traslado');
+        /*$from_impuesto = $this->from_impuesto(tipo_impuesto: 'fc_traslado');
         if(errores::$error){
             $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
             print_r($error);
             exit;
-        }
+        }*/
 
-        $fc_factura_traslados = "(
+       /* $fc_factura_traslados = "(
 	SELECT
 		SUM((
 			SELECT
@@ -113,17 +112,17 @@ class fc_factura extends modelo
 		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado.cat_sat_factor_id 
 	WHERE
 		fc_partida.fc_factura_id = fc_factura.id 
-	)";
+	)";*/
 
-        $from_impuesto = $this->from_impuesto(tipo_impuesto: 'fc_retenido');
+        /*$from_impuesto = $this->from_impuesto(tipo_impuesto: 'fc_retenido');
         if(errores::$error){
             $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
             print_r($error);
             exit;
-        }
+        }*/
 
 
-        $fc_factura_retenciones = "(
+       /* $fc_factura_retenciones = "(
 	SELECT
 		SUM((
 			SELECT
@@ -140,37 +139,37 @@ class fc_factura extends modelo
 		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido.cat_sat_factor_id 
 	WHERE
 		fc_partida.fc_factura_id = fc_factura.id 
-	)";
+	)";*/
 
-        $fc_factura_total = "ROUND(IFNULL($fc_factura_sub_total,0)+IFNULL(ROUND($fc_factura_traslados,2),0)-IFNULL(ROUND($fc_factura_retenciones,2),0),2)";
+        //$fc_factura_total = "ROUND(IFNULL($fc_factura_sub_total,0)+IFNULL(ROUND($fc_factura_traslados,2),0)-IFNULL(ROUND($fc_factura_retenciones,2),0),2)";
 
 
-        $fc_factura_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_factura_id = fc_factura.id)";
+        //$fc_factura_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_factura_id = fc_factura.id)";
 
-        $fc_factura_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa 
+        /*$fc_factura_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa
             LEFT JOIN pr_etapa_proceso ON pr_etapa_proceso.pr_etapa_id = pr_etapa.id 
             LEFT JOIN fc_factura_etapa ON fc_factura_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
-            WHERE fc_factura_etapa.fc_factura_id = fc_factura.id ORDER BY fc_factura_etapa.id DESC LIMIT 1)";
+            WHERE fc_factura_etapa.fc_factura_id = fc_factura.id ORDER BY fc_factura_etapa.id DESC LIMIT 1)";*/
 
-        $columnas_extra['fc_factura_sub_total_base'] = "IFNULL($fc_factura_sub_total_base,0)";
-        $columnas_extra['fc_factura_descuento'] = "IFNULL($fc_factura_descuento,0)";
-        $columnas_extra['fc_factura_sub_total'] = "IFNULL($fc_factura_sub_total,0)";
-        $columnas_extra['fc_factura_traslados'] = "IFNULL($fc_factura_traslados,0)";
-        $columnas_extra['fc_factura_retenciones'] = "IFNULL($fc_factura_retenciones,0)";
-        $columnas_extra['fc_factura_total'] = "IFNULL($fc_factura_total,0)";
-        $columnas_extra['fc_factura_uuid'] = "IFNULL($fc_factura_uuid,'SIN UUID')";
-        $columnas_extra['fc_factura_etapa'] = "$fc_factura_etapa";
+        //$columnas_extra['fc_factura_sub_total_base'] = "IFNULL($fc_factura_sub_total_base,0)";
+        //$columnas_extra['fc_factura_descuento'] = "IFNULL($fc_factura_descuento,0)";
+        //$columnas_extra['fc_factura_sub_total'] = "IFNULL($fc_factura_sub_total,0)";
+        //$columnas_extra['fc_factura_traslados'] = "IFNULL($fc_factura_traslados,0)";
+        //$columnas_extra['fc_factura_retenciones'] = "IFNULL($fc_factura_retenciones,0)";
+        //$columnas_extra['fc_factura_total'] = "IFNULL($fc_factura_total,0)";
+        //$columnas_extra['fc_factura_uuid'] = "IFNULL($fc_factura_uuid,'SIN UUID')";
+        //$columnas_extra['fc_factura_etapa'] = "$fc_factura_etapa";
 
 
 
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
+            columnas: $columnas, campos_view: $campos_view, columnas_extra: array(),
             no_duplicados: $no_duplicados);
 
         $this->NAMESPACE = __NAMESPACE__;
 
-        $this->etiqueta = 'Factura';
+        $this->etiqueta = 'Pagos';
 
         $modelo_etapa = new fc_factura_etapa(link: $this->link);
         $this->modelo_etapa = $modelo_etapa;
@@ -744,19 +743,6 @@ class fc_factura extends modelo
             $retenidos = (new fc_retenido($this->link))->get_retenidos(fc_partida_id: $partida['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida', data: $retenidos);
-            }
-
-            $filtro['com_producto.id'] = $partida['com_producto_id'];
-            $existe_tmp = (new com_tmp_prod_cs(link: $this->link))->existe(filtro: $filtro);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al validar si existe existe_tmp', data: $existe_tmp);
-            }
-            if($existe_tmp){
-                $r_com_tmp_prod_cs = (new com_tmp_prod_cs(link: $this->link))->filtro_and(filtro: $filtro);
-                if(errores::$error){
-                    return $this->error->error(mensaje: 'Error al obtener producto', data: $r_com_tmp_prod_cs);
-                }
-                $partida['cat_sat_producto_codigo'] = $r_com_tmp_prod_cs->registros[0]['com_tmp_prod_cs_cat_sat_producto'];
             }
 
 

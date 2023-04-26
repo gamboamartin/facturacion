@@ -3,6 +3,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use config\generales;
+use gamboamartin\comercial\models\com_tmp_prod_cs;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\validacion\validacion;
@@ -36,7 +37,14 @@ final class pdf
         $this->pdf->simpleTables = false;
 
         $css = file_get_contents((new generales())->path_base . "css/pdf.css");
-        $this->pdf->WriteHTML($css, 1);
+        try {
+            $this->pdf->WriteHTML($css, 1);
+        }
+        catch (Throwable $e){
+            $error = (new errores())->error('Error al generar objeto css', $e);
+            print_r($error);
+            die('Error');
+        }
 
     }
 
@@ -124,23 +132,33 @@ final class pdf
         }
 
 
-
-
-
-
     }
 
-    public function header(string $rfc_emisor, string $folio_fiscal, string $nombre_emisor, string $csd,
-                           string $rfc_receptor, string $cod_postal, string $fecha,
-                           string $nombre_receptor, string $efecto,
-                           string $cod_postal_receptor, string $regimen_fiscal, string $regimen_fiscal_receptor,
-                           string $exportacion, string $cfdi, string $observaciones): string|array
+    public function header(string $cfdi, string $cod_postal, string $cod_postal_receptor, string $csd, string $efecto,
+                           string $exportacion, string $fecha, string $folio, string $folio_fiscal,
+                           string $nombre_emisor, string $nombre_receptor,  string $observaciones,
+                           string $regimen_fiscal, string $regimen_fiscal_receptor, string $rfc_emisor,
+                           string $rfc_receptor, string $ruta_logo): string|array
     {
 
-        $body_td_1 = $this->html(etiqueta: "td", data: "RFC emisor:", class: "negrita");
-        $body_td_2 = $this->html(etiqueta: "td", data: $rfc_emisor);
-        $body_td_3 = $this->html(etiqueta: "td", data: "Folio fiscal:", class: "negrita");
-        $body_td_4 = $this->html(etiqueta: "td", data: $folio_fiscal);
+
+        $logo = '';
+        if($ruta_logo!=='') {
+            if(file_exists($ruta_logo)){
+                $logo = $this->html(etiqueta: "img", data: "", propiedades: 'src = "' . $ruta_logo . '" width = "350px"');
+                if (errores::$error) {
+                    return $this->error->error(mensaje: 'Error al generar data', data: $ruta_logo);
+                }
+                $logo = "<div width = '100%' align='center'>$logo</div>";
+            }
+        }
+
+        $body_td_rfc_emisor = $this->html(etiqueta: "td", data: "RFC emisor:", class: "negrita");
+        $body_td_rfc_emisor_data = $this->html(etiqueta: "td", data: $rfc_emisor);
+        $body_td_folio_fiscal = $this->html(etiqueta: "td", data: "Folio fiscal:", class: "negrita");
+        $body_td_folio_fiscal_data = $this->html(etiqueta: "td", data: $folio_fiscal);
+
+
         $body_td_5 = $this->html(etiqueta: "td", data: "Nombre emisor:", class: "negrita");
         $body_td_6 = $this->html(etiqueta: "td", data: $nombre_emisor);
         $body_td_7 = $this->html(etiqueta: "td", data: "No. de serie del CSD:", class: "negrita");
@@ -161,28 +179,35 @@ final class pdf
         $body_td_22 = $this->html(etiqueta: "td", data: $regimen_fiscal_receptor);
         $body_td_23 = $this->html(etiqueta: "td", data: "Exportación:", class: "negrita");
         $body_td_24 = $this->html(etiqueta: "td", data: $exportacion);
-        $body_td_25 = $this->html(etiqueta: "td", data: "Uso CFDI:", class: "negrita");
-        $body_td_26 = $this->html(etiqueta: "td", data: $cfdi);
+
+        $body_td_uso_cfdi = $this->html(etiqueta: "td", data: "Uso CFDI:", class: "negrita");
+        $body_td_uso_cfdi_data = $this->html(etiqueta: "td", data: $cfdi);
+
+        $body_td_folio = $this->html(etiqueta: "td", data: "Folio:", class: "negrita");
+        $body_td_folio_data = $this->html(etiqueta: "td", data: $folio);
 
         $body_td_tag_observaciones = $this->html(etiqueta: "td",data: "Observaciones:", class: "negrita" );
         $body_td_observaciones = $this->html(etiqueta: "td",data: $observaciones );
 
-        $body_tr_1 = $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2 . $body_td_3 . $body_td_4);
+
+        $body_tr_1 = $this->html(etiqueta: "tr", data: $body_td_rfc_emisor . $body_td_rfc_emisor_data .
+            $body_td_folio_fiscal . $body_td_folio_fiscal_data);
         $body_tr_2 = $this->html(etiqueta: "tr", data: $body_td_5 . $body_td_6 . $body_td_7 . $body_td_8);
         $body_tr_3 = $this->html(etiqueta: "tr", data: $body_td_9 . $body_td_10 . $body_td_11 . $body_td_12);
         $body_tr_4 = $this->html(etiqueta: "tr", data: $body_td_13 . $body_td_14 . $body_td_15 . $body_td_16);
         $body_tr_5 = $this->html(etiqueta: "tr", data: $body_td_17 . $body_td_18 . $body_td_19 . $body_td_20);
         $body_tr_6 = $this->html(etiqueta: "tr", data: $body_td_21 . $body_td_22 . $body_td_23 . $body_td_24);
-        $body_tr_7 = $this->html(etiqueta: "tr", data: $body_td_25 . $body_td_26);
+        $body_tr_7 = $this->html(etiqueta: "tr", data: $body_td_uso_cfdi . $body_td_uso_cfdi_data. $body_td_folio. $body_td_folio_data);
         $body_tr_8 = $this->html(etiqueta: "tr", data: $body_td_tag_observaciones. $body_td_observaciones);
 
-        $body = $this->html(etiqueta: "tbody", data: $body_tr_1 . $body_tr_2 . $body_tr_3 . $body_tr_4 . $body_tr_5 . $body_tr_6 .
-            $body_tr_7. $body_tr_8);
+        $body = $this->html(etiqueta: "tbody", data:  $body_tr_1 . $body_tr_2 . $body_tr_3 . $body_tr_4 .
+            $body_tr_5 . $body_tr_6 . $body_tr_7. $body_tr_8);
 
         $table = $this->html(etiqueta: "table", data: $body);
 
         try {
-            $this->pdf->WriteHTML($table);
+            $this->pdf->WriteHTML($logo. $table);
+            //$this->pdf->SetHeader($ruta_logo.$table);
         }
         catch (Throwable $e){
             return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
@@ -190,14 +215,12 @@ final class pdf
         return $table;
     }
 
-    private function concepto_datos(array $concepto): string|array
+    private function concepto_datos(array $concepto, PDO $link): string|array
     {
 
-        $keys_no_ob = array('fc_partida_descuento');
-        foreach ($keys_no_ob as $key_no_ob){
-            if(isset($concepto[$key_no_ob])){
-                $concepto[$key_no_ob] = 0;
-            }
+        $concepto = $this->keys_no_ob(concepto: $concepto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar concepto',data:  $concepto);
         }
 
         $keys = array('fc_partida_descuento','fc_partida_valor_unitario','cat_sat_producto_codigo',
@@ -210,34 +233,25 @@ final class pdf
 
         $class = "txt-center border";
 
-        $fc_partida_valor_unitario = $this->limpia_monto(monto: $concepto['fc_partida_valor_unitario']);
+        $fc_partida_valor_unitario = $this->fc_partida_double(concepto: $concepto,key: 'fc_partida_valor_unitario');
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_valor_unitario);
+            return $this->error->error(mensaje: 'Error al obtener fc_partida_valor_unitario',data:  $fc_partida_valor_unitario);
         }
 
-        $fc_partida_valor_unitario = (float)$fc_partida_valor_unitario;
-        $fc_partida_valor_unitario = round($fc_partida_valor_unitario,2);
-
-
-        $fc_partida_cantidad = $this->limpia_monto(monto: $concepto['fc_partida_cantidad']);
+        $fc_partida_cantidad = $this->fc_partida_double(concepto: $concepto, key: 'fc_partida_cantidad');
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_cantidad);
+            return $this->error->error(mensaje: 'Error al obtener fc_partida_cantidad',data:  $fc_partida_cantidad);
         }
-        $fc_partida_cantidad = (float)$fc_partida_cantidad;
-        $fc_partida_cantidad = round($fc_partida_cantidad,2);
 
-
-        $fc_partida_descuento = $this->limpia_monto(monto: $concepto['fc_partida_descuento']);
+        $fc_partida_descuento = $this->fc_partida_double(concepto: $concepto,key: 'fc_partida_descuento');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_descuento);
         }
 
-        $fc_partida_descuento = (float)$fc_partida_descuento;
-        $fc_partida_descuento = round($fc_partida_descuento,2);
-
-
-        $fc_partida_importe = $fc_partida_valor_unitario * $fc_partida_cantidad;
-        $fc_partida_importe = round($fc_partida_importe,2);
+        $fc_partida_importe = $this->fc_partida_double(concepto: $concepto,key: 'fc_partida_importe');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_importe);
+        }
 
 
         $fc_partida_descuento = $this->monto_moneda(monto: $fc_partida_descuento);
@@ -255,10 +269,24 @@ final class pdf
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_importe);
         }
 
+        $filtro['com_producto.id'] = $concepto['com_producto_id'];
+        $existe_tmp = (new com_tmp_prod_cs(link: $link))->existe(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si existe existe_tmp', data: $existe_tmp);
+        }
+        if($existe_tmp){
+            $r_com_tmp_prod_cs = (new com_tmp_prod_cs(link: $link))->filtro_and(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener producto', data: $r_com_tmp_prod_cs);
+            }
+            $concepto['cat_sat_producto_codigo'] = $r_com_tmp_prod_cs->registros[0]['com_tmp_prod_cs_cat_sat_producto'];
+        }
+
+        //print_r($concepto);exit;
 
 
         $body_td_1 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_codigo'], class: $class, propiedades: "colspan='2'");
-        $body_td_2 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_id'], class: $class);
+        $body_td_2 = $this->html(etiqueta: "td", data: $concepto['com_producto_codigo'], class: $class);
         $body_td_3 = $this->html(etiqueta: "td", data: $fc_partida_cantidad, class: $class);
         $body_td_4 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_codigo'], class: $class);
         $body_td_5 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_descripcion'], class: $class);
@@ -393,8 +421,12 @@ final class pdf
     public function conceptos(array $conceptos, PDO $link)
     {
         $titulo = $this->html(etiqueta: "h1", data: "Conceptos", class: "negrita titulo");
-        $this->pdf->WriteHTML($titulo);
-
+        try {
+            $this->pdf->WriteHTML($titulo);
+        }
+        catch (Throwable $e){
+            return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
+        }
         $head_td_clave_prod_serv = $this->html(etiqueta: "th",
             data: "Clave del producto y/o servicio", class: "negrita border color", propiedades: "colspan='2'");;
         $head_td_no_identificacion = $this->html(etiqueta: "th", data: "No. identificación", class: "negrita border color");
@@ -415,7 +447,7 @@ final class pdf
         foreach ($conceptos as $concepto) {
 
 
-            $concepto_pdf = $this->concepto_datos(concepto: $concepto);
+            $concepto_pdf = $this->concepto_datos(concepto: $concepto, link: $link);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al generar concepto',data:  $concepto_pdf);
             }
@@ -482,6 +514,38 @@ final class pdf
         return $base_imp;
     }
 
+    private function fc_partida_double(array $concepto, string $key){
+        $fc_monto = $this->limpia_monto(monto: $concepto[$key]);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_monto);
+        }
+        $fc_monto = (float)$fc_monto;
+        return round($fc_monto,2);
+    }
+
+    private function fc_partida_cantidad(array $concepto){
+        $fc_partida_cantidad = $this->fc_partida_double(concepto: $concepto,key:  'fc_partida_cantidad');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_cantidad);
+        }
+    }
+
+    private function fc_partida_valor_unitario(array $concepto){
+        $fc_partida_valor_unitario = $this->fc_partida_double(concepto: $concepto,key:  'fc_partida_valor_unitario');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_valor_unitario);
+        }
+        return $fc_partida_valor_unitario;
+    }
+
+    /**
+     * Integra un html para para pdf
+     * @param string $etiqueta
+     * @param string $data
+     * @param string $class
+     * @param string $propiedades
+     * @return string
+     */
     private function html(string $etiqueta, string $data = "", string $class = "", string $propiedades = ""): string
     {
         return "<$etiqueta class='$class' $propiedades>$data</$etiqueta>";
@@ -589,6 +653,19 @@ final class pdf
             }
         }
         return $tr;
+    }
+
+    private function keys_no_ob(array $concepto): array
+    {
+        $keys_no_ob = array('fc_partida_descuento');
+        foreach ($keys_no_ob as $key_no_ob){
+
+            if(isset($concepto[$key_no_ob])){
+                $concepto[$key_no_ob] = 0;
+            }
+
+        }
+        return $concepto;
     }
 
     /**
