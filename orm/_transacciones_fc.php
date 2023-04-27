@@ -11,7 +11,7 @@ use stdClass;
 class _transacciones_fc extends modelo
 {
 
-    protected modelo $modelo_etapa;
+    public modelo $modelo_etapa;
     protected modelo $modelo_email;
 
     /**

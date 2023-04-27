@@ -10,6 +10,7 @@ namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
 use config\pac;
+use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\compresor\compresor;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
@@ -19,16 +20,20 @@ use gamboamartin\facturacion\models\_pdf;
 use gamboamartin\facturacion\models\fc_email;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
+use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
+use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\system\actions;
 use gamboamartin\template\html;
+use gamboamartin\xml_cfdi_4\timbra;
 use html\cat_sat_conf_imps_html;
 use html\cat_sat_motivo_cancelacion_html;
 use html\cat_sat_tipo_relacion_html;
 use html\com_cliente_html;
 use html\com_email_cte_html;
+use html\com_sucursal_html;
 use JsonException;
 use PDO;
 use stdClass;
@@ -1683,6 +1688,106 @@ class controlador_fc_factura extends _base_system_fc {
         }
 
         return $inputs_partida;
+    }
+
+    public function verifica_cancelacion(bool $header, bool $ws = false){
+
+        $this->link->beginTransaction();
+        $fc_factura = $this->modelo->registro(registro_id: $this->registro_id);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $fc_factura,header:  $header, ws: $ws);
+        }
+
+        $verifica = (new timbra())->consulta_estado_sat($fc_factura['org_empresa_rfc'], $fc_factura['com_cliente_rfc'],
+            $fc_factura['fc_factura_total'], $fc_factura['fc_factura_uuid']);
+
+        /*$verifica = (new timbra())->consulta_estado_sat('EKU9003173C9', 'XAXX010101000',
+            '1.16', '4a5dc24d-e0a9-4172-9fdd-38b2dfbd4435');*/
+
+
+        $aplica_etapa = false;
+        if($verifica->mensaje === 'Cancelado'){
+
+            $filtro['pr_etapa.descripcion'] = 'cancelado_sat';
+            $filtro['fc_factura.id'] = $this->registro_id;
+            $existe = (new fc_factura_etapa(link: $this->link))->existe(filtro: $filtro);
+            if(errores::$error){
+                $this->link->rollBack();
+                return $this->retorno_error(mensaje: 'Error al validar etapa',data:  $existe,header:  $header, ws: $ws);
+            }
+            if(!$existe){
+                $aplica_etapa = true;
+            }
+
+        }
+
+        if($aplica_etapa) {
+            $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: 'cancelado_sat', fecha: '',
+                modelo: $this->modelo, modelo_etapa: $this->modelo->modelo_etapa, registro_id: $this->registro_id, valida_existencia_etapa: true);
+            if (errores::$error) {
+                $this->link->rollBack();
+                return $this->retorno_error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa, header: $header, ws: $ws);
+            }
+        }
+        $this->link->commit();
+
+
+
+        $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id,html: $this->html);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
+            print_r($error);
+            die('Error');
+        }
+
+        $row_upd = $this->modelo->registro(registro_id: $this->registro_id, retorno_obj: true);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener factura', data: $row_upd);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->partidas = $partidas;
+
+
+        $params = array();
+
+
+
+        $params['com_sucursal_id']['filtro']['com_sucursal.id'] = $row_upd->com_sucursal_id;
+        $params['com_sucursal_id']['disabled'] = true;
+
+        $params['cat_sat_tipo_de_comprobante_id']['filtro']['cat_sat_tipo_de_comprobante.id'] = $row_upd->cat_sat_tipo_de_comprobante_id;
+        $params['cat_sat_tipo_de_comprobante_id']['disabled'] = true;
+
+        $params['cat_sat_forma_pago_id']['filtro']['cat_sat_forma_pago.id'] = $row_upd->cat_sat_forma_pago_id;
+        $params['cat_sat_forma_pago_id']['disabled'] = true;
+
+        $params['cat_sat_metodo_pago_id']['filtro']['cat_sat_metodo_pago.id'] = $row_upd->cat_sat_metodo_pago_id;
+        $params['cat_sat_metodo_pago_id']['disabled'] = true;
+
+        $params['cat_sat_moneda_id']['filtro']['cat_sat_moneda.id'] = $row_upd->cat_sat_moneda_id;
+        $params['cat_sat_moneda_id']['disabled'] = true;
+
+        $params['com_tipo_cambio_id']['filtro']['com_tipo_cambio.id'] = $row_upd->com_tipo_cambio_id;
+        $params['com_tipo_cambio_id']['disabled'] = true;
+
+        $params['cat_sat_uso_cfdi_id']['filtro']['cat_sat_uso_cfdi.id'] = $row_upd->cat_sat_uso_cfdi_id;
+        $params['cat_sat_uso_cfdi_id']['disabled'] = true;
+
+        $base = $this->init_modifica(params: $params);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
+                header: $header,ws:$ws);
+        }
+
+        $this->mensaje = $verifica->mensaje;
+
+        return $verifica;
+
+
+
     }
 
 
