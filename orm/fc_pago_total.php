@@ -5,13 +5,11 @@ namespace gamboamartin\facturacion\models;
 use base\orm\_modelo_parent;
 use gamboamartin\errores\errores;
 use PDO;
-use stdClass;
 
-
-class fc_pago extends _modelo_parent{
+class fc_pago_total extends _modelo_parent{
     public function __construct(PDO $link)
     {
-        $tabla = 'fc_pago';
+        $tabla = 'fc_pago_total';
         $columnas = array($tabla=>false);
         $campos_obligatorios = array();
 
@@ -20,14 +18,14 @@ class fc_pago extends _modelo_parent{
             columnas: $columnas);
 
         $this->NAMESPACE = __NAMESPACE__;
-        $this->etiqueta = 'Pago';
+        $this->etiqueta = 'Pago Total';
     }
 
-    public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
+    public function alta_bd(array $keys_integra_ds = array('descripcion')): array|\stdClass
     {
 
         if(!isset($this->registro['descripcion'])){
-            $descripcion = $this->registro['version'];
+            $descripcion = $this->registro['codigo'];
             $this->registro['descripcion'] = $descripcion;
         }
 
@@ -37,5 +35,6 @@ class fc_pago extends _modelo_parent{
         }
         return $r_alta_bd;
     }
+
 
 }

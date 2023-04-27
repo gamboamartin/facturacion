@@ -10,8 +10,12 @@ namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\html\fc_partida_html;
+use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_traslado;
+use gamboamartin\system\_ctl_base;
 use gamboamartin\system\actions;
+use gamboamartin\system\links_menu;
 
 use gamboamartin\template\html;
 use PDO;
@@ -19,14 +23,14 @@ use stdClass;
 
 class controlador_fc_partida_cp extends _base {
 
-    public controlador_fc_traslado_cp $controlador_fc_traslado_cp;
-    public string $link_fc_traslado_cp_alta_bd = '';
+    public controlador_fc_traslado $controlador_fc_traslado;
+    public string $link_fc_traslado_alta_bd = '';
 
     public function __construct(PDO      $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass())
     {
-        $modelo = new fc_partida_cp(link: $link);
-        $html_ = new fc_partida_cp_html(html: $html);
+        $modelo = new fc_partida(link: $link);
+        $html_ = new fc_partida_html(html: $html);
 
         parent::__construct(html_: $html_,link:  $link,modelo:  $modelo, paths_conf: $paths_conf);
 
@@ -93,7 +97,7 @@ class controlador_fc_partida_cp extends _base {
 
         $init_data = array();
         $init_data['com_producto'] = "gamboamartin\\comercial";
-        $init_data['fc_complemento_pago'] = "gamboamartin\\facturacion";
+        $init_data['fc_factura'] = "gamboamartin\\facturacion";
 
         $campos_view = $this->campos_view_base(init_data: $init_data, keys: $keys);
         if (errores::$error) {
@@ -113,7 +117,7 @@ class controlador_fc_partida_cp extends _base {
 
     private function init_controladores(stdClass $paths_conf): controler
     {
-        $this->controlador_fc_traslado_cp = new controlador_fc_traslado_cp(link: $this->link,
+        $this->controlador_fc_traslado = new controlador_fc_traslado(link: $this->link,
             paths_conf: $paths_conf);
 
         return $this;
@@ -121,18 +125,18 @@ class controlador_fc_partida_cp extends _base {
 
     private function init_datatable(): stdClass
     {
-        $columns["fc_partida_cp_id"]["titulo"] = "Id";
+        $columns["fc_partida_id"]["titulo"] = "Id";
         $columns["com_producto_codigo"]["titulo"] = "Cod Producto";
         $columns["com_producto_descripcion"]["titulo"] = "Producto";
-        $columns["fc_complemento_pago_descripcion"]["titulo"] = "Complemento Pago";
-        $columns["fc_partida_cp_cantidad"]["titulo"] = "Cantidad";
-        $columns["fc_partida_cp_valor_unitario"]["titulo"] = "Valor Unitario";
-        $columns["fc_partida_cp_descuento"]["titulo"] = "Descuento";
-        $columns["fc_partida_cp_n_traslados"]["titulo"] = "# Traslados";
-        $columns["fc_partida_cp_n_retenidos"]["titulo"] = "# Retenidos";
+        $columns["fc_factura_descripcion"]["titulo"] = "Factura";
+        $columns["fc_partida_cantidad"]["titulo"] = "Cantidad";
+        $columns["fc_partida_valor_unitario"]["titulo"] = "Valor Unitario";
+        $columns["fc_partida_descuento"]["titulo"] = "Descuento";
+        $columns["fc_partida_n_traslados"]["titulo"] = "# Traslados";
+        $columns["fc_partida_n_retenidos"]["titulo"] = "# Retenidos";
 
-        $filtro = array("fc_partida_cp.id","fc_partida_cp.codigo","fc_complemento_pago.descripcion","com_producto.descripcion",
-            "fc_partida_cp.cantidad","fc_partida_cp.valor_unitario","fc_partida_cp.descuento");
+        $filtro = array("fc_partida.id","fc_partida.codigo","fc_factura.descripcion","com_producto.descripcion",
+            "fc_partida.cantidad","fc_partida.valor_unitario","fc_partida.descuento");
 
         $datatables = new stdClass();
         $datatables->columns = $columns;
@@ -144,7 +148,7 @@ class controlador_fc_partida_cp extends _base {
     public function init_links(): array|string
     {
         $this->link_fc_traslado_alta_bd = $this->obj_link->link_con_id(accion: 'nuevo_traslado_bd', link: $this->link,
-            registro_id: $this->registro_id, seccion: "fc_partida_cp");
+            registro_id: $this->registro_id, seccion: "fc_partida");
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener link',
                 data: $this->link_fc_traslado_alta_bd);
@@ -152,7 +156,7 @@ class controlador_fc_partida_cp extends _base {
             exit;
         }
 
-        return $this->link_fc_traslado_cp_alta_bd;
+        return $this->link_fc_traslado_alta_bd;
     }
 
     /**
@@ -188,7 +192,7 @@ class controlador_fc_partida_cp extends _base {
             "cat_sat_unidad_descripcion","cat_sat_obj_imp_descripcion",'com_producto_aplica_predial',
             'cat_sat_conf_imps_id');
 
-        $keys_selects = $this->init_selects(keys_selects: $keys_selects, key: "fc_complemento_pago_id", label: "Complemento Pago");
+        $keys_selects = $this->init_selects(keys_selects: $keys_selects, key: "fc_factura_id", label: "Factura");
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
         }
@@ -288,7 +292,7 @@ class controlador_fc_partida_cp extends _base {
         }
 
         $keys_selects['com_producto_id']->id_selected = $this->registro['com_producto_id'];
-        $keys_selects['fc_complemento_pago_id']->id_selected = $this->registro['fc_complemento_pago_id'];
+        $keys_selects['fc_factura_id']->id_selected = $this->registro['fc_factura_id'];
         $keys_selects['cat_sat_conf_imps_id']->id_selected = -1;
 
         $this->row_upd->subtotal = $this->row_upd->cantidad * $this->row_upd->valor_unitario;
@@ -318,7 +322,7 @@ class controlador_fc_partida_cp extends _base {
         $datatables->columns["modifica"]["campos"] = array("elimina_bd");
 
         $table = $this->datatable_init(columns: $datatables->columns, filtro: $datatables->filtro,
-            identificador: "#fc_traslado", data: array("fc_partida_cp.id" => $this->registro_id));
+            identificador: "#fc_traslado", data: array("fc_partida.id" => $this->registro_id));
         if (errores::$error) {
             return $this->retorno_error(mensaje: 'Error al generar datatable', data: $table, header: $header, ws: $ws);
         }
@@ -328,17 +332,17 @@ class controlador_fc_partida_cp extends _base {
             return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
         }
 
-        $partida = (new fc_partida_cp($this->link))->get_partida(fc_partida_id: $this->registro_id);
+        $partida = (new fc_partida($this->link))->get_partida(fc_partida_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener partida', data: $alta, header: $header, ws: $ws);
         }
 
-        $this->controlador_fc_traslado_cp->row_upd->codigo = $partida["fc_partida_cp_codigo"];
-        $this->controlador_fc_traslado_cp->row_upd->descripcion = $partida["fc_partida_cp_descripcion"];
+        $this->controlador_fc_traslado->row_upd->codigo = $partida["fc_partida_codigo"];
+        $this->controlador_fc_traslado->row_upd->descripcion = $partida["fc_partida_descripcion"];
 
-        $identificador = "fc_partida_cp_id";
+        $identificador = "fc_partida_id";
         $propiedades = array("id_selected" => $this->registro_id, "disabled" => true,
-            "filtro" => array('fc_partida_cp.id' => $this->registro_id));
+            "filtro" => array('fc_partida.id' => $this->registro_id));
         $this->controlador_fc_traslado->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "descripcion";
@@ -371,7 +375,7 @@ class controlador_fc_partida_cp extends _base {
             unset($_POST['btn_action_next']);
         }
 
-        $partida = (new fc_partida_cp($this->link))->get_partida(fc_partida_id: $this->registro_id);
+        $partida = (new fc_partida($this->link))->get_partida(fc_partida_id: $this->registro_id);
         if(errores::$error){
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al obtener partida', data: $siguiente_view,
@@ -379,8 +383,8 @@ class controlador_fc_partida_cp extends _base {
         }
 
         $registro = $_POST;
-        $registro['fc_partida_cp_id'] = $this->registro_id;
-        $registro['codigo'] = $partida['fc_partida_cp_id'].$registro['descripcion'];
+        $registro['fc_partida_id'] = $this->registro_id;
+        $registro['codigo'] = $partida['fc_partida_id'].$registro['descripcion'];
 
         $alta = (new fc_traslado($this->link))->alta_registro(registro:$registro);
         if(errores::$error){
