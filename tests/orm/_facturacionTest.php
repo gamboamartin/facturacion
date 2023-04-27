@@ -39,7 +39,7 @@ class _facturacionTest extends test
 
         $salida = "ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ";
         $salida .= "ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2)";
-        $resultado = $modelo->fc_partida_importe();
+        $resultado = $modelo->fc_partida_importe('fc_partida');
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals($salida, $resultado);
@@ -59,7 +59,7 @@ class _facturacionTest extends test
         $salida = "ROUND((ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ";
         $salida .= "ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2) - ";
         $salida .= "ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
-        $resultado = $modelo->fc_partida_importe_con_descuento();
+        $resultado = $modelo->fc_partida_importe_con_descuento('fc_partida');
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals($salida, $resultado);
@@ -77,17 +77,17 @@ class _facturacionTest extends test
 
         $modelo = new _facturacion();
 
-        $fc_partida_importe = "ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ";
-        $fc_partida_importe .= "ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2)";
+        $fc_partida_importe = "ROUND((ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2) - ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
+        //$fc_partida_importe .= "ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2)";
 
-        $fc_partida_importe_con_descuento = "ROUND(($fc_partida_importe - ";
-        $fc_partida_importe_con_descuento .= "ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
+        $fc_partida_importe_con_descuento = "ROUND((ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2) - ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
+        //$fc_partida_importe_con_descuento .= "ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
 
-        $resultado = (array)$modelo->importes_base();
+        $resultado = (array)$modelo->importes_base('fc_partida');
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals($fc_partida_importe, $resultado['fc_partida_importe']);
-        $this->assertEquals($fc_partida_importe_con_descuento, $resultado['fc_partida_importe_con_descuento']);
+        $this->assertEquals($fc_partida_importe, $resultado['fc_partida_entidad_importe']);
+        $this->assertEquals($fc_partida_importe_con_descuento, $resultado['fc_partida_entidad_importe_con_descuento']);
         errores::$error = false;
 
         return $resultado;
@@ -109,10 +109,10 @@ class _facturacionTest extends test
             exit;
         }
 
-        $salida = "ROUND(" . $importes_base['fc_partida_importe_con_descuento'];
+        $salida = "ROUND(" . $importes_base['fc_partida_entidad_importe_con_descuento'];
         $salida .= " * ROUND(IFNULL(cat_sat_factor.factor,0),4),2)";
         $resultado = $modelo->fc_impuesto_importe(
-            fc_partida_importe_con_descuento: $importes_base['fc_partida_importe_con_descuento']);
+            fc_partida_importe_con_descuento: $importes_base['fc_partida_entidad_importe_con_descuento']);
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals($salida, $resultado);
@@ -150,7 +150,7 @@ class _facturacionTest extends test
         $inner_join_cat_sat_factor = "INNER JOIN cat_sat_factor ON cat_sat_factor.id = $tabla_impuesto.cat_sat_factor_id";
         $where = "WHERE $tabla_impuesto.fc_partida_id = fc_partida.id";
         $salida = "(SELECT ROUND(SUM($impuesto_importe),2) FROM $tabla_impuesto $inner_join_cat_sat_factor $where)";
-        $resultado = $modelo->impuesto_partida(tabla_impuesto: $tabla_impuesto);
+        $resultado = $modelo->impuesto_partida(name_entidad_partida: 'fc_partida', tabla_impuesto: $tabla_impuesto);
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals($salida, $resultado);

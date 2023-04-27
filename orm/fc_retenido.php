@@ -27,21 +27,21 @@ class fc_retenido extends _base {
         $campos_view['codigo'] = array('type' => 'inputs');
         $campos_view['descripcion'] = array('type' => 'inputs');
 
-        $sq_importes = (new _facturacion())->importes_base();
+        $sq_importes = (new _facturacion())->importes_base(name_entidad_partida: 'fc_partida');
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al generar sq_importes',data:  $sq_importes);
             print_r($error);
             exit;
         }
-        $fc_impuesto_importe = (new _facturacion())->fc_impuesto_importe(fc_partida_importe_con_descuento: $sq_importes->fc_partida_importe_con_descuento);
+        $fc_impuesto_importe = (new _facturacion())->fc_impuesto_importe(fc_partida_importe_con_descuento: $sq_importes->fc_partida_entidad_importe_con_descuento);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al generar fc_impuesto_importe',data:  $fc_impuesto_importe);
             print_r($error);
             exit;
         }
 
-        $columnas_extra['fc_partida_importe'] = $sq_importes->fc_partida_importe;
-        $columnas_extra['fc_partida_importe_con_descuento'] = $sq_importes->fc_partida_importe_con_descuento;
+        $columnas_extra['fc_partida_importe'] = $sq_importes->fc_partida_entidad_importe;
+        $columnas_extra['fc_partida_importe_con_descuento'] = $sq_importes->fc_partida_entidad_importe_con_descuento;
         $columnas_extra['fc_retenido_importe'] = $fc_impuesto_importe;
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
@@ -70,7 +70,7 @@ class fc_retenido extends _base {
             return $this->error->error(mensaje: 'Error al obtener fc_partida', data: $fc_partida);
         }
 
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $fc_partida->fc_factura_id);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_partida->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -89,7 +89,7 @@ class fc_retenido extends _base {
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener retenido',data: $retenido);
         }
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $retenido['fc_factura_id']);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $retenido['fc_factura_id']);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -131,7 +131,7 @@ class fc_retenido extends _base {
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener retenido',data: $retenido);
         }
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $retenido->fc_factura_id);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $retenido->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }

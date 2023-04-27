@@ -65,6 +65,7 @@ class controlador_fc_facturaTest extends test {
         $ctl = new liberator($ctl);
 
         $resultado = $ctl->init_controladores($this->paths_conf);
+        //print_r($resultado);exit;
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
         errores::$error = false;

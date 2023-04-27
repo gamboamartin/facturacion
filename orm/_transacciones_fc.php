@@ -68,6 +68,23 @@ class _transacciones_fc extends modelo
     }
 
     /**
+     * Obtiene las etapas de una factura
+     * @param modelo $modelo_fc_etapa Modelo de tipo etapa
+     * @param string $name_entidad Nombre de la entidad base ej fc_factura, fc_nota_credito
+     * @param int $registro_id Factura o complemento a verificar etapas
+     * @return array
+     */
+    private function etapas(modelo $modelo_fc_etapa, string $name_entidad, int $registro_id): array
+    {
+        $filtro[$name_entidad.'.id'] =  $registro_id;
+        $r_fc_etapa = $modelo_fc_etapa->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener r_fc_etapa', data: $r_fc_etapa);
+        }
+        return $r_fc_etapa->registros;
+    }
+
+    /**
      * Inicializa los datos de un registro
      * @param array $registro
      * @return array
@@ -248,6 +265,18 @@ class _transacciones_fc extends modelo
         return $registro;
     }
 
+    private function permite_transaccion(int $registro_id){
+        $etapas = $this->etapas(modelo_fc_etapa: $this->modelo_etapa, name_entidad: $this->tabla, registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener fc_factura_etapas', data: $etapas);
+        }
+        $permite_transaccion = $this->valida_permite_transaccion(etapas: $etapas);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
+        }
+        return $permite_transaccion;
+    }
+
     private function ultimo_folio(int $fc_csd_id){
         $filtro['fc_csd.id'] = $fc_csd_id;
         $r_registro = $this->filtro_and(filtro: $filtro, limit: 1,order: array($this->tabla.'.folio'=>'DESC'));
@@ -292,6 +321,32 @@ class _transacciones_fc extends modelo
 
         return $fc_csd_serie.'-'.$folio_str;
 
+    }
+
+    private function valida_permite_transaccion(array $etapas): bool
+    {
+        $permite_transaccion = true;
+        foreach ($etapas as $etapa){
+            /**
+             * AJUSTAR MEDIANTE CONF
+             */
+            if($etapa['pr_etapa_descripcion'] === 'TIMBRADO'){
+                $permite_transaccion = false;
+            }
+        }
+        return $permite_transaccion;
+    }
+
+    final public function verifica_permite_transaccion(int $registro_id){
+        $permite_transaccion = $this->permite_transaccion(registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
+        }
+
+        if(!$permite_transaccion){
+            return $this->error->error(mensaje: 'Error no se permite la eliminacion', data: $permite_transaccion);
+        }
+        return $permite_transaccion;
     }
 
 

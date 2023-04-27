@@ -782,11 +782,10 @@ class controlador_fc_complemento_pago extends _base_system_fc {
      * Inicializa los controladores default
      * @param stdClass $paths_conf Rutas de archivos de configuracion
      * @return controler
-     * @version 4.25.0
      */
     private function init_controladores(stdClass $paths_conf): controler
     {
-        $this->controlador_fc_partida= new controlador_fc_partida(link:$this->link, paths_conf: $paths_conf);
+        $this->controlador_fc_partida_cp= new controlador_fc_partida_cp(link:$this->link, paths_conf: $paths_conf);
         $this->controlador_com_producto = new controlador_com_producto(link:$this->link, paths_conf: $paths_conf);
 
         return $this;

@@ -9,16 +9,16 @@ use gamboamartin\organigrama\models\org_sucursal;
 use PDO;
 use stdClass;
 
-class fc_traslado extends _base {
+class fc_traslado_cp extends _base {
     public function __construct(PDO $link){
-        $tabla = 'fc_traslado';
-        $columnas = array($tabla=>false,'fc_partida'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla,
-            'cat_sat_tipo_impuesto'=>$tabla,'com_producto'=>'fc_partida','fc_factura'=>'fc_partida');
-        $campos_obligatorios = array('codigo','fc_partida_id');
+        $tabla = 'fc_traslado_cp';
+        $columnas = array($tabla=>false,'fc_partida_cp'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla,
+            'cat_sat_tipo_impuesto'=>$tabla,'com_producto'=>'fc_partida_cp','fc_complemento_pago'=>'fc_partida_cp');
+        $campos_obligatorios = array('codigo','fc_partida_cp_id');
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 
-        $campos_view['fc_partida_id'] = array('type' => 'selects', 'model' => new fc_partida($link));
+        $campos_view['fc_partida_cp_id'] = array('type' => 'selects', 'model' => new fc_partida_cp($link));
         $campos_view['cat_sat_tipo_factor_id'] = array('type' => 'selects', 'model' => new cat_sat_tipo_factor($link));
         $campos_view['cat_sat_factor_id'] = array('type' => 'selects', 'model' => new cat_sat_factor($link));
         $campos_view['org_sucursal_id'] = array('type' => 'selects', 'model' => new org_sucursal($link));
@@ -27,14 +27,14 @@ class fc_traslado extends _base {
         $campos_view['descripcion'] = array('type' => 'inputs');
 
 
-        $sq_importes = (new _facturacion())->importes_base(name_entidad_partida: 'fc_partida');
+        $sq_importes = (new _facturacion())->importes_base(name_entidad_partida: 'fc_partida_cp');
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al generar sq_importes',data:  $sq_importes);
             print_r($error);
             exit;
         }
 
-        $fc_impuesto_importe = (new _facturacion())->fc_impuesto_importe(fc_partida_importe_con_descuento: $sq_importes->fc_partida_entidad_importe_con_descuento);
+        $fc_impuesto_importe = (new _facturacion())->fc_impuesto_importe(fc_partida_importe_con_descuento: $sq_importes->fc_partida_importe_con_descuento);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al generar fc_impuesto_importe',data:  $fc_impuesto_importe);
             print_r($error);
@@ -42,9 +42,9 @@ class fc_traslado extends _base {
         }
 
 
-        $columnas_extra['fc_partida_importe'] = $sq_importes->fc_partida_entidad_importe;
-        $columnas_extra['fc_partida_importe_con_descuento'] = $sq_importes->fc_partida_entidad_importe_con_descuento;
-        $columnas_extra['fc_traslado_importe'] = $fc_impuesto_importe;
+        $columnas_extra['fc_partida_cp_importe'] = $sq_importes->fc_partida_importe;
+        $columnas_extra['fc_partida_cp_importe_con_descuento'] = $sq_importes->fc_partida_importe_con_descuento;
+        $columnas_extra['fc_traslado_cp_importe'] = $fc_impuesto_importe;
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
@@ -67,12 +67,12 @@ class fc_traslado extends _base {
             return $this->error->error(mensaje: 'Error al validar foraneas',data: $this->registro);
         }
 
-        $fc_partida =(new fc_partida(link: $this->link))->registro(registro_id: $this->registro['fc_partida_id'], retorno_obj: true);
+        $fc_partida_cp =(new fc_partida_cp(link: $this->link))->registro(registro_id: $this->registro['fc_partida_cp_id'], retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener fc_partida', data: $fc_partida);
+            return $this->error->error(mensaje: 'Error al obtener fc_partida_cp', data: $fc_partida_cp);
         }
 
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_partida->fc_factura_id);
+        $permite_transaccion = (new fc_complemento_pago(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_partida_cp->fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -91,7 +91,7 @@ class fc_traslado extends _base {
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener retenido',data: $traslado);
         }
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $traslado['fc_factura_id']);
+        $permite_transaccion = (new fc_complemento_pago(link: $this->link))->verifica_permite_transaccion(fc_complemento_pago_id: $traslado['fc_complemento_pago_id']);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -103,9 +103,9 @@ class fc_traslado extends _base {
 
     }
 
-    public function get_traslado(int $fc_traslado_id): array|stdClass|int
+    public function get_traslado(int $fc_traslado_cp_id): array|stdClass|int
     {
-        $registro = $this->registro(registro_id: $fc_traslado_id);
+        $registro = $this->registro(registro_id: $fc_traslado_cp_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener traslado',data:  $registro);
         }
@@ -119,9 +119,9 @@ class fc_traslado extends _base {
      * @return array|stdClass|int
      * @version 6.18.0
      */
-    final public function get_traslados(int $fc_partida_id): array|stdClass|int
+    final public function get_traslados(int $fc_partida_cp_id): array|stdClass|int
     {
-        $filtro['fc_partida.id']  = $fc_partida_id;
+        $filtro['fc_partida_cp.id']  = $fc_partida_cp_id;
         $registro = $this->filtro_and(filtro: $filtro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener traslados',data:  $registro);
@@ -133,17 +133,17 @@ class fc_traslado extends _base {
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,
                                 array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-        $traslado = $this->get_traslado(fc_traslado_id: $id);
+        $traslado = $this->get_traslado(fc_traslado_cp_id: $id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener traslado',data: $traslado);
         }
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $traslado->fc_factura_id);
+        $permite_transaccion = (new fc_complemento_pago(link: $this->link))->verifica_permite_transaccion(fc_complemento_pago_id: $traslado->fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
 
         if(!isset($registro['codigo'])){
-            $registro['codigo'] =  $traslado["fc_traslado_codigo"];
+            $registro['codigo'] =  $traslado["fc_traslado_cp_codigo"];
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al obtener el codigo del registro',data: $registro);
             }
@@ -175,7 +175,7 @@ class fc_traslado extends _base {
             return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
         }
 
-        $keys = array('fc_partida_id', 'cat_sat_tipo_factor_id', 'cat_sat_factor_id', 'cat_sat_tipo_impuesto_id');
+        $keys = array('fc_partida_cp_id', 'cat_sat_tipo_factor_id', 'cat_sat_factor_id', 'cat_sat_tipo_impuesto_id');
         $valida = $this->validacion->valida_ids(keys: $keys, registro: $data);
         if(errores::$error){
             return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);

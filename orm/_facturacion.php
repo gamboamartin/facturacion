@@ -16,27 +16,38 @@ class _facturacion
 
     /**
      * Genera SQL para calcular el importe de una partida
-     * @return string
-     * @version 1.34.0
+     * @param string $name_entidad_partida Nombre de la entidad de la partida fc_partida, fc_partida_nc, fc_partida_xxx
+     * @return string|array
      */
-    private function fc_partida_importe(): string
+    private function fc_partida_importe(string $name_entidad_partida): string|array
     {
-        return "ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2)";
+        $name_entidad_partida = trim($name_entidad_partida);
+        if ($name_entidad_partida === '') {
+            return $this->error->error(mensaje: 'Error al name_entidad_partida esta vacio', data: $name_entidad_partida);
+        }
+
+        return "ROUND((ROUND(IFNULL(".$name_entidad_partida.".cantidad,0),2) * ROUND(IFNULL(".$name_entidad_partida.".valor_unitario,0),2)),2)";
     }
 
     /**
      * Genera SQL para calcular el importe con descuento de una partida
-     * @return string
-     * @version 1.35.0
+     * @param string $name_entidad_partida Nombre de la entidad de la partida fc_partida, fc_partida_nc, fc_partida_xxx
+     * @return string|array
      */
-    private function fc_partida_importe_con_descuento(): string
+    private function fc_partida_importe_con_descuento(string $name_entidad_partida): string|array
     {
-        $fc_partida_importe = $this->fc_partida_importe();
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al generar fc_partida_importe', data: $fc_partida_importe);
+        $name_entidad_partida = trim($name_entidad_partida);
+        if ($name_entidad_partida === '') {
+            return $this->error->error(mensaje: 'Error al name_entidad_partida esta vacio', data: $name_entidad_partida);
         }
 
-        return "ROUND(($fc_partida_importe - ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
+        $fc_partida_entidad_importe = $this->fc_partida_importe(name_entidad_partida: $name_entidad_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar fc_partida_entidad_importe',
+                data: $fc_partida_entidad_importe);
+        }
+
+        return "ROUND(($fc_partida_entidad_importe - ROUND(IFNULL($name_entidad_partida.descuento,0),2)),2)";
     }
 
     /**
@@ -52,38 +63,54 @@ class _facturacion
 
     /**
      * Obtiene SQL para calcular el importe e importe con descuento de una partida
+     * @param string $name_entidad_partida Nombre de la entidad de la partida fc_partida, fc_partida_nc, fc_partida_xxx
      * @return array|stdClass
      * @version 1.36.0
      */
-    public function importes_base(): array|stdClass
+    public function importes_base(string $name_entidad_partida): array|stdClass
     {
-        $fc_partida_importe = $this->fc_partida_importe();
+        $name_entidad_partida = trim($name_entidad_partida);
+        if ($name_entidad_partida === '') {
+            return $this->error->error(mensaje: 'Error al name_entidad_partida esta vacio', data: $name_entidad_partida);
+        }
+        $fc_partida_entidad_importe = $this->fc_partida_importe(name_entidad_partida: $name_entidad_partida);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al generar fc_partida_importe', data: $fc_partida_importe);
+            return $this->error->error(mensaje: 'Error al generar fc_partida_entidad_importe',
+                data: $fc_partida_entidad_importe);
         }
 
-        $fc_partida_importe_con_descuento = $this->fc_partida_importe_con_descuento();
+        $fc_partida_entidad_importe_con_descuento = $this->fc_partida_importe_con_descuento(
+            name_entidad_partida: $name_entidad_partida);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al generar fc_partida_importe_con_descuento',
-                data: $fc_partida_importe_con_descuento);
+            return $this->error->error(mensaje: 'Error al generar fc_partida_entidad_importe_con_descuento',
+                data: $fc_partida_entidad_importe_con_descuento);
         }
 
         $data = new stdClass();
-        $data->fc_partida_importe = $fc_partida_importe;
-        $data->fc_partida_importe_con_descuento = $fc_partida_importe_con_descuento;
+        $data->fc_partida_entidad_importe = $fc_partida_entidad_importe_con_descuento;
+        $data->fc_partida_entidad_importe_con_descuento = $fc_partida_entidad_importe_con_descuento;
 
         return $data;
     }
 
     /**
      * Obtiene SQL para calcular los impuestos de una partida en base al tipo de impuesto
+     * @param string $name_entidad_partida
      * @param string $tabla_impuesto Tipo de impuesto a evaluar
      * @return array|string
-     * @version 1.38.0
      */
-    public function impuesto_partida(string $tabla_impuesto): array|string
+    public function impuesto_partida(string $name_entidad_partida, string $tabla_impuesto): array|string
     {
-        $fc_partida_importe_con_descuento = $this->fc_partida_importe_con_descuento();
+        $name_entidad_partida = trim($name_entidad_partida);
+        if ($name_entidad_partida === '') {
+            return $this->error->error(mensaje: 'Error al name_entidad_partida esta vacio', data: $name_entidad_partida);
+        }
+        $tabla_impuesto = trim($tabla_impuesto);
+        if ($tabla_impuesto === '') {
+            return $this->error->error(mensaje: 'Error al tabla_impuesto esta vacio', data: $tabla_impuesto);
+        }
+        $fc_partida_importe_con_descuento = $this->fc_partida_importe_con_descuento(
+            name_entidad_partida: $name_entidad_partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar fc_partida_importe_con_descuento',
                 data: $fc_partida_importe_con_descuento);

@@ -56,7 +56,7 @@ class fc_factura_relacionada extends _modelo_parent_sin_codigo
             return $this->error->error(mensaje: 'Error al obtener fc_factura_relacionada', data: $fc_relacion);
         }
 
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $fc_relacion->fc_factura_id);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_relacion->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -92,7 +92,7 @@ class fc_factura_relacionada extends _modelo_parent_sin_codigo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_relacion);
         }
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $fc_relacion->fc_factura_id);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_relacion->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -115,7 +115,7 @@ class fc_factura_relacionada extends _modelo_parent_sin_codigo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_relacion);
         }
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $fc_relacion->fc_factura_id);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_relacion->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }

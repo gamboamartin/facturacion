@@ -23,31 +23,34 @@ class fc_partida extends _base
 
         $columnas_extra = array();
 
-        $sq_importes = (new _facturacion())->importes_base();
+        $sq_importes = (new _facturacion())->importes_base(name_entidad_partida: 'fc_partida');
         if (errores::$error) {
             $error = (new errores())->error(mensaje: 'Error al generar sq_importes', data: $sq_importes);
             print_r($error);
             exit;
         }
 
-        $sq_importe_total_traslado = (new _facturacion())->impuesto_partida(tabla_impuesto: 'fc_traslado');
+        $sq_importe_total_traslado = (new _facturacion())->impuesto_partida(
+            name_entidad_partida: 'fc_partida', tabla_impuesto: 'fc_traslado');
         if (errores::$error) {
             $error = (new errores())->error(mensaje: 'Error al generar sq_importe_total_traslado', data: $sq_importe_total_traslado);
             print_r($error);
             exit;
         }
-        $sq_importe_total_retenido = (new _facturacion())->impuesto_partida(tabla_impuesto: 'fc_retenido');
+        $sq_importe_total_retenido = (new _facturacion())->impuesto_partida(
+            name_entidad_partida: 'fc_partida', tabla_impuesto: 'fc_retenido');
         if (errores::$error) {
             $error = (new errores())->error(mensaje: 'Error al generar sq_importe_total_retenido', data: $sq_importe_total_retenido);
             print_r($error);
             exit;
         }
 
-        $columnas_extra['fc_partida_importe'] = $sq_importes->fc_partida_importe;
-        $columnas_extra['fc_partida_importe_con_descuento'] = $sq_importes->fc_partida_importe_con_descuento;
+       // print_r($sq_importes);exit;
+        $columnas_extra['fc_partida_importe'] = $sq_importes->fc_partida_entidad_importe;
+        $columnas_extra['fc_partida_importe_con_descuento'] = $sq_importes->fc_partida_entidad_importe_con_descuento;
         $columnas_extra['fc_partida_importe_total_traslado'] = $sq_importe_total_traslado;
         $columnas_extra['fc_partida_importe_total_retenido'] = $sq_importe_total_retenido;
-        $columnas_extra['fc_partida_importe_total'] = "$sq_importes->fc_partida_importe_con_descuento 
+        $columnas_extra['fc_partida_importe_total'] = "$sq_importes->fc_partida_entidad_importe_con_descuento 
         + $sq_importe_total_traslado - $sq_importe_total_retenido";
 
         $columnas_extra['fc_partida_n_traslados'] = "(SELECT COUNT(*) FROM fc_traslado 
@@ -150,7 +153,7 @@ class fc_partida extends _base
     {
 
 
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $this->registro['fc_factura_id']);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $this->registro['fc_factura_id']);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -293,7 +296,7 @@ class fc_partida extends _base
             return $this->error->error(mensaje: 'Error obtener fc_partida', data: $fc_partida);
         }
 
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $fc_partida->fc_factura_id);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_partida->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -427,7 +430,7 @@ class fc_partida extends _base
             return $this->error->error(mensaje: 'Error al obtener partida', data: $partida);
         }
 
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $partida->fc_factura_id);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $partida->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }

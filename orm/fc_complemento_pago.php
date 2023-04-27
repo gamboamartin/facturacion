@@ -339,7 +339,7 @@ class fc_complemento_pago extends _transacciones_fc
     public function elimina_bd(int $id): array|stdClass
     {
 
-        $permite_transaccion = $this->verifica_permite_transaccion(fc_factura_id: $id);
+        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -377,7 +377,7 @@ class fc_complemento_pago extends _transacciones_fc
      */
     private function elimina_partidas(int $fc_factura_id): array
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(fc_factura_id: $fc_factura_id);
+        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -417,20 +417,7 @@ class fc_complemento_pago extends _transacciones_fc
         return $notifica;
     }
 
-    /**
-     * Obtiene las etapas de una factura
-     * @param int $fc_factura_id Factura a verificar etapas
-     * @return array
-     */
-    private function etapas(int $fc_factura_id): array
-    {
-        $filtro['fc_factura.id'] =  $fc_factura_id;
-        $r_fc_factura_etapa = (new fc_factura_etapa(link: $this->link))->filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener r_fc_factura_etapa', data: $r_fc_factura_etapa);
-        }
-        return $r_fc_factura_etapa->registros;
-    }
+
 
 
 
@@ -456,7 +443,7 @@ class fc_complemento_pago extends _transacciones_fc
 
     public function genera_xml(int $fc_factura_id, string $tipo): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(fc_factura_id: $fc_factura_id);
+        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -752,7 +739,7 @@ class fc_complemento_pago extends _transacciones_fc
 
     final public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(fc_factura_id: $id);
+        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -890,22 +877,6 @@ class fc_complemento_pago extends _transacciones_fc
     }
 
 
-
-
-
-
-    private function permite_transaccion(int $fc_factura_id){
-        $fc_factura_etapas = $this->etapas(fc_factura_id: $fc_factura_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener fc_factura_etapas', data: $fc_factura_etapas);
-        }
-        $permite_transaccion = $this->valida_permite_transaccion(fc_factura_etapas: $fc_factura_etapas);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
-        }
-        return $permite_transaccion;
-    }
-
     private function receptor(array $factura): array
     {
         $com_sucursal = (new com_sucursal(link: $this->link))->registro(registro_id: $factura['com_sucursal_id']);
@@ -968,7 +939,7 @@ class fc_complemento_pago extends _transacciones_fc
 
     final public function status(string $campo, int $registro_id): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(fc_factura_id: $registro_id);
+        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -1155,7 +1126,7 @@ class fc_complemento_pago extends _transacciones_fc
 
     public function timbra_xml(int $fc_factura_id): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(fc_factura_id: $fc_factura_id);
+        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -1350,31 +1321,4 @@ class fc_complemento_pago extends _transacciones_fc
 
     }
 
-
-
-    private function valida_permite_transaccion(array $fc_factura_etapas): bool
-    {
-        $permite_transaccion = true;
-        foreach ($fc_factura_etapas as $fc_factura_etapa){
-            /**
-             * AJUSTAR MEDIANTE CONF
-             */
-            if($fc_factura_etapa['pr_etapa_descripcion'] === 'TIMBRADO'){
-                $permite_transaccion = false;
-            }
-        }
-        return $permite_transaccion;
-    }
-
-    final public function verifica_permite_transaccion(int $fc_factura_id){
-        $permite_transaccion = $this->permite_transaccion(fc_factura_id: $fc_factura_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
-        }
-
-        if(!$permite_transaccion){
-            return $this->error->error(mensaje: 'Error no se permite la eliminacion', data: $permite_transaccion);
-        }
-        return $permite_transaccion;
-    }
 }
