@@ -52,9 +52,6 @@ class controlador_fc_pago extends _ctl_base {
             return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
         }
 
-        $keys_selects['version'] = new stdClass();
-        $keys_selects['version']->cols = 6;
-
 
         $inputs = $this->inputs(keys_selects: $keys_selects);
         if(errores::$error){
@@ -111,12 +108,6 @@ class controlador_fc_pago extends _ctl_base {
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
         }
-
-
-        $keys_selects['version'] = new stdClass();
-        $keys_selects['version']->cols = 6;
-
-
 
         $base = $this->base_upd(keys_selects: $keys_selects, params: array(),params_ajustados: array());
         if(errores::$error){
