@@ -716,11 +716,49 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_complemento_pago(PDO $link): array
+    {
+
+        $del = (new base_test())->del_fc_complemento_pago_etapa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        $del = (new base_test())->del_fc_email_cp($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_complemento_pago');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_complemento_pago_etapa(PDO $link): array
+    {
+
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_complemento_pago_etapa');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_csd(PDO $link): array
     {
 
 
         $del = (new base_test())->del_fc_factura($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new base_test())->del_fc_complemento_pago($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
 
@@ -748,6 +786,15 @@ class base_test{
     public function del_fc_email(PDO $link): array
     {
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_email');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_email_cp(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_email_cp');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
