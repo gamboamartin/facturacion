@@ -27,7 +27,14 @@ class controlador_fc_pago extends _ctl_base {
         $html_ = new fc_pago_html(html: $html);
         $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
-        parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link,
+        $datatables = $this->init_datatable();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar datatable',data: $datatables);
+            print_r($error);
+            die('Error');
+        }
+
+        parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link, datatables: $datatables,
             paths_conf: $paths_conf);
     }
 
@@ -48,8 +55,6 @@ class controlador_fc_pago extends _ctl_base {
         $keys_selects['version'] = new stdClass();
         $keys_selects['version']->cols = 6;
 
-        $keys_selects['descripcion'] = new stdClass();
-        $keys_selects['descripcion']->cols = 6;
 
         $inputs = $this->inputs(keys_selects: $keys_selects);
         if(errores::$error){
@@ -87,10 +92,7 @@ class controlador_fc_pago extends _ctl_base {
             return $this->errores->error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects);
         }
 
-        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6,key: 'descripcion', keys_selects:$keys_selects, place_holder: 'Descripcion');
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects);
-        }
+
 
         return $keys_selects;
     }
@@ -114,8 +116,6 @@ class controlador_fc_pago extends _ctl_base {
         $keys_selects['version'] = new stdClass();
         $keys_selects['version']->cols = 6;
 
-        $keys_selects['descripcion'] = new stdClass();
-        $keys_selects['descripcion']->cols = 6;
 
 
         $base = $this->base_upd(keys_selects: $keys_selects, params: array(),params_ajustados: array());
@@ -126,13 +126,14 @@ class controlador_fc_pago extends _ctl_base {
         return $r_modifica;
     }
 
-    /**
     private function init_datatable(): stdClass
     {
         $columns["fc_pago_id"]["titulo"] = "Id";
-        $columns["pr_etapa_descripcion"]["titulo"] = "Etapa";
+        $columns["fc_pago_codigo"]["titulo"] = "Codigo";
+        $columns["fc_pago_descripcion_select"]["titulo"] = "Descripcion";
+        $columns["fc_pago_version"]["titulo"] = "Version";
 
-        $filtro = array("fc_pago.id","pr_etapa.descripcion");
+        $filtro = array("fc_pago.id","fc_pago.codigo","fc_pago.descripcion_select","fc_pago.version");
 
         $datatables = new stdClass();
         $datatables->columns = $columns;
@@ -140,7 +141,6 @@ class controlador_fc_pago extends _ctl_base {
 
         return $datatables;
     }
-     */
 
 
 }
