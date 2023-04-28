@@ -790,8 +790,17 @@ class fc_factura extends _transacciones_fc
 
         $imp_traslado = 0.0;
 
+        $modelo_predial = (new fc_cuenta_predial(link: $this->link));
+        $modelo_retencion = (new fc_retenido(link: $this->link));
+        $modelo_traslado = (new fc_traslado(link: $this->link));
+
+        $fc_partida_modelo = new fc_partida(link: $this->link,modelo_entidad: $this,
+            modelo_predial: $modelo_predial,modelo_retencion: $modelo_retencion,
+            modelo_traslado: $modelo_traslado);
+
         foreach ($partidas as $valor) {
-            $imp_traslado += (new fc_partida($this->link))->calculo_imp_retenido($valor['fc_partida_id']);
+
+            $imp_traslado += $fc_partida_modelo->calculo_imp_retenido($valor['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
             }

@@ -2,9 +2,14 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_cuenta_predial;
+use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_retenido;
+use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\system\html_controler;
 use gamboamartin\template\directivas;
+use gamboamartin\validacion\validacion;
 use PDO;
 use stdClass;
 
@@ -18,10 +23,18 @@ class _partidas_html{
     /**
      * @param string $tipo fc_traslado o fc_retenido
      * @param array $partida Partida de factura
-     * @return bool
+     * @return bool|array
      */
-    private function aplica_aplica_impuesto(string  $tipo, array $partida): bool
+    private function aplica_aplica_impuesto(string  $tipo, array $partida): bool|array
     {
+        $tipo = trim($tipo);
+        if($tipo === ''){
+            return $this->error->error(mensaje: 'Error tipo no existe', data: $tipo);
+        }
+        $valida = (new validacion())->valida_existencia_keys(keys: array($tipo),registro:  $partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
         $aplica = false;
         if(count($partida[$tipo])>0) {
             $aplica = true;
@@ -45,7 +58,14 @@ class _partidas_html{
 
     final function genera_partidas_html(int $fc_factura_id, html_controler $html, PDO $link): array|stdClass
     {
-        $partidas  = (new fc_partida($link))->partidas(fc_factura_id: $fc_factura_id,html: $html);
+        $modelo_traslado = (new fc_traslado(link: $link));
+        $modelo_retencion = (new fc_retenido(link: $link));
+        $modelo_predial = (new fc_cuenta_predial(link: $link));
+        $modelo_entidad = (new fc_factura(link: $link));
+        $fc_partida_modelo = new fc_partida(link: $link, modelo_entidad: $modelo_entidad,
+            modelo_predial: $modelo_predial, modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado);
+
+        $partidas  = $fc_partida_modelo->partidas(html: $html, registro_entidad_id: $fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
         }
@@ -89,7 +109,7 @@ class _partidas_html{
             $key_registro_id = $name_entidad.'_id';
             $registro_id = $impuesto[$key_registro_id];
 
-            $params = (new fc_partida(link: $link))->params_button_partida(fc_factura_id: $impuesto['fc_factura_id']);
+            $params = (new fc_partida(link: $link))->params_button_partida(registro_entidad_id: $impuesto['fc_factura_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener params', data: $params);
             }

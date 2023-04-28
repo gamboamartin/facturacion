@@ -417,7 +417,7 @@ class controlador_fc_factura extends _base_system_fc {
 
     private function data_partida(int $fc_partida_id): array|stdClass
     {
-        $data_partida = (new fc_partida($this->link))->data_partida_obj(fc_partida_id: $fc_partida_id);
+        $data_partida = (new fc_partida($this->link))->data_partida_obj(registro_partida_id: $fc_partida_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener partida',data:  $data_partida);
         }
@@ -1332,7 +1332,7 @@ class controlador_fc_factura extends _base_system_fc {
         }
 
 
-        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->fc_factura_id, html: $this->html);
+        $partidas = (new fc_partida($this->link))->partidas(html: $this->html, registro_entidad_id: $this->fc_factura_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
         }
@@ -1372,7 +1372,7 @@ class controlador_fc_factura extends _base_system_fc {
                 header: $header,ws:$ws);
         }
 
-        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->fc_factura_id,html: $this->html);
+        $partidas = (new fc_partida($this->link))->partidas(html: $this->html, registro_entidad_id: $this->fc_factura_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
         }
@@ -1430,7 +1430,7 @@ class controlador_fc_factura extends _base_system_fc {
     }
 
     public function relaciones(bool $header, bool $ws = false){
-        $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id,html: $this->html);
+        $partidas  = (new fc_partida($this->link))->partidas(registro_entidad_id: $this->registro_id,html: $this->html);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
             print_r($error);
@@ -1734,7 +1734,7 @@ class controlador_fc_factura extends _base_system_fc {
 
 
 
-        $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id,html: $this->html);
+        $partidas  = (new fc_partida($this->link))->partidas(registro_entidad_id: $this->registro_id,html: $this->html);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
             print_r($error);

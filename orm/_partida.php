@@ -383,7 +383,7 @@ class _partida extends  _base{
     {
         $hijo[$this->modelo_traslado->tabla]['filtros'][$this->key_filtro_id] = $this->key_id;
         $hijo[$this->modelo_traslado->tabla]['filtros_con_valor'] = array();
-        $hijo[$this->modelo_traslado->tabla]['nombre_estructura'] = '$this->modelo_traslado->tabla';
+        $hijo[$this->modelo_traslado->tabla]['nombre_estructura'] = $this->modelo_traslado->tabla;
         $hijo[$this->modelo_traslado->tabla]['namespace_model'] = 'gamboamartin\\facturacion\\models';
         return $hijo;
     }
@@ -525,6 +525,7 @@ class _partida extends  _base{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al integrar hijo', data: $hijo);
         }
+
 
         $r_fc_partida = $this->integra_buttons_partida(filtro: $filtro, hijo: $hijo,
             html: $html, registro_entidad_id: $registro_entidad_id);
