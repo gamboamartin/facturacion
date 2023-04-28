@@ -64,7 +64,7 @@ class fc_partidaTest extends test
             exit;
         }
 
-        $resultado = $modelo->calculo_imp_trasladado(fc_partida_id: $alta->registro_id);
+        $resultado = $modelo->calculo_imp_trasladado(registro_partida_id: $alta->registro_id);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0.0,$resultado);
@@ -82,10 +82,10 @@ class fc_partidaTest extends test
         //$modelo = new liberator($modelo);
 
         $fc_partida_id = -1;
-        $resultado = $modelo->get_partida(fc_partida_id: $fc_partida_id);
+        $resultado = $modelo->get_partida(registro_partida_id: $fc_partida_id);
         $this->assertIsArray($resultado);
         $this->assertTrue(errores::$error);
-        $this->assertEquals('<b><span style="color:red">Error $fc_partida_id debe ser mayor a 0</span></b>',
+        $this->assertEquals('<b><span style="color:red">Error registro_partida_id debe ser mayor a 0</span></b>',
             $resultado['mensaje']);
         errores::$error = false;
 
@@ -105,7 +105,7 @@ class fc_partidaTest extends test
             exit;
         }
 
-        $resultado = $modelo->get_partida(fc_partida_id: $fc_partida->registro_id);
+        $resultado = $modelo->get_partida(registro_partida_id: $fc_partida->registro_id);
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
         errores::$error = false;
@@ -122,15 +122,15 @@ class fc_partidaTest extends test
         //$modelo = new liberator($modelo);
 
         $fc_factura_id = -1;
-        $resultado = $modelo->get_partidas(fc_factura_id: $fc_factura_id);
+        $resultado = $modelo->get_partidas(registro_entidad_id: $fc_factura_id);
         $this->assertIsArray($resultado);
         $this->assertTrue(errores::$error);
-        $this->assertEquals('<b><span style="color:red">Error $fc_factura_id debe ser mayor a 0</span></b>',
+        $this->assertEquals('<b><span style="color:red">Error registro_entidad_id debe ser mayor a 0</span></b>',
             $resultado['mensaje']);
         errores::$error = false;
 
         $fc_factura_id = 1;
-        $resultado = $modelo->get_partidas(fc_factura_id: $fc_factura_id);
+        $resultado = $modelo->get_partidas(registro_entidad_id: $fc_factura_id);
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
         errores::$error = false;
@@ -147,7 +147,7 @@ class fc_partidaTest extends test
         //$modelo = new liberator($modelo);
 
         $fc_partida_id = -1;
-        $resultado = $modelo->subtotal_partida(fc_partida_id: $fc_partida_id);
+        $resultado = $modelo->subtotal_partida(registro_partida_id: $fc_partida_id);
         $this->assertIsArray($resultado);
         $this->assertTrue(errores::$error);
         $this->assertEquals('<b><span style="color:red">Error el id de la partida es incorrecto</span></b>',
@@ -172,7 +172,7 @@ class fc_partidaTest extends test
             exit;
         }
 
-        $resultado = $modelo->subtotal_partida(fc_partida_id: $fc_partida->registro_id);
+        $resultado = $modelo->subtotal_partida(registro_partida_id: $fc_partida->registro_id);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(55.7, $resultado);
@@ -190,7 +190,7 @@ class fc_partidaTest extends test
         //$modelo = new liberator($modelo);
 
         $fc_partida_id = -1;
-        $resultado = $modelo->subtotal_partida(fc_partida_id: $fc_partida_id);
+        $resultado = $modelo->subtotal_partida(registro_partida_id: $fc_partida_id);
         $this->assertIsArray($resultado);
         $this->assertTrue(errores::$error);
         $this->assertEquals('<b><span style="color:red">Error el id de la partida es incorrecto</span></b>',
@@ -214,7 +214,7 @@ class fc_partidaTest extends test
 
 
 
-        $resultado = $modelo->total_partida(fc_partida_id: $fc_partida->registro_id);
+        $resultado = $modelo->total_partida(registro_partida_id: $fc_partida->registro_id);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(46.35, $resultado);

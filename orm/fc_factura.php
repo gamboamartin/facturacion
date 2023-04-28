@@ -1072,7 +1072,7 @@ class fc_factura extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al validar fc_partida ', data: $valida);
         }
 
-        $st = (new fc_partida($this->link))->subtotal_partida($fc_partida['fc_partida_id']);
+        $st = (new fc_partida($this->link))->subtotal_partida(registro_partida_id: $fc_partida['fc_partida_id']);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener calculo ', data: $st);
         }

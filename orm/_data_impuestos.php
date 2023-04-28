@@ -5,13 +5,35 @@ namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 use gamboamartin\errores\errores;
 
+use PDO;
 use stdClass;
 
 class _data_impuestos extends _base{
 
-    protected modelo $modelo_partida;
-    protected _transacciones_fc $modelo_entidad;
-    protected _data_impuestos $modelo_impuesto;
+    protected _partida|stdClass $modelo_partida;
+    protected _transacciones_fc|stdClass $modelo_entidad;
+
+    public function __construct(PDO $link, string $tabla, bool $aplica_bitacora = false, bool $aplica_seguridad = false,
+                                bool $aplica_transaccion_inactivo = true, array $campos_encriptados = array(),
+                                array $campos_obligatorios = array(), array $columnas = array(),
+                                array $campos_view = array(), array $columnas_extra = array(),
+                                array $extension_estructura = array(), array $no_duplicados = array(),
+                                array $renombres = array(), array $sub_querys = array(), array $tipo_campos = array(),
+                                bool $validation = false, array $campos_no_upd = array(), array $parents = array(),
+                                bool $temp = false, array $childrens = array(), array $defaults = array(),
+                                array $parents_data = array(), array $atributos_criticos = array(),
+                                _partida|stdClass $modelo_partida = new stdClass(),
+                                _transacciones_fc|stdClass $modelo_entidad = new stdClass())
+    {
+        parent::__construct($link, $tabla, $aplica_bitacora, $aplica_seguridad, $aplica_transaccion_inactivo,
+            $campos_encriptados, $campos_obligatorios, $columnas, $campos_view, $columnas_extra, $extension_estructura,
+            $no_duplicados, $renombres, $sub_querys, $tipo_campos, $validation, $campos_no_upd, $parents, $temp,
+            $childrens, $defaults, $parents_data, $atributos_criticos);
+
+        $this->modelo_partida = $modelo_partida;
+        $this->modelo_entidad = $modelo_entidad;
+
+    }
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
@@ -29,6 +51,11 @@ class _data_impuestos extends _base{
         $fc_entidad_partida = $this->modelo_partida->registro(registro_id: $this->registro[$key_entidad_partida_id], retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener fc_entidad_partida', data: $fc_entidad_partida);
+        }
+
+        $class = get_class($this->modelo_entidad);
+        if($class === 'stdClass'){
+            $this->modelo_entidad = new fc_factura(link: $this->link);
         }
 
         $key_entidad_id_base = $this->modelo_entidad->tabla.'_id';
@@ -62,6 +89,12 @@ class _data_impuestos extends _base{
      */
     final public function get_data_rows(int $registro_partida_id): array|stdClass|int
     {
+
+        $class = get_class($this->modelo_partida);
+        if($class === 'stdClass'){
+            $this->modelo_partida = new fc_partida(link: $this->link);
+        }
+
         $modelo_partida = trim($this->modelo_partida->tabla);
         if($modelo_partida === ''){
             return $this->error->error(mensaje: 'Error modelo_entidad esta inicializado',data:  $modelo_partida);
@@ -142,6 +175,10 @@ class _data_impuestos extends _base{
             return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
         }
 
+        $class = get_class($this->modelo_partida);
+        if($class === 'stdClass'){
+            $this->modelo_partida = new fc_partida(link: $this->link);
+        }
 
         $keys = array($this->modelo_partida->tabla.'_id', 'cat_sat_tipo_factor_id', 'cat_sat_factor_id', 'cat_sat_tipo_impuesto_id');
         $valida = $this->validacion->valida_ids(keys: $keys, registro: $data);

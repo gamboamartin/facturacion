@@ -3,6 +3,7 @@
 namespace gamboamartin\facturacion\tests\orm;
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\tests\base_test;
 
@@ -33,7 +34,9 @@ class fc_trasladoTest extends test
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
-        $modelo = new fc_traslado($this->link);
+        $modelo_predial = new fc_cuenta_predial(link: $this->link);
+
+        $modelo = new fc_traslado(link: $this->link, modelo_predial: $modelo_predial);
 
 
 

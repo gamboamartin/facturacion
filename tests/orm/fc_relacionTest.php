@@ -4,7 +4,6 @@ namespace gamboamartin\facturacion\tests\orm;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_relacion;
-use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\tests\base_test;
 
 use gamboamartin\test\test;

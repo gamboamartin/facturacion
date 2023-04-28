@@ -10,10 +10,10 @@ use PDO;
 use stdClass;
 
 class fc_traslado extends _data_impuestos {
-    public function __construct(PDO $link){
+    public function __construct(PDO $link, _cuenta_predial|stdClass $modelo_predial = new stdClass(),
+                                _data_impuestos|stdClass $modelo_retencion = new stdClass(),
+                                _data_impuestos|stdClass $modelo_traslado= new stdClass()){
         $tabla = 'fc_traslado';
-        $this->modelo_partida = new fc_partida(link: $link);
-        $this->modelo_entidad = new fc_factura(link: $link);
 
         $columnas = array($tabla=>false,'fc_partida'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla,
             'cat_sat_tipo_impuesto'=>$tabla,'com_producto'=>'fc_partida','fc_factura'=>'fc_partida');
@@ -21,7 +21,8 @@ class fc_traslado extends _data_impuestos {
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 
-        $campos_view['fc_partida_id'] = array('type' => 'selects', 'model' => new fc_partida($link));
+        $campos_view['fc_partida_id'] = array('type' => 'selects', 'model' => new fc_partida(link: $link,
+            modelo_predial: $modelo_predial, modelo_retencion: $modelo_retencion,modelo_traslado: $modelo_traslado ));
         $campos_view['cat_sat_tipo_factor_id'] = array('type' => 'selects', 'model' => new cat_sat_tipo_factor($link));
         $campos_view['cat_sat_factor_id'] = array('type' => 'selects', 'model' => new cat_sat_factor($link));
         $campos_view['org_sucursal_id'] = array('type' => 'selects', 'model' => new org_sucursal($link));
@@ -56,7 +57,7 @@ class fc_traslado extends _data_impuestos {
         $this->NAMESPACE = __NAMESPACE__;
 
         $this->etiqueta = 'Traslado';
-        $this->modelo_impuesto = $this;
+
 
     }
 

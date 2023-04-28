@@ -11,10 +11,8 @@ use PDO;
 use stdClass;
 
 class fc_retenido extends _data_impuestos {
-    public function __construct(PDO $link){
+    public function __construct(PDO $link, _partida|stdClass $modelo_partida = new stdClass()){
         $tabla = 'fc_retenido';
-        $this->modelo_partida = new fc_partida(link: $link);
-        $this->modelo_entidad = new fc_factura(link: $link);
 
 
         $columnas = array($tabla=>false,'fc_partida'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla,
@@ -23,7 +21,7 @@ class fc_retenido extends _data_impuestos {
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 
-        $campos_view['fc_partida_id'] = array('type' => 'selects', 'model' => new fc_partida($link));
+        $campos_view['fc_partida_id'] = array('type' => 'selects', 'model' =>$modelo_partida);
         $campos_view['cat_sat_tipo_factor_id'] = array('type' => 'selects', 'model' => new cat_sat_tipo_factor($link));
         $campos_view['cat_sat_factor_id'] = array('type' => 'selects', 'model' => new cat_sat_factor($link));
         $campos_view['org_sucursal_id'] = array('type' => 'selects', 'model' => new org_sucursal($link));
@@ -37,7 +35,8 @@ class fc_retenido extends _data_impuestos {
             print_r($error);
             exit;
         }
-        $fc_impuesto_importe = (new _facturacion())->fc_impuesto_importe(fc_partida_importe_con_descuento: $sq_importes->fc_partida_entidad_importe_con_descuento);
+        $fc_impuesto_importe = (new _facturacion())->fc_impuesto_importe(
+            fc_partida_importe_con_descuento: $sq_importes->fc_partida_entidad_importe_con_descuento);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al generar fc_impuesto_importe',data:  $fc_impuesto_importe);
             print_r($error);
@@ -56,7 +55,6 @@ class fc_retenido extends _data_impuestos {
 
         $this->etiqueta = 'Retencion';
 
-        $this->modelo_impuesto = $this;
     }
 
 
