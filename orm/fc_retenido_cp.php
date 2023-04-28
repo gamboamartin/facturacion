@@ -1,7 +1,5 @@
 <?php
 namespace gamboamartin\facturacion\models;
-use base\orm\_modelo_parent;
-use base\orm\modelo;
 use gamboamartin\cat_sat\models\cat_sat_factor;
 use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
 use gamboamartin\cat_sat\models\cat_sat_tipo_impuesto;
@@ -10,20 +8,18 @@ use gamboamartin\organigrama\models\org_sucursal;
 use PDO;
 use stdClass;
 
-class fc_retenido extends _data_impuestos {
+class fc_retenido_cp extends _data_impuestos {
     public function __construct(PDO $link){
-        $tabla = 'fc_retenido';
-        $this->modelo_partida = new fc_partida(link: $link);
-        $this->modelo_entidad = new fc_factura(link: $link);
-
-
-        $columnas = array($tabla=>false,'fc_partida'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla,
-            'cat_sat_tipo_impuesto'=>$tabla,'com_producto'=>'fc_partida','fc_factura'=>'fc_partida');
+        $tabla = 'fc_retenido_cp';
+        $this->modelo_partida = new fc_partida_cp(link: $link);
+        $this->modelo_entidad = new fc_complemento_pago(link: $link);
+        $columnas = array($tabla=>false,'fc_partida_cp'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla,
+            'cat_sat_tipo_impuesto'=>$tabla,'com_producto'=>'fc_partida_cp','fc_complemento_pago'=>'fc_partida_cp');
         $campos_obligatorios = array('codigo','fc_partida_id');
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 
-        $campos_view['fc_partida_id'] = array('type' => 'selects', 'model' => new fc_partida($link));
+        $campos_view['fc_partida_cp_id'] = array('type' => 'selects', 'model' => new fc_partida_cp($link));
         $campos_view['cat_sat_tipo_factor_id'] = array('type' => 'selects', 'model' => new cat_sat_tipo_factor($link));
         $campos_view['cat_sat_factor_id'] = array('type' => 'selects', 'model' => new cat_sat_factor($link));
         $campos_view['org_sucursal_id'] = array('type' => 'selects', 'model' => new org_sucursal($link));
@@ -31,7 +27,7 @@ class fc_retenido extends _data_impuestos {
         $campos_view['codigo'] = array('type' => 'inputs');
         $campos_view['descripcion'] = array('type' => 'inputs');
 
-        $sq_importes = (new _facturacion())->importes_base(name_entidad_partida: 'fc_partida');
+        $sq_importes = (new _facturacion())->importes_base(name_entidad_partida: 'fc_partida_cp');
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al generar sq_importes',data:  $sq_importes);
             print_r($error);
@@ -44,9 +40,9 @@ class fc_retenido extends _data_impuestos {
             exit;
         }
 
-        $columnas_extra['fc_partida_importe'] = $sq_importes->fc_partida_entidad_importe;
-        $columnas_extra['fc_partida_importe_con_descuento'] = $sq_importes->fc_partida_entidad_importe_con_descuento;
-        $columnas_extra['fc_retenido_importe'] = $fc_impuesto_importe;
+        $columnas_extra['fc_partida_cp_importe'] = $sq_importes->fc_partida_entidad_importe;
+        $columnas_extra['fc_partida_cp_importe_con_descuento'] = $sq_importes->fc_partida_entidad_importe_con_descuento;
+        $columnas_extra['fc_retenido_cp_importe'] = $fc_impuesto_importe;
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
@@ -58,7 +54,6 @@ class fc_retenido extends _data_impuestos {
 
         $this->modelo_impuesto = $this;
     }
-
 
 
 

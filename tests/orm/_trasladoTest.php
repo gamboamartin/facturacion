@@ -25,7 +25,7 @@ class _trasladoTest extends test
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
-    public function test_get_traslados(): void
+    public function test_get_data_rows(): void
     {
         errores::$error = false;
 
@@ -73,7 +73,7 @@ class _trasladoTest extends test
         }
 
         $fc_partida_id = 1;
-        $resultado = $modelo->get_traslados($fc_partida_id);
+        $resultado = $modelo->get_data_rows($fc_partida_id);
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals('0.16', $resultado->registros[0]['cat_sat_factor_factor']);

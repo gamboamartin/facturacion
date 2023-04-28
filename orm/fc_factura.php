@@ -602,12 +602,12 @@ class fc_factura extends _transacciones_fc
         $ret_global= array();
         foreach ($registro['partidas'] as $key => $partida) {
 
-            $traslados = (new fc_traslado($this->link))->get_traslados(registro_partida_id: $partida['fc_partida_id']);
+            $traslados = (new fc_traslado($this->link))->get_data_rows(registro_partida_id: $partida['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el traslados de la partida', data: $traslados);
             }
 
-            $retenidos = (new fc_retenido($this->link))->get_retenidos(fc_partida_id: $partida['fc_partida_id']);
+            $retenidos = (new fc_retenido($this->link))->get_data_rows(registro_partida_id: $partida['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida', data: $retenidos);
             }

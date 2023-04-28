@@ -8,7 +8,7 @@ use gamboamartin\organigrama\models\org_sucursal;
 use PDO;
 use stdClass;
 
-class fc_traslado_cp extends _traslado {
+class fc_traslado_cp extends _data_impuestos {
     public function __construct(PDO $link){
         $tabla = 'fc_traslado_cp';
         $this->modelo_partida = new fc_partida_cp(link: $link);
@@ -56,6 +56,7 @@ class fc_traslado_cp extends _traslado {
         $this->NAMESPACE = __NAMESPACE__;
 
         $this->etiqueta = 'Traslado';
+        $this->modelo_impuesto = $this;
 
     }
 
