@@ -85,7 +85,7 @@ class controlador_fc_docto_relacionado extends _ctl_base {
     protected function campos_view(): array
     {
         $keys = new stdClass();
-        $keys->inputs = array('descripcion', 'equivalencia_dr', 'num_parcialidad', 'imp_saldo_ant', 'imp_pagado', 'imp_saldo_insoluto');
+        $keys->inputs = array('codigo', 'equivalencia_dr', 'num_parcialidad', 'imp_saldo_ant', 'imp_pagado', 'imp_saldo_insoluto');
         $keys->selects = array();
 
         $init_data = array();
@@ -105,7 +105,7 @@ class controlador_fc_docto_relacionado extends _ctl_base {
     protected function key_selects_txt(array $keys_selects): array
     {
 
-        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6,key: 'descripcion', keys_selects:$keys_selects, place_holder: 'Descripcion');
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6,key: 'codigo', keys_selects:$keys_selects, place_holder: 'Codigo');
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects);
         }
