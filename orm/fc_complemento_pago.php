@@ -610,7 +610,7 @@ class fc_complemento_pago extends _transacciones_fc
         $ret_global= array();
         foreach ($registro['partidas'] as $key => $partida) {
 
-            $traslados = (new fc_traslado($this->link))->get_traslados(fc_partida_id: $partida['fc_partida_id']);
+            $traslados = (new fc_traslado($this->link))->get_traslados(registro_partida_id: $partida['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el traslados de la partida', data: $traslados);
             }
@@ -750,27 +750,7 @@ class fc_complemento_pago extends _transacciones_fc
         return $r_modifica_bd;
     }
 
-    /**
-     * Obtiene el subtotal de una factura
-     * @param int $fc_factura_id Factura a obtener info
-     * @return float|array
-     * @version 6.7.0
-     */
-    final public function get_factura_sub_total(int $fc_factura_id): float|array
-    {
-        if ($fc_factura_id <= 0) {
-            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
-        }
-        $fc_factura = $this->registro(registro_id: $fc_factura_id, columnas: array('fc_factura_sub_total'),
-            retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
-        }
 
-        return round($fc_factura->fc_factura_sub_total,2);
-
-
-    }
 
     /**
      * Calcula los impuestos trasladados de una factura

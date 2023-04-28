@@ -227,6 +227,30 @@ class _transacciones_fc extends modelo
     }
 
     /**
+     * Obtiene el subtotal de una factura
+     * @param int $registro_id Factura o complemento de pago o NC a obtener info
+     * @return float|array
+     * @version 6.7.0
+     */
+    final public function get_factura_sub_total(int $registro_id): float|array
+    {
+        if ($registro_id <= 0) {
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+        }
+        $key = $this->tabla.'_sub_total';
+        $fc_factura = $this->registro(registro_id: $registro_id, columnas: array($key),
+            retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
+        }
+
+
+        return round($fc_factura->$key,2);
+
+
+    }
+
+    /**
      * Limpia los parametros de una factura
      * @param array $registro registro en proceso
      * @return array

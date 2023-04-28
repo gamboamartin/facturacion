@@ -332,7 +332,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $resultado = $modelo->get_factura_sub_total(fc_factura_id: $alta_fc_factura->registro_id);
+        $resultado = $modelo->get_factura_sub_total(registro_id: $alta_fc_factura->registro_id);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0,$resultado);

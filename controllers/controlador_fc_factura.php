@@ -982,7 +982,7 @@ class controlador_fc_factura extends _base_system_fc {
             return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
         }
 
-        $sub_total = (new fc_factura($this->link))->get_factura_sub_total(fc_factura_id: $this->registro_id);
+        $sub_total = (new fc_factura($this->link))->get_factura_sub_total(registro_id: $this->registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener sub_total',data:  $sub_total);
         }
