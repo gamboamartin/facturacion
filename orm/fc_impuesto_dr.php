@@ -8,10 +8,10 @@ use PDO;
 use stdClass;
 
 
-class fc_docto_relacionado extends _modelo_parent{
+class fc_impuesto_dr extends _modelo_parent{
     public function __construct(PDO $link)
     {
-        $tabla = 'fc_docto_relacionado';
+        $tabla = 'fc_impuesto_dr';
         $columnas = array($tabla=>false);
         $campos_obligatorios = array();
 
@@ -20,7 +20,7 @@ class fc_docto_relacionado extends _modelo_parent{
             columnas: $columnas);
 
         $this->NAMESPACE = __NAMESPACE__;
-        $this->etiqueta = 'Docto Relacionado';
+        $this->etiqueta = 'Impuesto Dr';
     }
 
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass

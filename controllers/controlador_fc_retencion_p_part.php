@@ -9,21 +9,21 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\html\fc_docto_relacionado_html;
-use gamboamartin\facturacion\models\fc_docto_relacionado;
+use gamboamartin\facturacion\html\fc_retencion_p_part_html;
+use gamboamartin\facturacion\models\fc_retencion_p_part;
 use gamboamartin\system\_ctl_base;
 use gamboamartin\system\links_menu;
 use gamboamartin\template\html;
 use PDO;
 use stdClass;
 
-class controlador_fc_docto_relacionado extends _ctl_base {
+class controlador_fc_retencion_p_part extends _ctl_base {
 
     public function __construct(PDO      $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass())
     {
-        $modelo = new fc_docto_relacionado(link: $link);
-        $html_ = new fc_docto_relacionado_html(html: $html);
+        $modelo = new fc_retencion_p_part(link: $link);
+        $html_ = new fc_retencion_p_part_html(html: $html);
         $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
         $datatables = $this->init_datatable();
@@ -75,23 +75,20 @@ class controlador_fc_docto_relacionado extends _ctl_base {
 
     public function init_selects_inputs(): array
     {
-        $keys_selects = $this->init_selects(keys_selects: array(), key: "fc_factura_id", label: "Factura",
+        $keys_selects = $this->init_selects(keys_selects: array(), key: "fc_retencion_p_id", label: "Retencion ",
             cols: 12);
-        $keys_selects = $this->init_selects(keys_selects: $keys_selects, key: "cat_sat_obj_imp_id",
-            label: "Objeto De Impuesto");
-        return $this->init_selects(keys_selects: $keys_selects, key: "fc_pago_pago_id", label: "Pago");
+        return $this->init_selects(keys_selects: $keys_selects, key: "cat_sat_tipo_impuesto_id", label: "Tipo impuesto");
     }
 
     protected function campos_view(): array
     {
         $keys = new stdClass();
-        $keys->inputs = array('codigo', 'equivalencia_dr', 'num_parcialidad', 'imp_saldo_ant', 'imp_pagado', 'imp_saldo_insoluto');
+        $keys->inputs = array('codigo', 'base_p', 'importe_p');
         $keys->selects = array();
 
         $init_data = array();
-        $init_data['fc_factura'] = "gamboamartin\\facturacion";
-        $init_data['cat_sat_obj_imp'] = "gamboamartin\\cat_sat";
-        $init_data['fc_pago_pago'] = "gamboamartin\\facturacion ";
+        $init_data['fc_retencion_p'] = "gamboamartin\\facturacion";
+        $init_data['cat_sat_tipo_impuesto'] = "gamboamartin\\cat_sat";
         $campos_view = $this->campos_view_base(init_data: $init_data,keys:  $keys);
 
         if(errores::$error){
@@ -109,23 +106,11 @@ class controlador_fc_docto_relacionado extends _ctl_base {
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects);
         }
-        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6,key: 'equivalencia_dr', keys_selects:$keys_selects, place_holder: 'Equivalencia');
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6,key: 'base_p', keys_selects:$keys_selects, place_holder: 'Base P');
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects);
         }
-        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6,key: 'num_parcialidad', keys_selects:$keys_selects, place_holder: 'Num. Parcialidad');
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects);
-        }
-        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6,key: 'imp_saldo_ant', keys_selects:$keys_selects, place_holder: 'Imp. Saldo Ant.');
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects);
-        }
-        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6,key: 'imp_pagado', keys_selects:$keys_selects, place_holder: 'Imp. Pagado');
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects);
-        }
-        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6,key: 'imp_saldo_insoluto', keys_selects:$keys_selects, place_holder: 'Imp. Saldo Insoluto');
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6,key: 'importe_p', keys_selects:$keys_selects, place_holder: 'Importe');
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects);
         }
@@ -157,11 +142,11 @@ class controlador_fc_docto_relacionado extends _ctl_base {
 
     private function init_datatable(): stdClass
     {
-        $columns["fc_docto_relacionado_id"]["titulo"] = "Id";
-        $columns["fc_docto_relacionado_codigo"]["titulo"] = "Codigo";
-        $columns["fc_docto_relacionado_descripcion_select"]["titulo"] = "Descripcion";
+        $columns["fc_retencion_p_part_id"]["titulo"] = "Id";
+        $columns["fc_retencion_p_part_codigo"]["titulo"] = "Codigo";
+        $columns["fc_retencion_p_part_descripcion_select"]["titulo"] = "Descripcion";
 
-        $filtro = array("fc_docto_relacionado.id","fc_docto_relacionado.codigo","fc_docto_relacionado.descripcion_select");
+        $filtro = array("fc_retencion_p_part.id","fc_retencion_p_part.codigo","fc_retencion_p_part.descripcion_select");
 
         $datatables = new stdClass();
         $datatables->columns = $columns;
