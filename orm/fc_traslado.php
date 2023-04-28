@@ -12,6 +12,9 @@ use stdClass;
 class fc_traslado extends _traslado {
     public function __construct(PDO $link){
         $tabla = 'fc_traslado';
+        $this->modelo_partida = new fc_partida(link: $link);
+        $this->modelo_entidad = new fc_factura(link: $link);
+
         $columnas = array($tabla=>false,'fc_partida'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla,
             'cat_sat_tipo_impuesto'=>$tabla,'com_producto'=>'fc_partida','fc_factura'=>'fc_partida');
         $campos_obligatorios = array('codigo','fc_partida_id');
@@ -53,8 +56,7 @@ class fc_traslado extends _traslado {
         $this->NAMESPACE = __NAMESPACE__;
 
         $this->etiqueta = 'Traslado';
-        $this->modelo_partida = new fc_partida(link: $this->link);
-        $this->modelo_entidad = new fc_factura(link: $this->link);
+
     }
 
 

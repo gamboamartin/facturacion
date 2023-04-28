@@ -78,6 +78,10 @@ class _traslado extends _base{
      */
     final public function get_traslados(int $registro_partida_id): array|stdClass|int
     {
+        $modelo_entidad = trim($this->modelo_entidad->tabla);
+        if($modelo_entidad === ''){
+            return $this->error->error(mensaje: 'Error modelo_entidad esta inicializado',data:  $modelo_entidad);
+        }
         $key_id = $this->modelo_entidad->tabla.'.id';
         $filtro[$key_id]  = $registro_partida_id;
         $registro = $this->filtro_and(filtro: $filtro);
