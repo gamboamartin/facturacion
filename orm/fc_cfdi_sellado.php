@@ -26,7 +26,7 @@ class fc_cfdi_sellado extends _modelo_parent
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
 
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $this->registro['fc_factura_id']);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $this->registro['fc_factura_id']);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -59,7 +59,7 @@ class fc_cfdi_sellado extends _modelo_parent
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_cfdi_sellado);
         }
 
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $fc_cfdi_sellado->fc_factura_id);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_cfdi_sellado->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -103,7 +103,7 @@ class fc_cfdi_sellado extends _modelo_parent
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_cfdi_sellado);
         }
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $fc_cfdi_sellado->fc_factura_id);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_cfdi_sellado->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -117,7 +117,7 @@ class fc_cfdi_sellado extends _modelo_parent
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_cfdi_sellado);
         }
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(fc_factura_id: $fc_cfdi_sellado->fc_factura_id);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_cfdi_sellado->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
