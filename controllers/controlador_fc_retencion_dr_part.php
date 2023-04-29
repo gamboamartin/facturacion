@@ -9,6 +9,10 @@
 namespace gamboamartin\facturacion\controllers;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_retencion_dr_part_html;
+use gamboamartin\facturacion\models\fc_docto_relacionado;
+use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_impuesto_dr;
+use gamboamartin\facturacion\models\fc_retencion_dr;
 use gamboamartin\facturacion\models\fc_retencion_dr_part;
 use gamboamartin\system\_ctl_base;
 use gamboamartin\system\links_menu;
@@ -78,6 +82,57 @@ class controlador_fc_retencion_dr_part extends _ctl_base {
         return $r_alta;
 
     }
+    public function calcula_base_dr(bool $header, bool $ws = false)
+    {
+        $fc_retencion_dr_part_id = $this->registro_id;
+
+        $filtro_retencion_dr_part['fc_retencion_dr_part.id'] = $this->registro_id;
+        $fc_retencion_dr_part = (new fc_retencion_dr_part(link: $this->link))->filtro_and(filtro: $filtro_retencion_dr_part);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener fc_retencion_dr_part', data: $fc_retencion_dr_part);
+        }
+
+        $fc_retencion_dr_id = $fc_retencion_dr_part->registros[0]['fc_retencion_dr_part_fc_retencion_dr_id'];
+        $filtro_retencion_dr['fc_retencion_dr.id'] = $fc_retencion_dr_id;
+        $fc_retencion_dr = (new fc_retencion_dr($this->link))->filtro_and(filtro: $filtro_retencion_dr);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener $fc_retencion_dr', data: $fc_retencion_dr);
+        }
+
+        $fc_impuesto_dr_id = $fc_retencion_dr->registros[0]['fc_retencion_dr_fc_impuesto_dr_id'];
+        $filtro_impuesto_dr['fc_impuesto_dr.id'] = $fc_impuesto_dr_id;
+        $fc_impuesto_dr = (new fc_impuesto_dr($this->link))->filtro_and(filtro: $filtro_impuesto_dr);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener $fc_impuesto_dr', data: $fc_impuesto_dr);
+        }
+
+        $fc_docto_relacionado_id = $fc_impuesto_dr->registros[0]['fc_impuesto_dr_fc_docto_relacionado_id'];
+        $filtro_docto_relacionado['fc_docto_relacionado.id'] = $fc_docto_relacionado_id;
+        $fc_docto_relacionado = (new fc_docto_relacionado($this->link))->filtro_and(filtro: $filtro_docto_relacionado);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener $fc_docto_relacionado', data: $fc_docto_relacionado);
+        }
+
+        $fc_factura_id = $fc_docto_relacionado->registros[0]['fc_docto_relacionado_fc_factura_id'];
+        $filtro_fc_factura['fc_factura.id'] = $fc_factura_id;
+        $fc_factura = (new fc_factura($this->link))->filtro_and(filtro: $filtro_fc_factura);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener fc_factura', data: $fc_factura);
+        }
+
+        $factura = (new fc_factura(link: $this->link))->get_factura(fc_factura_id: $fc_factura->registros[0]['fc_factura_id']);
+
+        print_r($factura);
+
+        exit;
+    }
+
+    /**
+     * public function calcula_base_dr(float $total, float $factor_traslado, float $factor_retencion): float|array
+    {
+        return $total / ( 1 + ($factor_traslado - $factor_retencion));
+    }
+     */
 
     protected function campos_view(): array
     {
