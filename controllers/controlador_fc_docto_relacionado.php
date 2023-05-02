@@ -45,10 +45,22 @@ class controlador_fc_docto_relacionado extends _ctl_base {
                 mensaje: 'Error al inicializar alta',data:  $r_alta, header: $header,ws:  $ws);
         }
 
-        $keys_selects = $this->init_selects_inputs();
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al inicializar selects', data: $keys_selects, header: $header,
-                ws: $ws);
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'fc_factura_id',
+            keys_selects: array(), id_selected: -1, label: 'Factura');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
+        }
+
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'cat_sat_obj_imp_id',
+            keys_selects: $keys_selects, id_selected: -1, label: 'Objeto de impuesto');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
+        }
+
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'fc_pago_pago_id',
+            keys_selects: $keys_selects, id_selected: -1, label: 'Pago Pago');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
         }
 
         $inputs = $this->inputs(keys_selects: $keys_selects);
@@ -58,28 +70,6 @@ class controlador_fc_docto_relacionado extends _ctl_base {
         }
 
         return $r_alta;
-
-    }
-
-    private function init_selects(array $keys_selects, string $key, string $label, int $id_selected = -1, int $cols = 6,
-                                  bool  $con_registros = true, array $filtro = array()): array
-    {
-        $keys_selects = $this->key_select(cols: $cols, con_registros: $con_registros, filtro: $filtro, key: $key,
-            keys_selects: $keys_selects, id_selected: $id_selected, label: $label);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
-        }
-
-        return $keys_selects;
-    }
-
-    public function init_selects_inputs(): array
-    {
-        $keys_selects = $this->init_selects(keys_selects: array(), key: "fc_factura_id", label: "Factura",
-            cols: 12);
-        $keys_selects = $this->init_selects(keys_selects: $keys_selects, key: "cat_sat_obj_imp_id",
-            label: "Objeto De Impuesto");
-        return $this->init_selects(keys_selects: $keys_selects, key: "fc_pago_pago_id", label: "Pago");
     }
 
     protected function campos_view(): array
@@ -142,7 +132,20 @@ class controlador_fc_docto_relacionado extends _ctl_base {
                 mensaje: 'Error al generar salida de template',data:  $r_modifica,header: $header,ws: $ws);
         }
 
-        $keys_selects = $this->init_selects_inputs();
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'fc_factura_id',
+            keys_selects: array(), id_selected: $this->registro['fc_docto_relacionado_fc_factura_id'], label: 'Factura');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
+        }
+
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'cat_sat_obj_imp_id',
+            keys_selects: $keys_selects, id_selected: $this->registro['fc_docto_relacionado_cat_sat_obj_imp_id'], label: 'Objeto de Impuesto');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
+        }
+
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'fc_pago_pago_id',
+            keys_selects: $keys_selects, id_selected: $this->registro['fc_docto_relacionado_fc_pago_pago_id'], label: 'Pago Pago');
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
         }

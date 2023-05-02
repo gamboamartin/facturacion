@@ -45,10 +45,28 @@ class controlador_fc_traslado_p_part extends _ctl_base {
                 mensaje: 'Error al inicializar alta',data:  $r_alta, header: $header,ws:  $ws);
         }
 
-        $keys_selects = $this->init_selects_inputs();
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al inicializar selects', data: $keys_selects, header: $header,
-                ws: $ws);
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'fc_traslado_p_id',
+            keys_selects: array(), id_selected: -1, label: 'Traslado P');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
+        }
+
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'cat_sat_tipo_impuesto_id',
+            keys_selects: $keys_selects, id_selected: -1, label: 'Tipo de impuesto');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
+        }
+
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'cat_sat_tipo_factor_id',
+            keys_selects: $keys_selects, id_selected: -1, label: 'Tipo de factor');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
+        }
+
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'cat_sat_factor_id',
+            keys_selects: $keys_selects, id_selected: -1, label: 'Factor');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
         }
 
         $inputs = $this->inputs(keys_selects: $keys_selects);
@@ -59,29 +77,6 @@ class controlador_fc_traslado_p_part extends _ctl_base {
 
         return $r_alta;
 
-    }
-
-    private function init_selects(array $keys_selects, string $key, string $label, int $id_selected = -1, int $cols = 6,
-                                  bool  $con_registros = true, array $filtro = array()): array
-    {
-        $keys_selects = $this->key_select(cols: $cols, con_registros: $con_registros, filtro: $filtro, key: $key,
-            keys_selects: $keys_selects, id_selected: $id_selected, label: $label);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
-        }
-
-        return $keys_selects;
-    }
-
-    public function init_selects_inputs(): array
-    {
-        $keys_selects = $this->init_selects(keys_selects: array(), key: "fc_traslado_p_id", label: "Traslado P",
-            cols: 12);
-        $keys_selects = $this->init_selects(keys_selects: $keys_selects, key: "cat_sat_tipo_impuesto_id",
-            label: "Tipo Impuesto");
-        $keys_selects = $this->init_selects(keys_selects: $keys_selects, key: "cat_sat_factor_id",
-            label: "Factor");
-        return $this->init_selects(keys_selects: $keys_selects, key: "cat_sat_tipo_factor_id", label: "Tipo Factor");
     }
 
     protected function campos_view(): array
@@ -133,7 +128,26 @@ class controlador_fc_traslado_p_part extends _ctl_base {
                 mensaje: 'Error al generar salida de template',data:  $r_modifica,header: $header,ws: $ws);
         }
 
-        $keys_selects = $this->init_selects_inputs();
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'fc_traslado_p_id',
+            keys_selects: array(), id_selected: $this->registro['fc_traslado_p_part_fc_traslado_p_id'], label: 'Traslado P');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
+        }
+
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'cat_sat_tipo_impuesto_id',
+            keys_selects: $keys_selects, id_selected: $this->registro['fc_traslado_p_part_cat_sat_tipo_impuesto_id'], label: 'Tipo de impuesto');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
+        }
+
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'cat_sat_tipo_factor_id',
+            keys_selects: $keys_selects, id_selected: $this->registro['fc_traslado_p_part_cat_sat_tipo_factor_id'], label: 'Tipo de factor');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
+        }
+
+        $keys_selects = $this->key_select(cols:6, con_registros: true,filtro:  array(), key: 'cat_sat_factor_id',
+            keys_selects: $keys_selects, id_selected: $this->registro['fc_traslado_p_part_cat_sat_factor_id'], label: 'Factor');
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar key_selects',data:  $keys_selects, header: $header,ws:  $ws);
         }
