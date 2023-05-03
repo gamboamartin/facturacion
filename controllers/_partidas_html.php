@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\_partida;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
@@ -42,14 +43,15 @@ class _partidas_html{
         return $aplica;
     }
 
-    private function genera_impuesto(html_controler $html_controler, PDO $link, array $partida,
-                                     string $tag_tipo_impuesto, string $tipo){
+    private function genera_impuesto(html_controler $html_controler, PDO $link, _partida $modelo_partida,
+                                     array $partida, string $tag_tipo_impuesto, string $tipo){
         $aplica = $this->aplica_aplica_impuesto(tipo: $tipo,partida:  $partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al verificar aplica impuesto', data: $aplica);
         }
         $impuesto_html = $this->integra_impuesto_html(aplica: $aplica, html_controler: $html_controler,
-            link: $link, name_entidad: $tipo, partida: $partida, tag_tipo_impuesto: $tag_tipo_impuesto);
+            link: $link, modelo_partida: $modelo_partida, name_entidad: $tipo, partida: $partida,
+            tag_tipo_impuesto: $tag_tipo_impuesto);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar html', data: $impuesto_html);
         }
@@ -63,7 +65,8 @@ class _partidas_html{
         $modelo_predial = (new fc_cuenta_predial(link: $link));
         $modelo_entidad = (new fc_factura(link: $link));
         $fc_partida_modelo = new fc_partida(link: $link, modelo_entidad: $modelo_entidad,
-            modelo_predial: $modelo_predial, modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado);
+            modelo_predial: $modelo_predial, modelo_retencion: $modelo_retencion,
+            modelo_traslado: $modelo_traslado);
 
         $partidas  = $fc_partida_modelo->partidas(html: $html, registro_entidad_id: $fc_factura_id);
         if (errores::$error) {
@@ -71,8 +74,8 @@ class _partidas_html{
         }
 
         foreach ($partidas->registros as $indice=>$partida){
-            $partidas = $this->partida_html(html_controler: $html, link: $link, indice: $indice,
-                partida: $partida, partidas: $partidas);
+            $partidas = $this->partida_html(html_controler: $html, indice: $indice, link: $link,
+                modelo_partida: $fc_partida_modelo, partida: $partida, partidas: $partidas);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al generar html', data: $partidas);
             }
@@ -96,12 +99,14 @@ class _partidas_html{
      * @param html_controler $html_controler
      * @param string $impuesto_html_completo
      * @param PDO $link
+     * @param _partida $modelo_partida
      * @param string $name_entidad fc_traslado o fc_traslado
      * @param array $partida
      * @return array|string
      */
     private function impuesto_html_completo(html_controler $html_controler, string $impuesto_html_completo, PDO $link,
-                                            string $name_entidad, array $partida): array|string
+                                            _partida $modelo_partida, string $name_entidad,
+                                            array $partida): array|string
     {
         $key_importe = $name_entidad.'_importe';
 
@@ -109,7 +114,7 @@ class _partidas_html{
             $key_registro_id = $name_entidad.'_id';
             $registro_id = $impuesto[$key_registro_id];
 
-            $params = (new fc_partida(link: $link))->params_button_partida(registro_entidad_id: $impuesto['fc_factura_id']);
+            $params = $modelo_partida->params_button_partida(registro_entidad_id: $impuesto['fc_factura_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener params', data: $params);
             }
@@ -130,15 +135,16 @@ class _partidas_html{
         return $impuesto_html_completo;
     }
 
-    private function impuestos_html(html_controler $html_controler, PDO $link, array $partida): array|stdClass
+    private function impuestos_html(html_controler $html_controler, PDO $link, _partida $modelo_partida,
+                                    array $partida): array|stdClass
     {
         $impuesto_traslado_html = $this->genera_impuesto(html_controler: $html_controler, link: $link,
-            partida: $partida, tag_tipo_impuesto: 'Traslados', tipo: 'fc_traslado');
+            modelo_partida: $modelo_partida, partida: $partida, tag_tipo_impuesto: 'Traslados', tipo: 'fc_traslado');
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar html', data: $impuesto_traslado_html);
         }
         $impuesto_retenido_html = $this->genera_impuesto(html_controler: $html_controler, link: $link,
-            partida: $partida, tag_tipo_impuesto: 'Retenciones', tipo: 'fc_retenido');
+            modelo_partida: $modelo_partida, partida: $partida, tag_tipo_impuesto: 'Retenciones', tipo: 'fc_retenido');
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar html', data: $impuesto_retenido_html);
         }
@@ -149,12 +155,13 @@ class _partidas_html{
     }
 
     private function integra_impuesto_html(bool $aplica, html_controler $html_controler, PDO $link,
-                                           string $name_entidad, array $partida, string $tag_tipo_impuesto){
+                                           _partida $modelo_partida, string $name_entidad, array $partida,
+                                           string $tag_tipo_impuesto){
         $impuesto_html_completo = '';
         if($aplica){
             $impuesto_html_completo = $this->impuesto_html_completo(html_controler: $html_controler,
-                impuesto_html_completo: $impuesto_html_completo, link: $link, name_entidad: $name_entidad,
-                partida: $partida);
+                impuesto_html_completo: $impuesto_html_completo, link: $link, modelo_partida: $modelo_partida,
+                name_entidad: $name_entidad, partida: $partida);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al generar html', data: $impuesto_html_completo);
             }
@@ -169,8 +176,8 @@ class _partidas_html{
         return $impuesto_html;
     }
 
-    private function partida_html(html_controler $html_controler, PDO $link, int $indice, array $partida,
-                                  stdClass $partidas): array|stdClass
+    private function partida_html(html_controler $html_controler, int $indice, PDO $link, _partida $modelo_partida,
+                                  array $partida, stdClass $partidas): array|stdClass
     {
         $data_producto_html = (new _html_factura())->data_producto(link: $link, partida: $partida);
         if (errores::$error) {
@@ -196,7 +203,8 @@ class _partidas_html{
         $partidas->registros[$indice]['descripcion_html'] = $descripcion_html;
 
 
-        $impuestos_html = $this->impuestos_html(html_controler: $html_controler, link: $link, partida: $partida);
+        $impuestos_html = $this->impuestos_html(html_controler: $html_controler, link: $link,
+            modelo_partida: $modelo_partida, partida: $partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar html', data: $impuestos_html);
 

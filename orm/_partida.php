@@ -507,6 +507,10 @@ class _partida extends  _base{
 
     final public function params_button_partida(int $registro_entidad_id): array
     {
+        if(!isset($this->modelo_entidad->tabla)){
+            return $this->error->error(mensaje: 'Error al no esta la tabla definida de la entidad',
+                data: $this->modelo_entidad);
+        }
         $params = array();
         $params['seccion_retorno'] = $this->modelo_entidad->tabla;
         $params['accion_retorno'] = 'modifica';

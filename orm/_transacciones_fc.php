@@ -35,7 +35,15 @@ class _transacciones_fc extends modelo
         }
 
         if(!isset($registro['fecha'])){
-            $registro['fecha'] = date('Y-m-d');
+            $registro['fecha'] = date('Y-m-d H:i:s');
+        }
+
+        $es_fecha = $this->validacion->valida_pattern(key:'fecha', txt: $registro['fecha']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar fecha', data: $es_fecha);
+        }
+        if($es_fecha){
+            $registro['fecha'] =  $registro['fecha'].' '.date('H:i:s');
         }
 
         $this->registro = $registro;

@@ -237,6 +237,36 @@ class controlador_fc_factura extends _base_system_fc {
         return $link_status;
     }
 
+    public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
+    {
+
+        $controladores = $this->init_controladores(paths_conf: $this->paths_conf);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
+            print_r($error);
+            die('Error');
+        }
+
+        $base = $this->init_modifica();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
+                header: $header,ws:$ws);
+        }
+
+        $fecha = $this->row_upd->fecha;
+
+        $fecha = $this->html_fc->input_fecha(cols:6,row_upd:  $this->row_upd, value_vacio: false,value: $fecha);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar input',data:  $fecha,
+                header: $header,ws:$ws);
+        }
+
+        $this->inputs->fecha = $fecha;
+
+
+        return $base->template;
+    }
+
     public function cancela(bool $header, bool $ws = false){
         $filtro['fc_factura.id'] = $this->registro_id;
         $columns_ds = array('fc_factura_folio','com_cliente_rfc','fc_factura_total','fc_factura_fecha');

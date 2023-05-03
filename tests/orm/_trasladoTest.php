@@ -64,6 +64,13 @@ class _trasladoTest extends test
             exit;
         }
 
+        $del = (new base_test())->del_cat_sat_factor(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al del', $del);
+            print_r($error);
+            exit;
+        }
+
         $alta = (new base_test())->alta_fc_conf_traslado(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar', $alta);
