@@ -16,7 +16,7 @@
                         <?php echo $controlador->inputs->serie; ?>
                         <?php echo $controlador->inputs->folio; ?>
                         <?php echo $controlador->inputs->exportacion; ?>
-                        <?php echo $controlador->inputs->fecha; ?>
+                        <?php echo $controlador->inputs->fecha_hora; ?>
                         <?php echo $controlador->inputs->impuestos_trasladados; ?>
                         <?php echo $controlador->inputs->impuestos_retenidos; ?>
                         <?php echo $controlador->inputs->subtotal; ?>

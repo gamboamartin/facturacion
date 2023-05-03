@@ -26,6 +26,7 @@ use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\system\actions;
+use gamboamartin\system\html_controler;
 use gamboamartin\template\html;
 use gamboamartin\xml_cfdi_4\timbra;
 use html\cat_sat_conf_imps_html;
@@ -121,6 +122,37 @@ class controlador_fc_factura extends _base_system_fc {
 
 
 
+    public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
+    {
+
+        $controladores = $this->init_controladores(paths_conf: $this->paths_conf);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
+            print_r($error);
+            die('Error');
+        }
+
+        $base = $this->init_modifica(fecha_original: true);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
+                header: $header,ws:$ws);
+        }
+
+
+        $v_fecha_hora = $this->row_upd->fecha;
+
+        $fecha_hora = (new html_controler(html: $this->html_base))->input_fecha(cols: 6, row_upd: new stdClass(),
+            value_vacio: false, value: $v_fecha_hora, value_hora: true);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar input',data:  $fecha_hora,
+                header: $header,ws:$ws);
+        }
+
+        $this->inputs->fecha_hora = $fecha_hora;
+
+
+        return $base->template;
+    }
     public function alta_partida_bd(bool $header, bool $ws = false){
 
         $this->link->beginTransaction();
@@ -237,35 +269,7 @@ class controlador_fc_factura extends _base_system_fc {
         return $link_status;
     }
 
-    public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
-    {
 
-        $controladores = $this->init_controladores(paths_conf: $this->paths_conf);
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
-            print_r($error);
-            die('Error');
-        }
-
-        $base = $this->init_modifica();
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
-                header: $header,ws:$ws);
-        }
-
-        $fecha = $this->row_upd->fecha;
-
-        $fecha = $this->html_fc->input_fecha(cols:6,row_upd:  $this->row_upd, value_vacio: false,value: $fecha);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al maquetar input',data:  $fecha,
-                header: $header,ws:$ws);
-        }
-
-        $this->inputs->fecha = $fecha;
-
-
-        return $base->template;
-    }
 
     public function cancela(bool $header, bool $ws = false){
         $filtro['fc_factura.id'] = $this->registro_id;
@@ -897,19 +901,21 @@ class controlador_fc_factura extends _base_system_fc {
 
 
 
-    private function init_modifica(array $params = array()): array|stdClass
+    private function init_modifica(bool $fecha_original, array $params = array()): array|stdClass
     {
         $r_modifica =  parent::modifica(header: false);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
         }
-        $es_fecha_hora_min_sec_esp = $this->validacion->valida_pattern(key:'fecha_hora_min_sec_esp', txt: $this->row_upd->fecha);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al validar fecha', data: $es_fecha_hora_min_sec_esp);
-        }
-        if($es_fecha_hora_min_sec_esp) {
-            $hora_ex = explode(' ', $this->row_upd->fecha);
-            $this->row_upd->fecha = $hora_ex[0];
+        if(!$fecha_original) {
+            $es_fecha_hora_min_sec_esp = $this->validacion->valida_pattern(key: 'fecha_hora_min_sec_esp', txt: $this->row_upd->fecha);
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al validar fecha', data: $es_fecha_hora_min_sec_esp);
+            }
+            if ($es_fecha_hora_min_sec_esp) {
+                $hora_ex = explode(' ', $this->row_upd->fecha);
+                $this->row_upd->fecha = $hora_ex[0];
+            }
         }
 
         $identificador = "fc_csd_id";
