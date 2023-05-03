@@ -1520,7 +1520,7 @@ class controlador_fc_factura extends _base_system_fc {
         $params['cat_sat_uso_cfdi_id']['filtro']['cat_sat_uso_cfdi.id'] = $row_upd->cat_sat_uso_cfdi_id;
         $params['cat_sat_uso_cfdi_id']['disabled'] = true;
 
-        $base = $this->init_modifica(params: $params);
+        $base = $this->init_modifica(fecha_original: false, params: $params);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
@@ -1823,7 +1823,7 @@ class controlador_fc_factura extends _base_system_fc {
         $params['cat_sat_uso_cfdi_id']['filtro']['cat_sat_uso_cfdi.id'] = $row_upd->cat_sat_uso_cfdi_id;
         $params['cat_sat_uso_cfdi_id']['disabled'] = true;
 
-        $base = $this->init_modifica(params: $params);
+        $base = $this->init_modifica(fecha_original: false, params: $params);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
