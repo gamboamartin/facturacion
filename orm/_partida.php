@@ -378,9 +378,19 @@ class _partida extends  _base{
      * Maqueta el elemento para un children de factura
      * @param array $hijo Hijo a maquetar
      * @return array
+     * @version 8.47.3
      */
     private function hijo_traslado(array $hijo): array
     {
+        if(!isset($this->modelo_traslado->tabla)){
+            return $this->error->error(mensaje: 'Error no existe tabla definida traslado', data: $this->modelo_traslado);
+        }
+
+        $tabla = trim($this->modelo_traslado->tabla);
+        if($tabla === ''){
+            return $this->error->error(mensaje: 'Error la tabla esta vacia', data: $tabla);
+        }
+
         $hijo[$this->modelo_traslado->tabla]['filtros'][$this->key_filtro_id] = $this->key_id;
         $hijo[$this->modelo_traslado->tabla]['filtros_con_valor'] = array();
         $hijo[$this->modelo_traslado->tabla]['nombre_estructura'] = $this->modelo_traslado->tabla;

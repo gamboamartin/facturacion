@@ -136,6 +136,26 @@ class fc_partidaTest extends test
         errores::$error = false;
     }
 
+    public function test_hijo_traslado(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida($this->link);
+        $modelo = new liberator($modelo);
+
+        $hijo = array();
+        $modelo->modelo_traslado->tabla = 'a';
+        $resultado = $modelo->hijo_traslado($hijo);
+
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('fc_partida_id',$resultado['a']['filtros']['fc_partida.id']);
+        errores::$error = false;
+    }
+
     public function test_subtotal_partida(): void
     {
         errores::$error = false;
