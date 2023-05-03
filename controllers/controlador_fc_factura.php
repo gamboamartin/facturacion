@@ -1208,7 +1208,7 @@ class controlador_fc_factura extends _base_system_fc {
         $this->partidas = $partidas;
 
 
-        $base = $this->init_modifica();
+        $base = $this->init_modifica(fecha_original: false);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
