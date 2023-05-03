@@ -903,6 +903,14 @@ class controlador_fc_factura extends _base_system_fc {
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
         }
+        $es_fecha_hora_min_sec_esp = $this->validacion->valida_pattern(key:'fecha_hora_min_sec_esp', txt: $this->row_upd->fecha);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al validar fecha', data: $es_fecha_hora_min_sec_esp);
+        }
+        if($es_fecha_hora_min_sec_esp) {
+            $hora_ex = explode(' ', $this->row_upd->fecha);
+            $this->row_upd->fecha = $hora_ex[0];
+        }
 
         $identificador = "fc_csd_id";
         $propiedades = array("id_selected" => $this->row_upd->fc_csd_id);
@@ -1193,11 +1201,14 @@ class controlador_fc_factura extends _base_system_fc {
 
         $this->partidas = $partidas;
 
+
         $base = $this->init_modifica();
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
         }
+
+
 
         $identificador = "com_producto_id";
         $propiedades = array("cols" => 12);
