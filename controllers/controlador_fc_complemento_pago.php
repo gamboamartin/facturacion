@@ -10,10 +10,10 @@ namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
 use config\pac;
+use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\compresor\compresor;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\html\fc_complemento_pago_html;
 use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\_pdf;
@@ -27,6 +27,7 @@ use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\system\actions;
+use gamboamartin\system\html_controler;
 use gamboamartin\template\html;
 use gamboamartin\xml_cfdi_4\timbra;
 use html\cat_sat_conf_imps_html;
@@ -34,6 +35,7 @@ use html\cat_sat_motivo_cancelacion_html;
 use html\cat_sat_tipo_relacion_html;
 use html\com_cliente_html;
 use html\com_email_cte_html;
+use html\com_sucursal_html;
 use JsonException;
 use PDO;
 use stdClass;
@@ -41,50 +43,52 @@ use stdClass;
 class controlador_fc_complemento_pago extends _base_system_fc {
 
     public array|stdClass $keys_selects = array();
-    public controlador_fc_partida $controlador_fc_partida;
+    public controlador_fc_partida_cp $controlador_fc_partida_cp;
     public controlador_com_producto $controlador_com_producto;
 
-    public string $button_fc_factura_modifica = '';
-    public string $button_fc_factura_relaciones = '';
-    public string $button_fc_factura_timbra = '';
+    public string $button_fc_complemento_pago_modifica = '';
+    public string $button_fc_complemento_pago_relaciones = '';
+    public string $button_fc_complemento_pago_timbra = '';
 
     public string $rfc = '';
     public string $razon_social = '';
-    public string $link_fc_partida_alta_bd = '';
-    public string $link_fc_partida_modifica_bd = '';
-    public string $link_fc_factura_partidas = '';
-    public string $link_fc_factura_nueva_partida = '';
+    public string $link_fc_partida_cp_alta_bd = '';
+    public string $link_fc_partida_cp_modifica_bd = '';
+    public string $link_fc_factura_cp_partidas = '';
+    public string $link_fc_complemento_pago_nueva_partida = '';
 
-    public string $link_fc_email_alta_bd = '';
-    public string $link_fc_relacion_alta_bd = '';
+    public string $link_fc_email_cp_alta_bd = '';
+    public string $link_fc_relacion_cp_alta_bd = '';
     public string $link_com_producto = '';
 
-    public string $link_factura_cancela = '';
-    public string $link_factura_genera_xml = '';
-    public string $link_factura_timbra_xml = '';
-    public string $button_fc_factura_correo = '';
-    public string $link_fc_factura_relacionada_alta_bd = '';
-    public int $fc_factura_id = -1;
-    public int $fc_partida_id = -1;
+    public string $link_complemento_pago_cancela = '';
+    public string $link_complemento_pago_xml = '';
+    public string $link_complemento_pago_timbra_xml = '';
+    public string $button_fc_complemento_pago_correo = '';
+    public string $link_fc_complemento_pago_relacionada_alta_bd = '';
+    public int $fc_complemento_pago_id = -1;
+    public int $fc_partida_cp_id = -1;
     public stdClass $partidas;
 
+
     public array $relaciones = array();
-    public array$facturas_cliente = array();
+    public array$complementos_pago_cliente = array();
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass()){
         $modelo = new fc_complemento_pago(link: $link);
         $this->modelo = $modelo;
         $this->cat_sat_tipo_de_comprobante = 'Pago';
-        $html_ = new fc_complemento_pago_html(html: $html);
+        $html_ = new fc_factura_html(html: $html);
         $this->html_fc = $html_;
 
         parent::__construct(html_: $html_, link: $link,modelo:  $modelo, paths_conf: $paths_conf);
 
+
         $this->data_selected_alta['cat_sat_forma_pago_id']['id'] = 99;
         $this->data_selected_alta['cat_sat_forma_pago_id']['filtro'] = array('cat_sat_forma_pago.id'=>99);
 
-        $this->data_selected_alta['cat_sat_metodo_pago_id']['id'] = 1;
-        $this->data_selected_alta['cat_sat_metodo_pago_id']['filtro'] = array('cat_sat_metodo_pago.id'=>1);
+        $this->data_selected_alta['cat_sat_metodo_pago_id']['id'] = 2;
+        $this->data_selected_alta['cat_sat_metodo_pago_id']['filtro'] = array('cat_sat_metodo_pago.id'=>2);
 
         $this->data_selected_alta['cat_sat_moneda_id']['id'] = 163;
         $this->data_selected_alta['cat_sat_moneda_id']['filtro'] = array('cat_sat_moneda.id'=>163);
@@ -94,6 +98,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
         $this->data_selected_alta['cat_sat_uso_cfdi_id']['id'] = 23;
         $this->data_selected_alta['cat_sat_uso_cfdi_id']['filtro'] = array('cat_sat_uso_cfdi.id'=>23);
+
 
         $init_ctl = (new _fc_base())->init_base_fc(controler: $this);
         if(errores::$error){
@@ -118,6 +123,38 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     }
 
 
+
+    public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
+    {
+
+        $controladores = $this->init_controladores(paths_conf: $this->paths_conf);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
+            print_r($error);
+            die('Error');
+        }
+
+        $base = $this->init_modifica(fecha_original: true);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
+                header: $header,ws:$ws);
+        }
+
+
+        $v_fecha_hora = $this->row_upd->fecha;
+
+        $fecha_hora = (new html_controler(html: $this->html_base))->input_fecha(cols: 6, row_upd: new stdClass(),
+            value_vacio: false, value: $v_fecha_hora, value_hora: true);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar input',data:  $fecha_hora,
+                header: $header,ws:$ws);
+        }
+
+        $this->inputs->fecha_hora = $fecha_hora;
+
+
+        return $base->template;
+    }
     public function alta_partida_bd(bool $header, bool $ws = false){
 
         $this->link->beginTransaction();
@@ -233,6 +270,8 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         }
         return $link_status;
     }
+
+
 
     public function cancela(bool $header, bool $ws = false){
         $filtro['fc_factura.id'] = $this->registro_id;
@@ -414,7 +453,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
     private function data_partida(int $fc_partida_id): array|stdClass
     {
-        $data_partida = (new fc_partida($this->link))->data_partida_obj(fc_partida_id: $fc_partida_id);
+        $data_partida = (new fc_partida($this->link))->data_partida_obj(registro_partida_id: $fc_partida_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener partida',data:  $data_partida);
         }
@@ -738,7 +777,6 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     }
 
 
-
     private function htmls_partida(): stdClass
     {
         $fc_partida_html = (new fc_partida_html(html: $this->html_base));
@@ -782,15 +820,21 @@ class controlador_fc_complemento_pago extends _base_system_fc {
      * Inicializa los controladores default
      * @param stdClass $paths_conf Rutas de archivos de configuracion
      * @return controler
+     * @version 4.25.0
      */
     private function init_controladores(stdClass $paths_conf): controler
     {
-        $this->controlador_fc_partida_cp= new controlador_fc_partida_cp(link:$this->link, paths_conf: $paths_conf);
+        $this->controlador_fc_partida= new controlador_fc_partida(link:$this->link, paths_conf: $paths_conf);
         $this->controlador_com_producto = new controlador_com_producto(link:$this->link, paths_conf: $paths_conf);
 
         return $this;
     }
 
+    /**
+     * Inicializa los elementos de la lista get data
+     * @return stdClass
+     * @version 4.3.0
+     */
 
 
     private function init_factura_documento(int $fc_factura_id): bool|array
@@ -858,11 +902,22 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     }
 
 
-    private function init_modifica(array $params = array()): array|stdClass
+
+    private function init_modifica(bool $fecha_original, array $params = array()): array|stdClass
     {
         $r_modifica =  parent::modifica(header: false);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
+        }
+        if(!$fecha_original) {
+            $es_fecha_hora_min_sec_esp = $this->validacion->valida_pattern(key: 'fecha_hora_min_sec_esp', txt: $this->row_upd->fecha);
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al validar fecha', data: $es_fecha_hora_min_sec_esp);
+            }
+            if ($es_fecha_hora_min_sec_esp) {
+                $hora_ex = explode(' ', $this->row_upd->fecha);
+                $this->row_upd->fecha = $hora_ex[0];
+            }
         }
 
         $identificador = "fc_csd_id";
@@ -973,7 +1028,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
         }
 
-        $sub_total = (new fc_complemento_pago($this->link))->get_factura_sub_total(registro_id: $this->registro_id);
+        $sub_total = (new fc_factura($this->link))->get_factura_sub_total(registro_id: $this->registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener sub_total',data:  $sub_total);
         }
@@ -1154,11 +1209,14 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
         $this->partidas = $partidas;
 
-        $base = $this->init_modifica();
+
+        $base = $this->init_modifica(fecha_original: false);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
         }
+
+
 
         $identificador = "com_producto_id";
         $propiedades = array("cols" => 12);
@@ -1298,7 +1356,6 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     }
 
 
-
     /*
      * POR REVISAR
      */
@@ -1324,7 +1381,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         }
 
 
-        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->fc_factura_id, html: $this->html);
+        $partidas = (new fc_partida($this->link))->partidas(html: $this->html, registro_entidad_id: $this->fc_factura_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
         }
@@ -1364,7 +1421,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
                 header: $header,ws:$ws);
         }
 
-        $partidas = (new fc_partida($this->link))->partidas(fc_factura_id: $this->fc_factura_id,html: $this->html);
+        $partidas = (new fc_partida($this->link))->partidas(html: $this->html, registro_entidad_id: $this->fc_factura_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
         }
@@ -1422,7 +1479,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     }
 
     public function relaciones(bool $header, bool $ws = false){
-        $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id,html: $this->html);
+        $partidas  = (new fc_partida($this->link))->partidas(registro_entidad_id: $this->registro_id,html: $this->html);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
             print_r($error);
@@ -1465,7 +1522,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $params['cat_sat_uso_cfdi_id']['filtro']['cat_sat_uso_cfdi.id'] = $row_upd->cat_sat_uso_cfdi_id;
         $params['cat_sat_uso_cfdi_id']['disabled'] = true;
 
-        $base = $this->init_modifica(params: $params);
+        $base = $this->init_modifica(fecha_original: false, params: $params);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
@@ -1646,7 +1703,6 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     }
 
 
-
     public function ve_partida(bool $header, bool $ws = false): array|stdClass
     {
 
@@ -1727,7 +1783,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
 
 
-        $partidas  = (new fc_partida($this->link))->partidas(fc_factura_id: $this->registro_id,html: $this->html);
+        $partidas  = (new fc_partida($this->link))->partidas(registro_entidad_id: $this->registro_id,html: $this->html);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
             print_r($error);
@@ -1769,7 +1825,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $params['cat_sat_uso_cfdi_id']['filtro']['cat_sat_uso_cfdi.id'] = $row_upd->cat_sat_uso_cfdi_id;
         $params['cat_sat_uso_cfdi_id']['disabled'] = true;
 
-        $base = $this->init_modifica(params: $params);
+        $base = $this->init_modifica(fecha_original: false, params: $params);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
@@ -1782,7 +1838,6 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
 
     }
-
 
 
 
