@@ -16,6 +16,7 @@ use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\comercial\models\com_tmp_cte_dp;
+use gamboamartin\comercial\models\com_tmp_prod_cs;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
@@ -70,36 +71,36 @@ class fc_complemento_pago extends _transacciones_fc
 
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
-        //$fc_partida_cantidad = ' ROUND( IFNULL( fc_partida.cantidad,0 ),2) ';
-        $fc_partida_valor_unitario = ' ROUND( IFNULL( fc_partida.valor_unitario,0),2) ';
-        //$fc_partida_descuento = ' ROUND( IFNULL(fc_partida.descuento,0 ),2 )';
+        $fc_partida_cp_cantidad = ' ROUND( IFNULL( fc_partida_cp.cantidad,0 ),2) ';
+        $fc_partida_cp_valor_unitario = ' ROUND( IFNULL( fc_partida_cp.valor_unitario,0),2) ';
+        $fc_partida_cp_descuento = ' ROUND( IFNULL(fc_partida_cp.descuento,0 ),2 )';
 
-        //$fc_partida_sub_total_base = "ROUND( $fc_partida_cantidad * $fc_partida_valor_unitario, 2 ) ";
-
-
-        $fc_ligue_partida_factura = " fc_partida.fc_factura_id = fc_factura.id ";
+        $fc_partida_cp_sub_total_base = "ROUND( $fc_partida_cp_cantidad * $fc_partida_cp_valor_unitario, 2 ) ";
 
 
-        //$fc_factura_sub_total_base = "ROUND((SELECT SUM( $fc_partida_sub_total_base) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
-        //$fc_factura_descuento = "ROUND((SELECT SUM( $fc_partida_descuento ) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
-        //$fc_factura_sub_total = "($fc_factura_sub_total_base - $fc_factura_descuento)";
+        $fc_ligue_partida_complemento_pago = " fc_partida_cp.fc_complemento_pago_id = fc_complemento_pago.id ";
 
 
-        //$fc_partida_operacion = "IFNULL(fc_partida_operacion.cantidad,0) * IFNULL(fc_partida_operacion.valor_unitario,0) - IFNULL(fc_partida_operacion.descuento,0)";
-        $where_pc_partida_operacion = "fc_partida_operacion.fc_factura_id = fc_factura.id AND fc_partida_operacion.id = fc_partida.id";
+        $fc_complemento_pago_sub_total_base = "ROUND((SELECT SUM( $fc_partida_cp_sub_total_base) FROM fc_partida_cp WHERE $fc_ligue_partida_complemento_pago),4)";
+        $fc_complemento_pago_descuento = "ROUND((SELECT SUM( $fc_partida_cp_descuento ) FROM fc_partida_cp WHERE $fc_ligue_partida_complemento_pago),4)";
+        $fc_complemento_pago_sub_total = "($fc_complemento_pago_sub_total_base - $fc_complemento_pago_descuento)";
 
-        /*$from_impuesto = $this->from_impuesto(tipo_impuesto: 'fc_traslado');
+
+        $fc_partida_cp_operacion = "IFNULL(fc_partida_cp_operacion.cantidad,0) * IFNULL(fc_partida_cp_operacion.valor_unitario,0) - IFNULL(fc_partida_cp_operacion.descuento,0)";
+        $where_pc_partida_operacion = "fc_partida_cp_operacion.fc_complemento_pago_id = fc_complemento_pago.id AND fc_partida_cp_operacion.id = fc_partida_cp.id";
+
+        $from_impuesto = $this->from_impuesto(tipo_impuesto: 'fc_traslado_cp');
         if(errores::$error){
             $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
             print_r($error);
             exit;
-        }*/
+        }
 
-       /* $fc_factura_traslados = "(
+        $fc_complemento_pago_traslados = "(
 	SELECT
 		SUM((
 			SELECT
-				ROUND(SUM( $fc_partida_operacion ),4) 
+				ROUND(SUM( $fc_partida_cp_operacion ),4) 
 			FROM
 				$from_impuesto
 			WHERE
@@ -107,26 +108,26 @@ class fc_complemento_pago extends _transacciones_fc
 				) * cat_sat_factor.factor 
 		) 
 	FROM
-		fc_traslado
-		LEFT JOIN fc_partida ON fc_partida.id = fc_traslado.fc_partida_id
-		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado.cat_sat_factor_id 
+		fc_traslado_cp
+		LEFT JOIN fc_partida_cp ON fc_partida_cp.id = fc_traslado_cp.fc_partida_cp_id
+		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado_cp.cat_sat_factor_id 
 	WHERE
-		fc_partida.fc_factura_id = fc_factura.id 
-	)";*/
+		fc_partida_cp.fc_complemento_pago_id = fc_complemento_pago.id 
+	)";
 
-        /*$from_impuesto = $this->from_impuesto(tipo_impuesto: 'fc_retenido');
+        $from_impuesto = $this->from_impuesto(tipo_impuesto: 'fc_retenido_cp');
         if(errores::$error){
             $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
             print_r($error);
             exit;
-        }*/
+        }
 
 
-       /* $fc_factura_retenciones = "(
+        $fc_complemento_pago_retenciones = "(
 	SELECT
 		SUM((
 			SELECT
-				ROUND(SUM( $fc_partida_operacion ),4) 
+				ROUND(SUM( $fc_partida_cp_operacion ),4) 
 			FROM
 				$from_impuesto
 			WHERE
@@ -134,42 +135,42 @@ class fc_complemento_pago extends _transacciones_fc
 				) * cat_sat_factor.factor 
 		) 
 	FROM
-		fc_retenido
-		LEFT JOIN fc_partida ON fc_partida.id = fc_retenido.fc_partida_id
-		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido.cat_sat_factor_id 
+		fc_retenido_cp
+		LEFT JOIN fc_partida_cp ON fc_partida_cp.id = fc_retenido_cp.fc_partida_cp_id
+		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido_cp.cat_sat_factor_id 
 	WHERE
-		fc_partida.fc_factura_id = fc_factura.id 
-	)";*/
+		fc_partida_cp.fc_complemento_pago_id = fc_complemento_pago.id 
+	)";
 
-        //$fc_factura_total = "ROUND(IFNULL($fc_factura_sub_total,0)+IFNULL(ROUND($fc_factura_traslados,2),0)-IFNULL(ROUND($fc_factura_retenciones,2),0),2)";
+        $fc_complemento_pago_total = "ROUND(IFNULL($fc_complemento_pago_sub_total,0)+IFNULL(ROUND($fc_complemento_pago_traslados,2),0)-IFNULL(ROUND($fc_complemento_pago_retenciones,2),0),2)";
 
 
-        //$fc_factura_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_factura_id = fc_factura.id)";
+        $fc_complemento_pago_uuid = "(SELECT IFNULL(fc_cfdi_sellado_cp.uuid,'') FROM fc_cfdi_sellado_cp WHERE fc_cfdi_sellado_cp.fc_complemento_pago_id = fc_complemento_pago.id)";
 
-        /*$fc_factura_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa
+        $fc_complemento_pago_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa 
             LEFT JOIN pr_etapa_proceso ON pr_etapa_proceso.pr_etapa_id = pr_etapa.id 
-            LEFT JOIN fc_factura_etapa ON fc_factura_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
-            WHERE fc_factura_etapa.fc_factura_id = fc_factura.id ORDER BY fc_factura_etapa.id DESC LIMIT 1)";*/
+            LEFT JOIN fc_complemento_pago_etapa ON fc_complemento_pago_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
+            WHERE fc_complemento_pago_etapa.fc_complemento_pago_id = fc_complemento_pago.id ORDER BY fc_complemento_pago_etapa.id DESC LIMIT 1)";
 
-        //$columnas_extra['fc_factura_sub_total_base'] = "IFNULL($fc_factura_sub_total_base,0)";
-        //$columnas_extra['fc_factura_descuento'] = "IFNULL($fc_factura_descuento,0)";
-        //$columnas_extra['fc_factura_sub_total'] = "IFNULL($fc_factura_sub_total,0)";
-        //$columnas_extra['fc_factura_traslados'] = "IFNULL($fc_factura_traslados,0)";
-        //$columnas_extra['fc_factura_retenciones'] = "IFNULL($fc_factura_retenciones,0)";
-        //$columnas_extra['fc_factura_total'] = "IFNULL($fc_factura_total,0)";
-        //$columnas_extra['fc_factura_uuid'] = "IFNULL($fc_factura_uuid,'SIN UUID')";
-        //$columnas_extra['fc_factura_etapa'] = "$fc_factura_etapa";
+        $columnas_extra['fc_complemento_pago_sub_total_base'] = "IFNULL($fc_complemento_pago_sub_total_base,0)";
+        $columnas_extra['fc_complemento_pago_descuento'] = "IFNULL($fc_complemento_pago_descuento,0)";
+        $columnas_extra['fc_complemento_pago_sub_total'] = "IFNULL($fc_complemento_pago_sub_total,0)";
+        $columnas_extra['fc_complemento_pago_traslados'] = "IFNULL($fc_complemento_pago_traslados,0)";
+        $columnas_extra['fc_complemento_pago_retenciones'] = "IFNULL($fc_complemento_pago_retenciones,0)";
+        $columnas_extra['fc_complemento_pago_total'] = "IFNULL($fc_complemento_pago_total,0)";
+        $columnas_extra['fc_complemento_pago_uuid'] = "IFNULL($fc_complemento_pago_uuid,'SIN UUID')";
+        $columnas_extra['fc_complemento_pago_etapa'] = "$fc_complemento_pago_etapa";
 
 
 
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas, campos_view: $campos_view, columnas_extra: array(),
+            columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
             no_duplicados: $no_duplicados);
 
         $this->NAMESPACE = __NAMESPACE__;
 
-        $this->etiqueta = 'Pagos';
+        $this->etiqueta = 'Factura';
 
         $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
         $this->modelo_etapa = $modelo_etapa;
@@ -179,22 +180,18 @@ class fc_complemento_pago extends _transacciones_fc
         $this->key_fc_id = 'fc_complemento_pago_id';
 
 
-
     }
-
-
-
 
 
     /**
      * Cancela una factura
      * @param int $cat_sat_motivo_cancelacion_id Motivo de cancelacion
-     * @param int $fc_factura_id Factura a cancelar
+     * @param int $fc_complemento_pago_id Factura a cancelar
      * @return array|stdClass
      */
-    final public function cancela_bd(int $cat_sat_motivo_cancelacion_id, int $fc_factura_id): array|stdClass
+    final public function cancela_bd(int $cat_sat_motivo_cancelacion_id, int $fc_complemento_pago_id): array|stdClass
     {
-        $fc_cancelacion_ins['fc_factura_id'] = $fc_factura_id;
+        $fc_cancelacion_ins['fc_complemento_pago_id'] = $fc_complemento_pago_id;
         $fc_cancelacion_ins['cat_sat_motivo_cancelacion_id'] = $cat_sat_motivo_cancelacion_id;
 
         $r_fc_cancelacion = (new fc_cancelacion(link: $this->link))->alta_registro(registro: $fc_cancelacion_ins);
@@ -203,7 +200,7 @@ class fc_complemento_pago extends _transacciones_fc
         }
 
         $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
-            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $fc_factura_id, valida_existencia_etapa: true);
+            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $fc_complemento_pago_id, valida_existencia_etapa: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
         }
@@ -225,13 +222,13 @@ class fc_complemento_pago extends _transacciones_fc
             return $this->error->error(mensaje: 'Error el descuento previo no puede ser menor a 0', data: $descuento);
         }
 
-        $keys = array('fc_partida_id');
+        $keys = array('fc_partida_cp_id');
         $valida = $this->validacion->valida_ids(keys: $keys, registro: $partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
         }
 
-        $descuento_nuevo = $this->descuento_partida(fc_partida_id: $partida['fc_partida_id']);
+        $descuento_nuevo = $this->descuento_partida(fc_partida_cp_id: $partida['fc_partida_cp_id']);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener descuento', data: $descuento_nuevo);
         }
@@ -275,16 +272,13 @@ class fc_complemento_pago extends _transacciones_fc
     }
 
 
-
-
-
     /**
      */
-    private function del_partidas(array $fc_partidas): array
+    private function del_partidas(array $fc_partida_cps): array
     {
         $dels = array();
-        foreach ($fc_partidas as $fc_partida) {
-            $del = (new fc_partida($this->link))->elimina_bd(id: $fc_partida['fc_partida_id']);
+        foreach ($fc_partida_cps as $fc_partida_cp) {
+            $del = (new fc_partida_cp($this->link))->elimina_bd(id: $fc_partida_cp['fc_partida_cp_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al eliminar partida', data: $del);
             }
@@ -294,24 +288,23 @@ class fc_complemento_pago extends _transacciones_fc
     }
 
 
-
     /**
      * Obtiene y redondea un descuento de una partida
-     * @param int $fc_partida_id partida
+     * @param int $fc_partida_cp_id partida
      * @return float|array
      * @version 0.98.26
      */
-    private function descuento_partida(int $fc_partida_id): float|array
+    private function descuento_partida(int $fc_partida_cp_id): float|array
     {
-        if ($fc_partida_id <= 0) {
-            return $this->error->error(mensaje: 'Error $fc_partida_id debe ser mayor a 0', data: $fc_partida_id);
+        if ($fc_partida_cp_id <= 0) {
+            return $this->error->error(mensaje: 'Error $fc_partida_cp_id debe ser mayor a 0', data: $fc_partida_cp_id);
         }
-        $fc_partida = (new fc_partida($this->link))->registro(registro_id: $fc_partida_id, retorno_obj: true);
+        $fc_partida_cp = (new fc_partida_cp($this->link))->registro(registro_id: $fc_partida_cp_id, retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener $fc_partida', data: $fc_partida);
+            return $this->error->error(mensaje: 'Error al obtener $fc_partida_cp', data: $fc_partida_cp);
         }
 
-        $descuento = $fc_partida->fc_partida_descuento;
+        $descuento = $fc_partida_cp->fc_partida_cp_descuento;
 
         return round($descuento, 4);
 
@@ -345,25 +338,25 @@ class fc_complemento_pago extends _transacciones_fc
         }
 
 
-        $del = $this->elimina_partidas(fc_factura_id: $id);
+        $del = $this->elimina_partidas(fc_complemento_pago_id: $id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al eliminar partida', data: $del);
         }
 
         $filtro = array();
-        $filtro['fc_factura.id'] = $id;
+        $filtro['fc_complemento_pago.id'] = $id;
 
-        $r_fc_factura_documento = (new fc_factura_documento(link: $this->link))->elimina_con_filtro_and(filtro: $filtro);
+        $r_fc_complemento_pago_documento = (new fc_complemento_pago_documento(link: $this->link))->elimina_con_filtro_and(filtro: $filtro);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_documento);
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_complemento_pago_documento);
         }
-        $r_fc_email = (new fc_email(link: $this->link))->elimina_con_filtro_and(filtro: $filtro);
+        $r_fc_email_cp = (new fc_email_cp(link: $this->link))->elimina_con_filtro_and(filtro: $filtro);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_email);
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_email_cp);
         }
-        $r_fc_factura_etapa = (new fc_factura_etapa(link: $this->link))->elimina_con_filtro_and(filtro: $filtro);
+        $r_fc_complemento_pago_etapa = (new fc_complemento_pago_etapa(link: $this->link))->elimina_con_filtro_and(filtro: $filtro);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_etapa);
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_complemento_pago_etapa);
         }
 
         $r_elimina_factura = parent::elimina_bd($id); // TODO: Change the autogenerated stub
@@ -375,18 +368,18 @@ class fc_complemento_pago extends _transacciones_fc
 
     /**
      */
-    private function elimina_partidas(int $fc_factura_id): array
+    private function elimina_partidas(int $fc_complemento_pago_id): array
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_factura_id);
+        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
-        $fc_partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        $fc_partida_cps = $this->get_partidas(fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas', data: $fc_partidas);
+            return $this->error->error(mensaje: 'Error al obtener partidas', data: $fc_partida_cps);
         }
 
-        $del = $this->del_partidas(fc_partidas: $fc_partidas);
+        $del = $this->del_partidas(fc_partida_cps: $fc_partida_cps);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al eliminar partida', data: $del);
         }
@@ -409,8 +402,8 @@ class fc_complemento_pago extends _transacciones_fc
         return $emisor;
     }
 
-    final public function envia_factura(int $fc_factura_id){
-        $notifica = (new _email())->envia_factura(fc_factura_id: $fc_factura_id,link:  $this->link);
+    final public function envia_factura(int $fc_complemento_pago_id){
+        $notifica = (new _email())->envia_factura(fc_complemento_pago_id: $fc_complemento_pago_id,link:  $this->link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al enviar notificacion',data:  $notifica);
         }
@@ -418,12 +411,9 @@ class fc_complemento_pago extends _transacciones_fc
     }
 
 
-
-
-
     private function from_impuesto(string $tipo_impuesto): string
     {
-        return "fc_partida AS fc_partida_operacion LEFT JOIN $tipo_impuesto ON $tipo_impuesto.fc_partida_id = fc_partida_operacion.id";
+        return "fc_partida_cp AS fc_partida_cp_operacion LEFT JOIN $tipo_impuesto ON $tipo_impuesto.fc_partida_cp_id = fc_partida_cp_operacion.id";
     }
 
 
@@ -441,13 +431,13 @@ class fc_complemento_pago extends _transacciones_fc
         return $ruta_archivos_tmp;
     }
 
-    public function genera_xml(int $fc_factura_id, string $tipo): array|stdClass
+    public function genera_xml(int $fc_complemento_pago_id, string $tipo): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_factura_id);
+        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
-        $factura = $this->get_factura(fc_factura_id: $fc_factura_id);
+        $factura = $this->get_factura(fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
         }
@@ -486,7 +476,7 @@ class fc_complemento_pago extends _transacciones_fc
         $file_xml_st = $ruta_archivos_tmp . '/' . $this->registro_id . '.st.xml';
         file_put_contents($file_xml_st, $ingreso);
 
-        $existe = (new fc_factura_documento(link: $this->link))->existe(array('fc_factura.id' => $this->registro_id));
+        $existe = (new fc_complemento_pago_documento(link: $this->link))->existe(array('fc_complemento_pago.id' => $this->registro_id));
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar si existe documento', data: $existe);
         }
@@ -509,31 +499,31 @@ class fc_complemento_pago extends _transacciones_fc
                 return $this->error->error(mensaje: 'Error al guardar xml', data: $documento);
             }
 
-            $fc_factura_documento = array();
-            $fc_factura_documento['fc_factura_id'] = $this->registro_id;
-            $fc_factura_documento['doc_documento_id'] = $documento->registro_id;
+            $fc_complemento_pago_documento = array();
+            $fc_complemento_pago_documento['fc_complemento_pago_id'] = $this->registro_id;
+            $fc_complemento_pago_documento['doc_documento_id'] = $documento->registro_id;
 
-            $fc_factura_documento = (new fc_factura_documento(link: $this->link))->alta_registro(registro: $fc_factura_documento);
+            $fc_complemento_pago_documento = (new fc_complemento_pago_documento(link: $this->link))->alta_registro(registro: $fc_complemento_pago_documento);
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al dar de alta factura documento', data: $fc_factura_documento);
+                return $this->error->error(mensaje: 'Error al dar de alta factura documento', data: $fc_complemento_pago_documento);
             }
         }
         else {
-            $r_fc_factura_documento = (new fc_factura_documento(link: $this->link))->filtro_and(
-                filtro: array('fc_factura.id' => $this->registro_id));
+            $r_fc_complemento_pago_documento = (new fc_complemento_pago_documento(link: $this->link))->filtro_and(
+                filtro: array('fc_complemento_pago.id' => $this->registro_id));
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener factura documento', data: $r_fc_factura_documento);
+                return $this->error->error(mensaje: 'Error al obtener factura documento', data: $r_fc_complemento_pago_documento);
             }
 
-            if ($r_fc_factura_documento->n_registros > 1) {
-                return $this->error->error(mensaje: 'Error solo debe existir una factura_documento', data: $r_fc_factura_documento);
+            if ($r_fc_complemento_pago_documento->n_registros > 1) {
+                return $this->error->error(mensaje: 'Error solo debe existir una factura_documento', data: $r_fc_complemento_pago_documento);
             }
-            if ($r_fc_factura_documento->n_registros === 0) {
-                return $this->error->error(mensaje: 'Error  debe existir al menos una factura_documento', data: $r_fc_factura_documento);
+            if ($r_fc_complemento_pago_documento->n_registros === 0) {
+                return $this->error->error(mensaje: 'Error  debe existir al menos una factura_documento', data: $r_fc_complemento_pago_documento);
             }
-            $fc_factura_documento = $r_fc_factura_documento->registros[0];
+            $fc_complemento_pago_documento = $r_fc_complemento_pago_documento->registros[0];
 
-            $doc_documento_id = $fc_factura_documento['doc_documento_id'];
+            $doc_documento_id = $fc_complemento_pago_documento['doc_documento_id'];
 
             $registro['descripcion'] = $ruta_archivos_tmp;
             $registro['doc_tipo_documento_id'] = $doc_tipo_documento_id;
@@ -559,9 +549,9 @@ class fc_complemento_pago extends _transacciones_fc
         return $rutas;
     }
 
-    final public function  get_data_relaciones(int $fc_factura_id){
+    final public function  get_data_relaciones(int $fc_complemento_pago_id){
 
-        $relaciones = (new fc_relacion(link: $this->link))->relaciones(fc_factura_id: $fc_factura_id);
+        $relaciones = (new fc_relacion(link: $this->link))->relaciones(fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
         }
@@ -571,7 +561,7 @@ class fc_complemento_pago extends _transacciones_fc
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener relacionadas', data: $relacionadas);
             }
-            $relaciones[$indice]['fc_facturas_relacionadas'] = $relacionadas;
+            $relaciones[$indice]['fc_complemento_pagos_relacionadas'] = $relacionadas;
         }
         return $relaciones;
 
@@ -579,22 +569,22 @@ class fc_complemento_pago extends _transacciones_fc
 
     /**
      *
-     * @param int $fc_factura_id
+     * @param int $fc_complemento_pago_id
      * @return array|stdClass|int
      */
-    final public function get_factura(int $fc_factura_id): array|stdClass|int
+    final public function get_factura(int $fc_complemento_pago_id): array|stdClass|int
     {
         $hijo = array();
-        $hijo['fc_partida']['filtros'] = array();
-        $hijo['fc_partida']['filtros_con_valor'] = array('fc_factura.id' => $fc_factura_id);
-        $hijo['fc_partida']['nombre_estructura'] = 'partidas';
-        $hijo['fc_partida']['namespace_model'] = 'gamboamartin\\facturacion\\models';
-        $registro = $this->registro(registro_id: $fc_factura_id, hijo: $hijo);
+        $hijo['fc_partida_cp']['filtros'] = array();
+        $hijo['fc_partida_cp']['filtros_con_valor'] = array('fc_complemento_pago.id' => $fc_complemento_pago_id);
+        $hijo['fc_partida_cp']['nombre_estructura'] = 'partidas';
+        $hijo['fc_partida_cp']['namespace_model'] = 'gamboamartin\\facturacion\\models';
+        $registro = $this->registro(registro_id: $fc_complemento_pago_id, hijo: $hijo);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $registro);
         }
 
-        $relacionados = (new fc_relacion(link: $this->link))->get_relaciones(fc_factura_id: $fc_factura_id);
+        $relacionados = (new fc_relacion(link: $this->link))->get_relaciones(fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relacionados);
         }
@@ -610,14 +600,27 @@ class fc_complemento_pago extends _transacciones_fc
         $ret_global= array();
         foreach ($registro['partidas'] as $key => $partida) {
 
-            $traslados = (new fc_traslado($this->link))->get_traslados(registro_partida_id: $partida['fc_partida_id']);
+            $traslados = (new fc_traslado_cp($this->link))->get_data_rows(registro_partida_id: $partida['fc_partida_cp_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el traslados de la partida', data: $traslados);
             }
 
-            $retenidos = (new fc_retenido($this->link))->get_retenidos(fc_partida_id: $partida['fc_partida_id']);
+            $retenidos = (new fc_retenido_cp($this->link))->get_data_rows(registro_partida_id: $partida['fc_partida_cp_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida', data: $retenidos);
+            }
+
+            $filtro['com_producto.id'] = $partida['com_producto_id'];
+            $existe_tmp = (new com_tmp_prod_cs(link: $this->link))->existe(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar si existe existe_tmp', data: $existe_tmp);
+            }
+            if($existe_tmp){
+                $r_com_tmp_prod_cs = (new com_tmp_prod_cs(link: $this->link))->filtro_and(filtro: $filtro);
+                if(errores::$error){
+                    return $this->error->error(mensaje: 'Error al obtener producto', data: $r_com_tmp_prod_cs);
+                }
+                $partida['cat_sat_producto_codigo'] = $r_com_tmp_prod_cs->registros[0]['com_tmp_prod_cs_cat_sat_producto'];
             }
 
 
@@ -628,18 +631,18 @@ class fc_complemento_pago extends _transacciones_fc
 
             $concepto = new stdClass();
             $concepto->clave_prod_serv = $partida['cat_sat_producto_codigo'];
-            $concepto->cantidad = $partida['fc_partida_cantidad'];
+            $concepto->cantidad = $partida['fc_partida_cp_cantidad'];
             $concepto->clave_unidad = $partida['cat_sat_unidad_codigo'];
-            $concepto->descripcion = $partida['fc_partida_descripcion'];
-            $concepto->valor_unitario = number_format($partida['fc_partida_valor_unitario'], 2);;
-            $concepto->importe = number_format($partida['fc_partida_importe'], 2);
+            $concepto->descripcion = $partida['fc_partida_cp_descripcion'];
+            $concepto->valor_unitario = number_format($partida['fc_partida_cp_valor_unitario'], 2);;
+            $concepto->importe = number_format($partida['fc_partida_cp_importe'], 2);
             $concepto->objeto_imp = $partida['cat_sat_obj_imp_codigo'];
             $concepto->no_identificacion = $partida['com_producto_codigo'];;
             $concepto->unidad = $partida['cat_sat_unidad_descripcion'];
 
             $descuento = 0.0;
-            if(isset($partida['fc_partida_descuento'])){
-                $descuento = $partida['fc_partida_descuento'];
+            if(isset($partida['fc_partida_cp_descuento'])){
+                $descuento = $partida['fc_partida_cp_descuento'];
             }
 
             $descuento = (new _comprobante())->monto_dos_dec(monto: $descuento);
@@ -655,19 +658,19 @@ class fc_complemento_pago extends _transacciones_fc
             $concepto->impuestos[0]->retenciones = array();
 
 
-            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $traslados, key_importe_impuesto: 'fc_traslado_importe');
+            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $traslados, key_importe_impuesto: 'fc_traslado_cp_importe');
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar traslados', data: $impuestos);
             }
 
 
 
-            $trs_global = (new _impuestos())->impuestos_globales(impuestos: $traslados, global_imp: $trs_global, key_importe: 'fc_traslado_importe');
+            $trs_global = (new _impuestos())->impuestos_globales(impuestos: $traslados, global_imp: $trs_global, key_importe: 'fc_traslado_cp_importe');
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $trs_global);
             }
 
-            $ret_global = (new _impuestos())->impuestos_globales(impuestos: $retenidos, global_imp: $ret_global, key_importe: 'fc_retenido_importe');
+            $ret_global = (new _impuestos())->impuestos_globales(impuestos: $retenidos, global_imp: $ret_global, key_importe: 'fc_retenido_cp_importe');
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $ret_global);
             }
@@ -675,7 +678,7 @@ class fc_complemento_pago extends _transacciones_fc
 
             $concepto->impuestos[0]->traslados = $impuestos;
 
-            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $retenidos,  key_importe_impuesto: 'fc_retenido_importe');
+            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $retenidos,  key_importe_impuesto: 'fc_retenido_cp_importe');
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar retenciones', data: $impuestos);
             }
@@ -683,7 +686,7 @@ class fc_complemento_pago extends _transacciones_fc
             $concepto->impuestos[0]->retenciones = $impuestos;
 
             if(isset($partida['com_producto_aplica_predial']) && $partida['com_producto_aplica_predial'] === 'activo'){
-                $r_fc_cuenta_predial = (new fc_cuenta_predial(link: $this->link))->filtro_and(filtro: array('fc_factura.id'=>$fc_factura_id));
+                $r_fc_cuenta_predial = (new fc_cuenta_predial(link: $this->link))->filtro_and(filtro: array('fc_complemento_pago.id'=>$fc_complemento_pago_id));
                 if (errores::$error) {
                     return $this->error->error(mensaje: 'Error al obtener cuenta predial', data: $r_fc_cuenta_predial);
                 }
@@ -702,12 +705,12 @@ class fc_complemento_pago extends _transacciones_fc
 
             $conceptos[] = $concepto;
 
-            $total_impuestos_trasladados += ($partida['fc_partida_importe_total_traslado']);
-            $total_impuestos_retenidos += ($partida['fc_partida_importe_total_retenido']);
+            $total_impuestos_trasladados += ($partida['fc_partida_cp_importe_total_traslado']);
+            $total_impuestos_retenidos += ($partida['fc_partida_cp_importe_total_retenido']);
 
         }
 
-        $registro['fc_factura_total'] = round($registro['fc_factura_sub_total']
+        $registro['fc_complemento_pago_total'] = round($registro['fc_complemento_pago_sub_total']
             + $total_impuestos_trasladados - $total_impuestos_retenidos,2);
         $registro['traslados'] = $trs_global;
         $registro['retenidos'] = $ret_global;
@@ -743,6 +746,17 @@ class fc_complemento_pago extends _transacciones_fc
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
+
+        if(isset($registro['fecha'])){
+            $es_fecha = $this->validacion->valida_pattern(key:'fecha', txt: $registro['fecha']);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar fecha', data: $es_fecha);
+            }
+            if($es_fecha){
+                $registro['fecha'] =  $registro['fecha'].' '.date('H:i:s');
+            }
+        }
+
         $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva); // TODO: Change the autogenerated stub
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al modificar', data: $r_modifica_bd);
@@ -754,20 +768,20 @@ class fc_complemento_pago extends _transacciones_fc
 
     /**
      * Calcula los impuestos trasladados de una factura
-     * @param int $fc_factura_id Factura a calcular
+     * @param int $fc_complemento_pago_id Factura a calcular
      * @return float|array
      * @version 4.14.0
      */
-    public function get_factura_imp_trasladados(int $fc_factura_id): float|array
+    public function get_factura_imp_trasladados(int $fc_complemento_pago_id): float|array
     {
-        $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        $partidas = $this->get_partidas(fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
         }
         $imp_traslado = 0.0;
 
         foreach ($partidas as $partida) {
-            $imp_traslado += (new fc_partida($this->link))->calculo_imp_trasladado($partida['fc_partida_id']);
+            $imp_traslado += (new fc_partida_cp($this->link))->calculo_imp_trasladado($partida['fc_partida_cp_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
             }
@@ -776,17 +790,26 @@ class fc_complemento_pago extends _transacciones_fc
         return $imp_traslado;
     }
 
-    public function get_factura_imp_retenidos(int $fc_factura_id): float|array
+    public function get_factura_imp_retenidos(int $fc_complemento_pago_id): float|array
     {
-        $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        $partidas = $this->get_partidas(fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
         }
 
         $imp_traslado = 0.0;
 
+        $modelo_predial = (new fc_cuenta_predial(link: $this->link));
+        $modelo_retencion = (new fc_retenido_cp(link: $this->link));
+        $modelo_traslado = (new fc_traslado_cp(link: $this->link));
+
+        $fc_partida_cp_modelo = new fc_partida_cp(link: $this->link,modelo_entidad: $this,
+            modelo_predial: $modelo_predial,modelo_retencion: $modelo_retencion,
+            modelo_traslado: $modelo_traslado);
+
         foreach ($partidas as $valor) {
-            $imp_traslado += (new fc_partida($this->link))->calculo_imp_retenido($valor['fc_partida_id']);
+
+            $imp_traslado += $fc_partida_cp_modelo->calculo_imp_retenido($valor['fc_partida_cp_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
             }
@@ -797,64 +820,66 @@ class fc_complemento_pago extends _transacciones_fc
 
     /**
      * Obtiene el total de descuento de una factura
-     * @param int $fc_factura_id Identificador de factura
+     * @param int $fc_complemento_pago_id Identificador de factura
      * @return float|array
      * @version 6.10.0
      */
-    final public function get_factura_descuento(int $fc_factura_id): float|array
+    final public function get_factura_descuento(int $fc_complemento_pago_id): float|array
     {
-        if ($fc_factura_id <= 0) {
-            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
+        if ($fc_complemento_pago_id <= 0) {
+            return $this->error->error(mensaje: 'Error $fc_complemento_pago_id debe ser mayor a 0', data: $fc_complemento_pago_id);
         }
 
-        $fc_factura = $this->registro(registro_id: $fc_factura_id, columnas: array('fc_factura_descuento'),
+        $fc_complemento_pago = $this->registro(registro_id: $fc_complemento_pago_id, columnas: array('fc_complemento_pago_descuento'),
             retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_complemento_pago);
         }
-        return round($fc_factura->fc_factura_descuento,2);
+        return round($fc_complemento_pago->fc_complemento_pago_descuento,2);
 
     }
 
     /**
      * Obtiene el total de una factura
-     * @param int $fc_factura_id Factura a obtener total
+     * @param int $fc_complemento_pago_id Factura a obtener total
      * @return float|array
      */
-    final public function get_factura_total(int $fc_factura_id): float|array
+    final public function get_factura_total(int $fc_complemento_pago_id): float|array
     {
-        if ($fc_factura_id <= 0) {
-            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
+        if ($fc_complemento_pago_id <= 0) {
+            return $this->error->error(mensaje: 'Error $fc_complemento_pago_id debe ser mayor a 0', data: $fc_complemento_pago_id);
         }
-        $fc_factura = $this->registro(registro_id: $fc_factura_id, columnas: array('fc_factura_total'),
+        $fc_complemento_pago = $this->registro(registro_id: $fc_complemento_pago_id, columnas: array('fc_complemento_pago_total'),
             retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_complemento_pago);
         }
-        return round($fc_factura->fc_factura_total,2);
+        return round($fc_complemento_pago->fc_complemento_pago_total,2);
     }
 
     /**
      * Obtiene las partidas de una factura
-     * @param int $fc_factura_id Factura a validar
+     * @param int $fc_complemento_pago_id Factura a validar
      * @return array
      * @version 0.83.26
      */
-    private function get_partidas(int $fc_factura_id): array
+    private function get_partidas(int $fc_complemento_pago_id): array
     {
-        if ($fc_factura_id <= 0) {
-            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
+        if ($fc_complemento_pago_id <= 0) {
+            return $this->error->error(mensaje: 'Error $fc_complemento_pago_id debe ser mayor a 0', data: $fc_complemento_pago_id);
         }
 
-        $filtro['fc_factura.id'] = $fc_factura_id;
+        $filtro['fc_complemento_pago.id'] = $fc_complemento_pago_id;
 
-        $r_fc_partida = (new fc_partida($this->link))->filtro_and(filtro: $filtro);
+        $r_fc_partida_cp = (new fc_partida_cp($this->link))->filtro_and(filtro: $filtro);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_partida);
+            return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_partida_cp);
         }
 
-        return $r_fc_partida->registros;
+        return $r_fc_partida_cp->registros;
     }
+
+
 
 
     private function receptor(array $factura): array
@@ -932,23 +957,23 @@ class fc_complemento_pago extends _transacciones_fc
 
     /**
      * Obtiene el subtotal de una factura
-     * @param int $fc_factura_id Factura
+     * @param int $fc_complemento_pago_id Factura
      * @return float|int|array
      * @version 0.96.26
      */
-    public function sub_total(int $fc_factura_id): float|int|array
+    public function sub_total(int $fc_complemento_pago_id): float|int|array
     {
-        if ($fc_factura_id <= 0) {
-            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
+        if ($fc_complemento_pago_id <= 0) {
+            return $this->error->error(mensaje: 'Error $fc_complemento_pago_id debe ser mayor a 0', data: $fc_complemento_pago_id);
         }
 
-        $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
+        $partidas = $this->get_partidas(fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
         }
         $sub_total = 0;
         foreach ($partidas as $partida) {
-            $sub_total += $this->sub_total_partida(fc_partida_id: $partida['fc_partida_id']);
+            $sub_total += $this->sub_total_partida(fc_partida_cp_id: $partida['fc_partida_cp_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener sub total', data: $sub_total);
             }
@@ -965,24 +990,24 @@ class fc_complemento_pago extends _transacciones_fc
 
     /**
      * Suma los subtotales acumulando por partida
-     * @param array $fc_partidas Partidas de una factura
+     * @param array $fc_partida_cps Partidas de una factura
      * @return array|float
      * @version 5.7.1
      */
-    private function suma_sub_totales(array $fc_partidas): float|array
+    private function suma_sub_totales(array $fc_partida_cps): float|array
     {
         $subtotal = 0.0;
-        foreach ($fc_partidas as $fc_partida) {
-            if(!is_array($fc_partida)){
-                return $this->error->error(mensaje: 'Error fc_partida debe ser un array', data: $fc_partida);
+        foreach ($fc_partida_cps as $fc_partida_cp) {
+            if(!is_array($fc_partida_cp)){
+                return $this->error->error(mensaje: 'Error fc_partida_cp debe ser un array', data: $fc_partida_cp);
             }
-            $keys = array('fc_partida_id');
-            $valida = $this->validacion->valida_ids(keys: $keys, registro: $fc_partida);
+            $keys = array('fc_partida_cp_id');
+            $valida = $this->validacion->valida_ids(keys: $keys, registro: $fc_partida_cp);
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al validar fc_partida ', data: $valida);
+                return $this->error->error(mensaje: 'Error al validar fc_partida_cp ', data: $valida);
             }
 
-            $subtotal = $this->suma_sub_total(fc_partida: $fc_partida,subtotal:  $subtotal);
+            $subtotal = $this->suma_sub_total(fc_partida_cp: $fc_partida_cp,subtotal:  $subtotal);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $subtotal);
             }
@@ -992,31 +1017,31 @@ class fc_complemento_pago extends _transacciones_fc
 
     /**
      * Calcula el subtotal de una partida
-     * @param int $fc_partida_id Partida a verificar sub total
+     * @param int $fc_partida_cp_id Partida a verificar sub total
      * @return float|array
      * @version 0.95.26
      */
-    private function sub_total_partida(int $fc_partida_id): float|array
+    private function sub_total_partida(int $fc_partida_cp_id): float|array
     {
-        if ($fc_partida_id <= 0) {
-            return $this->error->error(mensaje: 'Error $fc_partida_id debe ser mayor a 0', data: $fc_partida_id);
+        if ($fc_partida_cp_id <= 0) {
+            return $this->error->error(mensaje: 'Error $fc_partida_cp_id debe ser mayor a 0', data: $fc_partida_cp_id);
         }
-        $fc_partida = (new fc_partida($this->link))->registro(registro_id: $fc_partida_id, retorno_obj: true);
+        $fc_partida_cp = (new fc_partida_cp($this->link))->registro(registro_id: $fc_partida_cp_id, retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener $fc_partida', data: $fc_partida);
+            return $this->error->error(mensaje: 'Error al obtener $fc_partida_cp', data: $fc_partida_cp);
         }
 
-        $keys = array('fc_partida_cantidad', 'fc_partida_valor_unitario');
-        $valida = $this->validacion->valida_double_mayores_0(keys: $keys, registro: $fc_partida);
+        $keys = array('fc_partida_cp_cantidad', 'fc_partida_cp_valor_unitario');
+        $valida = $this->validacion->valida_double_mayores_0(keys: $keys, registro: $fc_partida_cp);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
         }
 
 
-        $cantidad = $fc_partida->fc_partida_cantidad;
+        $cantidad = $fc_partida_cp->fc_partida_cp_cantidad;
         $cantidad = round($cantidad, 4);
 
-        $valor_unitario = $fc_partida->fc_partida_valor_unitario;
+        $valor_unitario = $fc_partida_cp->fc_partida_cp_valor_unitario;
         $valor_unitario = round($valor_unitario, 4);
 
         $sub_total = $cantidad * $valor_unitario;
@@ -1039,7 +1064,7 @@ class fc_complemento_pago extends _transacciones_fc
                 return $this->error->error(mensaje: 'Error partida debe ser un array', data: $partida);
             }
 
-            $descuento_partida = $this->descuento_partida(fc_partida_id: $partida['fc_partida_id']);
+            $descuento_partida = $this->descuento_partida(fc_partida_cp_id: $partida['fc_partida_cp_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener descuento partida', data: $descuento_partida);
             }
@@ -1050,22 +1075,22 @@ class fc_complemento_pago extends _transacciones_fc
 
     /**
      * Suma un subtotal al previo
-     * @param array $fc_partida Partida a integrar
+     * @param array $fc_partida_cp Partida a integrar
      * @param float $subtotal subtotal previo
      * @return array|float
      * @version 2.20.0
      */
-    private function suma_sub_total(array $fc_partida, float $subtotal): float|array
+    private function suma_sub_total(array $fc_partida_cp, float $subtotal): float|array
     {
         $subtotal = round($subtotal,4);
 
-        $keys = array('fc_partida_id');
-        $valida = $this->validacion->valida_ids(keys: $keys, registro: $fc_partida);
+        $keys = array('fc_partida_cp_id');
+        $valida = $this->validacion->valida_ids(keys: $keys, registro: $fc_partida_cp);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar fc_partida ', data: $valida);
+            return $this->error->error(mensaje: 'Error al validar fc_partida_cp ', data: $valida);
         }
 
-        $st = (new fc_partida($this->link))->subtotal_partida($fc_partida['fc_partida_id']);
+        $st = (new fc_partida_cp($this->link))->subtotal_partida(registro_partida_id: $fc_partida_cp['fc_partida_cp_id']);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener calculo ', data: $st);
         }
@@ -1104,14 +1129,14 @@ class fc_complemento_pago extends _transacciones_fc
         return $xml_data;
     }
 
-    public function timbra_xml(int $fc_factura_id): array|stdClass
+    public function timbra_xml(int $fc_complemento_pago_id): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_factura_id);
+        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
         $tipo = (new pac())->tipo;
-        $timbrada = (new fc_cfdi_sellado($this->link))->existe(filtro: array('fc_factura.id' => $fc_factura_id));
+        $timbrada = (new fc_cfdi_sellado_cp($this->link))->existe(filtro: array('fc_complemento_pago.id' => $fc_complemento_pago_id));
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar si la factura esta timbrado', data: $timbrada);
         }
@@ -1120,12 +1145,12 @@ class fc_complemento_pago extends _transacciones_fc
             return $this->error->error(mensaje: 'Error: la factura ya ha sido timbrada', data: $timbrada);
         }
 
-        $fc_factura = $this->registro(registro_id: $fc_factura_id);
+        $fc_complemento_pago = $this->registro(registro_id: $fc_complemento_pago_id);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_complemento_pago);
         }
 
-        $xml = $this->genera_xml(fc_factura_id: $fc_factura_id, tipo: $tipo);
+        $xml = $this->genera_xml(fc_complemento_pago_id: $fc_complemento_pago_id, tipo: $tipo);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar XML', data: $xml);
         }
@@ -1135,7 +1160,7 @@ class fc_complemento_pago extends _transacciones_fc
         $xml_contenido = file_get_contents($xml->doc_documento_ruta_absoluta);
 
 
-        $filtro_files['fc_csd.id'] = $fc_factura['fc_csd_id'];
+        $filtro_files['fc_csd.id'] = $fc_complemento_pago['fc_csd_id'];
 
         $r_fc_key_pem = (new fc_key_pem(link: $this->link))->filtro_and(filtro: $filtro_files);
         if (errores::$error) {
@@ -1156,7 +1181,7 @@ class fc_complemento_pago extends _transacciones_fc
             $ruta_cer_pem = $r_fc_cer_pem->registros[0]['doc_documento_ruta_absoluta'];
         }
 
-        $factura = $this->get_factura(fc_factura_id: $fc_factura_id);
+        $factura = $this->get_factura(fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
         }
@@ -1173,7 +1198,7 @@ class fc_complemento_pago extends _transacciones_fc
         $xml_timbrado = (new timbra())->timbra(contenido_xml: $xml_contenido, id_comprobante: '',
             ruta_cer_pem: $ruta_cer_pem, ruta_key_pem: $ruta_key_pem, pac_prov: $pac_prov);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al timbrar XML', data: $xml_timbrado,params: array($fc_factura));
+            return $this->error->error(mensaje: 'Error al timbrar XML', data: $xml_timbrado,params: array($fc_complemento_pago));
         }
 
 
@@ -1185,13 +1210,13 @@ class fc_complemento_pago extends _transacciones_fc
         }
 
         $alta_qr = $this->guarda_documento(directorio: "codigos_qr", extension: "jpg", contenido: $qr_code,
-            fc_factura_id: $fc_factura_id);
+            fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al guardar QR', data: $alta_qr);
         }
 
         $alta_txt = $this->guarda_documento(directorio: "textos", extension: "txt", contenido: $xml_timbrado->txt,
-            fc_factura_id: $fc_factura_id);
+            fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al guardar TXT', data: $alta_txt);
         }
@@ -1201,8 +1226,8 @@ class fc_complemento_pago extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al obtener datos del XML', data: $datos_xml);
         }
 
-        $cfdi_sellado = (new fc_cfdi_sellado($this->link))->maqueta_datos(codigo: $datos_xml['cfdi_comprobante']['NoCertificado'],
-            descripcion: $datos_xml['cfdi_comprobante']['NoCertificado'], fc_factura_id: $fc_factura_id,
+        $cfdi_sellado = (new fc_cfdi_sellado_cp($this->link))->maqueta_datos(codigo: $datos_xml['cfdi_comprobante']['NoCertificado'],
+            descripcion: $datos_xml['cfdi_comprobante']['NoCertificado'], fc_complemento_pago_id: $fc_complemento_pago_id,
             comprobante_sello: $datos_xml['cfdi_comprobante']['Sello'], comprobante_certificado: $datos_xml['cfdi_comprobante']['Certificado'],
             comprobante_no_certificado: $datos_xml['cfdi_comprobante']['NoCertificado'], complemento_tfd_sl: "",
             complemento_tfd_fecha_timbrado: $datos_xml['tfd']['FechaTimbrado'],
@@ -1213,13 +1238,13 @@ class fc_complemento_pago extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al maquetar datos para cfdi sellado', data: $cfdi_sellado);
         }
 
-        $alta = (new fc_cfdi_sellado($this->link))->alta_registro(registro: $cfdi_sellado);
+        $alta = (new fc_cfdi_sellado_cp($this->link))->alta_registro(registro: $cfdi_sellado);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al dar de alta cfdi sellado', data: $alta);
         }
 
         $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
-            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $fc_factura_id, valida_existencia_etapa: true);
+            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $fc_complemento_pago_id, valida_existencia_etapa: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
         }
@@ -1227,7 +1252,7 @@ class fc_complemento_pago extends _transacciones_fc
         return $cfdi_sellado;
     }
 
-    private function guarda_documento(string $directorio, string $extension, string $contenido, int $fc_factura_id): array|stdClass
+    private function guarda_documento(string $directorio, string $extension, string $contenido, int $fc_complemento_pago_id): array|stdClass
     {
         $ruta_archivos = $this->ruta_archivos(directorio: $directorio);
         if (errores::$error) {
@@ -1241,7 +1266,7 @@ class fc_complemento_pago extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al guardar archivo', data: $guarda_archivo);
         }
 
-        $tipo_documento = (new fc_factura(link: $this->link))->doc_tipo_documento_id(extension: $extension);
+        $tipo_documento = (new fc_complemento_pago(link: $this->link))->doc_tipo_documento_id(extension: $extension);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar extension del documento', data: $tipo_documento);
         }
@@ -1258,9 +1283,9 @@ class fc_complemento_pago extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al guardar jpg', data: $documento);
         }
 
-        $registro['fc_factura_id'] = $fc_factura_id;
+        $registro['fc_complemento_pago_id'] = $fc_complemento_pago_id;
         $registro['doc_documento_id'] = $documento->registro_id;
-        $factura_documento = (new fc_factura_documento($this->link))->alta_registro(registro: $registro);
+        $factura_documento = (new fc_complemento_pago_documento($this->link))->alta_registro(registro: $registro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al guardar relacion factura con documento', data: $factura_documento);
         }
@@ -1270,22 +1295,22 @@ class fc_complemento_pago extends _transacciones_fc
 
     /**
      * Obtiene el total de una factura
-     * @param int $fc_factura_id Identificador de factura
+     * @param int $fc_complemento_pago_id Identificador de factura
      * @return float|array
      * @version 0.127.26
      */
-    public function total(int $fc_factura_id): float|array
+    public function total(int $fc_complemento_pago_id): float|array
     {
 
-        if ($fc_factura_id <= 0) {
-            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
+        if ($fc_complemento_pago_id <= 0) {
+            return $this->error->error(mensaje: 'Error $fc_complemento_pago_id debe ser mayor a 0', data: $fc_complemento_pago_id);
         }
 
-        $sub_total = $this->sub_total(fc_factura_id: $fc_factura_id);
+        $sub_total = $this->sub_total(fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener sub total', data: $sub_total);
         }
-        $descuento = $this->get_factura_descuento(fc_factura_id: $fc_factura_id);
+        $descuento = $this->get_factura_descuento(fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener descuento', data: $descuento);
         }
@@ -1300,5 +1325,8 @@ class fc_complemento_pago extends _transacciones_fc
         return $total;
 
     }
+
+
+
 
 }

@@ -109,7 +109,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
 
         if(isset($_GET['fc_partida_id'])){
-            $this->fc_partida_id = $_GET['fc_partida_id'];
+            $this->fc_partida_cp_id = $_GET['fc_partida_cp_id'];
         }
 
         $this->lista_get_data = true;
