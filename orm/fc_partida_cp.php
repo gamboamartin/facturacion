@@ -1,12 +1,18 @@
 <?php
 
 namespace gamboamartin\facturacion\models;
+
+
 use gamboamartin\errores\errores;
 use PDO;
+use stdClass;
 
 class fc_partida_cp extends _partida
 {
-    public function __construct(PDO $link)
+    public function __construct(PDO $link, _transacciones_fc|stdClass $modelo_entidad = new stdClass(),
+                                _cuenta_predial|stdClass $modelo_predial = new stdClass(),
+                                _data_impuestos|stdClass $modelo_retencion = new stdClass(),
+                                _data_impuestos|stdClass $modelo_traslado = new stdClass())
     {
         $tabla = 'fc_partida_cp';
         $columnas = array($tabla => false, 'fc_complemento_pago' => $tabla, 'com_producto' => $tabla,
@@ -52,21 +58,17 @@ class fc_partida_cp extends _partida
 
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
-        parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas,  columnas_extra: $columnas_extra,
-            no_duplicados: $no_duplicados, tipo_campos: array());
+
+        parent::__construct(link: $link, tabla: $tabla, modelo_entidad: $modelo_entidad,
+            modelo_predial: $modelo_predial, modelo_retencion: $modelo_retencion,
+            modelo_traslado: $modelo_traslado, campos_obligatorios: $campos_obligatorios, columnas: $columnas,
+            columnas_extra: $columnas_extra, no_duplicados: $no_duplicados, tipo_campos: array());
 
         $this->NAMESPACE = __NAMESPACE__;
 
         $this->etiqueta = 'Partida';
 
-
-
     }
-
-
-
-
 
 
 }

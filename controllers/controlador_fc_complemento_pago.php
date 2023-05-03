@@ -14,6 +14,7 @@ use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\compresor\compresor;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\html\fc_complemento_pago_html;
 use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\_pdf;
@@ -78,7 +79,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $modelo = new fc_complemento_pago(link: $link);
         $this->modelo = $modelo;
         $this->cat_sat_tipo_de_comprobante = 'Pago';
-        $html_ = new fc_factura_html(html: $html);
+        $html_ = new fc_complemento_pago_html(html: $html);
         $this->html_fc = $html_;
 
         parent::__construct(html_: $html_, link: $link,modelo:  $modelo, paths_conf: $paths_conf);
@@ -351,7 +352,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
 
         $this->inputs = new stdClass();
-        $fc_factura_id = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols: 12,
+        $fc_factura_id = (new fc_complemento_pago_html(html: $this->html_base))->select_fc_factura_id(cols: 12,
             con_registros: true, id_selected: $this->registro_id, link: $this->link,
             disabled: true, filtro: array('fc_factura.id'=>$this->registro_id));
         if (errores::$error) {
@@ -360,7 +361,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
         $this->inputs->fc_factura_id = $fc_factura_id;
 
-        $fc_factura_folio = (new fc_factura_html(html: $this->html_base))->input_folio(cols: 12,row_upd: $row_upd,
+        $fc_factura_folio = (new fc_complemento_pago_html(html: $this->html_base))->input_folio(cols: 12,row_upd: $row_upd,
             value_vacio: false, disabled: true);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al maquetar input', data: $fc_factura_folio);
@@ -1028,29 +1029,29 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
         }
 
-        $sub_total = (new fc_factura($this->link))->get_factura_sub_total(registro_id: $this->registro_id);
+        $sub_total = (new fc_complemento_pago($this->link))->get_factura_sub_total(registro_id: $this->registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener sub_total',data:  $sub_total);
         }
 
-        $descuento = (new fc_factura($this->link))->get_factura_descuento(fc_factura_id: $this->registro_id);
+        $descuento = (new fc_complemento_pago($this->link))->get_factura_descuento(fc_complemento_pago_id: $this->registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener descuento',data:  $descuento);
         }
 
-        $imp_trasladados = (new fc_factura($this->link))->get_factura_imp_trasladados(fc_factura_id:
+        $imp_trasladados = (new fc_complemento_pago($this->link))->get_factura_imp_trasladados(fc_complemento_pago_id:
             $this->registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener imp_trasladados',data:  $imp_trasladados);
         }
 
-        $imp_retenidos = (new fc_factura($this->link))->get_factura_imp_retenidos(fc_factura_id:
+        $imp_retenidos = (new fc_complemento_pago($this->link))->get_factura_imp_retenidos(fc_complemento_pago_id:
             $this->registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener imp_retenidos',data:  $imp_retenidos);
         }
 
-        $total = (new fc_factura($this->link))->get_factura_total(fc_factura_id: $this->registro_id);
+        $total = (new fc_complemento_pago($this->link))->get_factura_total(fc_complemento_pago_id: $this->registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener total factura',data:  $total);
         }
@@ -1246,7 +1247,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $this->inputs->partidas->cat_sat_conf_imps_id = $cat_sat_conf_imps_id;
 
 
-        $t_head_producto = (new _html_factura())->thead_producto();
+        $t_head_producto = (new _html_complemento_pago())->thead_producto();
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al generar html', data: $t_head_producto);
             print_r($error);
@@ -1368,7 +1369,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
         }
 
-        $inputs = (new fc_factura_html(html: $this->html_base))->genera_inputs_fc_partida(controler:$this,
+        $inputs = (new fc_complemento_pago_html(html: $this->html_base))->genera_inputs_fc_partida(controler:$this,
             link: $this->link);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);
@@ -1409,7 +1410,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
         $this->row_upd = $registro;
 
-        $inputs = (new fc_factura_html(html: $this->html_base))->genera_inputs_fc_partida_modifica(controler:$this,
+        $inputs = (new fc_complemento_pago_html(html: $this->html_base))->genera_inputs_fc_partida_modifica(controler:$this,
             link: $this->link);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);
@@ -1656,7 +1657,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
     private function select_fc_factura_id(): array|string
     {
-        $select = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols:12,con_registros: true,
+        $select = (new fc_complemento_pago_html(html: $this->html_base))->select_fc_factura_id(cols:12,con_registros: true,
             id_selected: $this->registro_id,link:  $this->link, disabled: true);
 
         if(errores::$error){
@@ -1717,7 +1718,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
         }
 
-        $inputs = (new fc_factura_html(html: $this->html_base))->genera_inputs_fc_partida(controler:$this,
+        $inputs = (new fc_complemento_pago_html(html: $this->html_base))->genera_inputs_fc_partida(controler:$this,
             link: $this->link);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al inicializar inputs',data:  $inputs, header: $header,ws:$ws);

@@ -2,10 +2,9 @@
 namespace gamboamartin\facturacion\html;
 
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\controllers\controlador_fc_factura;
+use gamboamartin\facturacion\controllers\controlador_fc_complemento_pago;
+
 use gamboamartin\facturacion\models\fc_complemento_pago;
-use gamboamartin\facturacion\models\fc_factura;
-use gamboamartin\system\html_controler;
 
 use gamboamartin\validacion\validacion;
 use html\cat_sat_factor_html;
@@ -36,11 +35,11 @@ class fc_complemento_pago_html extends _base_fc_html {
     /**
      * Asigna diferentes inputs de paquetes cat_sat, comercial, dirección postal, organigrama
      * e inputs declarados localmente.
-     * @param controlador_fc_factura $controler Controlador en ejecución
+     * @param controlador_fc_complemento_pago $controler Controlador en ejecución
      * @param stdClass $inputs Inputs precargados
      * @return array|stdClass
      */
-    private function asigna_inputs(controlador_fc_factura $controler, stdClass $inputs): array|stdClass
+    private function asigna_inputs(controlador_fc_complemento_pago $controler, stdClass $inputs): array|stdClass
     {
         $controler->inputs->select = new stdClass();
         $controler->inputs->select->fc_csd_id = $inputs->selects->fc_csd_id;
@@ -72,7 +71,7 @@ class fc_complemento_pago_html extends _base_fc_html {
         return $controler->inputs;
     }
 
-    private function asigna_inputs_fc_partida(controlador_fc_factura $controler, stdClass $inputs): array|stdClass
+    private function asigna_inputs_fc_partida_cp(controlador_fc_complemento_pago $controler, stdClass $inputs): array|stdClass
     {
         $controler->inputs->select = new stdClass();
         $controler->inputs->select->fc_factura_id = $inputs->selects->fc_factura_id;
@@ -90,7 +89,7 @@ class fc_complemento_pago_html extends _base_fc_html {
     }
 
 
-    public function genera_inputs_alta(controlador_fc_factura $controler, array $keys_selects, PDO $link): array|stdClass
+    public function genera_inputs_alta(controlador_fc_complemento_pago $controler, array $keys_selects, PDO $link): array|stdClass
     {
         $inputs = $this->init_alta(keys_selects: $keys_selects, link: $link);
         if(errores::$error){
@@ -105,7 +104,7 @@ class fc_complemento_pago_html extends _base_fc_html {
         return $inputs_asignados;
     }
 
-    private function genera_inputs_modifica(controlador_fc_factura $controler, PDO $link): array|stdClass
+    private function genera_inputs_modifica(controlador_fc_complemento_pago $controler, PDO $link): array|stdClass
     {
         $inputs = $this->init_modifica(link: $link, row_upd: $controler->row_upd);
         if(errores::$error){
@@ -120,14 +119,14 @@ class fc_complemento_pago_html extends _base_fc_html {
         return $inputs_asignados;
     }
 
-    public function genera_inputs_fc_partida(controlador_fc_factura $controler, PDO $link): array|stdClass
+    public function genera_inputs_fc_partida_cp(controlador_fc_complemento_pago $controler, PDO $link): array|stdClass
     {
-        $inputs = $this->init_alta_fc_partida(link: $link);
+        $inputs = $this->init_alta_fc_partida_cp(link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
 
         }
-        $inputs_asignados = $this->asigna_inputs_fc_partida(controler:$controler, inputs: $inputs);
+        $inputs_asignados = $this->asigna_inputs_fc_partida_cp(controler:$controler, inputs: $inputs);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al asignar inputs',data:  $inputs_asignados);
         }
@@ -135,14 +134,14 @@ class fc_complemento_pago_html extends _base_fc_html {
         return $inputs_asignados;
     }
 
-    public function genera_inputs_fc_partida_modifica(controlador_fc_factura $controler, PDO $link): array|stdClass
+    public function genera_inputs_fc_partida_cp_modifica(controlador_fc_complemento_pago $controler, PDO $link): array|stdClass
     {
-        $inputs = $this->init_modifica_fc_partida(link: $link, row_upd: $controler->row_upd);
+        $inputs = $this->init_modifica_fc_partida_cp(link: $link, row_upd: $controler->row_upd);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
 
         }
-        $inputs_asignados = $this->asigna_inputs_fc_partida(controler:$controler, inputs: $inputs);
+        $inputs_asignados = $this->asigna_inputs_fc_partida_cp(controler:$controler, inputs: $inputs);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al asignar inputs',data:  $inputs_asignados);
         }
@@ -150,14 +149,14 @@ class fc_complemento_pago_html extends _base_fc_html {
         return $inputs_asignados;
     }
 
-    private function init_alta_fc_partida(PDO $link): array|stdClass
+    private function init_alta_fc_partida_cp(PDO $link): array|stdClass
     {
-        $selects = $this->selects_alta_fc_partida(link: $link);
+        $selects = $this->selects_alta_fc_partida_cp(link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar selects',data:  $selects);
         }
 
-        $texts = $this->texts_alta_fc_partida(row_upd: new stdClass(), value_vacio: true);
+        $texts = $this->texts_alta_fc_partida_cp(row_upd: new stdClass(), value_vacio: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar texts',data:  $texts);
         }
@@ -169,14 +168,14 @@ class fc_complemento_pago_html extends _base_fc_html {
         return $alta_inputs;
     }
 
-    private function init_modifica_fc_partida(PDO $link, stdClass $row_upd): array|stdClass
+    private function init_modifica_fc_partida_cp(PDO $link, stdClass $row_upd): array|stdClass
     {
-        $selects = $this->selects_modifica_fc_partida(link: $link, row_upd: $row_upd);
+        $selects = $this->selects_modifica_fc_partida_cp(link: $link, row_upd: $row_upd);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar selects',data:  $selects);
         }
 
-        $texts = $this->texts_alta_fc_partida(row_upd: $row_upd, value_vacio: false);
+        $texts = $this->texts_alta_fc_partida_cp(row_upd: $row_upd, value_vacio: false);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar texts',data:  $texts);
         }
@@ -188,7 +187,7 @@ class fc_complemento_pago_html extends _base_fc_html {
         return $alta_inputs;
     }
 
-    private function texts_alta_fc_partida(stdClass $row_upd, bool $value_vacio, stdClass $params = new stdClass()): array|stdClass
+    private function texts_alta_fc_partida_cp(stdClass $row_upd, bool $value_vacio, stdClass $params = new stdClass()): array|stdClass
     {
         $texts = new stdClass();
 
@@ -212,14 +211,14 @@ class fc_complemento_pago_html extends _base_fc_html {
             $row_upd->valor_unitario = 0;
         }
 
-        if($row_upd->cantidad === 0 && isset($row_upd->fc_partida_cantidad)){
-            $row_upd->cantidad = $row_upd->fc_partida_cantidad;
+        if($row_upd->cantidad === 0 && isset($row_upd->fc_partida_cp_cantidad)){
+            $row_upd->cantidad = $row_upd->fc_partida_cp_cantidad;
         }
-        if($row_upd->descuento === 0 && isset($row_upd->fc_partida_descuento)){
-            $row_upd->descuento = $row_upd->fc_partida_descuento;
+        if($row_upd->descuento === 0 && isset($row_upd->fc_partida_cp_descuento)){
+            $row_upd->descuento = $row_upd->fc_partida_cp_descuento;
         }
-        if($row_upd->valor_unitario === 0 && isset($row_upd->fc_partida_valor_unitario)){
-            $row_upd->valor_unitario = $row_upd->fc_partida_valor_unitario;
+        if($row_upd->valor_unitario === 0 && isset($row_upd->fc_partida_cp_valor_unitario)){
+            $row_upd->valor_unitario = $row_upd->fc_partida_cp_valor_unitario;
         }
         $in_cantidad= $this->input_cantidad(cols: 4,row_upd:  $row_upd,value_vacio:  false);
         if(errores::$error){
@@ -285,7 +284,7 @@ class fc_complemento_pago_html extends _base_fc_html {
         return $div;
     }
 
-    private function selects_alta_fc_partida(PDO $link): array|stdClass
+    private function selects_alta_fc_partida_cp(PDO $link): array|stdClass
     {
         $selects = new stdClass();
 
@@ -296,13 +295,13 @@ class fc_complemento_pago_html extends _base_fc_html {
         }
         $selects->com_producto_id = $select;
 
-        $select = (new fc_complemento_pago_html(html:$this->html_base))->select_fc_factura_id(
+        $select = (new fc_factura_html(html:$this->html_base))->select_fc_factura_id(
             cols: 12, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
         $selects->fc_factura_id = $select;
-        
+
         $select = (new cat_sat_tipo_factor_html(html:$this->html_base))->select_cat_sat_tipo_factor_id(
             cols: 4, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
@@ -316,7 +315,7 @@ class fc_complemento_pago_html extends _base_fc_html {
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
         }
         $selects->cat_sat_factor_id = $select;
-        
+
         $select = (new cat_sat_tipo_impuesto_html(html:$this->html_base))->select_cat_sat_tipo_impuesto_id(
             cols: 4, con_registros:true, id_selected:-1,link: $link);
         if(errores::$error){
@@ -327,7 +326,7 @@ class fc_complemento_pago_html extends _base_fc_html {
         return $selects;
     }
 
-    private function selects_modifica_fc_partida(PDO $link, stdClass $row_upd): array|stdClass
+    private function selects_modifica_fc_partida_cp(PDO $link, stdClass $row_upd): array|stdClass
     {
         $selects = new stdClass();
 
@@ -338,7 +337,7 @@ class fc_complemento_pago_html extends _base_fc_html {
         }
         $selects->com_producto_id = $select;
 
-        $select = (new fc_complemento_pago_html(html:$this->html_base))->select_fc_factura_id(
+        $select = (new fc_factura_html(html:$this->html_base))->select_fc_factura_id(
             cols: 12, con_registros:true, id_selected:$row_upd->fc_factura_id,link: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select',data:  $select);
@@ -410,9 +409,9 @@ class fc_complemento_pago_html extends _base_fc_html {
         return $alta_inputs;
     }
 
-    public function inputs_fc_factura(controlador_fc_factura $controlador): array|stdClass
+    public function inputs_fc_factura(controlador_fc_complemento_pago $controlador): array|stdClass
     {
-        $init = (new limpieza())->init_modifica_fc_factura(controler: $controlador);
+        $init = (new limpieza())->init_modifica_fc_complemento_pago(controler: $controlador);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializa datos',data:  $init);
         }
@@ -773,28 +772,16 @@ class fc_complemento_pago_html extends _base_fc_html {
         return $selects;
     }
 
-    public function select_fc_factura_id(int $cols, bool $con_registros, int $id_selected, PDO $link,
-                                         array $columns_ds = array('fc_factura_descripcion_select'),
+    public function select_fc_complemento_pago_id(int $cols, bool $con_registros, int $id_selected, PDO $link,
+                                         array $columns_ds = array('fc_complemento_pago_descripcion_select'),
                                          bool $disabled = false, array $filtro = array(),
                                          array $registros = array()): array|string
     {
-        $modelo = new fc_factura(link: $link);
+        $modelo = new fc_complemento_pago(link: $link);
 
         $select = $this->select_catalogo(cols: $cols, con_registros: $con_registros, id_selected: $id_selected,
             modelo: $modelo, columns_ds: $columns_ds, disabled: $disabled, filtro: $filtro, label: 'Factura',
             registros: $registros, required: true);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select', data: $select);
-        }
-        return $select;
-    }
-
-    public function select_fc_complemento_pago_id(int $cols, bool $con_registros, int $id_selected, PDO $link): array|string
-    {
-        $modelo = new fc_complemento_pago(link: $link);
-
-        $select = $this->select_catalogo(cols:$cols,con_registros:$con_registros,id_selected:$id_selected,
-            modelo: $modelo, label: 'Complemento pago',required: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select', data: $select);
         }

@@ -92,6 +92,13 @@ class _transacciones_fc extends modelo
         return $r_fc_etapa->registros;
     }
 
+    final protected function from_impuesto(string $entidad_partida, string $tipo_impuesto): string
+    {
+        $key_id = $entidad_partida.'_id';
+        $base = $entidad_partida.'_operacion';
+        return "$entidad_partida AS $base LEFT JOIN $tipo_impuesto ON $tipo_impuesto.$key_id = $base.id";
+    }
+
     /**
      * Inicializa los datos de un registro
      * @param array $registro
@@ -328,7 +335,7 @@ class _transacciones_fc extends modelo
         if((int)$r_registro->n_registros > 0){
             $fc_factura = $r_registro->registros[0];
 
-            $fc_folio = $fc_factura['fc_factura_folio'];
+            $fc_folio = $fc_factura[$this->tabla.'_folio'];
             $data_explode = $fc_csd_serie.'-';
             $fc_folio_explode = explode($data_explode, $fc_folio);
             if(isset($fc_folio_explode[1])){

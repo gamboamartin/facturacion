@@ -1,5 +1,6 @@
 <?php
 namespace gamboamartin\facturacion\models;
+use base\orm\_modelo_parent;
 use gamboamartin\cat_sat\models\cat_sat_factor;
 use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
 use gamboamartin\cat_sat\models\cat_sat_tipo_impuesto;
@@ -9,9 +10,10 @@ use PDO;
 use stdClass;
 
 class fc_traslado_cp extends _data_impuestos {
-    public function __construct(PDO $link){
+    public function __construct(PDO $link, _cuenta_predial|stdClass $modelo_predial = new stdClass(),
+                                _data_impuestos|stdClass $modelo_retencion = new stdClass(),
+                                _data_impuestos|stdClass $modelo_traslado= new stdClass()){
         $tabla = 'fc_traslado_cp';
-
 
         $columnas = array($tabla=>false,'fc_partida_cp'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla,
             'cat_sat_tipo_impuesto'=>$tabla,'com_producto'=>'fc_partida_cp','fc_complemento_pago'=>'fc_partida_cp');
@@ -19,7 +21,8 @@ class fc_traslado_cp extends _data_impuestos {
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 
-        $campos_view['fc_partida_cp_id'] = array('type' => 'selects', 'model' => new fc_partida_cp($link));
+        $campos_view['fc_partida_cp_id'] = array('type' => 'selects', 'model' => new fc_partida_cp(link: $link,
+            modelo_predial: $modelo_predial, modelo_retencion: $modelo_retencion,modelo_traslado: $modelo_traslado ));
         $campos_view['cat_sat_tipo_factor_id'] = array('type' => 'selects', 'model' => new cat_sat_tipo_factor($link));
         $campos_view['cat_sat_factor_id'] = array('type' => 'selects', 'model' => new cat_sat_factor($link));
         $campos_view['org_sucursal_id'] = array('type' => 'selects', 'model' => new org_sucursal($link));
@@ -35,8 +38,7 @@ class fc_traslado_cp extends _data_impuestos {
             exit;
         }
 
-        $fc_impuesto_importe = (new _facturacion())->fc_impuesto_importe(
-            fc_partida_importe_con_descuento: $sq_importes->fc_partida_importe_con_descuento);
+        $fc_impuesto_importe = (new _facturacion())->fc_impuesto_importe(fc_partida_importe_con_descuento: $sq_importes->fc_partida_entidad_importe_con_descuento);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al generar fc_impuesto_importe',data:  $fc_impuesto_importe);
             print_r($error);
@@ -44,8 +46,8 @@ class fc_traslado_cp extends _data_impuestos {
         }
 
 
-        $columnas_extra['fc_partida_cp_importe'] = $sq_importes->fc_partida_importe;
-        $columnas_extra['fc_partida_cp_importe_con_descuento'] = $sq_importes->fc_partida_importe_con_descuento;
+        $columnas_extra['fc_partida_cp_importe'] = $sq_importes->fc_partida_entidad_importe;
+        $columnas_extra['fc_partida_cp_importe_con_descuento'] = $sq_importes->fc_partida_entidad_importe_con_descuento;
         $columnas_extra['fc_traslado_cp_importe'] = $fc_impuesto_importe;
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
@@ -58,7 +60,6 @@ class fc_traslado_cp extends _data_impuestos {
 
 
     }
-
 
 
 

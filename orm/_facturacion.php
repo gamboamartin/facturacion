@@ -122,8 +122,10 @@ class _facturacion
                 data: $fc_partida_importe_con_descuento);
         }
 
+        $id_partida = $name_entidad_partida.'_id';
+
         $inner_join_cat_sat_factor = "INNER JOIN cat_sat_factor ON cat_sat_factor.id = $tabla_impuesto.cat_sat_factor_id";
-        $where = "WHERE $tabla_impuesto.fc_partida_id = fc_partida.id";
+        $where = "WHERE $tabla_impuesto.$id_partida = $name_entidad_partida.id";
 
 
         return "(SELECT ROUND(SUM($fc_impuesto_importe),2) FROM $tabla_impuesto $inner_join_cat_sat_factor $where)";

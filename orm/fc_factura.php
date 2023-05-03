@@ -89,7 +89,7 @@ class fc_factura extends _transacciones_fc
         $fc_partida_operacion = "IFNULL(fc_partida_operacion.cantidad,0) * IFNULL(fc_partida_operacion.valor_unitario,0) - IFNULL(fc_partida_operacion.descuento,0)";
         $where_pc_partida_operacion = "fc_partida_operacion.fc_factura_id = fc_factura.id AND fc_partida_operacion.id = fc_partida.id";
 
-        $from_impuesto = $this->from_impuesto(tipo_impuesto: 'fc_traslado');
+        $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida', tipo_impuesto: 'fc_traslado');
         if(errores::$error){
             $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
             print_r($error);
@@ -115,7 +115,7 @@ class fc_factura extends _transacciones_fc
 		fc_partida.fc_factura_id = fc_factura.id 
 	)";
 
-        $from_impuesto = $this->from_impuesto(tipo_impuesto: 'fc_retenido');
+        $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida', tipo_impuesto: 'fc_retenido');
         if(errores::$error){
             $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
             print_r($error);
@@ -411,10 +411,7 @@ class fc_factura extends _transacciones_fc
     }
 
 
-    private function from_impuesto(string $tipo_impuesto): string
-    {
-        return "fc_partida AS fc_partida_operacion LEFT JOIN $tipo_impuesto ON $tipo_impuesto.fc_partida_id = fc_partida_operacion.id";
-    }
+
 
 
     public function genera_ruta_archivo_tmp(): array|string
