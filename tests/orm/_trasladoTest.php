@@ -87,7 +87,7 @@ class _trasladoTest extends test
         }
 
         $fc_partida_id = 1;
-        $resultado = $modelo->get_data_rows($fc_partida_id);
+        $resultado = $modelo->get_data_rows(registro_partida_id: $fc_partida_id,name_modelo_partida: 'fc_partida');
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals('0.16', $resultado->registros[0]['cat_sat_factor_factor']);

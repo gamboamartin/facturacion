@@ -12,6 +12,8 @@ class _relacion extends _modelo_parent_sin_codigo{
     protected _transacciones_fc $modelo_entidad;
     protected _relacionada $modelo_relacionada;
 
+    protected _etapa $modelo_etapa;
+
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
         $row_entidad = $this->modelo_entidad->registro(registro_id: $this->registro[$this->modelo_entidad->key_id]);
@@ -19,7 +21,8 @@ class _relacion extends _modelo_parent_sin_codigo{
             return $this->error->error(mensaje: 'Error al al obtener row_entidad', data: $row_entidad);
         }
 
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(registro_id: $this->registro[$this->modelo_entidad->key_id]);
+        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa,
+            registro_id: $this->registro[$this->modelo_entidad->key_id]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -49,7 +52,8 @@ class _relacion extends _modelo_parent_sin_codigo{
         }
         $key_id_entidad = $this->modelo_entidad->key_id;
 
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(registro_id: $fc_relacion->$key_id_entidad);
+        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa,
+            registro_id: $fc_relacion->$key_id_entidad);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }

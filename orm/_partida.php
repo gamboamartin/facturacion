@@ -9,46 +9,17 @@ use stdClass;
 
 class _partida extends  _base{
 
-    protected _data_impuestos|stdClass $modelo_retencion;
-    protected _data_impuestos|stdClass $modelo_traslado;
+    protected _data_impuestos $modelo_retencion;
+    protected _data_impuestos $modelo_traslado;
 
-    protected _transacciones_fc|stdClass $modelo_entidad;
-    protected _cuenta_predial|stdClass $modelo_predial;
-    public function __construct(PDO $link, string $tabla, _transacciones_fc|stdClass $modelo_entidad = new stdClass(),
-                                _cuenta_predial|stdClass $modelo_predial = new stdClass(),
-                                _data_impuestos|stdClass $modelo_retencion = new stdClass(),
-                                _data_impuestos|stdClass $modelo_traslado = new stdClass(),
-                                bool $aplica_bitacora = false, bool $aplica_seguridad = false,
-                                bool $aplica_transaccion_inactivo = true, array $campos_encriptados = array(),
-                                array $campos_obligatorios = array(), array $columnas = array(),
-                                array $campos_view = array(), array $columnas_extra = array(),
-                                array $extension_estructura = array(), array $no_duplicados = array(),
-                                array $renombres = array(), array $sub_querys = array(), array $tipo_campos = array(),
-                                bool $validation = false, array $campos_no_upd = array(), array $parents = array(),
-                                bool $temp = false, array $childrens = array(), array $defaults = array(),
-                                array $parents_data = array(), array $atributos_criticos = array())
-    {
+    protected _transacciones_fc $modelo_entidad;
+    protected _cuenta_predial $modelo_predial;
 
+    protected _etapa $modelo_etapa;
 
-
-        parent::__construct(link: $link,tabla:  $tabla,aplica_bitacora:  $aplica_bitacora,
-            aplica_seguridad:  $aplica_seguridad,aplica_transaccion_inactivo:  $aplica_transaccion_inactivo,
-            campos_encriptados: $campos_encriptados,campos_obligatorios:  $campos_obligatorios,columnas:  $columnas,
-            campos_view:  $campos_view,columnas_extra:  $columnas_extra,extension_estructura:  $extension_estructura,
-            no_duplicados: $no_duplicados,renombres:  $renombres,sub_querys:  $sub_querys,tipo_campos:  $tipo_campos,
-            validation: $validation,campos_no_upd:  $campos_no_upd,parents:  $parents,temp:  $temp,
-            childrens: $childrens,defaults:  $defaults, parents_data: $parents_data,
-            atributos_criticos:  $atributos_criticos);
-
-        $this->modelo_retencion = $modelo_retencion;
-        $this->modelo_traslado = $modelo_traslado;
-        $this->modelo_entidad = $modelo_entidad;
-        $this->modelo_predial = $modelo_predial;
-
-    }
 
     private function acciones_conf_retenido(bool $aplica_cat_sat_conf_imps, int $cat_sat_conf_imps_id,
-                                            stdClass $fc_registro_partida): array|stdClass
+                                            stdClass $fc_registro_partida, _data_impuestos $modelo_retencion): array|stdClass
     {
         $conf_retenidos = (new fc_conf_retenido($this->link))->get_configuraciones(
             com_producto_id: $this->registro["com_producto_id"]);
@@ -78,11 +49,7 @@ class _partida extends  _base{
                 return $this->error->error(mensaje: 'Error al maquetar datos retenidos', data: $retenido);
             }
 
-            $class = get_class($this->modelo_retencion);
-            if($class === 'stdClass'){
-                $this->modelo_retencion = new fc_retenido(link: $this->link);
-            }
-            $alta_retenido = $this->modelo_retencion->alta_registro(registro: $retenido);
+            $alta_retenido = $modelo_retencion->alta_registro(registro: $retenido);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al dar de alta retenidos', data: $alta_retenido);
             }
@@ -92,7 +59,7 @@ class _partida extends  _base{
     }
 
     private function acciones_conf_traslado(bool $aplica_cat_sat_conf_imps, int $cat_sat_conf_imps_id,
-                                            stdClass $fc_registro_partida): array|stdClass
+                                            stdClass $fc_registro_partida, _data_impuestos $modelo_traslado): array|stdClass
     {
         $conf_traslados = (new fc_conf_traslado($this->link))->get_configuraciones(
             com_producto_id: $this->registro["com_producto_id"]);
@@ -121,12 +88,8 @@ class _partida extends  _base{
                 return $this->error->error(mensaje: 'Error al maquetar datos traslados', data: $traslado);
             }
 
-            $class = get_class($this->modelo_traslado);
-            if($class === 'stdClass'){
-                $this->modelo_traslado = new fc_traslado(link: $this->link);
-            }
 
-            $alta_traslado = $this->modelo_traslado->alta_registro(registro: $traslado);
+            $alta_traslado = $modelo_traslado->alta_registro(registro: $traslado);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al dar de alta traslados', data: $alta_traslado);
             }
@@ -136,16 +99,17 @@ class _partida extends  _base{
     }
 
 
+    /**
+     * SOBRRESCRIBIR
+     * @param array $keys_integra_ds
+     * @return array|stdClass
+     */
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
 
-        $class = get_class($this->modelo_entidad);
-        if($class === 'stdClass'){
-            $this->modelo_entidad = new fc_factura(link: $this->link);
-        }
 
         $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(
-            registro_id: $this->registro[$this->modelo_entidad->tabla.'_id']);
+            modelo_etapa: $this->modelo_etapa, registro_id: $this->registro[$this->modelo_entidad->tabla.'_id']);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -192,13 +156,15 @@ class _partida extends  _base{
 
 
         $traslado = $this->acciones_conf_traslado(aplica_cat_sat_conf_imps: $aplica_cat_sat_conf_imps,
-            cat_sat_conf_imps_id: $cat_sat_conf_imps_id, fc_registro_partida: $fc_registro_partida);
+            cat_sat_conf_imps_id: $cat_sat_conf_imps_id, fc_registro_partida: $fc_registro_partida,
+            modelo_traslado: $this->modelo_traslado);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al realizar acciones de conf. traslado', data: $traslado);
         }
 
         $retenido = $this->acciones_conf_retenido(aplica_cat_sat_conf_imps: $aplica_cat_sat_conf_imps,
-            cat_sat_conf_imps_id: $cat_sat_conf_imps_id,fc_registro_partida: $fc_registro_partida);
+            cat_sat_conf_imps_id: $cat_sat_conf_imps_id,fc_registro_partida: $fc_registro_partida,
+            modelo_retencion: $this->modelo_retencion);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al realizar acciones de conf. retenido', data: $retenido);
         }
@@ -244,19 +210,16 @@ class _partida extends  _base{
 
     /**
      * Calcula los impuestos trasladados de una partida
+     * @param _data_impuestos $modelo_traslado
      * @param int $registro_partida_id Partida a calcular
-     * @return float|array
+     * @return float
      */
-    public function calculo_imp_trasladado(int $registro_partida_id):float
+    public function calculo_imp_trasladado(_data_impuestos $modelo_traslado, int $registro_partida_id):float
     {
         $filtro[$this->key_filtro_id] = $registro_partida_id;
 
-        $class = get_class($this->modelo_traslado);
-        if($class === 'stdClass'){
-            $this->modelo_traslado = new fc_traslado(link: $this->link);
-        }
 
-        $traslado = $this->modelo_traslado->filtro_and(filtro: $filtro);
+        $traslado = $modelo_traslado->filtro_and(filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener los registros', data: $traslado);
         }
@@ -295,7 +258,7 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error obtener fc_partida', data: $fc_partida);
         }
         $key_entidad_id = $this->modelo_entidad->tabla.'_id';
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(registro_id: $fc_partida->$key_entidad_id);
+        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa, registro_id: $fc_partida->$key_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -342,21 +305,18 @@ class _partida extends  _base{
 
     /**
      * Obtiene las partidas de una factura
+     * @param string $key_filtro_entidad_id Jey id para filtro de factura complemento
      * @param int $registro_entidad_id Factura a validar
      * @return array
      */
-    public function get_partidas(int $registro_entidad_id): array
+    public function get_partidas(string $key_filtro_entidad_id,int $registro_entidad_id): array
     {
         if ($registro_entidad_id <= 0) {
             return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0', data: $registro_entidad_id);
         }
 
-        $class = get_class($this->modelo_entidad);
-        if($class === 'stdClass'){
-            $this->modelo_entidad = new fc_factura(link: $this->link);
-        }
 
-        $filtro[$this->modelo_entidad->key_filtro_id] = $registro_entidad_id;
+        $filtro[$key_filtro_entidad_id] = $registro_entidad_id;
         $r_fc_partida = $this->filtro_and(filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_partida);
@@ -494,7 +454,7 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al obtener partida', data: $partida);
         }
 
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(registro_id: $this->modelo_entidad->key_id);
+        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa, registro_id: $this->modelo_entidad->key_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }

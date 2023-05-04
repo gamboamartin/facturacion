@@ -65,7 +65,8 @@ class fc_partidaTest extends test
             exit;
         }
 
-        $resultado = $modelo->calculo_imp_trasladado(registro_partida_id: $alta->registro_id);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $resultado = $modelo->calculo_imp_trasladado(registro_partida_id: $alta->registro_id, modelo_traslado: $modelo_traslado);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0.0,$resultado);
@@ -123,7 +124,7 @@ class fc_partidaTest extends test
         //$modelo = new liberator($modelo);
 
         $fc_factura_id = -1;
-        $resultado = $modelo->get_partidas(registro_entidad_id: $fc_factura_id);
+        $resultado = $modelo->get_partidas(key_filtro_entidad_id: 'fc_factura.id', registro_entidad_id: $fc_factura_id);
         $this->assertIsArray($resultado);
         $this->assertTrue(errores::$error);
         $this->assertEquals('<b><span style="color:red">Error registro_entidad_id debe ser mayor a 0</span></b>',
@@ -131,7 +132,7 @@ class fc_partidaTest extends test
         errores::$error = false;
 
         $fc_factura_id = 1;
-        $resultado = $modelo->get_partidas(registro_entidad_id: $fc_factura_id);
+        $resultado = $modelo->get_partidas(key_filtro_entidad_id: 'fc_factura.id', registro_entidad_id: $fc_factura_id);
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
         errores::$error = false;

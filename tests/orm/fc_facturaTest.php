@@ -5,6 +5,7 @@ namespace gamboamartin\facturacion\tests\orm;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\facturacion\tests\base_test2;
 use gamboamartin\organigrama\models\org_empresa;
@@ -302,7 +303,9 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $resultado = $modelo->get_factura_imp_trasladados($alta_fc_factura->registro_id);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+
+        $resultado = $modelo->get_factura_imp_trasladados(fc_factura_id: $alta_fc_factura->registro_id, modelo_traslado: $modelo_traslado);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0,$resultado);

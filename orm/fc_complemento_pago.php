@@ -261,8 +261,9 @@ class fc_complemento_pago extends _transacciones_fc
 
     public function elimina_bd(int $id): array|stdClass
     {
+        $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
 
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $id);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -300,7 +301,8 @@ class fc_complemento_pago extends _transacciones_fc
      */
     private function elimina_partidas(int $fc_complemento_pago_id): array
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_complemento_pago_id);
+        $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -360,7 +362,8 @@ class fc_complemento_pago extends _transacciones_fc
 
     public function genera_xml(int $fc_complemento_pago_id, string $tipo): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_complemento_pago_id);
+        $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -520,7 +523,7 @@ class fc_complemento_pago extends _transacciones_fc
 
         $modelo_relacionada = new fc_complemento_pago_relacionada(link: $this->link);
         $modelo_entidad = $this;
-        $relacionados = (new fc_relacion(link: $this->link))->get_relaciones(
+        $relacionados = (new fc_relacion_cp(link: $this->link))->get_relaciones(
             registro_entidad_id: $fc_complemento_pago_id, modelo_entidad: $modelo_entidad, modelo_relacionada: $modelo_relacionada);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relacionados);
@@ -537,12 +540,14 @@ class fc_complemento_pago extends _transacciones_fc
         $ret_global= array();
         foreach ($registro['partidas'] as $key => $partida) {
 
-            $traslados = (new fc_traslado_cp($this->link))->get_data_rows(registro_partida_id: $partida['fc_partida_cp_id']);
+            $traslados = (new fc_traslado_cp($this->link))->get_data_rows(name_modelo_partida: 'fc_partida_cp',
+                registro_partida_id: $partida['fc_partida_cp_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el traslados de la partida', data: $traslados);
             }
 
-            $retenidos = (new fc_retenido_cp($this->link))->get_data_rows(registro_partida_id: $partida['fc_partida_cp_id']);
+            $retenidos = (new fc_retenido_cp($this->link))->get_data_rows(name_modelo_partida: 'fc_partida_cp',
+                registro_partida_id: $partida['fc_partida_cp_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida', data: $retenidos);
             }
@@ -679,7 +684,8 @@ class fc_complemento_pago extends _transacciones_fc
 
     final public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $id);
+        $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -709,7 +715,7 @@ class fc_complemento_pago extends _transacciones_fc
      * @return float|array
      * @version 4.14.0
      */
-    public function get_factura_imp_trasladados(int $fc_complemento_pago_id): float|array
+    public function get_factura_imp_trasladados(int $fc_complemento_pago_id, _data_impuestos $modelo_traslado): float|array
     {
         $partidas = $this->get_partidas(fc_complemento_pago_id: $fc_complemento_pago_id);
         if (errores::$error) {
@@ -718,7 +724,8 @@ class fc_complemento_pago extends _transacciones_fc
         $imp_traslado = 0.0;
 
         foreach ($partidas as $partida) {
-            $imp_traslado += (new fc_partida_cp($this->link))->calculo_imp_trasladado($partida['fc_partida_cp_id']);
+            $imp_traslado += (new fc_partida_cp($this->link))->calculo_imp_trasladado(
+                modelo_traslado: $modelo_traslado, registro_partida_id: $partida['fc_partida_cp_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
             }
@@ -881,7 +888,8 @@ class fc_complemento_pago extends _transacciones_fc
 
     final public function status(string $campo, int $registro_id): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $registro_id);
+        $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -1047,7 +1055,8 @@ class fc_complemento_pago extends _transacciones_fc
 
     public function timbra_xml(int $fc_complemento_pago_id): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_complemento_pago_id);
+        $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }

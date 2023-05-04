@@ -1042,8 +1042,9 @@ class controlador_fc_factura extends _base_system_fc {
             return $this->errores->error(mensaje: 'Error al obtener descuento',data:  $descuento);
         }
 
+        $modelo_traslado = new fc_traslado(link: $this->link);
         $imp_trasladados = (new fc_factura($this->link))->get_factura_imp_trasladados(fc_factura_id:
-            $this->registro_id);
+            $this->registro_id, modelo_traslado: $modelo_traslado);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener imp_trasladados',data:  $imp_trasladados);
         }

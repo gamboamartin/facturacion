@@ -10,6 +10,7 @@ class _relacionada extends _modelo_parent_sin_codigo{
 
     protected _relacion $modelo_relacion;
     protected _transacciones_fc $modelo_entidad;
+    protected _etapa $modelo_etapa;
 
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
@@ -30,7 +31,8 @@ class _relacionada extends _modelo_parent_sin_codigo{
         $key_entidad_folio = $this->modelo_entidad->tabla.'_folio';
         $key_entidad_fecha = $this->modelo_entidad->tabla.'_fecha';
 
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(registro_id: $fc_relacion->$key_entidad_id);
+        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa,
+            registro_id: $fc_relacion->$key_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -69,7 +71,8 @@ class _relacionada extends _modelo_parent_sin_codigo{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_relacion);
         }
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(registro_id: $fc_relacion->$key_entidad_id);
+        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa,
+            registro_id: $fc_relacion->$key_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -94,7 +97,7 @@ class _relacionada extends _modelo_parent_sin_codigo{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_relacion);
         }
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(registro_id: $fc_relacion->$key_entidad_id);
+        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa, registro_id: $fc_relacion->$key_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }

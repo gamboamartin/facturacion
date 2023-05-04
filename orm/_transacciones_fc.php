@@ -387,8 +387,8 @@ class _transacciones_fc extends modelo
         return $registro;
     }
 
-    private function permite_transaccion(int $registro_id){
-        $etapas = $this->etapas(modelo_fc_etapa: $this->modelo_etapa, name_entidad: $this->tabla, registro_id: $registro_id);
+    private function permite_transaccion(_etapa $modelo_etapa, int $registro_id){
+        $etapas = $this->etapas(modelo_fc_etapa: $modelo_etapa, name_entidad: $this->tabla, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener fc_factura_etapas', data: $etapas);
         }
@@ -484,8 +484,8 @@ class _transacciones_fc extends modelo
         return $permite_transaccion;
     }
 
-    final public function verifica_permite_transaccion(int $registro_id){
-        $permite_transaccion = $this->permite_transaccion(registro_id: $registro_id);
+    final public function verifica_permite_transaccion(_etapa $modelo_etapa, int $registro_id){
+        $permite_transaccion = $this->permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
         }
