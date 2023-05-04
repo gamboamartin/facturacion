@@ -14,7 +14,7 @@ class fc_nota_credito_etapa extends _modelo_parent_sin_codigo
     public function __construct(PDO $link)
     {
         $tabla = 'fc_nota_credito_etapa';
-        $columnas = array($tabla => false, 'fc_nota_credito_etapa' => $tabla, 'pr_etapa_proceso' => $tabla,
+        $columnas = array($tabla => false, 'fc_nota_credito' => $tabla, 'pr_etapa_proceso' => $tabla,
             'pr_etapa' => 'pr_etapa_proceso', 'pr_proceso' => 'pr_etapa_proceso', 'pr_tipo_proceso' => 'pr_proceso');
         $campos_obligatorios = array('fc_nota_credito_id', 'pr_etapa_proceso_id');
 
@@ -27,7 +27,7 @@ class fc_nota_credito_etapa extends _modelo_parent_sin_codigo
 
         $this->NAMESPACE = __NAMESPACE__;
 
-        $this->etiqueta = 'Factura Etapa';
+        $this->etiqueta = 'Nota Credito Etapa';
     }
 
     public function alta_bd(array $keys_integra_ds = array('descripcion','pr_etapa_proceso_id','fc_nota_credito_id', 'fecha')): array|stdClass
