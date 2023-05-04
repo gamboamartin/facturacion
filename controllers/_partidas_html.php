@@ -68,7 +68,8 @@ class _partidas_html{
             modelo_predial: $modelo_predial, modelo_retencion: $modelo_retencion,
             modelo_traslado: $modelo_traslado);
 
-        $partidas  = $fc_partida_modelo->partidas(html: $html, registro_entidad_id: $fc_factura_id);
+        $partidas  = $fc_partida_modelo->partidas(html: $html, modelo_entidad: $modelo_entidad,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
         }

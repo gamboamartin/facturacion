@@ -3,6 +3,8 @@
 namespace gamboamartin\facturacion\tests\orm;
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\tests\base_test;
 
@@ -76,7 +78,8 @@ class fc_relacionTest extends test
         $fc_relacion = array();
         $fc_relacion['fc_relacion_id'] = 1;
         $fc_relacion['fc_factura_id'] = 1;
-        $resultado = $modelo->facturas_relacionadas($fc_relacion);
+        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+        $resultado = $modelo->facturas_relacionadas($modelo_relacionada, $fc_relacion);
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
 
@@ -125,7 +128,8 @@ class fc_relacionTest extends test
         }
 
         $fc_partida_id = 1;
-        $resultado = $modelo->relaciones($fc_partida_id);
+        $modelo_entidad = new fc_factura(link: $this->link);
+        $resultado = $modelo->relaciones($modelo_entidad, $fc_partida_id);
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
 

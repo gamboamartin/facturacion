@@ -365,47 +365,57 @@ class _partida extends  _base{
         return $r_fc_partida->registros;
     }
 
-    private function hijo_retenido(array $hijo): array
+    private function hijo_retenido(array $hijo, _data_impuestos $modelo_retencion): array
     {
-        $hijo[$this->modelo_retencion->tabla]['filtros'][$this->key_filtro_id] = $this->key_id;
-        $hijo[$this->modelo_retencion->tabla]['filtros_con_valor'] = array();
-        $hijo[$this->modelo_retencion->tabla]['nombre_estructura'] = $this->modelo_retencion->tabla;
-        $hijo[$this->modelo_retencion->tabla]['namespace_model'] = 'gamboamartin\\facturacion\\models';
+        if(!isset($modelo_retencion->tabla)){
+            return $this->error->error(mensaje: 'Error no existe tabla definida traslado', data: $modelo_retencion);
+        }
+
+        $tabla = trim($modelo_retencion->tabla);
+        if($tabla === ''){
+            return $this->error->error(mensaje: 'Error la tabla esta vacia', data: $tabla);
+        }
+
+        $hijo[$modelo_retencion->tabla]['filtros'][$this->key_filtro_id] = $this->key_id;
+        $hijo[$modelo_retencion->tabla]['filtros_con_valor'] = array();
+        $hijo[$modelo_retencion->tabla]['nombre_estructura'] = $modelo_retencion->tabla;
+        $hijo[$modelo_retencion->tabla]['namespace_model'] = 'gamboamartin\\facturacion\\models';
         return $hijo;
     }
 
     /**
      * Maqueta el elemento para un children de factura
      * @param array $hijo Hijo a maquetar
+     * @param _data_impuestos $modelo_traslado Modelo de tipo traslado
      * @return array
      * @version 8.47.3
      */
-    private function hijo_traslado(array $hijo): array
+    private function hijo_traslado(array $hijo, _data_impuestos $modelo_traslado): array
     {
-        if(!isset($this->modelo_traslado->tabla)){
-            return $this->error->error(mensaje: 'Error no existe tabla definida traslado', data: $this->modelo_traslado);
+        if(!isset($modelo_traslado->tabla)){
+            return $this->error->error(mensaje: 'Error no existe tabla definida traslado', data: $modelo_traslado);
         }
 
-        $tabla = trim($this->modelo_traslado->tabla);
+        $tabla = trim($modelo_traslado->tabla);
         if($tabla === ''){
             return $this->error->error(mensaje: 'Error la tabla esta vacia', data: $tabla);
         }
 
-        $hijo[$this->modelo_traslado->tabla]['filtros'][$this->key_filtro_id] = $this->key_id;
-        $hijo[$this->modelo_traslado->tabla]['filtros_con_valor'] = array();
-        $hijo[$this->modelo_traslado->tabla]['nombre_estructura'] = $this->modelo_traslado->tabla;
-        $hijo[$this->modelo_traslado->tabla]['namespace_model'] = 'gamboamartin\\facturacion\\models';
+        $hijo[$modelo_traslado->tabla]['filtros'][$this->key_filtro_id] = $this->key_id;
+        $hijo[$modelo_traslado->tabla]['filtros_con_valor'] = array();
+        $hijo[$modelo_traslado->tabla]['nombre_estructura'] = $modelo_traslado->tabla;
+        $hijo[$modelo_traslado->tabla]['namespace_model'] = 'gamboamartin\\facturacion\\models';
         return $hijo;
     }
 
-    private function hijos_partida(){
+    private function hijos_partida(_data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado){
         $hijo = array();
 
-        $hijo = $this->hijo_traslado(hijo: $hijo);
+        $hijo = $this->hijo_traslado(hijo: $hijo,modelo_traslado: $modelo_traslado);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al integrar hijo', data: $hijo);
         }
-        $hijo = $this->hijo_retenido(hijo: $hijo);
+        $hijo = $this->hijo_retenido(hijo: $hijo, modelo_retencion: $modelo_retencion);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al integrar hijo', data: $hijo);
         }
@@ -528,14 +538,15 @@ class _partida extends  _base{
         return $params;
     }
 
-    public function partidas( html_controler $html, int $registro_entidad_id, $hijo = array()): array|stdClass
+    public function partidas( html_controler $html, _transacciones_fc $modelo_entidad,_data_impuestos $modelo_retencion,
+                              _data_impuestos $modelo_traslado, int $registro_entidad_id, $hijo = array()): array|stdClass
     {
         if ($registro_entidad_id <= 0) {
             return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0', data: $registro_entidad_id);
         }
 
-        $filtro[$this->modelo_entidad->key_filtro_id] = $registro_entidad_id;
-        $hijo = $this->hijos_partida();
+        $filtro[$modelo_entidad->key_filtro_id] = $registro_entidad_id;
+        $hijo = $this->hijos_partida(modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al integrar hijo', data: $hijo);
         }

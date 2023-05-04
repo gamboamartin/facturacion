@@ -478,13 +478,20 @@ class fc_complemento_pago extends _transacciones_fc
 
     final public function  get_data_relaciones(int $fc_complemento_pago_id){
 
-        $relaciones = (new fc_relacion(link: $this->link))->relaciones(fc_complemento_pago_id: $fc_complemento_pago_id);
+        $modelo_relacionada = new fc_complemento_pago_relacionada(link: $this->link);
+        $modelo_entidad = $this;
+
+        $relaciones = (new fc_relacion(link: $this->link))->relaciones(modelo_entidad: $modelo_entidad,
+            registro_entidad_id: $fc_complemento_pago_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
         }
 
+
+
         foreach ($relaciones as $indice=>$fc_relacion){
-            $relacionadas = (new fc_relacion(link: $this->link))->facturas_relacionadas(fc_relacion: $fc_relacion);
+            $relacionadas = (new fc_relacion(link: $this->link))->facturas_relacionadas(
+                modelo_relacionada: $modelo_relacionada, row_relacion: $fc_relacion);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener relacionadas', data: $relacionadas);
             }
@@ -511,7 +518,10 @@ class fc_complemento_pago extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al obtener factura', data: $registro);
         }
 
-        $relacionados = (new fc_relacion(link: $this->link))->get_relaciones(fc_complemento_pago_id: $fc_complemento_pago_id);
+        $modelo_relacionada = new fc_complemento_pago_relacionada(link: $this->link);
+        $modelo_entidad = $this;
+        $relacionados = (new fc_relacion(link: $this->link))->get_relaciones(
+            registro_entidad_id: $fc_complemento_pago_id, modelo_entidad: $modelo_entidad, modelo_relacionada: $modelo_relacionada);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relacionados);
         }

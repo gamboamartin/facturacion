@@ -20,13 +20,17 @@ use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\_pdf;
 use gamboamartin\facturacion\models\fc_cancelacion;
 use gamboamartin\facturacion\models\fc_complemento_pago;
+use gamboamartin\facturacion\models\fc_complemento_pago_etapa;
 use gamboamartin\facturacion\models\fc_email;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_partida_cp;
 use gamboamartin\facturacion\models\fc_relacion;
+use gamboamartin\facturacion\models\fc_retenido_cp;
+use gamboamartin\facturacion\models\fc_traslado_cp;
 use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\system\actions;
 use gamboamartin\system\html_controler;
@@ -118,8 +122,6 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
 
         $this->verifica_parents_alta = true;
-
-
 
 
     }
@@ -875,25 +877,25 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener link nueva_partida',data:  $link);
         }
-        $this->link_fc_factura_nueva_partida = $link;
+        $this->link_fc_complemento_pago_nueva_partida = $link;
 
         $link = $this->obj_link->get_link($this->seccion,"alta_partida_bd");
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener link alta_partida_bd',data:  $link);
         }
-        $this->link_fc_partida_alta_bd = $link;
+        $this->link_fc_partida_cp_alta_bd = $link;
 
         $link = $this->obj_link->get_link($this->seccion,"genera_xml");
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener link genera_xml',data:  $link);
         }
-        $this->link_factura_genera_xml = $link;
+        $this->link_factura_cp_genera_xml = $link;
 
         $link = $this->obj_link->get_link($this->seccion,"timbra_xml");
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener link genera_xml',data:  $link);
         }
-        $this->link_factura_timbra_xml = $link;
+        $this->link_factura_cp_timbra_xml = $link;
 
         $link_fc_email_alta_bd = $this->obj_link->link_alta_bd(link: $this->link, seccion: 'fc_email');
         if(errores::$error){
@@ -901,7 +903,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             print_r($error);
             exit;
         }
-        $this->link_fc_email_alta_bd  = $link_fc_email_alta_bd;
+        $this->link_fc_email_cp_alta_bd  = $link_fc_email_alta_bd;
 
         return $link;
     }
@@ -1386,7 +1388,12 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         }
 
 
-        $partidas = (new fc_partida($this->link))->partidas(html: $this->html, registro_entidad_id: $this->fc_factura_id);
+        $modelo_entidad = (new fc_complemento_pago(link: $this->link));
+        $modelo_traslado = (new fc_traslado_cp(link: $this->link));
+        $modelo_retencion = (new fc_retenido_cp(link: $this->link));
+
+        $partidas = (new fc_partida_cp($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
         }
@@ -1426,7 +1433,12 @@ class controlador_fc_complemento_pago extends _base_system_fc {
                 header: $header,ws:$ws);
         }
 
-        $partidas = (new fc_partida($this->link))->partidas(html: $this->html, registro_entidad_id: $this->fc_factura_id);
+        $modelo_entidad = (new fc_complemento_pago(link: $this->link));
+        $modelo_traslado = (new fc_traslado_cp(link: $this->link));
+        $modelo_retencion = (new fc_retenido_cp(link: $this->link));
+
+        $partidas = (new fc_partida_cp($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
         }
@@ -1484,7 +1496,13 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     }
 
     public function relaciones(bool $header, bool $ws = false){
-        $partidas  = (new fc_partida($this->link))->partidas(registro_entidad_id: $this->registro_id,html: $this->html);
+        $modelo_entidad = (new fc_complemento_pago(link: $this->link));
+
+        $modelo_traslado = (new fc_traslado_cp(link: $this->link));
+        $modelo_retencion = (new fc_retenido_cp(link: $this->link));
+
+        $partidas  = (new fc_partida_cp($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $this->registro_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
             print_r($error);
@@ -1765,7 +1783,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
             $filtro['pr_etapa.descripcion'] = 'cancelado_sat';
             $filtro['fc_factura.id'] = $this->registro_id;
-            $existe = (new fc_factura_etapa(link: $this->link))->existe(filtro: $filtro);
+            $existe = (new fc_complemento_pago_etapa(link: $this->link))->existe(filtro: $filtro);
             if(errores::$error){
                 $this->link->rollBack();
                 return $this->retorno_error(mensaje: 'Error al validar etapa',data:  $existe,header:  $header, ws: $ws);
@@ -1787,8 +1805,12 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $this->link->commit();
 
 
+        $modelo_entidad = (new fc_complemento_pago(link: $this->link));
+        $modelo_retencion = (new fc_retenido_cp(link: $this->link));
+        $modelo_traslado = (new fc_traslado_cp(link: $this->link));
 
-        $partidas  = (new fc_partida($this->link))->partidas(registro_entidad_id: $this->registro_id,html: $this->html);
+        $partidas  = (new fc_partida($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $this->registro_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
             print_r($error);

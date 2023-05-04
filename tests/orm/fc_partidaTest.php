@@ -6,6 +6,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\facturacion\tests\base_test2;
 use gamboamartin\organigrama\models\org_empresa;
@@ -147,12 +148,13 @@ class fc_partidaTest extends test
         $modelo = new liberator($modelo);
 
         $hijo = array();
-        $modelo->modelo_traslado->tabla = 'a';
-        $resultado = $modelo->hijo_traslado($hijo);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+
+        $resultado = $modelo->hijo_traslado($hijo,modelo_traslado:$modelo_traslado );
 
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals('fc_partida_id',$resultado['a']['filtros']['fc_partida.id']);
+        $this->assertEquals('fc_partida_id',$resultado['fc_traslado']['filtros']['fc_partida.id']);
         errores::$error = false;
     }
 
