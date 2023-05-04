@@ -314,7 +314,7 @@ class _partida extends  _base{
      * @param int $registro_entidad_id Factura a validar
      * @return array
      */
-    public function get_partidas(string $key_filtro_entidad_id,int $registro_entidad_id): array
+    final public function get_partidas(string $key_filtro_entidad_id,int $registro_entidad_id): array
     {
         if ($registro_entidad_id <= 0) {
             return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0', data: $registro_entidad_id);
@@ -461,7 +461,8 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al obtener partida', data: $partida);
         }
 
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa, registro_id: $this->modelo_entidad->key_id);
+        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(
+            modelo_etapa: $this->modelo_etapa, registro_id: $this->modelo_entidad->key_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -502,7 +503,7 @@ class _partida extends  _base{
         return $params;
     }
 
-    public function partidas( html_controler $html, _transacciones_fc $modelo_entidad,_data_impuestos $modelo_retencion,
+    final public function partidas( html_controler $html, _transacciones_fc $modelo_entidad,_data_impuestos $modelo_retencion,
                               _data_impuestos $modelo_traslado, int $registro_entidad_id, $hijo = array()): array|stdClass
     {
         if ($registro_entidad_id <= 0) {
@@ -552,7 +553,7 @@ class _partida extends  _base{
      * @param int $registro_partida_id Partida a validar
      * @return float|array
      */
-    public function total_partida(int $registro_partida_id): float|array
+    final public function total_partida(int $registro_partida_id): float|array
     {
         if ($registro_partida_id <= 0) {
             return $this->error->error(mensaje: 'Error el id de la partida es incorrecto', data: $registro_partida_id);
