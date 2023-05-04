@@ -14,17 +14,16 @@ use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\compresor\compresor;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_nota_credito_html;
 use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\_pdf;
 use gamboamartin\facturacion\models\fc_email;
-use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_nota_credito;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_partida_nc;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\system\actions;
@@ -353,7 +352,7 @@ class controlador_fc_nota_credito extends _base_system_fc {
         $this->inputs = new stdClass();
         $fc_nota_credito_id = (new fc_nota_credito_html(html: $this->html_base))->select_fc_nota_credito_id(cols: 12,
             con_registros: true, id_selected: $this->registro_id, link: $this->link,
-            disabled: true, filtro: array('fc_factura.id'=>$this->registro_id));
+            disabled: true, filtro: array('fc_nota_credito.id'=>$this->registro_id));
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al maquetar input', data: $fc_nota_credito_id);
         }
@@ -592,7 +591,7 @@ class controlador_fc_nota_credito extends _base_system_fc {
         }
 
 
-        $ruta_pdf = (new _pdf())->pdf(descarga: false,fc_factura_id: $this->registro_id,guarda: true,link:  $this->link);
+        $ruta_pdf = (new _pdf())->pdf(descarga: false,fc_nota_credito_id: $this->registro_id,guarda: true,link:  $this->link);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar PDF',data:  $ruta_pdf, header: $header,ws:$ws);
         }
@@ -712,7 +711,7 @@ class controlador_fc_nota_credito extends _base_system_fc {
 
     public function genera_pdf(bool $header, bool $ws = false){
 
-        $pdf = (new _pdf())->pdf(descarga: false, fc_factura_id: $this->registro_id,guarda: true,link: $this->link);
+        $pdf = (new _pdf())->pdf(descarga: false, fc_nota_credito_id: $this->registro_id,guarda: true,link: $this->link);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $pdf, header: $header,ws:$ws);
         }
@@ -1380,8 +1379,10 @@ class controlador_fc_nota_credito extends _base_system_fc {
                 header: $header,ws:$ws);
         }
 
-
-        $partidas = (new fc_partida($this->link))->partidas(html: $this->html, registro_entidad_id: $this->fc_nota_credito_id);
+        $modelo_entidad = (new fc_nota_credito(link: $this->link));
+        $modelo_traslado = (new fc_traslado_nc(link: $this->link));
+        $partidas = (new fc_partida_nc($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            modelo_traslado: $modelo_traslado, registro_entidad_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
         }
@@ -1421,7 +1422,11 @@ class controlador_fc_nota_credito extends _base_system_fc {
                 header: $header,ws:$ws);
         }
 
-        $partidas = (new fc_partida($this->link))->partidas(html: $this->html, registro_entidad_id: $this->fc_nota_credito_id);
+        $modelo_entidad = (new fc_nota_credito(link: $this->link));
+        $modelo_traslado = (new fc_traslado_nc(link: $this->link));
+
+        $partidas = (new fc_partida_nc($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            modelo_traslado: $modelo_traslado, registro_entidad_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
         }
@@ -1479,7 +1484,11 @@ class controlador_fc_nota_credito extends _base_system_fc {
     }
 
     public function relaciones(bool $header, bool $ws = false){
-        $partidas  = (new fc_partida($this->link))->partidas(registro_entidad_id: $this->registro_id,html: $this->html);
+
+        $modelo_entidad = (new fc_nota_credito(link: $this->link));
+        $modelo_traslado = (new fc_traslado_nc(link: $this->link));
+        $partidas  = (new fc_partida_nc($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            registro_entidad_id: $this->registro_id, modelo_traslado: $modelo_traslado);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
             print_r($error);
@@ -1760,7 +1769,7 @@ class controlador_fc_nota_credito extends _base_system_fc {
 
             $filtro['pr_etapa.descripcion'] = 'cancelado_sat';
             $filtro['fc_nota_credito.id'] = $this->registro_id;
-            $existe = (new fc_factura_etapa(link: $this->link))->existe(filtro: $filtro);
+            $existe = (new fc_nota_credito_etapa(link: $this->link))->existe(filtro: $filtro);
             if(errores::$error){
                 $this->link->rollBack();
                 return $this->retorno_error(mensaje: 'Error al validar etapa',data:  $existe,header:  $header, ws: $ws);
@@ -1780,10 +1789,11 @@ class controlador_fc_nota_credito extends _base_system_fc {
             }
         }
         $this->link->commit();
+        $modelo_entidad = (new fc_nota_credito(link: $this->link));
+        $modelo_traslado = (new fc_traslado_nc(link: $this->link));
 
-
-
-        $partidas  = (new fc_partida($this->link))->partidas(registro_entidad_id: $this->registro_id,html: $this->html);
+        $partidas  = (new fc_partida_nc($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            registro_entidad_id: $this->registro_id, modelo_traslado: $modelo_traslado);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
             print_r($error);

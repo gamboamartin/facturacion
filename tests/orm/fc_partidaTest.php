@@ -6,6 +6,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\facturacion\tests\base_test2;
 use gamboamartin\organigrama\models\org_empresa;
@@ -64,7 +65,8 @@ class fc_partidaTest extends test
             exit;
         }
 
-        $resultado = $modelo->calculo_imp_trasladado(registro_partida_id: $alta->registro_id);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $resultado = $modelo->calculo_imp_trasladado(registro_partida_id: $alta->registro_id, modelo_traslado: $modelo_traslado);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0.0,$resultado);
@@ -122,7 +124,7 @@ class fc_partidaTest extends test
         //$modelo = new liberator($modelo);
 
         $fc_factura_id = -1;
-        $resultado = $modelo->get_partidas(registro_entidad_id: $fc_factura_id);
+        $resultado = $modelo->get_partidas(key_filtro_entidad_id: 'fc_factura.id', registro_entidad_id: $fc_factura_id);
         $this->assertIsArray($resultado);
         $this->assertTrue(errores::$error);
         $this->assertEquals('<b><span style="color:red">Error registro_entidad_id debe ser mayor a 0</span></b>',
@@ -130,7 +132,7 @@ class fc_partidaTest extends test
         errores::$error = false;
 
         $fc_factura_id = 1;
-        $resultado = $modelo->get_partidas(registro_entidad_id: $fc_factura_id);
+        $resultado = $modelo->get_partidas(key_filtro_entidad_id: 'fc_factura.id', registro_entidad_id: $fc_factura_id);
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
         errores::$error = false;
@@ -147,12 +149,13 @@ class fc_partidaTest extends test
         $modelo = new liberator($modelo);
 
         $hijo = array();
-        $modelo->modelo_traslado->tabla = 'a';
-        $resultado = $modelo->hijo_traslado($hijo);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+
+        $resultado = $modelo->hijo_traslado($hijo,modelo_traslado:$modelo_traslado );
 
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals('fc_partida_id',$resultado['a']['filtros']['fc_partida.id']);
+        $this->assertEquals('fc_partida_id',$resultado['fc_traslado']['filtros']['fc_partida.id']);
         errores::$error = false;
     }
 

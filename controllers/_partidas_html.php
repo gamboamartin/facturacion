@@ -62,13 +62,11 @@ class _partidas_html{
     {
         $modelo_traslado = (new fc_traslado(link: $link));
         $modelo_retencion = (new fc_retenido(link: $link));
-        $modelo_predial = (new fc_cuenta_predial(link: $link));
         $modelo_entidad = (new fc_factura(link: $link));
-        $fc_partida_modelo = new fc_partida(link: $link, modelo_entidad: $modelo_entidad,
-            modelo_predial: $modelo_predial, modelo_retencion: $modelo_retencion,
-            modelo_traslado: $modelo_traslado);
+        $fc_partida_modelo = new fc_partida(link: $link);
 
-        $partidas  = $fc_partida_modelo->partidas(html: $html, registro_entidad_id: $fc_factura_id);
+        $partidas  = $fc_partida_modelo->partidas(html: $html, modelo_entidad: $modelo_entidad,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
         }
@@ -114,7 +112,8 @@ class _partidas_html{
             $key_registro_id = $name_entidad.'_id';
             $registro_id = $impuesto[$key_registro_id];
 
-            $params = $modelo_partida->params_button_partida(registro_entidad_id: $impuesto['fc_factura_id']);
+            $params = $modelo_partida->params_button_partida(name_modelo_entidad: $name_entidad,
+                registro_entidad_id: $impuesto['fc_factura_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener params', data: $params);
             }

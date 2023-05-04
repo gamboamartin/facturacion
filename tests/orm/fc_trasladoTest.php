@@ -36,7 +36,7 @@ class fc_trasladoTest extends test
 
         $modelo_predial = new fc_cuenta_predial(link: $this->link);
 
-        $modelo = new fc_traslado(link: $this->link, modelo_predial: $modelo_predial);
+        $modelo = new fc_traslado(link: $this->link);
 
 
 
@@ -63,7 +63,7 @@ class fc_trasladoTest extends test
         }
 
         $fc_partida_id = 1;
-        $resultado = $modelo->get_data_rows($fc_partida_id);
+        $resultado = $modelo->get_data_rows(registro_partida_id: $fc_partida_id,name_modelo_partida: 'fc_partida');
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
 

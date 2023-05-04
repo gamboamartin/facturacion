@@ -76,6 +76,89 @@ class _transacciones_fc extends modelo
     }
 
     /**
+     * Cancela una factura
+     * @param int $cat_sat_motivo_cancelacion_id Motivo de cancelacion
+     * @param modelo $modelo_cancelacion Modelo para integrar la cancelacion
+     * @param int $registro_id Factura a cancelar
+     * @return array|stdClass
+     */
+    final public function cancela_bd(int $cat_sat_motivo_cancelacion_id, modelo $modelo_cancelacion, int $registro_id): array|stdClass
+    {
+        $fc_cancelacion_ins[$this->key_id] = $registro_id;
+        $fc_cancelacion_ins['cat_sat_motivo_cancelacion_id'] = $cat_sat_motivo_cancelacion_id;
+
+        $r_fc_cancelacion = $modelo_cancelacion->alta_registro(registro: $fc_cancelacion_ins);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al cancelar factura',data:  $r_fc_cancelacion);
+        }
+
+        $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
+            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $registro_id, valida_existencia_etapa: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
+        }
+
+        return $r_fc_cancelacion;
+    }
+
+    /**
+     * Carga un descuento nuevo a un descuento previo
+     * @param float $descuento Descuento previo
+     * @param _partida $modelo_partida
+     * @param array $partida Partida a sumar descuento
+     * @return float|array
+     * @version 0.117.27
+     */
+    private function carga_descuento(float $descuento, _partida $modelo_partida, array $partida): float|array
+    {
+        if ($descuento < 0.0) {
+            return $this->error->error(mensaje: 'Error el descuento previo no puede ser menor a 0', data: $descuento);
+        }
+
+        $key_partida_id = $modelo_partida->key_id;
+
+        $keys = array($key_partida_id);
+        $valida = $this->validacion->valida_ids(keys: $keys, registro: $partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
+
+
+        $descuento_nuevo = $this->descuento_partida(modelo_partida: $modelo_partida,
+            registro_partida_id: $partida[$key_partida_id]);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener descuento', data: $descuento_nuevo);
+        }
+        return round($descuento + $descuento_nuevo, 2);
+    }
+
+    /**
+     * Obtiene y redondea un descuento de una partida
+     * @param _partida $modelo_partida Modelo de la partida
+     * @param int $registro_partida_id partida
+     * @return float|array
+     * @version 0.98.26
+     */
+    private function descuento_partida(_partida $modelo_partida, int $registro_partida_id): float|array
+    {
+        if ($registro_partida_id <= 0) {
+            return $this->error->error(mensaje: 'Error registro_partida_id debe ser mayor a 0', data: $registro_partida_id);
+        }
+        $partida = $modelo_partida->registro(registro_id: $registro_partida_id, retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener partida', data: $partida);
+        }
+
+        $key_out = $modelo_partida->tabla.'_descuento';
+
+        $descuento = $partida->$key_out;
+
+        return round($descuento, 4);
+
+
+    }
+
+    /**
      * Obtiene las etapas de una factura
      * @param modelo $modelo_fc_etapa Modelo de tipo etapa
      * @param string $name_entidad Nombre de la entidad base ej fc_factura, fc_nota_credito
@@ -304,8 +387,8 @@ class _transacciones_fc extends modelo
         return $registro;
     }
 
-    private function permite_transaccion(int $registro_id){
-        $etapas = $this->etapas(modelo_fc_etapa: $this->modelo_etapa, name_entidad: $this->tabla, registro_id: $registro_id);
+    private function permite_transaccion(_etapa $modelo_etapa, int $registro_id){
+        $etapas = $this->etapas(modelo_fc_etapa: $modelo_etapa, name_entidad: $this->tabla, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener fc_factura_etapas', data: $etapas);
         }
@@ -314,6 +397,31 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
         }
         return $permite_transaccion;
+    }
+
+    /**
+     * Suma el conjunto de partidas para descuento
+     * @param _partida $modelo_partida Modelo de tipo partida
+     * @param array $partidas Partidas de una factura
+     * @return float|array|int
+     * @version 0.118.26
+     */
+    private function suma_descuento_partida(_partida $modelo_partida, array $partidas): float|array|int
+    {
+        $descuento = 0;
+        foreach ($partidas as $partida) {
+            if (!is_array($partida)) {
+                return $this->error->error(mensaje: 'Error partida debe ser un array', data: $partida);
+            }
+
+            $descuento_partida = $this->descuento_partida(modelo_partida: $modelo_partida,
+                registro_partida_id: $partida[$modelo_partida->key_id]);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener descuento partida', data: $descuento_partida);
+            }
+            $descuento += $descuento_partida;
+        }
+        return $descuento;
     }
 
     private function ultimo_folio(int $fc_csd_id){
@@ -376,8 +484,8 @@ class _transacciones_fc extends modelo
         return $permite_transaccion;
     }
 
-    final public function verifica_permite_transaccion(int $registro_id){
-        $permite_transaccion = $this->permite_transaccion(registro_id: $registro_id);
+    final public function verifica_permite_transaccion(_etapa $modelo_etapa, int $registro_id){
+        $permite_transaccion = $this->permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
         }

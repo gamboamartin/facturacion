@@ -17,6 +17,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\_pdf;
+use gamboamartin\facturacion\models\fc_cancelacion;
 use gamboamartin\facturacion\models\fc_email;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
@@ -24,6 +25,8 @@ use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
+use gamboamartin\facturacion\models\fc_retenido;
+use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\system\actions;
 use gamboamartin\system\html_controler;
@@ -312,8 +315,11 @@ class controlador_fc_factura extends _base_system_fc {
     public function cancela_bd(bool $header, bool $ws = false): array|stdClass
     {
 
+        $modelo_cancelacion = new fc_cancelacion(link: $this->link);
+
         $r_fc_cancelacion = (new fc_factura(link: $this->link))->cancela_bd(
-            cat_sat_motivo_cancelacion_id: $_POST['cat_sat_motivo_cancelacion_id'], fc_factura_id: $this->registro_id);
+            cat_sat_motivo_cancelacion_id: $_POST['cat_sat_motivo_cancelacion_id'],
+            modelo_cancelacion: $modelo_cancelacion, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al cancelar factura',data:  $r_fc_cancelacion, header: $header,ws:$ws);
         }
@@ -1036,14 +1042,17 @@ class controlador_fc_factura extends _base_system_fc {
             return $this->errores->error(mensaje: 'Error al obtener descuento',data:  $descuento);
         }
 
+        $modelo_traslado = new fc_traslado(link: $this->link);
+
         $imp_trasladados = (new fc_factura($this->link))->get_factura_imp_trasladados(fc_factura_id:
-            $this->registro_id);
+            $this->registro_id, modelo_traslado: $modelo_traslado);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener imp_trasladados',data:  $imp_trasladados);
         }
 
-        $imp_retenidos = (new fc_factura($this->link))->get_factura_imp_retenidos(fc_factura_id:
-            $this->registro_id);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $imp_retenidos = (new fc_factura($this->link))->get_factura_imp_retenidos(modelo_retencion: $modelo_retencion,
+            fc_factura_id: $this->registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener imp_retenidos',data:  $imp_retenidos);
         }
@@ -1379,7 +1388,12 @@ class controlador_fc_factura extends _base_system_fc {
         }
 
 
-        $partidas = (new fc_partida($this->link))->partidas(html: $this->html, registro_entidad_id: $this->fc_factura_id);
+        $modelo_entidad = (new fc_factura(link: $this->link));
+        $modelo_traslado = (new fc_traslado(link: $this->link));
+        $modelo_retencion = (new fc_retenido(link: $this->link));
+
+        $partidas = (new fc_partida($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
         }
@@ -1419,7 +1433,11 @@ class controlador_fc_factura extends _base_system_fc {
                 header: $header,ws:$ws);
         }
 
-        $partidas = (new fc_partida($this->link))->partidas(html: $this->html, registro_entidad_id: $this->fc_factura_id);
+        $modelo_entidad = (new fc_factura(link: $this->link));
+        $modelo_traslado = (new fc_traslado(link: $this->link));
+        $modelo_retencion = (new fc_retenido(link: $this->link));
+        $partidas = (new fc_partida($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener sucursales',data:  $partidas, header: $header,ws:$ws);
         }
@@ -1477,7 +1495,13 @@ class controlador_fc_factura extends _base_system_fc {
     }
 
     public function relaciones(bool $header, bool $ws = false){
-        $partidas  = (new fc_partida($this->link))->partidas(registro_entidad_id: $this->registro_id,html: $this->html);
+
+        $modelo_entidad = (new fc_factura(link: $this->link));
+        $modelo_traslado = (new fc_traslado(link: $this->link));
+        $modelo_retencion = (new fc_retenido(link: $this->link));
+
+        $partidas  = (new fc_partida($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $this->registro_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
             print_r($error);
@@ -1780,8 +1804,11 @@ class controlador_fc_factura extends _base_system_fc {
         $this->link->commit();
 
 
-
-        $partidas  = (new fc_partida($this->link))->partidas(registro_entidad_id: $this->registro_id,html: $this->html);
+        $modelo_entidad = (new fc_factura(link: $this->link));
+        $modelo_traslado = (new fc_traslado(link: $this->link));
+        $modelo_retencion = (new fc_retenido(link: $this->link));
+        $partidas  = (new fc_partida($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $this->registro_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
             print_r($error);

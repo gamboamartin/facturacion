@@ -183,58 +183,6 @@ class fc_factura extends _transacciones_fc
     }
 
 
-    /**
-     * Cancela una factura
-     * @param int $cat_sat_motivo_cancelacion_id Motivo de cancelacion
-     * @param int $fc_factura_id Factura a cancelar
-     * @return array|stdClass
-     */
-    final public function cancela_bd(int $cat_sat_motivo_cancelacion_id, int $fc_factura_id): array|stdClass
-    {
-        $fc_cancelacion_ins['fc_factura_id'] = $fc_factura_id;
-        $fc_cancelacion_ins['cat_sat_motivo_cancelacion_id'] = $cat_sat_motivo_cancelacion_id;
-
-        $r_fc_cancelacion = (new fc_cancelacion(link: $this->link))->alta_registro(registro: $fc_cancelacion_ins);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al cancelar factura',data:  $r_fc_cancelacion);
-        }
-
-        $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
-            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $fc_factura_id, valida_existencia_etapa: true);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
-        }
-
-        return $r_fc_cancelacion;
-    }
-
-
-    /**
-     * Carga un descuento nuevo a un descuento previo
-     * @param float $descuento Descuento previo
-     * @param array $partida Partida a sumar descuento
-     * @return float|array
-     * @version 0.117.27
-     */
-    private function carga_descuento(float $descuento, array $partida): float|array
-    {
-        if ($descuento < 0.0) {
-            return $this->error->error(mensaje: 'Error el descuento previo no puede ser menor a 0', data: $descuento);
-        }
-
-        $keys = array('fc_partida_id');
-        $valida = $this->validacion->valida_ids(keys: $keys, registro: $partida);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
-        }
-
-        $descuento_nuevo = $this->descuento_partida(fc_partida_id: $partida['fc_partida_id']);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener descuento', data: $descuento_nuevo);
-        }
-        return round($descuento + $descuento_nuevo, 2);
-    }
-
 
     private function data_factura(array $factura): array|stdClass
     {
@@ -288,28 +236,6 @@ class fc_factura extends _transacciones_fc
     }
 
 
-    /**
-     * Obtiene y redondea un descuento de una partida
-     * @param int $fc_partida_id partida
-     * @return float|array
-     * @version 0.98.26
-     */
-    private function descuento_partida(int $fc_partida_id): float|array
-    {
-        if ($fc_partida_id <= 0) {
-            return $this->error->error(mensaje: 'Error $fc_partida_id debe ser mayor a 0', data: $fc_partida_id);
-        }
-        $fc_partida = (new fc_partida($this->link))->registro(registro_id: $fc_partida_id, retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener $fc_partida', data: $fc_partida);
-        }
-
-        $descuento = $fc_partida->fc_partida_descuento;
-
-        return round($descuento, 4);
-
-
-    }
 
     public function doc_tipo_documento_id(string $extension)
     {
@@ -331,8 +257,8 @@ class fc_factura extends _transacciones_fc
 
     public function elimina_bd(int $id): array|stdClass
     {
-
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $id);
+        $modelo_etapa = new fc_factura_etapa(link: $this->link);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -370,7 +296,8 @@ class fc_factura extends _transacciones_fc
      */
     private function elimina_partidas(int $fc_factura_id): array
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_factura_id);
+        $modelo_etapa = new fc_factura_etapa(link: $this->link);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -430,7 +357,8 @@ class fc_factura extends _transacciones_fc
 
     public function genera_xml(int $fc_factura_id, string $tipo): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_factura_id);
+        $modelo_etapa = new fc_factura_etapa(link: $this->link);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -548,13 +476,18 @@ class fc_factura extends _transacciones_fc
 
     final public function  get_data_relaciones(int $fc_factura_id){
 
-        $relaciones = (new fc_relacion(link: $this->link))->relaciones(fc_factura_id: $fc_factura_id);
+        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+        $modelo_entidad = $this;
+
+        $relaciones = (new fc_relacion(link: $this->link))->relaciones(modelo_entidad: $modelo_entidad,
+            registro_entidad_id: $fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
         }
 
         foreach ($relaciones as $indice=>$fc_relacion){
-            $relacionadas = (new fc_relacion(link: $this->link))->facturas_relacionadas(fc_relacion: $fc_relacion);
+            $relacionadas = (new fc_relacion(link: $this->link))->facturas_relacionadas(
+                modelo_relacionada: $modelo_relacionada, row_relacion: $fc_relacion);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener relacionadas', data: $relacionadas);
             }
@@ -581,7 +514,11 @@ class fc_factura extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al obtener factura', data: $registro);
         }
 
-        $relacionados = (new fc_relacion(link: $this->link))->get_relaciones(fc_factura_id: $fc_factura_id);
+        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+        $modelo_entidad = $this;
+
+        $relacionados = (new fc_relacion(link: $this->link))->get_relaciones(registro_entidad_id: $fc_factura_id,
+            modelo_entidad: $modelo_entidad,modelo_relacionada: $modelo_relacionada);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relacionados);
         }
@@ -597,12 +534,12 @@ class fc_factura extends _transacciones_fc
         $ret_global= array();
         foreach ($registro['partidas'] as $key => $partida) {
 
-            $traslados = (new fc_traslado($this->link))->get_data_rows(registro_partida_id: $partida['fc_partida_id']);
+            $traslados = (new fc_traslado($this->link))->get_data_rows(name_modelo_partida: 'fc_partida', registro_partida_id: $partida['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el traslados de la partida', data: $traslados);
             }
 
-            $retenidos = (new fc_retenido($this->link))->get_data_rows(registro_partida_id: $partida['fc_partida_id']);
+            $retenidos = (new fc_retenido($this->link))->get_data_rows(name_modelo_partida: 'fc_partida', registro_partida_id: $partida['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida', data: $retenidos);
             }
@@ -739,7 +676,9 @@ class fc_factura extends _transacciones_fc
 
     final public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $id);
+
+        $modelo_etapa = new fc_factura_etapa(link: $this->link);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -762,14 +701,14 @@ class fc_factura extends _transacciones_fc
     }
 
 
-
     /**
      * Calcula los impuestos trasladados de una factura
      * @param int $fc_factura_id Factura a calcular
+     * @param _data_impuestos $modelo_traslado
      * @return float|array
      * @version 4.14.0
      */
-    public function get_factura_imp_trasladados(int $fc_factura_id): float|array
+    public function get_factura_imp_trasladados(int $fc_factura_id, _data_impuestos $modelo_traslado): float|array
     {
         $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
         if (errores::$error) {
@@ -778,7 +717,8 @@ class fc_factura extends _transacciones_fc
         $imp_traslado = 0.0;
 
         foreach ($partidas as $partida) {
-            $imp_traslado += (new fc_partida($this->link))->calculo_imp_trasladado($partida['fc_partida_id']);
+            $imp_traslado += (new fc_partida($this->link))->calculo_imp_trasladado(
+                modelo_traslado: $modelo_traslado, registro_partida_id: $partida['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
             }
@@ -787,7 +727,7 @@ class fc_factura extends _transacciones_fc
         return $imp_traslado;
     }
 
-    public function get_factura_imp_retenidos(int $fc_factura_id): float|array
+    public function get_factura_imp_retenidos(_data_impuestos $modelo_retencion, int $fc_factura_id): float|array
     {
         $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
         if (errores::$error) {
@@ -796,17 +736,13 @@ class fc_factura extends _transacciones_fc
 
         $imp_traslado = 0.0;
 
-        $modelo_predial = (new fc_cuenta_predial(link: $this->link));
-        $modelo_retencion = (new fc_retenido(link: $this->link));
-        $modelo_traslado = (new fc_traslado(link: $this->link));
 
-        $fc_partida_modelo = new fc_partida(link: $this->link,modelo_entidad: $this,
-            modelo_predial: $modelo_predial,modelo_retencion: $modelo_retencion,
-            modelo_traslado: $modelo_traslado);
+        $fc_partida_modelo = new fc_partida(link: $this->link);
 
         foreach ($partidas as $valor) {
 
-            $imp_traslado += $fc_partida_modelo->calculo_imp_retenido($valor['fc_partida_id']);
+            $imp_traslado += $fc_partida_modelo->calculo_imp_retenido(modelo_retencion: $modelo_retencion,
+                registro_partida_id: $valor['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
             }
@@ -1047,28 +983,7 @@ class fc_factura extends _transacciones_fc
 
     }
 
-    /**
-     * Suma el conjunto de partidas para descuento
-     * @param array $partidas Partidas de una factura
-     * @return float|array|int
-     * @version 0.118.26
-     */
-    private function suma_descuento_partida(array $partidas): float|array|int
-    {
-        $descuento = 0;
-        foreach ($partidas as $partida) {
-            if (!is_array($partida)) {
-                return $this->error->error(mensaje: 'Error partida debe ser un array', data: $partida);
-            }
 
-            $descuento_partida = $this->descuento_partida(fc_partida_id: $partida['fc_partida_id']);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener descuento partida', data: $descuento_partida);
-            }
-            $descuento += $descuento_partida;
-        }
-        return $descuento;
-    }
 
     /**
      * Suma un subtotal al previo
@@ -1128,7 +1043,8 @@ class fc_factura extends _transacciones_fc
 
     public function timbra_xml(int $fc_factura_id): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $fc_factura_id);
+        $modelo_etapa = new fc_factura_etapa(link: $this->link);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
