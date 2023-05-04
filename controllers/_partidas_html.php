@@ -112,7 +112,8 @@ class _partidas_html{
             $key_registro_id = $name_entidad.'_id';
             $registro_id = $impuesto[$key_registro_id];
 
-            $params = $modelo_partida->params_button_partida(registro_entidad_id: $impuesto['fc_factura_id']);
+            $params = $modelo_partida->params_button_partida(name_modelo_entidad: $name_entidad,
+                registro_entidad_id: $impuesto['fc_factura_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener params', data: $params);
             }
