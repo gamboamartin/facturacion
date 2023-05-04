@@ -14,12 +14,10 @@ use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\compresor\compresor;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_nota_credito_html;
 use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\_pdf;
 use gamboamartin\facturacion\models\fc_email;
-use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
@@ -354,7 +352,7 @@ class controlador_fc_nota_credito extends _base_system_fc {
         $this->inputs = new stdClass();
         $fc_nota_credito_id = (new fc_nota_credito_html(html: $this->html_base))->select_fc_nota_credito_id(cols: 12,
             con_registros: true, id_selected: $this->registro_id, link: $this->link,
-            disabled: true, filtro: array('fc_factura.id'=>$this->registro_id));
+            disabled: true, filtro: array('fc_nota_credito.id'=>$this->registro_id));
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al maquetar input', data: $fc_nota_credito_id);
         }
@@ -593,7 +591,7 @@ class controlador_fc_nota_credito extends _base_system_fc {
         }
 
 
-        $ruta_pdf = (new _pdf())->pdf(descarga: false,fc_factura_id: $this->registro_id,guarda: true,link:  $this->link);
+        $ruta_pdf = (new _pdf())->pdf(descarga: false,fc_nota_credito_id: $this->registro_id,guarda: true,link:  $this->link);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar PDF',data:  $ruta_pdf, header: $header,ws:$ws);
         }
@@ -713,7 +711,7 @@ class controlador_fc_nota_credito extends _base_system_fc {
 
     public function genera_pdf(bool $header, bool $ws = false){
 
-        $pdf = (new _pdf())->pdf(descarga: false, fc_factura_id: $this->registro_id,guarda: true,link: $this->link);
+        $pdf = (new _pdf())->pdf(descarga: false, fc_nota_credito_id: $this->registro_id,guarda: true,link: $this->link);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $pdf, header: $header,ws:$ws);
         }
@@ -1771,7 +1769,7 @@ class controlador_fc_nota_credito extends _base_system_fc {
 
             $filtro['pr_etapa.descripcion'] = 'cancelado_sat';
             $filtro['fc_nota_credito.id'] = $this->registro_id;
-            $existe = (new fc_factura_etapa(link: $this->link))->existe(filtro: $filtro);
+            $existe = (new fc_nota_credito_etapa(link: $this->link))->existe(filtro: $filtro);
             if(errores::$error){
                 $this->link->rollBack();
                 return $this->retorno_error(mensaje: 'Error al validar etapa',data:  $existe,header:  $header, ws: $ws);
