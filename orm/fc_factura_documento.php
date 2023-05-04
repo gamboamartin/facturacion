@@ -35,7 +35,9 @@ class fc_factura_documento extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al obtener doc_documento_id', data: $doc_documento_id);
         }
         if($doc_documento_id->doc_tipo_documento_descripcion!=='CFDI PDF') {
-            $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_factura->fc_factura_id);
+            $modelo_etapa = new fc_factura_etapa(link: $this->link);
+            $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(
+                modelo_etapa: $modelo_etapa, registro_id: $fc_factura->fc_factura_id);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
             }
@@ -69,7 +71,9 @@ class fc_factura_documento extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_factura_documento);
         }
         if($fc_factura_documento->doc_tipo_documento_descripcion!=='CFDI PDF') {
-            $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_factura_documento->fc_factura_id);
+            $modelo_etapa = new fc_factura_etapa(link: $this->link);
+            $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(
+                modelo_etapa: $modelo_etapa, registro_id: $fc_factura_documento->fc_factura_id);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
             }
@@ -117,7 +121,9 @@ class fc_factura_documento extends _modelo_parent {
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_factura_documento);
         }
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_factura_documento->fc_factura_id);
+        $modelo_etapa = new fc_factura_etapa(link: $this->link);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(
+            modelo_etapa: $modelo_etapa, registro_id: $fc_factura_documento->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -134,7 +140,9 @@ class fc_factura_documento extends _modelo_parent {
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_factura_documento);
         }
-        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(registro_id: $fc_factura_documento->fc_factura_id);
+        $modelo_etapa = new fc_factura_etapa(link: $this->link);
+        $permite_transaccion = (new fc_factura(link: $this->link))->verifica_permite_transaccion(
+            modelo_etapa: $modelo_etapa, registro_id: $fc_factura_documento->fc_factura_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
