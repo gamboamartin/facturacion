@@ -3,17 +3,17 @@ namespace gamboamartin\facturacion\models;
 use base\orm\_modelo_parent;
 use base\orm\modelo;
 use gamboamartin\facturacion\models\fc_relacion_nc;
-/*use gamboamartin\facturacion\models\fc_cfdi;*/
+use gamboamartin\facturacion\models\fc_cfdi;
 use gamboamartin\errores\errores;
 use PDO;
 use stdClass;
 class fc_uuid_rel_nc extends _base {
     public function __construct(PDO $link){
         $tabla = 'fc_uuid_rel_nc';
-        $columnas = array($tabla=>false, /*'fc_cfdi' => $tabla,*/'fc_relacion_nc' => $tabla, );
+        $columnas = array($tabla=>false, 'fc_relacion_nc' => $tabla, 'fc_cfdi' => $tabla,);
         $campos_obligatorios = array();
 
-        /*$campos_view['fc_cfdi_id'] = array('type' => 'selects', 'model' => new fc_cfdi($link));*/
+        $campos_view['fc_cfdi_id'] = array('type' => 'selects', 'model' => new fc_cfdi($link));
         $campos_view['fc_relacion_nc_id'] = array('type' => 'selects', 'model' => new fc_relacion_nc($link));
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
@@ -21,7 +21,7 @@ class fc_uuid_rel_nc extends _base {
 
         $this->NAMESPACE = __NAMESPACE__;
 
-        $this->etiqueta = 'Configuracion Nota credito';
+        $this->etiqueta = 'Configuracion Relacion UUID';
     }
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
@@ -43,7 +43,7 @@ class fc_uuid_rel_nc extends _base {
 
         $r_alta_bd =  parent::alta_bd();
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error registrar nota credito', data: $r_alta_bd);
+            return $this->error->error(mensaje: 'Error registrar relacion uuid', data: $r_alta_bd);
         }
 
         return $r_alta_bd;
@@ -71,7 +71,7 @@ class fc_uuid_rel_nc extends _base {
     }
     public function get_configuraciones(int $fc_csd): array|stdClass|int
     {
-        $filtro['fc_relacion_nc'] = 'activo';
+        $filtro['fc_cfdi'] = 'activo';
         $filtro['fc_relacion_nc'] = $fc_csd;
         $registro = $this->filtro_and(filtro: $filtro);
         if(errores::$error){
@@ -151,7 +151,7 @@ class fc_uuid_rel_nc extends _base {
             return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
         }
 
-        $keys = array(/*'fc_cfdi_id',*/'fc_relacion_nc_id',);
+        $keys = array('fc_cfdi_id','fc_relacion_nc_id',);
         $valida = $this->validacion->valida_ids(keys: $keys, registro: $data);
         if(errores::$error){
             return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
