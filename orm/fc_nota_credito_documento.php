@@ -10,10 +10,10 @@ use gamboamartin\organigrama\models\org_sucursal;
 use PDO;
 use stdClass;
 
-class fc_complemento_pago_documento extends _modelo_parent {
+class fc_nota_credito_documento extends _modelo_parent {
     public function __construct(PDO $link){
-        $tabla = 'fc_complemento_pago_documento';
-        $columnas = array($tabla=>false,'fc_complemento_pago'=>$tabla,'doc_documento'=>$tabla,
+        $tabla = 'fc_nota_credito_documento';
+        $columnas = array($tabla=>false,'fc_nota_credito'=>$tabla,'doc_documento'=>$tabla,
             'doc_tipo_documento' => 'doc_documento','doc_extension'=>'doc_documento');
         $campos_obligatorios = array();
 
@@ -21,23 +21,23 @@ class fc_complemento_pago_documento extends _modelo_parent {
 
         $this->NAMESPACE = __NAMESPACE__;
 
-        $this->etiqueta = 'Complemento Pago Documento';
+        $this->etiqueta = 'Nota Credito Documento';
     }
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-        $fc_complemento_pago = (new fc_complemento_pago(link: $this->link))->registro(registro_id: $this->registro['fc_complemento_pago_id'], retorno_obj: true);
+        $fc_nota_credito = (new fc_nota_credito(link: $this->link))->registro(registro_id: $this->registro['fc_nota_credito_id'], retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_complemento_pago);
+            return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_nota_credito);
         }
         $doc_documento_id = (new doc_documento(link: $this->link))->registro(registro_id: $this->registro['doc_documento_id'], retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener doc_documento_id', data: $doc_documento_id);
         }
         if($doc_documento_id->doc_tipo_documento_descripcion!=='CFDI PDF') {
-            $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
-            $permite_transaccion = (new fc_complemento_pago(link: $this->link))->verifica_permite_transaccion(
-                modelo_etapa: $modelo_etapa, registro_id: $fc_complemento_pago->fc_complemento_pago_id);
+            $modelo_etapa = new fc_nota_credito_etapa(link: $this->link);
+            $permite_transaccion = (new fc_nota_credito(link: $this->link))->verifica_permite_transaccion(
+                modelo_etapa: $modelo_etapa, registro_id: $fc_nota_credito->fc_nota_credito_id);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
             }
@@ -58,7 +58,7 @@ class fc_complemento_pago_documento extends _modelo_parent {
 
         $r_alta_bd =  parent::alta_bd();
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error registrar complemento pago documento', data: $r_alta_bd);
+            return $this->error->error(mensaje: 'Error registrar nota credito documento', data: $r_alta_bd);
         }
 
         return $r_alta_bd;
@@ -66,14 +66,14 @@ class fc_complemento_pago_documento extends _modelo_parent {
 
     final public function elimina_bd(int $id): array|stdClass
     {
-        $fc_complemento_pago_documento = $this->registro(registro_id: $id, retorno_obj: true);
+        $fc_nota_credito_documento = $this->registro(registro_id: $id, retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_complemento_pago_documento);
+            return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_nota_credito_documento);
         }
-        if($fc_complemento_pago_documento->doc_tipo_documento_descripcion!=='CFDI PDF') {
-            $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
-            $permite_transaccion = (new fc_complemento_pago(link: $this->link))->verifica_permite_transaccion(
-                modelo_etapa: $modelo_etapa, registro_id: $fc_complemento_pago_documento->fc_complemento_pago_id);
+        if($fc_nota_credito_documento->doc_tipo_documento_descripcion!=='CFDI PDF') {
+            $modelo_etapa = new fc_nota_credito_etapa(link: $this->link);
+            $permite_transaccion = (new fc_nota_credito(link: $this->link))->verifica_permite_transaccion(
+                modelo_etapa: $modelo_etapa, registro_id: $fc_nota_credito_documento->fc_nota_credito_id);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
             }
@@ -85,10 +85,10 @@ class fc_complemento_pago_documento extends _modelo_parent {
         return $r_elimina;
     }
 
-    public function get_complemento_pago_documento(int $fc_complemento_pago_id, string $tipo_documento): array|string{
+    public function get_nota_credito_documento(int $fc_nota_credito_id, string $tipo_documento): array|string{
 
 
-        $documento = $this->get_complemento_pago_documentos(fc_complemento_pago_id: $fc_complemento_pago_id,tipo_documento: $tipo_documento);
+        $documento = $this->get_nota_credito_documentos(fc_nota_credito_id: $fc_nota_credito_id,tipo_documento: $tipo_documento);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener documento', data: $documento);
         }
@@ -102,9 +102,9 @@ class fc_complemento_pago_documento extends _modelo_parent {
         return $ruta_archivo;
     }
 
-    public function get_complemento_pago_documentos(int $fc_complemento_pago_id, string $tipo_documento): array|stdClass{
+    public function get_nota_credito_documentos(int $fc_nota_credito_id, string $tipo_documento): array|stdClass{
 
-        $filtro['fc_complemento_pago.id'] = $fc_complemento_pago_id;
+        $filtro['fc_nota_credito.id'] = $fc_nota_credito_id;
         $filtro['doc_tipo_documento.descripcion'] = $tipo_documento;
         $documento = $this->filtro_and(filtro: $filtro);
         if (errores::$error) {
@@ -117,13 +117,13 @@ class fc_complemento_pago_documento extends _modelo_parent {
 
     final public function modifica_bd(array $registro, int $id, bool $reactiva = false, array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-        $fc_complemento_pago_documento = $this->registro(registro_id: $id, retorno_obj: true);
+        $fc_nota_credito_documento = $this->registro(registro_id: $id, retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_complemento_pago_documento);
+            return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_nota_credito_documento);
         }
-        $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
-        $permite_transaccion = (new fc_complemento_pago(link: $this->link))->verifica_permite_transaccion(
-            modelo_etapa: $modelo_etapa, registro_id: $fc_complemento_pago_documento->fc_complemento_pago_id);
+        $modelo_etapa = new fc_nota_credito_etapa(link: $this->link);
+        $permite_transaccion = (new fc_nota_credito(link: $this->link))->verifica_permite_transaccion(
+            modelo_etapa: $modelo_etapa, registro_id: $fc_nota_credito_documento->fc_nota_credito_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -136,13 +136,13 @@ class fc_complemento_pago_documento extends _modelo_parent {
 
     final public function status(string $campo, int $registro_id): array|stdClass
     {
-        $fc_complemento_pago_documento = $this->registro(registro_id: $registro_id, retorno_obj: true);
+        $fc_nota_credito_documento = $this->registro(registro_id: $registro_id, retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_complemento_pago_documento);
+            return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_nota_credito_documento);
         }
-        $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
-        $permite_transaccion = (new fc_complemento_pago(link: $this->link))->verifica_permite_transaccion(
-            modelo_etapa: $modelo_etapa, registro_id: $fc_complemento_pago_documento->fc_complemento_pago_id);
+        $modelo_etapa = new fc_nota_credito_etapa(link: $this->link);
+        $permite_transaccion = (new fc_nota_credito(link: $this->link))->verifica_permite_transaccion(
+            modelo_etapa: $modelo_etapa, registro_id: $fc_nota_credito_documento->fc_nota_credito_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
