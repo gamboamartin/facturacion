@@ -743,17 +743,14 @@ class fc_complemento_pago extends _transacciones_fc
 
         $imp_traslado = 0.0;
 
-        $modelo_predial = (new fc_cuenta_predial(link: $this->link));
         $modelo_retencion = (new fc_retenido_cp(link: $this->link));
-        $modelo_traslado = (new fc_traslado_cp(link: $this->link));
 
-        $fc_partida_cp_modelo = new fc_partida_cp(link: $this->link,modelo_entidad: $this,
-            modelo_predial: $modelo_predial,modelo_retencion: $modelo_retencion,
-            modelo_traslado: $modelo_traslado);
+        $fc_partida_cp_modelo = new fc_partida_cp(link: $this->link);
 
         foreach ($partidas as $valor) {
 
-            $imp_traslado += $fc_partida_cp_modelo->calculo_imp_retenido($valor['fc_partida_cp_id']);
+            $imp_traslado += $fc_partida_cp_modelo->calculo_imp_retenido(modelo_retencion: $modelo_retencion,
+                registro_partida_id: $valor['fc_partida_cp_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
             }

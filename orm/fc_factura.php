@@ -727,7 +727,7 @@ class fc_factura extends _transacciones_fc
         return $imp_traslado;
     }
 
-    public function get_factura_imp_retenidos(int $fc_factura_id): float|array
+    public function get_factura_imp_retenidos(_data_impuestos $modelo_retencion, int $fc_factura_id): float|array
     {
         $partidas = $this->get_partidas(fc_factura_id: $fc_factura_id);
         if (errores::$error) {
@@ -741,7 +741,8 @@ class fc_factura extends _transacciones_fc
 
         foreach ($partidas as $valor) {
 
-            $imp_traslado += $fc_partida_modelo->calculo_imp_retenido($valor['fc_partida_id']);
+            $imp_traslado += $fc_partida_modelo->calculo_imp_retenido(modelo_retencion: $modelo_retencion,
+                registro_partida_id: $valor['fc_partida_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
             }

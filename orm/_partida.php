@@ -188,10 +188,10 @@ class _partida extends  _base{
         return $r_alta_bd;
     }
 
-    public function calculo_imp_retenido(int $registro_partida_id)
+    public function calculo_imp_retenido(_data_impuestos $modelo_retencion, int $registro_partida_id)
     {
         $filtro[$this->key_filtro_id] = $registro_partida_id;
-        $retenido = $this->modelo_retencion->filtro_and(filtro: $filtro);
+        $retenido = $modelo_retencion->filtro_and(filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener los registros', data: $retenido);
         }
@@ -382,10 +382,11 @@ class _partida extends  _base{
         return $hijo;
     }
 
-    private function integra_button_partida(html_controler $html, int $indice, array $partida,
+    private function integra_button_partida(html_controler $html, int $indice, string $name_modelo_entidad, array $partida,
                                             stdClass $r_fc_registro_partida, int $registro_entidad_id){
 
-        $params = $this->params_button_partida(registro_entidad_id: $registro_entidad_id);
+        $params = $this->params_button_partida(name_modelo_entidad: $name_modelo_entidad,
+            registro_entidad_id: $registro_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener params', data: $params);
         }
@@ -399,7 +400,7 @@ class _partida extends  _base{
         return $r_fc_registro_partida;
     }
 
-    private function integra_buttons_partida( array $filtro, array $hijo, html_controler $html,
+    private function integra_buttons_partida( array $filtro, array $hijo, html_controler $html, string $name_modelo_entidad,
                                               int $registro_entidad_id){
         $r_fc_partida = $this->filtro_and(filtro: $filtro, hijo: $hijo);
         if (errores::$error) {
@@ -407,8 +408,9 @@ class _partida extends  _base{
         }
 
         foreach ($r_fc_partida->registros as $indice => $partida) {
-            $r_fc_partida = $this->integra_button_partida(html: $html, indice: $indice, partida: $partida,
-                r_fc_registro_partida: $r_fc_partida, registro_entidad_id: $registro_entidad_id);
+            $r_fc_partida = $this->integra_button_partida(html: $html, indice: $indice, name_modelo_entidad: $name_modelo_entidad,
+                partida: $partida, r_fc_registro_partida: $r_fc_partida,
+                registro_entidad_id: $registro_entidad_id);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al generar link elimina_bd para partida', data: $r_fc_partida);
             }
@@ -510,7 +512,7 @@ class _partida extends  _base{
 
 
         $r_fc_partida = $this->integra_buttons_partida(filtro: $filtro, hijo: $hijo,
-            html: $html, registro_entidad_id: $registro_entidad_id);
+            html: $html, name_modelo_entidad: $modelo_entidad->tabla, registro_entidad_id: $registro_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar link elimina_bd para partida', data: $r_fc_partida);
         }
