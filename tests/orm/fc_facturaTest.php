@@ -4,6 +4,7 @@ namespace gamboamartin\facturacion\tests\orm;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_csd;
+use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\facturacion\tests\base_test2;
 use gamboamartin\organigrama\models\org_empresa;
@@ -82,7 +83,8 @@ class fc_facturaTest extends test {
         $descuento = 11;
         $partida = array();
         $partida['fc_partida_id'] = 1;
-        $resultado = $modelo->carga_descuento($descuento, $partida);
+        $modelo_partida = (new fc_partida(link: $this->link));
+        $resultado = $modelo->carga_descuento($descuento, $modelo_partida, $partida);
 
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
@@ -131,7 +133,8 @@ class fc_facturaTest extends test {
 
 
         $fc_partida_id = 1;
-        $resultado = $modelo->descuento_partida($fc_partida_id);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $resultado = $modelo->descuento_partida($modelo_partida, $fc_partida_id);
 
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
@@ -657,8 +660,8 @@ class fc_facturaTest extends test {
 
         $partidas = array();
         $partidas[0]['fc_partida_id'] = 1;
-
-        $resultado = $modelo->suma_descuento_partida($partidas);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $resultado = $modelo->suma_descuento_partida($modelo_partida, $partidas);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0,$resultado);

@@ -183,57 +183,8 @@ class fc_complemento_pago extends _transacciones_fc
     }
 
 
-    /**
-     * Cancela una factura
-     * @param int $cat_sat_motivo_cancelacion_id Motivo de cancelacion
-     * @param int $fc_complemento_pago_id Factura a cancelar
-     * @return array|stdClass
-     */
-    final public function cancela_bd(int $cat_sat_motivo_cancelacion_id, int $fc_complemento_pago_id): array|stdClass
-    {
-        $fc_cancelacion_ins['fc_complemento_pago_id'] = $fc_complemento_pago_id;
-        $fc_cancelacion_ins['cat_sat_motivo_cancelacion_id'] = $cat_sat_motivo_cancelacion_id;
-
-        $r_fc_cancelacion = (new fc_cancelacion(link: $this->link))->alta_registro(registro: $fc_cancelacion_ins);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al cancelar factura',data:  $r_fc_cancelacion);
-        }
-
-        $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
-            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $fc_complemento_pago_id, valida_existencia_etapa: true);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
-        }
-
-        return $r_fc_cancelacion;
-    }
 
 
-    /**
-     * Carga un descuento nuevo a un descuento previo
-     * @param float $descuento Descuento previo
-     * @param array $partida Partida a sumar descuento
-     * @return float|array
-     * @version 0.117.27
-     */
-    private function carga_descuento(float $descuento, array $partida): float|array
-    {
-        if ($descuento < 0.0) {
-            return $this->error->error(mensaje: 'Error el descuento previo no puede ser menor a 0', data: $descuento);
-        }
-
-        $keys = array('fc_partida_cp_id');
-        $valida = $this->validacion->valida_ids(keys: $keys, registro: $partida);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
-        }
-
-        $descuento_nuevo = $this->descuento_partida(fc_partida_cp_id: $partida['fc_partida_cp_id']);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener descuento', data: $descuento_nuevo);
-        }
-        return round($descuento + $descuento_nuevo, 2);
-    }
 
 
     private function data_factura(array $factura): array|stdClass
@@ -288,28 +239,7 @@ class fc_complemento_pago extends _transacciones_fc
     }
 
 
-    /**
-     * Obtiene y redondea un descuento de una partida
-     * @param int $fc_partida_cp_id partida
-     * @return float|array
-     * @version 0.98.26
-     */
-    private function descuento_partida(int $fc_partida_cp_id): float|array
-    {
-        if ($fc_partida_cp_id <= 0) {
-            return $this->error->error(mensaje: 'Error $fc_partida_cp_id debe ser mayor a 0', data: $fc_partida_cp_id);
-        }
-        $fc_partida_cp = (new fc_partida_cp($this->link))->registro(registro_id: $fc_partida_cp_id, retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener $fc_partida_cp', data: $fc_partida_cp);
-        }
 
-        $descuento = $fc_partida_cp->fc_partida_cp_descuento;
-
-        return round($descuento, 4);
-
-
-    }
 
     public function doc_tipo_documento_id(string $extension)
     {
@@ -1047,28 +977,7 @@ class fc_complemento_pago extends _transacciones_fc
 
     }
 
-    /**
-     * Suma el conjunto de partidas para descuento
-     * @param array $partidas Partidas de una factura
-     * @return float|array|int
-     * @version 0.118.26
-     */
-    private function suma_descuento_partida(array $partidas): float|array|int
-    {
-        $descuento = 0;
-        foreach ($partidas as $partida) {
-            if (!is_array($partida)) {
-                return $this->error->error(mensaje: 'Error partida debe ser un array', data: $partida);
-            }
 
-            $descuento_partida = $this->descuento_partida(fc_partida_cp_id: $partida['fc_partida_cp_id']);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener descuento partida', data: $descuento_partida);
-            }
-            $descuento += $descuento_partida;
-        }
-        return $descuento;
-    }
 
     /**
      * Suma un subtotal al previo

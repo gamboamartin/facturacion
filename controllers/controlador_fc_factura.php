@@ -17,6 +17,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\_pdf;
+use gamboamartin\facturacion\models\fc_cancelacion;
 use gamboamartin\facturacion\models\fc_email;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
@@ -312,8 +313,11 @@ class controlador_fc_factura extends _base_system_fc {
     public function cancela_bd(bool $header, bool $ws = false): array|stdClass
     {
 
+        $modelo_cancelacion = new fc_cancelacion(link: $this->link);
+
         $r_fc_cancelacion = (new fc_factura(link: $this->link))->cancela_bd(
-            cat_sat_motivo_cancelacion_id: $_POST['cat_sat_motivo_cancelacion_id'], fc_factura_id: $this->registro_id);
+            cat_sat_motivo_cancelacion_id: $_POST['cat_sat_motivo_cancelacion_id'],
+            modelo_cancelacion: $modelo_cancelacion, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al cancelar factura',data:  $r_fc_cancelacion, header: $header,ws:$ws);
         }
