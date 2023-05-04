@@ -188,7 +188,7 @@ class _partida extends  _base{
         return $r_alta_bd;
     }
 
-    public function calculo_imp_retenido(_data_impuestos $modelo_retencion, int $registro_partida_id)
+    final public function calculo_imp_retenido(_data_impuestos $modelo_retencion, int $registro_partida_id)
     {
         $filtro[$this->key_filtro_id] = $registro_partida_id;
         $retenido = $modelo_retencion->filtro_and(filtro: $filtro);
@@ -214,7 +214,7 @@ class _partida extends  _base{
      * @param int $registro_partida_id Partida a calcular
      * @return float
      */
-    public function calculo_imp_trasladado(_data_impuestos $modelo_traslado, int $registro_partida_id):float
+    final public function calculo_imp_trasladado(_data_impuestos $modelo_traslado, int $registro_partida_id):float
     {
         $filtro[$this->key_filtro_id] = $registro_partida_id;
 
@@ -237,7 +237,7 @@ class _partida extends  _base{
         return 0;
     }
 
-    public function data_partida_obj(int $registro_partida_id): array|stdClass
+    final public function data_partida_obj(int $registro_partida_id): array|stdClass
     {
         $fc_partida = $this->registro(registro_id: $registro_partida_id, columnas_en_bruto: true, retorno_obj: true);
         if (errores::$error) {
@@ -251,6 +251,11 @@ class _partida extends  _base{
         return $data;
     }
 
+    /**
+     * SOBREESCRIBIR
+     * @param int $id
+     * @return array|stdClass
+     */
     public function elimina_bd(int $id): array|stdClass
     {
         $fc_partida = $this->registro(registro_id: $id, retorno_obj: true);
