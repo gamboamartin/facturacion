@@ -38,7 +38,7 @@ class _html_factura{
 </tr>";
     }
 
-    public function data_producto(PDO $link, array $partida): string
+    public function data_producto(PDO $link, string $name_entidad_partida, array $partida): string
     {
         $filtro['com_producto.id'] = $partida['com_producto_id'];
         $existe_tmp = (new com_tmp_prod_cs(link: $link))->existe(filtro: $filtro);
@@ -53,15 +53,20 @@ class _html_factura{
             $partida['cat_sat_producto_codigo'] = $r_com_tmp_prod_cs->registros[0]['com_tmp_prod_cs_cat_sat_producto'];
         }
 
+        $key_cantidad = $name_entidad_partida.'_cantidad';
+        $key_valor_unitario = $name_entidad_partida.'_valor_unitario';
+        $key_importe = $name_entidad_partida.'_importe';
+        $key_descuento = $name_entidad_partida.'_descuento';
+
         return "
             <tr>
                 <td>$partida[cat_sat_producto_codigo]</td>
                 <td>$partida[com_producto_codigo]</td>
-                <td>$partida[fc_partida_cantidad]</td>
+                <td>$partida[$key_cantidad]</td>
                 <td>$partida[cat_sat_unidad_descripcion]</td>
-                <td>$partida[fc_partida_valor_unitario]</td>
-                <td>$partida[fc_partida_importe]</td>
-                <td>$partida[fc_partida_descuento]</td>
+                <td>$partida[$key_valor_unitario]</td>
+                <td>$partida[$key_importe]</td>
+                <td>$partida[$key_descuento]</td>
                 <td>$partida[cat_sat_obj_imp_descripcion]</td>
                 <td>$partida[elimina_bd]</td>
             </tr>";

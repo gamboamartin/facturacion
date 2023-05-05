@@ -2,7 +2,9 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\_data_impuestos;
 use gamboamartin\facturacion\models\_partida;
+use gamboamartin\facturacion\models\_transacciones_fc;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
@@ -58,22 +60,22 @@ class _partidas_html{
         return $impuesto_html;
     }
 
-    final function genera_partidas_html(int $fc_factura_id, html_controler $html, PDO $link): array|stdClass
+    final function genera_partidas_html(html_controler $html, PDO $link, _transacciones_fc $modelo_entidad,
+                                        _partida $modelo_partida,_data_impuestos $modelo_retencion,
+                                        _data_impuestos $modelo_traslado, int $registro_entidad_id): array|stdClass
     {
-        $modelo_traslado = (new fc_traslado(link: $link));
-        $modelo_retencion = (new fc_retenido(link: $link));
-        $modelo_entidad = (new fc_factura(link: $link));
-        $fc_partida_modelo = new fc_partida(link: $link);
 
-        $partidas  = $fc_partida_modelo->partidas(html: $html, modelo_entidad: $modelo_entidad,
-            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $fc_factura_id);
+
+        $partidas  = $modelo_partida->partidas(html: $html, modelo_entidad: $modelo_entidad,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $registro_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
         }
 
         foreach ($partidas->registros as $indice=>$partida){
             $partidas = $this->partida_html(html_controler: $html, indice: $indice, link: $link,
-                modelo_partida: $fc_partida_modelo, partida: $partida, partidas: $partidas);
+                modelo_partida: $modelo_partida, name_entidad_retenido: $modelo_retencion->tabla,
+                name_entidad_traslado: $modelo_traslado->tabla, partida: $partida, partidas: $partidas);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al generar html', data: $partidas);
             }
@@ -113,7 +115,7 @@ class _partidas_html{
             $registro_id = $impuesto[$key_registro_id];
 
             $params = $modelo_partida->params_button_partida(name_modelo_entidad: $name_entidad,
-                registro_entidad_id: $impuesto['fc_factura_id']);
+                registro_entidad_id: $impuesto[$name_entidad.'_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener params', data: $params);
             }
@@ -135,15 +137,18 @@ class _partidas_html{
     }
 
     private function impuestos_html(html_controler $html_controler, PDO $link, _partida $modelo_partida,
+                                    string $name_entidad_retenido, string $name_entidad_traslado,
                                     array $partida): array|stdClass
     {
         $impuesto_traslado_html = $this->genera_impuesto(html_controler: $html_controler, link: $link,
-            modelo_partida: $modelo_partida, partida: $partida, tag_tipo_impuesto: 'Traslados', tipo: 'fc_traslado');
+            modelo_partida: $modelo_partida, partida: $partida, tag_tipo_impuesto: 'Traslados',
+            tipo: $name_entidad_traslado);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar html', data: $impuesto_traslado_html);
         }
         $impuesto_retenido_html = $this->genera_impuesto(html_controler: $html_controler, link: $link,
-            modelo_partida: $modelo_partida, partida: $partida, tag_tipo_impuesto: 'Retenciones', tipo: 'fc_retenido');
+            modelo_partida: $modelo_partida, partida: $partida, tag_tipo_impuesto: 'Retenciones',
+            tipo: $name_entidad_retenido);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar html', data: $impuesto_retenido_html);
         }
@@ -176,15 +181,21 @@ class _partidas_html{
     }
 
     private function partida_html(html_controler $html_controler, int $indice, PDO $link, _partida $modelo_partida,
+                                  string $name_entidad_retenido, string $name_entidad_traslado,
                                   array $partida, stdClass $partidas): array|stdClass
     {
-        $data_producto_html = (new _html_factura())->data_producto(link: $link, partida: $partida);
+        $data_producto_html = (new _html_factura())->data_producto(link: $link,
+            name_entidad_partida: $modelo_partida->tabla, partida: $partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar html', data: $data_producto_html);
         }
         $partidas->registros[$indice]['data_producto_html'] = $data_producto_html;
 
-        $fc_partida_descripcion = "<tbody><tr><td>$partida[fc_partida_descripcion]</td></tr></tbody>";
+        $key_descripcion = $modelo_partida->tabla.'_descripcion';
+        $key_descripcion_html = $modelo_partida->tabla.'descripcion_html';
+
+        $fc_partida_descripcion = "<tbody><tr><td>$partida[$key_descripcion]</td></tr></tbody>";
+
         $t_head_producto = "<thead><tr><th>Descripcion</th></tr></thead>";
 
         $descripcion_html = "<tr>
@@ -197,13 +208,14 @@ class _partidas_html{
                             </tr>";
 
 
-        $partidas->registros[$indice]['fc_partida_descripcion_html'] = $fc_partida_descripcion;
+        $partidas->registros[$indice][$key_descripcion_html] = $fc_partida_descripcion;
         $partidas->registros[$indice]['t_head_producto'] = $t_head_producto;
         $partidas->registros[$indice]['descripcion_html'] = $descripcion_html;
 
 
         $impuestos_html = $this->impuestos_html(html_controler: $html_controler, link: $link,
-            modelo_partida: $modelo_partida, partida: $partida);
+            modelo_partida: $modelo_partida, name_entidad_retenido: $name_entidad_retenido,
+            name_entidad_traslado: $name_entidad_traslado, partida: $partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar html', data: $impuestos_html);
 

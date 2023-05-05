@@ -1,24 +1,37 @@
 <?php
 namespace gamboamartin\facturacion\html;
+
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\controllers\controlador_fc_factura;
+use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\system\html_controler;
-use gamboamartin\facturacion\models\fc_nota_credito;
+
+use gamboamartin\validacion\validacion;
+use html\cat_sat_factor_html;
+use html\cat_sat_forma_pago_html;
+use html\cat_sat_metodo_pago_html;
+use html\cat_sat_moneda_html;
+use html\cat_sat_regimen_fiscal_html;
+use html\cat_sat_tipo_de_comprobante_html;
+use html\cat_sat_tipo_factor_html;
+use html\cat_sat_tipo_impuesto_html;
+use html\cat_sat_uso_cfdi_html;
+use html\com_producto_html;
+use html\com_sucursal_html;
+use html\com_tipo_cambio_html;
+use html\dp_calle_pertenece_html;
+use html\dp_colonia_postal_html;
+use html\dp_cp_html;
+use html\dp_estado_html;
+use html\dp_municipio_html;
+use html\dp_pais_html;
+use models\base\limpieza;
 use PDO;
-class fc_nota_credito_html extends html_controler {
-    public function select_fc_nota_credito_id(int $cols, bool $con_registros, int $id_selected, PDO $link,
-                                              bool $required = false): array|string
-    {
-        $modelo = new fc_nota_credito($link);
+use stdClass;
 
-        $select = $this->select_catalogo(cols:$cols,con_registros:$con_registros,id_selected:$id_selected,
-            modelo: $modelo, label: "Nota Credito",required: $required);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar select', data: $select);
-        }
-        return $select;
-    }
+
+class fc_nota_credito_html extends _base_fc_html {
+
+
+
 }
-
-
-
-

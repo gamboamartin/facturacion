@@ -6,7 +6,14 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_comprobante;
 use gamboamartin\facturacion\models\_email;
 use gamboamartin\facturacion\models\_facturacion;
+use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_factura_relacionada;
+use gamboamartin\facturacion\models\fc_nota_credito_relacionada;
+use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_relacion;
+use gamboamartin\facturacion\models\fc_retenido;
+use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\test\liberator;
 use gamboamartin\test\test;
@@ -92,7 +99,16 @@ class _comprobanteTest extends test
             exit;
         }
 
-        $factura = (new fc_factura($this->link))->get_factura(fc_factura_id: $alta_fc_factura->registro_id);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $modelo_predial = new fc_cuenta_predial(link: $this->link);
+        $modelo_relacion = new fc_relacion(link: $this->link);
+        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+
+        $factura = (new fc_factura($this->link))->get_factura(modelo_partida: $modelo_partida,
+            modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_id: $alta_fc_factura->registro_id);
         if(errores::$error){
             $error = (new errores())->error('Error al obtener factura',$factura);
             print_r($error);

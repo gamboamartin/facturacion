@@ -4,7 +4,11 @@ namespace gamboamartin\facturacion\tests\orm;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_csd;
+use gamboamartin\facturacion\models\fc_cuenta_predial;
+use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_relacion;
+use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\facturacion\tests\base_test2;
@@ -202,7 +206,15 @@ class fc_facturaTest extends test {
         /**
          * CRITICA
          */
-        $resultado = $modelo->get_factura(1);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $modelo_predial = new fc_cuenta_predial(link: $this->link);
+        $modelo_relacion = new fc_relacion(link: $this->link);
+        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $registro_id = 1;
+        $resultado = $modelo->get_factura($modelo_partida, $modelo_predial, $modelo_relacion, $modelo_relacionada,
+            $modelo_retencion, $modelo_traslado, $registro_id);
 
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
@@ -240,10 +252,15 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        /**
-         * CRITICA
-         */
-        $resultado = $modelo->get_factura(1);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $modelo_predial = new fc_cuenta_predial(link: $this->link);
+        $modelo_relacion = new fc_relacion(link: $this->link);
+        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $registro_id = 1;
+        $resultado = $modelo->get_factura($modelo_partida, $modelo_predial, $modelo_relacion, $modelo_relacionada,
+            $modelo_retencion, $modelo_traslado, $registro_id);
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(5099, $resultado['fc_factura_sub_total_base']);
@@ -306,8 +323,8 @@ class fc_facturaTest extends test {
         $modelo_traslado = new fc_traslado(link: $this->link);
         $modelo_partida = new fc_partida(link: $this->link);
 
-        $resultado = $modelo->get_factura_imp_trasladados(fc_factura_id: $alta_fc_factura->registro_id,
-            modelo_partida: $modelo_partida, modelo_traslado: $modelo_traslado, name_entidad: 'fc_factura');
+        $resultado = $modelo->get_factura_imp_trasladados($modelo_partida, $modelo_traslado, 'fc_factura',
+            1);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0,$resultado);

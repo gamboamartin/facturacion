@@ -41,11 +41,11 @@ class fc_partida_cp extends _partida
         }
 
         // print_r($sq_importes);exit;
-        $columnas_extra['fc_partida_cp_importe'] = $sq_importes->fc_partida_entidad_importe;
-        $columnas_extra['fc_partida_cp_importe_con_descuento'] = $sq_importes->fc_partida_entidad_importe_con_descuento;
+        $columnas_extra['fc_partida_cp_importe'] = $sq_importes->fc_partida_cp_entidad_importe;
+        $columnas_extra['fc_partida_cp_importe_con_descuento'] = $sq_importes->fc_partida_cp_entidad_importe_con_descuento;
         $columnas_extra['fc_partida_cp_importe_total_traslado'] = $sq_importe_total_traslado;
         $columnas_extra['fc_partida_cp_importe_total_retenido'] = $sq_importe_total_retenido;
-        $columnas_extra['fc_partida_cp_importe_total'] = "$sq_importes->fc_partida_entidad_importe_con_descuento 
+        $columnas_extra['fc_partida_cp_importe_total'] = "$sq_importes->fc_partida_cp_entidad_importe_con_descuento 
         + $sq_importe_total_traslado - $sq_importe_total_retenido";
 
         $columnas_extra['fc_partida_cp_n_traslados'] = "(SELECT COUNT(*) FROM fc_traslado_cp 
@@ -105,7 +105,6 @@ class fc_partida_cp extends _partida
         }
         return $r_modifica_bd;
     }
-
 
 
 }

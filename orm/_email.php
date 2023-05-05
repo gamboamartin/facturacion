@@ -303,6 +303,8 @@ class _email{
             return $this->error->error(mensaje: 'Error al obtener fc_email_ins', data: $fc_email_ins);
         }
 
+        //print_r($fc_email_ins);exit;
+
         $r_alta_fc_email = $modelo_email->alta_registro(registro: $fc_email_ins);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);

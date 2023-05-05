@@ -4,6 +4,7 @@ namespace gamboamartin\facturacion\tests\controllers;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
+use gamboamartin\facturacion\controllers\controlador_fc_partida;
 use gamboamartin\facturacion\controllers\pdf;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\tests\base_test;
@@ -64,7 +65,9 @@ class controlador_fc_facturaTest extends test {
         $ctl = new controlador_fc_factura(link: $this->link, paths_conf: $this->paths_conf);
         $ctl = new liberator($ctl);
 
-        $resultado = $ctl->init_controladores($this->paths_conf);
+        $ctl_partida = new controlador_fc_partida(link: $this->link, paths_conf: $this->paths_conf);
+
+        $resultado = $ctl->init_controladores(ctl_partida: $ctl_partida, paths_conf: $this->paths_conf);
         //print_r($resultado);exit;
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);

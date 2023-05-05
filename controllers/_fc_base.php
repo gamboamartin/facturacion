@@ -10,7 +10,7 @@ class _fc_base{
         $this->error = new errores();
     }
 
-    final public function init_base_fc(controlador_fc_factura|controlador_fc_csd|controlador_fc_complemento_pago $controler){
+    final public function init_base_fc(_base_system_fc $controler){
         $links = $controler->init_links();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar links',data:  $links);

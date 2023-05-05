@@ -4,14 +4,17 @@ namespace gamboamartin\facturacion\models;
 
 use base\orm\modelo;
 use config\generales;
+use config\pac;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tmp_cte_dp;
 use gamboamartin\comercial\models\com_tmp_prod_cs;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
+use gamboamartin\plugins\files;
 use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\xml_cfdi_4\cfdis;
+use gamboamartin\xml_cfdi_4\timbra;
 use stdClass;
 
 
@@ -21,6 +24,13 @@ class _transacciones_fc extends modelo
     public _etapa $modelo_etapa;
     protected _data_mail $modelo_email;
     protected _doc $modelo_documento;
+
+    protected _relacionada $modelo_relacionada;
+    protected _relacion $modelo_relacion;
+
+    protected _data_impuestos $modelo_traslado;
+    protected _data_impuestos $modelo_retencion;
+    protected _partida $modelo_partida;
 
     protected string $key_fc_id = '';
 
@@ -70,6 +80,7 @@ class _transacciones_fc extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar correos', data: $r_alta_fc_email);
         }
+
 
         $r_alta_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
             modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $r_alta_bd->registro_id,
@@ -284,31 +295,36 @@ class _transacciones_fc extends modelo
 
     /**
      *
-     * @param int $fc_factura_id
+     * @param _partida $modelo_partida
+     * @param _cuenta_predial $modelo_predial
+     * @param _relacion $modelo_relacion
+     * @param _relacionada $modelo_relacionada
+     * @param _data_impuestos $modelo_retencion
+     * @param _data_impuestos $modelo_traslado
+     * @param int $registro_id
      * @return array|stdClass|int
      */
-    final public function get_factura(int $fc_factura_id): array|stdClass|int
+    final public function get_factura(_partida $modelo_partida,_cuenta_predial $modelo_predial,
+                                      _relacion $modelo_relacion, _relacionada $modelo_relacionada,
+                                      _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado,
+                                      int $registro_id): array|stdClass|int
     {
         $hijo = array();
-        $hijo['fc_partida']['filtros'] = array();
-        $hijo['fc_partida']['filtros_con_valor'] = array('fc_factura.id' => $fc_factura_id);
-        $hijo['fc_partida']['nombre_estructura'] = 'partidas';
-        $hijo['fc_partida']['namespace_model'] = 'gamboamartin\\facturacion\\models';
-        $registro = $this->registro(registro_id: $fc_factura_id, hijo: $hijo);
+        $hijo[$modelo_partida->tabla]['filtros'] = array();
+        $hijo[$modelo_partida->tabla]['filtros_con_valor'] = array($this->key_filtro_id => $registro_id);
+        $hijo[$modelo_partida->tabla]['nombre_estructura'] = 'partidas';
+        $hijo[$modelo_partida->tabla]['namespace_model'] = 'gamboamartin\\facturacion\\models';
+        $registro = $this->registro(registro_id: $registro_id, hijo: $hijo);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $registro);
         }
 
-        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
-        $modelo_entidad = $this;
 
-        $relacionados = (new fc_relacion(link: $this->link))->get_relaciones(registro_entidad_id: $fc_factura_id,
-            modelo_entidad: $modelo_entidad,modelo_relacionada: $modelo_relacionada);
+        $relacionados = $modelo_relacion->get_relaciones(registro_entidad_id: $registro_id,
+            modelo_entidad: $this,modelo_relacionada: $modelo_relacionada);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relacionados);
         }
-
-
 
         $conceptos = array();
 
@@ -319,12 +335,14 @@ class _transacciones_fc extends modelo
         $ret_global= array();
         foreach ($registro['partidas'] as $key => $partida) {
 
-            $traslados = (new fc_traslado($this->link))->get_data_rows(name_modelo_partida: 'fc_partida', registro_partida_id: $partida['fc_partida_id']);
+            $traslados = $modelo_traslado->get_data_rows(name_modelo_partida: $modelo_partida->tabla,
+                registro_partida_id: $partida[$modelo_partida->key_id]);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el traslados de la partida', data: $traslados);
             }
 
-            $retenidos = (new fc_retenido($this->link))->get_data_rows(name_modelo_partida: 'fc_partida', registro_partida_id: $partida['fc_partida_id']);
+            $retenidos = $modelo_retencion->get_data_rows(name_modelo_partida: $modelo_partida->tabla,
+                registro_partida_id: $partida[$modelo_partida->key_id]);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida', data: $retenidos);
             }
@@ -348,20 +366,26 @@ class _transacciones_fc extends modelo
             $registro['partidas'][$key]['traslados'] = $traslados->registros;
             $registro['partidas'][$key]['retenidos'] = $retenidos->registros;
 
+            $key_cantidad = $modelo_partida->tabla.'_cantidad';
+            $key_descripcion = $modelo_partida->tabla.'_descripcion';
+            $key_valor_unitario = $modelo_partida->tabla.'_valor_unitario';
+            $key_importe = $modelo_partida->tabla.'_importe';
+            $key_descuento = $modelo_partida->tabla.'_descuento';
+
             $concepto = new stdClass();
             $concepto->clave_prod_serv = $partida['cat_sat_producto_codigo'];
-            $concepto->cantidad = $partida['fc_partida_cantidad'];
+            $concepto->cantidad = $partida[$key_cantidad];
             $concepto->clave_unidad = $partida['cat_sat_unidad_codigo'];
-            $concepto->descripcion = $partida['fc_partida_descripcion'];
-            $concepto->valor_unitario = number_format($partida['fc_partida_valor_unitario'], 2);;
-            $concepto->importe = number_format($partida['fc_partida_importe'], 2);
+            $concepto->descripcion = $partida[$key_descripcion];
+            $concepto->valor_unitario = number_format($partida[$key_valor_unitario], 2);;
+            $concepto->importe = number_format($partida[$key_importe], 2);
             $concepto->objeto_imp = $partida['cat_sat_obj_imp_codigo'];
             $concepto->no_identificacion = $partida['com_producto_codigo'];;
             $concepto->unidad = $partida['cat_sat_unidad_descripcion'];
 
             $descuento = 0.0;
-            if(isset($partida['fc_partida_descuento'])){
-                $descuento = $partida['fc_partida_descuento'];
+            if(isset($partida[$key_descuento])){
+                $descuento = $partida[$key_descuento];
             }
 
             $descuento = (new _comprobante())->monto_dos_dec(monto: $descuento);
@@ -376,20 +400,22 @@ class _transacciones_fc extends modelo
             $concepto->impuestos[0]->traslados = array();
             $concepto->impuestos[0]->retenciones = array();
 
+            $key_traslado_importe = $modelo_traslado->tabla.'_importe';
 
-            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $traslados, key_importe_impuesto: 'fc_traslado_importe');
+            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $traslados, key_importe_impuesto: $key_traslado_importe);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar traslados', data: $impuestos);
             }
 
 
 
-            $trs_global = (new _impuestos())->impuestos_globales(impuestos: $traslados, global_imp: $trs_global, key_importe: 'fc_traslado_importe');
+            $trs_global = (new _impuestos())->impuestos_globales(impuestos: $traslados, global_imp: $trs_global, key_importe: $key_traslado_importe);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $trs_global);
             }
 
-            $ret_global = (new _impuestos())->impuestos_globales(impuestos: $retenidos, global_imp: $ret_global, key_importe: 'fc_retenido_importe');
+            $key_retenido_importe = $modelo_retencion->tabla.'_importe';
+            $ret_global = (new _impuestos())->impuestos_globales(impuestos: $retenidos, global_imp: $ret_global, key_importe: $key_retenido_importe);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $ret_global);
             }
@@ -397,7 +423,7 @@ class _transacciones_fc extends modelo
 
             $concepto->impuestos[0]->traslados = $impuestos;
 
-            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $retenidos,  key_importe_impuesto: 'fc_retenido_importe');
+            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $retenidos,  key_importe_impuesto: $key_retenido_importe);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar retenciones', data: $impuestos);
             }
@@ -405,7 +431,7 @@ class _transacciones_fc extends modelo
             $concepto->impuestos[0]->retenciones = $impuestos;
 
             if(isset($partida['com_producto_aplica_predial']) && $partida['com_producto_aplica_predial'] === 'activo'){
-                $r_fc_cuenta_predial = (new fc_cuenta_predial(link: $this->link))->filtro_and(filtro: array('fc_factura.id'=>$fc_factura_id));
+                $r_fc_cuenta_predial = $modelo_predial->filtro_and(filtro: array($this->key_filtro_id=>$registro_id));
                 if (errores::$error) {
                     return $this->error->error(mensaje: 'Error al obtener cuenta predial', data: $r_fc_cuenta_predial);
                 }
@@ -415,7 +441,9 @@ class _transacciones_fc extends modelo
                 if($r_fc_cuenta_predial->n_registros > 1){
                     return $this->error->error(mensaje: 'Error de integridad en predial', data: $r_fc_cuenta_predial);
                 }
-                $fc_cuenta_predial_numero = $r_fc_cuenta_predial->registros[0]['fc_cuenta_predial_descripcion'];
+
+                $key_cuenta_predial_descripcion = $modelo_predial->tabla.'_descripcion';
+                $fc_cuenta_predial_numero = $r_fc_cuenta_predial->registros[0][$key_cuenta_predial_descripcion];
 
                 $concepto->cuenta_predial = $fc_cuenta_predial_numero;
 
@@ -424,12 +452,18 @@ class _transacciones_fc extends modelo
 
             $conceptos[] = $concepto;
 
-            $total_impuestos_trasladados += ($partida['fc_partida_importe_total_traslado']);
-            $total_impuestos_retenidos += ($partida['fc_partida_importe_total_retenido']);
+            $key_importe_total_traslado = $modelo_partida->tabla.'_importe_total_traslado';
+            $key_importe_total_retenido = $modelo_partida->tabla.'_importe_total_retenido';
+
+            $total_impuestos_trasladados += ($partida[$key_importe_total_traslado]);
+            $total_impuestos_retenidos += ($partida[$key_importe_total_retenido]);
 
         }
 
-        $registro['fc_factura_total'] = round($registro['fc_factura_sub_total']
+        $key_total = $this->tabla.'_total';
+        $key_sub_total = $this->tabla.'_sub_total';
+
+        $registro[$key_total] = round($registro[$key_sub_total]
             + $total_impuestos_trasladados - $total_impuestos_retenidos,2);
         $registro['traslados'] = $trs_global;
         $registro['retenidos'] = $ret_global;
@@ -450,14 +484,19 @@ class _transacciones_fc extends modelo
         return $registro;
     }
 
-    public function genera_xml(int $fc_factura_id, string $tipo): array|stdClass
+    public function genera_xml(_etapa $modelo_etapa, _partida $modelo_partida, _cuenta_predial$modelo_predial,
+                               _relacion $modelo_relacion, _relacionada $modelo_relacionada,
+                               _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado,
+                               int $registro_id, string $tipo): array|stdClass
     {
 
-        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa, registro_id: $fc_factura_id);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
-        $factura = $this->get_factura(fc_factura_id: $fc_factura_id);
+        $factura = $this->get_factura(modelo_partida: $modelo_partida,modelo_predial:  $modelo_predial,
+            modelo_relacion:  $modelo_relacion,modelo_relacionada:  $modelo_relacionada,
+            modelo_retencion: $modelo_retencion,modelo_traslado:  $modelo_traslado,registro_id:  $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
         }
@@ -1112,24 +1151,25 @@ class _transacciones_fc extends modelo
 
     /**
      * Calcula los impuestos trasladados de una factura
-     * @param int $fc_factura_id Factura a calcular
+     * @param int $registro_entidad_id Factura a calcular
      * @param _partida $modelo_partida
      * @param _data_impuestos $modelo_traslado
      * @param string $name_entidad
      * @return float|array
      * @version 4.14.0
      */
-    public function get_factura_imp_trasladados(int $fc_factura_id,_partida $modelo_partida, _data_impuestos $modelo_traslado, string $name_entidad): float|array
+    public function get_factura_imp_trasladados(_partida $modelo_partida, _data_impuestos $modelo_traslado,
+                                                string $name_entidad, int $registro_entidad_id): float|array
     {
-        $partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida, registro_entidad_id: $fc_factura_id);
+        $partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida, registro_entidad_id: $registro_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
         }
         $imp_traslado = 0.0;
 
         foreach ($partidas as $partida) {
-            $imp_traslado += (new fc_partida($this->link))->calculo_imp_trasladado(
-                modelo_traslado: $modelo_traslado, registro_partida_id: $partida['fc_partida_id']);
+            $imp_traslado += $modelo_partida->calculo_imp_trasladado(
+                modelo_traslado: $modelo_traslado, registro_partida_id: $partida[$modelo_partida->key_id]);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
             }
@@ -1138,9 +1178,11 @@ class _transacciones_fc extends modelo
         return $imp_traslado;
     }
 
-    public function get_factura_imp_retenidos(_partida $modelo_partida, _data_impuestos $modelo_retencion, string $name_entidad, int $fc_factura_id): float|array
+    public function get_factura_imp_retenidos(_partida $modelo_partida, _data_impuestos $modelo_retencion,
+                                              string $name_entidad, int $registro_entidad_id): float|array
     {
-        $partidas = $this->get_partidas(registro_entidad_id: $fc_factura_id,modelo_partida: $modelo_partida,name_entidad: $name_entidad);
+        $partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida,
+            registro_entidad_id: $registro_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
         }
@@ -1148,15 +1190,16 @@ class _transacciones_fc extends modelo
         $imp_traslado = 0.0;
 
 
-        $fc_partida_modelo = new fc_partida(link: $this->link);
-
         foreach ($partidas as $valor) {
 
-            $imp_traslado += $fc_partida_modelo->calculo_imp_retenido(modelo_retencion: $modelo_retencion,
-                registro_partida_id: $valor['fc_partida_id']);
+            $importe = $modelo_partida->calculo_imp_retenido(modelo_retencion: $modelo_retencion,
+                registro_partida_id: $valor[$modelo_partida->key_id]);
+
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
+                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $importe);
             }
+
+            $imp_traslado += $importe;
         }
 
         return $imp_traslado;
@@ -1174,12 +1217,15 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
         }
 
-        $fc_factura = $this->registro(registro_id: $registro_id, columnas: array('fc_factura_descuento'),
+        $key_descuento = $this->tabla.'_descuento';
+
+        $fc_factura = $this->registro(registro_id: $registro_id, columnas: array($key_descuento),
             retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
         }
-        return round($fc_factura->fc_factura_descuento,2);
+
+        return round($fc_factura->$key_descuento,2);
 
     }
 
@@ -1193,12 +1239,13 @@ class _transacciones_fc extends modelo
         if ($fc_factura_id <= 0) {
             return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
         }
-        $fc_factura = $this->registro(registro_id: $fc_factura_id, columnas: array('fc_factura_total'),
+        $key_total = $this->tabla.'_total';
+        $fc_factura = $this->registro(registro_id: $fc_factura_id, columnas: array($key_total),
             retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
         }
-        return round($fc_factura->fc_factura_total,2);
+        return round($fc_factura->$key_total,2);
     }
 
 
@@ -1206,7 +1253,8 @@ class _transacciones_fc extends modelo
 
     final public function status(string $campo, int $registro_id): array|stdClass
     {
-        $permite_transaccion = $this->verifica_permite_transaccion(registro_id: $registro_id);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa,
+            registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -1373,15 +1421,23 @@ class _transacciones_fc extends modelo
         return $xml_data;
     }
 
-    public function timbra_xml(int $fc_factura_id): array|stdClass
+    public function timbra_xml(int $registro_id): array|stdClass
     {
         $modelo_etapa = new fc_factura_etapa(link: $this->link);
-        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $fc_factura_id);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $modelo_predial = new fc_cuenta_predial(link: $this->link);
+        $modelo_relacion = new fc_relacion(link: $this->link);
+        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+
+
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
         $tipo = (new pac())->tipo;
-        $timbrada = (new fc_cfdi_sellado($this->link))->existe(filtro: array('fc_factura.id' => $fc_factura_id));
+        $timbrada = (new fc_cfdi_sellado($this->link))->existe(filtro: array('fc_factura.id' => $registro_id));
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar si la factura esta timbrado', data: $timbrada);
         }
@@ -1390,12 +1446,15 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error: la factura ya ha sido timbrada', data: $timbrada);
         }
 
-        $fc_factura = $this->registro(registro_id: $fc_factura_id);
+        $fc_factura = $this->registro(registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
         }
 
-        $xml = $this->genera_xml(fc_factura_id: $fc_factura_id, tipo: $tipo);
+        $xml = $this->genera_xml(modelo_etapa: $modelo_etapa, modelo_partida: $modelo_partida,
+            modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_id: $registro_id,
+            tipo: $tipo);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar XML', data: $xml);
         }
@@ -1426,7 +1485,9 @@ class _transacciones_fc extends modelo
             $ruta_cer_pem = $r_fc_cer_pem->registros[0]['doc_documento_ruta_absoluta'];
         }
 
-        $factura = $this->get_factura(fc_factura_id: $fc_factura_id);
+        $factura = $this->get_factura(modelo_partida: $modelo_partida,modelo_predial:  $modelo_predial,
+            modelo_relacion:  $modelo_relacion,modelo_relacionada:  $modelo_relacionada,
+            modelo_retencion: $modelo_retencion,modelo_traslado:  $modelo_traslado,registro_id:  $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
         }
@@ -1455,13 +1516,13 @@ class _transacciones_fc extends modelo
         }
 
         $alta_qr = $this->guarda_documento(directorio: "codigos_qr", extension: "jpg", contenido: $qr_code,
-            fc_factura_id: $fc_factura_id);
+            fc_factura_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al guardar QR', data: $alta_qr);
         }
 
         $alta_txt = $this->guarda_documento(directorio: "textos", extension: "txt", contenido: $xml_timbrado->txt,
-            fc_factura_id: $fc_factura_id);
+            fc_factura_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al guardar TXT', data: $alta_txt);
         }
@@ -1472,7 +1533,7 @@ class _transacciones_fc extends modelo
         }
 
         $cfdi_sellado = (new fc_cfdi_sellado($this->link))->maqueta_datos(codigo: $datos_xml['cfdi_comprobante']['NoCertificado'],
-            descripcion: $datos_xml['cfdi_comprobante']['NoCertificado'], fc_factura_id: $fc_factura_id,
+            descripcion: $datos_xml['cfdi_comprobante']['NoCertificado'], fc_factura_id: $registro_id,
             comprobante_sello: $datos_xml['cfdi_comprobante']['Sello'], comprobante_certificado: $datos_xml['cfdi_comprobante']['Certificado'],
             comprobante_no_certificado: $datos_xml['cfdi_comprobante']['NoCertificado'], complemento_tfd_sl: "",
             complemento_tfd_fecha_timbrado: $datos_xml['tfd']['FechaTimbrado'],
@@ -1489,7 +1550,7 @@ class _transacciones_fc extends modelo
         }
 
         $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
-            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $fc_factura_id, valida_existencia_etapa: true);
+            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $registro_id, valida_existencia_etapa: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
         }

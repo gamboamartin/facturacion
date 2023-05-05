@@ -776,6 +776,12 @@ class base_test{
 
         }
 
+        $del = (new base_test())->del_fc_nota_credito($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_csd');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
@@ -795,6 +801,15 @@ class base_test{
     public function del_fc_email_cp(PDO $link): array
     {
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_email_cp');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_email_nc(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_email_nc');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
@@ -888,6 +903,44 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_nota_credito(PDO $link): array
+    {
+
+        $del = $this->del_fc_email_nc($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = $this->del_fc_nota_credito_etapa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = $this->del_fc_partida_nc($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_nota_credito');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_nota_credito_etapa(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_nota_credito_etapa');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+
+
 
     public function del_fc_factura_etapa(PDO $link): array
     {
@@ -935,6 +988,30 @@ class base_test{
         }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_partida');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_partida_nc(PDO $link): array
+    {
+
+        $del = $this->del_fc_traslado_nc($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_partida_nc');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_traslado_nc(PDO $link): array
+    {
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_traslado_nc');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
