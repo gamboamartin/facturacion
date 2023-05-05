@@ -535,7 +535,7 @@ class _transacciones_fc extends modelo
         $file_xml_st = $ruta_archivos_tmp . '/' . $this->registro_id . '.st.xml';
         file_put_contents($file_xml_st, $ingreso);
 
-        $existe = $this->modelo_documento->existe(array('fc_factura.id' => $this->registro_id));
+        $existe = $modelo_documento->existe(array('fc_factura.id' => $this->registro_id));
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar si existe documento', data: $existe);
         }
