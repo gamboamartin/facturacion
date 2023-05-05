@@ -933,12 +933,14 @@ class _base_system_fc extends _base_system{
         $modelo_retencion = new fc_retenido(link: $this->link);
         $modelo_traslado = new fc_traslado(link: $this->link);
         $modelo_etapa = new fc_factura_etapa(link: $this->link);
+        $modelo_documento = new fc_factura_documento(link: $this->link);
 
 
-        $factura = (new fc_factura(link: $this->link))->genera_xml(modelo_etapa: $modelo_etapa,
-            modelo_partida: $modelo_partida, modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion,
-            modelo_relacionada: $modelo_relacionada, modelo_retencion: $modelo_retencion,
-            modelo_traslado: $modelo_traslado, registro_id: $this->registro_id, tipo: $tipo);
+        $factura = (new fc_factura(link: $this->link))->genera_xml(modelo_documento: $modelo_documento,
+            modelo_etapa: $modelo_etapa, modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
+            modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_id: $this->registro_id,
+            tipo: $tipo);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar XML',data:  $factura, header: $header,ws:$ws);
         }
@@ -1692,6 +1694,7 @@ class _base_system_fc extends _base_system{
         $modelo_entidad = (new fc_factura(link: $this->link));
         $modelo_traslado = (new fc_traslado(link: $this->link));
         $modelo_retencion = (new fc_retenido(link: $this->link));
+        $modelo_partida = (new fc_partida(link: $this->link));
 
         $partidas  = (new fc_partida($this->link))->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
             modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $this->registro_id);
@@ -1737,8 +1740,8 @@ class _base_system_fc extends _base_system{
         $params['cat_sat_uso_cfdi_id']['filtro']['cat_sat_uso_cfdi.id'] = $row_upd->cat_sat_uso_cfdi_id;
         $params['cat_sat_uso_cfdi_id']['disabled'] = true;
 
-        $base = $this->init_modifica(fecha_original: false, modelo_entidad: $this->modelo_entidad, modelo_partida: $this->modelo_partida,
-            modelo_retencion: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado,
+        $base = $this->init_modifica(fecha_original: false, modelo_entidad: $modelo_entidad, modelo_partida: $modelo_partida,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
             params: $params);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
@@ -1758,7 +1761,8 @@ class _base_system_fc extends _base_system{
         $this->inputs->cat_sat_tipo_relacion_id = $cat_sat_tipo_relacion_id;
 
 
-        $link = $this->obj_link->link_con_id(accion: 'fc_relacion_alta_bd',link:  $this->link, registro_id: $this->registro_id, seccion: $this->tabla);
+        $link = $this->obj_link->link_con_id(accion: 'fc_relacion_alta_bd',link:  $this->link,
+            registro_id: $this->registro_id, seccion: $this->tabla);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener link', data: $link);
             print_r($error);
@@ -1767,7 +1771,8 @@ class _base_system_fc extends _base_system{
 
         $this->link_fc_relacion_alta_bd = $link;
 
-        $link = $this->obj_link->link_con_id(accion: 'fc_factura_relacionada_alta_bd',link:  $this->link, registro_id: $this->registro_id, seccion: $this->tabla);
+        $link = $this->obj_link->link_con_id(accion: 'fc_factura_relacionada_alta_bd',link:  $this->link,
+            registro_id: $this->registro_id, seccion: $this->tabla);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener link', data: $link);
             print_r($error);

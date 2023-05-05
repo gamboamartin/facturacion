@@ -484,10 +484,10 @@ class _transacciones_fc extends modelo
         return $registro;
     }
 
-    public function genera_xml(_etapa $modelo_etapa, _partida $modelo_partida, _cuenta_predial$modelo_predial,
-                               _relacion $modelo_relacion, _relacionada $modelo_relacionada,
-                               _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado,
-                               int $registro_id, string $tipo): array|stdClass
+    public function genera_xml(_doc $modelo_documento, _etapa $modelo_etapa, _partida $modelo_partida,
+                               _cuenta_predial$modelo_predial, _relacion $modelo_relacion,
+                               _relacionada $modelo_relacionada, _data_impuestos $modelo_retencion,
+                               _data_impuestos $modelo_traslado, int $registro_id, string $tipo): array|stdClass
     {
 
         $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
@@ -562,13 +562,13 @@ class _transacciones_fc extends modelo
             $fc_factura_documento['fc_factura_id'] = $this->registro_id;
             $fc_factura_documento['doc_documento_id'] = $documento->registro_id;
 
-            $fc_factura_documento = $this->modelo_documento->alta_registro(registro: $fc_factura_documento);
+            $fc_factura_documento = $modelo_documento->alta_registro(registro: $fc_factura_documento);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al dar de alta factura documento', data: $fc_factura_documento);
             }
         }
         else {
-            $r_fc_factura_documento = $this->modelo_documento->filtro_and(
+            $r_fc_factura_documento = $modelo_documento->filtro_and(
                 filtro: array('fc_factura.id' => $this->registro_id));
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener factura documento', data: $r_fc_factura_documento);
@@ -1430,6 +1430,7 @@ class _transacciones_fc extends modelo
         $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
         $modelo_retencion = new fc_retenido(link: $this->link);
         $modelo_traslado = new fc_traslado(link: $this->link);
+        $modelo_documento = new fc_factura_documento(link: $this->link);
 
 
         $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
@@ -1451,10 +1452,10 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
         }
 
-        $xml = $this->genera_xml(modelo_etapa: $modelo_etapa, modelo_partida: $modelo_partida,
-            modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
-            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_id: $registro_id,
-            tipo: $tipo);
+        $xml = $this->genera_xml(modelo_documento: $modelo_documento, modelo_etapa: $modelo_etapa,
+            modelo_partida: $modelo_partida, modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion,
+            modelo_relacionada: $modelo_relacionada, modelo_retencion: $modelo_retencion,
+            modelo_traslado: $modelo_traslado, registro_id: $registro_id, tipo: $tipo);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar XML', data: $xml);
         }
