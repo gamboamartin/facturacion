@@ -21,10 +21,14 @@ use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\_cuenta_predial;
 use gamboamartin\facturacion\models\_data_impuestos;
+use gamboamartin\facturacion\models\_data_mail;
+use gamboamartin\facturacion\models\_doc;
+use gamboamartin\facturacion\models\_etapa;
 use gamboamartin\facturacion\models\_partida;
 use gamboamartin\facturacion\models\_pdf;
 use gamboamartin\facturacion\models\_relacion;
 use gamboamartin\facturacion\models\_relacionada;
+use gamboamartin\facturacion\models\_sellado;
 use gamboamartin\facturacion\models\_transacciones_fc;
 use gamboamartin\facturacion\models\com_producto;
 use gamboamartin\facturacion\models\fc_cancelacion;
@@ -67,6 +71,10 @@ class _base_system_fc extends _base_system{
     protected _cuenta_predial $modelo_predial;
     protected _relacionada $modelo_relacionada;
     protected _relacion $modelo_relacion;
+    protected _doc $modelo_documento;
+    protected _etapa $modelo_etapa;
+    protected _data_mail $modelo_email;
+    protected _sellado $modelo_sello;
 
     public string $link_fc_partida_alta_bd = '';
 
@@ -1486,7 +1494,7 @@ class _base_system_fc extends _base_system{
 
         $button_fc_factura_relaciones =  $this->html->button_href(accion: 'relaciones', etiqueta: 'Relaciones',
             registro_id: $this->registro_id,
-            seccion: 'fc_factura', style: 'warning', params: array());
+            seccion: $this->seccion, style: 'warning', params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_relaciones);
         }
@@ -1495,7 +1503,7 @@ class _base_system_fc extends _base_system{
 
         $button_fc_factura_timbra =  $this->html->button_href(accion: 'timbra_xml', etiqueta: 'Timbra',
             registro_id: $this->registro_id,
-            seccion: 'fc_factura', style: 'danger', params: array());
+            seccion: $this->seccion, style: 'danger', params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_relaciones);
         }
@@ -1504,7 +1512,7 @@ class _base_system_fc extends _base_system{
 
         $button_fc_factura_correo =  $this->html->button_href(accion: 'correo', etiqueta: 'Correos',
             registro_id: $this->registro_id,
-            seccion: 'fc_factura', style: 'success', params: array());
+            seccion: $this->seccion, style: 'success', params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_correo);
         }
@@ -1512,8 +1520,8 @@ class _base_system_fc extends _base_system{
         $this->button_fc_factura_correo = $button_fc_factura_correo;
 
         $filtro = array();
-        $filtro['fc_factura.id'] = $this->registro_id;
-        $r_fc_email = (new fc_email(link: $this->link))->filtro_and(filtro: $filtro);
+        $filtro[$this->modelo_entidad->key_filtro_id] = $this->registro_id;
+        $r_fc_email = $this->modelo_email->filtro_and(filtro: $filtro);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al obtener emails', data: $r_fc_email);
         }
@@ -1910,7 +1918,12 @@ class _base_system_fc extends _base_system{
 
     public function timbra_xml(bool $header, bool $ws = false): array|stdClass{
 
-        $timbre = (new fc_factura(link: $this->link))->timbra_xml(registro_id: $this->registro_id);
+        $timbre = $this->modelo_entidad->timbra_xml(modelo_documento: $this->modelo_documento,
+            modelo_etapa: $this->modelo_etapa, modelo_partida: $this->modelo_partida,
+            modelo_predial: $this->modelo_predial, modelo_relacion: $this->modelo_relacion,
+            modelo_relacionada: $this->modelo_relacionada, modelo_retencion: $this->modelo_retencion,
+            modelo_sello: $this->modelo_sello, modelo_traslado: $this->modelo_traslado, registro_id:
+            $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al timbrar XML',data:  $timbre, header: $header,ws:$ws);
         }

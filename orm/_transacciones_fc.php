@@ -1421,17 +1421,12 @@ class _transacciones_fc extends modelo
         return $xml_data;
     }
 
-    public function timbra_xml(int $registro_id): array|stdClass
+    public function timbra_xml(_doc $modelo_documento, _etapa $modelo_etapa, _partida $modelo_partida,
+                               _cuenta_predial $modelo_predial, _relacion $modelo_relacion,
+                               _relacionada $modelo_relacionada, _data_impuestos $modelo_retencion,
+                               _sellado $modelo_sello, _data_impuestos $modelo_traslado,
+                               int $registro_id): array|stdClass
     {
-        $modelo_etapa = new fc_factura_etapa(link: $this->link);
-        $modelo_partida = new fc_partida(link: $this->link);
-        $modelo_predial = new fc_cuenta_predial(link: $this->link);
-        $modelo_relacion = new fc_relacion(link: $this->link);
-        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
-        $modelo_retencion = new fc_retenido(link: $this->link);
-        $modelo_traslado = new fc_traslado(link: $this->link);
-        $modelo_documento = new fc_factura_documento(link: $this->link);
-
 
         $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
@@ -1533,19 +1528,24 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener datos del XML', data: $datos_xml);
         }
 
-        $cfdi_sellado = (new fc_cfdi_sellado($this->link))->maqueta_datos(codigo: $datos_xml['cfdi_comprobante']['NoCertificado'],
-            descripcion: $datos_xml['cfdi_comprobante']['NoCertificado'], fc_factura_id: $registro_id,
-            comprobante_sello: $datos_xml['cfdi_comprobante']['Sello'], comprobante_certificado: $datos_xml['cfdi_comprobante']['Certificado'],
-            comprobante_no_certificado: $datos_xml['cfdi_comprobante']['NoCertificado'], complemento_tfd_sl: "",
-            complemento_tfd_fecha_timbrado: $datos_xml['tfd']['FechaTimbrado'],
-            complemento_tfd_no_certificado_sat: $datos_xml['tfd']['NoCertificadoSAT'], complemento_tfd_rfc_prov_certif: $datos_xml['tfd']['RfcProvCertif'],
-            complemento_tfd_sello_cfd: $datos_xml['tfd']['SelloCFD'], complemento_tfd_sello_sat: $datos_xml['tfd']['SelloSAT'],
-            uuid: $datos_xml['tfd']['UUID'], complemento_tfd_tfd: "", cadena_complemento_sat: $xml_timbrado->txt);
+        $cfdi_sellado = $modelo_sello->maqueta_datos(
+            codigo: $datos_xml['cfdi_comprobante']['NoCertificado'],
+            descripcion: $datos_xml['cfdi_comprobante']['NoCertificado'],
+            comprobante_sello: $datos_xml['cfdi_comprobante']['Sello'],
+            comprobante_certificado: $datos_xml['cfdi_comprobante']['Certificado'],
+            comprobante_no_certificado: $datos_xml['cfdi_comprobante']['NoCertificado'],
+            complemento_tfd_sl: "", complemento_tfd_fecha_timbrado: $datos_xml['tfd']['FechaTimbrado'],
+            complemento_tfd_no_certificado_sat: $datos_xml['tfd']['NoCertificadoSAT'],
+            complemento_tfd_rfc_prov_certif: $datos_xml['tfd']['RfcProvCertif'],
+            complemento_tfd_sello_cfd: $datos_xml['tfd']['SelloCFD'],
+            complemento_tfd_sello_sat: $datos_xml['tfd']['SelloSAT'], uuid: $datos_xml['tfd']['UUID'],
+            complemento_tfd_tfd: "", cadena_complemento_sat: $xml_timbrado->txt, key_entidad_id: $this->key_id,
+            registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al maquetar datos para cfdi sellado', data: $cfdi_sellado);
         }
 
-        $alta = (new fc_cfdi_sellado($this->link))->alta_registro(registro: $cfdi_sellado);
+        $alta = $modelo_sello->alta_registro(registro: $cfdi_sellado);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al dar de alta cfdi sellado', data: $alta);
         }
