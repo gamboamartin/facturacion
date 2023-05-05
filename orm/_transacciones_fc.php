@@ -1513,13 +1513,13 @@ class _transacciones_fc extends modelo
         }
 
         $alta_qr = $this->guarda_documento(directorio: "codigos_qr", extension: "jpg", contenido: $qr_code,
-            fc_factura_id: $registro_id);
+            modelo_documento: $modelo_documento, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al guardar QR', data: $alta_qr);
         }
 
         $alta_txt = $this->guarda_documento(directorio: "textos", extension: "txt", contenido: $xml_timbrado->txt,
-            fc_factura_id: $registro_id);
+            modelo_documento: $modelo_documento, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al guardar TXT', data: $alta_txt);
         }
@@ -1560,7 +1560,8 @@ class _transacciones_fc extends modelo
         return $cfdi_sellado;
     }
 
-    private function guarda_documento(string $directorio, string $extension, string $contenido, int $fc_factura_id): array|stdClass
+    private function guarda_documento(string $directorio, string $extension, string $contenido,
+                                      _doc $modelo_documento, int $registro_id): array|stdClass
     {
         $ruta_archivos = $this->ruta_archivos(directorio: $directorio);
         if (errores::$error) {
@@ -1574,7 +1575,7 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al guardar archivo', data: $guarda_archivo);
         }
 
-        $tipo_documento = (new fc_factura(link: $this->link))->doc_tipo_documento_id(extension: $extension);
+        $tipo_documento = $this->doc_tipo_documento_id(extension: $extension);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar extension del documento', data: $tipo_documento);
         }
@@ -1591,9 +1592,9 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al guardar jpg', data: $documento);
         }
 
-        $registro['fc_factura_id'] = $fc_factura_id;
+        $registro[$this->key_id] = $registro_id;
         $registro['doc_documento_id'] = $documento->registro_id;
-        $factura_documento = (new fc_factura_documento($this->link))->alta_registro(registro: $registro);
+        $factura_documento = $modelo_documento->alta_registro(registro: $registro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al guardar relacion factura con documento', data: $factura_documento);
         }
