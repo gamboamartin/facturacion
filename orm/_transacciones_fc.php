@@ -1551,7 +1551,7 @@ class _transacciones_fc extends modelo
         }
 
         $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
-            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $registro_id, valida_existencia_etapa: true);
+            modelo: $this, modelo_etapa: $modelo_etapa, registro_id: $registro_id, valida_existencia_etapa: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
         }
