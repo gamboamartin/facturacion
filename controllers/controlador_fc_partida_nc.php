@@ -332,7 +332,7 @@ class controlador_fc_partida_nc extends _base {
             return $this->retorno_error(mensaje: 'Error al generar template', data: $alta, header: $header, ws: $ws);
         }
 
-        $partida = (new fc_partida_nc($this->link))->get_partida(fc_partida_nc_id: $this->registro_id);
+        $partida = (new fc_partida_nc($this->link))->get_partida_nc(fc_partida_nc_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener partida', data: $alta, header: $header, ws: $ws);
         }
@@ -375,7 +375,7 @@ class controlador_fc_partida_nc extends _base {
             unset($_POST['btn_action_next']);
         }
 
-        $partida = (new fc_partida_nc($this->link))->get_partida(fc_partida_nc_id: $this->registro_id);
+        $partida = (new fc_partida_nc($this->link))->get_partida_nc(fc_partida_nc_id: $this->registro_id);
         if(errores::$error){
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al obtener partida', data: $siguiente_view,
