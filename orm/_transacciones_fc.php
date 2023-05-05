@@ -235,19 +235,28 @@ class _transacciones_fc extends modelo
 
     /**
      * Obtiene las etapas de una factura
-     * @param modelo $modelo_fc_etapa Modelo de tipo etapa
-     * @param string $name_entidad Nombre de la entidad base ej fc_factura, fc_nota_credito
+     * @param _etapa $modelo_etapa Modelo de tipo etapa
      * @param int $registro_id Factura o complemento a verificar etapas
      * @return array
+     * @version 8.72.4
      */
-    private function etapas(modelo $modelo_fc_etapa, string $name_entidad, int $registro_id): array
+    private function etapas(_etapa $modelo_etapa, int $registro_id): array
     {
-        $filtro[$name_entidad.'.id'] =  $registro_id;
-        $r_fc_etapa = $modelo_fc_etapa->filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener r_fc_etapa', data: $r_fc_etapa);
+        if($registro_id <= 0){
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
         }
-        return $r_fc_etapa->registros;
+        $key_filtro_id = trim($this->key_filtro_id);
+        if($key_filtro_id === ''){
+            return $this->error->error(mensaje: 'Error key_filtro_id debe estar inicializado en el modelo',
+                data: $key_filtro_id);
+        }
+        $filtro[$this->key_filtro_id] =  $registro_id;
+
+        $r_etapa = $modelo_etapa->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener r_etapa', data: $r_etapa);
+        }
+        return $r_etapa->registros;
     }
 
     final public function  get_data_relaciones(int $fc_factura_id){
@@ -933,7 +942,7 @@ class _transacciones_fc extends modelo
     }
 
     private function permite_transaccion(_etapa $modelo_etapa, int $registro_id){
-        $etapas = $this->etapas(modelo_fc_etapa: $modelo_etapa, name_entidad: $this->tabla, registro_id: $registro_id);
+        $etapas = $this->etapas(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener fc_factura_etapas', data: $etapas);
         }

@@ -1,181 +1,194 @@
 <?php
+
 namespace gamboamartin\facturacion\models;
-use base\orm\_modelo_parent;
+
+
 use base\orm\modelo;
-use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
-use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
+
+use config\generales;
+use config\pac;
+use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
-use gamboamartin\cat_sat\models\cat_sat_forma_pago;
+use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
+use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
-use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\comercial\models\com_sucursal;
+use gamboamartin\comercial\models\com_tipo_cambio;
+use gamboamartin\comercial\models\com_tmp_cte_dp;
+use gamboamartin\comercial\models\com_tmp_prod_cs;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
-use gamboamartin\facturacion\models\fc_csd;
+use gamboamartin\documento\models\doc_documento;
+use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
+use gamboamartin\plugins\files;
+use gamboamartin\proceso\models\pr_proceso;
+use gamboamartin\xml_cfdi_4\cfdis;
+use gamboamartin\xml_cfdi_4\timbra;
 use PDO;
 use stdClass;
-class fc_nota_credito extends _base {
-    public function __construct(PDO $link){
-        $tabla = 'fc_nota_credito';
-        $columnas = array($tabla=>false,'com_sucursal' => $tabla,'com_tipo_cambio' => $tabla,'cat_sat_tipo_de_comprobante' => $tabla,
-            'cat_sat_regimen_fiscal'=>$tabla, 'cat_sat_forma_pago'=>$tabla, 'cat_sat_metodo_pago'=>$tabla,
-            'cat_sat_moneda'=>$tabla, 'cat_sat_uso_cfdi'=>$tabla, 'dp_calle_pertenece'=>$tabla, 'fc_csd'=>$tabla, );
-        $campos_obligatorios = array();
 
-        $campos_view['com_sucursal_id'] = array('type' => 'selects', 'model' => new com_sucursal($link));
-        $campos_view['com_tipo_cambio_id'] = array('type' => 'selects', 'model' => new com_tipo_cambio($link));
-        $campos_view['cat_sat_regimen_fiscal_id'] = array('type' => 'selects', 'model' => new cat_sat_regimen_fiscal($link));
-        $campos_view['cat_sat_tipo_de_comprobante_id'] = array('type' => 'selects', 'model' => new cat_sat_tipo_de_comprobante($link));
+class fc_nota_credito extends _transacciones_fc
+{
+
+    public function __construct(PDO $link)
+    {
+        $tabla = 'fc_nota_credito';
+        $columnas = array($tabla => false, 'fc_csd' => $tabla, 'cat_sat_forma_pago' => $tabla, 'cat_sat_metodo_pago' => $tabla,
+            'cat_sat_moneda' => $tabla, 'com_tipo_cambio' => $tabla, 'cat_sat_uso_cfdi' => $tabla,
+            'cat_sat_tipo_de_comprobante' => $tabla, 'cat_sat_regimen_fiscal' => $tabla, 'com_sucursal' => $tabla,
+            'com_cliente' => 'com_sucursal', 'dp_calle_pertenece' => $tabla, 'dp_calle' => 'dp_calle_pertenece',
+            'dp_colonia_postal' => 'dp_calle_pertenece', 'dp_colonia' => 'dp_colonia_postal', 'dp_cp' => 'dp_colonia_postal',
+            'dp_municipio' => 'dp_cp', 'dp_estado' => 'dp_municipio', 'dp_pais' => 'dp_estado', 'org_sucursal' => 'fc_csd',
+            'org_empresa' => 'org_sucursal');
+
+
+        $campos_view['fc_csd_id'] = array('type' => 'selects', 'model' => new fc_csd($link));
         $campos_view['cat_sat_forma_pago_id'] = array('type' => 'selects', 'model' => new cat_sat_forma_pago($link));
         $campos_view['cat_sat_metodo_pago_id'] = array('type' => 'selects', 'model' => new cat_sat_metodo_pago($link));
         $campos_view['cat_sat_moneda_id'] = array('type' => 'selects', 'model' => new cat_sat_moneda($link));
+        $campos_view['com_tipo_cambio_id'] = array('type' => 'selects', 'model' => new com_tipo_cambio($link));
         $campos_view['cat_sat_uso_cfdi_id'] = array('type' => 'selects', 'model' => new cat_sat_uso_cfdi($link));
+        $campos_view['cat_sat_tipo_de_comprobante_id'] = array('type' => 'selects', 'model' => new cat_sat_tipo_de_comprobante($link));
         $campos_view['dp_calle_pertenece_id'] = array('type' => 'selects', 'model' => new dp_calle_pertenece($link));
-        $campos_view['fc_csd_id'] = array('type' => 'selects', 'model' => new fc_csd($link));
+        $campos_view['cat_sat_regimen_fiscal_id'] = array('type' => 'selects', 'model' => new cat_sat_regimen_fiscal($link));
+        $campos_view['com_sucursal_id'] = array('type' => 'selects', 'model' => new com_sucursal($link));
+
+        $campos_view['folio'] = array('type' => 'inputs');
+        $campos_view['serie'] = array('type' => 'inputs');
+        $campos_view['version'] = array('type' => 'inputs');
+        $campos_view['exportacion'] = array('type' => 'inputs');
+        $campos_view['fecha'] = array('type' => 'dates');
+        $campos_view['subtotal'] = array('type' => 'inputs');
+        $campos_view['descuento'] = array('type' => 'inputs');
+        $campos_view['impuestos_trasladados'] = array('type' => 'inputs');
+        $campos_view['impuestos_retenidos'] = array('type' => 'inputs');
+        $campos_view['total'] = array('type' => 'inputs');
+
+        $campos_obligatorios = array('folio', 'fc_csd_id', 'cat_sat_forma_pago_id', 'cat_sat_metodo_pago_id',
+            'cat_sat_moneda_id', 'com_tipo_cambio_id', 'cat_sat_uso_cfdi_id', 'cat_sat_tipo_de_comprobante_id',
+            'dp_calle_pertenece_id', 'cat_sat_regimen_fiscal_id', 'com_sucursal_id', 'exportacion');
+
+        $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
+
+        $fc_partida_cantidad = ' ROUND( IFNULL( fc_partida.cantidad,0 ),2) ';
+        $fc_partida_valor_unitario = ' ROUND( IFNULL( fc_partida.valor_unitario,0),2) ';
+        $fc_partida_descuento = ' ROUND( IFNULL(fc_partida.descuento,0 ),2 )';
+
+        $fc_partida_sub_total_base = "ROUND( $fc_partida_cantidad * $fc_partida_valor_unitario, 2 ) ";
+
+
+        $fc_ligue_partida_factura = " fc_partida.fc_nota_credito_id = fc_nota_credito.id ";
+
+
+        $fc_nota_credito_sub_total_base = "ROUND((SELECT SUM( $fc_partida_sub_total_base) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
+        $fc_nota_credito_descuento = "ROUND((SELECT SUM( $fc_partida_descuento ) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
+        $fc_nota_credito_sub_total = "($fc_nota_credito_sub_total_base - $fc_nota_credito_descuento)";
+
+
+        $fc_partida_operacion = "IFNULL(fc_partida_operacion.cantidad,0) * IFNULL(fc_partida_operacion.valor_unitario,0) - IFNULL(fc_partida_operacion.descuento,0)";
+        $where_pc_partida_operacion = "fc_partida_operacion.fc_nota_credito_id = fc_nota_credito.id AND fc_partida_operacion.id = fc_partida.id";
+
+        $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida', tipo_impuesto: 'fc_traslado');
+        if(errores::$error){
+            $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
+            print_r($error);
+            exit;
+        }
+
+        $fc_nota_credito_traslados = "(
+	SELECT
+		SUM((
+			SELECT
+				ROUND(SUM( $fc_partida_operacion ),4) 
+			FROM
+				$from_impuesto
+			WHERE
+				$where_pc_partida_operacion
+				) * cat_sat_factor.factor 
+		) 
+	FROM
+		fc_traslado
+		LEFT JOIN fc_partida ON fc_partida.id = fc_traslado.fc_partida_id
+		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado.cat_sat_factor_id 
+	WHERE
+		fc_partida.fc_nota_credito_id = fc_nota_credito.id 
+	)";
+
+        $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida', tipo_impuesto: 'fc_retenido');
+        if(errores::$error){
+            $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
+            print_r($error);
+            exit;
+        }
+
+
+        $fc_nota_credito_retenciones = "(
+	SELECT
+		SUM((
+			SELECT
+				ROUND(SUM( $fc_partida_operacion ),4) 
+			FROM
+				$from_impuesto
+			WHERE
+				$where_pc_partida_operacion
+				) * cat_sat_factor.factor 
+		) 
+	FROM
+		fc_retenido
+		LEFT JOIN fc_partida ON fc_partida.id = fc_retenido.fc_partida_id
+		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido.cat_sat_factor_id 
+	WHERE
+		fc_partida.fc_nota_credito_id = fc_nota_credito.id 
+	)";
+
+        $fc_nota_credito_total = "ROUND(IFNULL($fc_nota_credito_sub_total,0)+IFNULL(ROUND($fc_nota_credito_traslados,2),0)-IFNULL(ROUND($fc_nota_credito_retenciones,2),0),2)";
+
+
+        $fc_nota_credito_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_nota_credito_id = fc_nota_credito.id)";
+
+        $fc_nota_credito_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa 
+            LEFT JOIN pr_etapa_proceso ON pr_etapa_proceso.pr_etapa_id = pr_etapa.id 
+            LEFT JOIN fc_nota_credito_etapa ON fc_nota_credito_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
+            WHERE fc_nota_credito_etapa.fc_nota_credito_id = fc_nota_credito.id ORDER BY fc_nota_credito_etapa.id DESC LIMIT 1)";
+
+        $columnas_extra['fc_nota_credito_sub_total_base'] = "IFNULL($fc_nota_credito_sub_total_base,0)";
+        $columnas_extra['fc_nota_credito_descuento'] = "IFNULL($fc_nota_credito_descuento,0)";
+        $columnas_extra['fc_nota_credito_sub_total'] = "IFNULL($fc_nota_credito_sub_total,0)";
+        $columnas_extra['fc_nota_credito_traslados'] = "IFNULL($fc_nota_credito_traslados,0)";
+        $columnas_extra['fc_nota_credito_retenciones'] = "IFNULL($fc_nota_credito_retenciones,0)";
+        $columnas_extra['fc_nota_credito_total'] = "IFNULL($fc_nota_credito_total,0)";
+        $columnas_extra['fc_nota_credito_uuid'] = "IFNULL($fc_nota_credito_uuid,'SIN UUID')";
+        $columnas_extra['fc_nota_credito_etapa'] = "$fc_nota_credito_etapa";
+
+
+
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas, campos_view: $campos_view);
+            columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
+            no_duplicados: $no_duplicados);
 
         $this->NAMESPACE = __NAMESPACE__;
 
-        $this->etiqueta = 'Configuracion Nota credito';
+        $this->etiqueta = 'Factura';
+
+
+        $this->key_fc_id = 'fc_nota_credito_id';
+
+
     }
 
-    public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
+    public function alta_bd(): array|stdClass
     {
-        $registro = $this->init_alta_bd();
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al inicializar campos base', data: $registro);
-        }
+        $this->modelo_email = new fc_email(link: $this->link);
+        $this->modelo_etapa = new fc_nota_credito_etapa(link: $this->link);
 
-        $this->registro = $this->validaciones(data: $this->registro);
+        $r_alta_bd = parent::alta_bd(); // TODO: Change the autogenerated stub
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar foraneas',data: $this->registro);
+            return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
-
-        $this->registro = $this->limpia_campos(registro: $this->registro, campos_limpiar: array());
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al limpiar campos', data: $this->registro);
-        }
-
-        $r_alta_bd =  parent::alta_bd();
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error registrar nota credito', data: $r_alta_bd);
-        }
-
         return $r_alta_bd;
     }
 
-    protected function campos_base(array $data, modelo $modelo, int $id = -1,
-                                   array $keys_integra_ds = array('codigo', 'descripcion')): array
-    {
-        if(!isset($data['descripcion'])){
-            $csd =  (new fc_csd($this->link))->get_csd(fc_csd_id: $data['fc_csd_id']);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener producto',data:  $data);
-            }
 
-            $data['descripcion'] =  $data['codigo'];
-            $data['descripcion'] .=  " ".$csd['fc_csd_id'];
-        }
-
-        $data = parent::campos_base($data, $modelo, $id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
-        }
-
-        return $data;
-    }
-    public function get_configuraciones(int $fc_csd): array|stdClass|int
-    {
-        $filtro['com_sucursal.status'] = 'activo';
-        $filtro['fc_csd_.id'] = $fc_csd;
-        $registro = $this->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al configuraciones de traslado',data:  $registro);
-        }
-
-        return $registro;
-    }
-
-    public function get_nota_credito(int $fc_nota_credito_id): array|stdClass|int
-    {
-        $registro = $this->registro(registro_id: $fc_nota_credito_id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener conf. retenido',data:  $registro);
-        }
-
-        return $registro;
-    }
-
-    private function limpia_campos(array $registro, array $campos_limpiar): array
-    {
-        foreach ($campos_limpiar as $valor) {
-            if (isset($registro[$valor])) {
-                unset($registro[$valor]);
-            }
-        }
-        return $registro;
-    }
-
-    public function modifica_bd(array $registro, int $id, bool $reactiva = false,
-                                array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
-    {
-        $conf = $this->get_nota_credito(fc_nota_credito_id: $id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener conf retenido',data: $conf);
-        }
-
-        if(!isset($registro['codigo'])){
-            $registro['codigo'] =  $conf["fc_nota_credito_codigo"];
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener el codigo del registro',data: $registro);
-            }
-        }
-
-        $registro = $this->campos_base(data: $registro,modelo: $this,id: $id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $registro);
-        }
-
-        $registro = $this->validaciones(data: $registro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar foraneas',data: $registro);
-        }
-
-        $registro = $this->limpia_campos(registro: $registro, campos_limpiar: array('com_sucursal_id'));
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al limpiar campos', data: $registro);
-        }
-
-        $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al modificar conf. retenido',data:  $r_modifica_bd);
-        }
-
-        return $r_modifica_bd;
-    }
-
-    private function validaciones(array $data): bool|array
-    {
-        if(isset($data['status'])){
-            return $data;
-        }
-
-        $keys = array('descripcion','codigo');
-        $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro:  $data);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
-        }
-
-        $keys = array('com_sucursal_id', 'com_tipo_cambio_id', 'cat_sat_tipo_de_comprobante_id', 'cat_sat_regimen_fiscal_id', 'cat_sat_forma_pago_id',
-            'cat_sat_metodo_pago_id', 'cat_sat_moneda_id', 'cat_sat_uso_cfdi_id', 'dp_calle_pertenece_id', 'fc_csd_id');
-        $valida = $this->validacion->valida_ids(keys: $keys, registro: $data);
-        if(errores::$error){
-            return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
-        }
-
-        return $data;
-    }
 }
