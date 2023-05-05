@@ -44,7 +44,7 @@ class _comprobanteTest extends test
         $comp = new _comprobante($this->link);
         //$modelo = new liberator($modelo);
 
-        $resultado = $comp->comprobante(factura: array());
+        $resultado = $comp->comprobante(row_entidad: array(), name_entidad: 'fc_factura');
         $this->assertIsArray($resultado);
         $this->assertTrue(errores::$error);
         $this->assertEquals("Error la factura pasada no tiene registros",$resultado['mensaje_limpio']);
@@ -99,7 +99,7 @@ class _comprobanteTest extends test
             exit;
         }
 
-        $resultado = $comp->comprobante(factura: $factura);
+        $resultado = $comp->comprobante(row_entidad: $factura, name_entidad: 'fc_factura');
 
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);

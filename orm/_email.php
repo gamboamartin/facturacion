@@ -120,8 +120,9 @@ class _email{
        return $r_fc_factura_documento->registros;
     }
 
-    final public function envia_factura(int $fc_factura_id, PDO $link){
-        $fc_notificaciones = $this->get_notificaciones(fc_factura_id: $fc_factura_id,link:  $link);
+    final public function envia_factura( string $key_filter_entidad_id, PDO $link, _notificacion $modelo_notificacion, int $registro_id){
+        $fc_notificaciones = $this->get_notificaciones(key_filter_entidad_id: $key_filter_entidad_id, link: $link,
+            registro_id: $registro_id, modelo_notificacion: $modelo_notificacion);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener r_fc_notificacion',data:  $fc_notificaciones);
         }
@@ -249,14 +250,16 @@ class _email{
 
     /**
      * Obtiene las notificaciones de una factura
-     * @param int $fc_factura_id Factura a obtener notificaciones
+     * @param string $key_filter_entidad_id
      * @param PDO $link Conexion a la base de datos
+     * @param int $registro_id Factura a obtener notificaciones
+     * @param _notificacion $modelo_notificacion
      * @return array
      */
-    private function get_notificaciones(int $fc_factura_id, PDO $link): array
+    private function get_notificaciones(string $key_filter_entidad_id, PDO $link, int $registro_id, _notificacion $modelo_notificacion): array
     {
-        $filtro['fc_factura.id'] = $fc_factura_id;
-        $r_fc_notificacion = (new fc_notificacion(link: $link))->filtro_and(filtro: $filtro);
+        $filtro[$key_filter_entidad_id] = $registro_id;
+        $r_fc_notificacion = $modelo_notificacion->filtro_and(filtro: $filtro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener r_fc_notificacion',data:  $r_fc_notificacion);
         }
@@ -307,7 +310,7 @@ class _email{
         return $r_alta_fc_email;
     }
 
-    final public function inserta_fc_emails( string $key_fc_id, modelo $modelo_email, PDO $link, stdClass $registro_fc){
+    final public function inserta_fc_emails( string $key_fc_id, _data_mail $modelo_email, PDO $link, stdClass $registro_fc){
         $com_emails_ctes = $this->com_emails_ctes(registro_fc: $registro_fc, link: $link);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener correos', data: $com_emails_ctes);

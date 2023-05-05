@@ -55,13 +55,13 @@ class _impuestos{
         return $imp_global;
     }
 
-    final public function impuestos(array $factura): stdClass
+    final public function impuestos(array $row_entidad): stdClass
     {
         $impuestos = new stdClass();
-        $impuestos->total_impuestos_trasladados = $factura['total_impuestos_trasladados'];
-        $impuestos->total_impuestos_retenidos = $factura['total_impuestos_retenidos'];
-        $impuestos->traslados = $factura['traslados'];
-        $impuestos->retenciones = $factura['retenidos'];
+        $impuestos->total_impuestos_trasladados = $row_entidad['total_impuestos_trasladados'];
+        $impuestos->total_impuestos_retenidos = $row_entidad['total_impuestos_retenidos'];
+        $impuestos->traslados = $row_entidad['traslados'];
+        $impuestos->retenciones = $row_entidad['retenidos'];
         return $impuestos;
     }
 

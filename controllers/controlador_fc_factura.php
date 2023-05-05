@@ -23,6 +23,7 @@ use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
+use gamboamartin\facturacion\models\fc_notificacion;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_retenido;
@@ -469,8 +470,8 @@ class controlador_fc_factura extends _base_system_fc {
     }
 
     public function descarga_xml(bool $header, bool $ws = false){
-        $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(fc_factura_id: $this->registro_id,
-            tipo_documento: "xml_sin_timbrar");
+        $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(key_entidad_filter_id: 'fc_factura.id',
+            registro_id: $this->registro_id, tipo_documento: "xml_sin_timbrar");
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener XML',data:  $ruta_xml, header: $header,ws:$ws);
         }
@@ -531,7 +532,10 @@ class controlador_fc_factura extends _base_system_fc {
             return $this->retorno_error(mensaje: 'Error al insertar notificacion',data:  $inserta_notificacion, header: $header,ws:$ws);
         }
 
-        $envia_notificacion = (new fc_factura(link: $this->link))->envia_factura(fc_factura_id: $this->registro_id);
+        $modelo_notificacion = new fc_notificacion(link: $this->link);
+
+        $envia_notificacion = (new fc_factura(link: $this->link))->envia_factura(
+            modelo_notificacion: $modelo_notificacion, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al enviar notificacion',data:  $envia_notificacion, header: $header,ws:$ws);
         }
@@ -559,8 +563,11 @@ class controlador_fc_factura extends _base_system_fc {
 
     public function envia_factura(bool $header, bool $ws = false){
 
+        $modelo_notificacion = new fc_notificacion(link: $this->link);
+
         $this->link->beginTransaction();
-        $notifica = (new fc_factura(link: $this->link))->envia_factura(fc_factura_id: $this->registro_id);
+        $notifica = (new fc_factura(link: $this->link))->envia_factura(modelo_notificacion: $modelo_notificacion,
+            registro_id: $this->registro_id);
         if(errores::$error){
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al enviar notificacion',data:  $notifica, header: $header,ws:$ws);
@@ -589,8 +596,8 @@ class controlador_fc_factura extends _base_system_fc {
 
     public function exportar_documentos(bool $header, bool $ws = false){
 
-        $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(fc_factura_id: $this->registro_id,
-            tipo_documento: "xml_sin_timbrar");
+        $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(key_entidad_filter_id: 'fc_factura.id',
+            registro_id: $this->registro_id, tipo_documento: "xml_sin_timbrar");
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener XML',data:  $ruta_xml, header: $header,ws:$ws);
         }
@@ -1037,22 +1044,24 @@ class controlador_fc_factura extends _base_system_fc {
             return $this->errores->error(mensaje: 'Error al obtener sub_total',data:  $sub_total);
         }
 
-        $descuento = (new fc_factura($this->link))->get_factura_descuento(fc_factura_id: $this->registro_id);
+        $descuento = (new fc_factura($this->link))->get_factura_descuento(registro_id: $this->registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener descuento',data:  $descuento);
         }
 
         $modelo_traslado = new fc_traslado(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_partida = new fc_partida(link: $this->link);
 
-        $imp_trasladados = (new fc_factura($this->link))->get_factura_imp_trasladados(fc_factura_id:
-            $this->registro_id, modelo_traslado: $modelo_traslado);
+        $imp_trasladados = (new fc_factura($this->link))->get_factura_imp_trasladados(fc_factura_id: $this->registro_id,
+            modelo_partida: $modelo_partida, modelo_traslado: $modelo_traslado, name_entidad: $this->tabla);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener imp_trasladados',data:  $imp_trasladados);
         }
 
-        $modelo_retencion = new fc_retenido(link: $this->link);
-        $imp_retenidos = (new fc_factura($this->link))->get_factura_imp_retenidos(modelo_retencion: $modelo_retencion,
-            fc_factura_id: $this->registro_id);
+
+        $imp_retenidos = (new fc_factura($this->link))->get_factura_imp_retenidos(modelo_partida: $modelo_partida,
+            modelo_retencion: $modelo_retencion, name_entidad: $this->tabla, fc_factura_id: $this->registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener imp_retenidos',data:  $imp_retenidos);
         }

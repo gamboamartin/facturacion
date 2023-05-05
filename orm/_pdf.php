@@ -112,8 +112,8 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al obtener factura',data:  $factura);
         }
 
-        $ruta_qr = (new fc_factura_documento(link: $link))->get_factura_documento(fc_factura_id: $fc_factura_id,
-            tipo_documento: "qr_cfdi");
+        $ruta_qr = (new fc_factura_documento(link: $link))->get_factura_documento(key_entidad_filter_id: 'fc_factura.id',
+            registro_id: $fc_factura_id, tipo_documento: "qr_cfdi");
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener QR',data:  $ruta_qr);
         }

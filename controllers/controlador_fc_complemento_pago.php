@@ -472,8 +472,8 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     }
 
     public function descarga_xml(bool $header, bool $ws = false){
-        $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(fc_factura_id: $this->registro_id,
-            tipo_documento: "xml_sin_timbrar");
+        $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(key_entidad_filter_id: 'fc_complemento_pago.id',
+            registro_id: $this->registro_id, tipo_documento: "xml_sin_timbrar");
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener XML',data:  $ruta_xml, header: $header,ws:$ws);
         }
@@ -592,8 +592,8 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
     public function exportar_documentos(bool $header, bool $ws = false){
 
-        $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(fc_factura_id: $this->registro_id,
-            tipo_documento: "xml_sin_timbrar");
+        $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(key_entidad_filter_id: 'fc_complemento_pago.id',
+            registro_id: $this->registro_id, tipo_documento: "xml_sin_timbrar");
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener XML',data:  $ruta_xml, header: $header,ws:$ws);
         }

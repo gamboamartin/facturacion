@@ -304,8 +304,10 @@ class fc_facturaTest extends test {
         }
 
         $modelo_traslado = new fc_traslado(link: $this->link);
+        $modelo_partida = new fc_partida(link: $this->link);
 
-        $resultado = $modelo->get_factura_imp_trasladados(fc_factura_id: $alta_fc_factura->registro_id, modelo_traslado: $modelo_traslado);
+        $resultado = $modelo->get_factura_imp_trasladados(fc_factura_id: $alta_fc_factura->registro_id,
+            modelo_partida: $modelo_partida, modelo_traslado: $modelo_traslado, name_entidad: 'fc_factura');
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0,$resultado);
@@ -509,7 +511,9 @@ class fc_facturaTest extends test {
         $modelo = new liberator($modelo);
 
         $fc_factura_id = 1;
-        $resultado = $modelo->get_partidas($fc_factura_id);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $resultado = $modelo->get_partidas(name_entidad: 'fc_factura',modelo_partida: $modelo_partida,
+            registro_entidad_id: $fc_factura_id);
 
 
         $this->assertIsArray($resultado);
@@ -596,8 +600,10 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $fc_partida_id = 1;
-        $resultado = $modelo->sub_total($fc_partida_id);
+        $registro_id = 1;
+        $modelo_partida = new fc_partida(link: $this->link);
+        $name_entidad = 'fc_factura';
+        $resultado = $modelo->sub_total($modelo_partida, $name_entidad, $registro_id);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(1,$resultado);
@@ -775,9 +781,12 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $fc_factura_id = 1;
+        $registro_id = 1;
+        $modelo_partida = new fc_partida(link: $this->link);
+        $name_entidad = 'fc_factura';
 
-        $resultado = $modelo->total($fc_factura_id);
+
+        $resultado = $modelo->total($modelo_partida, $name_entidad, $registro_id);
 
         $this->assertIsArray($resultado);
         $this->assertTrue(errores::$error);
@@ -793,7 +802,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $resultado = $modelo->total($fc_factura_id);
+        $resultado = $modelo->total($modelo_partida, $name_entidad, $registro_id);
 
 
         $this->assertIsFloat($resultado);
