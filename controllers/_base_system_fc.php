@@ -1096,6 +1096,7 @@ class _base_system_fc extends _base_system{
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener link alta_partida_bd',data:  $link);
         }
+
         $this->link_fc_partida_alta_bd = $link;
 
         $link = $this->obj_link->get_link($this->seccion,"genera_xml");

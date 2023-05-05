@@ -402,28 +402,29 @@ class _transacciones_fc extends modelo
 
             $key_traslado_importe = $modelo_traslado->tabla.'_importe';
 
-            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $traslados, key_importe_impuesto: $key_traslado_importe);
+            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $traslados,
+                key_importe_impuesto: $key_traslado_importe,name_tabla_partida: $modelo_partida->tabla);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar traslados', data: $impuestos);
             }
 
-
-
-            $trs_global = (new _impuestos())->impuestos_globales(impuestos: $traslados, global_imp: $trs_global, key_importe: $key_traslado_importe);
+            $trs_global = (new _impuestos())->impuestos_globales(impuestos: $traslados, global_imp: $trs_global,
+                key_importe: $key_traslado_importe, name_tabla_partida: $modelo_partida->tabla);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $trs_global);
             }
 
             $key_retenido_importe = $modelo_retencion->tabla.'_importe';
-            $ret_global = (new _impuestos())->impuestos_globales(impuestos: $retenidos, global_imp: $ret_global, key_importe: $key_retenido_importe);
+            $ret_global = (new _impuestos())->impuestos_globales(impuestos: $retenidos, global_imp: $ret_global,
+                key_importe: $key_retenido_importe, name_tabla_partida: $modelo_partida->tabla);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $ret_global);
             }
 
-
             $concepto->impuestos[0]->traslados = $impuestos;
 
-            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $retenidos,  key_importe_impuesto: $key_retenido_importe);
+            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $retenidos,
+                key_importe_impuesto: $key_retenido_importe, name_tabla_partida: $modelo_partida->tabla);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar retenciones', data: $impuestos);
             }
@@ -535,7 +536,7 @@ class _transacciones_fc extends modelo
         $file_xml_st = $ruta_archivos_tmp . '/' . $this->registro_id . '.st.xml';
         file_put_contents($file_xml_st, $ingreso);
 
-        $existe = $modelo_documento->existe(array('fc_factura.id' => $this->registro_id));
+        $existe = $modelo_documento->existe(array($this->key_filtro_id => $this->registro_id));
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar si existe documento', data: $existe);
         }
@@ -559,7 +560,7 @@ class _transacciones_fc extends modelo
             }
 
             $fc_factura_documento = array();
-            $fc_factura_documento['fc_factura_id'] = $this->registro_id;
+            $fc_factura_documento[$this->key_id] = $this->registro_id;
             $fc_factura_documento['doc_documento_id'] = $documento->registro_id;
 
             $fc_factura_documento = $modelo_documento->alta_registro(registro: $fc_factura_documento);
@@ -569,7 +570,7 @@ class _transacciones_fc extends modelo
         }
         else {
             $r_fc_factura_documento = $modelo_documento->filtro_and(
-                filtro: array('fc_factura.id' => $this->registro_id));
+                filtro: array($this->key_filtro_id => $this->registro_id));
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener factura documento', data: $r_fc_factura_documento);
             }

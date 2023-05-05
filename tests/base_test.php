@@ -921,6 +921,11 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
         }
 
+        $del = $this->del_fc_nota_credito_documento($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
 
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_nota_credito');
@@ -933,6 +938,15 @@ class base_test{
     public function del_fc_nota_credito_etapa(PDO $link): array
     {
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_nota_credito_etapa');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_nota_credito_documento(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_nota_credito_documento');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }

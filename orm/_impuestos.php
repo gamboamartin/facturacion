@@ -65,12 +65,14 @@ class _impuestos{
         return $impuestos;
     }
 
-    final public function impuestos_globales(stdClass $impuestos, array $global_imp, string $key_importe){
+    final public function impuestos_globales(stdClass $impuestos, array $global_imp, string $key_importe,
+                                             string $name_tabla_partida){
         foreach ($impuestos->registros as $impuesto){
 
             $key_gl = $impuesto['cat_sat_tipo_factor_id'].'.'.$impuesto['cat_sat_factor_id'].'.'.$impuesto['cat_sat_tipo_impuesto_id'];
 
-            $global_imp = $this->integra_ac_impuesto(global_imp: $global_imp, impuesto: $impuesto, key_gl: $key_gl, key_importe: $key_importe);
+            $global_imp = $this->integra_ac_impuesto(global_imp: $global_imp, impuesto: $impuesto, key_gl: $key_gl,
+                key_importe: $key_importe, name_tabla_partida: $name_tabla_partida);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $global_imp);
             }
@@ -79,10 +81,11 @@ class _impuestos{
         return $global_imp;
     }
 
-    private function init_globales(array $global_nodo, array $impuesto, string $key, string $key_importe): stdClass
+    private function init_globales(array $global_nodo, array $impuesto, string $key, string $key_importe,
+                                   string $name_tabla_partida): stdClass
     {
         $global_nodo[$key] = new stdClass();
-        $base = round($impuesto['fc_partida_importe'],2);
+        $base = round($impuesto[$name_tabla_partida.'_importe'],2);
         $importe = round($impuesto[$key_importe],2);
         $cat_sat_factor_factor = round($impuesto['cat_sat_factor_factor'],6);
 
@@ -101,15 +104,19 @@ class _impuestos{
 
     }
 
-    private function init_imp_global(array $global_nodo, array $impuesto, string $key_gl, string $key_importe){
-        $data_imp = $this->init_globales(global_nodo:$global_nodo, impuesto: $impuesto, key: $key_gl, key_importe:$key_importe);
+    private function init_imp_global(array $global_nodo, array $impuesto, string $key_gl, string $key_importe,
+                                     string $name_tabla_partida){
+
+        $data_imp = $this->init_globales(global_nodo:$global_nodo, impuesto: $impuesto, key: $key_gl,
+            key_importe:$key_importe, name_tabla_partida: $name_tabla_partida);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar global impuesto', data: $data_imp);
         }
 
         $global_nodo = $data_imp->global_nodo;
 
-        $global_nodo = $this->carga_global(data_imp: $data_imp,impuesto:  $impuesto, imp_global: $global_nodo, key_gl: $key_gl);
+        $global_nodo = $this->carga_global(data_imp: $data_imp,impuesto:  $impuesto, imp_global: $global_nodo,
+            key_gl: $key_gl);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar global impuesto', data: $global_nodo);
         }
@@ -117,16 +124,19 @@ class _impuestos{
         return $global_nodo;
     }
 
-    private function integra_ac_impuesto(array $global_imp, array $impuesto, string $key_gl, string $key_importe){
+    private function integra_ac_impuesto(array $global_imp, array $impuesto, string $key_gl, string $key_importe,
+                                         string $name_tabla_partida){
         if(!isset($global_imp[$key_gl])) {
-            $global_imp = $this->init_imp_global(global_nodo: $global_imp, impuesto: $impuesto, key_gl: $key_gl, key_importe: $key_importe);
+            $global_imp = $this->init_imp_global(global_nodo: $global_imp, impuesto: $impuesto, key_gl: $key_gl,
+                key_importe: $key_importe, name_tabla_partida: $name_tabla_partida);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar global impuesto', data: $global_imp);
             }
 
         }
         else{
-            $global_imp = $this->acumulado_global_impuesto(global_imp: $global_imp, impuesto: $impuesto, key_gl: $key_gl, key_importe: $key_importe);
+            $global_imp = $this->acumulado_global_impuesto(global_imp: $global_imp, impuesto: $impuesto,
+                key_gl: $key_gl, key_importe: $key_importe);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $global_imp);
             }
@@ -134,14 +144,14 @@ class _impuestos{
         return $global_imp;
     }
 
-    final public function maqueta_impuesto(stdClass $impuestos, string $key_importe_impuesto): array
+    final public function maqueta_impuesto(stdClass $impuestos, string $key_importe_impuesto, string $name_tabla_partida): array
     {
         $imp = array();
 
         foreach ($impuestos->registros as $impuesto) {
 
             $impuesto_obj = new stdClass();
-            $impuesto_obj->base = number_format($impuesto['fc_partida_importe'], 2,'.','');
+            $impuesto_obj->base = number_format($impuesto[$name_tabla_partida.'_importe'], 2,'.','');
             $impuesto_obj->impuesto = $impuesto['cat_sat_tipo_impuesto_codigo'];
             $impuesto_obj->tipo_factor = $impuesto['cat_sat_tipo_factor_descripcion'];
             $impuesto_obj->tasa_o_cuota = number_format($impuesto['cat_sat_factor_factor'], 6,'.','');

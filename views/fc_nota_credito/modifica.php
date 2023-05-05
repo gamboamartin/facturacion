@@ -136,7 +136,7 @@
                             <tbody>
                             <?php foreach ($controlador->registros['fc_emails'] as $fc_email){ ?>
                             <tr>
-                                <td><?php echo $fc_email['fc_email_id']; ?></td>
+                                <td><?php echo $fc_email['fc_email_nc_id']; ?></td>
                                 <td><?php echo $fc_email['com_email_cte_descripcion']; ?></td>
                             </tr>
                             <?php } ?>
