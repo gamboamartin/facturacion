@@ -763,6 +763,13 @@ class _base_system_fc extends _base_system{
 
     public function exportar_documentos(bool $header, bool $ws = false){
 
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $modelo_relacion = new fc_relacion(link: $this->link);
+        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_predial = new fc_cuenta_predial(link: $this->link);
+        $modelo_partida = new fc_partida(link: $this->link);
+
         $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(key_entidad_filter_id: 'fc_factura.id',
             registro_id: $this->registro_id, tipo_documento: "xml_sin_timbrar");
         if(errores::$error){
@@ -770,7 +777,9 @@ class _base_system_fc extends _base_system{
         }
 
 
-        $ruta_pdf = (new _pdf())->pdf(descarga: false,fc_factura_id: $this->registro_id,guarda: true,link:  $this->link);
+        $ruta_pdf = (new _pdf())->pdf(descarga: false, guarda: true, link: $this->link, modelo_partida: $modelo_partida,
+            modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar PDF',data:  $ruta_pdf, header: $header,ws:$ws);
         }
@@ -890,7 +899,17 @@ class _base_system_fc extends _base_system{
 
     public function genera_pdf(bool $header, bool $ws = false){
 
-        $pdf = (new _pdf())->pdf(descarga: false, fc_factura_id: $this->registro_id,guarda: true,link: $this->link);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $modelo_predial = new fc_cuenta_predial(link: $this->link);
+        $modelo_relacion = new fc_relacion(link: $this->link);
+        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+
+
+        $pdf = (new _pdf())->pdf(descarga: false, guarda: true, link: $this->link, modelo_partida: $modelo_partida,
+            modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $pdf, header: $header,ws:$ws);
         }

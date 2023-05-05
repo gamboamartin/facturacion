@@ -5,7 +5,6 @@ use gamboamartin\comercial\models\com_tmp_cte_dp;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\pdf;
-use gamboamartin\organigrama\models\org_empresa;
 use gamboamartin\organigrama\models\org_logo;
 use PDO;
 use stdClass;
@@ -106,14 +105,21 @@ class _pdf{
         return $data;
 
     }
-    final public function pdf( bool $descarga, int $fc_factura_id, bool $guarda, PDO $link):array|string|bool{
-        $factura = (new fc_factura($link))->get_factura(fc_factura_id: $fc_factura_id);
+    final public function pdf( bool $descarga, bool $guarda, PDO $link, _partida $modelo_partida,
+                               _cuenta_predial $modelo_predial, _relacion $modelo_relacion,
+                               _relacionada $modelo_relacionada, _data_impuestos $modelo_retencion,
+                               _data_impuestos $modelo_traslado, int $registro_id):array|string|bool{
+
+        $factura = (new fc_factura($link))->get_factura(modelo_partida: $modelo_partida,
+            modelo_predial:  $modelo_predial,modelo_relacion:  $modelo_relacion,
+            modelo_relacionada: $modelo_relacionada,modelo_retencion:  $modelo_retencion,
+            modelo_traslado:  $modelo_traslado,registro_id:  $registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener factura',data:  $factura);
         }
 
         $ruta_qr = (new fc_factura_documento(link: $link))->get_factura_documento(key_entidad_filter_id: 'fc_factura.id',
-            registro_id: $fc_factura_id, tipo_documento: "qr_cfdi");
+            registro_id: $registro_id, tipo_documento: "qr_cfdi");
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener QR',data:  $ruta_qr);
         }
@@ -187,7 +193,7 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al maquetar header',data:  $pdf);
         }
 
-        $relacionadas = (new fc_factura(link: $link))->get_data_relaciones(fc_factura_id: $fc_factura_id);
+        $relacionadas = (new fc_factura(link: $link))->get_data_relaciones(fc_factura_id: $registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relacionadas',data:  $relacionadas);
         }

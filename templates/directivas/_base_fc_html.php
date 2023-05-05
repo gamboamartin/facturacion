@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\html;
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\controllers\_base_system_fc;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\limpieza;
@@ -93,7 +94,7 @@ class _base_fc_html extends html_controler{
         return $controler->inputs;
     }
 
-    private function asigna_inputs_fc_partida(controlador_fc_factura $controler, stdClass $inputs): array|stdClass
+    private function asigna_inputs_fc_partida(_base_system_fc $controler, stdClass $inputs): array|stdClass
     {
         $controler->inputs->select = new stdClass();
         $controler->inputs->select->fc_factura_id = $inputs->selects->fc_factura_id;
@@ -141,7 +142,7 @@ class _base_fc_html extends html_controler{
         return $inputs_asignados;
     }
 
-    public function genera_inputs_fc_partida(controlador_fc_factura $controler, PDO $link): array|stdClass
+    public function genera_inputs_fc_partida(_base_system_fc $controler, PDO $link): array|stdClass
     {
         $inputs = $this->init_alta_fc_partida(link: $link);
         if(errores::$error){
