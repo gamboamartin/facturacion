@@ -41,7 +41,7 @@ class _sellado extends _modelo_parent{
         return $r_alta_bd;
     }
 
-    final public function elimina_bd(int $id): array|stdClass
+    public function elimina_bd(int $id): array|stdClass
     {
         $fc_cfdi_sellado = $this->registro(registro_id: $id, retorno_obj: true);
         if (errores::$error) {
@@ -106,7 +106,7 @@ class _sellado extends _modelo_parent{
         return $this->error->error(mensaje: 'Error este registro no puede ser eliminado',data: $id);
     }
 
-    final public function status(string $campo, int $registro_id): array|stdClass
+     public function status(string $campo, int $registro_id): array|stdClass
     {
         $fc_cfdi_sellado = $this->registro(registro_id: $registro_id, retorno_obj: true);
         if (errores::$error) {
