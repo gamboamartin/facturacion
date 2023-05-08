@@ -8,12 +8,9 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
-use base\controller\controler;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_traslado_html;
-use gamboamartin\facturacion\models\fc_traslado;
-use gamboamartin\system\links_menu;
-use gamboamartin\system\system;
+use gamboamartin\facturacion\models\fc_traslado_cp;
 
 use gamboamartin\template\html;
 use PDO;
@@ -25,7 +22,7 @@ class controlador_fc_traslado_cp extends _ctl_traslado {
 
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass()){
-        $modelo = new fc_traslado(link: $link);
+        $modelo = new fc_traslado_cp(link: $link);
         $html_ = new fc_traslado_html(html: $html);
         parent::__construct(html_: $html_, link: $link,modelo:  $modelo, paths_conf: $paths_conf);
 

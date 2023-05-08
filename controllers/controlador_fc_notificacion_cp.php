@@ -10,9 +10,9 @@ namespace gamboamartin\facturacion\controllers;
 
 
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\html\fc_factura_html;
+use gamboamartin\facturacion\html\fc_complemento_pago_html;
 use gamboamartin\facturacion\html\fc_notificacion_cp_html;
-use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_complemento_pago;
 use gamboamartin\facturacion\models\fc_notificacion_cp;
 use gamboamartin\notificaciones\html\not_mensaje_html;
 use gamboamartin\notificaciones\models\not_mensaje;
@@ -48,7 +48,7 @@ class controlador_fc_notificacion_cp extends system{
 
         $this->lista_get_data = true;
 
-        $this->parents_verifica[] = (new fc_factura(link: $this->link));
+        $this->parents_verifica[] = (new fc_complemento_pago(link: $this->link));
         $this->parents_verifica[] = (new not_mensaje(link: $this->link));
 
 
@@ -61,10 +61,10 @@ class controlador_fc_notificacion_cp extends system{
     {
 
         $columns["fc_notificacion_cp_id"]["titulo"] = "Id";
-        $columns["fc_factura_folio"]["titulo"] = "Folio";
+        $columns["fc_complemento_pago_folio"]["titulo"] = "Folio";
         $columns["not_mensaje_id"]["titulo"] = "Mnesaje Id";
 
-        $filtro = array("fc_notificacion_cp.id","fc_factura.folio", "not_mensaje.id");
+        $filtro = array("fc_notificacion_cp.id","fc_complemento_pago.folio", "not_mensaje.id");
 
         $datatables = new stdClass();
         $datatables->columns = $columns;
@@ -79,10 +79,10 @@ class controlador_fc_notificacion_cp extends system{
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al insertar',data:  $r_alta,header:  $header,ws:  $ws);
         }
-        $fc_factura_id = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols:12,
+        $fc_complemento_pago_id = (new fc_complemento_pago_html(html: $this->html_base))->select_fc_complemento_pago_id(cols:12,
             con_registros:  true,id_selected: -1,link: $this->link);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $fc_factura_id,header:  $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $fc_complemento_pago_id,header:  $header,ws:  $ws);
         }
 
         $not_mensaje_id = (new not_mensaje_html(html: $this->html_base))->select_not_mensaje_id(cols:12,
@@ -92,7 +92,7 @@ class controlador_fc_notificacion_cp extends system{
         }
 
         $this->inputs = new stdClass();
-        $this->inputs->fc_factura_id = $fc_factura_id;
+        $this->inputs->fc_complemento_pago_id = $fc_complemento_pago_id;
         $this->inputs->not_mensaje_id = $not_mensaje_id;
         return $r_alta;
     }
@@ -103,10 +103,10 @@ class controlador_fc_notificacion_cp extends system{
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica,header:  $header,ws:  $ws);
         }
-        $fc_factura_id = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols:12,
-            con_registros:  true,id_selected: $this->row_upd->fc_factura_id,link: $this->link);
+        $fc_complemento_pago_id = (new fc_complemento_pago_html(html: $this->html_base))->select_fc_complemento_pago_id(cols:12,
+            con_registros:  true,id_selected: $this->row_upd->fc_complemento_pago_id,link: $this->link);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $fc_factura_id,header:  $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $fc_complemento_pago_id,header:  $header,ws:  $ws);
         }
 
         $not_mensaje_id = (new not_mensaje_html(html: $this->html_base))->select_not_mensaje_id(cols:12,
@@ -116,7 +116,7 @@ class controlador_fc_notificacion_cp extends system{
         }
 
         $this->inputs = new stdClass();
-        $this->inputs->fc_factura_id = $fc_factura_id;
+        $this->inputs->fc_complemento_pago_id = $fc_complemento_pago_id;
         $this->inputs->not_mensaje_id = $not_mensaje_id;
 
         return $r_modifica;
