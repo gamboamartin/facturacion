@@ -707,6 +707,16 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_cfdi_sellado_nc(PDO $link): array
+    {
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_cfdi_sellado_nc');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_cfdi_sellado(PDO $link): array
     {
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_cfdi_sellado');
@@ -926,6 +936,10 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
         }
 
+        $del = $this->del_fc_cfdi_sellado_nc($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
 
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_nota_credito');

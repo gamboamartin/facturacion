@@ -796,17 +796,14 @@ class _transacciones_fc extends modelo
 
     public function elimina_bd(int $id): array|stdClass
     {
-        $modelo_etapa = new fc_factura_etapa(link: $this->link);
-        $modelo_partida = new fc_partida(link: $this->link);
-        $modelo_email = new fc_email(link: $this->link);
 
-        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $id);
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa, registro_id: $id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
 
-
-        $del = $this->elimina_partidas(modelo_etapa: $modelo_etapa, modelo_partida: $modelo_partida, name_entidad: $this->tabla, registro_id: $id);
+        $del = $this->elimina_partidas(modelo_etapa: $this->modelo_etapa, modelo_partida: $this->modelo_partida,
+            name_entidad: $this->tabla, registro_id: $id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al eliminar partida', data: $del);
         }
@@ -814,15 +811,15 @@ class _transacciones_fc extends modelo
         $filtro = array();
         $filtro['fc_factura.id'] = $id;
 
-        $r_fc_factura_documento = (new fc_factura_documento(link: $this->link))->elimina_con_filtro_and(filtro: $filtro);
+        $r_fc_factura_documento = $this->modelo_documento->elimina_con_filtro_and(filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_documento);
         }
-        $r_fc_email = $modelo_email->elimina_con_filtro_and(filtro: $filtro);
+        $r_fc_email = $this->modelo_email->elimina_con_filtro_and(filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_email);
         }
-        $r_fc_factura_etapa = $modelo_etapa->elimina_con_filtro_and(filtro: $filtro);
+        $r_fc_factura_etapa = $this->modelo_etapa->elimina_con_filtro_and(filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_etapa);
         }
@@ -842,7 +839,8 @@ class _transacciones_fc extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
-        $fc_partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida, registro_entidad_id: $registro_id);
+        $fc_partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida,
+            registro_entidad_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $fc_partidas);
         }
@@ -1124,6 +1122,11 @@ class _transacciones_fc extends modelo
 
     }
 
+    /**
+     * Valida si una entidad relacionada de facturacion puede ser o no eliminada
+     * @param array $etapas Etapas a verificar
+     * @return bool
+     */
     private function valida_permite_transaccion(array $etapas): bool
     {
         $permite_transaccion = true;
@@ -1132,6 +1135,9 @@ class _transacciones_fc extends modelo
              * AJUSTAR MEDIANTE CONF
              */
             if($etapa['pr_etapa_descripcion'] === 'TIMBRADO'){
+                $permite_transaccion = false;
+            }
+            if($etapa['pr_etapa_descripcion'] === 'CANCELADO'){
                 $permite_transaccion = false;
             }
         }
