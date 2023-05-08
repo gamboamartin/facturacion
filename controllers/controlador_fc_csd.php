@@ -66,7 +66,7 @@ class controlador_fc_csd extends system{
         }
 
 
-        $init_ctl = (new _fc_base())->init_base_fc(controler: $this);
+        $init_ctl = (new _fc_base())->init_base_fc(controler: $this, name_modelo_email: 'fc_email');
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al inicializar',data:  $init_ctl);
             print_r($error);

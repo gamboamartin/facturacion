@@ -10,8 +10,8 @@ class _fc_base{
         $this->error = new errores();
     }
 
-    final public function init_base_fc(_base_system_fc $controler){
-        $links = $controler->init_links();
+    final public function init_base_fc(_base_system_fc $controler, string $name_modelo_email){
+        $links = $controler->init_links(name_modelo_email: $name_modelo_email);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar links',data:  $links);
         }

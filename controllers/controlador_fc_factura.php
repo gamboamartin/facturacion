@@ -49,18 +49,14 @@ use stdClass;
 class controlador_fc_factura extends _base_system_fc {
 
     public array|stdClass $keys_selects = array();
-    public controlador_fc_partida $controlador_fc_partida;
     public controlador_com_producto $controlador_com_producto;
 
-    public string $button_fc_factura_modifica = '';
     public string $button_fc_factura_relaciones = '';
     public string $button_fc_factura_timbra = '';
 
     public string $rfc = '';
     public string $razon_social = '';
 
-    public string $link_fc_partida_modifica_bd = '';
-    public string $link_fc_factura_partidas = '';
     public string $link_fc_factura_nueva_partida = '';
 
     public string $link_fc_email_alta_bd = '';
@@ -105,7 +101,7 @@ class controlador_fc_factura extends _base_system_fc {
         $this->data_selected_alta['cat_sat_uso_cfdi_id']['id'] = -1;
         $this->data_selected_alta['cat_sat_uso_cfdi_id']['filtro'] = array();
 
-        $init_ctl = (new _fc_base())->init_base_fc(controler: $this);
+        $init_ctl = (new _fc_base())->init_base_fc(controler: $this,name_modelo_email: 'fc_email');
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al inicializar',data:  $init_ctl);
             print_r($error);

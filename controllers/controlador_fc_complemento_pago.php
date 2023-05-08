@@ -76,7 +76,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $this->data_selected_alta['cat_sat_uso_cfdi_id']['filtro'] = array('cat_sat_uso_cfdi.id'=>23);
 
 
-        $init_ctl = (new _fc_base())->init_base_fc(controler: $this);
+        $init_ctl = (new _fc_base())->init_base_fc(controler: $this,name_modelo_email: 'fc_email_cp');
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al inicializar',data:  $init_ctl);
             print_r($error);

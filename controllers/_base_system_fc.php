@@ -23,6 +23,7 @@ use gamboamartin\facturacion\models\_cuenta_predial;
 use gamboamartin\facturacion\models\_data_impuestos;
 use gamboamartin\facturacion\models\_data_mail;
 use gamboamartin\facturacion\models\_doc;
+use gamboamartin\facturacion\models\_email;
 use gamboamartin\facturacion\models\_etapa;
 use gamboamartin\facturacion\models\_partida;
 use gamboamartin\facturacion\models\_pdf;
@@ -77,7 +78,44 @@ class _base_system_fc extends _base_system{
     protected _sellado $modelo_sello;
 
     public string $link_fc_partida_alta_bd = '';
+    public string $link_fc_email_alta_bd = '';
+    public string $button_fc_factura_modifica = '';
 
+    public string $key_email_id = '';
+
+    public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
+    {
+
+        $controladores = $this->init_controladores(ctl_partida: $this->ctl_partida, paths_conf: $this->paths_conf);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
+            print_r($error);
+            die('Error');
+        }
+
+        $base = $this->init_modifica(fecha_original: true, modelo_entidad: $this->modelo_entidad,
+            modelo_partida: $this->modelo_partida, modelo_retencion: $this->modelo_retencion,
+            modelo_traslado: $this->modelo_traslado);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
+                header: $header,ws:$ws);
+        }
+
+
+        $v_fecha_hora = $this->row_upd->fecha;
+
+        $fecha_hora = (new html_controler(html: $this->html_base))->input_fecha(cols: 6, row_upd: new stdClass(),
+            value_vacio: false, value: $v_fecha_hora, value_hora: true);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al maquetar input',data:  $fecha_hora,
+                header: $header,ws:$ws);
+        }
+
+        $this->inputs->fecha_hora = $fecha_hora;
+
+
+        return $base->template;
+    }
     public function alta(bool $header, bool $ws = false): array|string
     {
         /**
@@ -133,6 +171,133 @@ class _base_system_fc extends _base_system{
 
 
         return $r_alta;
+    }
+
+    public function correo(bool $header, bool $ws = false): array|stdClass
+    {
+
+        $this->key_email_id = $this->modelo_email->key_id;
+
+        $row_upd = $this->modelo_entidad->registro(registro_id: $this->registro_id, columnas_en_bruto: true, retorno_obj: true);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener registro', data: $row_upd, header: $header, ws: $ws);
+        }
+
+
+        $this->inputs = new stdClass();
+
+
+        $columns_ds[] = $this->tabla.'_descripcion_select';
+        $filtro[$this->tabla.'.id'] = $this->registro_id;
+        $selector_id = $this->html_fc->select_fc_entidad_id(cols: 12,columns_ds:  $columns_ds, con_registros: true,
+            disabled: true,filtro:  $filtro, id_selected: $this->registro_id,label: $this->modelo->etiqueta,
+            modelo_entidad:  $this->modelo_entidad, registros: array());
+
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al maquetar input', data: $selector_id, header: $header, ws: $ws);
+        }
+
+        $key_entidad_id = $this->modelo_entidad->key_id;
+        $key_entidad_folio = $this->modelo_entidad->tabla.'_folio';
+
+        $this->inputs->$key_entidad_id = $selector_id;
+
+
+        $fc_factura_folio = $this->html_fc->input_folio(cols: 12,row_upd: $row_upd,
+            value_vacio: false, disabled: true);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $fc_factura_folio);
+        }
+
+        $this->inputs->$key_entidad_folio = $fc_factura_folio;
+
+
+        $com_cliente_razon_social= (new com_cliente_html(html: $this->html_base))->input_razon_social(cols: 12,
+            row_upd: $row_upd, value_vacio: false, disabled: true);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $com_cliente_razon_social);
+        }
+
+        $this->inputs->com_cliente_razon_social = $com_cliente_razon_social;
+
+        $com_email_cte_descripcion= (new com_email_cte_html(html: $this->html_base))->input_email(cols: 12,
+            row_upd:  new stdClass(),value_vacio:  false, name: 'descripcion');
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $com_email_cte_descripcion);
+        }
+
+        $this->inputs->com_email_cte_descripcion = $com_email_cte_descripcion;
+
+
+        $com_email_cte_id= (new com_email_cte_html(html: $this->html_base))->select_com_email_cte_id(cols: 12,
+            con_registros:  true,id_selected:  -1, link: $this->link);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $com_email_cte_descripcion);
+        }
+
+        $this->inputs->com_email_cte_id = $com_email_cte_id;
+
+        $hidden_row_id = $this->html->hidden(name: $key_entidad_id,value:  $this->registro_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $hidden_row_id);
+        }
+
+        $hidden_seccion_retorno = $this->html->hidden(name: 'seccion_retorno',value:  $this->tabla);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $hidden_seccion_retorno);
+        }
+        $hidden_id_retorno = $this->html->hidden(name: 'id_retorno',value:  $this->registro_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $hidden_id_retorno);
+        }
+
+        $this->inputs->hidden_row_id = $hidden_row_id;
+        $this->inputs->hidden_seccion_retorno = $hidden_seccion_retorno;
+        $this->inputs->hidden_id_retorno = $hidden_id_retorno;
+
+        $key_filer_id = $this->modelo_entidad->key_filtro_id;
+        $filtro[$key_filer_id] = $this->registro_id;
+
+        $r_fc_email = $this->modelo_email->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener correos', data: $r_fc_email);
+        }
+
+        $emails_facturas = $r_fc_email->registros;
+
+        $key_email_id = $this->modelo_email->key_id;
+
+        foreach ($emails_facturas as $indice=>$email_factura){
+
+            $link_elimina = $this->button_elimina_correo(name_modelo_email: $this->modelo_email->tabla,
+                name_modelo_entidad: $this->modelo_entidad->tabla, registro_email_id: $email_factura[$key_email_id],
+                registro_entidad_id: $this->registro_id);
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina);
+            }
+            $emails_facturas[$indice]['elimina_bd'] = $link_elimina;
+
+            $link_status = $this->button_status_correo(modelo_email: $this->modelo_email,
+                name_modelo_entidad: $this->modelo_entidad->tabla, registro_email_id: $email_factura[$key_email_id],
+                registro_entidad_id: $this->registro_id);
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina);
+            }
+            $emails_facturas[$indice]['status'] = $link_status;
+        }
+
+
+        $this->registros['emails_facturas'] = $emails_facturas;
+
+
+        $button_fc_factura_modifica =  $this->html->button_href(accion: 'modifica', etiqueta: 'Ir a CFDI',
+            registro_id: $this->registro_id, seccion: $this->tabla, style: 'warning', params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_modifica);
+        }
+
+        $this->button_fc_factura_modifica = $button_fc_factura_modifica;
+        return $this->inputs;
     }
 
     private function get_tipo_comprobante(): array|int
@@ -298,39 +463,7 @@ class _base_system_fc extends _base_system{
         return $tipo_comprobante;
     }
 
-    public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
-    {
 
-        $controladores = $this->init_controladores(ctl_partida: $this->ctl_partida, paths_conf: $this->paths_conf);
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
-            print_r($error);
-            die('Error');
-        }
-
-        $base = $this->init_modifica(fecha_original: true, modelo_entidad: $this->modelo_entidad,
-            modelo_partida: $this->modelo_partida, modelo_retencion: $this->modelo_retencion,
-            modelo_traslado: $this->modelo_traslado);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
-                header: $header,ws:$ws);
-        }
-
-
-        $v_fecha_hora = $this->row_upd->fecha;
-
-        $fecha_hora = (new html_controler(html: $this->html_base))->input_fecha(cols: 6, row_upd: new stdClass(),
-            value_vacio: false, value: $v_fecha_hora, value_hora: true);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al maquetar input',data:  $fecha_hora,
-                header: $header,ws:$ws);
-        }
-
-        $this->inputs->fecha_hora = $fecha_hora;
-
-
-        return $base->template;
-    }
     public function alta_partida_bd(bool $header, bool $ws = false){
 
         $this->link->beginTransaction();
@@ -408,41 +541,46 @@ class _base_system_fc extends _base_system{
         return $data_return;
     }
 
-    private function button_elimina_correo(int $fc_email_id, int $fc_factura_id): array|string
+    private function button_elimina_correo(string $name_modelo_email, string $name_modelo_entidad,
+                                           int $registro_email_id, int $registro_entidad_id): array|string
     {
-        $params = $this->params_button_partida(accion_retorno: 'correo', fc_factura_id: $fc_factura_id);
+        $params = $this->params_button_partida(accion_retorno: 'correo', name_modelo_entidad: $name_modelo_entidad,
+            registro_entidad_id: $registro_entidad_id);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar params', data: $params);
         }
 
-        $link_elimina = $this->html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar', registro_id: $fc_email_id,
-            seccion: 'fc_email', style: 'danger',icon: 'bi bi-trash', muestra_icono_btn: true,
-            muestra_titulo_btn: false, params: $params);
+        $link_elimina = $this->html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
+            registro_id: $registro_email_id, seccion: $name_modelo_email, style: 'danger',icon: 'bi bi-trash',
+            muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina);
         }
         return $link_elimina;
     }
-    private function button_status_correo(int $fc_email_id, int $fc_factura_id): array|string
+    private function button_status_correo(_data_mail $modelo_email, string $name_modelo_entidad,
+                                          int $registro_email_id, int $registro_entidad_id): array|string
     {
-        $params = $this->params_button_partida(accion_retorno: 'correo', fc_factura_id: $fc_factura_id);
+        $params = $this->params_button_partida(accion_retorno: 'correo', name_modelo_entidad: $name_modelo_entidad,
+            registro_entidad_id: $registro_entidad_id);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar params', data: $params);
         }
 
-        $fc_email = (new fc_email(link: $this->link))->registro(registro_id: $fc_email_id, retorno_obj: true);
+        $fc_email = $modelo_email->registro(registro_id: $registro_email_id, retorno_obj: true);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al obtener fc_email', data: $fc_email);
         }
 
+        $key_email_status = $modelo_email->tabla.'_status';
         $style = 'success';
-        if($fc_email->fc_email_status === 'inactivo'){
+        if($fc_email->$key_email_status === 'inactivo'){
             $style = 'danger';
         }
 
 
-        $link_status = $this->html->button_href(accion: 'status', etiqueta: 'Status', registro_id: $fc_email_id,
-            seccion: 'fc_email', style: $style,icon: 'bi bi-file-diff', muestra_icono_btn: true,
+        $link_status = $this->html->button_href(accion: 'status', etiqueta: 'Status', registro_id: $registro_email_id,
+            seccion: $modelo_email->tabla, style: $style,icon: 'bi bi-file-diff', muestra_icono_btn: true,
             muestra_titulo_btn: false, params: $params);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_status);
@@ -521,115 +659,7 @@ class _base_system_fc extends _base_system{
 
     }
 
-    public function correo(bool $header, bool $ws = false): array|stdClass
-    {
 
-        $row_upd = $this->modelo->registro(registro_id: $this->registro_id, columnas_en_bruto: true, retorno_obj: true);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al obtener registro', data: $row_upd);
-        }
-
-
-        $this->inputs = new stdClass();
-        $fc_factura_id = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols: 12,
-            con_registros: true, id_selected: $this->registro_id, link: $this->link,
-            disabled: true, filtro: array('fc_factura.id'=>$this->registro_id));
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al maquetar input', data: $fc_factura_id);
-        }
-
-        $this->inputs->fc_factura_id = $fc_factura_id;
-
-        $fc_factura_folio = (new fc_factura_html(html: $this->html_base))->input_folio(cols: 12,row_upd: $row_upd,
-            value_vacio: false, disabled: true);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al maquetar input', data: $fc_factura_folio);
-        }
-
-        $this->inputs->fc_factura_folio = $fc_factura_folio;
-
-
-        $com_cliente_razon_social= (new com_cliente_html(html: $this->html_base))->input_razon_social(cols: 12,
-            row_upd: $row_upd, value_vacio: false, disabled: true);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al maquetar input', data: $com_cliente_razon_social);
-        }
-
-        $this->inputs->com_cliente_razon_social = $com_cliente_razon_social;
-
-        $com_email_cte_descripcion= (new com_email_cte_html(html: $this->html_base))->input_email(cols: 12,
-            row_upd:  new stdClass(),value_vacio:  false, name: 'descripcion');
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al maquetar input', data: $com_email_cte_descripcion);
-        }
-
-        $this->inputs->com_email_cte_descripcion = $com_email_cte_descripcion;
-
-
-        $com_email_cte_id= (new com_email_cte_html(html: $this->html_base))->select_com_email_cte_id(cols: 12,
-            con_registros:  true,id_selected:  -1, link: $this->link);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al maquetar input', data: $com_email_cte_descripcion);
-        }
-
-        $this->inputs->com_email_cte_id = $com_email_cte_id;
-
-        $hidden_row_id = $this->html->hidden(name: 'fc_factura_id',value:  $this->registro_id);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al maquetar input', data: $hidden_row_id);
-        }
-
-        $hidden_seccion_retorno = $this->html->hidden(name: 'seccion_retorno',value:  $this->tabla);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al maquetar input', data: $hidden_seccion_retorno);
-        }
-        $hidden_id_retorno = $this->html->hidden(name: 'id_retorno',value:  $this->registro_id);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al maquetar input', data: $hidden_id_retorno);
-        }
-
-        $this->inputs->hidden_row_id = $hidden_row_id;
-        $this->inputs->hidden_seccion_retorno = $hidden_seccion_retorno;
-        $this->inputs->hidden_id_retorno = $hidden_id_retorno;
-
-        $filtro['fc_factura.id'] = $this->registro_id;
-
-        $r_fc_email = (new fc_email(link: $this->link))->filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al obtener correos', data: $r_fc_email);
-        }
-
-        $emails_facturas = $r_fc_email->registros;
-
-        foreach ($emails_facturas as $indice=>$email_factura){
-
-            $link_elimina = $this->button_elimina_correo(fc_email_id: $email_factura['fc_email_id'], fc_factura_id: $this->registro_id);
-            if (errores::$error) {
-                return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina);
-            }
-            $emails_facturas[$indice]['elimina_bd'] = $link_elimina;
-
-            $link_status = $this->button_status_correo(fc_email_id: $email_factura['fc_email_id'], fc_factura_id: $this->registro_id);
-            if (errores::$error) {
-                return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina);
-            }
-            $emails_facturas[$indice]['status'] = $link_status;
-        }
-
-
-        $this->registros['emails_facturas'] = $emails_facturas;
-
-
-        $button_fc_factura_modifica =  $this->html->button_href(accion: 'modifica', etiqueta: 'Ir a Factura',
-            registro_id: $this->registro_id,
-            seccion: 'fc_factura', style: 'warning', params: array());
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_modifica);
-        }
-
-        $this->button_fc_factura_modifica = $button_fc_factura_modifica;
-        return $this->inputs;
-    }
 
     private function data_partida(int $fc_partida_id): array|stdClass
     {
@@ -1076,7 +1106,7 @@ class _base_system_fc extends _base_system{
         return $existe_factura_documento;
     }
 
-    public function init_links(): array|string
+    public function init_links(string $name_modelo_email): array|string
     {
 
 
@@ -1111,7 +1141,7 @@ class _base_system_fc extends _base_system{
         }
         $this->link_factura_timbra_xml = $link;
 
-        $link_fc_email_alta_bd = $this->obj_link->link_alta_bd(link: $this->link, seccion: 'fc_email');
+        $link_fc_email_alta_bd = $this->obj_link->link_alta_bd(link: $this->link, seccion: $name_modelo_email);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al obtener link',data:  $this->link_fc_email_alta_bd);
             print_r($error);
@@ -1576,12 +1606,12 @@ class _base_system_fc extends _base_system{
     }
 
 
-    private function params_button_partida(string $accion_retorno, int $fc_factura_id): array
+    private function params_button_partida(string $accion_retorno, string $name_modelo_entidad, int $registro_entidad_id): array
     {
         $params = array();
-        $params['seccion_retorno'] = 'fc_factura';
+        $params['seccion_retorno'] = $name_modelo_entidad;
         $params['accion_retorno'] = $accion_retorno;
-        $params['id_retorno'] = $fc_factura_id;
+        $params['id_retorno'] = $registro_entidad_id;
         return $params;
     }
 

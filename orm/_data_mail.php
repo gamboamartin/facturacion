@@ -107,7 +107,8 @@ class _data_mail extends _modelo_parent_sin_codigo{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_email',data:  $fc_email);
         }
-        $com_email_cte['status'] = $fc_email->fc_email_status;
+        $key_email_status = $this->tabla.'_status';
+        $com_email_cte['status'] = $fc_email->$key_email_status;
         $r_com_email_cte = (new com_email_cte(link: $this->link))->modifica_bd(registro: $com_email_cte,
             id: $fc_email->com_email_cte_id);
         if(errores::$error){
