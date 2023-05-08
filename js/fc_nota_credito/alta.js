@@ -15,7 +15,7 @@ sl_fc_csd.change(function () {
 });
 
 sl_com_sucursal.change(function () {
-    let selected = $(this).find('option:selected');
+    /*let selected = $(this).find('option:selected');
     let cat_sat_forma_pago = selected.data(`com_cliente_cat_sat_forma_pago_id`);
     let cat_sat_metodo_pago = selected.data(`com_cliente_cat_sat_metodo_pago_id`);
     let cat_sat_moneda = selected.data(`com_cliente_cat_sat_moneda_id`);
@@ -28,5 +28,5 @@ sl_com_sucursal.change(function () {
     sl_cat_sat_moneda.val(cat_sat_moneda);
     sl_cat_sat_moneda.selectpicker('refresh');
     sl_cat_sat_uso_cfdi.val(cat_sat_uso_cfdi);
-    sl_cat_sat_uso_cfdi.selectpicker('refresh');
+    sl_cat_sat_uso_cfdi.selectpicker('refresh');*/
 });

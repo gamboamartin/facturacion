@@ -158,7 +158,7 @@ class fc_nota_credito extends _transacciones_fc
 
         $this->NAMESPACE = __NAMESPACE__;
 
-        $this->etiqueta = 'Factura';
+        $this->etiqueta = 'Notas de crédito';
 
 
         $this->key_fc_id = 'fc_nota_credito_id';

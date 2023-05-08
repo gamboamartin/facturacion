@@ -9,9 +9,9 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\html\fc_partida_html;
-use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\html\fc_partida_nc_html;
 
+use gamboamartin\facturacion\models\fc_partida_nc;
 use gamboamartin\template\html;
 use PDO;
 use stdClass;
@@ -24,8 +24,8 @@ class controlador_fc_partida_nc extends _ctl_partida {
     public function __construct(PDO      $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass())
     {
-        $modelo = new fc_partida(link: $link);
-        $html_ = new fc_partida_html(html: $html);
+        $modelo = new fc_partida_nc(link: $link);
+        $html_ = new fc_partida_nc_html(html: $html);
 
         parent::__construct(html_: $html_,link:  $link,modelo:  $modelo, paths_conf: $paths_conf);
 

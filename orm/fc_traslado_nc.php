@@ -34,7 +34,8 @@ class fc_traslado_nc extends _data_impuestos {
             exit;
         }
 
-        $fc_impuesto_importe = (new _facturacion())->fc_impuesto_importe(fc_partida_importe_con_descuento: $sq_importes->fc_partida_entidad_importe_con_descuento);
+        $fc_impuesto_importe = (new _facturacion())->fc_impuesto_importe(
+            fc_partida_importe_con_descuento: $sq_importes->fc_partida_entidad_importe_con_descuento);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al generar fc_impuesto_importe',data:  $fc_impuesto_importe);
             print_r($error);

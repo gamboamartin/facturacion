@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
+use gamboamartin\errores\errores;
 use stdClass;
 
 class _ctl_traslado extends _base_system_conf{
