@@ -263,7 +263,8 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error obtener fc_partida', data: $fc_partida);
         }
         $key_entidad_id = $this->modelo_entidad->tabla.'_id';
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa, registro_id: $fc_partida->$key_entidad_id);
+        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa,
+            registro_id: $fc_partida->$key_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }

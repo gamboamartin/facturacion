@@ -809,7 +809,7 @@ class _transacciones_fc extends modelo
         }
 
         $filtro = array();
-        $filtro['fc_factura.id'] = $id;
+        $filtro[$this->key_filtro_id] = $id;
 
         $r_fc_factura_documento = $this->modelo_documento->elimina_con_filtro_and(filtro: $filtro);
         if (errores::$error) {

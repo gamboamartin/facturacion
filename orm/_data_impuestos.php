@@ -123,14 +123,15 @@ class _data_impuestos extends _base{
         return $r_modifica_bd;
     }
 
-    final public function elimina_bd(int $id): array|stdClass
+    public function elimina_bd(int $id): array|stdClass
     {
         $traslado = $this->get_data_row(registro_id: $id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener retenido',data: $traslado);
         }
         $key_id = $this->modelo_entidad->tabla.'_id';
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa, registro_id: $traslado[$key_id]);
+        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa,
+            registro_id: $traslado[$key_id]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
