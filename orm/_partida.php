@@ -494,6 +494,12 @@ class _partida extends  _base{
         return $r_modifica_bd;
     }
 
+    /**
+     * Integra los parametros por get para retorno
+     * @param string $name_modelo_entidad Nombre del modelo o entidad de retorno
+     * @param int $registro_entidad_id Registro id de la entidad de retorno
+     * @return array
+     */
     final public function params_button_partida(string $name_modelo_entidad, int $registro_entidad_id): array
     {
 
