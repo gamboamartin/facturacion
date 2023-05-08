@@ -26,7 +26,7 @@ class fc_email_nc extends _data_mail
 
         $this->NAMESPACE = __NAMESPACE__;
 
-        $this->etiqueta = 'Factura Email';
+        $this->etiqueta = 'Nota Credito Email';
     }
 
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass

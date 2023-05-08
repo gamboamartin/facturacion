@@ -103,7 +103,7 @@ class controlador_fc_email_cp extends system{
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica,header:  $header,ws:  $ws);
         }
         $fc_complemento_pago_id = (new fc_complemento_pago_html(html: $this->html_base))->select_fc_complemento_pago_id(cols:12,
-            con_registros:  true,id_selected: $this->row_upd->fc_factura_id,link: $this->link);
+            con_registros:  true,id_selected: $this->row_upd->fc_complemento_pago_id,link: $this->link);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar input',data:  $fc_complemento_pago_id,header:  $header,ws:  $ws);
         }

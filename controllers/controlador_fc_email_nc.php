@@ -11,9 +11,9 @@ namespace gamboamartin\facturacion\controllers;
 use gamboamartin\cat_sat\models\cat_sat_motivo_cancelacion;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_email_nc_html;
-use gamboamartin\facturacion\html\fc_factura_html;
+use gamboamartin\facturacion\html\fc_nota_credito_html;
 use gamboamartin\facturacion\models\fc_email_nc;
-use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_nota_credito;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template\html;
@@ -47,7 +47,7 @@ class controlador_fc_email_nc extends system{
 
         $this->lista_get_data = true;
 
-        $this->parents_verifica[] = (new fc_factura(link: $this->link));
+        $this->parents_verifica[] = (new fc_nota_credito(link: $this->link));
         $this->parents_verifica[] = (new cat_sat_motivo_cancelacion(link: $this->link));
 
 
@@ -59,11 +59,11 @@ class controlador_fc_email_nc extends system{
     final public function init_datatable(): stdClass
     {
 
-        $columns["fc_factura_folio"]["titulo"] = "Fol";
+        $columns["fc_nota_credito_folio"]["titulo"] = "Fol";
         $columns["com_email_cte_descripcion"]["titulo"] = "Correo";
         $columns["com_cliente_rfc"]["titulo"] = "Cte";
 
-        $filtro = array("fc_factura.folio","com_email_cte.descripcion", "com_cliente.rfc");
+        $filtro = array("fc_nota_credito.folio","com_email_cte.descripcion", "com_cliente.rfc");
 
         $datatables = new stdClass();
         $datatables->columns = $columns;
@@ -78,10 +78,10 @@ class controlador_fc_email_nc extends system{
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al insertar',data:  $r_alta,header:  $header,ws:  $ws);
         }
-        $fc_factura_id = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols:12,
+        $fc_nota_credito_id = (new fc_nota_credito_html(html: $this->html_base))->select_fc_nota_credito_id(cols:12,
             con_registros:  true,id_selected: -1,link: $this->link);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $fc_factura_id,header:  $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $fc_nota_credito_id,header:  $header,ws:  $ws);
         }
 
         $com_email_cte_id = (new com_email_cte_html(html: $this->html_base))->select_com_email_cte_id(cols:12,
@@ -91,7 +91,7 @@ class controlador_fc_email_nc extends system{
         }
 
         $this->inputs = new stdClass();
-        $this->inputs->fc_factura_id = $fc_factura_id;
+        $this->inputs->fc_nota_credito_id = $fc_nota_credito_id;
         $this->inputs->com_email_cte_id = $com_email_cte_id;
         return $r_alta;
     }
@@ -102,10 +102,10 @@ class controlador_fc_email_nc extends system{
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica,header:  $header,ws:  $ws);
         }
-        $fc_factura_id = (new fc_factura_html(html: $this->html_base))->select_fc_factura_id(cols:12,
-            con_registros:  true,id_selected: $this->row_upd->fc_factura_id,link: $this->link);
+        $fc_nota_credito_id = (new fc_nota_credito_html(html: $this->html_base))->select_fc_nota_credito_id(cols:12,
+            con_registros:  true,id_selected: $this->row_upd->fc_nota_credito_id,link: $this->link);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $fc_factura_id,header:  $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $fc_nota_credito_id,header:  $header,ws:  $ws);
         }
 
         $com_email_cte_id = (new com_email_cte_html(html: $this->html_base))->select_com_email_cte_id(cols:12,
@@ -115,7 +115,7 @@ class controlador_fc_email_nc extends system{
         }
 
         $this->inputs = new stdClass();
-        $this->inputs->fc_factura_id = $fc_factura_id;
+        $this->inputs->fc_nota_credito_id = $fc_nota_credito_id;
         $this->inputs->com_email_cte_id = $com_email_cte_id;
 
         return $r_modifica;
