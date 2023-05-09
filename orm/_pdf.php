@@ -193,7 +193,8 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al maquetar header',data:  $pdf);
         }
 
-        $relacionadas = (new fc_factura(link: $link))->get_data_relaciones(fc_factura_id: $registro_id);
+        $relacionadas = (new fc_factura(link: $link))->get_data_relaciones(modelo_relacion: $modelo_relacion,
+            modelo_relacionada:  $modelo_relacionada,registro_entidad_id:  $registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relacionadas',data:  $relacionadas);
         }

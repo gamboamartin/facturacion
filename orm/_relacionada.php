@@ -59,15 +59,17 @@ class _relacionada extends _modelo_parent_sin_codigo{
 
     public function elimina_bd(int $id): array|stdClass
     {
-        $fc_factura_relacion = $this->registro(registro_id: $id, retorno_obj: true);
+        $fc_factura_relacionada = $this->registro(registro_id: $id, retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener factura_relacion', data: $fc_factura_relacion);
+            return $this->error->error(mensaje: 'Error al obtener fc_factura_relacionada', data: $fc_factura_relacionada);
         }
 
         $key_relacion_id = $this->modelo_relacion->key_id;
         $key_entidad_id = $this->modelo_entidad->key_id;
 
-        $fc_relacion = $this->registro(registro_id: $fc_factura_relacion->$key_relacion_id, retorno_obj: true);
+        //print_r($key_relacion_id);exit;
+
+        $fc_relacion = $this->modelo_relacion->registro(registro_id: $fc_factura_relacionada->$key_relacion_id, retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_relacion);
         }
