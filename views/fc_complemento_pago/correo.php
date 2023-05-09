@@ -12,8 +12,8 @@
                     <form method="post" action="<?php echo $controlador->link_fc_email_alta_bd; ?>" class="form-additional">
                         <?php include (new views())->ruta_templates."head/subtitulo.php"; ?>
 
-                        <?php echo $controlador->inputs->fc_factura_id; ?>
-                        <?php echo $controlador->inputs->fc_factura_folio; ?>
+                        <?php echo $controlador->inputs->fc_complemento_pago_id; ?>
+                        <?php echo $controlador->inputs->fc_complemento_pago_folio; ?>
                         <?php echo $controlador->inputs->com_email_cte_descripcion; ?>
 
 
@@ -54,7 +54,7 @@
                         foreach ($controlador->registros['emails_facturas'] as $fc_email){
                         ?>
                         <tr>
-                            <td><?php echo $fc_email['fc_email_id'] ?></td>
+                            <td><?php echo $fc_email[$controlador->key_email_id] ?></td>
                             <td><?php echo $fc_email['com_email_cte_descripcion'] ?></td>
                             <td><?php echo $fc_email['elimina_bd'] ?></td>
                             <td><?php echo $fc_email['status'] ?></td>
