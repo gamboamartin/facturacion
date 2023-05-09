@@ -39,7 +39,7 @@ class fc_complemento_pago_relacionada extends _relacionada
 
         $this->NAMESPACE = __NAMESPACE__;
 
-        $this->etiqueta = 'Factura Relacionada';
+        $this->etiqueta = 'Complemento Pago Relacionada';
     }
 
     public function alta_bd(array $keys_integra_ds = array('descripcion', 'fc_relacion_cp_id', 'fc_complemento_pago_id')): array|stdClass
