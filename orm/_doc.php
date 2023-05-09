@@ -81,10 +81,12 @@ class _doc extends _modelo_parent{
         return $r_elimina;
     }
 
-    final public function get_factura_documento(string $key_entidad_filter_id, int $registro_id, string $tipo_documento): array|string{
+    final public function get_factura_documento(string $key_entidad_filter_id, int $registro_id,
+                                                string $tipo_documento): array|string{
 
 
-        $documento = $this->get_factura_documentos(key_entidad_filter_id: $key_entidad_filter_id, registro_id: $registro_id, tipo_documento: $tipo_documento);
+        $documento = $this->get_factura_documentos(key_entidad_filter_id: $key_entidad_filter_id,
+            registro_id: $registro_id, tipo_documento: $tipo_documento);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener documento', data: $documento);
         }

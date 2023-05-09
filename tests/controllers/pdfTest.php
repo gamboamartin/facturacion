@@ -46,7 +46,7 @@ class pdfTest extends test {
 
         $concepto = array();
         $concepto['fc_partida_descripcion'] = 'A';
-        $resultado = $pdf->concepto_producto($concepto);
+        $resultado = $pdf->concepto_producto($concepto,'fc_partida');
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals("<tr class='' ><td class='border color negrita' colspan='10'>Descripción</td></tr><tr class='' ><td class='border' colspan='10'>A</td></tr>",$resultado);

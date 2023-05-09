@@ -96,7 +96,15 @@ class _relacion extends _modelo_parent_sin_codigo{
     }
 
 
-    private function genera_relacionado(_relacionada $modelo_relacionada, string $name_entidad, array $relacionados, array $row_relacion){
+    /**
+     * @param _relacionada $modelo_relacionada
+     * @param string $name_entidad
+     * @param array $relacionados
+     * @param array $row_relacion
+     * @return array
+     */
+    private function genera_relacionado(_relacionada $modelo_relacionada, string $name_entidad, array $relacionados, array $row_relacion): array
+    {
         $cat_sat_tipo_relacion_codigo = $row_relacion['cat_sat_tipo_relacion_codigo'];
         $relacionados[$cat_sat_tipo_relacion_codigo] = array();
 
@@ -113,8 +121,15 @@ class _relacion extends _modelo_parent_sin_codigo{
         return $relacionados;
     }
 
+    /**
+     * @param int $registro_entidad_id
+     * @param _transacciones_fc $modelo_entidad
+     * @param _relacionada $modelo_relacionada
+     * @return array
+     */
     final public function get_relaciones(int $registro_entidad_id, _transacciones_fc $modelo_entidad,
-                                         _relacionada $modelo_relacionada){
+                                         _relacionada $modelo_relacionada): array
+    {
 
 
         $row_relaciones = $this->relaciones(modelo_entidad: $modelo_entidad, registro_entidad_id: $registro_entidad_id);
@@ -138,22 +153,42 @@ class _relacion extends _modelo_parent_sin_codigo{
      * @param array $relacionados Conjunto de elementos relacionados
      * @param array $row_relacionada Registro base de relacion
      * @return array
+     * @version 8.88.4
      */
-    private function integra_relacionado(string $cat_sat_tipo_relacion_codigo, string $name_entidad, array $relacionados,
-                                         array $row_relacionada): array
+    private function integra_relacionado(string $cat_sat_tipo_relacion_codigo, string $name_entidad,
+                                         array $relacionados, array $row_relacionada): array
     {
         $cat_sat_tipo_relacion_codigo = trim($cat_sat_tipo_relacion_codigo);
+        if($cat_sat_tipo_relacion_codigo === ''){
+            return $this->error->error(mensaje: 'Error al validar cat_sat_tipo_relacion_codigo esta vacio',
+                data: $cat_sat_tipo_relacion_codigo);
+        }
+
+        $name_entidad = trim($name_entidad);
+        if($name_entidad === ''){
+            return $this->error->error(mensaje: 'Error name_entidad esta vacio', data: $name_entidad);
+        }
+
         $keys = array($name_entidad.'_uuid');
         $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro: $row_relacionada);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar fc_factura_relacionada', data: $valida);
+            return $this->error->error(mensaje: 'Error al validar row_relacionada', data: $valida);
         }
         $relacionados[$cat_sat_tipo_relacion_codigo][] = $row_relacionada[$name_entidad.'_uuid'];
         return $relacionados;
     }
 
+    /**
+     * @param string $cat_sat_tipo_relacion_codigo
+     * @param array $fc_rows_relacionadas
+     * @param string $name_entidad
+     * @param array $relacionados
+     * @return array
+     */
     private function integra_relacionados(string $cat_sat_tipo_relacion_codigo, array $fc_rows_relacionadas,
-                                          string $name_entidad, array $relacionados){
+                                          string $name_entidad, array $relacionados): array
+    {
+
         foreach ($fc_rows_relacionadas as $row_relacionada){
             $relacionados = $this->integra_relacionado(cat_sat_tipo_relacion_codigo: $cat_sat_tipo_relacion_codigo,
                 name_entidad: $name_entidad, relacionados: $relacionados, row_relacionada: $row_relacionada);
@@ -201,7 +236,14 @@ class _relacion extends _modelo_parent_sin_codigo{
         return $r_fc_relacion->registros;
     }
 
-    private function relacionados(array $row_relaciones, _relacionada $modelo_relacionada, string $name_entidad){
+    /**
+     * @param array $row_relaciones
+     * @param _relacionada $modelo_relacionada
+     * @param string $name_entidad
+     * @return array
+     */
+    private function relacionados(array $row_relaciones, _relacionada $modelo_relacionada, string $name_entidad): array
+    {
         $relacionados = array();
         foreach ($row_relaciones as $row_relacion){
             $relacionados = $this->genera_relacionado(modelo_relacionada: $modelo_relacionada,

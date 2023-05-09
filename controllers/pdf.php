@@ -215,7 +215,7 @@ final class pdf
         return $table;
     }
 
-    private function concepto_datos(array $concepto, PDO $link): string|array
+    private function concepto_datos(array $concepto, string $name_entidad_partida, PDO $link): string|array
     {
 
         $concepto = $this->keys_no_ob(concepto: $concepto);
@@ -223,9 +223,9 @@ final class pdf
             return $this->error->error(mensaje: 'Error al integrar concepto',data:  $concepto);
         }
 
-        $keys = array('fc_partida_descuento','fc_partida_valor_unitario','cat_sat_producto_codigo',
-            'cat_sat_producto_id','fc_partida_cantidad','cat_sat_unidad_codigo','cat_sat_unidad_descripcion',
-            'fc_partida_cantidad','cat_sat_obj_imp_descripcion');
+        $keys = array($name_entidad_partida.'_descuento',$name_entidad_partida.'_valor_unitario','cat_sat_producto_codigo',
+            'cat_sat_producto_id',$name_entidad_partida.'_cantidad','cat_sat_unidad_codigo','cat_sat_unidad_descripcion',
+            $name_entidad_partida.'_cantidad','cat_sat_obj_imp_descripcion');
         $valida = $this->valida->valida_existencia_keys(keys: $keys,registro:  $concepto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar concepto',data:  $valida);
@@ -233,22 +233,22 @@ final class pdf
 
         $class = "txt-center border";
 
-        $fc_partida_valor_unitario = $this->fc_partida_double(concepto: $concepto,key: 'fc_partida_valor_unitario');
+        $fc_partida_valor_unitario = $this->fc_partida_double(concepto: $concepto,key: $name_entidad_partida.'_valor_unitario');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_partida_valor_unitario',data:  $fc_partida_valor_unitario);
         }
 
-        $fc_partida_cantidad = $this->fc_partida_double(concepto: $concepto, key: 'fc_partida_cantidad');
+        $fc_partida_cantidad = $this->fc_partida_double(concepto: $concepto, key: $name_entidad_partida.'_cantidad');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_partida_cantidad',data:  $fc_partida_cantidad);
         }
 
-        $fc_partida_descuento = $this->fc_partida_double(concepto: $concepto,key: 'fc_partida_descuento');
+        $fc_partida_descuento = $this->fc_partida_double(concepto: $concepto,key: $name_entidad_partida.'_descuento');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_descuento);
         }
 
-        $fc_partida_importe = $this->fc_partida_double(concepto: $concepto,key: 'fc_partida_importe');
+        $fc_partida_importe = $this->fc_partida_double(concepto: $concepto,key: $name_entidad_partida.'_importe');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_importe);
         }
@@ -325,19 +325,19 @@ final class pdf
         return $html;
     }
 
-    private function concepto_calculos(array $concepto): string
+    private function concepto_calculos(array $concepto, string $name_entidad_partida): string
     {
 
         $body_tr = $columns_imp = $this->columnas_impuestos_base(concepto: $concepto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar columns_imp',data:  $columns_imp);
         }
-        $tr = $this->integra_impuesto(concepto: $concepto,tipo_impuesto:  'traslados');
+        $tr = $this->integra_impuesto(concepto: $concepto, name_entidad_partida: $name_entidad_partida, tipo_impuesto: 'traslados');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar tr',data:  $tr);
         }
         $body_tr.= $tr;
-        $tr = $this->integra_impuesto(concepto: $concepto,tipo_impuesto:  'retenidos');
+        $tr = $this->integra_impuesto(concepto: $concepto, name_entidad_partida: $name_entidad_partida, tipo_impuesto: 'retenidos');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar tr',data:  $tr);
         }
@@ -347,10 +347,15 @@ final class pdf
         return $body_tr;
     }
 
-    private function concepto_producto(array $concepto): string|array
+    private function concepto_producto(array $concepto, string $name_entidad_partida): string|array
     {
 
-        $keys = array('fc_partida_descripcion');
+        $name_entidad_partida = trim($name_entidad_partida);
+        if($name_entidad_partida === ''){
+            return $this->error->error(mensaje: 'Error name_entidad_partida esta vacio', data: $name_entidad_partida);
+        }
+
+        $keys = array($name_entidad_partida.'_descripcion');
         $valida = $this->valida->valida_existencia_keys(keys: $keys,registro:  $concepto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar concepto', data: $valida);
@@ -360,7 +365,7 @@ final class pdf
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al genera dato', data: $body_td_1);
         }
-        $body_td_2 = $this->html(etiqueta: "td", data: $concepto['fc_partida_descripcion'], class: "border",
+        $body_td_2 = $this->html(etiqueta: "td", data: $concepto[$name_entidad_partida.'_descripcion'], class: "border",
             propiedades: "colspan='10'");
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al genera dato', data: $body_td_1);
@@ -401,7 +406,7 @@ final class pdf
         }
         if($aplica_cuenta_predial) {
 
-            $cuenta_predial = (new fc_cuenta_predial(link: $link))->cuenta_predial(fc_partida_id: $concepto['fc_partida_id']);
+            $cuenta_predial = (new fc_cuenta_predial(link: $link))->cuenta_predial(fc_registro_partida_id: $concepto['fc_partida_id']);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al obtener predial', data: $cuenta_predial);
             }
@@ -418,8 +423,13 @@ final class pdf
         return $body_tr;
     }
 
-    public function conceptos(array $conceptos, PDO $link)
+    public function conceptos(array $conceptos, PDO $link, string $name_entidad_partida)
     {
+        $name_entidad_partida = trim($name_entidad_partida);
+        if($name_entidad_partida === ''){
+            return $this->error->error(mensaje: 'Error name_entidad_partida esta vacio',data:  $name_entidad_partida);
+        }
+
         $titulo = $this->html(etiqueta: "h1", data: "Conceptos", class: "negrita titulo");
         try {
             $this->pdf->WriteHTML($titulo);
@@ -447,7 +457,7 @@ final class pdf
         foreach ($conceptos as $concepto) {
 
 
-            $concepto_pdf = $this->concepto_datos(concepto: $concepto, link: $link);
+            $concepto_pdf = $this->concepto_datos(concepto: $concepto, name_entidad_partida: $name_entidad_partida, link: $link);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al generar concepto',data:  $concepto_pdf);
             }
@@ -455,14 +465,20 @@ final class pdf
             $body_tr .= $concepto_pdf;
 
 
-            $body_tr .= $this->concepto_producto(concepto: $concepto);
+            $concepto_producto = $this->concepto_producto(concepto: $concepto, name_entidad_partida: $name_entidad_partida);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al generar concepto de producto',data:  $concepto_producto);
+            }
+
+
+            $body_tr .= $concepto_producto;
             if (errores::$error) {
                 $error = (new errores())->error('Error al maquetar concepto', $body_tr);
                 print_r($error);
                 die('Error');
             }
 
-            $body_tr .= $this->concepto_calculos(concepto: $concepto);
+            $body_tr .= $this->concepto_calculos(concepto: $concepto, name_entidad_partida: $name_entidad_partida);
             if (errores::$error) {
                 $error = (new errores())->error('Error al maquetar concepto', $body_tr);
                 print_r($error);
@@ -485,8 +501,9 @@ final class pdf
         $this->pdf->WriteHTML($table);
     }
 
-    private function data_impuestos(array $concepto, string $tipo_impuesto){
-        $base_imp = $this->init_impuesto(concepto: $concepto, tipo_impuesto: $tipo_impuesto);
+    private function data_impuestos(array $concepto, string $name_entidad_partida, string $tipo_impuesto){
+        $base_imp = $this->init_impuesto(concepto: $concepto, name_entidad_partida: $name_entidad_partida,
+            tipo_impuesto: $tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener impuesto base',data:  $base_imp);
         }
@@ -551,7 +568,7 @@ final class pdf
         return "<$etiqueta class='$class' $propiedades>$data</$etiqueta>";
     }
 
-    private function init_impuesto(array $concepto, string $tipo_impuesto){
+    private function init_impuesto(array $concepto, string $name_entidad_partida, string $tipo_impuesto){
         $impuesto = $this->impuesto(concepto: $concepto, tipo_impuesto: $tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener impuesto base',data:  $impuesto);
@@ -563,9 +580,9 @@ final class pdf
         if($tipo_impuesto === 'retenidos') {
             $tipo = 'Retenciones';
         }
-        $fc_partida_valor_unitario = round($concepto[$tipo_impuesto][0]['fc_partida_valor_unitario'],2);
-        $fc_partida_cantidad = round($concepto[$tipo_impuesto][0]['fc_partida_cantidad'],2);
-        $fc_partida_descuento = round($concepto[$tipo_impuesto][0]['fc_partida_descuento'],2);
+        $fc_partida_valor_unitario = round($concepto[$tipo_impuesto][0][$name_entidad_partida.'_valor_unitario'],2);
+        $fc_partida_cantidad = round($concepto[$tipo_impuesto][0][$name_entidad_partida.'_cantidad'],2);
+        $fc_partida_descuento = round($concepto[$tipo_impuesto][0][$name_entidad_partida.'_descuento'],2);
         $tasa_cuota = round($concepto[$tipo_impuesto][0]['cat_sat_factor_factor'],6);
         $tipo_factor = $concepto[$tipo_impuesto][0]['cat_sat_tipo_factor_codigo'];
 
@@ -640,14 +657,15 @@ final class pdf
 
     }
 
-    private function integra_impuesto(array $concepto, string $tipo_impuesto){
+    private function integra_impuesto(array $concepto, string $name_entidad_partida, string $tipo_impuesto){
         $tr = '';
         $aplica = $this->aplica_impuesto(concepto: $concepto, tipo_impuesto: $tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error validar aplica impuesto',data:  $aplica);
         }
         if($aplica){
-            $tr = $this->tr_impuestos_concepto(concepto: $concepto,tipo_impuesto:  $tipo_impuesto);
+            $tr = $this->tr_impuestos_concepto(concepto: $concepto, name_entidad_partida: $name_entidad_partida,
+                tipo_impuesto: $tipo_impuesto);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al generar tr',data:  $tr);
             }
@@ -797,8 +815,9 @@ final class pdf
         return $tr;
     }
 
-    private function tr_impuestos_concepto(array $concepto, string $tipo_impuesto){
-        $data_impuestos = $this->data_impuestos(concepto: $concepto, tipo_impuesto: $tipo_impuesto);
+    private function tr_impuestos_concepto(array $concepto, string $name_entidad_partida, string $tipo_impuesto){
+        $data_impuestos = $this->data_impuestos(concepto: $concepto, name_entidad_partida: $name_entidad_partida,
+            tipo_impuesto: $tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al ajustar datos de impuestos',data:  $data_impuestos);
         }

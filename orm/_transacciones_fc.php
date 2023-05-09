@@ -296,7 +296,7 @@ class _transacciones_fc extends modelo
 
     /**
      *
-     * @param _partida $modelo_partida
+     * @param _partida $modelo_partida Modelo tipo partida
      * @param _cuenta_predial $modelo_predial
      * @param _relacion $modelo_relacion
      * @param _relacionada $modelo_relacionada

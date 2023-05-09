@@ -32,6 +32,7 @@ use gamboamartin\facturacion\models\_sellado;
 use gamboamartin\facturacion\models\_transacciones_fc;
 use gamboamartin\facturacion\models\com_producto;
 use gamboamartin\facturacion\models\fc_cancelacion;
+use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\facturacion\models\fc_factura;
@@ -718,10 +719,10 @@ class _base_system_fc extends _base_system{
 
     }
 
-    private function doc_documento_id(stdClass $fc_factura, string $pdf){
+    private function doc_documento_id(string $pdf,stdClass $row_entidad){
         $doc_documento_ins = array();
 
-        $file = $this->file_doc_pdf(fc_factura: $fc_factura,pdf:  $pdf);
+        $file = $this->file_doc_pdf(pdf: $pdf, row_entidad: $row_entidad);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al maquetar file',data:  $file);
         }
@@ -820,6 +821,9 @@ class _base_system_fc extends _base_system{
         $modelo_retencion = new fc_retenido(link: $this->link);
         $modelo_predial = new fc_cuenta_predial(link: $this->link);
         $modelo_partida = new fc_partida(link: $this->link);
+        $modelo_entidad = new fc_factura(link: $this->link);
+        $modelo_documento = new fc_factura_documento(link: $this->link);
+        $modelo_sellado = new fc_cfdi_sellado(link: $this->link);
 
         $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(key_entidad_filter_id: 'fc_factura.id',
             registro_id: $this->registro_id, tipo_documento: "xml_sin_timbrar");
@@ -828,9 +832,10 @@ class _base_system_fc extends _base_system{
         }
 
 
-        $ruta_pdf = (new _pdf())->pdf(descarga: false, guarda: true, link: $this->link, modelo_partida: $modelo_partida,
-            modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
-            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_id: $this->registro_id);
+        $ruta_pdf = (new _pdf())->pdf(descarga: false, guarda: true, link: $this->link, modelo_documento: $modelo_documento,
+            modelo_entidad: $modelo_entidad, modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
+            modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada, modelo_retencion: $modelo_retencion,
+            modelo_sellado: $modelo_sellado, modelo_traslado: $modelo_traslado, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar PDF',data:  $ruta_pdf, header: $header,ws:$ws);
         }
@@ -853,9 +858,10 @@ class _base_system_fc extends _base_system{
         exit;
     }
 
-    private function fc_factura_documento_ins(int $doc_documento_id, int $fc_factura_id): array
+    private function fc_factura_documento_ins(int $doc_documento_id, int $registro_id): array
     {
-        $fc_factura_documento_ins['fc_factura_id'] = $fc_factura_id;
+        $key_id = $this->tabla.'_id';
+        $fc_factura_documento_ins[$key_id] = $registro_id;
         $fc_factura_documento_ins['doc_documento_id'] = $doc_documento_id;
         return $fc_factura_documento_ins;
     }
@@ -929,21 +935,23 @@ class _base_system_fc extends _base_system{
 
     }
 
-    private function file_doc_pdf(stdClass $fc_factura, string $pdf): array
+    private function file_doc_pdf(string $pdf, stdClass $row_entidad): array
     {
-        $file['name'] = $fc_factura->fc_factura_folio.'.pdf';
+        $key_folio = $this->tabla.'_folio';
+        $file['name'] = $row_entidad->$key_folio.'.pdf';
         $file['tmp_name'] = $pdf;
         return $file;
     }
 
-    private function genera_factura_pdf(stdClass $fc_factura, int $fc_factura_id, string $pdf): array|stdClass
+    private function genera_factura_pdf(_doc $modelo_documento, string $pdf, int $registro_id, stdClass $row_entidad): array|stdClass
     {
-        $doc_documento_id = $this->doc_documento_id(fc_factura: $fc_factura,pdf:  $pdf);
+        $doc_documento_id = $this->doc_documento_id(pdf: $pdf, row_entidad: $row_entidad);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al al insertar documento',data:  $doc_documento_id);
         }
 
-        $r_fc_factura_documento = $this->inserta_fc_factura_documento(doc_documento_id: $doc_documento_id,fc_factura_id: $fc_factura_id);
+        $r_fc_factura_documento = $this->inserta_fc_factura_documento(doc_documento_id: $doc_documento_id,
+            modelo_documento: $modelo_documento, registro_id: $registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al al insertar factura_doc',data:  $r_fc_factura_documento);
         }
@@ -952,27 +960,24 @@ class _base_system_fc extends _base_system{
 
     public function genera_pdf(bool $header, bool $ws = false){
 
-        $modelo_partida = new fc_partida(link: $this->link);
-        $modelo_predial = new fc_cuenta_predial(link: $this->link);
-        $modelo_relacion = new fc_relacion(link: $this->link);
-        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
-        $modelo_retencion = new fc_retenido(link: $this->link);
-        $modelo_traslado = new fc_traslado(link: $this->link);
 
-
-        $pdf = (new _pdf())->pdf(descarga: false, guarda: true, link: $this->link, modelo_partida: $modelo_partida,
-            modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
-            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_id: $this->registro_id);
+        $pdf = (new _pdf())->pdf(descarga: false, guarda: true, link: $this->link,
+            modelo_documento: $this->modelo_documento, modelo_entidad: $this->modelo_entidad,
+            modelo_partida: $this->modelo_partida, modelo_predial: $this->modelo_predial,
+            modelo_relacion: $this->modelo_relacion, modelo_relacionada: $this->modelo_relacionada,
+            modelo_retencion: $this->modelo_retencion, modelo_sellado: $this->modelo_sello,
+            modelo_traslado: $this->modelo_traslado, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $pdf, header: $header,ws:$ws);
         }
 
-        $fc_factura = (new fc_factura(link: $this->link))->registro(registro_id: $this->registro_id, retorno_obj: true);
+        $row_entidad = $this->modelo_entidad->registro(registro_id: $this->registro_id, retorno_obj: true);
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener factura',data:  $fc_factura);
+            return $this->errores->error(mensaje: 'Error al obtener factura',data:  $row_entidad);
         }
 
-        $r_fc_factura_documento = $this->inicializa_factura_documento(fc_factura: $fc_factura, fc_factura_id: $this->registro_id,pdf:  $pdf);
+        $r_fc_factura_documento = $this->inicializa_factura_documento(modelo_documento: $this->modelo_documento, pdf: $pdf,
+            registro_id: $this->registro_id, row_entidad: $row_entidad);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al al insertar factura_doc',data:  $r_fc_factura_documento, header: $header,ws:$ws);
         }
@@ -1050,16 +1055,17 @@ class _base_system_fc extends _base_system{
         return $data;
     }
 
-    private function inicializa_factura_documento(stdClass $fc_factura, int $fc_factura_id, string $pdf): array|stdClass
+    private function inicializa_factura_documento(_doc $modelo_documento, string $pdf, int $registro_id, stdClass $row_entidad): array|stdClass
     {
 
-
-        $r_fc_factura_documento = $this->init_factura_documento(fc_factura_id: $fc_factura_id);
+        $r_fc_factura_documento = $this->init_factura_documento(modelo_documento: $modelo_documento,
+            registro_id: $registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al al eliminar registro',data:  $r_fc_factura_documento);
         }
 
-        $r_fc_factura_documento = $this->genera_factura_pdf(fc_factura: $fc_factura, fc_factura_id: $fc_factura_id, pdf: $pdf);
+        $r_fc_factura_documento = $this->genera_factura_pdf(modelo_documento: $modelo_documento, pdf: $pdf,
+            registro_id: $registro_id, row_entidad: $row_entidad);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al al insertar factura_doc',data:  $r_fc_factura_documento);
         }
@@ -1096,24 +1102,25 @@ class _base_system_fc extends _base_system{
 
     /**
      * Inicializa los elementos de la lista get data
-     * @param int $fc_factura_id
+     * @param _doc $modelo_documento Modelo de tipo dcumento
+     * @param int $registro_id Registro de factura o nota de credito
      * @return bool|array
      * @version 4.3.0
      */
 
 
-    private function init_factura_documento(int $fc_factura_id): bool|array
+    private function init_factura_documento(_doc $modelo_documento, int $registro_id): bool|array
     {
-        $filtro['fc_factura.id'] = $fc_factura_id;
+        $filtro[$this->tabla.'.id'] = $registro_id;
         $filtro['doc_tipo_documento.id'] = 8;
 
-        $existe_factura_documento = (new fc_factura_documento(link: $this->link))->existe(filtro: $filtro);
+        $existe_factura_documento = $modelo_documento->existe(filtro: $filtro);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al validar si existe documento',data:  $existe_factura_documento);
         }
 
         if($existe_factura_documento){
-            $r_fc_factura_documento = (new fc_factura_documento(link: $this->link))->elimina_con_filtro_and(filtro: $filtro);
+            $r_fc_factura_documento = $modelo_documento->elimina_con_filtro_and(filtro: $filtro);
             if(errores::$error){
                 return $this->errores->error(mensaje: 'Error al al eliminar registro',data:  $r_fc_factura_documento);
             }
@@ -1413,14 +1420,14 @@ class _base_system_fc extends _base_system{
         return $this->inputs;
     }
 
-    private function inserta_fc_factura_documento(int $doc_documento_id, int $fc_factura_id): array|stdClass
+    private function inserta_fc_factura_documento(int $doc_documento_id, _doc $modelo_documento, int $registro_id): array|stdClass
     {
-        $fc_factura_documento_ins = $this->fc_factura_documento_ins(doc_documento_id: $doc_documento_id,fc_factura_id: $fc_factura_id);
+        $fc_factura_documento_ins = $this->fc_factura_documento_ins(doc_documento_id: $doc_documento_id,registro_id: $registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener fc_factura_documento_ins',data:  $fc_factura_documento_ins);
         }
 
-        $r_fc_factura_documento = (new fc_factura_documento(link: $this->link))->alta_registro(registro: $fc_factura_documento_ins);
+        $r_fc_factura_documento = $modelo_documento->alta_registro(registro: $fc_factura_documento_ins);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al al insertar factura_doc',data:  $r_fc_factura_documento);
         }

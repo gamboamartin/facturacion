@@ -43,7 +43,7 @@ class _pdf{
         return $cod_postal_receptor;
     }
 
-    private function data_factura(stdClass $cfdi_sellado){
+    private function data_factura(stdClass $cfdi_sellado, string $name_entidad_sellado){
         $data = $this->data_init_limpio();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al asignar datos', data:  $data);
@@ -51,7 +51,7 @@ class _pdf{
 
         if ($cfdi_sellado->n_registros > 0) {
 
-            $data = $this->data_init(cfdi_sellado: $cfdi_sellado);
+            $data = $this->data_init(cfdi_sellado: $cfdi_sellado, name_entidad_sellado: $name_entidad_sellado);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al asignar datos', data:  $data);
             }
@@ -60,15 +60,15 @@ class _pdf{
         return $data;
     }
 
-    private function data_init(stdClass $cfdi_sellado): stdClass
+    private function data_init(stdClass $cfdi_sellado, string $name_entidad_sellado): stdClass
     {
-        $folio_fiscal = $cfdi_sellado->registros[0]['fc_cfdi_sellado_uuid'];
-        $sello_cfdi = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_sello_cfd'];
-        $sello_sat = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_sello_sat'];
-        $complento = $cfdi_sellado->registros[0]['fc_cfdi_sellado_cadena_complemento_sat'];
-        $rfc_proveedor = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_rfc_prov_certif'];
-        $fecha_timbrado = $cfdi_sellado->registros[0]['fc_cfdi_sellado_complemento_tfd_fecha_timbrado'];
-        $no_certificado = $cfdi_sellado->registros[0]['fc_cfdi_sellado_comprobante_no_certificado'];
+        $folio_fiscal = $cfdi_sellado->registros[0][$name_entidad_sellado.'_uuid'];
+        $sello_cfdi = $cfdi_sellado->registros[0][$name_entidad_sellado.'_complemento_tfd_sello_cfd'];
+        $sello_sat = $cfdi_sellado->registros[0][$name_entidad_sellado.'_complemento_tfd_sello_sat'];
+        $complento = $cfdi_sellado->registros[0][$name_entidad_sellado.'_cadena_complemento_sat'];
+        $rfc_proveedor = $cfdi_sellado->registros[0][$name_entidad_sellado.'_complemento_tfd_rfc_prov_certif'];
+        $fecha_timbrado = $cfdi_sellado->registros[0][$name_entidad_sellado.'_complemento_tfd_fecha_timbrado'];
+        $no_certificado = $cfdi_sellado->registros[0][$name_entidad_sellado.'_comprobante_no_certificado'];
 
         $data = new stdClass();
         $data->folio_fiscal = $folio_fiscal;
@@ -105,12 +105,14 @@ class _pdf{
         return $data;
 
     }
-    final public function pdf( bool $descarga, bool $guarda, PDO $link, _partida $modelo_partida,
+    final public function pdf( bool $descarga, bool $guarda, PDO $link, _doc $modelo_documento,
+                               _transacciones_fc $modelo_entidad, _partida $modelo_partida,
                                _cuenta_predial $modelo_predial, _relacion $modelo_relacion,
                                _relacionada $modelo_relacionada, _data_impuestos $modelo_retencion,
-                               _data_impuestos $modelo_traslado, int $registro_id):array|string|bool{
+                               _sellado $modelo_sellado, _data_impuestos $modelo_traslado,
+                               int $registro_id):array|string|bool{
 
-        $factura = (new fc_factura($link))->get_factura(modelo_partida: $modelo_partida,
+        $factura = $modelo_entidad->get_factura(modelo_partida: $modelo_partida,
             modelo_predial:  $modelo_predial,modelo_relacion:  $modelo_relacion,
             modelo_relacionada: $modelo_relacionada,modelo_retencion:  $modelo_retencion,
             modelo_traslado:  $modelo_traslado,registro_id:  $registro_id);
@@ -118,7 +120,8 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al obtener factura',data:  $factura);
         }
 
-        $ruta_qr = (new fc_factura_documento(link: $link))->get_factura_documento(key_entidad_filter_id: 'fc_factura.id',
+
+        $ruta_qr = $modelo_documento->get_factura_documento(key_entidad_filter_id: $modelo_entidad->key_filtro_id,
             registro_id: $registro_id, tipo_documento: "qr_cfdi");
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener QR',data:  $ruta_qr);
@@ -136,8 +139,8 @@ class _pdf{
         }
 
         $filtro = array();
-        $filtro["fc_factura_id"] = $factura['fc_factura_id'];
-        $cfdi_sellado = (new fc_cfdi_sellado($link))->filtro_and(filtro: $filtro);
+        $filtro[$modelo_entidad->key_id] = $factura[$modelo_entidad->key_id];
+        $cfdi_sellado = $modelo_sellado->filtro_and(filtro: $filtro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener cfdi_sellado', data:  $cfdi_sellado);
         }
@@ -167,25 +170,29 @@ class _pdf{
         }
 
 
-        $data = $this->data_factura(cfdi_sellado: $cfdi_sellado);
+        $data = $this->data_factura(cfdi_sellado: $cfdi_sellado, name_entidad_sellado: $modelo_sellado->tabla);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al asignar datos', data:  $data);
         }
 
 
-
-        if(!isset($factura['fc_factura_observaciones'])){
-            $factura['fc_factura_observaciones'] = '';
+        $key_observaciones = $modelo_entidad->tabla.'_observaciones';
+        if(!isset($factura[$key_observaciones])){
+            $factura[$key_observaciones] = '';
         }
+
+        $key_exportacion = $modelo_entidad->tabla.'_exportacion';
+        $key_fecha = $modelo_entidad->tabla.'_fecha';
+        $key_folio = $modelo_entidad->tabla.'_folio';
 
         $pdf = new pdf();
         $pdf->header(cfdi: $factura['cat_sat_uso_cfdi_descripcion'], cod_postal: $factura['dp_cp_descripcion'],
             cod_postal_receptor: $cod_postal_receptor, csd: $factura['fc_csd_serie'],
             efecto: $factura['cat_sat_tipo_de_comprobante_descripcion'],
-            exportacion: $factura['fc_factura_exportacion'], fecha: $factura['fc_factura_fecha'],
-            folio: $factura['fc_factura_folio'], folio_fiscal: $data->folio_fiscal,
+            exportacion: $factura[$key_exportacion], fecha: $factura[$key_fecha],
+            folio: $factura[$key_folio], folio_fiscal: $data->folio_fiscal,
             nombre_emisor: $factura['org_empresa_razon_social'], nombre_receptor: $factura['com_cliente_razon_social'],
-            observaciones: $factura['fc_factura_observaciones'],
+            observaciones: $factura[$key_observaciones],
             regimen_fiscal: $rf_emisor['cat_sat_regimen_fiscal_descripcion'],
             regimen_fiscal_receptor: $rf_receptor['cat_sat_regimen_fiscal_descripcion'],
             rfc_emisor: $factura['org_empresa_rfc'], rfc_receptor: $factura['com_cliente_rfc'], ruta_logo: $ruta_logo);
@@ -193,7 +200,7 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al maquetar header',data:  $pdf);
         }
 
-        $relacionadas = (new fc_factura(link: $link))->get_data_relaciones(modelo_relacion: $modelo_relacion,
+        $relacionadas = $modelo_entidad->get_data_relaciones(modelo_relacion: $modelo_relacion,
             modelo_relacionada:  $modelo_relacionada,registro_entidad_id:  $registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relacionadas',data:  $relacionadas);
@@ -204,15 +211,18 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al maquetar relacionadas',data:  $rs);
         }
 
-        $rs = $pdf->conceptos(conceptos: $factura['partidas'], link: $link);
+        $rs = $pdf->conceptos(conceptos: $factura['partidas'], link: $link, name_entidad_partida: $modelo_partida->tabla);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar conceptos',data:  $rs);
         }
 
-        $pdf->totales(moneda: $factura['cat_sat_moneda_descripcion'],subtotal: $factura['fc_factura_sub_total'],
+        $key_sub_total = $modelo_entidad->tabla.'_sub_total';
+        $key_total = $modelo_entidad->tabla.'_total';
+
+        $pdf->totales(moneda: $factura['cat_sat_moneda_descripcion'],subtotal: $factura[$key_sub_total],
             forma_pago: $factura['cat_sat_forma_pago_descripcion'],imp_trasladados: $factura['total_impuestos_trasladados'],
             imp_retenidos: $factura['total_impuestos_retenidos'],metodo_pago: $factura['cat_sat_metodo_pago_descripcion'],
-            total: $factura['fc_factura_total']);
+            total: $factura[$key_total]);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar totales',data:  $pdf);
         }
@@ -235,7 +245,10 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al generar pdf',data:  $pdf);
         }
 
-        $nombre_documento = $factura['fc_factura_serie'].$factura['fc_factura_folio'];
+        $key_serie = $modelo_entidad->tabla.'_serie';
+        $key_folio = $modelo_entidad->tabla.'_folio';
+
+        $nombre_documento = $factura[$key_serie].$factura[$key_folio];
 
         $nombre_documento = $pdf->guardar(nombre_documento: $nombre_documento, descarga: $descarga, guarda: $guarda);
         if(errores::$error){
