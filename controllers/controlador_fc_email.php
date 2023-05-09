@@ -85,7 +85,7 @@ class controlador_fc_email extends system{
         }
 
         $com_email_cte_id = (new com_email_cte_html(html: $this->html_base))->select_com_email_cte_id(cols:12,
-            con_registros:  true,id_selected: -1,link: $this->link);
+            con_registros:  true,id_selected: -1,link: $this->link, required: true);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar input',data:  $com_email_cte_id,header:  $header,ws:  $ws);
         }

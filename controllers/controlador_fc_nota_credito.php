@@ -12,7 +12,6 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_nota_credito_html;
 use gamboamartin\facturacion\models\fc_cfdi_sellado_nc;
 use gamboamartin\facturacion\models\fc_cuenta_predial_nc;
-use gamboamartin\facturacion\models\fc_email;
 use gamboamartin\facturacion\models\fc_email_nc;
 use gamboamartin\facturacion\models\fc_nota_credito;
 use gamboamartin\facturacion\models\fc_nota_credito_documento;
