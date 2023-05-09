@@ -690,7 +690,7 @@ class _base_system_fc extends _base_system{
     }
 
     public function descarga_xml(bool $header, bool $ws = false){
-        $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(key_entidad_filter_id: 'fc_factura.id',
+        $ruta_xml = $this->modelo_documento->get_factura_documento(key_entidad_filter_id: $this->tabla.'.id',
             registro_id: $this->registro_id, tipo_documento: "xml_sin_timbrar");
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener XML',data:  $ruta_xml, header: $header,ws:$ws);
@@ -701,7 +701,10 @@ class _base_system_fc extends _base_system{
             return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $fc_factura, header: $header,ws:$ws);
         }
 
-        $file_name = $fc_factura->fc_factura_serie.$fc_factura->fc_factura_folio.'.xml';
+        $key_serie = $this->tabla.'_serie';
+        $key_folio = $this->tabla.'_folio';
+
+        $file_name = $fc_factura->$key_serie.$fc_factura->$key_folio.'.xml';
 
         if(!empty($ruta_xml) && file_exists($ruta_xml)){
             // Define headers
@@ -717,6 +720,7 @@ class _base_system_fc extends _base_system{
         }else{
             echo 'The file does not exist.';
         }
+        return $file_name;
 
     }
 
