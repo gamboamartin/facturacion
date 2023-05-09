@@ -48,6 +48,7 @@ use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\system\actions;
 use gamboamartin\system\html_controler;
 use gamboamartin\xml_cfdi_4\timbra;
+use gamboamartin\xml_cfdi_4\xml;
 use html\cat_sat_conf_imps_html;
 use html\cat_sat_motivo_cancelacion_html;
 use html\cat_sat_tipo_relacion_html;
@@ -815,27 +816,25 @@ class _base_system_fc extends _base_system{
 
     public function exportar_documentos(bool $header, bool $ws = false){
 
-        $modelo_traslado = new fc_traslado(link: $this->link);
-        $modelo_relacion = new fc_relacion(link: $this->link);
-        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
-        $modelo_retencion = new fc_retenido(link: $this->link);
-        $modelo_predial = new fc_cuenta_predial(link: $this->link);
-        $modelo_partida = new fc_partida(link: $this->link);
-        $modelo_entidad = new fc_factura(link: $this->link);
-        $modelo_documento = new fc_factura_documento(link: $this->link);
-        $modelo_sellado = new fc_cfdi_sellado(link: $this->link);
 
-        $ruta_xml = (new fc_factura_documento(link: $this->link))->get_factura_documento(key_entidad_filter_id: 'fc_factura.id',
-            registro_id: $this->registro_id, tipo_documento: "xml_sin_timbrar");
+
+        $ruta_xml = $this->modelo_documento->get_factura_documento(
+            key_entidad_filter_id: $this->modelo_entidad->key_filtro_id, registro_id: $this->registro_id,
+            tipo_documento: "xml_sin_timbrar");
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener XML',data:  $ruta_xml, header: $header,ws:$ws);
         }
+        
+        if(!file_exists($ruta_xml)){
+            return $this->retorno_error(mensaje: 'Error al no existe xml',data:  $ruta_xml, header: $header,ws:$ws);
+        }
 
-
-        $ruta_pdf = (new _pdf())->pdf(descarga: false, guarda: true, link: $this->link, modelo_documento: $modelo_documento,
-            modelo_entidad: $modelo_entidad, modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
-            modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada, modelo_retencion: $modelo_retencion,
-            modelo_sellado: $modelo_sellado, modelo_traslado: $modelo_traslado, registro_id: $this->registro_id);
+        $ruta_pdf = (new _pdf())->pdf(descarga: false, guarda: true, link: $this->link,
+            modelo_documento: $this->modelo_documento, modelo_entidad: $this->modelo_entidad,
+            modelo_partida: $this->modelo_partida, modelo_predial: $this->modelo_predial,
+            modelo_relacion: $this->modelo_relacion, modelo_relacionada: $this->modelo_relacionada,
+            modelo_retencion: $this->modelo_retencion, modelo_sellado: $this->modelo_sello,
+            modelo_traslado: $this->modelo_traslado, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar PDF',data:  $ruta_pdf, header: $header,ws:$ws);
         }
@@ -843,14 +842,19 @@ class _base_system_fc extends _base_system{
 
         $fc_factura = $this->modelo->registro(registro_id: $this->registro_id, retorno_obj: true);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener Factura',data:  $fc_factura, header: $header,ws:$ws);
+            return $this->retorno_error(mensaje: 'Error al obtener CFDI',data:  $fc_factura, header: $header,ws:$ws);
         }
 
-        $name_zip = $fc_factura->fc_factura_serie.$fc_factura->fc_factura_folio;
+        $key_serie = $this->tabla.'_serie';
+        $key_folio = $this->tabla.'_folio';
+
+        $name_zip = $fc_factura->$key_folio;
 
         $archivos = array();
-        $archivos[$ruta_xml] = "$fc_factura->fc_factura_serie$fc_factura->fc_factura_folio.xml";
-        $archivos[$ruta_pdf] = "$fc_factura->fc_factura_serie$fc_factura->fc_factura_folio.pdf";
+
+        $archivos[$ruta_xml] = $fc_factura->$key_serie.$fc_factura->$key_folio.".xml";
+        $archivos[$ruta_pdf] = $fc_factura->$key_serie.$fc_factura->$key_folio.".pdf";
+
 
         Compresor::descarga_zip_multiple(archivos: $archivos,name_zip: $name_zip);
 
