@@ -132,11 +132,11 @@ class _relacion extends _modelo_parent_sin_codigo{
     }
 
     /**
-     *
-     * @param string $cat_sat_tipo_relacion_codigo
-     * @param string $name_entidad
-     * @param array $relacionados
-     * @param array $row_relacionada
+     * Integra una relacion de tipo factura
+     * @param string $cat_sat_tipo_relacion_codigo Codigo sat de relacion
+     * @param string $name_entidad Nombre de la entidad base factura, complemento pago, nota credito
+     * @param array $relacionados Conjunto de elementos relacionados
+     * @param array $row_relacionada Registro base de relacion
      * @return array
      */
     private function integra_relacionado(string $cat_sat_tipo_relacion_codigo, string $name_entidad, array $relacionados,

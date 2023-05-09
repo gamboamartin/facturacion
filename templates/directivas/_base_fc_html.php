@@ -5,7 +5,6 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\_base_system_fc;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
 use gamboamartin\facturacion\models\_transacciones_fc;
-use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\limpieza;
 use gamboamartin\system\html_controler;
 use gamboamartin\validacion\validacion;

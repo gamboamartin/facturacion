@@ -1,10 +1,9 @@
 <?php
 namespace gamboamartin\facturacion\html;
 use gamboamartin\errores\errores;
-use gamboamartin\system\html_controler;
 use gamboamartin\facturacion\models\fc_relacion_nc;
 use PDO;
-class fc_relacion_nc_html extends html_controler {
+class fc_relacion_nc_html extends _relacion_html {
     public function select_fc_relacion_nc_id(int $cols, bool $con_registros, int $id_selected, PDO $link,
                                               bool $required = false): array|string
     {
