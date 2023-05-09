@@ -32,6 +32,8 @@ class _transacciones_fc extends modelo
     protected _data_impuestos $modelo_retencion;
     protected _partida $modelo_partida;
 
+
+
     protected string $key_fc_id = '';
 
     /**
@@ -270,19 +272,18 @@ class _transacciones_fc extends modelo
         return $r_etapa->registros;
     }
 
-    final public function  get_data_relaciones(int $fc_factura_id){
+    final public function  get_data_relaciones(_relacion $modelo_relacion, _relacionada $modelo_relacionada,
+                                               int $registro_entidad_id){
 
-        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
-        $modelo_entidad = $this;
 
-        $relaciones = (new fc_relacion(link: $this->link))->relaciones(modelo_entidad: $modelo_entidad,
-            registro_entidad_id: $fc_factura_id);
+        $relaciones = $modelo_relacion->relaciones(modelo_entidad: $this,
+            registro_entidad_id: $registro_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
         }
 
         foreach ($relaciones as $indice=>$fc_relacion){
-            $relacionadas = (new fc_relacion(link: $this->link))->facturas_relacionadas(
+            $relacionadas = $modelo_relacion->facturas_relacionadas(
                 modelo_relacionada: $modelo_relacionada, row_relacion: $fc_relacion);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener relacionadas', data: $relacionadas);
@@ -890,6 +891,37 @@ class _transacciones_fc extends modelo
         return $ruta_archivos_tmp;
     }
 
+    private function get_datos_xml(string $ruta_xml = ""): array
+    {
+        $xml = simplexml_load_file($ruta_xml);
+        $ns = $xml->getNamespaces(true);
+        $xml->registerXPathNamespace('c', $ns['cfdi']);
+        $xml->registerXPathNamespace('t', $ns['tfd']);
+
+        $xml_data = array();
+        $xml_data['cfdi_comprobante'] = array();
+        $xml_data['cfdi_emisor'] = array();
+        $xml_data['cfdi_receptor'] = array();
+        $xml_data['cfdi_conceptos'] = array();
+        $xml_data['tfd'] = array();
+
+        $nodos = array();
+        $nodos[] = '//cfdi:Comprobante';
+        $nodos[] = '//cfdi:Comprobante//cfdi:Emisor';
+        $nodos[] = '//cfdi:Comprobante//cfdi:Receptor';
+        $nodos[] = '//cfdi:Comprobante//cfdi:Conceptos//cfdi:Concepto';
+        $nodos[] = '//t:TimbreFiscalDigital';
+
+        foreach ($nodos as $key => $nodo) {
+            foreach ($xml->xpath($nodo) as $value) {
+                $data = (array)$value->attributes();
+                $data = $data['@attributes'];
+                $xml_data[array_keys($xml_data)[$key]] = $data;
+            }
+        }
+        return $xml_data;
+    }
+
     /**
      * Obtiene el subtotal de una factura
      * @param int $registro_id Factura o complemento de pago o NC a obtener info
@@ -1144,17 +1176,7 @@ class _transacciones_fc extends modelo
         return $permite_transaccion;
     }
 
-    final public function verifica_permite_transaccion(_etapa $modelo_etapa, int $registro_id){
-        $permite_transaccion = $this->permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
-        }
 
-        if(!$permite_transaccion){
-            return $this->error->error(mensaje: 'Error no se permite la eliminacion', data: $permite_transaccion);
-        }
-        return $permite_transaccion;
-    }
 
     /**
      * Calcula los impuestos trasladados de una factura
@@ -1212,6 +1234,48 @@ class _transacciones_fc extends modelo
         return $imp_traslado;
     }
 
+    private function guarda_documento(string $directorio, string $extension, string $contenido,
+                                      _doc $modelo_documento, int $registro_id): array|stdClass
+    {
+        $ruta_archivos = $this->ruta_archivos(directorio: $directorio);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener ruta de archivos', data: $ruta_archivos);
+        }
+
+        $ruta_archivo = "$ruta_archivos/$this->registro_id.$extension";
+
+        $guarda_archivo = (new files())->guarda_archivo_fisico(contenido_file: $contenido, ruta_file: $ruta_archivo);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al guardar archivo', data: $guarda_archivo);
+        }
+
+        $tipo_documento = $this->doc_tipo_documento_id(extension: $extension);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar extension del documento', data: $tipo_documento);
+        }
+
+        $file['name'] = $guarda_archivo;
+        $file['tmp_name'] = $guarda_archivo;
+
+        $documento['doc_tipo_documento_id'] = $tipo_documento;
+        $documento['descripcion'] = "$this->registro_id.$extension";
+        $documento['descripcion_select'] = "$this->registro_id.$extension";
+
+        $documento = (new doc_documento(link: $this->link))->alta_documento(registro: $documento, file: $file);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al guardar jpg', data: $documento);
+        }
+
+        $registro[$this->key_id] = $registro_id;
+        $registro['doc_documento_id'] = $documento->registro_id;
+        $factura_documento = $modelo_documento->alta_registro(registro: $registro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al guardar relacion factura con documento', data: $factura_documento);
+        }
+
+        return $documento;
+    }
+
     /**
      * Obtiene el total de descuento de una factura
      * @param int $registro_id Identificador de factura
@@ -1254,8 +1318,6 @@ class _transacciones_fc extends modelo
         }
         return round($fc_factura->$key_total,2);
     }
-
-
 
 
     final public function status(string $campo, int $registro_id): array|stdClass
@@ -1370,8 +1432,6 @@ class _transacciones_fc extends modelo
 
     }
 
-
-
     /**
      * Suma un subtotal al previo
      * @param array $fc_partida Partida a integrar
@@ -1397,36 +1457,19 @@ class _transacciones_fc extends modelo
         return round($subtotal,4);
     }
 
-    private function get_datos_xml(string $ruta_xml = ""): array
-    {
-        $xml = simplexml_load_file($ruta_xml);
-        $ns = $xml->getNamespaces(true);
-        $xml->registerXPathNamespace('c', $ns['cfdi']);
-        $xml->registerXPathNamespace('t', $ns['tfd']);
-
-        $xml_data = array();
-        $xml_data['cfdi_comprobante'] = array();
-        $xml_data['cfdi_emisor'] = array();
-        $xml_data['cfdi_receptor'] = array();
-        $xml_data['cfdi_conceptos'] = array();
-        $xml_data['tfd'] = array();
-
-        $nodos = array();
-        $nodos[] = '//cfdi:Comprobante';
-        $nodos[] = '//cfdi:Comprobante//cfdi:Emisor';
-        $nodos[] = '//cfdi:Comprobante//cfdi:Receptor';
-        $nodos[] = '//cfdi:Comprobante//cfdi:Conceptos//cfdi:Concepto';
-        $nodos[] = '//t:TimbreFiscalDigital';
-
-        foreach ($nodos as $key => $nodo) {
-            foreach ($xml->xpath($nodo) as $value) {
-                $data = (array)$value->attributes();
-                $data = $data['@attributes'];
-                $xml_data[array_keys($xml_data)[$key]] = $data;
-            }
+    final public function verifica_permite_transaccion(_etapa $modelo_etapa, int $registro_id){
+        $permite_transaccion = $this->permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
         }
-        return $xml_data;
+
+        if(!$permite_transaccion){
+            return $this->error->error(mensaje: 'Error no se permite la eliminacion', data: $permite_transaccion);
+        }
+        return $permite_transaccion;
     }
+
+
 
     public function timbra_xml(_doc $modelo_documento, _etapa $modelo_etapa, _partida $modelo_partida,
                                _cuenta_predial $modelo_predial, _relacion $modelo_relacion,
@@ -1566,47 +1609,7 @@ class _transacciones_fc extends modelo
         return $cfdi_sellado;
     }
 
-    private function guarda_documento(string $directorio, string $extension, string $contenido,
-                                      _doc $modelo_documento, int $registro_id): array|stdClass
-    {
-        $ruta_archivos = $this->ruta_archivos(directorio: $directorio);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener ruta de archivos', data: $ruta_archivos);
-        }
 
-        $ruta_archivo = "$ruta_archivos/$this->registro_id.$extension";
-
-        $guarda_archivo = (new files())->guarda_archivo_fisico(contenido_file: $contenido, ruta_file: $ruta_archivo);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al guardar archivo', data: $guarda_archivo);
-        }
-
-        $tipo_documento = $this->doc_tipo_documento_id(extension: $extension);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar extension del documento', data: $tipo_documento);
-        }
-
-        $file['name'] = $guarda_archivo;
-        $file['tmp_name'] = $guarda_archivo;
-
-        $documento['doc_tipo_documento_id'] = $tipo_documento;
-        $documento['descripcion'] = "$this->registro_id.$extension";
-        $documento['descripcion_select'] = "$this->registro_id.$extension";
-
-        $documento = (new doc_documento(link: $this->link))->alta_documento(registro: $documento, file: $file);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al guardar jpg', data: $documento);
-        }
-
-        $registro[$this->key_id] = $registro_id;
-        $registro['doc_documento_id'] = $documento->registro_id;
-        $factura_documento = $modelo_documento->alta_registro(registro: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al guardar relacion factura con documento', data: $factura_documento);
-        }
-
-        return $documento;
-    }
 
     /**
      * Obtiene el total de una factura

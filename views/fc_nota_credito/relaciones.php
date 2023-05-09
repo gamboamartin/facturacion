@@ -83,22 +83,22 @@
                                         <tbody>
                                         <?php foreach ($fc_relacion['fc_facturas'] as $fc_factura){ ?>
                                             <tr>
-                                                <td><?php echo $fc_factura['fc_factura_uuid']; ?></td>
+                                                <td><?php echo $fc_factura[$controlador->key_uuid]; ?></td>
                                                 <td><?php echo $fc_factura['com_cliente_rfc']; ?></td>
-                                                <td><?php echo $fc_factura['fc_factura_folio']; ?></td>
-                                                <td><?php echo $fc_factura['fc_factura_fecha']; ?></td>
-                                                <td><?php echo $fc_factura['fc_factura_etapa']; ?></td>
-                                                <td><input type="checkbox" name="fc_facturas_id[<?php echo $fc_relacion['fc_relacion_id'] ?>]" value="<?php echo $fc_factura['fc_factura_id']; ?>"> </td>
+                                                <td><?php echo $fc_factura[$controlador->key_folio]; ?></td>
+                                                <td><?php echo $fc_factura[$controlador->key_fecha]; ?></td>
+                                                <td><?php echo $fc_factura[$controlador->key_etapa]; ?></td>
+                                                <td><input type="checkbox" name="fc_facturas_id[<?php echo $fc_relacion[$controlador->key_relacion_id] ?>]" value="<?php echo $fc_factura[$controlador->key_entidad_id]; ?>"> </td>
                                             </tr>
                                         <?php } ?>
 
                                         <?php foreach ($fc_relacion['fc_facturas_relacionadas'] as $fc_factura){ ?>
                                             <tr>
-                                                <td><?php echo $fc_factura['fc_factura_uuid']; ?></td>
+                                                <td><?php echo $fc_factura[$controlador->key_uuid]; ?></td>
                                                 <td><?php echo $fc_factura['com_cliente_rfc']; ?></td>
-                                                <td><?php echo $fc_factura['fc_factura_folio']; ?></td>
-                                                <td><?php echo $fc_factura['fc_factura_fecha']; ?></td>
-                                                <td><?php echo $fc_factura['fc_factura_etapa']; ?></td>
+                                                <td><?php echo $fc_factura[$controlador->key_folio]; ?></td>
+                                                <td><?php echo $fc_factura[$controlador->key_fecha]; ?></td>
+                                                <td><?php echo $fc_factura[$controlador->key_etapa]; ?></td>
                                                 <td><?php echo $fc_factura['elimina_bd']; ?></td>
                                             </tr>
                                         <?php } ?>
