@@ -3,7 +3,6 @@
 
 <?php echo $controlador->inputs->fc_complemento_pago_id; ?>
 <?php echo $controlador->inputs->cat_sat_tipo_relacion_id; ?>
-<?php echo $controlador->inputs->descripcion; ?>
 
 <?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>
 
