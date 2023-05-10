@@ -72,6 +72,7 @@ class _base_system_fc extends _base_system{
     protected _cuenta_predial $modelo_predial;
     protected _relacionada $modelo_relacionada;
     protected _relacion $modelo_relacion;
+    //protected _cancela
     protected _doc $modelo_documento;
     protected _etapa $modelo_etapa;
     protected _data_mail $modelo_email;
@@ -604,11 +605,18 @@ class _base_system_fc extends _base_system{
     }
 
     public function cancela(bool $header, bool $ws = false){
-        $filtro['fc_factura.id'] = $this->registro_id;
-        $columns_ds = array('fc_factura_folio','com_cliente_rfc','fc_factura_total','fc_factura_fecha');
-        $fc_factura_id = $this->html_fc->select_fc_factura_id(cols: 12, con_registros: true,
-            id_selected: $this->registro_id, link: $this->link, columns_ds: $columns_ds, disabled: true,
-            filtro: $filtro);
+
+        $key_filter_id = $this->tabla.'.id';
+        $key_folio = $this->tabla.'_folio';
+        $key_total = $this->tabla.'_total';
+        $key_fecha = $this->tabla.'_fecha';
+
+        $filtro[$key_filter_id] = $this->registro_id;
+        $columns_ds = array($key_folio,'com_cliente_rfc',$key_total,$key_fecha);
+
+        $fc_factura_id = $this->html_fc->select_fc_entidad_id(cols: 12, columns_ds: $columns_ds, con_registros: true,
+            disabled: true, filtro: $filtro, id_selected: $this->registro_id, label: 'CFDI',
+            modelo_entidad: $this->modelo_entidad, registros: array());
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $fc_factura_id, header: $header,ws:$ws);
         }
@@ -621,7 +629,8 @@ class _base_system_fc extends _base_system{
                 data:  $cat_sat_motivo_cancelacion_id, header: $header,ws:$ws);
         }
 
-        $link_factura_cancela = $this->obj_link->link_con_id(accion: 'cancela_bd',link: $this->link,registro_id: $this->registro_id,seccion: $this->tabla);
+        $link_factura_cancela = $this->obj_link->link_con_id(accion: 'cancela_bd',link: $this->link,
+            registro_id: $this->registro_id,seccion: $this->tabla);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener link_factura_cancela',
                 data:  $link_factura_cancela, header: $header,ws:$ws);
@@ -644,11 +653,9 @@ class _base_system_fc extends _base_system{
     public function cancela_bd(bool $header, bool $ws = false): array|stdClass
     {
 
-        $modelo_cancelacion = new fc_cancelacion(link: $this->link);
-
-        $r_fc_cancelacion = (new fc_factura(link: $this->link))->cancela_bd(
+        $r_fc_cancelacion = $this->modelo_entidad->cancela_bd(
             cat_sat_motivo_cancelacion_id: $_POST['cat_sat_motivo_cancelacion_id'],
-            modelo_cancelacion: $modelo_cancelacion, registro_id: $this->registro_id);
+            modelo_cancelacion: $this->modelo_cancelacion, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al cancelar factura',data:  $r_fc_cancelacion, header: $header,ws:$ws);
         }
