@@ -83,6 +83,48 @@ class _transacciones_fcTest extends test
         errores::$error = false;
     }
 
+    public function test_valida_permite_transaccion(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo = new fc_complemento_pago(link: $this->link);
+        $modelo = new liberator($modelo);
+        $etapas = array();
+
+        $resultado = $modelo->valida_permite_transaccion($etapas);
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+
+        errores::$error = false;
+
+        $etapas[] = array('pr_etapa_descripcion'=>'CANCELADO');
+
+        $resultado = $modelo->valida_permite_transaccion($etapas);
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertNotTrue($resultado);
+
+        errores::$error = false;
+
+        $etapas = array();
+        $etapas[] = array('pr_etapa_descripcion'=>'TIMBRADO');
+
+        $resultado = $modelo->valida_permite_transaccion($etapas);
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertNotTrue($resultado);
+
+        errores::$error = false;
+    }
+
 
 
 

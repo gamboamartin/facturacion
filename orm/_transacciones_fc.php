@@ -1054,7 +1054,13 @@ class _transacciones_fc extends modelo
         return $r_modifica_bd;
     }
 
-    private function permite_transaccion(_etapa $modelo_etapa, int $registro_id){
+    /**
+     * @param _etapa $modelo_etapa
+     * @param int $registro_id
+     * @return array|bool
+     */
+    private function permite_transaccion(_etapa $modelo_etapa, int $registro_id): bool|array
+    {
         $etapas = $this->etapas(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener fc_factura_etapas', data: $etapas);
@@ -1201,6 +1207,7 @@ class _transacciones_fc extends modelo
      * Valida si una entidad relacionada de facturacion puede ser o no eliminada
      * @param array $etapas Etapas a verificar
      * @return bool
+     * @version 9.3.0
      */
     private function valida_permite_transaccion(array $etapas): bool
     {
@@ -1500,7 +1507,13 @@ class _transacciones_fc extends modelo
         return round($subtotal,4);
     }
 
-    final public function verifica_permite_transaccion(_etapa $modelo_etapa, int $registro_id){
+    /**
+     * @param _etapa $modelo_etapa
+     * @param int $registro_id
+     * @return array|bool
+     */
+    final public function verifica_permite_transaccion(_etapa $modelo_etapa, int $registro_id): bool|array
+    {
         $permite_transaccion = $this->permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
