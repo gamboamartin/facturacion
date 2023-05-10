@@ -40,12 +40,7 @@
     </div>
 
     <div class="container">
-        <div class="col-md-12 buttons-form">
-            <?php echo $controlador->button_fc_factura_correo; ?>
-            <?php echo $controlador->button_fc_factura_relaciones; ?>
-            <?php echo $controlador->button_fc_factura_timbra; ?>
-            <?php echo $controlador->button_fc_factura_envia; ?>
-        </div>
+        <?php echo $controlador->buttons_base; ?>
     </div>
 
     <div class="container partidas">
@@ -149,15 +144,7 @@
             </div>
         </div>
 
-
-
-        <div class="col-md-12 buttons-form">
-            <?php echo $controlador->button_fc_factura_correo; ?>
-            <?php echo $controlador->button_fc_factura_relaciones; ?>
-            <?php echo $controlador->button_fc_factura_timbra; ?>
-            <?php echo $controlador->button_fc_factura_envia; ?>
-        </div>
-
+        <?php echo $controlador->buttons_base; ?>
 
         <div class="col-md-12 buttons-form">
             <?php

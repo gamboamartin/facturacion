@@ -88,6 +88,7 @@ class _base_system_fc extends _base_system{
     public string $button_fc_factura_modifica = '';
     public string $button_fc_factura_correo = '';
     public string $button_fc_factura_envia = '';
+    public string $buttons_base = '';
 
     public string $key_email_id = '';
 
@@ -197,6 +198,38 @@ class _base_system_fc extends _base_system{
 
 
         return $r_alta;
+    }
+
+    private function buttons_base(): array|string
+    {
+        $button_fc_factura_relaciones =  $this->html->button_href(accion: 'relaciones', etiqueta: 'Relaciones',
+            registro_id: $this->registro_id, seccion: $this->seccion, style: 'warning', cols: 3, params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_relaciones);
+        }
+
+        $button_fc_factura_timbra =  $this->html->button_href(accion: 'timbra_xml', etiqueta: 'Timbra',
+            registro_id: $this->registro_id, seccion: $this->seccion, style: 'danger', cols: 3, params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_timbra);
+        }
+        $button_fc_factura_correo =  $this->html->button_href(accion: 'correo', etiqueta: 'Correos',
+            registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 3, params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_correo);
+        }
+
+        $button_fc_factura_envia =  $this->html->button_href(accion: 'envia_cfdi', etiqueta: 'Envia Por Correo',
+            registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 3, params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_envia);
+        }
+
+        $buttons = $button_fc_factura_relaciones.$button_fc_factura_timbra.$button_fc_factura_correo.$button_fc_factura_envia;
+
+        return "<div class='col-md-12 buttons-form'>$buttons</div>";
+
+
     }
 
     public function correo(bool $header, bool $ws = false): array|stdClass
@@ -1641,38 +1674,6 @@ class _base_system_fc extends _base_system{
         }
         $this->inputs->observaciones = $observaciones;
 
-        $button_fc_factura_relaciones =  $this->html->button_href(accion: 'relaciones', etiqueta: 'Relaciones',
-            registro_id: $this->registro_id, seccion: $this->seccion, style: 'warning', cols: 3, params: array());
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_relaciones);
-        }
-
-        $this->button_fc_factura_relaciones = $button_fc_factura_relaciones;
-
-        $button_fc_factura_timbra =  $this->html->button_href(accion: 'timbra_xml', etiqueta: 'Timbra',
-            registro_id: $this->registro_id, seccion: $this->seccion, style: 'danger', cols: 3, params: array());
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_relaciones);
-        }
-
-        $this->button_fc_factura_timbra = $button_fc_factura_timbra;
-
-        $button_fc_factura_correo =  $this->html->button_href(accion: 'correo', etiqueta: 'Correos',
-            registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 3, params: array());
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_correo);
-        }
-
-        $this->button_fc_factura_correo = $button_fc_factura_correo;
-
-
-        $button_fc_factura_envia =  $this->html->button_href(accion: 'envia_cfdi', etiqueta: 'Envia Por Correo',
-            registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 3, params: array());
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_correo);
-        }
-
-        $this->button_fc_factura_envia = $button_fc_factura_envia;
 
 
         $filtro = array();
@@ -1683,6 +1684,15 @@ class _base_system_fc extends _base_system{
         }
 
         $this->registros['fc_emails'] = $r_fc_email->registros;
+
+
+        $buttons = $this->buttons_base();
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener buttons', data: $buttons);
+        }
+
+        $this->buttons_base = $buttons;
+
 
 
         return $base->template;
