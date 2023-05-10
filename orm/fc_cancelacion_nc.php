@@ -18,7 +18,6 @@ class fc_cancelacion_nc extends _cancelacion {
         $campos_obligatorios = array('fc_nota_credito_id','cat_sat_motivo_cancelacion_id','codigo_bis');
 
 
-
         parent::__construct(link: $link,tabla:  $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas);
 

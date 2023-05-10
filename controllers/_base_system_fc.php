@@ -19,6 +19,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\_base_fc_html;
 use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_partida_html;
+use gamboamartin\facturacion\models\_cancelacion;
 use gamboamartin\facturacion\models\_cuenta_predial;
 use gamboamartin\facturacion\models\_data_impuestos;
 use gamboamartin\facturacion\models\_data_mail;
@@ -72,7 +73,7 @@ class _base_system_fc extends _base_system{
     protected _cuenta_predial $modelo_predial;
     protected _relacionada $modelo_relacionada;
     protected _relacion $modelo_relacion;
-    //protected _cancela
+    protected _cancelacion $modelo_cancelacion;
     protected _doc $modelo_documento;
     protected _etapa $modelo_etapa;
     protected _data_mail $modelo_email;

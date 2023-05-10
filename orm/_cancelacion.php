@@ -106,10 +106,11 @@ class _cancelacion extends modelo {
 
         $ruta_key = $fc_csd_key['doc_documento_ruta_absoluta'];
 
+        $key_total = $this->modelo_entidad->tabla.'_total';
 
         $cancela = (new timbra())->cancela(motivo_cancelacion: $motivo_cancelacion,rfc_emisor:  $rfc_emisor,
             rfc_receptor:  $rfc_receptor,uuid:  $uuid,pass_csd: $fc_csd->fc_csd_password,ruta_cer: $ruta_cer,
-            ruta_key: $ruta_key,total: $fc_factura->fc_factura_total,uuid_sustitucion: '');
+            ruta_key: $ruta_key,total: $fc_factura->$key_total,uuid_sustitucion: '');
 
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al cancelar',data: $cancela);

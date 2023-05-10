@@ -102,7 +102,7 @@ class _transacciones_fc extends modelo
      * @param int $registro_id Factura a cancelar
      * @return array|stdClass
      */
-    final public function cancela_bd(int $cat_sat_motivo_cancelacion_id, modelo $modelo_cancelacion, int $registro_id): array|stdClass
+    public function cancela_bd(int $cat_sat_motivo_cancelacion_id, modelo $modelo_cancelacion, int $registro_id): array|stdClass
     {
         $fc_cancelacion_ins[$this->key_id] = $registro_id;
         $fc_cancelacion_ins['cat_sat_motivo_cancelacion_id'] = $cat_sat_motivo_cancelacion_id;
