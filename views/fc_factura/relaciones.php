@@ -88,7 +88,9 @@
                                                 <td><?php echo $fc_factura['fc_factura_folio']; ?></td>
                                                 <td><?php echo $fc_factura['fc_factura_fecha']; ?></td>
                                                 <td><?php echo $fc_factura['fc_factura_etapa']; ?></td>
-                                                <td><input type="checkbox" name="fc_facturas_id[<?php echo $fc_relacion['fc_relacion_id'] ?>]" value="<?php echo $fc_factura['fc_factura_id']; ?>"> </td>
+                                                <td>
+                                                    <?php echo $fc_factura['seleccion']; ?>
+                                                </td>
                                             </tr>
                                         <?php } ?>
 

@@ -888,8 +888,9 @@ class _base_system_fc extends _base_system{
     public function fc_factura_relacionada_alta_bd(bool $header, bool $ws = false){
 
         $fc_facturas_id = $_POST['fc_facturas_id'];
+
         $alta = array();
-        foreach ($fc_facturas_id as $fc_relacion_id=>$fc_factura_id){
+        foreach ($fc_facturas_id as $fc_factura_id=>$fc_relacion_id){
             $fc_factura_relacionada_ins[$this->modelo_relacion->key_id] = $fc_relacion_id;
             $fc_factura_relacionada_ins[$this->modelo_entidad->key_id] = $fc_factura_id;
             $r_fc_factura_relacionada = $this->modelo_relacionada->alta_registro(registro: $fc_factura_relacionada_ins);
@@ -960,6 +961,25 @@ class _base_system_fc extends _base_system{
         $file['name'] = $row_entidad->$key_folio.'.pdf';
         $file['tmp_name'] = $pdf;
         return $file;
+    }
+
+    private function genera_base_upd(_transacciones_fc $modelo_entidad, _partida $modelo_partida,
+                                     _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado,
+                                     stdClass $row_upd, array $params): array|stdClass
+    {
+        $params = $this->params_base(params: $params,row_upd:  $row_upd);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener params', data: $params);
+        }
+
+        $base = $this->init_modifica(fecha_original: false, modelo_entidad: $modelo_entidad,
+            modelo_partida: $modelo_partida, modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
+            params: $params);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al maquetar datos',data:  $base);
+        }
+
+        return $base;
     }
 
     private function genera_factura_pdf(_doc $modelo_documento, string $pdf, int $registro_id, stdClass $row_entidad): array|stdClass
@@ -1365,6 +1385,28 @@ class _base_system_fc extends _base_system{
         $data->template = $r_modifica;
         $data->inputs = $inputs;
 
+        return $data;
+    }
+
+    private function init_upd(_transacciones_fc $modelo_entidad, _partida $modelo_partida,
+                              _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado,
+                              int $registro_entidad_id): array|stdClass
+    {
+        $partidas  = $modelo_partida->partidas(html: $this->html, modelo_entidad: $modelo_entidad,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
+            registro_entidad_id: $registro_entidad_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
+        }
+
+        $row_upd = $this->modelo->registro(registro_id: $registro_entidad_id, retorno_obj: true);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener factura', data: $row_upd);
+        }
+
+        $data = new stdClass();
+        $data->partidas = $partidas;
+        $data->row_upd = $row_upd;
         return $data;
     }
 
@@ -1788,39 +1830,8 @@ class _base_system_fc extends _base_system{
 
     }
 
-    public function relaciones(bool $header, bool $ws = false){
-
-        $this->key_uuid = $this->modelo_entidad->tabla.'_uuid';
-        $this->key_folio = $this->modelo_entidad->tabla.'_folio';
-        $this->key_fecha = $this->modelo_entidad->tabla.'_fecha';
-        $this->key_etapa = $this->modelo_etapa->tabla;
-        $this->key_relacion_id = $this->modelo_relacion->key_id;
-        $this->key_entidad_id = $this->modelo_entidad->key_id;
-
-        $partidas  = $this->modelo_partida->partidas(html: $this->html, modelo_entidad: $this->modelo_entidad,
-            modelo_retencion: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado,
-            registro_entidad_id: $this->registro_id);
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
-            print_r($error);
-            die('Error');
-        }
-
-        $row_upd = $this->modelo->registro(registro_id: $this->registro_id, retorno_obj: true);
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al obtener factura', data: $row_upd);
-            print_r($error);
-            die('Error');
-        }
-
-        $this->partidas = $partidas;
-
-
-        $params = array();
-
-        $params['fc_csd_id']['filtro']['fc_csd.id'] = $row_upd->fc_csd_id;
-        $params['fc_csd_id']['disabled'] = true;
-
+    private function params_base(array $params, stdClass $row_upd): array
+    {
         $params['com_sucursal_id']['filtro']['com_sucursal.id'] = $row_upd->com_sucursal_id;
         $params['com_sucursal_id']['disabled'] = true;
 
@@ -1842,9 +1853,41 @@ class _base_system_fc extends _base_system{
         $params['cat_sat_uso_cfdi_id']['filtro']['cat_sat_uso_cfdi.id'] = $row_upd->cat_sat_uso_cfdi_id;
         $params['cat_sat_uso_cfdi_id']['disabled'] = true;
 
-        $base = $this->init_modifica(fecha_original: false, modelo_entidad: $this->modelo_entidad,
-            modelo_partida: $this->modelo_partida, modelo_retencion: $this->modelo_retencion,
-            modelo_traslado: $this->modelo_traslado, params: $params);
+        return $params;
+    }
+
+    public function relaciones(bool $header, bool $ws = false){
+
+        $this->key_uuid = $this->modelo_entidad->tabla.'_uuid';
+        $this->key_folio = $this->modelo_entidad->tabla.'_folio';
+        $this->key_fecha = $this->modelo_entidad->tabla.'_fecha';
+        $this->key_etapa = $this->modelo_etapa->tabla;
+        $this->key_relacion_id = $this->modelo_relacion->key_id;
+        $this->key_entidad_id = $this->modelo_entidad->key_id;
+
+
+        $datos = $this->init_upd(modelo_entidad: $this->modelo_entidad,modelo_partida:  $this->modelo_partida,
+            modelo_retencion:  $this->modelo_retencion,modelo_traslado:  $this->modelo_traslado,
+            registro_entidad_id:  $this->registro_id);
+
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener datos', data: $datos);
+            print_r($error);
+            die('Error');
+        }
+
+
+        $this->partidas = $datos->partidas;
+
+
+        $params = array();
+
+        $params['fc_csd_id']['filtro']['fc_csd.id'] = $datos->row_upd->fc_csd_id;
+        $params['fc_csd_id']['disabled'] = true;
+
+        $base = $this->init_modifica(fecha_original: false, modelo_entidad: $this->modelo_entidad, modelo_partida: $this->modelo_partida,
+            modelo_retencion: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado,
+            params: $params);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
@@ -1893,8 +1936,8 @@ class _base_system_fc extends _base_system{
 
 
         $filtro = array();
-        $filtro['com_cliente.id'] = $row_upd->com_cliente_id;
-        $filtro['org_empresa.id'] = $row_upd->org_empresa_id;
+        $filtro['com_cliente.id'] = $datos->row_upd->com_cliente_id;
+        $filtro['org_empresa.id'] = $datos->row_upd->org_empresa_id;
         $r_fc_factura = $this->modelo_entidad->filtro_and(filtro: $filtro);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener facturas', data: $r_fc_factura);
@@ -1918,6 +1961,12 @@ class _base_system_fc extends _base_system{
                     }
                 }
                 if(!$existe_factura_rel){
+                    $key_relacion_id = $this->key_relacion_id;
+
+                    $checkbox = "<input type='checkbox' name='fc_facturas_id[$factura_cliente[$key_entidad_id]]' value='$relacion[$key_relacion_id]'>";
+
+                    $factura_cliente['seleccion'] = $checkbox;
+
                     $facturas_cliente_[] = $factura_cliente;
                 }
             }
@@ -1965,6 +2014,9 @@ class _base_system_fc extends _base_system{
                 return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_rel);
             }
             $relaciones[$indice]['elimina_bd'] = $link_elimina_rel;
+
+
+
 
 
         }
@@ -2122,49 +2174,21 @@ class _base_system_fc extends _base_system{
         $this->link->commit();
 
 
-        $partidas  = $this->modelo_partida->partidas(html: $this->html, modelo_entidad: $this->modelo_entidad,
-            modelo_retencion: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado,
-            registro_entidad_id: $this->registro_id);
+        $datos = $this->init_upd(modelo_entidad: $this->modelo_entidad,modelo_partida:  $this->modelo_partida,
+            modelo_retencion:  $this->modelo_retencion,modelo_traslado:  $this->modelo_traslado,
+            registro_entidad_id:  $this->registro_id);
+
         if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
+            $error = $this->errores->error(mensaje: 'Error al obtener datos', data: $datos);
             print_r($error);
             die('Error');
         }
 
-        $row_upd = $this->modelo->registro(registro_id: $this->registro_id, retorno_obj: true);
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al obtener factura', data: $row_upd);
-            print_r($error);
-            die('Error');
-        }
-
-        $this->partidas = $partidas;
+        $this->partidas = $datos->partidas;
 
 
         $params = array();
 
-
-
-        $params['com_sucursal_id']['filtro']['com_sucursal.id'] = $row_upd->com_sucursal_id;
-        $params['com_sucursal_id']['disabled'] = true;
-
-        $params['cat_sat_tipo_de_comprobante_id']['filtro']['cat_sat_tipo_de_comprobante.id'] = $row_upd->cat_sat_tipo_de_comprobante_id;
-        $params['cat_sat_tipo_de_comprobante_id']['disabled'] = true;
-
-        $params['cat_sat_forma_pago_id']['filtro']['cat_sat_forma_pago.id'] = $row_upd->cat_sat_forma_pago_id;
-        $params['cat_sat_forma_pago_id']['disabled'] = true;
-
-        $params['cat_sat_metodo_pago_id']['filtro']['cat_sat_metodo_pago.id'] = $row_upd->cat_sat_metodo_pago_id;
-        $params['cat_sat_metodo_pago_id']['disabled'] = true;
-
-        $params['cat_sat_moneda_id']['filtro']['cat_sat_moneda.id'] = $row_upd->cat_sat_moneda_id;
-        $params['cat_sat_moneda_id']['disabled'] = true;
-
-        $params['com_tipo_cambio_id']['filtro']['com_tipo_cambio.id'] = $row_upd->com_tipo_cambio_id;
-        $params['com_tipo_cambio_id']['disabled'] = true;
-
-        $params['cat_sat_uso_cfdi_id']['filtro']['cat_sat_uso_cfdi.id'] = $row_upd->cat_sat_uso_cfdi_id;
-        $params['cat_sat_uso_cfdi_id']['disabled'] = true;
 
         $base = $this->init_modifica(fecha_original: false, modelo_entidad: $this->modelo_entidad, modelo_partida: $this->modelo_partida,
             modelo_retencion: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado,
