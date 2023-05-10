@@ -850,6 +850,10 @@ class _transacciones_fc extends modelo
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_relacionada);
             }
+            $r_fc_relacion = $this->modelo_relacion->elimina_con_filtro_and(filtro: $filtro);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_relacion);
+            }
         }
 
         $r_fc_notificacion = $this->modelo_notificacion->elimina_con_filtro_and(filtro: $filtro);
@@ -1055,8 +1059,9 @@ class _transacciones_fc extends modelo
     }
 
     /**
-     * @param _etapa $modelo_etapa
-     * @param int $registro_id
+     * Verifica si se permite o no una transaccion dependiendo la etapa en la que se encuentre la entidad
+     * @param _etapa $modelo_etapa Modelo de etapa
+     * @param int $registro_id Registro en proceso
      * @return array|bool
      */
     private function permite_transaccion(_etapa $modelo_etapa, int $registro_id): bool|array

@@ -262,6 +262,7 @@ class _partida extends  _base{
     {
 
         $this->modelo_traslado->valida_restriccion = $this->valida_restriccion;
+        $this->modelo_retencion->valida_restriccion = $this->valida_restriccion;
 
         $fc_partida = $this->registro(registro_id: $id, retorno_obj: true);
         if (errores::$error) {
