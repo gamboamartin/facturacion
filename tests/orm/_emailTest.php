@@ -45,7 +45,7 @@ class _emailTest extends test
         $resultado = $email->asunto($row_entidad, $uuid);
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals('Factura de ALFA RFC: BETA Folio: a', $resultado);
+        $this->assertEquals('CFDI de ALFA RFC: BETA Folio: a', $resultado);
         errores::$error = false;
     }
 

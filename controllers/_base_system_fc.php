@@ -25,6 +25,7 @@ use gamboamartin\facturacion\models\_data_impuestos;
 use gamboamartin\facturacion\models\_data_mail;
 use gamboamartin\facturacion\models\_doc;
 use gamboamartin\facturacion\models\_etapa;
+use gamboamartin\facturacion\models\_notificacion;
 use gamboamartin\facturacion\models\_partida;
 use gamboamartin\facturacion\models\_pdf;
 use gamboamartin\facturacion\models\_relacion;
@@ -73,6 +74,7 @@ class _base_system_fc extends _base_system{
     protected _cuenta_predial $modelo_predial;
     protected _relacionada $modelo_relacionada;
     protected _relacion $modelo_relacion;
+    protected _notificacion $modelo_notificacion;
     protected _cancelacion $modelo_cancelacion;
     protected _doc $modelo_documento;
     protected _etapa $modelo_etapa;
@@ -760,15 +762,15 @@ class _base_system_fc extends _base_system{
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $genera_pdf, header: $header,ws:$ws);
         }
 
-        $inserta_notificacion = (new fc_factura(link: $this->link))->inserta_notificacion(registro_id: $this->registro_id);
+        $inserta_notificacion = $this->modelo_entidad->inserta_notificacion(modelo_email: $this->modelo_email,
+            modelo_notificacion: $this->modelo_notificacion,registro_id:  $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al insertar notificacion',data:  $inserta_notificacion, header: $header,ws:$ws);
         }
 
-        $modelo_notificacion = new fc_notificacion(link: $this->link);
 
-        $envia_notificacion = (new fc_factura(link: $this->link))->envia_factura(
-            modelo_notificacion: $modelo_notificacion, registro_id: $this->registro_id);
+        $envia_notificacion = $this->modelo_entidad->envia_factura(
+            modelo_notificacion: $this->modelo_notificacion, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al enviar notificacion',data:  $envia_notificacion, header: $header,ws:$ws);
         }

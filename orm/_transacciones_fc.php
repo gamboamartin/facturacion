@@ -638,8 +638,11 @@ class _transacciones_fc extends modelo
         return $r_fc_partida_cp->registros;
     }
 
-    final public function inserta_notificacion(int $registro_id){
-        $notificaciones = (new _email())->crear_notificaciones(registro_id: $registro_id,link:  $this->link);
+    final public function inserta_notificacion(_data_mail $modelo_email, _notificacion $modelo_notificacion,
+                                               int $registro_id){
+        $notificaciones = (new _email())->crear_notificaciones(registro_entidad_id: $registro_id,
+            modelo_email:  $modelo_email,modelo_entidad:  $this,modelo_notificacion:  $modelo_notificacion,
+            link:  $this->link);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar notificaciones', data: $notificaciones);
         }
