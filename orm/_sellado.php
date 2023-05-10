@@ -11,6 +11,8 @@ class _sellado extends _modelo_parent{
     protected _etapa $modelo_etapa;
     protected _transacciones_fc $modelo_entidad;
 
+    public bool $valida_restriccion;
+
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
 
@@ -47,12 +49,21 @@ class _sellado extends _modelo_parent{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_cfdi_sellado);
         }
-
         $key_entidad_id = $this->modelo_entidad->key_id;
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(
-            modelo_etapa: $this->modelo_etapa, registro_id: $fc_cfdi_sellado->$key_entidad_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
+        if($this->valida_restriccion) {
+            $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(
+                modelo_etapa: $this->modelo_etapa, registro_id: $fc_cfdi_sellado->$key_entidad_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
+            }
+        }
+        else{
+            $r_elimina_bd = parent::elimina_bd(id: $id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al eliminar', data: $r_elimina_bd);
+            }
+            return $r_elimina_bd;
+
         }
         errores::$error = true;
         return $this->error->error(mensaje: 'Error este registro no puede ser eliminado',data: $id);

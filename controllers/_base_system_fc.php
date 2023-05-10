@@ -755,6 +755,34 @@ class _base_system_fc extends _base_system{
         return $r_doc_documento->registro_id;
     }
 
+    public function elimina_sin_restriccion(bool $header, bool $ws = false){
+
+
+        $r_elimina = $this->modelo_entidad->elimina_bd(id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al r_elimina factura',data:  $r_elimina, header: $header,ws:$ws);
+        }
+
+        if($header){
+
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: "lista");
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_elimina,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($r_elimina, JSON_THROW_ON_ERROR);
+            exit;
+        }
+
+        return $r_elimina;
+    }
+
     public function envia_cfdi(bool $header, bool $ws = false){
 
         $genera_pdf = $this->genera_pdf(header: false);

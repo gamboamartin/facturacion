@@ -17,6 +17,8 @@ class _partida extends  _base{
 
     protected _etapa $modelo_etapa;
 
+    public bool $valida_restriccion = true;
+
 
     private function acciones_conf_retenido(bool $aplica_cat_sat_conf_imps, int $cat_sat_conf_imps_id,
                                             stdClass $fc_registro_partida, _data_impuestos $modelo_retencion): array|stdClass
@@ -258,15 +260,21 @@ class _partida extends  _base{
      */
     public function elimina_bd(int $id): array|stdClass
     {
+
+        $this->modelo_traslado->valida_restriccion = $this->valida_restriccion;
+
         $fc_partida = $this->registro(registro_id: $id, retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener fc_partida', data: $fc_partida);
         }
+
         $key_entidad_id = $this->modelo_entidad->tabla.'_id';
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa,
-            registro_id: $fc_partida->$key_entidad_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
+        if($this->valida_restriccion){
+            $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa,
+                registro_id: $fc_partida->$key_entidad_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
+            }
         }
 
         $filtro[$this->tabla.'.id'] = $id;
