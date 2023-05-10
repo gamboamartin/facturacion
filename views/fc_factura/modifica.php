@@ -44,6 +44,7 @@
             <?php echo $controlador->button_fc_factura_correo; ?>
             <?php echo $controlador->button_fc_factura_relaciones; ?>
             <?php echo $controlador->button_fc_factura_timbra; ?>
+            <?php echo $controlador->button_fc_factura_envia; ?>
         </div>
     </div>
 
@@ -154,6 +155,7 @@
             <?php echo $controlador->button_fc_factura_correo; ?>
             <?php echo $controlador->button_fc_factura_relaciones; ?>
             <?php echo $controlador->button_fc_factura_timbra; ?>
+            <?php echo $controlador->button_fc_factura_envia; ?>
         </div>
 
 

@@ -52,8 +52,8 @@ class controlador_fc_factura extends _base_system_fc {
     public array|stdClass $keys_selects = array();
     public controlador_com_producto $controlador_com_producto;
 
-    public string $button_fc_factura_relaciones = '';
-    public string $button_fc_factura_timbra = '';
+
+
 
     public string $rfc = '';
     public string $razon_social = '';
