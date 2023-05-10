@@ -30,6 +30,14 @@ class fc_cer_pem extends modelo{
 
     public function alta_bd(): array|stdClass
     {
+
+        if(!isset($this->registro['codigo'])){
+            $this->registro['codigo'] =  $this->get_codigo_aleatorio();
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $this->registro);
+            }
+        }
+
         $validacion = $this->validaciones(data: $this->registro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
