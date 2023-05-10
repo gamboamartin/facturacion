@@ -656,7 +656,8 @@ class _base_system_fc extends _base_system{
 
         $r_fc_cancelacion = $this->modelo_entidad->cancela_bd(
             cat_sat_motivo_cancelacion_id: $_POST['cat_sat_motivo_cancelacion_id'],
-            modelo_cancelacion: $this->modelo_cancelacion, registro_id: $this->registro_id);
+            modelo_cancelacion: $this->modelo_cancelacion, modelo_etapa: $this->modelo_etapa,
+            registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al cancelar factura',data:  $r_fc_cancelacion, header: $header,ws:$ws);
         }

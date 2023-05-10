@@ -98,11 +98,13 @@ class _transacciones_fc extends modelo
     /**
      * Cancela una factura
      * @param int $cat_sat_motivo_cancelacion_id Motivo de cancelacion
-     * @param modelo $modelo_cancelacion Modelo para integrar la cancelacion
+     * @param _cancelacion $modelo_cancelacion Modelo para integrar la cancelacion
+     * @param _etapa $modelo_etapa
      * @param int $registro_id Factura a cancelar
      * @return array|stdClass
      */
-    public function cancela_bd(int $cat_sat_motivo_cancelacion_id, modelo $modelo_cancelacion, int $registro_id): array|stdClass
+    public function cancela_bd(int $cat_sat_motivo_cancelacion_id, _cancelacion $modelo_cancelacion,
+                               _etapa $modelo_etapa, int $registro_id): array|stdClass
     {
         $fc_cancelacion_ins[$this->key_id] = $registro_id;
         $fc_cancelacion_ins['cat_sat_motivo_cancelacion_id'] = $cat_sat_motivo_cancelacion_id;
@@ -113,7 +115,7 @@ class _transacciones_fc extends modelo
         }
 
         $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
-            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $registro_id, valida_existencia_etapa: true);
+            modelo: $this, modelo_etapa: $modelo_etapa, registro_id: $registro_id, valida_existencia_etapa: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
         }
