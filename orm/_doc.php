@@ -85,6 +85,12 @@ class _doc extends _modelo_parent{
         return $r_elimina;
     }
 
+    /**
+     * @param string $key_entidad_filter_id
+     * @param int $registro_id
+     * @param string $tipo_documento
+     * @return array|string
+     */
     final public function get_factura_documento(string $key_entidad_filter_id, int $registro_id,
                                                 string $tipo_documento): array|string{
 
@@ -104,7 +110,15 @@ class _doc extends _modelo_parent{
         return $ruta_archivo;
     }
 
-    final public function get_factura_documentos(string $key_entidad_filter_id,int $registro_id, string $tipo_documento): array|stdClass{
+    /**
+     * Obtiene un documento de tipo factura cfdi o pdf
+     * @param string $key_entidad_filter_id Key de identificador base de factura complemento o nota de credito
+     * @param int $registro_id Registro de tipo factura complemento o nota de credito
+     * @param string $tipo_documento Descripcion del documento a obtener
+     * @return array|stdClass
+     */
+    private function get_factura_documentos(string $key_entidad_filter_id,int $registro_id,
+                                                 string $tipo_documento): array|stdClass{
 
         $filtro[$key_entidad_filter_id] = $registro_id;
         $filtro['doc_tipo_documento.descripcion'] = $tipo_documento;
