@@ -2083,16 +2083,21 @@ class _base_system_fc extends _base_system{
             return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $fc_factura,header:  $header, ws: $ws);
         }
 
+
+        $key_factura_total = $this->tabla.'_total';
+        $key_factura_uuid = $this->tabla.'_uuid';
+        $key_factura_id_filter = $this->tabla.'.id';
+
         $verifica = (new timbra())->consulta_estado_sat($fc_factura['org_empresa_rfc'], $fc_factura['com_cliente_rfc'],
-            $fc_factura['fc_factura_total'], $fc_factura['fc_factura_uuid']);
+            $fc_factura[$key_factura_total], $fc_factura[$key_factura_uuid]);
 
 
         $aplica_etapa = false;
         if($verifica->mensaje === 'Cancelado'){
 
             $filtro['pr_etapa.descripcion'] = 'cancelado_sat';
-            $filtro['fc_factura.id'] = $this->registro_id;
-            $existe = (new fc_factura_etapa(link: $this->link))->existe(filtro: $filtro);
+            $filtro[$key_factura_id_filter] = $this->registro_id;
+            $existe = $this->modelo_etapa->existe(filtro: $filtro);
             if(errores::$error){
                 $this->link->rollBack();
                 return $this->retorno_error(mensaje: 'Error al validar etapa',data:  $existe,header:  $header, ws: $ws);
@@ -2105,7 +2110,8 @@ class _base_system_fc extends _base_system{
 
         if($aplica_etapa) {
             $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: 'cancelado_sat', fecha: '',
-                modelo: $this->modelo, modelo_etapa: $this->modelo->modelo_etapa, registro_id: $this->registro_id, valida_existencia_etapa: true);
+                modelo: $this->modelo, modelo_etapa: $this->modelo_etapa,
+                registro_id: $this->registro_id, valida_existencia_etapa: true);
             if (errores::$error) {
                 $this->link->rollBack();
                 return $this->retorno_error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa, header: $header, ws: $ws);
@@ -2115,7 +2121,8 @@ class _base_system_fc extends _base_system{
 
 
         $partidas  = $this->modelo_partida->partidas(html: $this->html, modelo_entidad: $this->modelo_entidad,
-            modelo_retencion: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado, registro_entidad_id: $this->registro_id);
+            modelo_retencion: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado,
+            registro_entidad_id: $this->registro_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener partidas', data: $partidas);
             print_r($error);

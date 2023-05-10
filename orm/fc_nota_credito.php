@@ -194,4 +194,5 @@ class fc_nota_credito extends _transacciones_fc
     }
 
 
+
 }
