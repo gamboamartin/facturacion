@@ -87,6 +87,8 @@ class _relacion extends _modelo_parent_sin_codigo{
         }
         $filtro = array();
         $filtro[$this->key_filtro_id] = $row_relacion[$this->key_id];
+
+
         $r_fc_factura_relacionada = $modelo_relacionada->filtro_and(filtro: $filtro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener r_fc_factura_relacionada', data: $r_fc_factura_relacionada);
@@ -246,6 +248,8 @@ class _relacion extends _modelo_parent_sin_codigo{
     {
         $relacionados = array();
         foreach ($row_relaciones as $row_relacion){
+
+
             $relacionados = $this->genera_relacionado(modelo_relacionada: $modelo_relacionada,
                 name_entidad: $name_entidad, relacionados: $relacionados, row_relacion: $row_relacion);
             if(errores::$error){

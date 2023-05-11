@@ -279,8 +279,16 @@ class _transacciones_fc extends modelo
         return $r_etapa->registros;
     }
 
+    /**
+     * Obtiene los datos para relacionar a factura
+     * @param _relacion $modelo_relacion Modelo base de relacion
+     * @param _relacionada $modelo_relacionada Modelo de detalle de relacion
+     * @param int $registro_entidad_id Registro base para integrar relacion
+     * @return array
+     */
     final public function  get_data_relaciones(_relacion $modelo_relacion, _relacionada $modelo_relacionada,
-                                               int $registro_entidad_id){
+                                               int $registro_entidad_id): array
+    {
 
 
         $relaciones = $modelo_relacion->relaciones(modelo_entidad: $this,
@@ -483,6 +491,8 @@ class _transacciones_fc extends modelo
                 unset($registro['traslados'][$indice]->importe);
             }
         }
+
+
 
 
         $registro['conceptos'] = $conceptos;

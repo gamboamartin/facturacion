@@ -23,6 +23,7 @@ class _relacionada extends _modelo_parent_sin_codigo{
             return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
         }
 
+
         $fc_relacion = $this->modelo_relacion->registro(registro_id: $this->registro[$this->modelo_relacion->key_id], retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener fc_factura_relacionada', data: $fc_relacion);

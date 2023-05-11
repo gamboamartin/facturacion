@@ -583,6 +583,18 @@ class _base_system_fc extends _base_system{
 
     }
 
+    private function asigna_por_relacionar(bool $existe_factura_rel, array $factura_cliente,
+                                           array $facturas_cliente_, string $key_entidad_id, array $relacion): array
+    {
+        if(!$existe_factura_rel){
+            $factura_cliente = $this->integra_seleccion(factura_cliente: $factura_cliente,
+                key_entidad_id:  $key_entidad_id,relacion:  $relacion);
+
+            $facturas_cliente_[] = $factura_cliente;
+        }
+        return $facturas_cliente_;
+    }
+
     private function base_data_partida(int $fc_partida_id): array|stdClass
     {
         $data = $this->data_partida(fc_partida_id: $fc_partida_id);
@@ -725,8 +737,10 @@ class _base_system_fc extends _base_system{
 
     }
 
-
-
+    private function checkbox_relaciona(array $factura_cliente, string $key_entidad_id, string $key_relacion_id, array $relacion): string
+    {
+        return "<input type='checkbox' name='fc_facturas_id[$factura_cliente[$key_entidad_id]]' value='$relacion[$key_relacion_id]'>";
+    }
     private function data_partida(int $fc_partida_id): array|stdClass
     {
         $data_partida = (new fc_partida($this->link))->data_partida_obj(registro_partida_id: $fc_partida_id);
@@ -897,6 +911,20 @@ class _base_system_fc extends _base_system{
 
     }
 
+    private function existe_factura_rel(array $factura_cliente, string $key_entidad_id, array $relacion): bool
+    {
+        $existe_factura_rel = false;
+
+        foreach ($relacion['fc_facturas_relacionadas'] as $fc_factura_relacionada){
+
+            if($factura_cliente[$key_entidad_id] === $fc_factura_relacionada[$key_entidad_id]){
+                $existe_factura_rel = true;
+                break;
+            }
+        }
+        return $existe_factura_rel;
+    }
+
     public function exportar_documentos(bool $header, bool $ws = false){
 
 
@@ -943,6 +971,53 @@ class _base_system_fc extends _base_system{
 
 
         exit;
+    }
+
+    private function facturas_by_client(int $com_cliente_id, int $org_empresa_id){
+        $filtro = array();
+        $filtro['com_cliente.id'] = $com_cliente_id;
+        $filtro['org_empresa.id'] = $org_empresa_id;
+        $r_fc_factura = $this->modelo_entidad->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener facturas', data: $r_fc_factura);
+
+        }
+        return $r_fc_factura->registros;
+    }
+
+    private function facturas_cliente_(array $facturas_cliente, string $name_entidad, array $relacion): array
+    {
+        $facturas_cliente_ = array();
+        $key_entidad_id = $name_entidad.'_id';
+        $key_entidad_etapa = $name_entidad.'_etapa';
+        foreach ($facturas_cliente as $factura_cliente){
+
+            if($factura_cliente[$key_entidad_etapa] !== 'ALTA') {
+
+                $facturas_cliente_ = $this->integra_facturas_cliente(factura_cliente: $factura_cliente,
+                    facturas_cliente_: $facturas_cliente_, key_entidad_id: $key_entidad_id, relacion: $relacion);
+
+                if (errores::$error) {
+                    return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
+                }
+            }
+        }
+        return $facturas_cliente_;
+    }
+
+    private function facturas_relacion(array $facturas_cliente, string $name_entidad, array $relaciones): array
+    {
+        foreach ($relaciones as $indice=>$relacion){
+
+            $facturas_cliente_ = $this->facturas_cliente_(facturas_cliente: $facturas_cliente,
+                name_entidad:  $name_entidad,relacion:  $relacion);
+
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
+            }
+            $relaciones[$indice]['fc_facturas'] = $facturas_cliente_;
+        }
+        return $relaciones;
     }
 
     private function fc_factura_documento_ins(int $doc_documento_id, int $registro_id): array
@@ -1104,6 +1179,30 @@ class _base_system_fc extends _base_system{
         }
         return $r_fc_factura_documento;
 
+    }
+
+    private function genera_relaciones(int $com_cliente_id, string $name_entidad,  int $org_empresa_id): array
+    {
+        $relaciones = $this->modelo_entidad->get_data_relaciones(modelo_relacion: $this->modelo_relacion,
+            modelo_relacionada: $this->modelo_relacionada, registro_entidad_id: $this->registro_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
+
+        }
+
+        $facturas_cliente = $this->facturas_by_client(com_cliente_id: $com_cliente_id, org_empresa_id: $org_empresa_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener facturas', data: $facturas_cliente);
+        }
+
+
+
+        $relaciones = $this->facturas_relacion(facturas_cliente: $facturas_cliente, name_entidad: $name_entidad,
+            relaciones: $relaciones);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al integrar facturas', data: $relaciones);
+        }
+        return $relaciones;
     }
 
     public function genera_xml(bool $header, bool $ws = false){
@@ -1595,6 +1694,39 @@ class _base_system_fc extends _base_system{
 
     }
 
+    private function integra_facturas_cliente(array $factura_cliente, array $facturas_cliente_, string $key_entidad_id, array $relacion): array
+    {
+        $existe_factura_rel = $this->existe_factura_rel(factura_cliente: $factura_cliente,
+            key_entidad_id:  $key_entidad_id,relacion:  $relacion);
+
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al verificar si existe relacion', data: $existe_factura_rel);
+        }
+
+        $facturas_cliente_ = $this->asigna_por_relacionar(existe_factura_rel: $existe_factura_rel,
+            factura_cliente:  $factura_cliente,facturas_cliente_:  $facturas_cliente_,
+            key_entidad_id:  $key_entidad_id,relacion:  $relacion);
+
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
+        }
+
+        return $facturas_cliente_;
+    }
+
+    private function integra_seleccion(array $factura_cliente, string $key_entidad_id, array $relacion): array
+    {
+        $key_relacion_id = $this->key_relacion_id;
+        $checkbox = $this->checkbox_relaciona(factura_cliente: $factura_cliente,
+            key_entidad_id:  $key_entidad_id,key_relacion_id:  $key_relacion_id, relacion: $relacion);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar checkbox', data: $checkbox);
+        }
+        $factura_cliente['seleccion'] = $checkbox;
+
+        return $factura_cliente;
+    }
+
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
 
@@ -1978,54 +2110,14 @@ class _base_system_fc extends _base_system{
 
         $this->link_fc_factura_relacionada_alta_bd = $link;
 
-        $relaciones = $this->modelo_entidad->get_data_relaciones(modelo_relacion: $this->modelo_relacion,
-            modelo_relacionada: $this->modelo_relacionada, registro_entidad_id: $this->registro_id);
+        $relaciones = $this->genera_relaciones(com_cliente_id: $datos->row_upd->com_cliente_id,
+            name_entidad: $this->tabla, org_empresa_id: $datos->row_upd->org_empresa_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
             print_r($error);
             die('Error');
         }
 
-
-        $filtro = array();
-        $filtro['com_cliente.id'] = $datos->row_upd->com_cliente_id;
-        $filtro['org_empresa.id'] = $datos->row_upd->org_empresa_id;
-        $r_fc_factura = $this->modelo_entidad->filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al obtener facturas', data: $r_fc_factura);
-            print_r($error);
-            die('Error');
-        }
-        $facturas_cliente = $r_fc_factura->registros;
-
-        $key_entidad_id = $this->modelo_entidad->key_id;
-
-        foreach ($relaciones as $indice=>$relacion){
-            $facturas_cliente_ = array();
-            foreach ($facturas_cliente as $factura_cliente){
-                $existe_factura_rel = false;
-                foreach ($relacion['fc_facturas_relacionadas'] as $fc_factura_relacionada){
-
-
-                    if($factura_cliente[$key_entidad_id] === $fc_factura_relacionada[$key_entidad_id]){
-                        $existe_factura_rel = true;
-                        break;
-                    }
-                }
-                if(!$existe_factura_rel){
-                    $key_relacion_id = $this->key_relacion_id;
-
-                    $checkbox = "<input type='checkbox' name='fc_facturas_id[$factura_cliente[$key_entidad_id]]' value='$relacion[$key_relacion_id]'>";
-
-                    $factura_cliente['seleccion'] = $checkbox;
-
-                    $facturas_cliente_[] = $factura_cliente;
-                }
-            }
-
-            $relaciones[$indice]['fc_facturas'] = $facturas_cliente_;
-
-        }
 
         $key_relacionada_id = $this->modelo_relacionada->key_id;
         $key_relacion_id = $this->modelo_relacion->key_id;
@@ -2038,8 +2130,6 @@ class _base_system_fc extends _base_system{
                 if (errores::$error) {
                     return $this->errores->error(mensaje: 'Error al generar params', data: $params);
                 }
-
-
 
                 $link_elimina_rel = $this->html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
                     registro_id: $fc_factura_relacionada[$key_relacionada_id],
@@ -2066,9 +2156,6 @@ class _base_system_fc extends _base_system{
                 return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_rel);
             }
             $relaciones[$indice]['elimina_bd'] = $link_elimina_rel;
-
-
-
 
 
         }
