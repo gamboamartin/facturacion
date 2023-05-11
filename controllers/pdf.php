@@ -89,7 +89,7 @@ final class pdf
         return round($base,2);
     }
 
-    final public function data_relacionados(array $relacionadas){
+    final public function data_relacionados(string $name_entidad, array $relacionadas){
 
         if(count($relacionadas)>0) {
             $body_td_title = $this->html(etiqueta: "td", data: "Facturas Relacionadas", class: "negrita");
@@ -117,7 +117,8 @@ final class pdf
             }
 
             foreach ($relacion['fc_facturas_relacionadas'] as $relacionada){
-                $body_td_uuid = $this->html(etiqueta: "td", data: "UUID: $relacionada[fc_factura_uuid]");
+                $key_uuid = $name_entidad.'_uuid';
+                $body_td_uuid = $this->html(etiqueta: "td", data: "UUID: $relacionada[$key_uuid]");
                 $body_tr_uuid = $this->html(etiqueta: "tr", data: $body_td_uuid);
                 $body_uuid = $this->html(etiqueta: "tbody", data: $body_tr_uuid );
                 $table_uuid = $this->html(etiqueta: "table", data: $body_uuid);

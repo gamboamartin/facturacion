@@ -206,7 +206,7 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al obtener relacionadas',data:  $relacionadas);
         }
 
-        $rs = $pdf->data_relacionados(relacionadas: $relacionadas);
+        $rs = $pdf->data_relacionados(relacionadas: $relacionadas, name_entidad: $modelo_entidad->tabla);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar relacionadas',data:  $rs);
         }
