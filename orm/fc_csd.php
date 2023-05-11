@@ -47,10 +47,6 @@ class fc_csd extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al obtener sucursal',data:  $sucursal);
         }
 
-        $this->registro['codigo'] = $this->get_codigo_aleatorio();
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $this->registro);
-        }
 
         $this->registro['descripcion_select'] =  $this->registro['codigo'].' '."{$sucursal['org_empresa_razon_social']}";
             if(errores::$error){
@@ -83,7 +79,7 @@ class fc_csd extends _modelo_parent {
         }
 
         if(!isset($data['codigo'])){
-            $data['codigo'] =  $data['serie'];
+            $data['codigo'] =  $this->get_codigo_aleatorio();;
         }
 
         if(!isset($data['codigo_bis'])){
@@ -93,12 +89,10 @@ class fc_csd extends _modelo_parent {
         if(!isset($data['descripcion'])){
             $data['descripcion'] =  "{$sucursal['org_empresa_rfc']} - ";
             $data['descripcion'] .= "{$sucursal['org_empresa_razon_social']} - ";
-            $data['descripcion'] .= "{$data['serie']}";
         }
 
         if(!isset($data['descripcion_select'])){
             $data['descripcion_select'] =  "{$data['codigo']} - ";
-            $data['descripcion_select'] .= "{$sucursal['org_empresa_rfc']} - ";
             $data['descripcion_select'] .= "{$sucursal['org_empresa_razon_social']}";
         }
 
@@ -121,6 +115,13 @@ class fc_csd extends _modelo_parent {
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,
                                 array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
+        $fc_csd = (new fc_csd(link: $this->link))->registro(registro_id: $this->registro_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_csd_codigo', data: $fc_scd);
+        }
+        $registro['codigo'] = $fc_csd['fc_csd_codigo'];
+
+
         $registro = $this->campos_base_temp(data: $registro,modelo: $this,id: $id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar campos base',data: $registro);
@@ -131,12 +132,7 @@ class fc_csd extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al obtener sucursal',data:  $sucursal);
         }
 
-        $fc_scd = (new fc_csd(link: $this->link))->registro(registro_id: $this->registro_id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener fc_csd_codigo', data: $fc_scd);
-        }
-
-        $registro['descripcion_select'] =  $fc_scd['fc_csd_codigo'].' '."{$sucursal['org_empresa_razon_social']}";
+        $registro['descripcion_select'] =  $registro['codigo'].' '."{$sucursal['org_empresa_razon_social']}";
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $registro);
         }
