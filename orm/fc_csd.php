@@ -47,6 +47,11 @@ class fc_csd extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al obtener sucursal',data:  $sucursal);
         }
 
+        $this->registro['codigo'] = $this->get_codigo_aleatorio();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $this->registro);
+        }
+
         $this->registro['descripcion_select'] =  $this->registro['codigo'].' '."{$sucursal['org_empresa_razon_social']}";
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $this->registro);
@@ -126,7 +131,12 @@ class fc_csd extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al obtener sucursal',data:  $sucursal);
         }
 
-        $registro['descripcion_select'] =  $registro['codigo'].' '."{$sucursal['org_empresa_razon_social']}";
+        $fc_scd = (new fc_csd(link: $this->link))->registro(registro_id: $this->registro_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_csd_codigo', data: $fc_scd);
+        }
+
+        $registro['descripcion_select'] =  $fc_scd['fc_csd_codigo'].' '."{$sucursal['org_empresa_razon_social']}";
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $registro);
         }
