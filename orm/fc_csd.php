@@ -42,6 +42,16 @@ class fc_csd extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
         }
 
+        $sucursal = (new org_sucursal($this->link))->get_sucursal(org_sucursal_id: $this->registro["org_sucursal_id"]);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener sucursal',data:  $sucursal);
+        }
+
+        $this->registro['descripcion_select'] .=  ' '.$this->registro['codigo'].' '."{$sucursal['org_empresa_razon_social']}";
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $this->registro);
+            }
+
         $this->registro = $this->validaciones(data: $this->registro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar datos',data: $this->registro);
