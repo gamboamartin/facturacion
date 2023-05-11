@@ -120,6 +120,23 @@ class _relacion extends _modelo_parent_sin_codigo{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al integrar relacionado', data: $relacionados);
         }
+
+
+        if($name_entidad === 'fc_nota_credito'){
+
+            $filtro[$this->key_filtro_id] =  $row_relacion[$this->key_id];
+            $r_fc_nc = (new fc_nc_rel(link: $this->link))->filtro_and(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_nc);
+            }
+
+            $relaciones = $r_fc_nc->registros;
+
+            foreach ($relaciones as $relacion){
+                $relacionados[$cat_sat_tipo_relacion_codigo][] = $relacion['fc_factura_uuid'];
+            }
+        }
+
         return $relacionados;
     }
 

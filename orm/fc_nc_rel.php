@@ -18,8 +18,13 @@ class fc_nc_rel extends _modelo_parent {
 
         $campos_view = array();
 
+        $fc_factura_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_factura_id = fc_factura.id)";
+
+        $columnas_extra['fc_factura_uuid'] = "IFNULL($fc_factura_uuid,'SIN UUID')";
+
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas, campos_view: $campos_view, no_duplicados: $no_duplicados, tipo_campos: array());
+            columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
+            no_duplicados: $no_duplicados, tipo_campos: array());
 
         $this->NAMESPACE = __NAMESPACE__;
 

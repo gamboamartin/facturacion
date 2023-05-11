@@ -872,6 +872,10 @@ class base_test{
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
+        $del = $this->del_fc_nc_rel($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_factura');
         if(errores::$error){
@@ -1048,6 +1052,15 @@ class base_test{
     public function del_fc_notificacion(PDO $link): array
     {
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_notificacion');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_nc_rel(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_nc_rel');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
