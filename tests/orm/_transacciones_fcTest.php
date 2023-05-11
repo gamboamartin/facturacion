@@ -83,6 +83,33 @@ class _transacciones_fcTest extends test
         errores::$error = false;
     }
 
+    public function test_permite_transaccion(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo = new fc_nota_credito(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $modelo_etapa = new fc_nota_credito_etapa(link: $this->link);
+
+        $registro_id = 1;
+
+        $resultado = $modelo->permite_transaccion($modelo_etapa, $registro_id);
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+
+        errores::$error = false;
+
+    }
+
     public function test_valida_permite_transaccion(): void
     {
         errores::$error = false;

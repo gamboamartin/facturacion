@@ -202,18 +202,18 @@ class _base_system_fc extends _base_system{
 
     private function buttons_base(): array|string
     {
-        $button_fc_factura_relaciones =  $this->html->button_href(accion: 'relaciones', etiqueta: 'Relaciones',
+        $button_fc_factura_relaciones =  $this->html->button_href(accion: 'relaciones', etiqueta: 'Asignar Relacion',
             registro_id: $this->registro_id, seccion: $this->seccion, style: 'warning', cols: 3, params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_relaciones);
         }
 
-        $button_fc_factura_timbra =  $this->html->button_href(accion: 'timbra_xml', etiqueta: 'Timbra',
+        $button_fc_factura_timbra =  $this->html->button_href(accion: 'timbra_xml', etiqueta: 'Timbrar',
             registro_id: $this->registro_id, seccion: $this->seccion, style: 'danger', cols: 3, params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_timbra);
         }
-        $button_fc_factura_correo =  $this->html->button_href(accion: 'correo', etiqueta: 'Correos',
+        $button_fc_factura_correo =  $this->html->button_href(accion: 'correo', etiqueta: 'Agregar Correos',
             registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 3, params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_correo);
@@ -2126,7 +2126,7 @@ class _base_system_fc extends _base_system{
         if($header){
 
             $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
-                seccion: $this->tabla, siguiente_view: "lista");
+                seccion: $this->tabla, siguiente_view: "modifica");
             if(errores::$error){
                 return $this->retorno_error(mensaje: 'Error cambiar de view', data: $retorno,
                     header:  true, ws: $ws);

@@ -1063,9 +1063,13 @@ class _transacciones_fc extends modelo
      * @param _etapa $modelo_etapa Modelo de etapa
      * @param int $registro_id Registro en proceso
      * @return array|bool
+     * @version 9.9.0
      */
     private function permite_transaccion(_etapa $modelo_etapa, int $registro_id): bool|array
     {
+        if($registro_id <= 0){
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+        }
         $etapas = $this->etapas(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener fc_factura_etapas', data: $etapas);

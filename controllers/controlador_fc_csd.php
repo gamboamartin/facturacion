@@ -66,12 +66,12 @@ class controlador_fc_csd extends system{
         }
 
 
-        $init_ctl = (new _fc_base())->init_base_fc(controler: $this, name_modelo_email: 'fc_email');
+        /*$init_ctl = (new _fc_base())->init_base_fc(controler: $this, name_modelo_email: 'fc_email');
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al inicializar',data:  $init_ctl);
             print_r($error);
             die('Error');
-        }
+        }*/
 
         $this->parents_verifica[] = new org_sucursal(link: $this->link);
         $this->verifica_parents_alta = true;
