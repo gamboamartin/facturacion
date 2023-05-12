@@ -79,7 +79,7 @@ class fc_csd extends _modelo_parent {
         }
 
         if(!isset($data['codigo'])){
-            $data['codigo'] =  $this->get_codigo_aleatorio();;
+            $data['codigo'] =  $this->get_codigo_aleatorio();
         }
 
         if(!isset($data['codigo_bis'])){
@@ -117,10 +117,14 @@ class fc_csd extends _modelo_parent {
     {
         $fc_csd = (new fc_csd(link: $this->link))->registro(registro_id: $this->registro_id);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener fc_csd_codigo', data: $fc_scd);
+            return $this->error->error(mensaje: 'Error al obtener fc_csd_codigo', data: $fc_csd);
         }
+
         $registro['codigo'] = $fc_csd['fc_csd_codigo'];
 
+        if ($registro['codigo'] == ''){
+            $registro['codigo'] = $this->get_codigo_aleatorio();
+        }
 
         $registro = $this->campos_base_temp(data: $registro,modelo: $this,id: $id);
         if(errores::$error){
