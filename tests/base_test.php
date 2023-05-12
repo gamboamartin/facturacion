@@ -1197,12 +1197,45 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_uuid(PDO $link): array
+    {
+
+        $del = $this->del_fc_uuid_cancela($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_uuid');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar retenido', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_uuid_cancela(PDO $link): array
+    {
+
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_uuid_cancela');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar retenido', $del);
+        }
+        return $del;
+    }
+
     public function del_org_empresa(PDO $link): array|\stdClass
     {
         $del = $this->del_fc_csd($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
+
+        $del = $this->del_fc_uuid($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+
 
         $del = (new \gamboamartin\organigrama\tests\base_test())->del_org_empresa($link);
         if(errores::$error){
