@@ -13,7 +13,8 @@ class fc_nota_credito_relacionada extends _relacionada
     {
         $tabla = 'fc_nota_credito_relacionada';
         $columnas = array($tabla => false, 'fc_nota_credito' => $tabla, 'fc_relacion_nc' => $tabla,
-            'cat_sat_tipo_relacion'=>'fc_relacion_nc','com_sucursal'=>'fc_nota_credito', 'com_cliente'=>'com_sucursal');
+            'cat_sat_tipo_relacion'=>'fc_relacion_nc','com_sucursal'=>'fc_nota_credito', 'com_cliente'=>'com_sucursal',
+            'cat_sat_tipo_de_comprobante'=>'fc_nota_credito');
         $campos_obligatorios = array('fc_nota_credito_id', 'fc_relacion_nc_id');
 
         $columnas_extra = array();

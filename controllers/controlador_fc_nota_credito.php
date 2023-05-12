@@ -298,6 +298,7 @@ class controlador_fc_nota_credito extends _base_system_fc {
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica,header:  $header, ws: $ws);
         }
 
+
         return $r_modifica;
     }
 

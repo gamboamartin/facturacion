@@ -77,17 +77,19 @@
                                             <th>Folio</th>
                                             <th>Fecha</th>
                                             <th>Estatus</th>
+                                            <th>Tipo de CFDI</th>
                                             <th>Selecciona</th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         <?php foreach ($fc_relacion['fc_facturas'] as $fc_factura){ ?>
                                             <tr>
-                                                <td><?php echo $fc_factura[$controlador->key_uuid]; ?></td>
+                                                <td><?php echo $fc_factura[$fc_factura['key_uuid']]; ?></td>
                                                 <td><?php echo $fc_factura['com_cliente_rfc']; ?></td>
-                                                <td><?php echo $fc_factura[$controlador->key_folio]; ?></td>
-                                                <td><?php echo $fc_factura[$controlador->key_fecha]; ?></td>
-                                                <td><?php echo $fc_factura[$controlador->key_etapa]; ?></td>
+                                                <td><?php echo $fc_factura[$fc_factura['key_folio']]; ?></td>
+                                                <td><?php echo $fc_factura[$fc_factura['key_fecha']] ?></td>
+                                                <td><?php echo $fc_factura[$fc_factura['key_etapa']]; ?></td>
+                                                <td><?php echo $fc_factura['cat_sat_tipo_de_comprobante_descripcion']; ?></td>
                                                 <td>
                                                     <?php echo $fc_factura['seleccion']; ?>
                                                 </td>
@@ -101,6 +103,20 @@
                                                 <td><?php echo $fc_factura[$controlador->key_folio]; ?></td>
                                                 <td><?php echo $fc_factura[$controlador->key_fecha]; ?></td>
                                                 <td><?php echo $fc_factura[$controlador->key_etapa]; ?></td>
+                                                <td><?php echo $fc_factura['cat_sat_tipo_de_comprobante_descripcion']; ?></td>
+                                                <td><?php echo $fc_factura['elimina_bd']; ?></td>
+                                            </tr>
+                                        <?php } ?>
+
+                                        <?php foreach ($fc_relacion['fc_facturas_relacionadas_factura'] as $fc_factura){
+                                            ?>
+                                            <tr>
+                                                <td><?php echo $fc_factura['fc_factura_uuid']; ?></td>
+                                                <td><?php echo $fc_factura['com_cliente_rfc']; ?></td>
+                                                <td><?php echo $fc_factura['fc_factura_folio']; ?></td>
+                                                <td><?php echo $fc_factura['fc_factura_fecha']; ?></td>
+                                                <td><?php echo $fc_factura['fc_factura_etapa']; ?></td>
+                                                <td><?php echo $fc_factura['cat_sat_tipo_de_comprobante_descripcion']; ?></td>
                                                 <td><?php echo $fc_factura['elimina_bd']; ?></td>
                                             </tr>
                                         <?php } ?>
