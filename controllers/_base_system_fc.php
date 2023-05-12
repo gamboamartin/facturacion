@@ -1956,7 +1956,13 @@ class _base_system_fc extends _base_system{
         return $inputs;
     }
 
-
+    /**
+     * Genera los parametros para integrar en un boton de tipo link
+     * @param string $accion_retorno Accion de regreso
+     * @param string $name_modelo_entidad Nombre del modelo base facturacion, nota credito etc
+     * @param int $registro_entidad_id Identificador base de la entidad base
+     * @return array
+     */
     private function params_button_partida(string $accion_retorno, string $name_modelo_entidad, int $registro_entidad_id): array
     {
         $params = array();
