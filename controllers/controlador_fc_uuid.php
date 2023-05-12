@@ -8,15 +8,18 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
+use base\orm\modelo;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_csd_html;
 use gamboamartin\facturacion\html\fc_uuid_html;
 use gamboamartin\facturacion\models\fc_uuid;
+use gamboamartin\facturacion\models\fc_uuid_etapa;
 use gamboamartin\organigrama\html\org_sucursal_html;
 use gamboamartin\system\_ctl_parent_sin_codigo;
 use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\template\html;
+use gamboamartin\xml_cfdi_4\timbra;
 use html\cat_sat_motivo_cancelacion_html;
 use html\cat_sat_tipo_de_comprobante_html;
 use html\com_sucursal_html;
@@ -27,6 +30,7 @@ use stdClass;
 class controlador_fc_uuid extends _ctl_parent_sin_codigo {
 
     public string $link_fc_uuid_cancela_bd = '';
+    private modelo $modelo_etapa;
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(), stdClass $paths_conf = new stdClass()){
         $modelo = new fc_uuid(link: $link);
 
@@ -57,6 +61,8 @@ class controlador_fc_uuid extends _ctl_parent_sin_codigo {
             paths_conf: $paths_conf);
 
         $this->titulo_lista = 'Folio Externos';
+
+        $this->modelo_etapa = new fc_uuid_etapa(link: $this->link);
 
 
     }
@@ -278,6 +284,44 @@ class controlador_fc_uuid extends _ctl_parent_sin_codigo {
         }
 
         return $r_fc_cancelacion;
+
+    }
+
+    public function verifica_cancelacion(bool $header, bool $ws = false){
+
+        $this->link->beginTransaction();
+        $fc_uuid = $this->modelo->registro(registro_id: $this->registro_id);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al obtener fc_uuid',data:  $fc_uuid,header:  $header, ws: $ws);
+        }
+
+
+        $verifica = (new timbra())->consulta_estado_sat($fc_uuid['org_empresa_rfc'], $fc_uuid['com_cliente_rfc'],
+            $fc_uuid['fc_uuid_total'], $fc_uuid['fc_uuid_uuid']);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al consulta estado',data:  $verifica,header:  $header, ws: $ws);
+        }
+
+
+        $integra_etapa = (new _fc_base())->integra_etapa(key_factura_id_filter: 'fc_uuid.id',
+            modelo: $this->modelo, modelo_etapa: $this->modelo_etapa, registro_id: $this->registro_id, verifica: $verifica);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al si aplica etapa',data:  $integra_etapa,header:  $header, ws: $ws);
+        }
+
+        $this->link->commit();
+
+
+        $this->mensaje = $verifica->mensaje;
+
+        print_r($this->mensaje);exit;
+
+        return $verifica;
+
+
 
     }
 

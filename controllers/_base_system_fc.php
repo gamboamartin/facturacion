@@ -201,6 +201,8 @@ class _base_system_fc extends _base_system{
         return $r_alta;
     }
 
+
+
     private function buttons_base(): array|string
     {
         $button_fc_factura_relaciones =  $this->html->button_href(accion: 'relaciones', etiqueta: 'Asignar Relacion',
@@ -1777,6 +1779,8 @@ class _base_system_fc extends _base_system{
 
     }
 
+
+
     private function integra_facturas_cliente(array $factura_cliente, array $facturas_cliente_, string $key_entidad_id,
                                               string $name_entidad_ejecucion, array $relacion): array
     {
@@ -2411,35 +2415,21 @@ class _base_system_fc extends _base_system{
 
         $verifica = (new timbra())->consulta_estado_sat($fc_factura['org_empresa_rfc'], $fc_factura['com_cliente_rfc'],
             $fc_factura[$key_factura_total], $fc_factura[$key_factura_uuid]);
-
-
-        $aplica_etapa = false;
-        if($verifica->mensaje === 'Cancelado'){
-
-            $filtro['pr_etapa.descripcion'] = 'cancelado_sat';
-            $filtro[$key_factura_id_filter] = $this->registro_id;
-            $existe = $this->modelo_etapa->existe(filtro: $filtro);
-            if(errores::$error){
-                $this->link->rollBack();
-                return $this->retorno_error(mensaje: 'Error al validar etapa',data:  $existe,header:  $header, ws: $ws);
-            }
-            if(!$existe){
-                $aplica_etapa = true;
-            }
-
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al consulta estado',data:  $verifica,header:  $header, ws: $ws);
         }
 
-        if($aplica_etapa) {
-            $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: 'cancelado_sat', fecha: '',
-                modelo: $this->modelo, modelo_etapa: $this->modelo_etapa,
-                registro_id: $this->registro_id, valida_existencia_etapa: true);
-            if (errores::$error) {
-                $this->link->rollBack();
-                return $this->retorno_error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa, header: $header, ws: $ws);
-            }
+
+        $integra_etapa = (new _fc_base())->integra_etapa(key_factura_id_filter: $key_factura_id_filter,
+            modelo: $this->modelo_entidad, modelo_etapa: $this->modelo_etapa, registro_id: $this->registro_id,
+            verifica: $verifica);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al si aplica etapa',data:  $integra_etapa,header:  $header, ws: $ws);
         }
+
         $this->link->commit();
-
 
         $datos = $this->init_upd(modelo_entidad: $this->modelo_entidad,modelo_partida:  $this->modelo_partida,
             modelo_retencion:  $this->modelo_retencion,modelo_traslado:  $this->modelo_traslado,
