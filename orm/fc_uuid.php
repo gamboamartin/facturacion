@@ -2,15 +2,16 @@
 namespace gamboamartin\facturacion\models;
 use base\orm\_modelo_parent;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
-use gamboamartin\comercial\models\com_cliente;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\errores\errores;
 use gamboamartin\organigrama\models\org_sucursal;
+use gamboamartin\proceso\models\pr_proceso;
 use PDO;
 use stdClass;
 
 
 class fc_uuid extends _modelo_parent {
+    private _modelo_parent $modelo_etapa;
     public function __construct(PDO $link){
         $tabla = 'fc_uuid';
         $columnas = array($tabla=>false,'org_sucursal'=>$tabla,'com_sucursal'=>$tabla,
@@ -20,16 +21,27 @@ class fc_uuid extends _modelo_parent {
 
         $no_duplicados = array('uuid');
 
+        $fc_uuid_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa 
+            LEFT JOIN pr_etapa_proceso ON pr_etapa_proceso.pr_etapa_id = pr_etapa.id 
+            LEFT JOIN fc_uuid_etapa ON fc_uuid_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
+            WHERE fc_uuid_etapa.fc_uuid_id = fc_uuid.id ORDER BY fc_uuid_etapa.id DESC LIMIT 1)";
+
+        $columnas_extra['fc_uuid_etapa'] = "$fc_uuid_etapa";
+
         $campos_view = array();
 
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas, campos_view: $campos_view, columnas_extra: array(),
+            columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
             no_duplicados: $no_duplicados, tipo_campos: array());
 
         $this->NAMESPACE = __NAMESPACE__;
 
         $this->etiqueta = 'UUID Externos';
+
+        $this->modelo_etapa = new fc_uuid_etapa(link: $this->link);
+
+
 
     }
 
@@ -66,6 +78,25 @@ class fc_uuid extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al dar de alta',data:  $r_alta_bd);
         }
         return $r_alta_bd;
+    }
+
+    public function cancela_bd(int $cat_sat_motivo_cancelacion_id, int $registro_id): array|stdClass
+    {
+        $fc_cancelacion_ins['fc_uuid_id'] = $registro_id;
+        $fc_cancelacion_ins['cat_sat_motivo_cancelacion_id'] = $cat_sat_motivo_cancelacion_id;
+
+        $r_fc_cancelacion = (new fc_uuid_cancela(link: $this->link))->alta_registro(registro: $fc_cancelacion_ins);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al cancelar factura',data:  $r_fc_cancelacion);
+        }
+
+        $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
+            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $registro_id, valida_existencia_etapa: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
+        }
+
+        return $r_fc_cancelacion;
     }
 
 

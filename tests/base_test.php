@@ -1204,6 +1204,10 @@ class base_test{
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
+        $del = $this->del_fc_uuid_etapa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_uuid');
         if(errores::$error){
@@ -1223,15 +1227,26 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_uuid_etapa(PDO $link): array
+    {
+
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_uuid_etapa');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar retenido', $del);
+        }
+        return $del;
+    }
+
     public function del_org_empresa(PDO $link): array|\stdClass
     {
         $del = $this->del_fc_csd($link);
-        if(errores::$error){
+        if (errores::$error) {
             return (new errores())->error('Error al eliminar', $del);
         }
 
         $del = $this->del_fc_uuid($link);
-        if(errores::$error){
+        if (errores::$error) {
             return (new errores())->error('Error al eliminar', $del);
         }
 
