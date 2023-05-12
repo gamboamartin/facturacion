@@ -29,6 +29,27 @@ class fc_uuid_html extends html_controler {
 
         return $div;
     }
+
+    public function input_total(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
+    {
+        $valida = $this->directivas->valida_cols(cols: $cols);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar columnas', data: $valida);
+        }
+
+        $html =$this->directivas->input_text_required(disabled: $disabled,name: 'total',place_holder: 'Total',
+            row_upd: $row_upd, value_vacio: $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input', data: $html);
+        }
+
+        $div = $this->directivas->html->div_group(cols: $cols,html:  $html);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar div', data: $div);
+        }
+
+        return $div;
+    }
     public function input_uuid(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false): array|string
     {
         $valida = $this->directivas->valida_cols(cols: $cols);

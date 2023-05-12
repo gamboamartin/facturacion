@@ -222,4 +222,24 @@ class fc_key_csd extends modelo{
         return $r_modifica_bd;
     }
 
+    final public function ruta_key(int $fc_csd_id){
+        $filtro = array();
+        $filtro['fc_csd.id'] = $fc_csd_id;
+        $r_fc_csd_key = $this->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener r_fc_csd_key', data: $r_fc_csd_key);
+        }
+
+        if($r_fc_csd_key->n_registros === 0){
+            return $this->error->error(mensaje: 'Error no existe registro', data: $r_fc_csd_key);
+        }
+        if($r_fc_csd_key->n_registros > 1){
+            return $this->error->error(mensaje: 'Error  existe mas de un registro', data: $r_fc_csd_key);
+        }
+
+        $fc_csd_key = $r_fc_csd_key->registros[0];
+
+        return $fc_csd_key['doc_documento_ruta_absoluta'];
+    }
+
 }

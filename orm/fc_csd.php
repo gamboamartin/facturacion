@@ -102,6 +102,29 @@ class fc_csd extends _modelo_parent {
         return $data;
     }
 
+    final public function data(int $fc_csd_id){
+        $fc_csd = $this->registro(registro_id: $fc_csd_id, retorno_obj: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_csd', data: $fc_csd);
+        }
+
+        $ruta_cer = (new fc_cer_csd(link: $this->link))->ruta_cer(fc_csd_id: $fc_csd->fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener ruta cer', data: $ruta_cer);
+        }
+
+        $ruta_key = (new fc_key_csd(link: $this->link))->ruta_key(fc_csd_id: $fc_csd->fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener ruta cer', data: $ruta_cer);
+        }
+
+        $data = new stdClass();
+        $data->ruta_cer = $ruta_cer;
+        $data->ruta_key = $ruta_key;
+        $data->fc_csd_password = $fc_csd->fc_csd_password;
+        return $data;
+    }
+
     public function get_csd(int $fc_csd_id): array|stdClass|int
     {
         $registro = $this->registro(registro_id: $fc_csd_id);
@@ -153,6 +176,8 @@ class fc_csd extends _modelo_parent {
 
         return $r_modifica_bd;
     }
+
+
 
     private function validaciones(array $data): bool|array
     {

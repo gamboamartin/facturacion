@@ -9,6 +9,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\html\fc_csd_html;
 use gamboamartin\facturacion\html\fc_uuid_html;
 use gamboamartin\facturacion\models\fc_uuid;
 use gamboamartin\organigrama\html\org_sucursal_html;
@@ -68,20 +69,20 @@ class controlador_fc_uuid extends _ctl_parent_sin_codigo {
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta_bd, header: $header,ws:  $ws);
         }
 
-        $org_sucursal_id = (new org_sucursal_html(html: $this->html_base))->select_org_sucursal_id(cols: 12,
+        $fc_csd_id = (new fc_csd_html(html: $this->html_base))->select_fc_csd_id(cols: 12,
             con_registros:  true,id_selected:  -1,link:  $this->link);
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $org_sucursal_id, header: $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $fc_csd_id, header: $header,ws:  $ws);
         }
 
-        $this->inputs->org_sucursal_id = $org_sucursal_id;
+        $this->inputs->fc_csd_id = $fc_csd_id;
 
         $com_sucursal_id = (new com_sucursal_html(html: $this->html_base))->select_com_sucursal_id(cols: 12,
             con_registros: true, id_selected: -1, link: $this->link, disabled: false, label: 'Cliente');
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $org_sucursal_id, header: $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $com_sucursal_id, header: $header,ws:  $ws);
         }
 
         $this->inputs->com_sucursal_id = $com_sucursal_id;
@@ -92,7 +93,7 @@ class controlador_fc_uuid extends _ctl_parent_sin_codigo {
                 cols: 12, con_registros: true, id_selected: -1, link: $this->link);
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $org_sucursal_id, header: $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $cat_sat_tipo_de_comprobante_id, header: $header,ws:  $ws);
         }
 
         $this->inputs->cat_sat_tipo_de_comprobante_id = $cat_sat_tipo_de_comprobante_id;
@@ -101,29 +102,38 @@ class controlador_fc_uuid extends _ctl_parent_sin_codigo {
                 value_vacio: false);
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $org_sucursal_id, header: $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $uuid, header: $header,ws:  $ws);
         }
 
         $this->inputs->uuid = $uuid;
 
-        $fecha = (new fc_uuid_html(html: $this->html_base))->input_fecha(cols: 6, row_upd: new stdClass(),
+        $fecha = (new fc_uuid_html(html: $this->html_base))->input_fecha(cols: 4, row_upd: new stdClass(),
                 value_vacio: false, value_hora: true);
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $org_sucursal_id, header: $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $fecha, header: $header,ws:  $ws);
         }
 
         $this->inputs->fecha = $fecha;
 
         $folio =
-            (new fc_uuid_html(html: $this->html_base))->input_folio(cols: 6, row_upd: new stdClass(),
+            (new fc_uuid_html(html: $this->html_base))->input_folio(cols: 4, row_upd: new stdClass(),
                 value_vacio: false);
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $org_sucursal_id, header: $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $folio, header: $header,ws:  $ws);
         }
 
         $this->inputs->folio = $folio;
+
+        $total =
+            (new fc_uuid_html(html: $this->html_base))->input_total(cols: 4,row_upd:  new stdClass(),value_vacio:  false);
+
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $folio, header: $header,ws:  $ws);
+        }
+
+        $this->inputs->total = $total;
 
         return $r_alta_bd;
     }
@@ -135,20 +145,20 @@ class controlador_fc_uuid extends _ctl_parent_sin_codigo {
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica, header: $header,ws:  $ws);
         }
 
-        $org_sucursal_id = (new org_sucursal_html(html: $this->html_base))->select_org_sucursal_id(cols: 12,
-            con_registros:  true,id_selected:  $this->row_upd->org_sucursal_id,link:  $this->link);
+        $fc_csd_id = (new fc_csd_html(html: $this->html_base))->select_fc_csd_id(cols: 12,
+            con_registros:  true,id_selected:  $this->row_upd->fc_csd_id,link:  $this->link);
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $org_sucursal_id, header: $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $fc_csd_id, header: $header,ws:  $ws);
         }
 
-        $this->inputs->org_sucursal_id = $org_sucursal_id;
+        $this->inputs->fc_csd_id = $fc_csd_id;
 
         $com_sucursal_id = (new com_sucursal_html(html: $this->html_base))->select_com_sucursal_id(cols: 12,
             con_registros: true, id_selected: $this->row_upd->com_sucursal_id, link: $this->link, disabled: false, label: 'Cliente');
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $org_sucursal_id, header: $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $com_sucursal_id, header: $header,ws:  $ws);
         }
 
         $this->inputs->com_sucursal_id = $com_sucursal_id;
@@ -159,7 +169,7 @@ class controlador_fc_uuid extends _ctl_parent_sin_codigo {
                 cols: 12, con_registros: true, id_selected: $this->row_upd->cat_sat_tipo_de_comprobante_id, link: $this->link);
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $org_sucursal_id, header: $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $cat_sat_tipo_de_comprobante_id, header: $header,ws:  $ws);
         }
 
         $this->inputs->cat_sat_tipo_de_comprobante_id = $cat_sat_tipo_de_comprobante_id;
@@ -168,30 +178,39 @@ class controlador_fc_uuid extends _ctl_parent_sin_codigo {
             value_vacio: false);
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $org_sucursal_id, header: $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $uuid, header: $header,ws:  $ws);
         }
 
         $this->inputs->uuid = $uuid;
 
 
-        $fecha = (new fc_uuid_html(html: $this->html_base))->input_fecha(cols: 6, row_upd: $this->row_upd,
+        $fecha = (new fc_uuid_html(html: $this->html_base))->input_fecha(cols: 4, row_upd: $this->row_upd,
             value_vacio: false, value: $this->row_upd->fecha, value_hora: true);
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $org_sucursal_id, header: $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $fecha, header: $header,ws:  $ws);
         }
 
         $this->inputs->fecha = $fecha;
 
         $folio =
-            (new fc_uuid_html(html: $this->html_base))->input_folio(cols: 6, row_upd:  $this->row_upd,
+            (new fc_uuid_html(html: $this->html_base))->input_folio(cols: 4, row_upd:  $this->row_upd,
                 value_vacio: false);
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar input',data:  $org_sucursal_id, header: $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $folio, header: $header,ws:  $ws);
         }
 
         $this->inputs->folio = $folio;
+
+        $total =
+            (new fc_uuid_html(html: $this->html_base))->input_total(cols: 4,row_upd: $this->row_upd,value_vacio:  false);
+
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar input',data:  $folio, header: $header,ws:  $ws);
+        }
+
+        $this->inputs->total = $total;
 
         return $r_modifica;
 

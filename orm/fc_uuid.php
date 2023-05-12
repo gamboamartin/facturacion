@@ -14,10 +14,10 @@ class fc_uuid extends _modelo_parent {
     private _modelo_parent $modelo_etapa;
     public function __construct(PDO $link){
         $tabla = 'fc_uuid';
-        $columnas = array($tabla=>false,'org_sucursal'=>$tabla,'com_sucursal'=>$tabla,
+        $columnas = array($tabla=>false,'fc_csd'=>$tabla,'org_sucursal'=>'fc_csd','com_sucursal'=>$tabla,
             'cat_sat_tipo_de_comprobante'=>$tabla,'org_empresa'=>'org_sucursal','com_cliente'=>'com_sucursal',
             'dp_calle_pertenece'=>'com_sucursal','dp_colonia_postal'=>'dp_calle_pertenece','dp_cp'=>'dp_colonia_postal');
-        $campos_obligatorios = array('codigo','org_sucursal_id','com_sucursal_id','cat_sat_tipo_de_comprobante_id');
+        $campos_obligatorios = array('codigo','fc_csd_id','com_sucursal_id','cat_sat_tipo_de_comprobante_id');
 
         $no_duplicados = array('uuid');
 
@@ -52,10 +52,10 @@ class fc_uuid extends _modelo_parent {
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener cat_sat_tipo_de_comprobante',data:  $cat_sat_tipo_de_comprobante);
         }
-        $org_sucursal = (new org_sucursal(link: $this->link))->registro(
-            registro_id: $this->registro['org_sucursal_id'],retorno_obj: true);
+        $fc_csd = (new fc_csd(link: $this->link))->registro(
+            registro_id: $this->registro['fc_csd_id'],retorno_obj: true);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener org_sucursal',data:  $org_sucursal);
+            return $this->error->error(mensaje: 'Error al obtener fc_csd',data:  $fc_csd);
         }
         $com_sucursal = (new com_sucursal(link: $this->link))->registro(
             registro_id: $this->registro['com_sucursal_id'],retorno_obj: true);
@@ -65,7 +65,7 @@ class fc_uuid extends _modelo_parent {
 
         if(!isset($this->registro['descripcion'])){
             $descripcion = $cat_sat_tipo_de_comprobante->cat_sat_tipo_de_comprobante_descripcion;
-            $descripcion .= ' '.$org_sucursal->org_sucursal_descripcion;
+            $descripcion .= ' '.$fc_csd->org_sucursal_descripcion;
             $descripcion .= ' '.$com_sucursal->com_sucursal_descripcion;
             $descripcion .= ' '.$this->registro['uuid'];
             $descripcion .= ' '.$this->registro['fecha'];

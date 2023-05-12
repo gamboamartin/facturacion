@@ -792,6 +792,12 @@ class base_test{
 
         }
 
+        $del = (new base_test())->del_fc_uuid($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_csd');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);

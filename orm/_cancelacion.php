@@ -65,52 +65,18 @@ class _cancelacion extends modelo {
         $rfc_emisor = $fc_factura->org_empresa_rfc;
         $rfc_receptor = $fc_factura->com_cliente_rfc;
 
-        $fc_csd = (new fc_csd(link: $this->link))->registro(registro_id: $fc_factura->fc_csd_id, retorno_obj: true);
+
+        $data_csd = (new fc_csd(link: $this->link))->data($fc_factura->fc_csd_id);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener fc_csd', data: $fc_csd);
+            return $this->error->error(mensaje: 'Error al obtener rutas', data: $data_csd);
         }
 
-        $filtro = array();
-        $filtro['fc_csd.id'] = $fc_csd->fc_csd_id;
-        $r_fc_csd_cer = (new fc_cer_csd(link: $this->link))->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener fc_csd_cer', data: $r_fc_csd_cer);
-        }
-
-        if($r_fc_csd_cer->n_registros === 0){
-            return $this->error->error(mensaje: 'Error no existe registro', data: $r_fc_csd_cer);
-        }
-        if($r_fc_csd_cer->n_registros > 1){
-            return $this->error->error(mensaje: 'Error  existe mas de un registro', data: $r_fc_csd_cer);
-        }
-
-        $fc_csd_cer = $r_fc_csd_cer->registros[0];
-
-        $ruta_cer = $fc_csd_cer['doc_documento_ruta_absoluta'];
-
-        $filtro = array();
-        $filtro['fc_csd.id'] = $fc_csd->fc_csd_id;
-        $r_fc_csd_key = (new fc_key_csd(link: $this->link))->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener r_fc_csd_key', data: $r_fc_csd_key);
-        }
-
-        if($r_fc_csd_key->n_registros === 0){
-            return $this->error->error(mensaje: 'Error no existe registro', data: $r_fc_csd_key);
-        }
-        if($r_fc_csd_key->n_registros > 1){
-            return $this->error->error(mensaje: 'Error  existe mas de un registro', data: $r_fc_csd_key);
-        }
-
-        $fc_csd_key = $r_fc_csd_key->registros[0];
-
-        $ruta_key = $fc_csd_key['doc_documento_ruta_absoluta'];
 
         $key_total = $this->modelo_entidad->tabla.'_total';
 
         $cancela = (new timbra())->cancela(motivo_cancelacion: $motivo_cancelacion,rfc_emisor:  $rfc_emisor,
-            rfc_receptor:  $rfc_receptor,uuid:  $uuid,pass_csd: $fc_csd->fc_csd_password,ruta_cer: $ruta_cer,
-            ruta_key: $ruta_key,total: $fc_factura->$key_total,uuid_sustitucion: '');
+            rfc_receptor:  $rfc_receptor,uuid:  $uuid,pass_csd: $data_csd->fc_csd_password,ruta_cer: $data_csd->ruta_cer,
+            ruta_key: $data_csd->ruta_key,total: $fc_factura->$key_total,uuid_sustitucion: '');
 
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al cancelar',data: $cancela);
