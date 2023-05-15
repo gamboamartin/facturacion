@@ -51,6 +51,28 @@ class _relacionTest extends test
         errores::$error = false;
     }
 
+    public function test_integra_relacionados(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_relacion(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $cat_sat_tipo_relacion_codigo = 'a';
+        $name_entidad = 'v';
+        $relacionados = array();
+        $fc_rows_relacionadas[]['v_uuid'] = 'z';
+        $resultado = $modelo->integra_relacionados($cat_sat_tipo_relacion_codigo, $fc_rows_relacionadas, $name_entidad, $relacionados);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('z', $resultado['a'][0]);
+        errores::$error = false;
+
+    }
+
 
 
 }

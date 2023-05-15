@@ -342,6 +342,8 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relacionados);
         }
 
+
+
         $conceptos = array();
 
         $total_impuestos_trasladados = 0.0;
@@ -520,10 +522,12 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
         }
 
+
         $data_factura = $this->data_factura(row_entidad: $factura);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
         }
+
 
 
         if($tipo === 'xml') {
@@ -1579,8 +1583,6 @@ class _transacciones_fc extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar XML', data: $xml);
         }
-
-
 
         $xml_contenido = file_get_contents($xml->doc_documento_ruta_absoluta);
 

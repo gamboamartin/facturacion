@@ -121,10 +121,22 @@ class _relacion extends _modelo_parent_sin_codigo{
             return $this->error->error(mensaje: 'Error al integrar relacionado', data: $relacionados);
         }
 
+        $filtro[$this->key_filtro_id] = $row_relacion[$this->key_id];
+
+        $r_fc_uuid_fc = (new fc_uuid_fc(link: $this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_uuid_fc);
+        }
+
+        $relaciones = $r_fc_uuid_fc->registros;
+
+        foreach ($relaciones as $relacion){
+            $relacionados[$cat_sat_tipo_relacion_codigo][] = $relacion['fc_uuid_uuid'];
+        }
+
 
         if($name_entidad === 'fc_nota_credito'){
 
-            $filtro[$this->key_filtro_id] =  $row_relacion[$this->key_id];
             $r_fc_nc = (new fc_nc_rel(link: $this->link))->filtro_and(filtro: $filtro);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_nc);
@@ -150,16 +162,19 @@ class _relacion extends _modelo_parent_sin_codigo{
                                          _relacionada $modelo_relacionada): array
     {
 
-
         $row_relaciones = $this->relaciones(modelo_entidad: $modelo_entidad, registro_entidad_id: $registro_entidad_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener row_relaciones', data: $row_relaciones);
         }
+
+
         $relacionados = $this->relacionados(row_relaciones: $row_relaciones,modelo_relacionada: $modelo_relacionada,
             name_entidad: $modelo_entidad->tabla);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al integrar relacionado', data: $relacionados);
         }
+
+
 
         return $relacionados;
 
@@ -204,12 +219,36 @@ class _relacion extends _modelo_parent_sin_codigo{
      * @param string $name_entidad Nombre de proceso en ejecucion factura, complemento de pago nota de credito
      * @param array $relacionados Elementos previamenete relacionados
      * @return array
+     * @version 9.24.3
      */
     private function integra_relacionados(string $cat_sat_tipo_relacion_codigo, array $fc_rows_relacionadas,
                                           string $name_entidad, array $relacionados): array
     {
+        $cat_sat_tipo_relacion_codigo = trim($cat_sat_tipo_relacion_codigo);
+        if($cat_sat_tipo_relacion_codigo === ''){
+            return $this->error->error(mensaje: 'Error al validar cat_sat_tipo_relacion_codigo esta vacio',
+                data: $cat_sat_tipo_relacion_codigo);
+        }
+        $name_entidad = trim($name_entidad);
+        if($name_entidad === ''){
+            return $this->error->error(mensaje: 'Error name_entidad esta vacio', data: $name_entidad);
+        }
 
         foreach ($fc_rows_relacionadas as $row_relacionada){
+
+            /**
+             * REFACTORIZAR
+             */
+            if(!is_array($row_relacionada)){
+                return $this->error->error(mensaje: 'Error row_relacionada no es un array', data: $row_relacionada);
+            }
+
+            $keys = array($name_entidad.'_uuid');
+            $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro: $row_relacionada);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar row_relacionada', data: $valida);
+            }
+
             $relacionados = $this->integra_relacionado(cat_sat_tipo_relacion_codigo: $cat_sat_tipo_relacion_codigo,
                 name_entidad: $name_entidad, relacionados: $relacionados, row_relacionada: $row_relacionada);
             if(errores::$error){
@@ -267,13 +306,14 @@ class _relacion extends _modelo_parent_sin_codigo{
         $relacionados = array();
         foreach ($row_relaciones as $row_relacion){
 
-
             $relacionados = $this->genera_relacionado(modelo_relacionada: $modelo_relacionada,
                 name_entidad: $name_entidad, relacionados: $relacionados, row_relacion: $row_relacion);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al integrar relacionado', data: $relacionados);
             }
         }
+
+
         return $relacionados;
     }
 
