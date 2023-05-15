@@ -198,10 +198,11 @@ class _relacion extends _modelo_parent_sin_codigo{
     }
 
     /**
-     * @param string $cat_sat_tipo_relacion_codigo
-     * @param array $fc_rows_relacionadas
-     * @param string $name_entidad
-     * @param array $relacionados
+     * Integra los cfdis relacionados al conjunto general de relaciones
+     * @param string $cat_sat_tipo_relacion_codigo Tipo de relacion codigo
+     * @param array $fc_rows_relacionadas Registros de facturas previamenete cargadas
+     * @param string $name_entidad Nombre de proceso en ejecucion factura, complemento de pago nota de credito
+     * @param array $relacionados Elementos previamenete relacionados
      * @return array
      */
     private function integra_relacionados(string $cat_sat_tipo_relacion_codigo, array $fc_rows_relacionadas,

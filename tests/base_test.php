@@ -1131,8 +1131,24 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_uuid_fc(PDO $link): array
+    {
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_uuid_fc');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_relacion(PDO $link): array
     {
+
+        $del = $this->del_fc_uuid_fc($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_relacion');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
