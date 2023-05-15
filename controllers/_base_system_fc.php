@@ -3,6 +3,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use base\controller\controler;
+use base\orm\modelo;
 use config\pac;
 use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
@@ -48,6 +49,7 @@ use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\models\fc_uuid;
+use gamboamartin\facturacion\models\fc_uuid_fc;
 use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\system\actions;
 use gamboamartin\system\html_controler;
@@ -1109,7 +1111,8 @@ class _base_system_fc extends _base_system{
     public function fc_factura_relacionada_alta_bd(bool $header, bool $ws = false){
 
         $fc_facturas_id = $_POST['fc_facturas_id'];
-       // print_r($fc_facturas_id);exit;
+
+
         $alta = array();
         foreach ($fc_facturas_id as $fc_factura_id=>$fc_relacion){
 
@@ -1119,28 +1122,46 @@ class _base_system_fc extends _base_system{
 
             if($entidad_origen === $this->modelo_entidad->key_id) {
 
-                $fc_factura_relacionada_ins[$this->modelo_relacion->key_id] = $fc_relacion_id;
-                $fc_factura_relacionada_ins[$this->modelo_entidad->key_id] = $fc_factura_id;
-
-                $r_fc_factura_relacionada = $this->modelo_relacionada->alta_registro(registro: $fc_factura_relacionada_ins);
+                $r_fc_factura_relacionada = $this->inserta_relacionada(
+                    key_modelo_base_id: $this->modelo_entidad->key_id,
+                    key_modelo_rel_id: $this->modelo_relacion->key_id,modelo_relacionada:  $this->modelo_relacionada,
+                    registro_entidad_id: $fc_factura_id, relacion_id: $fc_relacion_id);
                 if (errores::$error) {
                     return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_factura_relacionada,
                         header: true, ws: $ws);
                 }
+
             }
             else{
                 if($entidad_origen === 'fc_nota_credito') {
-                    $fc_factura_relacionada_ins[$this->modelo_relacion->key_id] = $fc_relacion_id;
-                    $fc_factura_relacionada_ins['fc_factura_id'] = $fc_factura_id;
 
-                    $r_fc_factura_relacionada = (new fc_nc_rel(link: $this->link))->alta_registro(registro: $fc_factura_relacionada_ins);
+
+                    $modelo_relacionada = new fc_nc_rel(link: $this->link);
+
+                    $r_fc_factura_relacionada = $this->inserta_relacionada(
+                        key_modelo_base_id: 'fc_factura_id',
+                        key_modelo_rel_id: $this->modelo_relacion->key_id,modelo_relacionada:  $modelo_relacionada,
+                        registro_entidad_id: $fc_factura_id, relacion_id: $fc_relacion_id);
                     if (errores::$error) {
                         return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_factura_relacionada,
                             header: true, ws: $ws);
                     }
+
                 }
                 else{
-                    $r_fc_factura_relacionada = array();
+
+                    $modelo_relacionada = new fc_uuid_fc(link: $this->link);
+
+                    $r_fc_factura_relacionada = $this->inserta_relacionada(
+                        key_modelo_base_id: 'fc_uuid_id',
+                        key_modelo_rel_id: $this->modelo_relacion->key_id,modelo_relacionada:  $modelo_relacionada,
+                        registro_entidad_id: $fc_factura_id, relacion_id: $fc_relacion_id);
+                    if (errores::$error) {
+                        return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_factura_relacionada,
+                            header: true, ws: $ws);
+                    }
+
+
                 }
             }
 
@@ -1797,6 +1818,24 @@ class _base_system_fc extends _base_system{
 
     }
 
+    private function inserta_relacionada(string $key_modelo_base_id, string $key_modelo_rel_id, modelo $modelo_relacionada,
+                                         int $registro_entidad_id, int $relacion_id): array|stdClass
+    {
+        $fc_factura_relacionada_ins = $this->row_relacionada(key_modelo_base_id: $key_modelo_base_id,
+            key_modelo_rel_id: $key_modelo_rel_id, registro_entidad_id: $registro_entidad_id, relacion_id: $relacion_id);
+
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener registro de relacion', data: $fc_factura_relacionada_ins);
+        }
+
+
+        $r_fc_factura_relacionada = $modelo_relacionada->alta_registro(registro: $fc_factura_relacionada_ins);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al dar de alta registro', data: $r_fc_factura_relacionada);
+        }
+        return $r_fc_factura_relacionada;
+    }
+
 
 
     private function integra_facturas_cliente(array $factura_cliente, array $facturas_cliente_, string $key_entidad_id,
@@ -2360,6 +2399,13 @@ class _base_system_fc extends _base_system{
 
 
         return $base->template;
+    }
+
+    private function row_relacionada(string $key_modelo_base_id, string $key_modelo_rel_id, int $registro_entidad_id, int $relacion_id): array
+    {
+        $fc_factura_relacionada_ins[$key_modelo_rel_id] = $relacion_id;
+        $fc_factura_relacionada_ins[$key_modelo_base_id] = $registro_entidad_id;
+        return $fc_factura_relacionada_ins;
     }
 
     private function select_fc_factura_id(): array|string

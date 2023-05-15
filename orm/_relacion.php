@@ -137,19 +137,12 @@ class _relacion extends _modelo_parent_sin_codigo{
 
 
         if($name_entidad === 'fc_nota_credito'){
-            /**
-             * REFACTORIZAR
-             */
-            $r_fc_nc = (new fc_nc_rel(link: $this->link))->filtro_and(filtro: $filtro);
+            $relacionados = $this->integra_relacion_nc(cat_sat_tipo_relacion_codigo: $cat_sat_tipo_relacion_codigo,
+                filtro:  $filtro,relacionados:  $relacionados);
             if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_nc);
+                return $this->error->error(mensaje: 'Error al obtener relacion', data: $relacionados);
             }
 
-            $relaciones = $r_fc_nc->registros;
-
-            foreach ($relaciones as $relacion){
-                $relacionados[$cat_sat_tipo_relacion_codigo][] = $relacion['fc_factura_uuid'];
-            }
         }
 
         return $relacionados;
@@ -181,6 +174,20 @@ class _relacion extends _modelo_parent_sin_codigo{
 
         return $relacionados;
 
+    }
+
+    private function integra_relacion_nc(string $cat_sat_tipo_relacion_codigo, array $filtro, array $relacionados){
+        $r_fc_nc = (new fc_nc_rel(link: $this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_nc);
+        }
+
+        $relaciones = $r_fc_nc->registros;
+
+        foreach ($relaciones as $relacion){
+            $relacionados[$cat_sat_tipo_relacion_codigo][] = $relacion['fc_factura_uuid'];
+        }
+        return $relacionados;
     }
 
     /**

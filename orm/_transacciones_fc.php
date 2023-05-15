@@ -89,8 +89,7 @@ class _transacciones_fc extends modelo
 
 
         $r_alta_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
-            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $r_alta_bd->registro_id,
-            valida_existencia_etapa: true);
+            modelo: $this, modelo_etapa: $this->modelo_etapa, registro_id: $r_alta_bd->registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_etapa);
         }
@@ -119,7 +118,7 @@ class _transacciones_fc extends modelo
         }
 
         $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
-            modelo: $this, modelo_etapa: $modelo_etapa, registro_id: $registro_id, valida_existencia_etapa: true);
+            modelo: $this, modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
         }
@@ -410,10 +409,10 @@ class _transacciones_fc extends modelo
             $concepto->cantidad = $partida[$key_cantidad];
             $concepto->clave_unidad = $partida['cat_sat_unidad_codigo'];
             $concepto->descripcion = $partida[$key_descripcion];
-            $concepto->valor_unitario = number_format($partida[$key_valor_unitario], 2);;
+            $concepto->valor_unitario = number_format($partida[$key_valor_unitario], 2);
             $concepto->importe = number_format($partida[$key_importe], 2);
             $concepto->objeto_imp = $partida['cat_sat_obj_imp_codigo'];
-            $concepto->no_identificacion = $partida['com_producto_codigo'];;
+            $concepto->no_identificacion = $partida['com_producto_codigo'];
             $concepto->unidad = $partida['cat_sat_unidad_descripcion'];
 
             $descuento = 0.0;
@@ -1639,7 +1638,7 @@ class _transacciones_fc extends modelo
 
 
         $pac_prov = (new pac())->pac_prov;
-        $xml_timbrado = (new timbra())->timbra(contenido_xml: $xml_contenido, id_comprobante: '',
+        $xml_timbrado = (new timbra())->timbra(contenido_xml: $xml_contenido,
             ruta_cer_pem: $ruta_cer_pem, ruta_key_pem: $ruta_key_pem, pac_prov: $pac_prov);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al timbrar XML', data: $xml_timbrado,params: array($fc_factura));
@@ -1693,7 +1692,7 @@ class _transacciones_fc extends modelo
         }
 
         $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
-            modelo: $this, modelo_etapa: $modelo_etapa, registro_id: $registro_id, valida_existencia_etapa: true);
+            modelo: $this, modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
         }
