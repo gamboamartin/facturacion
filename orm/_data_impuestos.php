@@ -86,13 +86,13 @@ class _data_impuestos extends _base{
 
     /**
      * Obtiene los impuestos trasladados de una partida
-     * @param string $name_modelo_partida
+     * @param string $name_modelo_partida Nombre del modelo de tipo impuestopuede ser retenido traslado
      * @param int $registro_partida_id partida
      * @return array|stdClass|int
+     *
      */
     final public function get_data_rows(string $name_modelo_partida, int $registro_partida_id): array|stdClass|int
     {
-
 
         $name_modelo_partida = trim($name_modelo_partida);
         if($name_modelo_partida === ''){

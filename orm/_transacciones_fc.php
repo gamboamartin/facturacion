@@ -305,6 +305,21 @@ class _transacciones_fc extends modelo
             }
             $relaciones[$indice]['fc_facturas_relacionadas'] = $relacionadas;
         }
+
+        foreach ($relaciones as $indice=>$fc_relacion){
+            /**
+             * REFACTORIZAR
+             */
+            $filtro[$modelo_relacion->key_filtro_id] = $fc_relacion[$modelo_relacion->key_id];
+            $r_fc_uuid_fc = (new fc_uuid_fc(link: $this->link))->filtro_and(filtro: $filtro);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener r_fc_uuid_fc', data: $r_fc_uuid_fc);
+            }
+
+            $relaciones[$indice]['fc_facturas_externas_relacionadas'] = $r_fc_uuid_fc->registros;
+        }
+
+
         return $relaciones;
 
     }

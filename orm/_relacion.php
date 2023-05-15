@@ -110,7 +110,8 @@ class _relacion extends _modelo_parent_sin_codigo{
         $cat_sat_tipo_relacion_codigo = $row_relacion['cat_sat_tipo_relacion_codigo'];
         $relacionados[$cat_sat_tipo_relacion_codigo] = array();
 
-        $fc_rows_relacionadas = $this->facturas_relacionadas(modelo_relacionada: $modelo_relacionada, row_relacion: $row_relacion);
+        $fc_rows_relacionadas = $this->facturas_relacionadas(modelo_relacionada: $modelo_relacionada,
+            row_relacion: $row_relacion);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_rows_relacionadas', data: $fc_rows_relacionadas);
         }
@@ -136,7 +137,9 @@ class _relacion extends _modelo_parent_sin_codigo{
 
 
         if($name_entidad === 'fc_nota_credito'){
-
+            /**
+             * REFACTORIZAR
+             */
             $r_fc_nc = (new fc_nc_rel(link: $this->link))->filtro_and(filtro: $filtro);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_nc);
@@ -292,6 +295,7 @@ class _relacion extends _modelo_parent_sin_codigo{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_relacion);
         }
+
         return $r_fc_relacion->registros;
     }
 

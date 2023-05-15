@@ -533,7 +533,7 @@ class _base_system_fc extends _base_system{
 
         $this->link->beginTransaction();
 
-        $siguiente_view = (new actions())->init_alta_bd(siguiente_view: "modifica");
+        $siguiente_view = (new actions())->init_alta_bd();
         if(errores::$error){
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,

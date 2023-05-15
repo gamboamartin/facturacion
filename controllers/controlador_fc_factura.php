@@ -73,8 +73,6 @@ class controlador_fc_factura extends _base_system_fc {
     public int $fc_partida_id = -1;
 
 
-
-
     public array$facturas_cliente = array();
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass()){

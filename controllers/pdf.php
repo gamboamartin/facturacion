@@ -130,6 +130,21 @@ final class pdf
                 }
             }
 
+            foreach ($relacion['fc_facturas_externas_relacionadas'] as $relacionada){
+                $key_uuid = 'fc_uuid_uuid';
+                $body_td_uuid = $this->html(etiqueta: "td", data: "UUID: $relacionada[$key_uuid]");
+                $body_tr_uuid = $this->html(etiqueta: "tr", data: $body_td_uuid);
+                $body_uuid = $this->html(etiqueta: "tbody", data: $body_tr_uuid );
+                $table_uuid = $this->html(etiqueta: "table", data: $body_uuid);
+                try {
+                    $this->pdf->WriteHTML($table_uuid);
+                }
+                catch (Throwable $e){
+                    return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
+                }
+            }
+
+
         }
 
 
