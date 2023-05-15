@@ -108,6 +108,13 @@ class controlador_fc_nota_credito extends _base_system_fc {
 
         $this->verifica_parents_alta = true;
 
+        $thead_relacion = $this->thead_relacion();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al generar html',data:  $thead_relacion);
+            print_r($error);
+            die('Error');
+        }
+
 
     }
 

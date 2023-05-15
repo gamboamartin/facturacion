@@ -70,28 +70,14 @@
                             <tr>
                                 <td colspan="2">
                                     <table class="table table-striped">
-                                        <thead>
-                                        <tr>
-                                            <th>UUID</th>
-                                            <th>Cliente</th>
-                                            <th>Folio</th>
-                                            <th>Fecha</th>
-                                            <th>Estatus</th>
-                                            <th>Selecciona</th>
-                                        </tr>
-                                        </thead>
+
+                                        <?php echo $controlador->thead_relacion; ?>
+
                                         <tbody>
                                         <?php foreach ($fc_relacion['fc_facturas'] as $fc_factura){ ?>
-                                            <tr>
-                                                <td><?php echo $fc_factura['fc_factura_uuid']; ?></td>
-                                                <td><?php echo $fc_factura['com_cliente_rfc']; ?></td>
-                                                <td><?php echo $fc_factura['fc_factura_folio']; ?></td>
-                                                <td><?php echo $fc_factura['fc_factura_fecha']; ?></td>
-                                                <td><?php echo $fc_factura['fc_factura_etapa']; ?></td>
-                                                <td>
-                                                    <?php echo $fc_factura['seleccion']; ?>
-                                                </td>
-                                            </tr>
+
+                                            <?php echo $controlador->tr_relacion($fc_factura); ?>
+
                                         <?php } ?>
 
                                         <?php foreach ($fc_relacion['fc_facturas_relacionadas'] as $fc_factura){ ?>

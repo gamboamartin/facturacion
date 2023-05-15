@@ -111,6 +111,8 @@ class _base_system_fc extends _base_system{
     public string $button_fc_factura_timbra = '';
     public string $t_head_producto = '';
 
+    public string $thead_relacion;
+
     public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
     {
 
@@ -2320,6 +2322,37 @@ class _base_system_fc extends _base_system{
         $this->inputs->select->fc_factura_id = $select;
 
         return $select;
+    }
+
+    final protected function thead_relacion(): string
+    {
+        $html = '<thead>
+                                        <tr>
+                                            <th>UUID</th>
+                                            <th>Cliente</th>
+                                            <th>Folio</th>
+                                            <th>Fecha</th>
+                                            <th>Estatus</th>
+                                            <th>Tipo de CFDI</th>
+                                            <th>Selecciona</th>
+                                        </tr>
+                                        </thead>';
+
+        $this->thead_relacion = $html;
+        return $html;
+    }
+
+    final public function tr_relacion(array $fc_factura): string
+    {
+        return "<tr>
+                    <td>$fc_factura[fc_factura_uuid]</td>
+                    <td>$fc_factura[com_cliente_rfc]</td>
+                    <td>$fc_factura[fc_factura_folio]</td>
+                    <td>$fc_factura[fc_factura_fecha]</td>
+                    <td>$fc_factura[fc_factura_etapa]</td>
+                    <td>$fc_factura[cat_sat_tipo_de_comprobante_descripcion]</td>
+                    <td>$fc_factura[seleccion]</td>
+                    </tr>";
     }
 
     public function timbra_xml(bool $header, bool $ws = false): array|stdClass{
