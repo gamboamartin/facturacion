@@ -75,7 +75,9 @@
                                         <tbody>
                                         <?php foreach ($fc_relacion['fc_facturas'] as $fc_factura){ ?>
 
-                                            <?php echo $controlador->tr_relacion($fc_factura); ?>
+                                            <?php echo $controlador->tr_relacion(fc_factura: $fc_factura,
+                                                key_etapa: 'fc_nota_credito_etapa', key_fecha: 'fc_nota_credito_fecha',
+                                                key_folio: 'fc_nota_credito_folio', key_uuid: 'fc_nota_credito_uuid'); ?>
 
                                         <?php } ?>
 

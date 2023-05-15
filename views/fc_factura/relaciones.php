@@ -68,7 +68,7 @@
                             </thead>
                             <tbody>
                             <tr>
-                                <td colspan="2">
+                                <td colspan="2" class="table-responsive">
                                     <table class="table table-striped">
 
                                         <?php echo $controlador->thead_relacion; ?>
@@ -76,7 +76,9 @@
                                         <tbody>
                                         <?php foreach ($fc_relacion['fc_facturas'] as $fc_factura){ ?>
 
-                                            <?php echo $controlador->tr_relacion($fc_factura); ?>
+                                            <?php echo $controlador->tr_relacion(fc_factura: $fc_factura,
+                                                key_etapa: 'fc_factura_etapa', key_fecha: 'fc_factura_fecha',
+                                                key_folio: 'fc_factura_folio', key_uuid: 'fc_factura_uuid'); ?>
 
                                         <?php } ?>
 
@@ -100,6 +102,41 @@
                             </tbody>
                         </table>
                         <?php } ?>
+
+                        <table id="fc_partida" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>EXTERNOS</th>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td colspan="2" class="table-responsive">
+                                    <table class="table table-striped">
+
+                                        <?php echo $controlador->thead_relacion; ?>
+
+                                        <tbody>
+                                        <?php foreach ($fc_relacion['fc_externas'] as $fc_factura){ ?>
+
+                                            <?php echo $controlador->tr_relacion(fc_factura: $fc_factura,
+                                                key_etapa: 'fc_uuid_etapa', key_fecha: 'fc_uuid_fecha',
+                                                key_folio: 'fc_uuid_folio', key_uuid: 'fc_uuid_uuid'); ?>
+
+                                        <?php } ?>
+
+
+
+                                        </tbody>
+                                    </table>
+
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+
 
 
                     </div>

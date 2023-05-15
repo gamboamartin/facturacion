@@ -340,6 +340,21 @@ class _partida extends  _base{
         return $r_fc_partida->registros;
     }
 
+    private function hijo(array $hijo, string $name_modelo_impuesto): array
+    {
+
+        $tabla = trim($name_modelo_impuesto);
+        if($tabla === ''){
+            return $this->error->error(mensaje: 'Error la tabla esta vacia', data: $name_modelo_impuesto);
+        }
+
+        $hijo[$name_modelo_impuesto]['filtros'][$this->key_filtro_id] = $this->key_id;
+        $hijo[$name_modelo_impuesto]['filtros_con_valor'] = array();
+        $hijo[$name_modelo_impuesto]['nombre_estructura'] = $name_modelo_impuesto;
+        $hijo[$name_modelo_impuesto]['namespace_model'] = 'gamboamartin\\facturacion\\models';
+        return $hijo;
+    }
+
     /**
      * Obtiene los childrens de un retenido
      * @param array $hijo Children
@@ -348,19 +363,17 @@ class _partida extends  _base{
      */
     private function hijo_retenido(array $hijo, _data_impuestos $modelo_retencion): array
     {
-        if(!isset($modelo_retencion->tabla)){
-            return $this->error->error(mensaje: 'Error no existe tabla definida traslado', data: $modelo_retencion);
+
+        $tabla = $this->tabla_impuesto(modelo_impuesto: $modelo_retencion);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integra modelo', data: $tabla);
         }
 
-        $tabla = trim($modelo_retencion->tabla);
-        if($tabla === ''){
-            return $this->error->error(mensaje: 'Error la tabla esta vacia', data: $tabla);
+        $hijo = $this->hijo(hijo: $hijo, name_modelo_impuesto: $tabla);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar hijo', data: $hijo);
         }
 
-        $hijo[$modelo_retencion->tabla]['filtros'][$this->key_filtro_id] = $this->key_id;
-        $hijo[$modelo_retencion->tabla]['filtros_con_valor'] = array();
-        $hijo[$modelo_retencion->tabla]['nombre_estructura'] = $modelo_retencion->tabla;
-        $hijo[$modelo_retencion->tabla]['namespace_model'] = 'gamboamartin\\facturacion\\models';
         return $hijo;
     }
 
@@ -373,19 +386,15 @@ class _partida extends  _base{
      */
     private function hijo_traslado(array $hijo, _data_impuestos $modelo_traslado): array
     {
-        if(!isset($modelo_traslado->tabla)){
-            return $this->error->error(mensaje: 'Error no existe tabla definida traslado', data: $modelo_traslado);
+        $tabla = $this->tabla_impuesto(modelo_impuesto: $modelo_traslado);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integra modelo', data: $tabla);
         }
 
-        $tabla = trim($modelo_traslado->tabla);
-        if($tabla === ''){
-            return $this->error->error(mensaje: 'Error la tabla esta vacia', data: $tabla);
+        $hijo = $this->hijo(hijo: $hijo, name_modelo_impuesto: $tabla);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar hijo', data: $hijo);
         }
-
-        $hijo[$modelo_traslado->tabla]['filtros'][$this->key_filtro_id] = $this->key_id;
-        $hijo[$modelo_traslado->tabla]['filtros_con_valor'] = array();
-        $hijo[$modelo_traslado->tabla]['nombre_estructura'] = $modelo_traslado->tabla;
-        $hijo[$modelo_traslado->tabla]['namespace_model'] = 'gamboamartin\\facturacion\\models';
         return $hijo;
     }
 
@@ -568,6 +577,19 @@ class _partida extends  _base{
         $key_valor_unitario = $this->tabla.'_valor_unitario';
 
         return round($data->$key_cantidad * $data->$key_valor_unitario, 4);
+    }
+
+    private function tabla_impuesto(_data_impuestos $modelo_impuesto): array|string
+    {
+        if(!isset($modelo_impuesto->tabla)){
+            return $this->error->error(mensaje: 'Error no existe tabla definida traslado', data: $modelo_impuesto);
+        }
+
+        $tabla = trim($modelo_impuesto->tabla);
+        if($tabla === ''){
+            return $this->error->error(mensaje: 'Error la tabla esta vacia', data: $tabla);
+        }
+        return $tabla;
     }
 
     /**
