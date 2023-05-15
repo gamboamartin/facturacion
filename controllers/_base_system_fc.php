@@ -1129,14 +1129,18 @@ class _base_system_fc extends _base_system{
                 }
             }
             else{
+                if($entidad_origen === 'fc_nota_credito') {
+                    $fc_factura_relacionada_ins[$this->modelo_relacion->key_id] = $fc_relacion_id;
+                    $fc_factura_relacionada_ins['fc_factura_id'] = $fc_factura_id;
 
-                $fc_factura_relacionada_ins[$this->modelo_relacion->key_id] = $fc_relacion_id;
-                $fc_factura_relacionada_ins['fc_factura_id'] = $fc_factura_id;
-
-                $r_fc_factura_relacionada = (new fc_nc_rel(link: $this->link))->alta_registro(registro: $fc_factura_relacionada_ins);
-                if (errores::$error) {
-                    return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_factura_relacionada,
-                        header: true, ws: $ws);
+                    $r_fc_factura_relacionada = (new fc_nc_rel(link: $this->link))->alta_registro(registro: $fc_factura_relacionada_ins);
+                    if (errores::$error) {
+                        return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_factura_relacionada,
+                            header: true, ws: $ws);
+                    }
+                }
+                else{
+                    $r_fc_factura_relacionada = array();
                 }
             }
 
