@@ -759,6 +759,13 @@ class _base_system_fc extends _base_system{
         return $chk;
     }
 
+    /**
+     * Genera input de tipo checkbox array para con variable facturas_id
+     * @param string $entidad_origen_key  key de base ej fc_factura_id
+     * @param int $relacion_id Identificador de relacion
+     * @param int $row_entidad_id Registro id de entidad base
+     * @return string
+     */
     private function input_chk_rel(string $entidad_origen_key, int $relacion_id, int $row_entidad_id): string
     {
         return "<input type='checkbox' name='fc_facturas_id[$row_entidad_id][$entidad_origen_key]' value='$relacion_id'>";
@@ -2336,8 +2343,6 @@ class _base_system_fc extends _base_system{
         $fc_externas = $r_fc_uuid->registros;
 
 
-
-
         foreach ($relaciones as $indice=>$relacion){
             $relaciones[$indice]['fc_externas'] = array();
 
@@ -2350,7 +2355,8 @@ class _base_system_fc extends _base_system{
                     return $this->errores->error(mensaje: 'Error al validar si existe', data: $existe);
                 }
                 if(!$existe) {
-                    $checkbox = $this->input_chk_rel(entidad_origen_key: 'fc_uuid', relacion_id: $relacion[$key_relacion_id], row_entidad_id: $fc_uuid['fc_uuid_id']);
+                    $checkbox = $this->input_chk_rel(entidad_origen_key: 'fc_uuid',
+                        relacion_id: $relacion[$key_relacion_id], row_entidad_id: $fc_uuid['fc_uuid_id']);
                     if (errores::$error) {
                         return $this->errores->error(mensaje: 'Error al generar checkbox', data: $checkbox);
                     }
@@ -2411,11 +2417,9 @@ class _base_system_fc extends _base_system{
 
                 }
 
-
             }
 
         }
-
 
 
         $this->relaciones = $relaciones;

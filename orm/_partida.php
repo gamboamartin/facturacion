@@ -579,6 +579,11 @@ class _partida extends  _base{
         return round($data->$key_cantidad * $data->$key_valor_unitario, 4);
     }
 
+    /**
+     * Obtiene el nombre de una tabla de tipo impuesto
+     * @param _data_impuestos $modelo_impuesto Modelo de tipo Impuestos
+     * @return array|string
+     */
     private function tabla_impuesto(_data_impuestos $modelo_impuesto): array|string
     {
         if(!isset($modelo_impuesto->tabla)){

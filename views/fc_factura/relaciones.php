@@ -101,7 +101,7 @@
 
                             </tbody>
                         </table>
-                        <?php } ?>
+
 
                         <table id="fc_partida" class="table table-striped">
                             <thead>
@@ -134,6 +134,7 @@
 
                             </tbody>
                         </table>
+                        <?php } ?>
 
 
 
