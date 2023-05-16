@@ -2336,18 +2336,52 @@ class _base_system_fc extends _base_system{
         $fc_externas = $r_fc_uuid->registros;
 
 
+
+
         foreach ($relaciones as $indice=>$relacion){
             $relaciones[$indice]['fc_externas'] = array();
 
             foreach ($fc_externas as $fc_uuid){
 
-                $checkbox = $this->input_chk_rel(entidad_origen_key: 'fc_uuid',relacion_id:  $relacion[$key_relacion_id],row_entidad_id: $fc_uuid['fc_uuid_id']);
+                $filtro['fc_relacion.id'] = $relacion['fc_relacion_id'];
+                $filtro['fc_uuid.id'] = $fc_uuid['fc_uuid_id'];
+                $existe = (new fc_uuid_fc(link: $this->link))->existe(filtro: $filtro);
                 if (errores::$error) {
-                    return $this->errores->error(mensaje: 'Error al generar checkbox', data: $checkbox);
+                    return $this->errores->error(mensaje: 'Error al validar si existe', data: $existe);
+                }
+                if(!$existe) {
+                    $checkbox = $this->input_chk_rel(entidad_origen_key: 'fc_uuid', relacion_id: $relacion[$key_relacion_id], row_entidad_id: $fc_uuid['fc_uuid_id']);
+                    if (errores::$error) {
+                        return $this->errores->error(mensaje: 'Error al generar checkbox', data: $checkbox);
+                    }
+                }
+                else{
+
+                    $r_fc_uuid_fc = (new fc_uuid_fc(link: $this->link))->filtro_and(filtro: $filtro);
+                    if (errores::$error) {
+                        return $this->errores->error(mensaje: 'Error al validar si existe', data: $existe);
+                    }
+                    if($r_fc_uuid_fc->n_registros === 0){
+                        return $this->errores->error(mensaje: 'Error no existe relacion', data: $r_fc_uuid_fc);
+                    }
+                    if($r_fc_uuid_fc->n_registros > 1){
+                        return $this->errores->error(mensaje: 'Error  existe mas de una relacion', data: $r_fc_uuid_fc);
+                    }
+                    $fc_uuid_fc = $r_fc_uuid_fc->registros[0];
+
+                    $link_elimina_rel = $this->link_elimina_rel(name_modelo_relacionada: 'fc_uuid_fc',
+                        registro_entidad_id:  $this->registro_id, registro_relacionada_id: $fc_uuid_fc['fc_uuid_fc_id']);
+
+                    if (errores::$error) {
+                        return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_rel);
+                    }
+
+                    $checkbox = $link_elimina_rel;
                 }
                 $fc_uuid['seleccion'] = $checkbox;
 
                 $relaciones[$indice]['fc_externas'][] = $fc_uuid;
+
             }
 
         }
