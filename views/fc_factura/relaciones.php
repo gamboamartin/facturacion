@@ -11,17 +11,7 @@
                         <?php include (new views())->ruta_templates."head/subtitulo.php"; ?>
                         <?php include (new views())->ruta_templates."mensajes.php"; ?>
 
-                        <?php echo $controlador->inputs->fc_csd_id; ?>
-                        <?php echo $controlador->inputs->com_sucursal_id; ?>
-                        <?php echo $controlador->inputs->serie; ?>
-                        <?php echo $controlador->inputs->folio; ?>
-                        <?php echo $controlador->inputs->impuestos_trasladados; ?>
-                        <?php echo $controlador->inputs->impuestos_retenidos; ?>
-                        <?php echo $controlador->inputs->subtotal; ?>
-                        <?php echo $controlador->inputs->descuento; ?>
-                        <?php echo $controlador->inputs->total; ?>
-                        <?php echo $controlador->inputs->cat_sat_tipo_relacion_id; ?>
-
+                        <?php echo $controlador->inputs_relaciones; ?>
 
                         <div class="control-group btn-alta">
                             <div class="controls">

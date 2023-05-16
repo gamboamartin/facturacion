@@ -109,7 +109,7 @@ class _pdf{
                                _transacciones_fc $modelo_entidad, _partida $modelo_partida,
                                _cuenta_predial $modelo_predial, _relacion $modelo_relacion,
                                _relacionada $modelo_relacionada, _data_impuestos $modelo_retencion,
-                               _sellado $modelo_sellado, _data_impuestos $modelo_traslado,
+                               _sellado $modelo_sellado, _data_impuestos $modelo_traslado, _uuid_ext $modelo_uuid_ext,
                                int $registro_id):array|string|bool{
 
         $factura = $modelo_entidad->get_factura(modelo_partida: $modelo_partida,
@@ -201,7 +201,7 @@ class _pdf{
         }
 
         $relacionadas = $modelo_entidad->get_data_relaciones(modelo_relacion: $modelo_relacion,
-            modelo_relacionada:  $modelo_relacionada,registro_entidad_id:  $registro_id);
+            modelo_relacionada: $modelo_relacionada, modelo_uuid_ext: $modelo_uuid_ext, registro_entidad_id: $registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relacionadas',data:  $relacionadas);
         }

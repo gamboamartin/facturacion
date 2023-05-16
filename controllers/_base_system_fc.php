@@ -33,6 +33,7 @@ use gamboamartin\facturacion\models\_relacion;
 use gamboamartin\facturacion\models\_relacionada;
 use gamboamartin\facturacion\models\_sellado;
 use gamboamartin\facturacion\models\_transacciones_fc;
+use gamboamartin\facturacion\models\_uuid_ext;
 use gamboamartin\facturacion\models\com_producto;
 use gamboamartin\facturacion\models\fc_cancelacion;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
@@ -80,6 +81,8 @@ class _base_system_fc extends _base_system{
     protected _cuenta_predial $modelo_predial;
     protected _relacionada $modelo_relacionada;
     protected _relacion $modelo_relacion;
+
+    protected _uuid_ext $modelo_uuid_ext;
     protected _notificacion $modelo_notificacion;
     protected _cancelacion $modelo_cancelacion;
     protected _doc $modelo_documento;
@@ -115,6 +118,8 @@ class _base_system_fc extends _base_system{
     public string $t_head_producto = '';
 
     public string $thead_relacion;
+
+    public string $inputs_relaciones = '';
 
     public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
     {
@@ -365,6 +370,17 @@ class _base_system_fc extends _base_system{
 
         $this->button_fc_factura_modifica = $button_fc_factura_modifica;
         return $this->inputs;
+    }
+
+    private function fc_externas(int $com_cliente_id){
+        $filtro['com_cliente.id'] = $com_cliente_id;
+
+        $r_fc_uuid = (new fc_uuid(link: $this->link))->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener relaciones externas', data: $r_fc_uuid);
+        }
+
+        return $r_fc_uuid->registros;
     }
 
     private function get_tipo_comprobante(): array|int
@@ -978,6 +994,20 @@ class _base_system_fc extends _base_system{
         return $existe_factura_rel;
     }
 
+    private function existe_uuid_externo(array $fc_uuid, string $key_relacion_id, _uuid_ext $modelo_uuid_ext,
+                                         array $row_relacion_ext): bool|array
+    {
+        $key_filtro_id = $modelo_uuid_ext->key_filtro_id;
+
+        $filtro[$key_filtro_id] = $row_relacion_ext[$key_relacion_id];
+        $filtro['fc_uuid.id'] = $fc_uuid['fc_uuid_id'];
+        $existe = $modelo_uuid_ext->existe(filtro: $filtro);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al validar si existe', data: $existe);
+        }
+        return $existe;
+    }
+
     public function exportar_documentos(bool $header, bool $ws = false){
 
 
@@ -998,7 +1028,7 @@ class _base_system_fc extends _base_system{
             modelo_partida: $this->modelo_partida, modelo_predial: $this->modelo_predial,
             modelo_relacion: $this->modelo_relacion, modelo_relacionada: $this->modelo_relacionada,
             modelo_retencion: $this->modelo_retencion, modelo_sellado: $this->modelo_sello,
-            modelo_traslado: $this->modelo_traslado, registro_id: $this->registro_id);
+            modelo_traslado: $this->modelo_traslado, modelo_uuid_ext: $this->modelo_uuid_ext, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar PDF',data:  $ruta_pdf, header: $header,ws:$ws);
         }
@@ -1157,7 +1187,7 @@ class _base_system_fc extends _base_system{
                 }
                 else{
 
-                    $modelo_relacionada = new fc_uuid_fc(link: $this->link);
+                    $modelo_relacionada = $this->modelo_uuid_ext;
 
                     $r_fc_factura_relacionada = $this->inserta_relacionada(
                         key_modelo_base_id: 'fc_uuid_id',
@@ -1279,7 +1309,7 @@ class _base_system_fc extends _base_system{
             modelo_partida: $this->modelo_partida, modelo_predial: $this->modelo_predial,
             modelo_relacion: $this->modelo_relacion, modelo_relacionada: $this->modelo_relacionada,
             modelo_retencion: $this->modelo_retencion, modelo_sellado: $this->modelo_sello,
-            modelo_traslado: $this->modelo_traslado, registro_id: $this->registro_id);
+            modelo_traslado: $this->modelo_traslado, modelo_uuid_ext: $this->modelo_uuid_ext, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $pdf, header: $header,ws:$ws);
         }
@@ -1312,10 +1342,10 @@ class _base_system_fc extends _base_system{
 
     }
 
-    private function genera_relaciones(int $com_cliente_id, string $name_entidad,  int $org_empresa_id): array
+    private function genera_relaciones(int $com_cliente_id, _uuid_ext $modelo_uuid_ext, string $name_entidad,  int $org_empresa_id): array
     {
         $relaciones = $this->modelo_entidad->get_data_relaciones(modelo_relacion: $this->modelo_relacion,
-            modelo_relacionada: $this->modelo_relacionada, registro_entidad_id: $this->registro_id);
+            modelo_relacionada: $this->modelo_relacionada, modelo_uuid_ext: $modelo_uuid_ext, registro_entidad_id: $this->registro_id);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
 
@@ -2303,7 +2333,7 @@ class _base_system_fc extends _base_system{
         $this->link_fc_factura_relacionada_alta_bd = $link;
 
         $relaciones = $this->genera_relaciones(com_cliente_id: $datos->row_upd->com_cliente_id,
-            name_entidad: $this->tabla, org_empresa_id: $datos->row_upd->org_empresa_id);
+            modelo_uuid_ext: $this->modelo_uuid_ext, name_entidad: $this->tabla, org_empresa_id: $datos->row_upd->org_empresa_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
             print_r($error);
@@ -2333,14 +2363,11 @@ class _base_system_fc extends _base_system{
         }
 
 
-        $filtro['com_cliente.id'] = $datos->row_upd->com_cliente_id;
 
-        $r_fc_uuid = (new fc_uuid(link: $this->link))->filtro_and(filtro: $filtro);
+        $fc_externas = $this->fc_externas(com_cliente_id: $datos->row_upd->com_cliente_id);
         if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al obtener relaciones externas', data: $r_fc_uuid);
+            return $this->errores->error(mensaje: 'Error al obtener relaciones externas', data: $fc_externas);
         }
-
-        $fc_externas = $r_fc_uuid->registros;
 
 
         foreach ($relaciones as $indice=>$relacion){
@@ -2348,12 +2375,10 @@ class _base_system_fc extends _base_system{
 
             foreach ($fc_externas as $fc_uuid){
 
-                $filtro['fc_relacion.id'] = $relacion['fc_relacion_id'];
-                $filtro['fc_uuid.id'] = $fc_uuid['fc_uuid_id'];
-                $existe = (new fc_uuid_fc(link: $this->link))->existe(filtro: $filtro);
-                if (errores::$error) {
-                    return $this->errores->error(mensaje: 'Error al validar si existe', data: $existe);
-                }
+
+                $existe  = $this->existe_uuid_externo(fc_uuid: $fc_uuid, key_relacion_id: $key_relacion_id,
+                    modelo_uuid_ext: $this->modelo_uuid_ext, row_relacion_ext: $relacion);
+
                 if(!$existe) {
                     $checkbox = $this->input_chk_rel(entidad_origen_key: 'fc_uuid',
                         relacion_id: $relacion[$key_relacion_id], row_entidad_id: $fc_uuid['fc_uuid_id']);
@@ -2435,6 +2460,22 @@ class _base_system_fc extends _base_system{
         $this->button_fc_factura_modifica = $button_fc_factura_modifica;
 
 
+        $inputs_relaciones = '';
+        $inputs_relaciones.= $this->inputs->fc_csd_id;
+        $inputs_relaciones.= $this->inputs->com_sucursal_id;
+        $inputs_relaciones.= $this->inputs->serie;
+        $inputs_relaciones.= $this->inputs->folio;
+        $inputs_relaciones.= $this->inputs->impuestos_trasladados;
+        $inputs_relaciones.= $this->inputs->impuestos_retenidos;
+        $inputs_relaciones.= $this->inputs->subtotal;
+        $inputs_relaciones.= $this->inputs->descuento;
+        $inputs_relaciones.= $this->inputs->total;
+        $inputs_relaciones.= $this->inputs->cat_sat_tipo_relacion_id;
+
+        $this->inputs_relaciones = $inputs_relaciones;
+
+
+
 
         return $base->template;
     }
@@ -2477,8 +2518,17 @@ class _base_system_fc extends _base_system{
         return $html;
     }
 
-    final public function tr_relacion(array $fc_factura, string $key_etapa, string $key_fecha, string $key_folio,  string $key_uuid): string
+    final public function tr_relacion(array $fc_factura, string $key_etapa, string $key_fecha, string $key_folio,  string $key_uuid): string|array
     {
+
+        $keys = array($key_uuid,'com_cliente_rfc', $key_folio, $key_fecha, $key_etapa,'cat_sat_tipo_de_comprobante_descripcion','seleccion');
+
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $fc_factura);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al validar',data:  $valida, header: true,ws: false);
+
+        }
+
         return "<tr>
                     <td>$fc_factura[$key_uuid]</td>
                     <td>$fc_factura[com_cliente_rfc]</td>

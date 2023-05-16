@@ -34,6 +34,8 @@ class _transacciones_fc extends modelo
     protected _sellado  $modelo_sello;
     protected _notificacion  $modelo_notificacion;
 
+    protected _uuid_ext $modelo_uuid_ext;
+
     public bool $valida_restriccion = true;
 
 
@@ -282,10 +284,11 @@ class _transacciones_fc extends modelo
      * Obtiene los datos para relacionar a factura
      * @param _relacion $modelo_relacion Modelo base de relacion
      * @param _relacionada $modelo_relacionada Modelo de detalle de relacion
+     * @param _uuid_ext $modelo_uuid_ext
      * @param int $registro_entidad_id Registro base para integrar relacion
      * @return array
      */
-    final public function  get_data_relaciones(_relacion $modelo_relacion, _relacionada $modelo_relacionada,
+    final public function  get_data_relaciones(_relacion $modelo_relacion, _relacionada $modelo_relacionada, _uuid_ext $modelo_uuid_ext,
                                                int $registro_entidad_id): array
     {
 
@@ -306,11 +309,9 @@ class _transacciones_fc extends modelo
         }
 
         foreach ($relaciones as $indice=>$fc_relacion){
-            /**
-             * REFACTORIZAR
-             */
+
             $filtro[$modelo_relacion->key_filtro_id] = $fc_relacion[$modelo_relacion->key_id];
-            $r_fc_uuid_fc = (new fc_uuid_fc(link: $this->link))->filtro_and(filtro: $filtro);
+            $r_fc_uuid_fc = $modelo_uuid_ext->filtro_and(filtro: $filtro);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener r_fc_uuid_fc', data: $r_fc_uuid_fc);
             }
