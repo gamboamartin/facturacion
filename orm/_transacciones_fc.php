@@ -1548,8 +1548,9 @@ class _transacciones_fc extends modelo
     }
 
     /**
-     * @param _etapa $modelo_etapa
-     * @param int $registro_id
+     * Verifica si se puede generar de una transaccion de afectacion de registro
+     * @param _etapa $modelo_etapa Modelo de etapa
+     * @param int $registro_id registro de entidad
      * @return array|bool
      */
     final public function verifica_permite_transaccion(_etapa $modelo_etapa, int $registro_id): bool|array

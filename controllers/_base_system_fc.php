@@ -2367,7 +2367,7 @@ class _base_system_fc extends _base_system{
                 return $this->errores->error(mensaje: 'Error al generar links elimina_bd para partida', data: $relaciones);
             }
 
-            $link_elimina_rel = $this->link_elimina_rel(name_modelo_relacionada: $this->modelo_entidad->tabla,
+            $link_elimina_rel = $this->link_elimina_rel(name_modelo_relacionada: $this->modelo_relacion->tabla,
                 registro_entidad_id:  $this->registro_id, registro_relacionada_id: $relacion[$key_relacion_id]);
 
             if (errores::$error) {
