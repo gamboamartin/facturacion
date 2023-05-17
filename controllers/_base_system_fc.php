@@ -1157,6 +1157,7 @@ class _base_system_fc extends _base_system{
 
     public function fc_factura_relacionada_alta_bd(bool $header, bool $ws = false){
 
+
         $fc_facturas_id = $_POST['fc_facturas_id'];
 
 
@@ -1164,8 +1165,8 @@ class _base_system_fc extends _base_system{
         foreach ($fc_facturas_id as $fc_factura_id=>$fc_relacion){
 
             $entidad_origen = key($fc_relacion);
-
             $fc_relacion_id = $fc_relacion[$entidad_origen];
+
 
             if($entidad_origen === $this->modelo_entidad->key_id) {
 
@@ -1180,7 +1181,8 @@ class _base_system_fc extends _base_system{
 
             }
             else{
-                if($entidad_origen === 'fc_nota_credito') {
+
+                if($this->tabla === 'fc_nota_credito' && $entidad_origen === 'fc_factura_id') {
 
 
                     $modelo_relacionada = new fc_nc_rel(link: $this->link);
@@ -2502,7 +2504,16 @@ class _base_system_fc extends _base_system{
         return $base->template;
     }
 
-    private function row_relacionada(string $key_modelo_base_id, string $key_modelo_rel_id, int $registro_entidad_id, int $relacion_id): array
+    /**
+     * Integra un elemento para insercion de una relacion
+     * @param string $key_modelo_base_id Key del modelo base
+     * @param string $key_modelo_rel_id Ker del modelo a relacionar
+     * @param int $registro_entidad_id Registro id de la entidad base
+     * @param int $relacion_id Relacion base
+     * @return array
+     */
+    private function row_relacionada(string $key_modelo_base_id, string $key_modelo_rel_id,
+                                     int $registro_entidad_id, int $relacion_id): array
     {
         $fc_factura_relacionada_ins[$key_modelo_rel_id] = $relacion_id;
         $fc_factura_relacionada_ins[$key_modelo_base_id] = $registro_entidad_id;
