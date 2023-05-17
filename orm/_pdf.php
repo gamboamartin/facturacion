@@ -113,9 +113,9 @@ class _pdf{
                                int $registro_id):array|string|bool{
 
         $factura = $modelo_entidad->get_factura(modelo_partida: $modelo_partida,
-            modelo_predial:  $modelo_predial,modelo_relacion:  $modelo_relacion,
-            modelo_relacionada: $modelo_relacionada,modelo_retencion:  $modelo_retencion,
-            modelo_traslado:  $modelo_traslado,registro_id:  $registro_id);
+            modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion,
+            modelo_relacionada: $modelo_relacionada, modelo_retencion: $modelo_retencion,
+            modelo_traslado: $modelo_traslado, modelo_uuid_ext: $modelo_uuid_ext, registro_id: $registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener factura',data:  $factura);
         }

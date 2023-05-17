@@ -100,12 +100,14 @@ class _relacion extends _modelo_parent_sin_codigo{
 
     /**
      * @param _relacionada $modelo_relacionada
+     * @param _uuid_ext $modelo_uuid_ext
      * @param string $name_entidad
      * @param array $relacionados
      * @param array $row_relacion
      * @return array
      */
-    private function genera_relacionado(_relacionada $modelo_relacionada, string $name_entidad, array $relacionados, array $row_relacion): array
+    private function genera_relacionado(_relacionada $modelo_relacionada, _uuid_ext $modelo_uuid_ext,
+                                        string $name_entidad, array $relacionados, array $row_relacion): array
     {
         $cat_sat_tipo_relacion_codigo = $row_relacion['cat_sat_tipo_relacion_codigo'];
         $relacionados[$cat_sat_tipo_relacion_codigo] = array();
@@ -124,7 +126,7 @@ class _relacion extends _modelo_parent_sin_codigo{
 
         $filtro[$this->key_filtro_id] = $row_relacion[$this->key_id];
 
-        $r_fc_uuid_fc = (new fc_uuid_fc(link: $this->link))->filtro_and(filtro: $filtro);
+        $r_fc_uuid_fc = $modelo_uuid_ext->filtro_and(filtro: $filtro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_uuid_fc);
         }
@@ -149,13 +151,14 @@ class _relacion extends _modelo_parent_sin_codigo{
     }
 
     /**
-     * @param int $registro_entidad_id
      * @param _transacciones_fc $modelo_entidad
      * @param _relacionada $modelo_relacionada
+     * @param _uuid_ext $modelo_uuid_ext
+     * @param int $registro_entidad_id
      * @return array
      */
-    final public function get_relaciones(int $registro_entidad_id, _transacciones_fc $modelo_entidad,
-                                         _relacionada $modelo_relacionada): array
+    final public function get_relaciones(_transacciones_fc $modelo_entidad, _relacionada $modelo_relacionada,
+                                         _uuid_ext $modelo_uuid_ext, int $registro_entidad_id): array
     {
 
         $row_relaciones = $this->relaciones(modelo_entidad: $modelo_entidad, registro_entidad_id: $registro_entidad_id);
@@ -163,9 +166,8 @@ class _relacion extends _modelo_parent_sin_codigo{
             return $this->error->error(mensaje: 'Error al obtener row_relaciones', data: $row_relaciones);
         }
 
-
-        $relacionados = $this->relacionados(row_relaciones: $row_relaciones,modelo_relacionada: $modelo_relacionada,
-            name_entidad: $modelo_entidad->tabla);
+        $relacionados = $this->relacionados(modelo_relacionada: $modelo_relacionada, modelo_uuid_ext: $modelo_uuid_ext,
+            name_entidad: $modelo_entidad->tabla, row_relaciones: $row_relaciones);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al integrar relacionado', data: $relacionados);
         }
@@ -307,18 +309,21 @@ class _relacion extends _modelo_parent_sin_codigo{
     }
 
     /**
-     * @param array $row_relaciones
      * @param _relacionada $modelo_relacionada
+     * @param _uuid_ext $modelo_uuid_ext
      * @param string $name_entidad
+     * @param array $row_relaciones
      * @return array
      */
-    private function relacionados(array $row_relaciones, _relacionada $modelo_relacionada, string $name_entidad): array
+    private function relacionados(_relacionada $modelo_relacionada, _uuid_ext $modelo_uuid_ext,
+                                  string $name_entidad, array $row_relaciones): array
     {
         $relacionados = array();
         foreach ($row_relaciones as $row_relacion){
 
             $relacionados = $this->genera_relacionado(modelo_relacionada: $modelo_relacionada,
-                name_entidad: $name_entidad, relacionados: $relacionados, row_relacion: $row_relacion);
+                modelo_uuid_ext: $modelo_uuid_ext, name_entidad: $name_entidad, relacionados: $relacionados,
+                row_relacion: $row_relacion);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al integrar relacionado', data: $relacionados);
             }

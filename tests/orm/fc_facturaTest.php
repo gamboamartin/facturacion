@@ -10,6 +10,7 @@ use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_traslado;
+use gamboamartin\facturacion\models\fc_uuid_fc;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\facturacion\tests\base_test2;
 use gamboamartin\organigrama\models\org_empresa;
@@ -212,9 +213,12 @@ class fc_facturaTest extends test {
         $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
         $modelo_retencion = new fc_retenido(link: $this->link);
         $modelo_traslado = new fc_traslado(link: $this->link);
+        $modelo_uuid_ext = new fc_uuid_fc(link: $this->link);
         $registro_id = 1;
-        $resultado = $modelo->get_factura($modelo_partida, $modelo_predial, $modelo_relacion, $modelo_relacionada,
-            $modelo_retencion, $modelo_traslado, $registro_id);
+        $resultado = $modelo->get_factura(modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
+            modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
+            modelo_uuid_ext: $modelo_uuid_ext, registro_id: $registro_id);
 
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
@@ -257,10 +261,13 @@ class fc_facturaTest extends test {
         $modelo_relacion = new fc_relacion(link: $this->link);
         $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
         $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_uuid_ext = new fc_uuid_fc(link: $this->link);
         $modelo_traslado = new fc_traslado(link: $this->link);
         $registro_id = 1;
-        $resultado = $modelo->get_factura($modelo_partida, $modelo_predial, $modelo_relacion, $modelo_relacionada,
-            $modelo_retencion, $modelo_traslado, $registro_id);
+        $resultado = $modelo->get_factura(modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
+            modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
+            modelo_uuid_ext: $modelo_uuid_ext, registro_id: $registro_id);
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(5099, $resultado['fc_factura_sub_total_base']);

@@ -332,13 +332,14 @@ class _transacciones_fc extends modelo
      * @param _relacionada $modelo_relacionada
      * @param _data_impuestos $modelo_retencion
      * @param _data_impuestos $modelo_traslado
+     * @param _uuid_ext $modelo_uuid_ext
      * @param int $registro_id
      * @return array|stdClass|int
      */
     final public function get_factura(_partida $modelo_partida,_cuenta_predial $modelo_predial,
                                       _relacion $modelo_relacion, _relacionada $modelo_relacionada,
                                       _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado,
-                                      int $registro_id): array|stdClass|int
+                                      _uuid_ext $modelo_uuid_ext, int $registro_id): array|stdClass|int
     {
         $hijo = array();
         $hijo[$modelo_partida->tabla]['filtros'] = array();
@@ -350,9 +351,9 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener factura', data: $registro);
         }
 
-
-        $relacionados = $modelo_relacion->get_relaciones(registro_entidad_id: $registro_id,
-            modelo_entidad: $this,modelo_relacionada: $modelo_relacionada);
+        $relacionados = $modelo_relacion->get_relaciones(modelo_entidad: $this,
+            modelo_relacionada: $modelo_relacionada, modelo_uuid_ext: $modelo_uuid_ext,
+            registro_entidad_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener relaciones', data: $relacionados);
         }
@@ -523,16 +524,17 @@ class _transacciones_fc extends modelo
     public function genera_xml(_doc $modelo_documento, _etapa $modelo_etapa, _partida $modelo_partida,
                                _cuenta_predial$modelo_predial, _relacion $modelo_relacion,
                                _relacionada $modelo_relacionada, _data_impuestos $modelo_retencion,
-                               _data_impuestos $modelo_traslado, int $registro_id, string $tipo): array|stdClass
+                               _data_impuestos $modelo_traslado, _uuid_ext $modelo_uuid_ext, int $registro_id, string $tipo): array|stdClass
     {
 
         $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
-        $factura = $this->get_factura(modelo_partida: $modelo_partida,modelo_predial:  $modelo_predial,
-            modelo_relacion:  $modelo_relacion,modelo_relacionada:  $modelo_relacionada,
-            modelo_retencion: $modelo_retencion,modelo_traslado:  $modelo_traslado,registro_id:  $registro_id);
+        $factura = $this->get_factura(modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
+            modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
+            modelo_uuid_ext: $modelo_uuid_ext, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
         }
@@ -1568,7 +1570,7 @@ class _transacciones_fc extends modelo
     public function timbra_xml(_doc $modelo_documento, _etapa $modelo_etapa, _partida $modelo_partida,
                                _cuenta_predial $modelo_predial, _relacion $modelo_relacion,
                                _relacionada $modelo_relacionada, _data_impuestos $modelo_retencion,
-                               _sellado $modelo_sello, _data_impuestos $modelo_traslado,
+                               _sellado $modelo_sello, _data_impuestos $modelo_traslado, _uuid_ext $modelo_uuid_ext,
                                int $registro_id): array|stdClass
     {
 
@@ -1594,7 +1596,7 @@ class _transacciones_fc extends modelo
         $xml = $this->genera_xml(modelo_documento: $modelo_documento, modelo_etapa: $modelo_etapa,
             modelo_partida: $modelo_partida, modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion,
             modelo_relacionada: $modelo_relacionada, modelo_retencion: $modelo_retencion,
-            modelo_traslado: $modelo_traslado, registro_id: $registro_id, tipo: $tipo);
+            modelo_traslado: $modelo_traslado, modelo_uuid_ext: $modelo_uuid_ext, registro_id: $registro_id, tipo: $tipo);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar XML', data: $xml);
         }
@@ -1623,9 +1625,10 @@ class _transacciones_fc extends modelo
             $ruta_cer_pem = $r_fc_cer_pem->registros[0]['doc_documento_ruta_absoluta'];
         }
 
-        $factura = $this->get_factura(modelo_partida: $modelo_partida,modelo_predial:  $modelo_predial,
-            modelo_relacion:  $modelo_relacion,modelo_relacionada:  $modelo_relacionada,
-            modelo_retencion: $modelo_retencion,modelo_traslado:  $modelo_traslado,registro_id:  $registro_id);
+        $factura = $this->get_factura(modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
+            modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
+            modelo_uuid_ext: $modelo_uuid_ext, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
         }

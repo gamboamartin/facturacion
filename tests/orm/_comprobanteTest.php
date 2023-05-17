@@ -14,6 +14,7 @@ use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_traslado;
+use gamboamartin\facturacion\models\fc_uuid_fc;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\test\liberator;
 use gamboamartin\test\test;
@@ -105,10 +106,12 @@ class _comprobanteTest extends test
         $modelo_predial = new fc_cuenta_predial(link: $this->link);
         $modelo_relacion = new fc_relacion(link: $this->link);
         $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+        $modelo_uuid_ext = new fc_uuid_fc(link: $this->link);
 
         $factura = (new fc_factura($this->link))->get_factura(modelo_partida: $modelo_partida,
             modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
-            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_id: $alta_fc_factura->registro_id);
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
+            modelo_uuid_ext: $modelo_uuid_ext, registro_id: $alta_fc_factura->registro_id);
         if(errores::$error){
             $error = (new errores())->error('Error al obtener factura',$factura);
             print_r($error);

@@ -569,7 +569,8 @@ class _base_system_fc extends _base_system{
         $factura = $this->modelo_entidad->get_factura(modelo_partida: $this->modelo_partida,
             modelo_predial: $this->modelo_predial, modelo_relacion: $this->modelo_relacion,
             modelo_relacionada: $this->modelo_relacionada, modelo_retencion: $this->modelo_retencion,
-            modelo_traslado: $this->modelo_traslado, registro_id: $this->registro_id);
+            modelo_traslado: $this->modelo_traslado, modelo_uuid_ext: $this->modelo_uuid_ext,
+            registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener factura', data: $factura, header: $header, ws: $ws);
         }
@@ -1321,7 +1322,8 @@ class _base_system_fc extends _base_system{
             modelo_partida: $this->modelo_partida, modelo_predial: $this->modelo_predial,
             modelo_relacion: $this->modelo_relacion, modelo_relacionada: $this->modelo_relacionada,
             modelo_retencion: $this->modelo_retencion, modelo_sellado: $this->modelo_sello,
-            modelo_traslado: $this->modelo_traslado, modelo_uuid_ext: $this->modelo_uuid_ext, registro_id: $this->registro_id);
+            modelo_traslado: $this->modelo_traslado, modelo_uuid_ext: $this->modelo_uuid_ext,
+            registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $pdf, header: $header,ws:$ws);
         }
@@ -1390,13 +1392,14 @@ class _base_system_fc extends _base_system{
         $modelo_traslado = new fc_traslado(link: $this->link);
         $modelo_etapa = new fc_factura_etapa(link: $this->link);
         $modelo_documento = new fc_factura_documento(link: $this->link);
+        $modelo_uuid_ext = new fc_uuid_fc(link: $this->link);
 
 
         $factura = (new fc_factura(link: $this->link))->genera_xml(modelo_documento: $modelo_documento,
             modelo_etapa: $modelo_etapa, modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
             modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
-            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_id: $this->registro_id,
-            tipo: $tipo);
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, modelo_uuid_ext: $modelo_uuid_ext,
+            registro_id: $this->registro_id, tipo: $tipo);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar XML',data:  $factura, header: $header,ws:$ws);
         }
@@ -2579,8 +2582,8 @@ class _base_system_fc extends _base_system{
             modelo_etapa: $this->modelo_etapa, modelo_partida: $this->modelo_partida,
             modelo_predial: $this->modelo_predial, modelo_relacion: $this->modelo_relacion,
             modelo_relacionada: $this->modelo_relacionada, modelo_retencion: $this->modelo_retencion,
-            modelo_sello: $this->modelo_sello, modelo_traslado: $this->modelo_traslado, registro_id:
-            $this->registro_id);
+            modelo_sello: $this->modelo_sello, modelo_traslado: $this->modelo_traslado,
+            modelo_uuid_ext: $this->modelo_uuid_ext, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al timbrar XML',data:  $timbre, header: $header,ws:$ws);
         }
