@@ -375,6 +375,7 @@ class controlador_fc_factura extends _base_system_fc {
             return $this->retorno_error(mensaje: 'Error al timbrar',data:  $r_verifica,header:  $header, ws: $ws);
         }
 
+
         return $r_verifica;
 
     }

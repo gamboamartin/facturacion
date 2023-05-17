@@ -2709,7 +2709,11 @@ class _base_system_fc extends _base_system{
                 header: $header,ws:$ws);
         }
 
+
         $this->mensaje = $verifica->mensaje;
+        if(isset($verifica->result->EstatusCancelacion)){
+            $this->mensaje .= ' Estado de Cancelacion '.$verifica->result->EstatusCancelacion;
+        }
 
         return $verifica;
 
