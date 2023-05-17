@@ -872,19 +872,18 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_etapa);
         }
 
-        if(!$this->valida_restriccion){
-            $r_cfdi_sellado = $this->modelo_sello->elimina_con_filtro_and(filtro: $filtro);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al eliminar', data: $r_cfdi_sellado);
-            }
-            $r_fc_factura_relacionada = $this->modelo_relacionada->elimina_con_filtro_and(filtro: $filtro);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_relacionada);
-            }
-            $r_fc_relacion = $this->modelo_relacion->elimina_con_filtro_and(filtro: $filtro);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_relacion);
-            }
+
+        $r_cfdi_sellado = $this->modelo_sello->elimina_con_filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_cfdi_sellado);
+        }
+        $r_fc_factura_relacionada = $this->modelo_relacionada->elimina_con_filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_relacionada);
+        }
+        $r_fc_relacion = $this->modelo_relacion->elimina_con_filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_relacion);
         }
 
         $r_fc_notificacion = $this->modelo_notificacion->elimina_con_filtro_and(filtro: $filtro);
@@ -1552,9 +1551,14 @@ class _transacciones_fc extends modelo
      * @param _etapa $modelo_etapa Modelo de etapa
      * @param int $registro_id registro de entidad
      * @return array|bool
+     * @version 9.35.3
      */
     final public function verifica_permite_transaccion(_etapa $modelo_etapa, int $registro_id): bool|array
     {
+        if($registro_id <= 0){
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+        }
+
         $permite_transaccion = $this->permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
