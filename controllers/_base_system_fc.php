@@ -994,17 +994,26 @@ class _base_system_fc extends _base_system{
         return $existe_factura_rel;
     }
 
-    private function existe_uuid_externo(array $fc_uuid, string $key_relacion_id, _uuid_ext $modelo_uuid_ext,
+    private function existe_uuid_externo(array $fc_uuid, string $name_entidad_relacion, _uuid_ext $modelo_uuid_ext,
                                          array $row_relacion_ext): bool|array
     {
-        $key_filtro_id = $modelo_uuid_ext->key_filtro_id;
+        //print_r($key_relacion_id);exit;
+        //print_r($filtro);exit;
+        $key_filtro_id = $name_entidad_relacion.'.id';
+
+        $key_relacion_id = $name_entidad_relacion.'_id';
 
         $filtro[$key_filtro_id] = $row_relacion_ext[$key_relacion_id];
         $filtro['fc_uuid.id'] = $fc_uuid['fc_uuid_id'];
+
+
+
         $existe = $modelo_uuid_ext->existe(filtro: $filtro);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al validar si existe', data: $existe);
         }
+
+
         return $existe;
     }
 
@@ -2375,9 +2384,13 @@ class _base_system_fc extends _base_system{
 
             foreach ($fc_externas as $fc_uuid){
 
-
-                $existe  = $this->existe_uuid_externo(fc_uuid: $fc_uuid, key_relacion_id: $key_relacion_id,
+                $existe  = $this->existe_uuid_externo(fc_uuid: $fc_uuid, name_entidad_relacion: $this->modelo_relacion->tabla,
                     modelo_uuid_ext: $this->modelo_uuid_ext, row_relacion_ext: $relacion);
+
+                if (errores::$error) {
+                    return $this->errores->error(mensaje: 'Error al validar si existe', data: $existe);
+                }
+
 
                 if(!$existe) {
                     $checkbox = $this->input_chk_rel(entidad_origen_key: 'fc_uuid',
@@ -2388,7 +2401,11 @@ class _base_system_fc extends _base_system{
                 }
                 else{
 
-                    $r_fc_uuid_fc = (new fc_uuid_fc(link: $this->link))->filtro_and(filtro: $filtro);
+                    $filtro['fc_uuid.id'] = $fc_uuid['fc_uuid_id'];
+                    $key_filtro_id = $this->modelo_relacion->key_filtro_id;
+                    $filtro[$key_filtro_id] = $relacion[$key_relacion_id];
+
+                    $r_fc_uuid_fc = $this->modelo_uuid_ext->filtro_and(filtro: $filtro);
                     if (errores::$error) {
                         return $this->errores->error(mensaje: 'Error al validar si existe', data: $existe);
                     }
@@ -2400,8 +2417,8 @@ class _base_system_fc extends _base_system{
                     }
                     $fc_uuid_fc = $r_fc_uuid_fc->registros[0];
 
-                    $link_elimina_rel = $this->link_elimina_rel(name_modelo_relacionada: 'fc_uuid_fc',
-                        registro_entidad_id:  $this->registro_id, registro_relacionada_id: $fc_uuid_fc['fc_uuid_fc_id']);
+                    $link_elimina_rel = $this->link_elimina_rel(name_modelo_relacionada: $this->modelo_uuid_ext->tabla,
+                        registro_entidad_id:  $this->registro_id, registro_relacionada_id: $fc_uuid_fc[$this->modelo_uuid_ext->key_id]);
 
                     if (errores::$error) {
                         return $this->errores->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_rel);
@@ -2423,9 +2440,12 @@ class _base_system_fc extends _base_system{
 
             foreach ($relaciones as $indice=>$relacion){
                 $relaciones[$indice]['fc_facturas_relacionadas_factura'] = array();
-
+                $filtro = array();
                 $filtro['fc_relacion_nc.id'] = $relacion['fc_relacion_nc_id'];
                 $r_fc_nc_rel = (new fc_nc_rel(link: $this->link))->filtro_and(filtro: $filtro);
+                if (errores::$error) {
+                    return $this->errores->error(mensaje: 'Error al obtener relacion', data: $r_fc_nc_rel);
+                }
                 $fc_nc_rels = $r_fc_nc_rel->registros;
 
                 foreach ($fc_nc_rels as $indice_fr=>$fc_factura_relacionada){

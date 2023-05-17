@@ -583,11 +583,14 @@ class _partida extends  _base{
      * Obtiene el nombre de una tabla de tipo impuesto
      * @param _data_impuestos $modelo_impuesto Modelo de tipo Impuestos
      * @return array|string
+     * @version 9.30.3
      */
     private function tabla_impuesto(_data_impuestos $modelo_impuesto): array|string
     {
+        $modelo_impuesto->tabla = trim($modelo_impuesto->tabla);
+
         if(!isset($modelo_impuesto->tabla)){
-            return $this->error->error(mensaje: 'Error no existe tabla definida traslado', data: $modelo_impuesto);
+            return $this->error->error(mensaje: 'Error no existe tabla definida de impuesto', data: $modelo_impuesto);
         }
 
         $tabla = trim($modelo_impuesto->tabla);
