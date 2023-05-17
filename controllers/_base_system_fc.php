@@ -1090,7 +1090,8 @@ class _base_system_fc extends _base_system{
                 $factura_cliente['key_fecha'] = $this->key_fecha;
                 $factura_cliente['key_etapa'] = $this->key_etapa;
                 $facturas_cliente_ = $this->integra_facturas_cliente(factura_cliente: $factura_cliente,
-                    facturas_cliente_: $facturas_cliente_, key_entidad_id: $key_entidad_id, name_entidad_ejecucion: $this->tabla, relacion: $relacion);
+                    facturas_cliente_: $facturas_cliente_, key_entidad_id: $key_entidad_id,
+                    name_entidad_ejecucion: $this->tabla, relacion: $relacion);
 
                 if (errores::$error) {
                     return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
@@ -2342,7 +2343,8 @@ class _base_system_fc extends _base_system{
         $this->link_fc_factura_relacionada_alta_bd = $link;
 
         $relaciones = $this->genera_relaciones(com_cliente_id: $datos->row_upd->com_cliente_id,
-            modelo_uuid_ext: $this->modelo_uuid_ext, name_entidad: $this->tabla, org_empresa_id: $datos->row_upd->org_empresa_id);
+            modelo_uuid_ext: $this->modelo_uuid_ext, name_entidad: $this->tabla,
+            org_empresa_id: $datos->row_upd->org_empresa_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
             print_r($error);
