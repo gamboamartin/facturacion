@@ -40,6 +40,8 @@ class _transacciones_fc extends modelo
 
 
 
+
+
     protected string $key_fc_id = '';
 
     /**
@@ -53,6 +55,7 @@ class _transacciones_fc extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
         }
+
 
         $registro = $this->init_data_alta_bd(registro: $this->registro);
         if (errores::$error) {

@@ -26,6 +26,8 @@ class fc_relacion_cp extends _relacion
         $this->NAMESPACE = __NAMESPACE__;
 
         $this->etiqueta = 'Facturas Relacionadas';
+
+        $this->codigos_rel_permitidos = array('01','02','03','04','05','06','07','08','09') ;
     }
 
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass

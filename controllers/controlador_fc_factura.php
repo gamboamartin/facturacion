@@ -8,15 +8,8 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
-use base\controller\controler;
-use config\pac;
-use gamboamartin\comercial\models\com_sucursal;
-use gamboamartin\compresor\compresor;
-use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_factura_html;
-use gamboamartin\facturacion\html\fc_partida_html;
-use gamboamartin\facturacion\models\_pdf;
 use gamboamartin\facturacion\models\fc_cancelacion;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
@@ -25,26 +18,13 @@ use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
-use gamboamartin\facturacion\models\fc_nota_credito_documento;
 use gamboamartin\facturacion\models\fc_notificacion;
 use gamboamartin\facturacion\models\fc_partida;
-use gamboamartin\facturacion\models\fc_partida_nc;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\models\fc_uuid_fc;
-use gamboamartin\proceso\models\pr_proceso;
-use gamboamartin\system\actions;
-use gamboamartin\system\html_controler;
 use gamboamartin\template\html;
-use gamboamartin\xml_cfdi_4\timbra;
-use html\cat_sat_conf_imps_html;
-use html\cat_sat_motivo_cancelacion_html;
-use html\cat_sat_tipo_relacion_html;
-use html\com_cliente_html;
-use html\com_email_cte_html;
-use html\com_sucursal_html;
-use JsonException;
 use PDO;
 use stdClass;
 

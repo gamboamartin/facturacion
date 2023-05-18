@@ -24,6 +24,9 @@ class fc_relacion extends _relacion
         $this->NAMESPACE = __NAMESPACE__;
 
         $this->etiqueta = 'Facturas Relacionadas';
+
+        $this->codigos_rel_permitidos = array('01','02','03','04','05','06','07') ;
+
     }
 
 

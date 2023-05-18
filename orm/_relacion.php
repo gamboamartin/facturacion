@@ -15,6 +15,8 @@ class _relacion extends _modelo_parent_sin_codigo{
 
     protected _etapa $modelo_etapa;
 
+    protected array $codigos_rel_permitidos = array();
+
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
         $row_entidad = $this->modelo_entidad->registro(registro_id: $this->registro[$this->modelo_entidad->key_id]);
@@ -22,16 +24,25 @@ class _relacion extends _modelo_parent_sin_codigo{
             return $this->error->error(mensaje: 'Error al al obtener row_entidad', data: $row_entidad);
         }
 
+
         $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa,
             registro_id: $this->registro[$this->modelo_entidad->key_id]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
 
-        $cat_sat_tipo_relacion = (new cat_sat_tipo_relacion(link: $this->link))->registro(registro_id: $this->registro['cat_sat_tipo_relacion_id']);
+        $cat_sat_tipo_relacion = (new cat_sat_tipo_relacion(link: $this->link))->registro(
+            registro_id: $this->registro['cat_sat_tipo_relacion_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al al obtener cat_sat_tipo_relacion', data: $cat_sat_tipo_relacion);
         }
+
+        $cat_sat_tipo_relacion_codigo = trim($cat_sat_tipo_relacion['cat_sat_tipo_relacion_codigo']);
+
+        if(!in_array($cat_sat_tipo_relacion_codigo, $this->codigos_rel_permitidos)){
+            return $this->error->error(mensaje: 'Error tipo de relacion invalida', data: $cat_sat_tipo_relacion_codigo);
+        }
+
 
         if(!isset($this->registro['descripcion'])){
             $descripcion = $row_entidad[$this->modelo_entidad->tabla.'_folio'].' '.$cat_sat_tipo_relacion['cat_sat_tipo_relacion_descripcion'];
