@@ -374,67 +374,22 @@ class _base_system_fc extends _base_system{
 
     public function duplica(bool $header, bool $ws = false){
         $this->link->beginTransaction();
-        $row_entidad = $this->modelo_entidad->registro(registro_id: $this->registro_id, columnas_en_bruto: true,
-            retorno_obj: true);
+
+
+        $duplica = $this->modelo_entidad->duplica(modelo_partida: $this->modelo_partida, registro_id: $this->registro_id);
         if (errores::$error) {
             $this->link->rollBack();
-            return $this->errores->error(mensaje: 'Error al obtener row_entidad', data: $row_entidad);
+            return $this->retorno_error(mensaje: 'Error al insertar registro', data: $duplica, header: $header,ws: $ws);
         }
 
-        $filtro[$this->modelo_entidad->key_filtro_id] = $this->registro_id;
-        $r_rows_partidas = $this->modelo_partida->filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            $this->link->rollBack();
-            return $this->errores->error(mensaje: 'Error al obtener rows_partidas', data: $r_rows_partidas);
-        }
-        $rows_partidas = $r_rows_partidas->registros;
-
-        $row_entidad_ins['fc_csd_id'] = $row_entidad->fc_csd_id;
-        $row_entidad_ins['cat_sat_forma_pago_id'] = $row_entidad->cat_sat_forma_pago_id;
-        $row_entidad_ins['cat_sat_metodo_pago_id'] = $row_entidad->cat_sat_metodo_pago_id;
-        $row_entidad_ins['cat_sat_moneda_id'] = $row_entidad->cat_sat_moneda_id;
-        $row_entidad_ins['com_tipo_cambio_id'] = $row_entidad->com_tipo_cambio_id;
-        $row_entidad_ins['cat_sat_uso_cfdi_id'] = $row_entidad->cat_sat_uso_cfdi_id;
-        $row_entidad_ins['cat_sat_tipo_de_comprobante_id'] = $row_entidad->cat_sat_tipo_de_comprobante_id;
-        $row_entidad_ins['dp_calle_pertenece_id'] = $row_entidad->dp_calle_pertenece_id;
-        $row_entidad_ins['exportacion'] = $row_entidad->exportacion;
-        $row_entidad_ins['cat_sat_regimen_fiscal_id'] = $row_entidad->cat_sat_regimen_fiscal_id;
-        $row_entidad_ins['com_sucursal_id'] = $row_entidad->com_sucursal_id;
-        $row_entidad_ins['observaciones'] = $row_entidad->observaciones;
-
-        $r_alta_bd = $this->modelo_entidad->alta_registro(registro: $row_entidad_ins);
-        if (errores::$error) {
-            $this->link->rollBack();
-            return $this->errores->error(mensaje: 'Error al insertar registro', data: $r_alta_bd);
-        }
-
-        $row_entidad_id = $r_alta_bd->registro_id;
-
-        $name_entidad_partida = $this->modelo_partida->tabla;
-
-        foreach ($rows_partidas as $row){
-
-            $fc_partida_ins['com_producto_id'] = $row[$name_entidad_partida . '_com_producto_id'];
-            $fc_partida_ins['cantidad'] = $row[$name_entidad_partida . '_cantidad'];
-            $fc_partida_ins['descripcion'] = $row[$name_entidad_partida . '_descripcion'];
-            $fc_partida_ins['valor_unitario'] = $row[$name_entidad_partida . '_valor_unitario'];
-            $fc_partida_ins['descuento'] = $row[$name_entidad_partida . '_descuento'];
-            $fc_partida_ins['fc_factura_id'] = $row_entidad_id;
-            $r_alta_bd_part = $this->modelo_partida->alta_registro(registro: $fc_partida_ins);
-            if (errores::$error) {
-                $this->link->rollBack();
-                return $this->errores->error(mensaje: 'Error al insertar registro', data: $r_alta_bd_part);
-            }
-
-        }
         $this->link->commit();
 
         if($header){
 
-            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $row_entidad_id,
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $duplica,
                 seccion: $this->tabla, siguiente_view: "modifica");
             if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_alta_bd,
+                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $duplica,
                     header:  true, ws: $ws);
             }
             header('Location:'.$retorno);
@@ -442,12 +397,12 @@ class _base_system_fc extends _base_system{
         }
         if($ws){
             header('Content-Type: application/json');
-            echo json_encode($r_alta_bd, JSON_THROW_ON_ERROR);
+            echo json_encode($duplica, JSON_THROW_ON_ERROR);
             exit;
         }
 
 
-        return $r_alta_bd;
+        return $duplica;
 
     }
 
@@ -461,6 +416,10 @@ class _base_system_fc extends _base_system{
 
         return $r_fc_uuid->registros;
     }
+
+
+
+
 
     private function get_tipo_comprobante(): array|int
     {
@@ -586,6 +545,8 @@ class _base_system_fc extends _base_system{
         return $this->keys_selects;
     }
 
+
+
     /**
      * Integra los parents de manera ordenada para su peticion
      * @return array
@@ -606,6 +567,10 @@ class _base_system_fc extends _base_system{
         $this->parents_verifica[] = (new com_producto(link: $this->link));
         return $this->parents_verifica;
     }
+
+
+
+
 
     private function tipo_de_comprobante_predeterminado(): array|stdClass
     {

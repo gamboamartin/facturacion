@@ -109,7 +109,6 @@ class _partida extends  _base{
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
 
-
         $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(
             modelo_etapa: $this->modelo_etapa, registro_id: $this->registro[$this->modelo_entidad->tabla.'_id']);
         if (errores::$error) {
@@ -253,6 +252,8 @@ class _partida extends  _base{
         return $data;
     }
 
+
+
     /**
      * SOBREESCRIBIR
      * @param int $id
@@ -299,6 +300,7 @@ class _partida extends  _base{
         return $r_elimina_bd;
     }
 
+
     /**
      * Obtiene una partida
      * @param int $registro_partida_id Partida a validar
@@ -339,6 +341,7 @@ class _partida extends  _base{
 
         return $r_fc_partida->registros;
     }
+
 
     private function hijo(array $hijo, string $name_modelo_impuesto): array
     {
@@ -556,6 +559,10 @@ class _partida extends  _base{
 
         return $r_fc_partida;
     }
+
+
+
+
 
     /**
      * Calcula el subtotal de una partida

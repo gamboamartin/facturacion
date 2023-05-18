@@ -256,6 +256,22 @@ class _transacciones_fc extends modelo
 
     }
 
+    final public function duplica(_partida $modelo_partida, int $registro_id){
+        $row_entidad_id = $this->inserta_row_entidad(registro_id:  $registro_id);
+        if (errores::$error) {
+            $this->link->rollBack();
+            return $this->error->error(mensaje: 'Error al insertar registro', data: $row_entidad_id);
+        }
+
+        $r_alta_bd_part = $this->genera_partidas(modelo_partida:  $modelo_partida, registro_id:  $registro_id,
+            row_entidad_id:  $row_entidad_id);
+        if (errores::$error) {
+
+            return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_bd_part);
+        }
+        return $row_entidad_id;
+    }
+
 
     /**
      * Obtiene las etapas de una factura
@@ -281,6 +297,131 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener r_etapa', data: $r_etapa);
         }
         return $r_etapa->registros;
+    }
+
+    private function fc_partida_ins(string $name_entidad_partida, array $row, int $row_entidad_id): array
+    {
+        $fc_partida_ins['com_producto_id'] = $row[$name_entidad_partida . '_com_producto_id'];
+        $fc_partida_ins['cantidad'] = $row[$name_entidad_partida . '_cantidad'];
+        $fc_partida_ins['descripcion'] = $row[$name_entidad_partida . '_descripcion'];
+        $fc_partida_ins['valor_unitario'] = $row[$name_entidad_partida . '_valor_unitario'];
+        $fc_partida_ins['descuento'] = $row[$name_entidad_partida . '_descuento'];
+        $fc_partida_ins[$this->key_id] = $row_entidad_id;
+
+        return $fc_partida_ins;
+    }
+
+    private function genera_partidas(_partida $modelo_partida, int $registro_id, int $row_entidad_id): array
+    {
+        $rows_partidas = $this->partidas_base(modelo_partida:  $modelo_partida, registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener rows_partidas', data: $rows_partidas);
+        }
+
+        $r_alta_bd_part = $this->inserta_partidas(modelo_partida:  $modelo_partida,name_entidad_partida:  $modelo_partida->tabla,
+            row_entidad_id:  $row_entidad_id,rows_partidas:  $rows_partidas);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_bd_part);
+        }
+        return $r_alta_bd_part;
+    }
+
+    private function genera_row_entidad_ins(int $registro_id): array
+    {
+        $row_entidad = $this->registro(registro_id: $registro_id, columnas_en_bruto: true,
+            retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener row_entidad', data: $row_entidad);
+        }
+
+        $row_entidad_ins = $this->row_entidad_ins(row_entidad: $row_entidad);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar registro', data: $row_entidad_ins);
+        }
+        return $row_entidad_ins;
+    }
+
+    private function inserta_partida(_partida $modelo_partida, string $name_entidad_partida, array $row,
+                                     int $row_entidad_id): array|stdClass
+    {
+        $fc_partida_ins = $this->fc_partida_ins(name_entidad_partida: $name_entidad_partida, row: $row,
+            row_entidad_id: $row_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar registro', data: $fc_partida_ins);
+        }
+
+
+        $r_alta_bd_part = $modelo_partida->alta_registro(registro: $fc_partida_ins);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_bd_part);
+        }
+        return $r_alta_bd_part;
+    }
+
+    private function inserta_partidas(_partida $modelo_partida, string $name_entidad_partida, int $row_entidad_id,
+                                      array $rows_partidas): array
+    {
+
+        $altas = array();
+        foreach ($rows_partidas as $row){
+
+            $r_alta_bd_part = $this->inserta_partida(modelo_partida:  $modelo_partida,
+                name_entidad_partida:  $name_entidad_partida,row:  $row, row_entidad_id:  $row_entidad_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_bd_part);
+            }
+            $altas[] = $r_alta_bd_part;
+        }
+        return $altas;
+    }
+
+    private function inserta_row_entidad(int $registro_id){
+        $row_entidad_ins = $this->genera_row_entidad_ins(registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar registro', data: $row_entidad_ins);
+        }
+
+
+        $r_alta_bd = $this->alta_registro(registro: $row_entidad_ins);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_bd);
+        }
+        return $r_alta_bd->registro_id;
+    }
+
+    private function partidas_base(_partida $modelo_partida, int $registro_id){
+        $filtro[$this->key_filtro_id] = $registro_id;
+        $r_rows_partidas = $modelo_partida->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener rows_partidas', data: $r_rows_partidas);
+        }
+        return $r_rows_partidas->registros;
+    }
+
+    /**
+     * Maqueta el registro para insersion
+     * @param stdClass $row_entidad Registro base de operacion
+     * @return array
+     */
+    private function row_entidad_ins(stdClass $row_entidad): array
+    {
+        $row_entidad_ins['fc_csd_id'] = $row_entidad->fc_csd_id;
+        $row_entidad_ins['cat_sat_forma_pago_id'] = $row_entidad->cat_sat_forma_pago_id;
+        $row_entidad_ins['cat_sat_metodo_pago_id'] = $row_entidad->cat_sat_metodo_pago_id;
+        $row_entidad_ins['cat_sat_moneda_id'] = $row_entidad->cat_sat_moneda_id;
+        $row_entidad_ins['com_tipo_cambio_id'] = $row_entidad->com_tipo_cambio_id;
+        $row_entidad_ins['cat_sat_uso_cfdi_id'] = $row_entidad->cat_sat_uso_cfdi_id;
+        $row_entidad_ins['cat_sat_tipo_de_comprobante_id'] = $row_entidad->cat_sat_tipo_de_comprobante_id;
+        $row_entidad_ins['dp_calle_pertenece_id'] = $row_entidad->dp_calle_pertenece_id;
+        $row_entidad_ins['exportacion'] = $row_entidad->exportacion;
+        $row_entidad_ins['cat_sat_regimen_fiscal_id'] = $row_entidad->cat_sat_regimen_fiscal_id;
+        $row_entidad_ins['com_sucursal_id'] = $row_entidad->com_sucursal_id;
+
+        if(isset($row_entidad->observaciones)) {
+            $row_entidad->observaciones = trim($row_entidad->observaciones);
+            $row_entidad_ins['observaciones'] = $row_entidad->observaciones;
+        }
+        return $row_entidad_ins;
     }
 
     /**
