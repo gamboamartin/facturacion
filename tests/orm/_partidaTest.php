@@ -6,6 +6,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_email;
 use gamboamartin\facturacion\models\_facturacion;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_partida_nc;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\test\liberator;
@@ -29,6 +30,25 @@ class _partidaTest extends test
         $this->paths_conf->generales = '/var/www/html/facturacion/config/generales.php';
         $this->paths_conf->database = '/var/www/html/facturacion/config/database.php';
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
+    }
+
+    public function test_hijo(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida_nc(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $hijo = array();
+        $name_modelo_impuesto = 'a';
+        $resultado = $modelo->hijo($hijo, $name_modelo_impuesto);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('fc_partida_nc_id', $resultado['a']['filtros']['fc_partida_nc.id']);
+        errores::$error = false;
     }
 
     public function test_integra_relacionado(): void

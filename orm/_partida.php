@@ -343,12 +343,19 @@ class _partida extends  _base{
     }
 
 
+    /**
+     * Genera un hijo de tipo impuesto
+     * @param array $hijo configuracion de hijo
+     * @param string $name_modelo_impuesto Nombre del modelo de tipo impuesto
+     * @return array
+     * @version 10.1.0
+     */
     private function hijo(array $hijo, string $name_modelo_impuesto): array
     {
 
         $tabla = trim($name_modelo_impuesto);
         if($tabla === ''){
-            return $this->error->error(mensaje: 'Error la tabla esta vacia', data: $name_modelo_impuesto);
+            return $this->error->error(mensaje: 'Error name_modelo_impuesto esta vacia', data: $name_modelo_impuesto);
         }
 
         $hijo[$name_modelo_impuesto]['filtros'][$this->key_filtro_id] = $this->key_id;
