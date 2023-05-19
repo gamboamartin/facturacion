@@ -983,6 +983,7 @@ class _transacciones_fc extends modelo
     public function elimina_bd(int $id): array|stdClass
     {
 
+
         $this->modelo_documento->valida_restriccion = $this->valida_restriccion;
         $this->modelo_sello->valida_restriccion = $this->valida_restriccion;
         $this->modelo_relacionada->valida_restriccion = $this->valida_restriccion;

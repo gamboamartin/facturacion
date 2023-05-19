@@ -5,6 +5,9 @@ namespace gamboamartin\facturacion\tests\orm;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_email;
 use gamboamartin\facturacion\models\_facturacion;
+use gamboamartin\facturacion\models\fc_complemento_pago;
+use gamboamartin\facturacion\models\fc_complemento_pago_etapa;
+use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_partida_cp;
 use gamboamartin\facturacion\models\fc_partida_nc;
@@ -114,6 +117,29 @@ class _partidaTest extends test
         $this->assertNotTrue(errores::$error);
         $this->assertEquals('fc_traslado', $resultado);
         errores::$error = false;
+    }
+
+    public function test_valida_restriccion(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida_cp(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $modelo_entidad = new fc_complemento_pago(link: $this->link);
+        $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
+        $row_partida = new stdClass();
+        $row_partida->fc_complemento_pago_id = '1';
+
+        $resultado = $modelo->valida_restriccion($modelo_entidad, $modelo_etapa, $row_partida);
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+        errores::$error = false;
+
     }
 
 
