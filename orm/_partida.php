@@ -370,6 +370,7 @@ class _partida extends  _base{
      * @param array $hijo Children
      * @param _data_impuestos $modelo_retencion Modelo de tipo impuesto
      * @return array
+     * @version 10.2.0
      */
     private function hijo_retenido(array $hijo, _data_impuestos $modelo_retencion): array
     {
@@ -408,7 +409,15 @@ class _partida extends  _base{
         return $hijo;
     }
 
-    private function hijos_partida(_data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado){
+    /**
+     * Integra los hijos de una partida
+     * @param _data_impuestos $modelo_retencion Modelo de retenciones
+     * @param _data_impuestos $modelo_traslado Modelo de traslados
+     * @return array
+     * @version 10.3.0
+     */
+    private function hijos_partida(_data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado): array
+    {
         $hijo = array();
 
         $hijo = $this->hijo_traslado(hijo: $hijo,modelo_traslado: $modelo_traslado);
