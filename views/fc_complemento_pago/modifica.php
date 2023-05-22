@@ -43,77 +43,10 @@
         <?php echo $controlador->buttons_base; ?>
     </div>
 
-    <div class="container partidas">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="widget  widget-box box-container form-main widget-form-cart" id="form">
-                    <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
-                        <h2>Partidas</h2>
-                    </div>
-                    <form method="post" action="<?php echo $controlador->link_fc_partida_cp_alta_bd; ?>" class="form-additional">
-
-                        <?php echo $controlador->inputs->partidas->com_producto_id; ?>
-                        <?php echo $controlador->inputs->partidas->unidad; ?>
-                        <?php echo $controlador->inputs->partidas->impuesto; ?>
-                        <?php echo $controlador->inputs->partidas->cuenta_predial; ?>
-                        <?php echo $controlador->inputs->partidas->descripcion; ?>
-                        <?php echo $controlador->inputs->partidas->cantidad; ?>
-                        <?php echo $controlador->inputs->partidas->valor_unitario; ?>
-                        <?php echo $controlador->inputs->partidas->subtotal; ?>
-                        <?php echo $controlador->inputs->partidas->descuento; ?>
-                        <?php echo $controlador->inputs->partidas->total; ?>
-                        <?php echo $controlador->inputs->partidas->cat_sat_conf_imps_id; ?>
 
 
-                        <div class="control-group btn-alta">
-                            <div class="controls">
-                                <button type="submit" class="btn btn-success" value="modifica" name="btn_action_next">Alta</button><br>
-                            </div>
-                        </div>
-
-                    </form>
-                </div>
-
-            </div>
-
-        </div>
-    </div>
 
     <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-
-                <div class="widget widget-box box-container widget-mylistings">
-                    <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
-                        <h2>Partidas</h2>
-                    </div>
-                    <div class="">
-
-                        <?php foreach ($controlador->partidas->registros as $partida){
-
-
-                        ?>
-                        <table id="fc_partida" class="table table-striped" style="font-size: 12px;">
-                            <?php echo $controlador->t_head_producto; ?>
-                            <tbody>
-                            <?php echo $partida['data_producto_html']; ?>
-
-                            <?php echo $partida['descripcion_html']; ?>
-
-                            <?php echo $partida['impuesto_traslado_html']; ?>
-                            <?php echo $partida['impuesto_retenido_html']; ?>
-
-                            </tbody>
-                        </table>
-                        <?php } ?>
-
-
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
 
         <div class="row">
             <div class="col-md-12">
@@ -138,7 +71,6 @@
                             <?php } ?>
                             </tbody>
                         </table>
-
                     </div>
                 </div>
             </div>

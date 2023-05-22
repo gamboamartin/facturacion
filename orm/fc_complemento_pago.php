@@ -179,34 +179,34 @@ class fc_complemento_pago extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
 
-        $com_producto = (new com_producto(link: $this->link))->registro_by_codigo(
-            codigo: $this->com_producto_codigo_default);
+        $alta_fc_partida_cp = $this->alta_fc_partida(fc_complemento_pago_id: $r_alta_bd->registro_id);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener producto',data:  $com_producto);
-        }
-        $cat_sat_unidad = (new cat_sat_unidad(link: $this->link))->registro_by_codigo(
-            codigo: $this->cat_sat_unidad_codigo_default);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener cat_sat_unidad',data:  $cat_sat_unidad);
+            return $this->error->error(mensaje: 'Error al integrar partida',data:  $alta_fc_partida_cp);
         }
 
-        $fc_complemento_pago_id = $r_alta_bd->registro_id;
+        $fc_pago['fc_complemento_pago_id'] = $r_alta_bd->registro_id;
+        $fc_pago['version'] = '2.0';
 
-        $fc_partida_cp_ins['com_producto_id'] = $com_producto['com_producto_id'];
-        $fc_partida_cp_ins['cantidad'] = 1;
-        $fc_partida_cp_ins['descripcion'] = 'Pago';
-        $fc_partida_cp_ins['valor_unitario'] = 0;
-        $fc_partida_cp_ins['descuento'] = 0;
-        $fc_partida_cp_ins['cat_sat_unidad_id'] = $cat_sat_unidad['cat_sat_unidad_id'];
-        $fc_partida_cp_ins['fc_complemento_pago_id'] = $fc_complemento_pago_id;
+        $r_alta_fc_pago = (new fc_pago(link: $this->link))->alta_registro(registro: $fc_pago);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar fc_pago',data:  $r_alta_fc_pago);
+        }
+
+
+        return $r_alta_bd;
+    }
+
+    private function alta_fc_partida(int $fc_complemento_pago_id){
+        $fc_partida_cp_ins = $this->genera_partida_default(fc_complemento_pago_id: $fc_complemento_pago_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar partida',data:  $fc_partida_cp_ins);
+        }
 
         $alta_fc_partida_cp = (new fc_partida_cp(link: $this->link))->alta_registro(registro: $fc_partida_cp_ins);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar partida',data:  $alta_fc_partida_cp);
         }
-
-
-        return $r_alta_bd;
+        return $alta_fc_partida_cp;
     }
 
     public function elimina_bd(int $id): array|stdClass
@@ -227,6 +227,55 @@ class fc_complemento_pago extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al eliminar',data:  $r_elimina_bd);
         }
         return $r_elimina_bd;
+    }
+
+    private function fc_partida_cp_ins(int $cat_sat_unidad_id, int $com_producto_id, int $fc_complemento_pago_id): array
+    {
+        $fc_partida_cp_ins['com_producto_id'] = $com_producto_id;
+        $fc_partida_cp_ins['cantidad'] = 1;
+        $fc_partida_cp_ins['descripcion'] = 'Pago';
+        $fc_partida_cp_ins['valor_unitario'] = 0;
+        $fc_partida_cp_ins['descuento'] = 0;
+        $fc_partida_cp_ins['cat_sat_unidad_id'] = $cat_sat_unidad_id;
+        $fc_partida_cp_ins['fc_complemento_pago_id'] = $fc_complemento_pago_id;
+
+        return $fc_partida_cp_ins;
+    }
+
+    private function genera_partida_default(int $fc_complemento_pago_id){
+        $data_partida = $this->partida_default();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partida default data',data:  $data_partida);
+        }
+
+        $fc_partida_cp_ins = $this->fc_partida_cp_ins(cat_sat_unidad_id: $data_partida->cat_sat_unidad['cat_sat_unidad_id'],
+            com_producto_id:  $data_partida->com_producto['com_producto_id'], fc_complemento_pago_id: $fc_complemento_pago_id);
+
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar partida',data:  $fc_partida_cp_ins);
+        }
+
+        return $fc_partida_cp_ins;
+    }
+
+    private function partida_default(){
+        $com_producto = (new com_producto(link: $this->link))->registro_by_codigo(
+            codigo: $this->com_producto_codigo_default);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener producto',data:  $com_producto);
+        }
+        $cat_sat_unidad = (new cat_sat_unidad(link: $this->link))->registro_by_codigo(
+            codigo: $this->cat_sat_unidad_codigo_default);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener cat_sat_unidad',data:  $cat_sat_unidad);
+        }
+        $data = new stdClass();
+        $data->com_producto = $com_producto;
+        $data->cat_sat_unidad = $cat_sat_unidad;
+
+        return $data;
+
+
     }
 
 
