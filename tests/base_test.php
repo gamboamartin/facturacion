@@ -12,6 +12,7 @@ use gamboamartin\comercial\models\com_producto;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_complemento_pago;
 use gamboamartin\facturacion\models\fc_conf_retenido;
 use gamboamartin\facturacion\models\fc_conf_traslado;
 use gamboamartin\facturacion\models\fc_csd;
@@ -20,6 +21,7 @@ use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_partida;
 
 
+use gamboamartin\facturacion\models\fc_partida_cp;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\organigrama\models\org_sucursal;
 use PDO;
@@ -363,6 +365,111 @@ class base_test{
         return $alta;
     }
 
+
+    public function alta_fc_complemento_pago(PDO $link, int $cat_sat_forma_pago_id = 1, int $cat_sat_metodo_pago_id = 2,
+                                    int $cat_sat_moneda_id = 999, string $codigo = '1', int $com_sucursal_id = 1,
+                                    int $com_tipo_cambio_id = 1, int $fc_csd_id = 1, string $folio = 'A-000001',
+                                    int $id = 1): array|\stdClass
+    {
+
+
+        $existe = (new com_sucursal($link))->existe_by_id(registro_id: $com_sucursal_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe factura', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_com_sucursal(link: $link, id: $com_sucursal_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar sucursal', data: $alta);
+            }
+        }
+
+        $existe = (new com_tipo_cambio($link))->existe_by_id(registro_id: $com_tipo_cambio_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_com_tipo_cambio(link: $link, id: $com_tipo_cambio_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+            }
+        }
+
+        $existe = (new fc_csd($link))->existe_by_id(registro_id: $fc_csd_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_csd(link: $link, id: $fc_csd_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar csd', data: $alta);
+            }
+        }
+
+        $existe = (new cat_sat_forma_pago($link))->existe_by_id(registro_id: $cat_sat_forma_pago_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_forma_pago(link: $link, id: $cat_sat_forma_pago_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+            }
+        }
+
+        $existe = (new cat_sat_metodo_pago($link))->existe_by_id(registro_id: $cat_sat_metodo_pago_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_metodo_pago(link: $link, id: $cat_sat_metodo_pago_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+            }
+        }
+
+        $existe = (new cat_sat_moneda($link))->filtro_and(filtro: array("cat_sat_moneda.codigo" => "MXN"));
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+
+        if($existe->n_registros == 0) {
+            $alta = $this->alta_cat_sat_moneda(link: $link, id: $cat_sat_moneda_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar moneda', data: $alta);
+            }
+
+            $cat_sat_moneda_id = $alta->registro_id;
+        } else {
+            $cat_sat_moneda_id = $existe->registros[0]['cat_sat_moneda_id'];
+        }
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['codigo'] = $codigo;
+        $registro['descripcion'] = 1;
+        $registro['fc_csd_id'] = $fc_csd_id;
+        $registro['com_sucursal_id'] = $com_sucursal_id;
+        $registro['serie'] = 1;
+        $registro['folio'] = $folio;
+        $registro['exportacion'] = 1;
+        $registro['cat_sat_forma_pago_id'] = $cat_sat_forma_pago_id;
+        $registro['cat_sat_metodo_pago_id'] = $cat_sat_metodo_pago_id;
+        $registro['cat_sat_moneda_id'] = $cat_sat_moneda_id;
+        $registro['com_tipo_cambio_id'] = $com_tipo_cambio_id;
+        $registro['cat_sat_uso_cfdi_id'] = 1;
+        $registro['cat_sat_tipo_de_comprobante_id'] = 1;
+
+
+
+        $alta = (new fc_complemento_pago($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
     public function alta_fc_factura_relacionada(PDO $link, int $fc_factura_id = 1,int $fc_relacion_id = 1, int $id = 1): array|\stdClass
     {
 
@@ -442,6 +549,54 @@ class base_test{
 
 
         $alta = (new fc_partida($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_partida_cp(PDO $link, string $codigo = '1', float $cantidad = 1, int $com_producto_id = 1,
+                                    string $descripcion = '1', float $descuento = 0,
+                                    string $fc_complemento_pago_folio = 'A-000001', int $fc_complemento_pago_id = 1,
+                                    int $id = 1, float $valor_unitario = 1): array|\stdClass
+    {
+
+        $existe = (new fc_complemento_pago($link))->existe_by_id(registro_id: $fc_complemento_pago_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_complemento_pago(link: $link, folio: $fc_complemento_pago_folio);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar factura', $alta);
+            }
+        }
+
+        $existe = (new com_producto($link))->existe_by_id(registro_id: $com_producto_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_com_producto(link: $link,id: $com_producto_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar com_producto', $alta);
+            }
+        }
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['codigo'] = $codigo;
+        $registro['descripcion'] = $descripcion;
+        $registro['cantidad'] = $cantidad;
+        $registro['valor_unitario'] = $valor_unitario;
+        $registro['fc_complemento_pago_id'] = $fc_complemento_pago_id;
+        $registro['com_producto_id'] = $com_producto_id;
+        $registro['codigo_bis'] = $codigo;
+        $registro['descuento'] = $descuento;
+
+
+        $alta = (new fc_partida_cp($link))->alta_registro($registro);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
 
@@ -735,6 +890,12 @@ class base_test{
 
         }
         $del = (new base_test())->del_fc_email_cp($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new base_test())->del_fc_partida_cp($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
 
@@ -1112,6 +1273,26 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_partida_cp(PDO $link): array
+    {
+
+        $del = $this->del_fc_traslado_cp($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = $this->del_fc_retenido_cp($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_partida_cp');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_partida_nc(PDO $link): array
     {
 
@@ -1174,6 +1355,24 @@ class base_test{
     public function del_fc_traslado(PDO $link): array
     {
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_traslado');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar traslado', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_traslado_cp(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_traslado_cp');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar traslado', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_retenido_cp(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_retenido_cp');
         if(errores::$error){
             return (new errores())->error('Error al eliminar traslado', $del);
         }

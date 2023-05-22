@@ -734,13 +734,18 @@ class _partida extends  _base{
     }
 
     /**
-     * @param int $id
-     * @param _transacciones_fc $modelo_entidad
-     * @param _etapa $modelo_etapa
+     * Verifica si una partida puede o no eliminarse
+     * @param int $id Identificador de la partida
+     * @param _transacciones_fc $modelo_entidad Modelo base
+     * @param _etapa $modelo_etapa Modelo para identificar etapa
      * @return array|bool
+     * @version 10.5.0
      */
     private function valida_restriccion_partida(int $id, _transacciones_fc $modelo_entidad, _etapa $modelo_etapa): bool|array
     {
+        if($id <= 0){
+            return $this->error->error(mensaje: 'Error id debe ser mayor a 0', data: $id);
+        }
         $row_partida = $this->registro(registro_id: $id, retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener row_partida', data: $row_partida);

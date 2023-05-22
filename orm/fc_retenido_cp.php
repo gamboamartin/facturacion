@@ -15,7 +15,7 @@ class fc_retenido_cp extends _data_impuestos {
 
         $columnas = array($tabla=>false,'fc_partida_cp'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla,
             'cat_sat_tipo_impuesto'=>$tabla,'com_producto'=>'fc_partida_cp','fc_complemento_pago'=>'fc_partida_cp');
-        $campos_obligatorios = array('codigo','fc_partida_id');
+        $campos_obligatorios = array('codigo','fc_partida_cp_id');
 
         $no_duplicados = array('codigo','descripcion_select','alias','codigo_bis');
 

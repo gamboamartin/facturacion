@@ -8,6 +8,7 @@ use gamboamartin\facturacion\models\_facturacion;
 use gamboamartin\facturacion\models\fc_complemento_pago;
 use gamboamartin\facturacion\models\fc_complemento_pago_etapa;
 use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_partida_cp;
 use gamboamartin\facturacion\models\fc_partida_nc;
@@ -15,6 +16,7 @@ use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_retenido_cp;
 use gamboamartin\facturacion\models\fc_traslado;
+use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\test\liberator;
 use gamboamartin\test\test;
 
@@ -140,6 +142,40 @@ class _partidaTest extends test
         $this->assertTrue($resultado);
         errores::$error = false;
 
+    }
+
+    public function test_valida_restriccion_partida(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida_cp(link: $this->link);
+        $modelo = new liberator($modelo);
+
+
+        $del = (new base_test())->del_fc_partida_cp(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
+            print_r($error);exit;
+        }
+
+
+        $inserta = (new base_test())->alta_fc_partida_cp(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $inserta);
+            print_r($error);exit;
+        }
+
+        $modelo_entidad = new fc_complemento_pago(link: $this->link);
+        $modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
+        $id = 1;
+        $resultado = $modelo->valida_restriccion_partida($id, $modelo_entidad, $modelo_etapa);
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+        errores::$error = false;
     }
 
 
