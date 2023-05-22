@@ -36,6 +36,25 @@ class fc_pago extends _modelo_parent{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
+
+        $fc_pago_total_ins['fc_pago_id'] = $r_alta_bd->registro_id;
+        $fc_pago_total_ins['total_traslados_base_iva_16'] = 0;
+        $fc_pago_total_ins['total_traslados_base_iva_08'] = 0;
+        $fc_pago_total_ins['total_traslados_base_iva_00'] = 0;
+        $fc_pago_total_ins['total_traslados_impuesto_iva_16'] = 0;
+        $fc_pago_total_ins['total_traslados_impuesto_iva_08'] = 0;
+        $fc_pago_total_ins['total_traslados_impuesto_iva_00'] = 0;
+        $fc_pago_total_ins['monto_total_pagos'] = 0;
+        $fc_pago_total_ins['total_retenciones_iva'] = 0;
+        $fc_pago_total_ins['total_retenciones_ieps'] = 0;
+        $fc_pago_total_ins['total_retenciones_isr'] = 0;
+
+        $r_alta_fc_pago_total = (new fc_pago_total(link: $this->link))->alta_registro(registro: $fc_pago_total_ins);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar totales',data:  $r_alta_fc_pago_total);
+        }
+
+
         return $r_alta_bd;
     }
 
