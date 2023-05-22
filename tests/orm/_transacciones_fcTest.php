@@ -37,6 +37,29 @@ class _transacciones_fcTest extends test
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_default_alta_emisor_data(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new fc_nota_credito($this->link);
+        $trs = new liberator($trs);
+
+        $registro = array();
+        $registro_csd = new stdClass();
+        $registro_csd->dp_calle_pertenece_id = 1;
+        $registro_csd->cat_sat_regimen_fiscal_id = 1;
+        $resultado = $trs->default_alta_emisor_data($registro, $registro_csd);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        errores::$error = false;
+    }
+
     public function test_etapas(): void
     {
         errores::$error = false;

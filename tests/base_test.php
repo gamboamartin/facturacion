@@ -101,9 +101,9 @@ class base_test{
         return $alta;
     }
 
-    public function alta_com_producto(PDO $link, int $id): array|\stdClass
+    public function alta_com_producto(PDO $link, int $codigo = 1, int $id = 1): array|\stdClass
     {
-        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_producto(link: $link, id: $id);
+        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_producto(link: $link, codigo: $codigo, id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -805,6 +805,13 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
 
         }
+
+        $del = (new base_test())->del_fc_partida_cp($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
 
         $del = (new \gamboamartin\comercial\test\base_test())->del_com_producto($link);
         if(errores::$error){

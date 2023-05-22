@@ -910,9 +910,16 @@ class _transacciones_fc extends modelo
      * @param array $registro Registro en proceso
      * @param stdClass $registro_csd Registro de tipo CSD
      * @return array
+     * @version 10.6.0
      */
     private function default_alta_emisor_data(array $registro, stdClass $registro_csd): array
     {
+        $keys = array('dp_calle_pertenece_id','cat_sat_regimen_fiscal_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $registro_csd);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar registro_csd', data: $valida);
+        }
+
         $registro['dp_calle_pertenece_id'] = $registro_csd->dp_calle_pertenece_id;
         $registro['cat_sat_regimen_fiscal_id'] = $registro_csd->cat_sat_regimen_fiscal_id;
         return $registro;

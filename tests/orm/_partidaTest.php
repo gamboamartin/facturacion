@@ -155,9 +155,16 @@ class _partidaTest extends test
         $modelo = new liberator($modelo);
 
 
-        $del = (new base_test())->del_fc_partida_cp(link: $this->link);
+        $del = (new base_test())->del_com_producto(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
+            print_r($error);exit;
+        }
+
+
+        $inserta = (new base_test())->alta_com_producto(link: $this->link, codigo: '84111506', id: '84111506');
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $inserta);
             print_r($error);exit;
         }
 

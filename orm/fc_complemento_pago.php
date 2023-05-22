@@ -8,6 +8,7 @@ use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
 use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
+use gamboamartin\cat_sat\models\cat_sat_unidad;
 use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
@@ -19,6 +20,8 @@ use stdClass;
 class fc_complemento_pago extends _transacciones_fc
 {
 
+    private string $com_producto_codigo_default = '84111506';
+    private string $cat_sat_unidad_codigo_default = 'ACT';
     public function __construct(PDO $link)
     {
         $tabla = 'fc_complemento_pago';
@@ -175,6 +178,34 @@ class fc_complemento_pago extends _transacciones_fc
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
+
+        $com_producto = (new com_producto(link: $this->link))->registro_by_codigo(
+            codigo: $this->com_producto_codigo_default);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener producto',data:  $com_producto);
+        }
+        $cat_sat_unidad = (new cat_sat_unidad(link: $this->link))->registro_by_codigo(
+            codigo: $this->cat_sat_unidad_codigo_default);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener cat_sat_unidad',data:  $cat_sat_unidad);
+        }
+
+        $fc_complemento_pago_id = $r_alta_bd->registro_id;
+
+        $fc_partida_cp_ins['com_producto_id'] = $com_producto['com_producto_id'];
+        $fc_partida_cp_ins['cantidad'] = 1;
+        $fc_partida_cp_ins['descripcion'] = 'Pago';
+        $fc_partida_cp_ins['valor_unitario'] = 0;
+        $fc_partida_cp_ins['descuento'] = 0;
+        $fc_partida_cp_ins['cat_sat_unidad_id'] = $cat_sat_unidad['cat_sat_unidad_id'];
+        $fc_partida_cp_ins['fc_complemento_pago_id'] = $fc_complemento_pago_id;
+
+        $alta_fc_partida_cp = (new fc_partida_cp(link: $this->link))->alta_registro(registro: $fc_partida_cp_ins);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar partida',data:  $alta_fc_partida_cp);
+        }
+
+
         return $r_alta_bd;
     }
 
