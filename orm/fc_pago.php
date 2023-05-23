@@ -37,22 +37,11 @@ class fc_pago extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
 
-        $fc_pago_total_ins['fc_pago_id'] = $r_alta_bd->registro_id;
-        $fc_pago_total_ins['total_traslados_base_iva_16'] = 0;
-        $fc_pago_total_ins['total_traslados_base_iva_08'] = 0;
-        $fc_pago_total_ins['total_traslados_base_iva_00'] = 0;
-        $fc_pago_total_ins['total_traslados_impuesto_iva_16'] = 0;
-        $fc_pago_total_ins['total_traslados_impuesto_iva_08'] = 0;
-        $fc_pago_total_ins['total_traslados_impuesto_iva_00'] = 0;
-        $fc_pago_total_ins['monto_total_pagos'] = 0;
-        $fc_pago_total_ins['total_retenciones_iva'] = 0;
-        $fc_pago_total_ins['total_retenciones_ieps'] = 0;
-        $fc_pago_total_ins['total_retenciones_isr'] = 0;
-
-        $r_alta_fc_pago_total = (new fc_pago_total(link: $this->link))->alta_registro(registro: $fc_pago_total_ins);
+        $r_alta_fc_pago_total = $this->inserta_fc_pago_total(fc_pago_id: $r_alta_bd->registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar totales',data:  $r_alta_fc_pago_total);
         }
+
 
 
         return $r_alta_bd;
@@ -68,6 +57,44 @@ class fc_pago extends _modelo_parent{
         $descripcion = $registro['version'];
         $descripcion .= ' '.$registro['fc_complemento_pago_id'];
         return $descripcion;
+    }
+
+    /**
+     * Genera un registro de tipo pago total
+     * @param int $fc_pago_id Registro de pago insertado
+     * @return array
+     */
+    private function fc_pago_total_ins(int $fc_pago_id): array
+    {
+        $fc_pago_total_ins['fc_pago_id'] = $fc_pago_id;
+        $fc_pago_total_ins['total_traslados_base_iva_16'] = 0;
+        $fc_pago_total_ins['total_traslados_base_iva_08'] = 0;
+        $fc_pago_total_ins['total_traslados_base_iva_00'] = 0;
+        $fc_pago_total_ins['total_traslados_impuesto_iva_16'] = 0;
+        $fc_pago_total_ins['total_traslados_impuesto_iva_08'] = 0;
+        $fc_pago_total_ins['total_traslados_impuesto_iva_00'] = 0;
+        $fc_pago_total_ins['monto_total_pagos'] = 0;
+        $fc_pago_total_ins['total_retenciones_iva'] = 0;
+        $fc_pago_total_ins['total_retenciones_ieps'] = 0;
+        $fc_pago_total_ins['total_retenciones_isr'] = 0;
+        return $fc_pago_total_ins;
+    }
+
+    private function inserta_fc_pago_total(int $fc_pago_id){
+        $fc_pago_total_ins = $this->fc_pago_total_ins(fc_pago_id: $fc_pago_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar row',data:  $fc_pago_total_ins);
+        }
+
+        $r_alta_fc_pago_total = (new fc_pago_total(link: $this->link))->alta_registro(registro: $fc_pago_total_ins);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar totales',data:  $r_alta_fc_pago_total);
+        }
+
+
+
+
+        return $fc_pago_total_ins;
     }
 
     private function integra_descripcion(array $registro){

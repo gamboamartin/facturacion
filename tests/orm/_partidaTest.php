@@ -17,6 +17,7 @@ use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_retenido_cp;
 use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\tests\base_test;
+use gamboamartin\js_base\eventos\adm_seccion;
 use gamboamartin\test\liberator;
 use gamboamartin\test\test;
 
@@ -160,6 +161,11 @@ class _partidaTest extends test
             $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
             print_r($error);exit;
         }
+        $del = (new base_test())->del_adm_seccion(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al del',data:  $del);
+            print_r($error);exit;
+        }
 
 
         $inserta = (new base_test())->alta_com_producto(link: $this->link, codigo: '84111506', id: '84111506');
@@ -168,6 +174,11 @@ class _partidaTest extends test
             print_r($error);exit;
         }
 
+        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link, adm_seccion_descripcion: 'fc_complemento_pago');
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
+            print_r($error);exit;
+        }
 
         $inserta = (new base_test())->alta_fc_partida_cp(link: $this->link);
         if(errores::$error){

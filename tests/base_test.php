@@ -25,6 +25,7 @@ use gamboamartin\facturacion\models\fc_partida_cp;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\organigrama\models\org_sucursal;
 use PDO;
+use stdClass;
 
 
 class base_test{
@@ -32,6 +33,17 @@ class base_test{
     public function alta_cat_sat_factor(PDO $link, string $codigo = '16', float $factor = .16, int $id = 1): array|\stdClass
     {
         $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_factor(link: $link, codigo: $codigo, factor: $factor, id: $id);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_adm_seccion(PDO $link, string $descripcion = 'fc_factura', $id = 1): array|\stdClass
+    {
+        $alta = (new \gamboamartin\administrador\tests\base_test())->alta_adm_seccion(link: $link,
+            descripcion: $descripcion, id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -460,8 +472,6 @@ class base_test{
         $registro['cat_sat_uso_cfdi_id'] = 1;
         $registro['cat_sat_tipo_de_comprobante_id'] = 1;
 
-
-
         $alta = (new fc_complemento_pago($link))->alta_registro($registro);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
@@ -654,6 +664,19 @@ class base_test{
         }
         return $alta;
     }
+
+    public function alta_pr_etapa_proceso(PDO $link, string $adm_accion_descripcion = 'alta_bd', int $adm_accion_id = 1,
+                                          string $adm_seccion_descripcion = 'fc_factura', int $id = 1): array|stdClass
+    {
+        $alta = (new \gamboamartin\proceso\tests\base_test())->alta_pr_etapa_proceso(link: $link,
+            adm_accion_id: $adm_accion_id, id: $id, adm_accion_descripcion: $adm_accion_descripcion,
+            adm_seccion_descripcion: $adm_seccion_descripcion);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
     
 
 
@@ -793,6 +816,39 @@ class base_test{
         return $del;
     }
 
+    public function del_adm_accion(PDO $link): array|\stdClass
+    {
+
+
+        $del = (new base_test())->del_pr_etapa_proceso($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = (new \gamboamartin\administrador\tests\base_test())->del_adm_accion($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
+    public function del_adm_seccion(PDO $link): array|\stdClass
+    {
+
+        $del = (new base_test())->del_pr_etapa_proceso($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = (new \gamboamartin\administrador\tests\base_test())->del_adm_seccion($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
     public function del_com_producto(PDO $link): array|\stdClass
     {
         $del = (new base_test())->del_fc_conf_retenido($link);
@@ -814,6 +870,38 @@ class base_test{
 
 
         $del = (new \gamboamartin\comercial\test\base_test())->del_com_producto($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
+    public function del_pr_etapa_proceso(PDO $link): array|\stdClass
+    {
+
+        $del = (new base_test())->del_fc_factura_etapa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        $del = (new base_test())->del_not_mensaje_etapa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+
+        $del = (new \gamboamartin\proceso\tests\base_test())->del_pr_etapa_proceso($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
+    public function del_not_mensaje_etapa(PDO $link): array|\stdClass
+    {
+        $del = (new \gamboamartin\notificaciones\tests\base_test())->del_not_mensaje_etapa($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
 

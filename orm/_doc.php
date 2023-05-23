@@ -6,7 +6,6 @@ use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use stdClass;
 
-
 class _doc extends _modelo_parent{
 
     protected _transacciones_fc $modelo_entidad;
@@ -116,9 +115,24 @@ class _doc extends _modelo_parent{
      * @param int $registro_id Registro de tipo factura complemento o nota de credito
      * @param string $tipo_documento Descripcion del documento a obtener
      * @return array|stdClass
+     * @version 10.9.0
      */
     private function get_factura_documentos(string $key_entidad_filter_id,int $registro_id,
                                                  string $tipo_documento): array|stdClass{
+
+        if($registro_id <= 0){
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+        }
+        $key_entidad_filter_id = trim($key_entidad_filter_id);
+        if($key_entidad_filter_id === ''){
+            return $this->error->error(mensaje: 'Error key_entidad_filter_id debe ser mayor a 0',
+                data: $key_entidad_filter_id);
+        }
+        if($tipo_documento === ''){
+            return $this->error->error(mensaje: 'Error tipo_documento debe ser mayor a 0',
+                data: $tipo_documento);
+        }
+
 
         $filtro[$key_entidad_filter_id] = $registro_id;
         $filtro['doc_tipo_documento.descripcion'] = $tipo_documento;
