@@ -10,7 +10,7 @@ class fc_pago_total extends _modelo_parent{
     public function __construct(PDO $link)
     {
         $tabla = 'fc_pago_total';
-        $columnas = array($tabla=>false);
+        $columnas = array($tabla=>false,'fc_pago'=>$tabla);
         $campos_obligatorios = array();
 
 

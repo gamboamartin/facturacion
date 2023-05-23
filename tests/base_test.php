@@ -18,6 +18,8 @@ use gamboamartin\facturacion\models\fc_conf_traslado;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
+use gamboamartin\facturacion\models\fc_pago;
+use gamboamartin\facturacion\models\fc_pago_pago;
 use gamboamartin\facturacion\models\fc_partida;
 
 
@@ -30,9 +32,10 @@ use stdClass;
 
 class base_test{
 
-    public function alta_cat_sat_factor(PDO $link, string $codigo = '16', float $factor = .16, int $id = 1): array|\stdClass
+    public function alta_adm_seccion(PDO $link, string $descripcion = 'fc_factura', $id = 1): array|\stdClass
     {
-        $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_factor(link: $link, codigo: $codigo, factor: $factor, id: $id);
+        $alta = (new \gamboamartin\administrador\tests\base_test())->alta_adm_seccion(link: $link,
+            descripcion: $descripcion, id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -40,10 +43,9 @@ class base_test{
         return $alta;
     }
 
-    public function alta_adm_seccion(PDO $link, string $descripcion = 'fc_factura', $id = 1): array|\stdClass
+    public function alta_cat_sat_factor(PDO $link, string $codigo = '16', float $factor = .16, int $id = 1): array|\stdClass
     {
-        $alta = (new \gamboamartin\administrador\tests\base_test())->alta_adm_seccion(link: $link,
-            descripcion: $descripcion, id: $id);
+        $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_factor(link: $link, codigo: $codigo, factor: $factor, id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -456,6 +458,17 @@ class base_test{
             $cat_sat_moneda_id = $existe->registros[0]['cat_sat_moneda_id'];
         }
 
+        $existe = (new com_producto($link))->existe_by_id(registro_id: '84111506');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe factura', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_com_producto(link: $link, codigo: '84111506', id: '84111506');
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar sucursal', data: $alta);
+            }
+        }
+
         $registro = array();
         $registro['id'] = $id;
         $registro['codigo'] = $codigo;
@@ -511,6 +524,81 @@ class base_test{
         $registro['fc_factura_id'] = $fc_factura_id;
 
         $alta = (new fc_factura_relacionada($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_pago(PDO $link, int $fc_complemento_pago_id = 1, int $id = 1,
+                                 string $version = '2.0'): array|\stdClass
+    {
+
+
+        $existe = (new fc_complemento_pago($link))->existe_by_id(registro_id: $fc_complemento_pago_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_complemento_pago(link: $link, id: $fc_complemento_pago_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+            }
+            $filtro['fc_complemento_pago.id'] = $fc_complemento_pago_id;
+            $del = (new fc_pago(link: $link))->elimina_con_filtro_and(filtro: $filtro);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al eliminar ', data: $del);
+            }
+
+        }
+
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['fc_complemento_pago_id'] = $fc_complemento_pago_id;
+        $registro['version'] = $version;
+
+
+        $alta = (new fc_pago($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_pago_pago(PDO $link, int $cat_sat_forma_pago_id = 1, int $cat_sat_moneda_id = 1,
+                                      int $com_tipo_cambio_id = 1, int $fc_pago_id = 1,
+                                      string $fecha_pago = '2020-01-01', int $id = 1, float $monto = 10): array|\stdClass
+    {
+
+
+        $existe = (new fc_pago($link))->existe_by_id(registro_id: $fc_pago_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+
+
+            $alta = $this->alta_fc_pago(link: $link, id: $fc_pago_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
+            }
+        }
+
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['fc_pago_id'] = $fc_pago_id;
+        $registro['fecha_pago'] = $fecha_pago;
+        $registro['cat_sat_forma_pago_id'] = $cat_sat_forma_pago_id;
+        $registro['cat_sat_moneda_id'] = $cat_sat_moneda_id;
+        $registro['com_tipo_cambio_id'] = $com_tipo_cambio_id;
+        $registro['monto'] = $monto;
+
+
+        $alta = (new fc_pago_pago($link))->alta_registro($registro);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
 
@@ -691,6 +779,39 @@ class base_test{
         return $del;
     }
 
+    public function del_adm_accion(PDO $link): array|\stdClass
+    {
+
+
+        $del = (new base_test())->del_pr_etapa_proceso($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = (new \gamboamartin\administrador\tests\base_test())->del_adm_accion($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
+    public function del_adm_seccion(PDO $link): array|\stdClass
+    {
+
+        $del = (new base_test())->del_pr_etapa_proceso($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = (new \gamboamartin\administrador\tests\base_test())->del_adm_seccion($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+
     public function del_cat_sat_factor(PDO $link): array|\stdClass
     {
 
@@ -803,6 +924,25 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
 
         }
+
+        $del = (new base_test())->del_fc_complemento_pago($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new base_test())->del_fc_nota_credito($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
+        $del = (new base_test())->del_fc_uuid($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
         $del = (new base_test())->del_fc_receptor_email($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
@@ -816,38 +956,9 @@ class base_test{
         return $del;
     }
 
-    public function del_adm_accion(PDO $link): array|\stdClass
-    {
 
 
-        $del = (new base_test())->del_pr_etapa_proceso($link);
-        if(errores::$error){
-            return (new errores())->error('Error al eliminar', $del);
-        }
 
-        $del = (new \gamboamartin\administrador\tests\base_test())->del_adm_accion($link);
-        if(errores::$error){
-            return (new errores())->error('Error al eliminar', $del);
-
-        }
-        return $del;
-    }
-
-    public function del_adm_seccion(PDO $link): array|\stdClass
-    {
-
-        $del = (new base_test())->del_pr_etapa_proceso($link);
-        if(errores::$error){
-            return (new errores())->error('Error al eliminar', $del);
-        }
-
-        $del = (new \gamboamartin\administrador\tests\base_test())->del_adm_seccion($link);
-        if(errores::$error){
-            return (new errores())->error('Error al eliminar', $del);
-
-        }
-        return $del;
-    }
 
     public function del_com_producto(PDO $link): array|\stdClass
     {
@@ -889,6 +1000,16 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
 
         }
+        $del = (new base_test())->del_fc_conf_etapa_rel($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        $del = (new base_test())->del_fc_complemento_pago_etapa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
 
 
         $del = (new \gamboamartin\proceso\tests\base_test())->del_pr_etapa_proceso($link);
@@ -926,6 +1047,15 @@ class base_test{
     public function del_fc_cancelacion(PDO $link): array
     {
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_cancelacion');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_conf_etapa_rel(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_conf_etapa_rel');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
@@ -1185,6 +1315,15 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_pago_pago(PDO $link): array
+    {
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_pago_pago');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_uuid_nc(PDO $link): array
     {
 
@@ -1396,7 +1535,10 @@ class base_test{
 
     public function del_fc_pago(PDO $link): array
     {
-
+        $del = $this->del_fc_pago_pago($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
         $del = $this->del_fc_pago_total($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
