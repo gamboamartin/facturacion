@@ -389,7 +389,7 @@ class _transacciones_fc extends modelo
         return $r_alta_bd->registro_id;
     }
 
-    private function partidas_base(_partida $modelo_partida, int $registro_id){
+    final public function partidas_base(_partida $modelo_partida, int $registro_id){
         $filtro[$this->key_filtro_id] = $registro_id;
         $r_rows_partidas = $modelo_partida->filtro_and(filtro: $filtro);
         if (errores::$error) {

@@ -210,6 +210,54 @@ class fc_factura extends _transacciones_fc
         return $r_elimina_bd;
     }
 
+    final public function n_parcialidades(int $fc_factura_id){
+        $filtro['fc_factura.id'] = $fc_factura_id;
+        $filtro['fc_docto_relacionado.status'] = 'activo';
+        $filtro['fc_factura.status'] = 'activo';
+        $filtro['fc_complemento_pago.status'] = 'activo';
+        $n_parcialidades = (new fc_docto_relacionado(link: $this->link))->cuenta(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener parcialidades',data:  $n_parcialidades);
+        }
+        return $n_parcialidades;
+
+    }
+
+
+
+    final public function saldo(int $fc_factura_id){
+
+        $fc_factura = (new fc_factura(link: $this->link))->registro(registro_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener factura',data:  $fc_factura);
+        }
+        $total_pagos = $this->total_pagos(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener total de pagos',data:  $total_pagos);
+        }
+
+        $saldo = round($fc_factura['fc_factura_total'],2) - round($total_pagos,2);
+        return round($saldo,2);
+
+    }
+
+    final public function total_pagos(int $fc_factura_id){
+
+        $filtro['fc_factura.id'] = $fc_factura_id;
+        $filtro['fc_docto_relacionado.status'] = 'activo';
+        $filtro['fc_factura.status'] = 'activo';
+        $filtro['fc_complemento_pago.status'] = 'activo';
+        $campos['total_pagos'] = 'fc_docto_relacionado.imp_pagado';
+        $r_fc_docto_relacionado = (new fc_docto_relacionado(link: $this->link))->suma(campos: $campos, filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener pagos',data:  $r_fc_docto_relacionado);
+        }
+        return round($r_fc_docto_relacionado['total_pagos'],2);
+
+    }
+
+
+
 
 
 
