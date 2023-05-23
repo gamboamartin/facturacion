@@ -581,9 +581,20 @@ class _partida extends  _base{
      * @param string $name_modelo_entidad Nombre del modelo o entidad de retorno
      * @param int $registro_entidad_id Registro id de la entidad de retorno
      * @return array
+     * @version 10.10.0
      */
     final public function params_button_partida(string $name_modelo_entidad, int $registro_entidad_id): array
     {
+
+        $name_modelo_entidad = trim($name_modelo_entidad);
+        if($name_modelo_entidad === ''){
+            return $this->error->error(mensaje: 'Error name_modelo_entidad esta vacio', data: $name_modelo_entidad);
+        }
+
+        if($registro_entidad_id <= 0){
+            return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
+                data: $registro_entidad_id);
+        }
 
         $params = array();
         $params['seccion_retorno'] = $name_modelo_entidad;

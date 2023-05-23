@@ -122,6 +122,27 @@ class _partidaTest extends test
         errores::$error = false;
     }
 
+    public function test_params_button_partida(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida(link: $this->link);
+        //$modelo = new liberator($modelo);
+
+        $name_modelo_entidad = 'a';
+        $registro_entidad_id = 1;
+        $resultado = $modelo->params_button_partida($name_modelo_entidad, $registro_entidad_id);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('a', $resultado['seccion_retorno']);
+        $this->assertEquals('modifica', $resultado['accion_retorno']);
+        $this->assertEquals(1, $resultado['id_retorno']);
+        errores::$error = false;
+    }
+
     public function test_valida_restriccion(): void
     {
         errores::$error = false;
