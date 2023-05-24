@@ -54,8 +54,14 @@
                         <?php echo $controlador->inputs->cat_sat_forma_pago_id_full; ?>
                         <?php echo $controlador->inputs->com_tipo_cambio_id; ?>
                         <?php echo $controlador->inputs->fc_pago_id; ?>
+                        <?php echo $controlador->inputs->seccion_retorno; ?>
+                        <?php echo $controlador->inputs->id_retorno; ?>
 
-                        <?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>
+                        <div class="control-group btn-alta">
+                            <div class="controls">
+                                <button type="submit" class="btn btn-success" value="modifica" name="btn_action_next">Alta</button><br>
+                            </div>
+                        </div>
 
                     </form>
                 </div>

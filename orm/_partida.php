@@ -470,8 +470,19 @@ class _partida extends  _base{
         return $del_dependientes;
     }
 
+    /**
+     * Integra un boton para partida
+     * @param html_controler $html Html base de template
+     * @param int $indice Indice de registro de partida
+     * @param string $name_modelo_entidad Nombre base de la entidad
+     * @param array $partida Partida a integrar datos
+     * @param stdClass $r_fc_registro_partida Registros de partidas
+     * @param int $registro_entidad_id Identificador de partida
+     * @return array|stdClass
+     */
     private function integra_button_partida(html_controler $html, int $indice, string $name_modelo_entidad, array $partida,
-                                            stdClass $r_fc_registro_partida, int $registro_entidad_id){
+                                            stdClass $r_fc_registro_partida, int $registro_entidad_id): array|stdClass
+    {
 
         $params = $this->params_button_partida(name_modelo_entidad: $name_modelo_entidad,
             registro_entidad_id: $registro_entidad_id);

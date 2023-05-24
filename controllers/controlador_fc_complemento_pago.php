@@ -308,8 +308,26 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener r_fc_pago',data:  $r_fc_pago,header:  $header, ws: $ws);
         }
+
         $fc_pago_id = (new fc_complemento_pago_html(html: $this->html_base))->hidden(name: 'fc_pago_id',value:  $r_fc_pago->registros[0]['fc_pago_id']);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener fc_pago_id',data:  $fc_pago_id,header:  $header, ws: $ws);
+        }
         $this->inputs->fc_pago_id = $fc_pago_id;
+
+        $seccion_retorno = (new fc_complemento_pago_html(html: $this->html_base))->hidden(name: 'seccion_retorno',value:  $this->tabla);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener seccion_retorno',data:  $seccion_retorno,header:  $header, ws: $ws);
+        }
+        $this->inputs->seccion_retorno = $seccion_retorno;
+
+        $id_retorno = (new fc_complemento_pago_html(html: $this->html_base))->hidden(name: 'id_retorno',value:  $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener id_retorno',data:  $id_retorno,header:  $header, ws: $ws);
+        }
+        $this->inputs->id_retorno = $id_retorno;
+
+
 
         return $r_modifica;
     }
