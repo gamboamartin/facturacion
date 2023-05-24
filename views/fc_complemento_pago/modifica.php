@@ -43,6 +43,28 @@
         <?php echo $controlador->buttons_base; ?>
     </div>
 
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="widget  widget-box box-container form-main widget-form-cart" id="form">
+                    <form method="post" action="<?php echo $controlador->link_fc_pago_pago_alta_bd; ?>" class="form-additional">
+
+                        <?php echo $controlador->inputs->fecha_pago; ?>
+                        <?php echo $controlador->inputs->monto; ?>
+                        <?php echo $controlador->inputs->cat_sat_forma_pago_id_full; ?>
+                        <?php echo $controlador->inputs->com_tipo_cambio_id; ?>
+                        <?php echo $controlador->inputs->fc_pago_id; ?>
+
+                        <?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>
+
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
 
 
 

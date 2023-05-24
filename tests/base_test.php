@@ -1010,6 +1010,16 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
 
         }
+        $del = (new base_test())->del_fc_nota_credito_etapa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        $del = (new base_test())->del_fc_uuid_etapa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
 
 
         $del = (new \gamboamartin\proceso\tests\base_test())->del_pr_etapa_proceso($link);

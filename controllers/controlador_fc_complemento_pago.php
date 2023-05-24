@@ -19,6 +19,7 @@ use gamboamartin\facturacion\models\fc_complemento_pago_relacionada;
 use gamboamartin\facturacion\models\fc_cuenta_predial_cp;
 use gamboamartin\facturacion\models\fc_email_cp;
 use gamboamartin\facturacion\models\fc_notificacion_cp;
+use gamboamartin\facturacion\models\fc_pago;
 use gamboamartin\facturacion\models\fc_partida_cp;
 use gamboamartin\facturacion\models\fc_relacion_cp;
 use gamboamartin\facturacion\models\fc_retenido_cp;
@@ -26,6 +27,7 @@ use gamboamartin\facturacion\models\fc_traslado_cp;
 use gamboamartin\facturacion\models\fc_uuid_cp;
 use gamboamartin\template\html;
 
+use html\cat_sat_forma_pago_html;
 use PDO;
 use stdClass;
 
@@ -58,6 +60,8 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     public int $fc_complemento_pago_id = -1;
     public int $fc_partida_cp_id = -1;
     public stdClass $partidas;
+
+    public string $link_fc_pago_pago_alta_bd = '';
 
 
     public array $relaciones = array();
@@ -264,6 +268,48 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica,header:  $header, ws: $ws);
         }
+
+        $value_fecha_pago = date('Y-m-d H:i:s');
+        $fecha_pago = (new fc_complemento_pago_html(html: $this->html_base))->input_fecha(cols: 6,
+            row_upd: new stdClass(), value_vacio: false, name: 'fecha_pago', value: $value_fecha_pago,
+            value_hora: true);
+
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar fecha_pago',data:  $fecha_pago,header:  $header, ws: $ws);
+        }
+
+        $this->inputs->fecha_pago = $fecha_pago;
+
+        $monto = (new fc_complemento_pago_html(html: $this->html_base))->input_monto(cols: 6,row_upd: new stdClass(),value_vacio: false);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar monto',data:  $monto,header:  $header, ws: $ws);
+        }
+
+        $this->inputs->monto = $monto;
+
+        $cat_sat_forma_pago_id_full = (new cat_sat_forma_pago_html(html: $this->html_base))->select_cat_sat_forma_pago_id(
+            cols: 6,con_registros: true,id_selected: -1,link: $this->link);
+
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar cat_sat_forma_pago_id_full',data:  $cat_sat_forma_pago_id_full,header:  $header, ws: $ws);
+        }
+
+        $this->inputs->cat_sat_forma_pago_id_full = $cat_sat_forma_pago_id_full;
+
+        $link_fc_pago_pago_alta_bd = $this->obj_link->link_alta_bd(link:  $this->link,seccion: 'fc_pago_pago');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar link_fc_pago_pago_alta_bd',data:  $link_fc_pago_pago_alta_bd,header:  $header, ws: $ws);
+        }
+
+        $this->link_fc_pago_pago_alta_bd = $link_fc_pago_pago_alta_bd;
+
+        $filtro['fc_complemento_pago.id'] = $this->registro_id;
+        $r_fc_pago = (new fc_pago(link: $this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener r_fc_pago',data:  $r_fc_pago,header:  $header, ws: $ws);
+        }
+        $fc_pago_id = (new fc_complemento_pago_html(html: $this->html_base))->hidden(name: 'fc_pago_id',value:  $r_fc_pago->registros[0]['fc_pago_id']);
+        $this->inputs->fc_pago_id = $fc_pago_id;
 
         return $r_modifica;
     }
