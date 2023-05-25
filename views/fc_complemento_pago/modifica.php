@@ -71,55 +71,126 @@
         </div>
     </div>
 
-
-
-
     <div class="container">
-
         <div class="row">
-            <div class="col-md-12">
-                <div class="widget widget-box box-container widget-mylistings">
-                    <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
-                        <h2>Correos</h2>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                            <tr>
-                                <th>Id</th>
-                                <th>Correo</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <?php foreach ($controlador->registros['fc_emails'] as $fc_email){ ?>
-                            <tr>
-                                <td><?php echo $fc_email['fc_email_cp_id']; ?></td>
-                                <td><?php echo $fc_email['com_email_cte_descripcion']; ?></td>
-                            </tr>
-                            <?php } ?>
-                            </tbody>
-                        </table>
+            <div class="col-lg-12">
+                <div class="widget  widget-box box-container form-main widget-form-cart" id="form">
+                    <h2>Pagos</h2>
+                    <div class="table table-responsive">
+                        <form method="post" action="<?php echo $controlador->link_fc_docto_relacionado_alta_bd; ?>" class="form-additional">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Id</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($controlador->fc_pagos as $fc_pago){
+                                        $fc_pago_totales = $fc_pago['fc_pago_totales'];
+                                        $fc_pago_pagos = $fc_pago['fc_pago_pagos'];
+                                        ?>
+                                        <tr>
+                                            <td><?php echo $fc_pago['fc_pago_id'] ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <h3>Totales</h3>
+                                                <div class="table table-responsive">
+                                                    <table class="table table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Id</th>
+                                                                <th>Monto Total</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <?php foreach ($fc_pago_totales as $fc_pago_total){ ?>
+                                                            <tr>
+                                                                <td><?php echo $fc_pago_total['fc_pago_total_id'] ?></td>
+                                                                <td><?php echo $fc_pago_total['fc_pago_total_monto_total_pagos'] ?></td>
+                                                            </tr>
+
+                                                        <?php }?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <h3>Detalle</h3>
+                                                <div class="table table-responsive">
+                                                    <table class="table table-striped">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Id</th>
+                                                            <th>Forma Pago</th>
+                                                            <th>Moneda</th>
+                                                            <th>Tipo Cambio</th>
+                                                            <th>Monto</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <?php foreach ($fc_pago_pagos as $fc_pago_pago){ ?>
+                                                            <tr>
+                                                                <td><?php echo $fc_pago_pago['fc_pago_pago_id'] ?></td>
+                                                                <td><?php echo $fc_pago_pago['cat_sat_forma_pago_codigo'] ?></td>
+                                                                <td><?php echo $fc_pago_pago['cat_sat_moneda_codigo'] ?></td>
+                                                                <td><?php echo $fc_pago_pago['com_tipo_cambio_monto'] ?></td>
+                                                                <td><?php echo $fc_pago_pago['fc_pago_pago_monto'] ?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="5">
+                                                                    <h4>Documento</h4>
+                                                                    <div class="table table-responsive">
+                                                                        <table class="table table-striped">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>UUID</th>
+                                                                                    <th>Total</th>
+                                                                                    <th>Monto Pagado</th>
+                                                                                    <th>Saldo</th>
+                                                                                    <th>Monto</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                            <?php foreach ($controlador->fc_facturas as $fc_factura){ ?>
+                                                                                <tr>
+                                                                                    <td><?php echo $fc_factura['fc_factura_uuid'] ?></td>
+                                                                                    <td><?php echo $fc_factura['fc_factura_total'] ?></td>
+                                                                                    <td><?php echo $fc_factura['fc_factura_monto_pagado'] ?></td>
+                                                                                    <td><?php echo $fc_factura['fc_factura_saldo'] ?></td>
+                                                                                    <td>
+                                                                                        <input type="text" class="form-control" name="monto[][<?php echo $fc_factura['fc_factura_id'] ?>][<?php echo $fc_pago_pago['fc_pago_pago_id'] ?>]">
+                                                                                    </td>
+                                                                                </tr>
+                                                                            <?php }?>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        <?php }?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php }?>
+                                </tbody>
+                            </table>
+                            <div class="control-group btn-alta">
+                                <div class="controls">
+                                    <button type="submit" class="btn btn-success" value="modifica" name="btn_action_next">Alta</button><br>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
 
-
-
-        <?php echo $controlador->buttons_base; ?>
-
-
-        <div class="col-md-12 buttons-form">
-            <?php
-            foreach ($controlador->buttons_parents_alta as $button){ ?>
-                <div class="col-md-4">
-                    <?php echo $button; ?>
-                </div>
-            <?php } ?>
-        </div>
-
     </div>
-
 
 
 </main>

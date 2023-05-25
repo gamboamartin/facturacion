@@ -13,7 +13,8 @@ class fc_pago_pago extends _modelo_parent{
     public function __construct(PDO $link)
     {
         $tabla = 'fc_pago_pago';
-        $columnas = array($tabla=>false,'fc_pago'=>$tabla,'com_tipo_cambio'=>$tabla);
+        $columnas = array($tabla=>false,'fc_pago'=>$tabla,'com_tipo_cambio'=>$tabla,'cat_sat_forma_pago'=>$tabla,
+            'cat_sat_moneda'=>'com_tipo_cambio');
         $campos_obligatorios = array();
 
 
