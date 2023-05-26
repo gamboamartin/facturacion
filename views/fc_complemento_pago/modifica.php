@@ -131,7 +131,9 @@
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        <?php foreach ($fc_pago_pagos as $fc_pago_pago){ ?>
+                                                        <?php foreach ($fc_pago_pagos as $fc_pago_pago){
+                                                            $fc_doctos_relacionados = $fc_pago_pago['fc_doctos_relacionados'];
+                                                            ?>
                                                             <tr>
                                                                 <td><?php echo $fc_pago_pago['fc_pago_pago_id'] ?></td>
                                                                 <td><?php echo $fc_pago_pago['cat_sat_forma_pago_codigo'] ?></td>
@@ -161,7 +163,7 @@
                                                                                     <td><?php echo $fc_factura['fc_factura_monto_pagado'] ?></td>
                                                                                     <td><?php echo $fc_factura['fc_factura_saldo'] ?></td>
                                                                                     <td>
-                                                                                        <input type="text" class="form-control" name="monto[][<?php echo $fc_factura['fc_factura_id'] ?>][<?php echo $fc_pago_pago['fc_pago_pago_id'] ?>]">
+                                                                                        <input type="text" class="form-text" name="monto[][<?php echo $fc_factura['fc_factura_id'] ?>][<?php echo $fc_pago_pago['fc_pago_pago_id'] ?>]">
                                                                                     </td>
                                                                                 </tr>
                                                                             <?php }?>
@@ -170,6 +172,39 @@
                                                                     </div>
                                                                 </td>
                                                             </tr>
+
+                                                            <tr>
+                                                                <td colspan="5">
+                                                                    <h4>Documentos Relacionados</h4>
+                                                                    <div class="table table-responsive">
+                                                                        <table class="table table-striped">
+                                                                            <thead>
+                                                                            <tr>
+                                                                                <th>UUID</th>
+                                                                                <th>Total</th>
+                                                                                <th>Monto Pagado</th>
+                                                                                <th>Saldo</th>
+                                                                                <th>Monto</th>
+                                                                                <th>Elimina</th>
+                                                                            </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                            <?php foreach ($fc_doctos_relacionados as $fc_docto_relacionado){ ?>
+                                                                                <tr>
+                                                                                    <td><?php echo $fc_docto_relacionado['fc_factura_uuid'] ?></td>
+                                                                                    <td><?php echo $fc_docto_relacionado['fc_factura_total'] ?></td>
+                                                                                    <td><?php echo $fc_docto_relacionado['fc_factura_monto_pagado'] ?></td>
+                                                                                    <td><?php echo $fc_docto_relacionado['fc_factura_saldo'] ?></td>
+                                                                                    <td><?php echo $fc_docto_relacionado['fc_docto_relacionado_imp_pagado'] ?></td>
+                                                                                    <td><?php echo $fc_docto_relacionado['elimina_bd'] ?></td>
+                                                                                </tr>
+                                                                            <?php }?>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+
                                                         <?php }?>
                                                         </tbody>
                                                     </table>

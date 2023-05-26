@@ -14,11 +14,15 @@ class fc_docto_relacionado extends _modelo_parent{
         $tabla = 'fc_docto_relacionado';
         $columnas = array($tabla=>false,'fc_pago_pago'=>$tabla,'fc_factura'=>$tabla,'fc_pago'=>'fc_pago_pago',
             'fc_complemento_pago'=>'fc_pago');
+
         $campos_obligatorios = array();
 
+        $fc_factura_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_factura_id = fc_factura.id)";
+
+        $columnas_extra['fc_factura_uuid'] = "IFNULL($fc_factura_uuid,'SIN UUID')";
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas);
+            columnas: $columnas, columnas_extra: $columnas_extra);
 
         $this->NAMESPACE = __NAMESPACE__;
         $this->etiqueta = 'Docto Relacionado';
@@ -233,7 +237,7 @@ class fc_docto_relacionado extends _modelo_parent{
 
     private function regenera_pago_pago_monto(int $fc_pago_pago_id){
         $filtro['fc_pago_pago.id'] = $fc_pago_pago_id;
-        $campos['monto'] = 'fc_pago_pago.id';
+        $campos['monto'] = 'fc_docto_relacionado.imp_pagado';
 
         $r_fc_docto_relacionados = $this->suma(campos: $campos, filtro: $filtro);
         if(errores::$error){
