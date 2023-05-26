@@ -223,8 +223,6 @@ class fc_factura extends _transacciones_fc
 
     }
 
-
-
     final public function saldo(int $fc_factura_id){
 
         $fc_factura = (new fc_factura(link: $this->link))->registro(registro_id: $fc_factura_id);
@@ -255,10 +253,6 @@ class fc_factura extends _transacciones_fc
         return round($r_fc_docto_relacionado['total_pagos'],2);
 
     }
-
-
-
-
 
 
 }

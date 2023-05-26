@@ -1348,6 +1348,43 @@ class _transacciones_fc extends modelo
         return $descuento;
     }
 
+    final public function tiene_impuestos(_data_impuestos $modelo_traslado, _data_impuestos $modelo_retencion, int $registro_id){
+        $tiene_retenciones = $this->tiene_retenciones(modelo_retencion: $modelo_retencion,registro_id:  $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $tiene_retenciones);
+        }
+        $tiene_traslados = $this->tiene_traslados(modelo_traslado: $modelo_traslado,registro_id:  $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $tiene_traslados);
+        }
+
+        $tiene_impuestos = false;
+        if($tiene_retenciones || $tiene_traslados){
+            $tiene_impuestos = true;
+        }
+        return $tiene_impuestos;
+
+    }
+
+    final public function tiene_retenciones(_data_impuestos $modelo_retencion, int $registro_id){
+        $filtro[$this->key_filtro_id] = $registro_id;
+        $tiene_rows = $modelo_retencion->existe(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $tiene_rows);
+        }
+        return $tiene_rows;
+    }
+
+
+    final public function tiene_traslados(_data_impuestos $modelo_traslado, int $registro_id){
+        $filtro[$this->key_filtro_id] = $registro_id;
+        $tiene_rows = $modelo_traslado->existe(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $tiene_rows);
+        }
+        return $tiene_rows;
+    }
+
     private function ultimo_folio(int $fc_csd_id){
         $filtro['fc_csd.id'] = $fc_csd_id;
         $r_registro = $this->filtro_and(filtro: $filtro, limit: 1,order: array($this->tabla.'.folio'=>'DESC'));
