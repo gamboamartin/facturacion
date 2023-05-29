@@ -49,6 +49,26 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al actualizar monto de pago',data:  $regenera_monto);
         }
 
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $fc_factura_id = $this->registro['fc_factura_id'];
+
+        $tiene_impuestos = (new fc_factura(link: $this->link))->tiene_impuestos(modelo_traslado: $modelo_traslado,
+            modelo_retencion:  $modelo_retencion, registro_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si existen impuestos',data:  $tiene_impuestos);
+        }
+        if($tiene_impuestos){
+
+            $fc_impuesto_dr_ins['fc_docto_relacionado_id'] = $r_alta_bd->registro_id;
+            $r_fc_impuesto_dr = (new fc_impuesto_dr(link: $this->link))->alta_registro(registro: $fc_impuesto_dr_ins);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al insertar r_fc_impuesto_dr',data:  $r_fc_impuesto_dr);
+            }
+
+        }
+
+
         return $r_alta_bd;
     }
 

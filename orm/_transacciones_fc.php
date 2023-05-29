@@ -1298,6 +1298,15 @@ class _transacciones_fc extends modelo
         return $receptor;
     }
 
+    final public function retenciones(_data_impuestos $modelo_retencion, int $registro_id){
+        $filtro[$this->key_filtro_id] = $registro_id;
+        $r_retenciones = $modelo_retencion->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $r_retenciones);
+        }
+        return $r_retenciones->registros;
+    }
+
     final public function ruta_archivos(string $directorio = ""): array|string
     {
         $ruta_archivos = (new generales())->path_base . "archivos/$directorio";
@@ -1383,6 +1392,63 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $tiene_rows);
         }
         return $tiene_rows;
+    }
+
+    final public function traslados(_data_impuestos $modelo_traslado, int $registro_id){
+        $filtro[$this->key_filtro_id] = $registro_id;
+        $r_traslados = $modelo_traslado->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $r_traslados);
+        }
+        return $r_traslados->registros;
+    }
+
+    final public function tasas_de_impuestos(_data_impuestos $modelo_traslado, _data_impuestos $modelo_retencion, int $registro_id){
+
+        $traslados = $this->traslados(modelo_traslado: $modelo_traslado,registro_id:  $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener traslados', data: $traslados);
+        }
+
+        $tiene_traslado = $this->tiene_traslados(modelo_traslado: $modelo_traslado,registro_id:  $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener traslados', data: $tiene_traslado);
+        }
+
+        $retenciones = $this->retenciones(modelo_retencion: $modelo_retencion,registro_id:  $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener retenciones', data: $retenciones);
+        }
+        $tiene_retencion = $this->tiene_retenciones(modelo_retencion: $modelo_retencion,registro_id:  $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener tiene_retencion', data: $tiene_retencion);
+        }
+
+        $factor_traslado = 0;
+        foreach ($traslados as $traslado){
+            $factor_traslado = $traslado['cat_sat_factor_factor'];
+        }
+
+        $factor_retenido = 0;
+        foreach ($retenciones as $retencion){
+            $factor_retenido = $retencion['cat_sat_factor_factor'];
+        }
+
+        $data = new stdClass();
+        $data->traslado = new stdClass();
+
+        $data->traslado->aplica = $tiene_traslado;
+        $data->traslado->registros = $traslados;
+        $data->traslado->factor = $factor_traslado;
+
+        $data->retencion = new stdClass();
+
+        $data->retencion->aplica = $tiene_retencion;
+        $data->retencion->registros = $retenciones;
+        $data->retencion->factor = $factor_retenido;
+
+        return $data;
+
     }
 
     private function ultimo_folio(int $fc_csd_id){

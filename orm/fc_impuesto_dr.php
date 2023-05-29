@@ -12,7 +12,7 @@ class fc_impuesto_dr extends _modelo_parent{
     public function __construct(PDO $link)
     {
         $tabla = 'fc_impuesto_dr';
-        $columnas = array($tabla=>false);
+        $columnas = array($tabla=>false,'fc_docto_relacionado'=>$tabla,'fc_factura'=>'fc_docto_relacionado');
         $campos_obligatorios = array();
 
 
@@ -25,6 +25,12 @@ class fc_impuesto_dr extends _modelo_parent{
 
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
+        if(!isset($this->registro['codigo'])){
+            $codigo = $this->registro['fc_docto_relacionado_id'];
+            $codigo .= time();
+            $codigo .= mt_rand(1000,9999);
+            $this->registro['codigo'] = $codigo;
+        }
 
         if(!isset($this->registro['descripcion'])){
             $descripcion = $this->registro['codigo'];
@@ -35,6 +41,36 @@ class fc_impuesto_dr extends _modelo_parent{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
+
+        $fc_impuesto_dr = $r_alta_bd->registro_obj;
+
+
+        $modelo_traslado = new fc_traslado(link: $this->link);
+
+        $tiene_traslados = (new fc_factura(link: $this->link))->tiene_traslados(modelo_traslado: $modelo_traslado,
+            registro_id: $fc_impuesto_dr->fc_factura_id);
+
+        if($tiene_traslados){
+            $fc_traslado_dr_ins['fc_impuesto_dr_id'] = $r_alta_bd->registro_id;
+            $r_fc_traslado_dr = (new fc_traslado_dr(link: $this->link))->alta_registro(registro: $fc_traslado_dr_ins);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al insertar',data:  $r_fc_traslado_dr);
+            }
+        }
+
+        $modelo_retencion = new fc_retenido(link: $this->link);
+
+        $tiene_retenciones = (new fc_factura(link: $this->link))->tiene_retenciones(modelo_retencion: $modelo_retencion,
+            registro_id: $fc_impuesto_dr->fc_factura_id);
+
+        if($tiene_retenciones){
+            $fc_retencion_dr_ins['fc_impuesto_dr_id'] = $r_alta_bd->registro_id;
+            $r_fc_retencion_dr = (new fc_retencion_dr(link: $this->link))->alta_registro(registro: $fc_retencion_dr_ins);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al insertar',data:  $r_fc_retencion_dr);
+            }
+        }
+
         return $r_alta_bd;
     }
 

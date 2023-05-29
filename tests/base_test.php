@@ -907,6 +907,17 @@ class base_test{
 
         }
 
+        $del = (new base_test())->del_fc_retenido($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        $del = (new base_test())->del_fc_traslado($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
         $del = (new \gamboamartin\cat_sat\tests\base_test())->del_cat_sat_tipo_factor($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
@@ -1505,7 +1516,54 @@ class base_test{
 
     public function del_fc_docto_relacionado(PDO $link): array
     {
+
+        $del = $this->del_fc_impuesto_dr($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_docto_relacionado');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_traslado_dr(PDO $link): array
+    {
+
+        $del = $this->del_fc_traslado_dr_part($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_traslado_dr');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_traslado_dr_part(PDO $link): array
+    {
+
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_traslado_dr_part');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_impuesto_dr(PDO $link): array
+    {
+        $del = $this->del_fc_traslado_dr($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_impuesto_dr');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }

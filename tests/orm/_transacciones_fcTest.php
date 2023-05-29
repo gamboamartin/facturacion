@@ -145,6 +145,19 @@ class _transacciones_fcTest extends test
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
+        $del = (new base_test())->del_cat_sat_tipo_factor(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar', data: $del);
+            print_r($error);
+            exit;
+        }
+        $del = (new base_test())->del_cat_sat_factor(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar', data: $del);
+            print_r($error);
+            exit;
+        }
+
         $del = (new base_test())->del_fc_factura(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al eliminar', data: $del);
@@ -203,7 +216,8 @@ class _transacciones_fcTest extends test
         $modelo_retencion = new fc_retenido(link: $this->link);
         $modelo_traslado = new fc_traslado(link: $this->link);
 
-        $resultado = $modelo->tiene_impuestos(modelo_traslado: $modelo_traslado, modelo_retencion: $modelo_retencion, registro_id: $registro_id);
+        $resultado = $modelo->tiene_impuestos(modelo_traslado: $modelo_traslado,
+            modelo_retencion: $modelo_retencion, registro_id: $registro_id);
 
         $this->assertIsBool($resultado);
         $this->assertNotTrue(errores::$error);
