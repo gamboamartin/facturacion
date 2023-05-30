@@ -44,32 +44,79 @@ class fc_docto_relacionado extends _modelo_parent{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
+
         $regenera_monto = $this->regenera_pago_pago_monto(fc_pago_pago_id: $registro['fc_pago_pago_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar monto de pago',data:  $regenera_monto);
         }
 
+
+        $transacciones = $this->genera_impuestos(fc_docto_relacionado_id: $r_alta_bd->registro_id,
+            fc_factura_id:  $registro['fc_factura_id'],fc_pago_pago_id:  $registro['fc_pago_pago_id']);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al transaccionar', data: $transacciones);
+        }
+
+
         $modelo_traslado = new fc_traslado(link: $this->link);
-        $modelo_retencion = new fc_retenido(link: $this->link);
-        $fc_factura_id = $this->registro['fc_factura_id'];
 
-        $tiene_impuestos = (new fc_factura(link: $this->link))->tiene_impuestos(modelo_traslado: $modelo_traslado,
-            modelo_retencion:  $modelo_retencion, registro_id: $fc_factura_id);
+        $tiene_traslado = (new fc_factura(link: $this->link))->tiene_traslados(modelo_traslado: $modelo_traslado,
+            registro_id:  $r_alta_bd->registro['fc_factura_id']);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar si existen impuestos',data:  $tiene_impuestos);
+            return $this->error->error(mensaje: 'Error al validar si existe traslado',data:  $tiene_traslado);
         }
-        if($tiene_impuestos){
-
-            $fc_impuesto_dr_ins['fc_docto_relacionado_id'] = $r_alta_bd->registro_id;
-            $r_fc_impuesto_dr = (new fc_impuesto_dr(link: $this->link))->alta_registro(registro: $fc_impuesto_dr_ins);
+        if($tiene_traslado){
+            $fc_traslado_p_ins['fc_impuesto_p_id'] = $transacciones->fc_impuesto_p_id;
+            $r_alta_fc_traslado_p = (new fc_traslado_p(link: $this->link))->alta_registro(registro: $fc_traslado_p_ins);
             if(errores::$error){
-                return $this->error->error(mensaje: 'Error al insertar r_fc_impuesto_dr',data:  $r_fc_impuesto_dr);
+                return $this->error->error(mensaje: 'Error al insertar impuesto traslado',data:  $r_alta_fc_traslado_p);
             }
-
         }
+
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $tiene_retencion = (new fc_factura(link: $this->link))->tiene_retenciones(modelo_retencion: $modelo_retencion,
+            registro_id:  $r_alta_bd->registro['fc_factura_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si existe traslado',data:  $tiene_traslado);
+        }
+        if($tiene_retencion){
+            $fc_retencion_p_ins['fc_impuesto_p_id'] = $transacciones->fc_impuesto_p_id;
+            $r_alta_fc_retencion_p = (new fc_retencion_p(link: $this->link))->alta_registro(registro: $fc_retencion_p_ins);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al insertar impuesto retenido',data:  $r_alta_fc_retencion_p);
+            }
+        }
+
 
 
         return $r_alta_bd;
+    }
+
+    private function alta_fc_impuesto_p(int $fc_pago_pago_id){
+        $r_alta_impuesto_p = new stdClass();
+        $filtro = array();
+        $filtro['fc_pago_pago.id'] = $fc_pago_pago_id;
+
+        $existe = (new fc_impuesto_p(link: $this->link))->existe(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si existe',data:  $existe);
+        }
+        if(!$existe) {
+            $r_alta_impuesto_p = $this->inserta_fc_impuesto_p(fc_pago_pago_id: $fc_pago_pago_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al insertar r_alta_impuesto_p', data: $r_alta_impuesto_p);
+            }
+            $fc_impuesto_p = $r_alta_impuesto_p->registro;
+        }
+        else{
+            $r_fc_impuesto_p = (new fc_impuesto_p(link: $this->link))->filtro_and(filtro: $filtro);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener fc_impuesto_p', data: $r_alta_impuesto_p);
+            }
+            $fc_impuesto_p = $r_fc_impuesto_p->registros[0];
+        }
+
+        return $fc_impuesto_p;
     }
 
     private function cat_sat_obj_imp_id(array $fc_partidas){
@@ -125,12 +172,27 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener registro',data:  $registro);
         }
 
+        $filtro['fc_docto_relacionado.id'] = $id;
+
+        $del_fc_impuesto_dr = (new fc_impuesto_dr(link: $this->link))->elimina_con_filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al eliminar fc_impuesto_dr',data:  $del_fc_impuesto_dr);
+        }
+
+
         $r_elimina_bd= parent::elimina_bd(id: $id); // TODO: Change the autogenerated stub
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al eliminar',data:  $r_elimina_bd);
+        }
 
         $regenera_monto = $this->regenera_pago_pago_monto(fc_pago_pago_id: $registro['fc_pago_pago_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar monto de pago',data:  $regenera_monto);
         }
+
+
+
+
         return $r_elimina_bd;
 
     }
@@ -141,6 +203,29 @@ class fc_docto_relacionado extends _modelo_parent{
             / round($fc_pago_pago['com_tipo_cambio_monto'],2) ;
 
         return round($equivalencia_dr,2);
+    }
+
+    private function genera_impuestos(int $fc_docto_relacionado_id, int $fc_factura_id, int $fc_pago_pago_id){
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+
+        $tiene_impuestos = (new fc_factura(link: $this->link))->tiene_impuestos(modelo_traslado: $modelo_traslado,
+            modelo_retencion:  $modelo_retencion, registro_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si existen impuestos',data:  $tiene_impuestos);
+        }
+        $transacciones = new stdClass();
+        if($tiene_impuestos){
+
+            $transacciones = $this->transacciona_impuestos(fc_docto_relacionado_id: $fc_docto_relacionado_id,
+                fc_pago_pago_id: $fc_pago_pago_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al transaccionar', data: $transacciones);
+            }
+        }
+
+        $transacciones->tiene_impuestos = $tiene_impuestos;
+        return $transacciones;
     }
 
     private function init_alta(int $fc_factura_id){
@@ -181,6 +266,24 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al integrar registro',data:  $registro);
         }
         return $registro;
+    }
+
+    private function inserta_fc_impuesto_dr(int $fc_docto_relacionado_id){
+        $fc_impuesto_dr_ins['fc_docto_relacionado_id'] = $fc_docto_relacionado_id;
+        $r_fc_impuesto_dr = (new fc_impuesto_dr(link: $this->link))->alta_registro(registro: $fc_impuesto_dr_ins);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar r_fc_impuesto_dr',data:  $r_fc_impuesto_dr);
+        }
+        return $r_fc_impuesto_dr;
+    }
+
+    private function inserta_fc_impuesto_p(int $fc_pago_pago_id){
+        $fc_impuesto_p_ins['fc_pago_pago_id'] = $fc_pago_pago_id;
+        $r_alta_impuesto_p = (new fc_impuesto_p(link: $this->link))->alta_registro(registro: $fc_impuesto_p_ins);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar r_alta_impuesto_p', data: $r_alta_impuesto_p);
+        }
+        return $r_alta_impuesto_p;
     }
 
     private function integra_equivalencia_dr(array $registro){
@@ -252,6 +355,7 @@ class fc_docto_relacionado extends _modelo_parent{
     }
 
     private function regenera_pago_pago_monto(int $fc_pago_pago_id){
+
         $filtro['fc_pago_pago.id'] = $fc_pago_pago_id;
         $campos['monto'] = 'fc_docto_relacionado.imp_pagado';
 
@@ -263,6 +367,9 @@ class fc_docto_relacionado extends _modelo_parent{
         $monto = round($r_fc_docto_relacionados['monto'],2);
 
         $fc_pago_pago['monto'] = $monto;
+
+
+
         $r_pago_pago = (new fc_pago_pago(link: $this->link))->modifica_bd(registro: $fc_pago_pago,id: $fc_pago_pago_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar pago pago',data:  $r_pago_pago);
@@ -301,6 +408,24 @@ class fc_docto_relacionado extends _modelo_parent{
             }
         }
         return $tiene_un_solo_obj_imp;
+    }
+
+    private function transacciona_impuestos(int $fc_docto_relacionado_id, int $fc_pago_pago_id){
+        $r_fc_impuesto_dr = $this->inserta_fc_impuesto_dr(fc_docto_relacionado_id: $fc_docto_relacionado_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar r_fc_impuesto_dr',data:  $r_fc_impuesto_dr);
+        }
+
+
+        $fc_impuesto_p = $this->alta_fc_impuesto_p(fc_pago_pago_id: $fc_pago_pago_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar r_alta_impuesto_p', data: $fc_impuesto_p);
+        }
+        $data = new stdClass();
+        $data->r_fc_impuesto_dr = $r_fc_impuesto_dr;
+        $data->fc_impuesto_p = $fc_impuesto_p;
+        $data->fc_impuesto_p_id = $fc_impuesto_p['fc_impuesto_p_id'];
+        return $data;
     }
 
     /**

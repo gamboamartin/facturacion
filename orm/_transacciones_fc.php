@@ -197,6 +197,24 @@ class _transacciones_fc extends modelo
         return $data;
     }
 
+    private function data_para_folio(int $fc_csd_id){
+        $filtro['fc_csd.id'] = $fc_csd_id;
+        $r_registro = $this->filtro_and(filtro: $filtro, limit: 1,order: array($this->tabla.'.folio'=>'DESC'));
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener r_registro', data: $r_registro);
+        }
+
+        $fc_csd_serie = $this->fc_csd_serie(fc_csd_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_csd_serie', data: $fc_csd_serie);
+        }
+        $data = new stdClass();
+        $data->r_registro = $r_registro;
+        $data->fc_csd_serie = $fc_csd_serie;
+
+        return $data;
+    }
+
     final public function doc_tipo_documento_id(string $extension)
     {
         $filtro['doc_extension.descripcion'] = $extension;
@@ -1078,10 +1096,6 @@ class _transacciones_fc extends modelo
         return $del;
     }
 
-
-
-
-
     /**
      * Obtiene el emisor de una factura
      * @param array $row_entidad Factura a integrar
@@ -1104,6 +1118,38 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al enviar notificacion',data:  $notifica);
         }
         return $notifica;
+    }
+
+    /**
+     * Obtiene la serie de un CSD
+     * @param int $fc_csd_id CSD de obtencion de serie
+     * @return array|string
+     */
+    private function fc_csd_serie(int $fc_csd_id): array|string
+    {
+        $columnas[] = 'fc_csd_serie';
+        $fc_csd = (new fc_csd(link: $this->link))->registro(registro_id: $fc_csd_id, columnas: $columnas);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener csd', data: $fc_csd);
+        }
+
+        return trim($fc_csd['fc_csd_serie']);
+    }
+
+    private function folio_str(string $number_folio): string
+    {
+        $long_nf = strlen($number_folio);
+        $n_ceros = 6;
+        $i = $long_nf;
+        $folio_str = '';
+
+        while($i<$n_ceros){
+            $folio_str.='0';
+            $i++;
+        }
+
+        $folio_str.=$number_folio;
+        return $folio_str;
     }
 
     final public function genera_ruta_archivo_tmp(): array|string
@@ -1238,6 +1284,25 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al modificar', data: $r_modifica_bd);
         }
         return $r_modifica_bd;
+    }
+
+
+    private function number_folio(string $fc_csd_serie, stdClass $r_registro): int
+    {
+        $number_folio = 1;
+        if((int)$r_registro->n_registros > 0){
+            $fc_factura = $r_registro->registros[0];
+
+            $fc_folio = $fc_factura[$this->tabla.'_folio'];
+            $data_explode = $fc_csd_serie.'-';
+            $fc_folio_explode = explode($data_explode, $fc_folio);
+            if(isset($fc_folio_explode[1])){
+                if(is_numeric($fc_folio_explode[1])){
+                    $number_folio = (int)$fc_folio_explode[1] + 1;
+                }
+            }
+        }
+        return $number_folio;
     }
 
     /**
@@ -1452,48 +1517,22 @@ class _transacciones_fc extends modelo
     }
 
     private function ultimo_folio(int $fc_csd_id){
-        $filtro['fc_csd.id'] = $fc_csd_id;
-        $r_registro = $this->filtro_and(filtro: $filtro, limit: 1,order: array($this->tabla.'.folio'=>'DESC'));
+
+        $data = $this->data_para_folio(fc_csd_id: $fc_csd_id);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener r_registro', data: $r_registro);
+            return $this->error->error(mensaje: 'Error al obtener data para folio', data: $data);
         }
-
-
-        $fc_csd = (new fc_csd(link: $this->link))->registro(registro_id: $fc_csd_id);
+        $number_folio = $this->number_folio(fc_csd_serie: $data->fc_csd_serie,r_registro:  $data->r_registro);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener csd', data: $fc_csd);
+            return $this->error->error(mensaje: 'Error al obtener number_folio', data: $number_folio);
         }
 
-        $fc_csd_serie = $fc_csd['fc_csd_serie'];
-
-        $number_folio = 1;
-        if((int)$r_registro->n_registros > 0){
-            $fc_factura = $r_registro->registros[0];
-
-            $fc_folio = $fc_factura[$this->tabla.'_folio'];
-            $data_explode = $fc_csd_serie.'-';
-            $fc_folio_explode = explode($data_explode, $fc_folio);
-            if(isset($fc_folio_explode[1])){
-                if(is_numeric($fc_folio_explode[1])){
-                    $number_folio = (int)$fc_folio_explode[1] + 1;
-                }
-            }
+        $folio_str = $this->folio_str(number_folio: $number_folio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener folio_str', data: $folio_str);
         }
 
-        $long_nf = strlen($number_folio);
-
-        $n_ceros = 6;
-
-        $i = $long_nf;
-        $folio_str = '';
-        while($i<$n_ceros){
-            $folio_str.='0';
-            $i++;
-        }
-        $folio_str.=$number_folio;
-
-
-        return $fc_csd_serie.'-'.$folio_str;
+        return $data->fc_csd_serie.'-'.$folio_str;
 
     }
 

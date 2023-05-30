@@ -46,6 +46,7 @@ class fc_pago_pago extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener totales',data:  $regenera_totales);
         }
 
+
         return $r_alta_bd;
     }
 
