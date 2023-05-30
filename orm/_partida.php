@@ -277,14 +277,15 @@ class _partida extends  _base{
     }
 
     /**
-     * @param int $id
-     * @param _cuenta_predial $modelo_predial
-     * @param _data_impuestos $modelo_retencion
-     * @param _data_impuestos $modelo_traslado
+     * Elimina los elementos dependientes de una partida
+     * @param int $id Identificador de base partida
+     * @param _cuenta_predial $modelo_predial Modelo de tipo predial
+     * @param _data_impuestos $modelo_retencion Modelo de tipo retencion
+     * @param _data_impuestos $modelo_traslado Modelo de tipo traslado
      * @return array|stdClass
      */
-    private function elimina_dependientes(int $id, _cuenta_predial $modelo_predial,
-                                          _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado): array|stdClass
+    private function elimina_dependientes(int $id, _cuenta_predial $modelo_predial, _data_impuestos $modelo_retencion,
+                                          _data_impuestos $modelo_traslado): array|stdClass
     {
 
         $filtro[$this->tabla.'.id'] = $id;
@@ -298,7 +299,7 @@ class _partida extends  _base{
         }
         $r_fc_cuenta_predial = $modelo_predial->elimina_con_filtro_and(filtro: $filtro);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_cuenta_predial);
+            return $this->error->error(mensaje: 'Error al eliminar predial', data: $r_fc_cuenta_predial);
         }
         $data = new stdClass();
         $data->r_fc_retenido = $r_fc_retenido;
