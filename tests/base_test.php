@@ -1153,6 +1153,12 @@ class base_test{
 
         }
 
+        $del = (new base_test())->del_fc_complemento_pago_documento($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_complemento_pago');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
@@ -1165,6 +1171,16 @@ class base_test{
 
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_complemento_pago_etapa');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+    public function del_fc_complemento_pago_documento(PDO $link): array
+    {
+
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_complemento_pago_documento');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }

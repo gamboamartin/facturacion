@@ -15,7 +15,7 @@ class fc_traslado_dr_part extends _modelo_parent{
         $tabla = 'fc_traslado_dr_part';
         $columnas = array($tabla=>false,'fc_traslado_dr'=>$tabla,'fc_impuesto_dr'=>'fc_traslado_dr',
             'fc_docto_relacionado'=>'fc_impuesto_dr','fc_pago_pago'=>'fc_docto_relacionado',
-            'fc_pago'=>'fc_pago_pago');
+            'fc_pago'=>'fc_pago_pago','cat_sat_tipo_impuesto'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla);
         $campos_obligatorios = array();
 
 

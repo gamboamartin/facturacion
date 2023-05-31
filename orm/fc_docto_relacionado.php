@@ -13,7 +13,7 @@ class fc_docto_relacionado extends _modelo_parent{
     {
         $tabla = 'fc_docto_relacionado';
         $columnas = array($tabla=>false,'fc_pago_pago'=>$tabla,'fc_factura'=>$tabla,'fc_pago'=>'fc_pago_pago',
-            'fc_complemento_pago'=>'fc_pago');
+            'fc_complemento_pago'=>'fc_pago','cat_sat_moneda'=>'fc_factura','cat_sat_obj_imp'=>$tabla);
 
         $campos_obligatorios = array();
 
