@@ -401,8 +401,6 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         return $r_genera;
     }
 
-
-
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
         $this->ctl_partida = new controlador_fc_partida_cp(link: $this->link);

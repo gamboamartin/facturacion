@@ -197,7 +197,15 @@ class _relacion extends _modelo_parent_sin_codigo{
 
     }
 
-    private function integra_relacion_nc(string $cat_sat_tipo_relacion_codigo, array $filtro, array $relacionados){
+    /**
+     * Integra las relaciones de notas de Credito
+     * @param string $cat_sat_tipo_relacion_codigo codigo de tipo de relacion del SAT
+     * @param array $filtro filtro para obtener relaciones aplicadas
+     * @param array $relacionados Elementos relacionados
+     * @return array
+     */
+    private function integra_relacion_nc(string $cat_sat_tipo_relacion_codigo, array $filtro, array $relacionados): array
+    {
         $r_fc_nc = (new fc_nc_rel(link: $this->link))->filtro_and(filtro: $filtro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_nc);

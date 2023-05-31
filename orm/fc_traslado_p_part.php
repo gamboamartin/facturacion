@@ -12,7 +12,7 @@ class fc_traslado_p_part extends _modelo_parent{
     public function __construct(PDO $link)
     {
         $tabla = 'fc_traslado_p_part';
-        $columnas = array($tabla=>false);
+        $columnas = array($tabla=>false,'fc_traslado_p'=>$tabla);
         $campos_obligatorios = array();
 
 
@@ -26,6 +26,13 @@ class fc_traslado_p_part extends _modelo_parent{
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
 
+        if(!isset($this->registro['codigo'])){
+            $codigo = $this->registro['fc_traslado_p_id'];
+            $codigo .= time();
+            $codigo .= mt_rand(1000,9999);
+            $this->registro['codigo'] = $codigo;
+        }
+
         if(!isset($this->registro['descripcion'])){
             $descripcion = $this->registro['codigo'];
             $this->registro['descripcion'] = $descripcion;
@@ -38,7 +45,8 @@ class fc_traslado_p_part extends _modelo_parent{
         return $r_alta_bd;
     }
 
-    public function modifica_bd(array $registro, int $id, bool $reactiva = false, array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
+    public function modifica_bd(array $registro, int $id, bool $reactiva = false,
+                                array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
 
         $registro_previo = $this->registro(registro_id: $id);

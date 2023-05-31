@@ -1371,7 +1371,23 @@ class base_test{
     public function del_fc_traslado_p(PDO $link): array
     {
 
+        $del = $this->del_fc_traslado_p_part($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_traslado_p');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_traslado_p_part(PDO $link): array
+    {
+
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_traslado_p_part');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }

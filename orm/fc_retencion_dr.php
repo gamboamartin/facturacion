@@ -26,6 +26,13 @@ class fc_retencion_dr extends _modelo_parent{
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
 
+        if(!isset($this->registro['codigo'])){
+            $codigo = $this->registro['fc_impuesto_dr_id'];
+            $codigo .= time();
+            $codigo .= mt_rand(1000,9999);
+            $this->registro['codigo'] = $codigo;
+        }
+
         if(!isset($this->registro['descripcion'])){
             $descripcion = $this->registro['codigo'];
             $this->registro['descripcion'] = $descripcion;
