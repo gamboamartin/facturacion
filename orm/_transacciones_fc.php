@@ -162,7 +162,7 @@ class _transacciones_fc extends modelo
         return round($descuento + $descuento_nuevo, 2);
     }
 
-    private function data_factura(array $row_entidad): array|stdClass
+    protected function data_factura(array $row_entidad): array|stdClass
     {
         $comprobante = (new _comprobante())->comprobante(name_entidad: $this->tabla, row_entidad: $row_entidad);
         if (errores::$error) {
@@ -197,6 +197,11 @@ class _transacciones_fc extends modelo
 
 
         if($this->tabla === 'fc_complemento_pago'){
+
+            $Complemento = array();
+            $Complemento[0]->Pagos20 = new stdClass();
+
+            $filtro = array();
             $filtro[$this->key_filtro_id] = $row_entidad[$this->key_id];
             $r_fc_pago = (new fc_pago(link: $this->link))->filtro_and(filtro: $filtro);
             if(errores::$error){
@@ -204,10 +209,9 @@ class _transacciones_fc extends modelo
             }
             $fc_pagos = $r_fc_pago->registros;
 
-            $pagos = array();
             foreach ($fc_pagos as $fc_pago){
-                $data_pago['version'] = $fc_pago['fc_pago_version'];
-
+                $Complemento[0]->Pagos20->Version = $fc_pago['fc_pago_version'];
+                $Complemento[0]->Pagos20->Totales = new stdClass();
 
                 $filtro = array();
                 $filtro['fc_pago.id'] = $fc_pago['fc_pago_id'];
@@ -215,15 +219,15 @@ class _transacciones_fc extends modelo
                 if(errores::$error){
                     return $this->error->error(mensaje: 'Error al obtener r_fc_pago_total', data: $r_fc_pago_total);
                 }
-
                 $fc_pago_totales = $r_fc_pago_total->registros;
 
                 foreach ($fc_pago_totales as $fc_pago_total){
-                    $data_pago_total['total_traslados_base_iva_16'] = $fc_pago_total['fc_pago_total_total_traslados_base_iva_16'];
-                    $data_pago_total['total_traslados_impuesto_iva_16'] = $fc_pago_total['fc_pago_total_total_traslados_impuesto_iva_16'];
-                    $data_pago_total['monto_total_pagos'] = $fc_pago_total['fc_pago_total_monto_total_pagos'];
-                    $data_pago['totales'] = $data_pago_total;
+                    $Complemento[0]->Pagos20->Totales->TotalTrasladosBaseIVA16 = $fc_pago_total['fc_pago_total_total_traslados_base_iva_16'];
+                    $Complemento[0]->Pagos20->Totales->TotalTrasladosImpuestoIVA16 = $fc_pago_total['fc_pago_total_total_traslados_impuesto_iva_16'];
+                    $Complemento[0]->Pagos20->Totales->MontoTotalPagos = $fc_pago_total['fc_pago_total_monto_total_pagos'];
                 }
+
+                $Complemento[0]->Pagos20->Pago[0] = new stdClass();
 
                 $filtro = array();
                 $filtro['fc_pago.id'] = $fc_pago['fc_pago_id'];
@@ -231,18 +235,17 @@ class _transacciones_fc extends modelo
                 if(errores::$error){
                     return $this->error->error(mensaje: 'Error al obtener r_fc_pago_pago', data: $r_fc_pago_pago);
                 }
-
                 $fc_pago_pagos = $r_fc_pago_pago->registros;
 
                 foreach ($fc_pago_pagos as $fc_pago_pago){
-                    $data_pago_pago['fecha_pago'] = $fc_pago_pago['fc_pago_pago_fecha_pago'];
-                    $data_pago_pago['forma_de_pago_p'] = $fc_pago_pago['cat_sat_forma_pago_codigo'];
-                    $data_pago_pago['moneda_p'] = $fc_pago_pago['cat_sat_moneda_codigo'];
-                    $data_pago_pago['tipo_cambio_p'] = $fc_pago_pago['com_tipo_cambio_monto'];
-                    $data_pago_pago['monto'] = $fc_pago_pago['fc_pago_pago_monto'];
+                    $Complemento[0]->Pagos20->Pago[0]->FechaPago = $fc_pago_pago['fc_pago_pago_fecha_pago'];
+                    $Complemento[0]->Pagos20->Pago[0]->FormaDePagoP = $fc_pago_pago['cat_sat_forma_pago_codigo'];
+                    $Complemento[0]->Pagos20->Pago[0]->MonedaP = $fc_pago_pago['cat_sat_moneda_codigo'];
+                    $Complemento[0]->Pagos20->Pago[0]->TipoCambioP = $fc_pago_pago['cat_sat_com_tipo_cambio_monto'];
+                    $Complemento[0]->Pagos20->Pago[0]->Monto = $fc_pago_pago['fc_pago_pago_monto'];
 
 
-
+                    $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0] = new stdClass();
 
                     $filtro = array();
                     $filtro['fc_pago_pago.id'] = $fc_pago_pago['fc_pago_pago_id'];
@@ -250,31 +253,31 @@ class _transacciones_fc extends modelo
                     if(errores::$error){
                         return $this->error->error(mensaje: 'Error al obtener r_fc_docto_relacionado', data: $r_fc_docto_relacionado);
                     }
-
                     $fc_doctos_relacionados = $r_fc_docto_relacionado->registros;
 
                     foreach ($fc_doctos_relacionados as $fc_docto_relacionado){
-                        $data_docto_relacionado['id_documento'] = $fc_docto_relacionado['fc_factura_uuid'];
-                        $data_docto_relacionado['serie'] = $fc_docto_relacionado['fc_factura_serie'];
-                        $data_docto_relacionado['folio'] = $fc_docto_relacionado['fc_factura_folio'];
-                        $data_docto_relacionado['moneda_dr'] = $fc_docto_relacionado['cat_sat_moneda_codigo'];
-                        $data_docto_relacionado['equivalencia_dr'] = $fc_docto_relacionado['fc_docto_relacionado_equivalencia_dr'];
-                        $data_docto_relacionado['num_parcialidad'] = $fc_docto_relacionado['fc_docto_relacionado_num_parcialidad'];
-                        $data_docto_relacionado['imp_saldo_ant'] = $fc_docto_relacionado['fc_docto_relacionado_imp_saldo_ant'];
-                        $data_docto_relacionado['imp_pagado'] = $fc_docto_relacionado['fc_docto_relacionado_imp_pagado'];
-                        $data_docto_relacionado['imp_saldo_insoluto'] = $fc_docto_relacionado['fc_docto_relacionado_imp_saldo_insoluto'];
-                        $data_docto_relacionado['objeto_imp_dr'] = $fc_docto_relacionado['cat_sat_obj_imp_codigo'];
+                        $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->IdDocumento = $fc_docto_relacionado['fc_factura_uuid'];
+                        $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->Serie = $fc_docto_relacionado['fc_factura_serie'];
+                        $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->Folio = $fc_docto_relacionado['fc_factura_folio'];
+                        $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->MonedaDR = $fc_docto_relacionado['cat_sat_moneda_codigo'];
+                        $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->EquivalenciaDR = $fc_docto_relacionado['cat_sat_moneda_codigo'];
+                        $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->NumParcialidad = $fc_docto_relacionado['fc_docto_relacionado_num_parcialidad'];
+                        $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->ImpSaldoAnt = $fc_docto_relacionado['fc_docto_relacionado_imp_saldo_ant'];
+                        $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->ImpPagado = $fc_docto_relacionado['fc_docto_relacionado_imp_pagado'];
+                        $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->ImpSaldoInsoluto = $fc_docto_relacionado['fc_docto_relacionado_imp_saldo_insoluto'];
+                        $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->ObjetoImpDR = $fc_docto_relacionado['cat_sat_obj_imp_codigo'];
+
 
                         $filtro = array();
                         $filtro['fc_docto_relacionado.id'] = $fc_docto_relacionado['fc_docto_relacionado_id'];
-
                         $r_fc_impuesto_dr = (new fc_impuesto_dr(link: $this->link))->filtro_and(filtro: $filtro);
                         if(errores::$error){
                             return $this->error->error(mensaje: 'Error al obtener r_fc_impuesto_dr', data: $r_fc_impuesto_dr);
                         }
-
                         $fc_impuestos_dr = $r_fc_impuesto_dr->registros;
 
+                        $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->ImpuestosDR = new stdClass();
+                        $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->ImpuestosDR->TrasladosDR[0] = new stdClass();
                         foreach ($fc_impuestos_dr as $fc_impuesto_dr){
 
                             $filtro = array();
@@ -283,7 +286,6 @@ class _transacciones_fc extends modelo
                             if(errores::$error){
                                 return $this->error->error(mensaje: 'Error al obtener r_fc_traslado_dr', data: $r_fc_traslado_dr);
                             }
-
                             $fc_traslados_dr = $r_fc_traslado_dr->registros;
                             foreach ($fc_traslados_dr as $fc_traslado_dr){
 
@@ -294,23 +296,22 @@ class _transacciones_fc extends modelo
                                     return $this->error->error(mensaje: 'Error al obtener r_fc_traslado_dr_part', data: $r_fc_traslado_dr_part);
                                 }
                                 $fc_traslados_dr_part = $r_fc_traslado_dr_part->registros;
-
                                 foreach ($fc_traslados_dr_part as $fc_traslado_dr_part){
-                                    $data_traslado_part['base_dr'] = $fc_traslado_dr_part['fc_traslado_dr_part_base_dr'];
-                                    $data_traslado_part['impuesto_dr'] = $fc_traslado_dr_part['cat_sat_tipo_impuesto_codigo'];
-                                    $data_traslado_part['tipo_factor_dr'] = $fc_traslado_dr_part['cat_sat_tipo_factor_codigo'];
-                                    $data_traslado_part['tasa_o_cuota_dr'] = $fc_traslado_dr_part['cat_sat_factor_factor'];
-                                    $data_traslado_part['importe_dr'] = $fc_traslado_dr_part['fc_traslado_dr_part_importe_dr'];
-                                    $data_docto_relacionado[]['impuestos_dr']['traslados_dr'][] = $data_traslado_part;
+                                    $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->ImpuestosDR->TrasladosDR[0]->BaseDR = $fc_traslado_dr_part['fc_traslado_dr_part_base_dr'];
+                                    $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->ImpuestosDR->TrasladosDR[0]->ImpuestoDR = $fc_traslado_dr_part['cat_sat_tipo_impuesto_codigo'];
+                                    $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->ImpuestosDR->TrasladosDR[0]->TipoFactorDR = $fc_traslado_dr_part['cat_sat_tipo_factor_codigo'];
+                                    $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->ImpuestosDR->TrasladosDR[0]->TasaOCuotaDR = $fc_traslado_dr_part['cat_sat_factor_factor'];
+                                    $Complemento[0]->Pagos20->Pago[0]->DoctoRelacionado[0]->ImpuestosDR->TrasladosDR[0]->ImporteDR = $fc_traslado_dr_part['fc_traslado_dr_part_importe_dr'];
                                 }
 
                             }
 
                         }
 
-
                     }
 
+                    $Complemento[0]->Pagos20->Pago[0]->ImpuestosP =new stdClass();
+                    $Complemento[0]->Pagos20->Pago[0]->ImpuestosP->TrasladosP[0] = new stdClass();
                     $filtro = array();
                     $filtro['fc_pago_pago.id'] = $fc_pago_pago['fc_pago_pago_id'];
                     $r_fc_impuesto_p = (new fc_impuesto_p(link: $this->link))->filtro_and(filtro: $filtro);
@@ -319,8 +320,8 @@ class _transacciones_fc extends modelo
                     }
                     $fc_impuestos_p = $r_fc_impuesto_p->registros;
 
-                    $data_impuesto_p = array();
-                    foreach ($fc_impuestos_p as $fc_impuesto_p){
+                    foreach ($fc_impuestos_p as $fc_impuesto_p) {
+
                         $filtro = array();
                         $filtro['fc_impuesto_p.id'] = $fc_impuesto_p['fc_impuesto_p_id'];
                         $r_fc_traslado_p = (new fc_traslado_p(link: $this->link))->filtro_and(filtro: $filtro);
@@ -329,40 +330,32 @@ class _transacciones_fc extends modelo
                         }
                         $fc_traslados_p = $r_fc_traslado_p->registros;
 
-                        foreach ($fc_traslados_p as $fc_traslado_p){
+                        foreach ($fc_traslados_p as $fc_traslado_p) {
+
                             $filtro = array();
                             $filtro['fc_traslado_p.id'] = $fc_traslado_p['fc_traslado_p_id'];
                             $r_fc_traslado_p_part = (new fc_traslado_p_part(link: $this->link))->filtro_and(filtro: $filtro);
                             if(errores::$error){
-                                return $this->error->error(mensaje: 'Error al obtener r_fc_traslado_p', data: $r_fc_traslado_p);
+                                return $this->error->error(mensaje: 'Error al obtener r_fc_traslado_p_part', data: $r_fc_traslado_p_part);
                             }
                             $fc_traslados_p_part = $r_fc_traslado_p_part->registros;
-
-                            foreach ($fc_traslados_p_part as $fc_traslado_p_part){
-                               // $traslado_p_part['traslados_p']['base_p'] =
-
+                            foreach ($fc_traslados_p_part as $fc_traslado_p_part) {
+                                $Complemento[0]->Pagos20->Pago[0]->ImpuestosP->TrasladosP[0]->BaseP = $fc_traslado_p_part['fc_traslado_p_part_base_p'];
+                                $Complemento[0]->Pagos20->Pago[0]->ImpuestosP->TrasladosP[0]->ImpuestoP = $fc_traslado_p_part['cat_sat_tipo_impuesto_codigo'];
+                                $Complemento[0]->Pagos20->Pago[0]->ImpuestosP->TrasladosP[0]->TipoFactorP = $fc_traslado_p_part['cat_sat_tipo_factor_codigo'];
+                                $Complemento[0]->Pagos20->Pago[0]->ImpuestosP->TrasladosP[0]->TasaOCuotaP = $fc_traslado_p_part['cat_sat_factor_factor'];
+                                $Complemento[0]->Pagos20->Pago[0]->ImpuestosP->TrasladosP[0]->ImporteP = $fc_traslado_p_part['fc_traslado_p_part_importe_p'];
                             }
-
 
                         }
 
+
                     }
-
-
-                    $data_pago_pago[] = $data_docto_relacionado;
-
-                    $data_pago['pago'][] = $data_pago_pago;
 
                 }
 
 
-
-                $pagos[] = $data_pago;
             }
-
-            $data->complemento = new stdClass();
-            $data->complemento->pagos = $pagos;
-
 
         }
 
