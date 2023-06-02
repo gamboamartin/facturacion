@@ -12,7 +12,8 @@ class fc_traslado_p_part extends _modelo_parent{
     public function __construct(PDO $link)
     {
         $tabla = 'fc_traslado_p_part';
-        $columnas = array($tabla=>false,'fc_traslado_p'=>$tabla);
+        $columnas = array($tabla=>false,'fc_traslado_p'=>$tabla,'cat_sat_tipo_factor'=>$tabla,
+            'cat_sat_tipo_impuesto'=>$tabla,'cat_sat_factor'=>$tabla);
         $campos_obligatorios = array();
 
 
@@ -25,6 +26,11 @@ class fc_traslado_p_part extends _modelo_parent{
 
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
+        $keys = array('fc_traslado_p_id','cat_sat_tipo_impuesto_id','cat_sat_factor_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $valida);
+        }
 
         if(!isset($this->registro['codigo'])){
             $codigo = $this->registro['fc_traslado_p_id'];

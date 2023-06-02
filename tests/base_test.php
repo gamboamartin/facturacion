@@ -6,7 +6,9 @@ use gamboamartin\cat_sat\models\cat_sat_factor;
 use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
+use gamboamartin\cat_sat\models\cat_sat_obj_imp;
 use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
+use gamboamartin\cat_sat\models\cat_sat_tipo_impuesto;
 use gamboamartin\cat_sat\models\cat_sat_tipo_relacion;
 use gamboamartin\comercial\models\com_producto;
 use gamboamartin\comercial\models\com_sucursal;
@@ -16,8 +18,11 @@ use gamboamartin\facturacion\models\fc_complemento_pago;
 use gamboamartin\facturacion\models\fc_conf_retenido;
 use gamboamartin\facturacion\models\fc_conf_traslado;
 use gamboamartin\facturacion\models\fc_csd;
+use gamboamartin\facturacion\models\fc_docto_relacionado;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
+use gamboamartin\facturacion\models\fc_impuesto_dr;
+use gamboamartin\facturacion\models\fc_impuesto_p;
 use gamboamartin\facturacion\models\fc_pago;
 use gamboamartin\facturacion\models\fc_pago_pago;
 use gamboamartin\facturacion\models\fc_partida;
@@ -25,6 +30,10 @@ use gamboamartin\facturacion\models\fc_partida;
 
 use gamboamartin\facturacion\models\fc_partida_cp;
 use gamboamartin\facturacion\models\fc_relacion;
+use gamboamartin\facturacion\models\fc_traslado_dr;
+use gamboamartin\facturacion\models\fc_traslado_dr_part;
+use gamboamartin\facturacion\models\fc_traslado_p;
+use gamboamartin\facturacion\models\fc_traslado_p_part;
 use gamboamartin\organigrama\models\org_sucursal;
 use PDO;
 use stdClass;
@@ -87,6 +96,16 @@ class base_test{
     {
         $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_tipo_factor(link: $link,
             descripcion: $descripcion, id: $id);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_cat_sat_tipo_impuesto(PDO $link, int $id = 1): array|\stdClass
+    {
+        $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_tipo_impuesto(link: $link, id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -238,6 +257,264 @@ class base_test{
         }
         return $alta;
     }
+
+    public function alta_fc_traslado_p_part(PDO $link, int $cat_sat_factor_id = 1, int $cat_sat_tipo_factor_id =1,
+                                            int $cat_sat_tipo_impuesto_id = 1, int $fc_traslado_p_id = 1,
+                                            int $id = 1): array|\stdClass
+    {
+
+        $existe = (new fc_traslado_p($link))->existe_by_id(registro_id: $fc_traslado_p_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_traslado_p(link: $link,  id: $fc_traslado_p_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+        $existe = (new cat_sat_tipo_impuesto($link))->existe_by_id(registro_id: $cat_sat_tipo_impuesto_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_tipo_impuesto(link: $link,  id: $cat_sat_tipo_impuesto_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+        $existe = (new cat_sat_tipo_factor($link))->existe_by_id(registro_id: $cat_sat_tipo_factor_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_tipo_factor(link: $link,  id: $cat_sat_tipo_factor_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+        $existe = (new cat_sat_factor($link))->existe_by_id(registro_id: $cat_sat_factor_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_factor(link: $link,  id: $cat_sat_factor_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['fc_traslado_p_id'] = $fc_traslado_p_id;
+        $registro['cat_sat_tipo_impuesto_id'] = $cat_sat_tipo_impuesto_id;
+        $registro['cat_sat_tipo_factor_id'] = $cat_sat_tipo_factor_id;
+        $registro['cat_sat_factor_id'] = $cat_sat_factor_id;
+
+        $alta = (new fc_traslado_p_part($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_traslado_dr_part(PDO $link, float $base_dr = 1, int $cat_sat_factor_id = 11,
+                                             int $fc_traslado_dr_id = 1, int $id = 1,
+                                             float $importe_dr = 1): array|\stdClass
+    {
+
+        $existe = (new fc_traslado_dr($link))->existe_by_id(registro_id: $fc_traslado_dr_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_traslado_dr(link: $link,  id: $fc_traslado_dr_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+        $existe = (new cat_sat_factor($link))->existe_by_id(registro_id: $cat_sat_factor_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_factor(link: $link,  id: $cat_sat_factor_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['base_dr'] = $base_dr;
+        $registro['cat_sat_tipo_impuesto_id'] = 2;
+        $registro['cat_sat_tipo_factor_id'] = 5;
+        $registro['cat_sat_factor_id'] = $cat_sat_factor_id;
+        $registro['importe_dr'] = $importe_dr;
+        $registro['fc_traslado_dr_id'] = $fc_traslado_dr_id;
+
+
+        $alta = (new fc_traslado_dr_part($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+
+
+    public function alta_fc_traslado_dr(PDO $link, $fc_impuesto_dr_id = 1,  int $id = 1): array|\stdClass
+    {
+
+        $existe = (new fc_impuesto_dr($link))->existe_by_id(registro_id: $fc_impuesto_dr_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_impuesto_dr(link: $link,  id: $fc_impuesto_dr_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['fc_impuesto_dr_id'] = $fc_impuesto_dr_id;
+
+
+        $alta = (new fc_traslado_dr($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_impuesto_dr(PDO $link, int $fc_docto_relacionado_id = 1,  int $id = 1): array|\stdClass
+    {
+
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['fc_docto_relacionado_id'] = $fc_docto_relacionado_id;
+
+
+        $alta = (new fc_impuesto_dr($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_docto_relacionado(PDO $link, float $equivalencia_dr = 1, int $fc_factura_id = 1,
+                                              int $fc_pago_pago_id = 1, int $id = 1, float $imp_pagado = 1,
+                                              float $imp_saldo_ant = 1, float $imp_saldo_insoluto = 0,
+                                              int $num_parcialidad = 1): array|\stdClass
+    {
+
+        $existe = (new fc_factura($link))->existe_by_id(registro_id: $fc_factura_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_factura(link: $link,  id: $fc_factura_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+        $existe = (new fc_pago_pago($link))->existe_by_id(registro_id: $fc_pago_pago_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_pago_pago(link: $link,  id: $fc_pago_pago_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['fc_factura_id'] = $fc_factura_id;
+        $registro['equivalencia_dr'] = $equivalencia_dr;
+        $registro['num_parcialidad'] = $num_parcialidad;
+        $registro['imp_saldo_ant'] = $imp_saldo_ant;
+        $registro['imp_pagado'] = $imp_pagado;
+        $registro['imp_saldo_insoluto'] = $imp_saldo_insoluto;
+        $registro['cat_sat_obj_imp_id'] = 1;
+        $registro['fc_pago_pago_id'] = $fc_pago_pago_id;
+
+
+        $alta = (new fc_docto_relacionado($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_traslado_p(PDO $link, int $fc_impuesto_p_id = 1, int $id = 1): array|\stdClass
+    {
+
+        $existe = (new fc_impuesto_p($link))->existe_by_id(registro_id: $fc_impuesto_p_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_impuesto_p(link: $link,  id: $fc_impuesto_p_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['fc_impuesto_p_id'] = $fc_impuesto_p_id;
+
+        $alta = (new fc_traslado_p($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_impuesto_p(PDO $link, int $fc_pago_pago_id = 1, int $id = 1): array|\stdClass
+    {
+
+        $existe = (new fc_pago_pago($link))->existe_by_id(registro_id: $fc_pago_pago_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_pago_pago(link: $link,  id: $fc_pago_pago_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['fc_pago_pago_id'] = $fc_pago_pago_id;
+
+
+        $alta = (new fc_impuesto_p($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
 
 
     public function alta_fc_csd(PDO $link, int $id = 1, int $org_sucursal_id = 1): array|\stdClass
@@ -1362,6 +1639,10 @@ class base_test{
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
+        $del = $this->del_fc_docto_relacionado($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_pago_pago');
         if(errores::$error){
@@ -1684,6 +1965,7 @@ class base_test{
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
+
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_pago');
         if(errores::$error){

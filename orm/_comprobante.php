@@ -1,13 +1,16 @@
 <?php
 namespace gamboamartin\facturacion\models;
 use gamboamartin\errores\errores;
+use gamboamartin\validacion\validacion;
 
 class _comprobante{
     private errores $error;
+    private validacion  $validacion;
 
     public function __construct()
     {
         $this->error = new errores();
+        $this->validacion = new validacion();
     }
 
     /**
@@ -21,6 +24,22 @@ class _comprobante{
     {
         if(count($row_entidad) === 0){
             return $this->error->error(mensaje: 'Error la factura pasada no tiene registros', data: $row_entidad);
+        }
+
+        $column_sub_total = $name_entidad.'_sub_total';
+        $column_total = $name_entidad.'_total';
+        $column_descuento = $name_entidad.'_descuento';
+        $column_exportacion = $name_entidad.'_exportacion';
+        $column_folio = $name_entidad.'_folio';
+        $column_fecha = $name_entidad.'_fecha';
+
+        $keys = array($column_sub_total,$column_total, $column_descuento,'dp_cp_descripcion',
+            'cat_sat_tipo_de_comprobante_codigo','cat_sat_moneda_codigo',$column_exportacion, $column_folio,
+            'cat_sat_forma_pago_codigo','cat_sat_metodo_pago_codigo',$column_fecha);
+
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row_entidad);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al valida row_entidad', data: $valida);
         }
 
         $fc_sub_total = $this->monto_dos_dec(monto: $row_entidad[$name_entidad.'_sub_total']);
@@ -76,15 +95,20 @@ class _comprobante{
     /**
      * Aplica formato a un monto ingresado
      * @param string|int|float $monto Monto a dar formato
-     * @return string
+     * @return string|array
      * @version 4.9.0
      */
-    final public function monto_dos_dec(string|int|float $monto): string
+    final public function monto_dos_dec(string|int|float $monto): string|array
     {
         $monto = $this->limpia_monto(monto: $monto);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al limpiar monto', data: $monto);
         }
+
+        if(!is_numeric($monto)){
+            return $this->error->error(mensaje: 'Error al monto no es un numero', data: $monto);
+        }
+
         $monto = round($monto,2);
         return number_format($monto,2,'.','');
     }

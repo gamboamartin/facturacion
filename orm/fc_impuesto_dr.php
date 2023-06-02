@@ -25,6 +25,12 @@ class fc_impuesto_dr extends _modelo_parent{
 
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
+        $keys = array('fc_docto_relacionado_id');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al valida',data:  $valida);
+        }
+
         if(!isset($this->registro['codigo'])){
             $codigo = $this->registro['fc_docto_relacionado_id'];
             $codigo .= time();

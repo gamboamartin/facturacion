@@ -1,14 +1,17 @@
 <?php
 namespace gamboamartin\facturacion\models;
 use gamboamartin\errores\errores;
+use gamboamartin\validacion\validacion;
 use stdClass;
 
 class _impuestos{
 
     private errores $error;
+    private validacion  $validacion;
 
     public function __construct(){
         $this->error = new errores();
+        $this->validacion = new validacion();
     }
 
     private function acumulado_global_imp(array $global_imp, array $impuesto, string $key_gl, string $key_importe): stdClass
@@ -55,8 +58,21 @@ class _impuestos{
         return $imp_global;
     }
 
-    final public function impuestos(array $row_entidad): stdClass
+    final public function impuestos(array $row_entidad): stdClass|array
     {
+        $keys = array('total_impuestos_trasladados','total_impuestos_retenidos');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row_entidad);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar $row_entidad', data: $valida);
+        }
+
+        if(!isset($row_entidad['traslados'])){
+            $row_entidad['traslados'] = array();
+        }
+        if(!isset($row_entidad['retenidos'])){
+            $row_entidad['retenidos'] = array();
+        }
+
         $impuestos = new stdClass();
         $impuestos->total_impuestos_trasladados = $row_entidad['total_impuestos_trasladados'];
         $impuestos->total_impuestos_retenidos = $row_entidad['total_impuestos_retenidos'];

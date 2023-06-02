@@ -136,6 +136,7 @@ class _comprobanteTest extends test
 
         $resultado = $comp->comprobante(row_entidad: $factura, name_entidad: 'fc_factura');
 
+
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(12,count($resultado));

@@ -26,6 +26,12 @@ class fc_traslado_p extends _modelo_parent{
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
 
+        $keys = array('fc_impuesto_p_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $valida);
+        }
+
         if(!isset($this->registro['codigo'])){
             $codigo = $this->registro['fc_impuesto_p_id'];
             $codigo .= time();
