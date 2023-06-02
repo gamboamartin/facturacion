@@ -212,10 +212,44 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al maquetar relacionadas',data:  $rs);
         }
 
-        $rs = $pdf->conceptos(conceptos: $factura['partidas'], link: $link, name_entidad_partida: $modelo_partida->tabla);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al maquetar conceptos',data:  $rs);
+        if($modelo_entidad->tabla !== 'fc_complemento_pago') {
+            $rs = $pdf->conceptos(conceptos: $factura['partidas'], link: $link, name_entidad_partida: $modelo_partida->tabla);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al maquetar conceptos', data: $rs);
+            }
         }
+
+
+        if($modelo_entidad->tabla === 'fc_complemento_pago') {
+
+            $r_fc_pago_pago = (new fc_pago_pago(link: $link))->filtro_and(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al maquetar conceptos',data:  $r_fc_pago_pago);
+            }
+            $fc_pago_pagos = $r_fc_pago_pago->registros;
+
+            $r_fc_pago_total = (new fc_pago_total(link: $link))->filtro_and(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al maquetar conceptos',data:  $r_fc_pago_total);
+            }
+            $fc_pago_totales = $r_fc_pago_total->registros;
+
+            $r_fc_docto_relacionado = (new fc_docto_relacionado(link: $link))->filtro_and(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al maquetar conceptos',data:  $r_fc_docto_relacionado);
+            }
+            $fc_doctos_relacionados = $r_fc_docto_relacionado->registros;
+
+
+            $rs = $pdf->complemento_pago(fc_doctos_relacionados: $fc_doctos_relacionados, fc_pago_pagos: $fc_pago_pagos,
+                fc_pago_totales: $fc_pago_totales);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al maquetar conceptos', data: $rs);
+            }
+        }
+
+
+
 
         $key_sub_total = $modelo_entidad->tabla.'_sub_total';
         $key_total = $modelo_entidad->tabla.'_total';

@@ -17,6 +17,19 @@ class _relacion extends _modelo_parent_sin_codigo{
 
     protected array $codigos_rel_permitidos = array();
 
+    private function ajusta_relacionados(string $cat_sat_tipo_relacion_codigo, _uuid_ext $modelo_uuid_ext,
+                                         array $relacionados, array $row_relacion){
+        $relaciones = $this->relaciones_externas(modelo_uuid_ext: $modelo_uuid_ext,row_relacion:  $row_relacion);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener relacion', data: $relaciones);
+        }
+
+        foreach ($relaciones as $relacion){
+            $relacionados[$cat_sat_tipo_relacion_codigo][] = $relacion['fc_uuid_uuid'];
+        }
+        return $relacionados;
+    }
+
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
         $row_entidad = $this->modelo_entidad->registro(registro_id: $this->registro[$this->modelo_entidad->key_id]);
@@ -145,15 +158,12 @@ class _relacion extends _modelo_parent_sin_codigo{
 
         $filtro[$this->key_filtro_id] = $row_relacion[$this->key_id];
 
-        $r_fc_uuid_fc = $modelo_uuid_ext->filtro_and(filtro: $filtro);
+
+
+        $relacionados = $this->ajusta_relacionados(cat_sat_tipo_relacion_codigo: $cat_sat_tipo_relacion_codigo,
+            modelo_uuid_ext: $modelo_uuid_ext,relacionados:  $relacionados,row_relacion:  $row_relacion);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_uuid_fc);
-        }
-
-        $relaciones = $r_fc_uuid_fc->registros;
-
-        foreach ($relaciones as $relacion){
-            $relacionados[$cat_sat_tipo_relacion_codigo][] = $relacion['fc_uuid_uuid'];
+            return $this->error->error(mensaje: 'Error al ajustar relacionados', data: $relacionados);
         }
 
 
@@ -203,9 +213,15 @@ class _relacion extends _modelo_parent_sin_codigo{
      * @param array $filtro filtro para obtener relaciones aplicadas
      * @param array $relacionados Elementos relacionados
      * @return array
+     * @version 10.28.0
      */
     private function integra_relacion_nc(string $cat_sat_tipo_relacion_codigo, array $filtro, array $relacionados): array
     {
+        $cat_sat_tipo_relacion_codigo = trim($cat_sat_tipo_relacion_codigo);
+        if($cat_sat_tipo_relacion_codigo === ''){
+            return $this->error->error(mensaje: 'Error cat_sat_tipo_relacion_codigo esta vacio',
+                data: $cat_sat_tipo_relacion_codigo);
+        }
         $r_fc_nc = (new fc_nc_rel(link: $this->link))->filtro_and(filtro: $filtro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_nc);
@@ -304,7 +320,8 @@ class _relacion extends _modelo_parent_sin_codigo{
             return $this->error->error(mensaje: 'Error al obtener relacion', data: $fc_relacion);
         }
         $key_entidad_id = $this->modelo_entidad->key_id;
-        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(registro_id: $fc_relacion->$key_entidad_id);
+        $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa,
+            registro_id: $fc_relacion->$key_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -333,6 +350,17 @@ class _relacion extends _modelo_parent_sin_codigo{
         }
 
         return $r_fc_relacion->registros;
+    }
+
+    private function relaciones_externas(_uuid_ext $modelo_uuid_ext, array $row_relacion){
+        $filtro[$this->key_filtro_id] = $row_relacion[$this->key_id];
+
+        $r_fc_uuid_fc = $modelo_uuid_ext->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_uuid_fc);
+        }
+
+        return $r_fc_uuid_fc->registros;
     }
 
     /**

@@ -517,6 +517,375 @@ final class pdf
         $this->pdf->WriteHTML($table);
     }
 
+
+    final function complemento_pago(array $fc_doctos_relacionados, array $fc_pago_pagos, array $fc_pago_totales){
+
+        $titulo = $this->html(etiqueta: "h2", data: "Totales", class: "negrita titulo");
+        try {
+            $this->pdf->WriteHTML($titulo);
+        }
+        catch (Throwable $e){
+            return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
+        }
+
+        $head_td_base_16 = $this->html(etiqueta: "th",
+            data: "Base IVA 16", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_base_16);
+            print_r($error);
+            die('Error');
+        }
+
+        $head_td_tr_16 = $this->html(etiqueta: "th",
+            data: "Traslados IVA 16", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_tr_16);
+            print_r($error);
+            die('Error');
+        }
+
+        $head_td_monto_total_pagos = $this->html(etiqueta: "th",
+            data: "Total Pagos", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_tr_16);
+            print_r($error);
+            die('Error');
+        }
+
+        $head_data = $head_td_base_16.$head_td_tr_16.$head_td_monto_total_pagos;
+        $head_tr_1 = $this->html(etiqueta: "tr", data: $head_data);
+        if (errores::$error) {
+            $error = (new errores())->error('Error al tr', $head_tr_1);
+            print_r($error);
+            die('Error');
+        }
+
+
+
+        $head = $this->html(etiqueta: "thead", data: $head_tr_1);
+
+        $body = '';
+        foreach ($fc_pago_totales as $fc_pago_total) {
+
+            $tds = '';
+
+            $fc_pago_total_traslados_base_iva_16 = $fc_pago_total['fc_pago_total_total_traslados_base_iva_16'];
+            $td = $this->html(etiqueta: "td", data: $fc_pago_total_traslados_base_iva_16, class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $fc_pago_total_traslados_impuestos_iva_16 = $fc_pago_total['fc_pago_total_total_traslados_impuesto_iva_16'];
+            $td = $this->html(etiqueta: "td", data: $fc_pago_total_traslados_impuestos_iva_16, class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $fc_pago_total_monto_total_pagos = $fc_pago_total['fc_pago_total_monto_total_pagos'];
+            $td = $this->html(etiqueta: "td", data: $fc_pago_total_monto_total_pagos, class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $tr = $this->html(etiqueta: "tr", data: $tds);
+            if (errores::$error) {
+                $error = (new errores())->error('Error al tr', $head_tr_1);
+                print_r($error);
+                die('Error');
+            }
+            $body.=$tr;
+        }
+
+
+
+        $table = $this->html(etiqueta: "table", data: $head . $body, class: "border");
+
+        $this->pdf->WriteHTML($table);
+
+
+        /**
+         *
+         */
+
+
+
+
+
+        $titulo = $this->html(etiqueta: "h1", data: "Pagos", class: "negrita titulo");
+        try {
+            $this->pdf->WriteHTML($titulo);
+        }
+        catch (Throwable $e){
+            return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
+        }
+
+        $head_td_fecha_pago = $this->html(etiqueta: "th",
+            data: "Fecha de Pago", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_fecha_pago);
+            print_r($error);
+            die('Error');
+        }
+
+
+        $head_td_forma_pago = $this->html(etiqueta: "th",
+            data: "Forma de Pago", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_forma_pago);
+            print_r($error);
+            die('Error');
+        }
+
+        $head_td_moneda = $this->html(etiqueta: "th",
+            data: "Moneda", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_moneda);
+            print_r($error);
+            die('Error');
+        }
+
+        $head_td_tipo_cambio = $this->html(etiqueta: "th",
+            data: "Tipo de Cambio", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_tipo_cambio);
+            print_r($error);
+            die('Error');
+        }
+
+        $head_td_monto = $this->html(etiqueta: "th",
+            data: "Monto de Pago", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_monto);
+            print_r($error);
+            die('Error');
+        }
+
+        $head_data = $head_td_fecha_pago.$head_td_forma_pago.$head_td_moneda.$head_td_tipo_cambio.$head_td_monto;
+
+
+        $head_tr_1 = $this->html(etiqueta: "tr", data: $head_data);
+        if (errores::$error) {
+            $error = (new errores())->error('Error al tr', $head_tr_1);
+            print_r($error);
+            die('Error');
+        }
+        $head = $this->html(etiqueta: "thead", data: $head_tr_1);
+
+        $body = '';
+        foreach ($fc_pago_pagos as $fc_pago_pago) {
+            $tds = '';
+
+            $fc_pago_pago_fecha_pago = $fc_pago_pago['fc_pago_pago_fecha_pago'];
+            $td = $this->html(etiqueta: "td", data: $fc_pago_pago_fecha_pago, class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+
+            $cat_sat_forma_pago = $fc_pago_pago['cat_sat_forma_pago_codigo'].' '.$fc_pago_pago['cat_sat_forma_pago_descripcion'];
+            $td = $this->html(etiqueta: "td", data: $cat_sat_forma_pago, class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $moneda = $fc_pago_pago['cat_sat_moneda_codigo'].' '.$fc_pago_pago['cat_sat_moneda_descripcion'];
+            $td = $this->html(etiqueta: "td", data: $moneda, class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $tipo_cambio = $fc_pago_pago['com_tipo_cambio_monto'];
+            $td = $this->html(etiqueta: "td", data: $tipo_cambio, class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $monto = $fc_pago_pago['fc_pago_pago_monto'];
+            $td = $this->html(etiqueta: "td", data: $monto, class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $tr = $this->html(etiqueta: "tr", data: $tds);
+            if (errores::$error) {
+                $error = (new errores())->error('Error al tr', $head_tr_1);
+                print_r($error);
+                die('Error');
+            }
+            $body.=$tr;
+        }
+
+        $table = $this->html(etiqueta: "table", data: $head . $body, class: "border");
+
+        $this->pdf->WriteHTML($table);
+
+
+
+        $titulo = $this->html(etiqueta: "h1", data: "Documentos Relacionados", class: "negrita titulo");
+        try {
+            $this->pdf->WriteHTML($titulo);
+        }
+        catch (Throwable $e){
+            return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
+        }
+
+        $head_td_fc_factura_folio = $this->html(etiqueta: "th",
+            data: "Folio", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_fc_factura_folio);
+            print_r($error);
+            die('Error');
+        }
+
+
+        $head_td_fc_factura_uuid = $this->html(etiqueta: "th",
+            data: "UUID", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_fc_factura_uuid);
+            print_r($error);
+            die('Error');
+        }
+
+        $head_td_num_parcialidad = $this->html(etiqueta: "th",
+            data: "Num Parcialidad", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_num_parcialidad);
+            print_r($error);
+            die('Error');
+        }
+
+        $head_td_saldo_anterior = $this->html(etiqueta: "th",
+            data: "Saldo Anterior", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_saldo_anterior);
+            print_r($error);
+            die('Error');
+        }
+
+        $head_td_importe_pagado = $this->html(etiqueta: "th",
+            data: "Importe Pagado", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_importe_pagado);
+            print_r($error);
+            die('Error');
+        }
+
+        $head_td_saldo_insoluto = $this->html(etiqueta: "th",
+            data: "Saldo", class: "negrita border color");;
+        if (errores::$error) {
+            $error = (new errores())->error('Error al td', $head_td_saldo_insoluto);
+            print_r($error);
+            die('Error');
+        }
+
+
+        $head_data = $head_td_fc_factura_folio.$head_td_fc_factura_uuid.$head_td_num_parcialidad.$head_td_saldo_anterior;
+        $head_data .= $head_td_importe_pagado.$head_td_saldo_insoluto;
+
+
+        $head_tr_1 = $this->html(etiqueta: "tr", data: $head_data);
+        if (errores::$error) {
+            $error = (new errores())->error('Error al tr', $head_tr_1);
+            print_r($error);
+            die('Error');
+        }
+        $head = $this->html(etiqueta: "thead", data: $head_tr_1);
+
+        $body = '';
+        foreach ($fc_doctos_relacionados as $fc_docto_relacionado) {
+            $tds = '';
+
+            $td = $this->html(etiqueta: "td", data: $fc_docto_relacionado['fc_factura_folio'], class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $td = $this->html(etiqueta: "td", data: $fc_docto_relacionado['fc_factura_uuid'], class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $td = $this->html(etiqueta: "td", data: $fc_docto_relacionado['fc_docto_relacionado_num_parcialidad'], class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $td = $this->html(etiqueta: "td", data: $fc_docto_relacionado['fc_docto_relacionado_imp_saldo_ant'], class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $td = $this->html(etiqueta: "td", data: $fc_docto_relacionado['fc_docto_relacionado_imp_pagado'], class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $td = $this->html(etiqueta: "td", data: $fc_docto_relacionado['fc_docto_relacionado_imp_saldo_insoluto'], class: "border");
+            if (errores::$error) {
+                $error = (new errores())->error('Error al td', $td);
+                print_r($error);
+                die('Error');
+            }
+            $tds.=$td;
+
+            $tr = $this->html(etiqueta: "tr", data: $tds);
+            if (errores::$error) {
+                $error = (new errores())->error('Error al tr', $head_tr_1);
+                print_r($error);
+                die('Error');
+            }
+            $body.=$tr;
+
+        }
+
+
+        $table = $this->html(etiqueta: "table", data: $head . $body, class: "border");
+
+        $this->pdf->WriteHTML($table);
+
+
+
+    }
+
     private function data_impuestos(array $concepto, string $name_entidad_partida, string $tipo_impuesto){
         $base_imp = $this->init_impuesto(concepto: $concepto, name_entidad_partida: $name_entidad_partida,
             tipo_impuesto: $tipo_impuesto);
