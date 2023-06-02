@@ -62,6 +62,34 @@ class _transacciones_fcTest extends test
         errores::$error = false;
     }
 
+    public function test_emisor(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new fc_complemento_pago($this->link);
+        $trs = new liberator($trs);
+
+        $row_entidad = array();
+
+        $row_entidad['org_empresa_rfc'] = 'AAA010101AAA';
+        $row_entidad['org_empresa_razon_social'] = 'a';
+        $row_entidad['cat_sat_regimen_fiscal_codigo'] = 'a';
+
+        $resultado = $trs->emisor($row_entidad);
+
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        errores::$error = false;
+    }
+
+
+
     public function test_etapas(): void
     {
         errores::$error = false;

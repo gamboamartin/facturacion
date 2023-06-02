@@ -157,7 +157,7 @@ class fc_complemento_pagoTest extends test {
         $row_entidad['cat_sat_metodo_pago_codigo'] = '1';
         $row_entidad['cat_sat_forma_pago_codigo'] = '1';
         $row_entidad['fc_complemento_pago_fecha'] = '1';
-        $row_entidad['org_empresa_rfc'] = '1';
+        $row_entidad['org_empresa_rfc'] = 'AAA010101AAA';
         $row_entidad['org_empresa_razon_social'] = '1';
         $row_entidad['cat_sat_regimen_fiscal_codigo'] = '1';
         $row_entidad['com_sucursal_id'] = '1';
