@@ -14,6 +14,8 @@ use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
+use gamboamartin\xml_cfdi_4\fechas;
+use gamboamartin\xml_cfdi_4\xml;
 use PDO;
 use stdClass;
 
@@ -216,6 +218,63 @@ class fc_complemento_pago extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al obtener data factura',data:  $data);
         }
 
+        if(!is_array($data->conceptos)){
+            return $this->error->error(mensaje: 'Error data conceptos debe ser un array',data:  $data);
+        }
+
+
+        if(isset($data->comprobante['forma_pago'])){
+            unset($data->comprobante['forma_pago']);
+        }
+        if(isset($data->comprobante['sub_total'])){
+            if((float)$data->comprobante['sub_total'] === 0.0){
+                $data->comprobante['sub_total'] = 0;
+            }
+        }
+        if(isset($data->comprobante['descuento'])){
+            if((float)$data->comprobante['descuento'] === 0.0){
+                unset($data->comprobante['descuento']);
+            }
+        }
+        if(isset($data->comprobante['metodo_pago'])){
+            unset($data->comprobante['metodo_pago']);
+        }
+        if(isset($data->comprobante['total'])){
+            if((float)$data->comprobante['total'] === 0.0){
+                $data->comprobante['total'] = 0;
+            }
+        }
+
+
+        foreach ($data->conceptos as $indice_concepto=>$concepto){
+            if(isset($concepto->no_identificacion)){
+                unset($data->conceptos[$indice_concepto]->no_identificacion);
+            }
+            if(isset($concepto->unidad)){
+                unset($data->conceptos[$indice_concepto]->unidad);
+            }
+            if(isset($concepto->clave_unidad)){
+                $data->conceptos[$indice_concepto]->clave_unidad = 'ACT';
+            }
+            if(isset($concepto->descuento)){
+                unset($data->conceptos[$indice_concepto]->descuento);
+            }
+
+            if(isset($concepto->valor_unitario)){
+                if((float)$concepto->valor_unitario === 0.0){
+                    $data->conceptos[$indice_concepto]->valor_unitario = 0;
+                }
+            }
+            if(isset($concepto->importe)){
+                if((float)$concepto->importe === 0.0){
+                    $data->conceptos[$indice_concepto]->importe = 0;
+                }
+            }
+
+        }
+
+        //print_r($data->conceptos);exit;
+
         $Complemento = array();
 
         $fc_pagos = $this->fc_pagos(fc_complemento_pago_id: $this->registro_id);
@@ -248,13 +307,18 @@ class fc_complemento_pago extends _transacciones_fc
 
             foreach ($fc_pago_pagos as $indice_fc_pago_pago=>$fc_pago_pago) {
 
-                $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago] = new stdClass();
+                $fecha_pago = (new fechas())->fecha_hora_min_sec_t($fc_pago_pago['fc_pago_pago_fecha_pago']);
+                if (errores::$error) {
+                    return $this->error->error(mensaje: 'Error al maquetar fecha de pago', data: $fecha_pago);
+                }
 
-                $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->FechaPago = $fc_pago_pago['fc_pago_pago_fecha_pago'];
+                $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago] = new stdClass();
+                $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->FechaPago = $fecha_pago;
                 $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->FormaDePagoP = $fc_pago_pago['cat_sat_forma_pago_codigo'];
                 $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->MonedaP = $fc_pago_pago['cat_sat_moneda_codigo'];
                 $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->TipoCambioP = $fc_pago_pago['com_tipo_cambio_monto'];
                 $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->Monto = $fc_pago_pago['fc_pago_pago_monto'];
+
 
 
                 $fc_doctos_relacionados = $this->fc_doctos_relacionados(fc_pago_pago_id: $fc_pago_pago['fc_pago_pago_id']);
@@ -271,7 +335,7 @@ class fc_complemento_pago extends _transacciones_fc
                     $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->Serie = $fc_docto_relacionado['fc_factura_serie'];
                     $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->Folio = $fc_docto_relacionado['fc_factura_folio'];
                     $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->MonedaDR = $fc_docto_relacionado['cat_sat_moneda_codigo'];
-                    $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->EquivalenciaDR = $fc_docto_relacionado['cat_sat_moneda_codigo'];
+                    $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->EquivalenciaDR = $fc_docto_relacionado['fc_docto_relacionado_equivalencia_dr'];
                     $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->NumParcialidad = $fc_docto_relacionado['fc_docto_relacionado_num_parcialidad'];
                     $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpSaldoAnt = $fc_docto_relacionado['fc_docto_relacionado_imp_saldo_ant'];
                     $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpPagado = $fc_docto_relacionado['fc_docto_relacionado_imp_pagado'];
@@ -302,12 +366,16 @@ class fc_complemento_pago extends _transacciones_fc
 
                             foreach ($fc_traslados_dr_part as $indice_fc_traslado_dr_part=>$fc_traslado_dr_part) {
 
+                                $tasa_o_cuota_dr = round($fc_traslado_dr_part['cat_sat_factor_factor'],6);
+                                $tasa_o_cuota_dr = number_format($tasa_o_cuota_dr,6,'.','');
+
+                               // print_r($tasa_o_cuota_dr);exit;
                                 $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part] = new stdClass();
 
                                 $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part]->BaseDR = $fc_traslado_dr_part['fc_traslado_dr_part_base_dr'];
                                 $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part]->ImpuestoDR = $fc_traslado_dr_part['cat_sat_tipo_impuesto_codigo'];
                                 $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part]->TipoFactorDR = $fc_traslado_dr_part['cat_sat_tipo_factor_codigo'];
-                                $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part]->TasaOCuotaDR = $fc_traslado_dr_part['cat_sat_factor_factor'];
+                                $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part]->TasaOCuotaDR = $tasa_o_cuota_dr;
                                 $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part]->ImporteDR = $fc_traslado_dr_part['fc_traslado_dr_part_importe_dr'];
                             }
 
@@ -547,12 +615,17 @@ class fc_complemento_pago extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al validar fc_traslado_p_part', data: $valida);
         }
 
+        $tasa_o_cuota_p = $this->tasa_o_cuota_p($fc_traslado_p_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maquetar tasa_o_cuota_p', data: $tasa_o_cuota_p);
+        }
+
 
         $traslado_p_part = new stdClass();
         $traslado_p_part->BaseP = $fc_traslado_p_part['fc_traslado_p_part_base_p'];
         $traslado_p_part->ImpuestoP = $fc_traslado_p_part['cat_sat_tipo_impuesto_codigo'];
         $traslado_p_part->TipoFactorP = $fc_traslado_p_part['cat_sat_tipo_factor_codigo'];
-        $traslado_p_part->TasaOCuotaP = $fc_traslado_p_part['cat_sat_factor_factor'];
+        $traslado_p_part->TasaOCuotaP = $tasa_o_cuota_p;
         $traslado_p_part->ImporteP = $fc_traslado_p_part['fc_traslado_p_part_importe_p'];
         return $traslado_p_part;
     }
@@ -591,6 +664,12 @@ class fc_complemento_pago extends _transacciones_fc
         return $data;
 
 
+    }
+
+    private function tasa_o_cuota_p(array $fc_traslado_p_part): string
+    {
+        $tasa_o_cuota_p = round($fc_traslado_p_part['cat_sat_factor_factor'],6);
+        return number_format($tasa_o_cuota_p,6,'.','');
     }
 
 

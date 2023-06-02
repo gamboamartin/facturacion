@@ -162,7 +162,7 @@ class fc_complemento_pagoTest extends test {
         $row_entidad['cat_sat_regimen_fiscal_codigo'] = '1';
         $row_entidad['com_sucursal_id'] = '1';
         $row_entidad['cat_sat_uso_cfdi_codigo'] = '1';
-        $row_entidad['conceptos'] = '1';
+        $row_entidad['conceptos'] = array();
         $row_entidad['total_impuestos_trasladados'] = '1';
         $row_entidad['total_impuestos_retenidos'] = '1';
         $resultado = $modelo->data_factura($row_entidad);
@@ -204,7 +204,7 @@ class fc_complemento_pagoTest extends test {
         $this->assertEquals('-1.0',$resultado->BaseP);
         $this->assertEquals('-1',$resultado->ImpuestoP);
         $this->assertEquals('-1',$resultado->TipoFactorP);
-        $this->assertEquals('-1',$resultado->TasaOCuotaP);
+        $this->assertEquals('-1.000000',$resultado->TasaOCuotaP);
         $this->assertEquals('-1',$resultado->ImporteP);
 
 

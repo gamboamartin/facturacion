@@ -42,15 +42,15 @@ class _comprobante{
             return $this->error->error(mensaje: 'Error al valida row_entidad', data: $valida);
         }
 
-        $fc_sub_total = $this->monto_dos_dec(monto: $row_entidad[$name_entidad.'_sub_total']);
+        $fc_sub_total = $this->monto_dos_dec(monto: $row_entidad[$column_sub_total]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al limpiar monto', data: $fc_sub_total);
         }
-        $fc_total = $this->monto_dos_dec(monto: $row_entidad[$name_entidad.'_total']);
+        $fc_total = $this->monto_dos_dec(monto: $row_entidad[$column_total]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al limpiar monto', data: $fc_total);
         }
-        $fc_descuento = $this->monto_dos_dec(monto: $row_entidad[$name_entidad.'_descuento']);
+        $fc_descuento = $this->monto_dos_dec(monto: $row_entidad[$column_descuento]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al limpiar monto', data: $fc_descuento);
         }
@@ -61,12 +61,12 @@ class _comprobante{
         $comprobante['moneda'] = $row_entidad['cat_sat_moneda_codigo'];
         $comprobante['sub_total'] = $fc_sub_total;
         $comprobante['total'] = $fc_total;
-        $comprobante['exportacion'] = $row_entidad[$name_entidad.'_exportacion'];
-        $comprobante['folio'] = $row_entidad[$name_entidad.'_folio'];
+        $comprobante['exportacion'] = $row_entidad[$column_exportacion];
+        $comprobante['folio'] = $row_entidad[$column_folio];
         $comprobante['forma_pago'] = $row_entidad['cat_sat_forma_pago_codigo'];
         $comprobante['descuento'] = $fc_descuento;
         $comprobante['metodo_pago'] = $row_entidad['cat_sat_metodo_pago_codigo'];
-        $comprobante['fecha'] = $row_entidad[$name_entidad.'_fecha'];
+        $comprobante['fecha'] = $row_entidad[$column_fecha];
 
         if(isset($row_entidad['fc_csd_no_certificado'])){
             if(trim($row_entidad['fc_csd_no_certificado']) !== ''){

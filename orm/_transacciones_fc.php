@@ -1942,7 +1942,6 @@ class _transacciones_fc extends modelo
 
 
 
-
         $filtro_files['fc_csd.id'] = $fc_factura['fc_csd_id'];
 
         $r_fc_key_pem = (new fc_key_pem(link: $this->link))->filtro_and(filtro: $filtro_files);

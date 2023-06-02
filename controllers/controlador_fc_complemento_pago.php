@@ -591,6 +591,8 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             return $this->retorno_error(mensaje: 'Error al timbrar',data:  $r_timbra,header:  $header, ws: $ws);
         }
 
+
+
         return $r_timbra;
 
     }
