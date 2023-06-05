@@ -70,6 +70,7 @@ class fc_impuesto_dr extends _modelo_parent{
             registro_id: $fc_impuesto_dr->fc_factura_id);
 
         if($tiene_retenciones){
+
             $fc_retencion_dr_ins['fc_impuesto_dr_id'] = $r_alta_bd->registro_id;
             $r_fc_retencion_dr = (new fc_retencion_dr(link: $this->link))->alta_registro(registro: $fc_retencion_dr_ins);
             if(errores::$error){

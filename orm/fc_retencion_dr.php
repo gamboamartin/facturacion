@@ -43,6 +43,60 @@ class fc_retencion_dr extends _modelo_parent{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
+
+        $fc_retencion_dr = $this->registro(registro_id: $r_alta_bd->registro_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener retencion',data:  $fc_retencion_dr);
+        }
+
+
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+
+        $retenciones = (new fc_factura(link: $this->link))->retenciones(modelo_retencion: $modelo_retencion,
+            registro_id:  $fc_retencion_dr['fc_factura_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener retenciones',data:  $retenciones);
+        }
+
+
+        foreach ($retenciones as $retencion){
+            $fc_retencion_dr_part_ins['cat_sat_tipo_impuesto_id'] = $retencion['cat_sat_tipo_impuesto_id'];
+            $fc_retencion_dr_part_ins['cat_sat_tipo_factor_id'] = $retencion['cat_sat_tipo_factor_id'];
+            $fc_retencion_dr_part_ins['fc_retencion_dr_id'] = $r_alta_bd->registro_id;
+            $fc_retencion_dr_part_ins['cat_sat_factor_id'] = $retencion['cat_sat_factor_id'];
+
+            $importe_pagado = round($fc_retencion_dr['fc_docto_relacionado_imp_pagado'],2);
+
+            $tasas = (new fc_factura(link: $this->link))->tasas_de_impuestos(modelo_traslado: $modelo_traslado,
+                modelo_retencion: $modelo_retencion, registro_id: $fc_retencion_dr['fc_factura_id']);
+
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener tasas',data:  $tasas);
+            }
+
+            $factor = 1 + round(($tasas->traslado->factor - $tasas->retencion->factor),6);
+            $base_dr = round($importe_pagado / $factor,2);
+
+            $importe_dr = round($base_dr * $tasas->retencion->factor,2);
+
+            $fc_retencion_dr_part_ins['base_dr'] = $base_dr;
+            $fc_retencion_dr_part_ins['importe_dr'] = $importe_dr;
+
+            $r_alta_fc_retencion_dr_part = (new fc_retencion_dr_part(link: $this->link))->alta_registro(registro: $fc_retencion_dr_part_ins);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_fc_retencion_dr_part);
+            }
+
+
+        }
+
+
+        /**
+         * insertar fc_retencion_part
+         */
+
+
         return $r_alta_bd;
     }
 
@@ -75,7 +129,7 @@ class fc_retencion_dr extends _modelo_parent{
 
         if(!isset($registro['descripcion'])){
 
-            $codigo = $registro_previo['fc_retencion_dr_codigo'];
+            $codigo = $registro_previo['fc_impuesto_p_codigo'];
             if(isset($registro['codigo'])){
                 $codigo = $registro['codigo'];
             }

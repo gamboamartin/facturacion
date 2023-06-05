@@ -49,7 +49,6 @@ class fc_traslado_dr extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener traslado',data:  $fc_traslado_dr);
         }
 
-
         $modelo_traslado = new fc_traslado(link: $this->link);
         $modelo_retencion = new fc_retenido(link: $this->link);
 

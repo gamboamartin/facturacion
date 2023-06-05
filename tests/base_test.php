@@ -1675,6 +1675,10 @@ class base_test{
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
+        $del = $this->del_fc_retencion_p($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_impuesto_p');
         if(errores::$error){
@@ -1697,11 +1701,37 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_retencion_p(PDO $link): array
+    {
+
+        $del = $this->del_fc_retencion_p_part($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_retencion_p');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_traslado_p_part(PDO $link): array
     {
 
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_traslado_p_part');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_retencion_p_part(PDO $link): array
+    {
+
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_retencion_p_part');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
@@ -1903,6 +1933,21 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_retencion_dr(PDO $link): array
+    {
+
+        $del = $this->del_fc_retencion_dr_part($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_retencion_dr');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_traslado_dr_part(PDO $link): array
     {
 
@@ -1914,9 +1959,24 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_retencion_dr_part(PDO $link): array
+    {
+
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_retencion_dr_part');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_impuesto_dr(PDO $link): array
     {
         $del = $this->del_fc_traslado_dr($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        $del = $this->del_fc_retencion_dr($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
