@@ -172,7 +172,13 @@ class fc_cer_csd extends modelo{
         return $r_modifica_bd;
     }
 
-    final public function ruta_cer(int $fc_csd_id){
+    /**
+     * Obtiene la ruta absoluta del cer de un csd
+     * @param int $fc_csd_id identificador de csd
+     * @return array|string
+     */
+    final public function ruta_cer(int $fc_csd_id): array|string
+    {
         $filtro = array();
         $filtro['fc_csd.id'] = $fc_csd_id;
         $r_fc_csd_cer = $this->filtro_and(filtro: $filtro);
