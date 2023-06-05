@@ -555,13 +555,13 @@ class _partida extends  _base{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partida', data: $partida);
         }
-
+/*
         $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(
             modelo_etapa: $this->modelo_etapa, registro_id: $this->modelo_entidad->key_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
-
+*/
         if (!isset($registro['codigo'])) {
             $registro['codigo'] = $partida[$this->tabla."_codigo"];
             if (errores::$error) {
