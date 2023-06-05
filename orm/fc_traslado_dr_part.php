@@ -15,7 +15,8 @@ class fc_traslado_dr_part extends _modelo_parent{
         $tabla = 'fc_traslado_dr_part';
         $columnas = array($tabla=>false,'fc_traslado_dr'=>$tabla,'fc_impuesto_dr'=>'fc_traslado_dr',
             'fc_docto_relacionado'=>'fc_impuesto_dr','fc_pago_pago'=>'fc_docto_relacionado',
-            'fc_pago'=>'fc_pago_pago','cat_sat_tipo_impuesto'=>$tabla,'cat_sat_tipo_factor'=>$tabla,'cat_sat_factor'=>$tabla);
+            'fc_pago'=>'fc_pago_pago','cat_sat_tipo_impuesto'=>$tabla,'cat_sat_tipo_factor'=>$tabla,
+            'cat_sat_factor'=>$tabla,'fc_complemento_pago'=>'fc_pago');
         $campos_obligatorios = array();
 
 
@@ -47,8 +48,7 @@ class fc_traslado_dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
 
-        $upd = $this->upd_fc_pago_total(cat_sat_factor: $cat_sat_factor,fc_pago_id:  $r_alta_bd->registro['fc_pago_id'],
-            registro:  $this->registro);
+        $upd = $this->upd_fc_pago_total(cat_sat_factor: $cat_sat_factor,fc_pago_id:  $r_alta_bd->registro['fc_pago_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
         }
@@ -111,7 +111,7 @@ class fc_traslado_dr_part extends _modelo_parent{
         return $r_pago_total->registros[0];
     }
 
-    private function fc_pago_total_upd(stdClass $cat_sat_factor, int $fc_pago_id, array $registro): array
+    private function fc_pago_total_upd(stdClass $cat_sat_factor, int $fc_pago_id): array
     {
 
         $impuestos = $this->importes_traslados_dr_part(cat_sat_factor_id: $cat_sat_factor->cat_sat_factor_id,
@@ -259,9 +259,8 @@ class fc_traslado_dr_part extends _modelo_parent{
         return $fc_traslado_dr_part;
     }
 
-    private function upd_fc_pago_total(stdClass $cat_sat_factor, int $fc_pago_id, array $registro){
-        $fc_pago_total_upd = $this->fc_pago_total_upd(cat_sat_factor: $cat_sat_factor, fc_pago_id: $fc_pago_id,
-            registro: $registro);
+    final public function upd_fc_pago_total(stdClass $cat_sat_factor, int $fc_pago_id){
+        $fc_pago_total_upd = $this->fc_pago_total_upd(cat_sat_factor: $cat_sat_factor, fc_pago_id: $fc_pago_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_pago_total_upd',data:  $fc_pago_total_upd);
         }

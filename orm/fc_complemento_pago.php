@@ -3,6 +3,7 @@
 namespace gamboamartin\facturacion\models;
 
 
+use gamboamartin\cat_sat\models\cat_sat_factor;
 use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
@@ -171,6 +172,34 @@ class fc_complemento_pago extends _transacciones_fc
 
     }
 
+    private function actualiza_total(int $cat_sat_factor_id, int $fc_pago_id){
+        $cat_sat_factor = (new cat_sat_factor(link: $this->link))->registro(
+            registro_id: $cat_sat_factor_id, retorno_obj: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener cat_sat_factor',data:  $cat_sat_factor);
+        }
+
+        $upd = (new fc_traslado_dr_part(link: $this->link))->upd_fc_pago_total(cat_sat_factor: $cat_sat_factor,
+            fc_pago_id:  $fc_pago_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
+        }
+        return $upd;
+    }
+
+    private function actualiza_totales(array $fc_traslados_dr_part){
+        $upds = array();
+        foreach ($fc_traslados_dr_part as $fc_traslado_dr_part){
+            $upd = $this->actualiza_total(cat_sat_factor_id: $fc_traslado_dr_part['cat_sat_factor_id'],
+                fc_pago_id:  $fc_traslado_dr_part['fc_pago_id']);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
+            }
+            $upds[] = $upd;
+        }
+        return $upds;
+    }
+
     public function alta_bd(): array|stdClass
     {
         $this->modelo_email = new fc_email_cp(link: $this->link);
@@ -209,6 +238,18 @@ class fc_complemento_pago extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al insertar partida',data:  $alta_fc_partida_cp);
         }
         return $alta_fc_partida_cp;
+    }
+
+    private function aplica_actualizacion_totales(int $fc_complemento_pago_id){
+        $fc_traslados_dr_part = $this->get_fc_traslados_dr_part(fc_complemento_pago_id: $fc_complemento_pago_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener fc_traslados_dr_part', data: $fc_traslados_dr_part);
+        }
+        $upd = $this->actualiza_totales(fc_traslados_dr_part: $fc_traslados_dr_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
+        }
+        return $upd;
     }
 
     final protected function data_factura(array $row_entidad): array|stdClass
@@ -568,6 +609,15 @@ class fc_complemento_pago extends _transacciones_fc
         return $Complemento;
     }
 
+    private function get_fc_traslados_dr_part(int $fc_complemento_pago_id){
+        $filtro['fc_complemento_pago.id'] = $fc_complemento_pago_id;
+        $r_fc_traslado_dr_part = (new fc_traslado_dr_part(link: $this->link))->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener r_fc_traslado_dr_part', data: $r_fc_traslado_dr_part);
+        }
+        return $r_fc_traslado_dr_part->registros;
+    }
+
     private function fc_traslados_p_part(int $fc_traslado_p_id){
         $filtro = array();
         $filtro['fc_traslado_p.id'] = $fc_traslado_p_id;
@@ -654,6 +704,13 @@ class fc_complemento_pago extends _transacciones_fc
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al modificar', data: $r_modifica_bd);
         }
+
+        $upd = $this->aplica_actualizacion_totales(fc_complemento_pago_id: $id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
+        }
+
+
         return $r_modifica_bd;
     }
 

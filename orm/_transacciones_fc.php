@@ -1255,9 +1255,10 @@ class _transacciones_fc extends modelo
      * Ajusta la fecha dependiendo la entrada de fecha
      * @param array $registro Registro en proceso de modificacion
      * @return array
+     * @version 10.31.0
      *
      */
-     function integra_fecha(array $registro): array
+     private function integra_fecha(array $registro): array
     {
         if(isset($registro['fecha'])){
             $es_fecha = $this->validacion->valida_pattern(key:'fecha', txt: $registro['fecha']);

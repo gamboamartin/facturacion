@@ -136,6 +136,30 @@ class _transacciones_fcTest extends test
         errores::$error = false;
     }
 
+    public function test_integra_fecha(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new fc_nota_credito($this->link);
+        $trs = new liberator($trs);
+
+        $registro = array();
+        $registro['fecha'] = '2020-01-01';
+
+        $resultado = $trs->integra_fecha($registro);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+
+
+        errores::$error = false;
+
+    }
     public function test_permite_transaccion(): void
     {
         errores::$error = false;
