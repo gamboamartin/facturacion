@@ -58,6 +58,13 @@ class fc_traslado_dr_part extends _modelo_parent{
         return $r_alta_bd;
     }
 
+    private function campos_dr_traslado_part(): array
+    {
+        $campos['base_dr'] = 'fc_traslado_dr_part.base_dr';
+        $campos['importe_dr'] = 'fc_traslado_dr_part.importe_dr';
+        return $campos;
+    }
+
     /**
      * Integra el codigo si no existe de manera automatica
      * @param array $registro Registro en proceso de alta
@@ -72,6 +79,17 @@ class fc_traslado_dr_part extends _modelo_parent{
             $registro['codigo'] = $codigo;
         }
         return $registro;
+    }
+
+    private function data_importes_total(array $fc_traslado_dr_part): stdClass
+    {
+        $base_dr = round($fc_traslado_dr_part['base_dr'],2);
+        $importe_dr = round($fc_traslado_dr_part['importe_dr'],2);
+
+        $data = new stdClass();
+        $data->base_dr = $base_dr;
+        $data->importe_dr = $importe_dr;
+        return $data;
     }
 
     private function descripcion(array $registro): array
@@ -93,22 +111,66 @@ class fc_traslado_dr_part extends _modelo_parent{
         return $r_pago_total->registros[0];
     }
 
-    private function fc_pago_total_upd(stdClass $cat_sat_factor, array $registro): array
+    private function fc_pago_total_upd(stdClass $cat_sat_factor, int $fc_pago_id, array $registro): array
     {
-        $fc_pago_total_upd = array();
-        if((float)$cat_sat_factor->cat_sat_factor_factor === 0.0){
-            $fc_pago_total_upd['total_traslados_base_iva_00'] = round($registro['base_dr'],2);
-            $fc_pago_total_upd['total_traslados_impuesto_iva_00'] = round($registro['importe_dr'],2);
+
+        $impuestos = $this->importes_traslados_dr_part(cat_sat_factor_id: $cat_sat_factor->cat_sat_factor_id,
+            fc_pago_id:  $fc_pago_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener sumatorias de fc_traslado_dr_part',
+                data:  $impuestos);
         }
-        if((float)$cat_sat_factor->cat_sat_factor_factor === 0.08){
-            $fc_pago_total_upd['total_traslados_base_iva_08'] = round($registro['base_dr'],2);
-            $fc_pago_total_upd['total_traslados_impuesto_iva_08'] = round($registro['importe_dr'],2);
+        $key_factor = $this->key_factor(cat_sat_factor: $cat_sat_factor);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener key_factor', data:  $key_factor);
         }
-        if((float)$cat_sat_factor->cat_sat_factor_factor === 0.16){
-            $fc_pago_total_upd['total_traslados_base_iva_16'] = round($registro['base_dr'],2);
-            $fc_pago_total_upd['total_traslados_impuesto_iva_16'] = round($registro['importe_dr'],2);
+
+        $fc_pago_total_upd = $this->fc_pago_total_upd_factor(impuestos: $impuestos,key_factor:  $key_factor);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maquetar fc_pago_total_upd', data:  $fc_pago_total_upd);
         }
+
         return $fc_pago_total_upd;
+    }
+
+    private function fc_pago_total_upd_factor(stdClass $impuestos, string $key_factor): array
+    {
+        $key_base_dr = "total_traslados_base_iva_$key_factor";
+        $key_importe_dr = "total_traslados_impuesto_iva_$key_factor";
+
+        $fc_pago_total_upd[$key_base_dr] = round($impuestos->base_dr,2);
+        $fc_pago_total_upd[$key_importe_dr] = round($impuestos->importe_dr,2);
+
+        return $fc_pago_total_upd;
+    }
+
+    /**
+     * Maqueta el filtro para obtener las partidas de traslados de un documento
+     * @param int $cat_sat_factor_id Factor a verificar
+     * @param int $fc_pago_id Pago a verificar
+     * @return array
+     */
+    private function filtro_traslados_dr_part(int $cat_sat_factor_id, int $fc_pago_id): array
+    {
+        $filtro['cat_sat_factor.id'] = $cat_sat_factor_id;
+        $filtro['fc_pago.id'] = $fc_pago_id;
+        return $filtro;
+    }
+
+    private function importes_traslados_dr_part(int $cat_sat_factor_id, int $fc_pago_id){
+
+        $fc_traslado_dr_part = $this->sum_traslados_dr_parts(cat_sat_factor_id: $cat_sat_factor_id,fc_pago_id:  $fc_pago_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener sumatorias de fc_traslado_dr_part', data:  $fc_traslado_dr_part);
+        }
+
+        $data = $this->data_importes_total(fc_traslado_dr_part: $fc_traslado_dr_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maquetar importes', data:  $data);
+        }
+
+        return $data;
+
     }
 
     private function init_registro_alta(array $registro){
@@ -121,6 +183,21 @@ class fc_traslado_dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener codigo',data:  $registro);
         }
         return $registro;
+    }
+
+    private function key_factor(stdClass $cat_sat_factor): string
+    {
+        $key_factor = '';
+        if((float)$cat_sat_factor->cat_sat_factor_factor === 0.00){
+            $key_factor = '00';
+        }
+        if((float)$cat_sat_factor->cat_sat_factor_factor === 0.08){
+            $key_factor = '08';
+        }
+        if((float)$cat_sat_factor->cat_sat_factor_factor === 0.16){
+            $key_factor = '16';
+        }
+        return $key_factor;
     }
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false, array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
@@ -150,8 +227,41 @@ class fc_traslado_dr_part extends _modelo_parent{
         return $r_modifica_bd;
     }
 
+    private function params_importes_total(int $cat_sat_factor_id, int $fc_pago_id){
+        $filtro = $this->filtro_traslados_dr_part(cat_sat_factor_id: $cat_sat_factor_id,fc_pago_id:  $fc_pago_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maquetar filtro', data:  $filtro);
+        }
+
+        $campos = $this->campos_dr_traslado_part();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maquetar filtro', data:  $filtro);
+        }
+
+        $data = new stdClass();
+        $data->filtro = $filtro;
+        $data->campos = $campos;
+        return $data;
+    }
+
+    private function sum_traslados_dr_parts(int $cat_sat_factor_id, int $fc_pago_id){
+        $params = $this->params_importes_total(cat_sat_factor_id: $cat_sat_factor_id, fc_pago_id: $fc_pago_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maquetar params', data:  $params);
+        }
+
+        $fc_traslado_dr_part = (new fc_traslado_dr_part(link: $this->link))->suma(campos: $params->campos,
+            filtro: $params->filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener sumatorias de fc_traslado_dr_part',
+                data:  $fc_traslado_dr_part);
+        }
+        return $fc_traslado_dr_part;
+    }
+
     private function upd_fc_pago_total(stdClass $cat_sat_factor, int $fc_pago_id, array $registro){
-        $fc_pago_total_upd = $this->fc_pago_total_upd(cat_sat_factor: $cat_sat_factor,registro: $registro);
+        $fc_pago_total_upd = $this->fc_pago_total_upd(cat_sat_factor: $cat_sat_factor, fc_pago_id: $fc_pago_id,
+            registro: $registro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_pago_total_upd',data:  $fc_pago_total_upd);
         }
