@@ -886,8 +886,10 @@ final class pdf
 
     }
 
-    private function data_impuestos(array $concepto, string $name_entidad_partida, string $tipo_impuesto){
-        $base_imp = $this->init_impuesto(concepto: $concepto, name_entidad_partida: $name_entidad_partida,
+    private function data_impuestos(array $data_impuesto, string $name_entidad_partida, string $tipo_impuesto){
+
+
+        $base_imp = $this->init_impuesto(data_impuesto: $data_impuesto, name_entidad_partida: $name_entidad_partida,
             tipo_impuesto: $tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener impuesto base',data:  $base_imp);
@@ -953,8 +955,8 @@ final class pdf
         return "<$etiqueta class='$class' $propiedades>$data</$etiqueta>";
     }
 
-    private function init_impuesto(array $concepto, string $name_entidad_partida, string $tipo_impuesto){
-        $impuesto = $this->impuesto(concepto: $concepto, tipo_impuesto: $tipo_impuesto);
+    private function init_impuesto(array $data_impuesto, string $name_entidad_partida, string $tipo_impuesto){
+        $impuesto = $this->impuesto(data_impuesto: $data_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener impuesto base',data:  $impuesto);
         }
@@ -965,11 +967,11 @@ final class pdf
         if($tipo_impuesto === 'retenidos') {
             $tipo = 'Retenciones';
         }
-        $fc_partida_valor_unitario = round($concepto[$tipo_impuesto][0][$name_entidad_partida.'_valor_unitario'],2);
-        $fc_partida_cantidad = round($concepto[$tipo_impuesto][0][$name_entidad_partida.'_cantidad'],2);
-        $fc_partida_descuento = round($concepto[$tipo_impuesto][0][$name_entidad_partida.'_descuento'],2);
-        $tasa_cuota = round($concepto[$tipo_impuesto][0]['cat_sat_factor_factor'],6);
-        $tipo_factor = $concepto[$tipo_impuesto][0]['cat_sat_tipo_factor_codigo'];
+        $fc_partida_valor_unitario = round($data_impuesto[$name_entidad_partida.'_valor_unitario'],2);
+        $fc_partida_cantidad = round($data_impuesto[$name_entidad_partida.'_cantidad'],2);
+        $fc_partida_descuento = round($data_impuesto[$name_entidad_partida.'_descuento'],2);
+        $tasa_cuota = round($data_impuesto['cat_sat_factor_factor'],6);
+        $tipo_factor = $data_impuesto['cat_sat_tipo_factor_codigo'];
 
         $data = new stdClass();
         $data->impuesto = $impuesto;
@@ -992,8 +994,14 @@ final class pdf
         return $importe;
     }
 
-    private function impuesto(array $concepto, string $tipo_impuesto){
-        return $concepto[$tipo_impuesto][0]['cat_sat_tipo_impuesto_descripcion'];
+    /**
+     * Obtiene el tipo de impuesto
+     * @param array $data_impuesto Datos del impuesto a integrar
+     * @return string
+     */
+    private function impuesto(array $data_impuesto): string
+    {
+        return $data_impuesto['cat_sat_tipo_impuesto_descripcion'];
     }
 
     private function impuestos_concepto(string $base, string $importe, string $impuesto, string $tasa_cuota, string $tipo, string $tipo_factor){
@@ -1201,17 +1209,26 @@ final class pdf
     }
 
     private function tr_impuestos_concepto(array $concepto, string $name_entidad_partida, string $tipo_impuesto){
-        $data_impuestos = $this->data_impuestos(concepto: $concepto, name_entidad_partida: $name_entidad_partida,
-            tipo_impuesto: $tipo_impuesto);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al ajustar datos de impuestos',data:  $data_impuestos);
+
+
+        $impuestos = array();
+        if(isset($concepto[$tipo_impuesto])){
+            $impuestos = $concepto[$tipo_impuesto];
         }
 
+        $tr = '';
+        foreach ($impuestos as $data_impuesto) {
+            $data_impuestos = $this->data_impuestos(data_impuesto: $data_impuesto,
+                name_entidad_partida: $name_entidad_partida, tipo_impuesto: $tipo_impuesto);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al ajustar datos de impuestos', data: $data_impuestos);
+            }
 
-        $tr = $this->tr_impuestos(base: $data_impuestos->base,importe:  $data_impuestos->importe,impuesto:  $data_impuestos->impuesto,
-            tasa_cuota:  $data_impuestos->tasa_cuota,tipo:  $data_impuestos->tipo,tipo_factor:  $data_impuestos->tipo_factor);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar tr',data:  $tr);
+            $tr .= $this->tr_impuestos(base: $data_impuestos->base, importe: $data_impuestos->importe, impuesto: $data_impuestos->impuesto,
+                tasa_cuota: $data_impuestos->tasa_cuota, tipo: $data_impuestos->tipo, tipo_factor: $data_impuestos->tipo_factor);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al generar tr', data: $tr);
+            }
         }
         return $tr;
 
