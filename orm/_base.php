@@ -6,7 +6,12 @@ use gamboamartin\errores\errores;
 
 class _base extends _modelo_parent{
 
-    protected function init_alta_bd(){
+    /**
+     * Integra los elementos base de un modelo para alta
+     * @return array
+     */
+    protected function init_alta_bd(): array
+    {
         if (!isset($this->registro['codigo'])) {
             $this->registro['codigo'] = $this->get_codigo_aleatorio();
             if (errores::$error) {

@@ -34,7 +34,8 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
 
-        $upd = $this->upd_fc_pago_total(cat_sat_factor: $cat_sat_factor,fc_pago_id:  $r_alta_bd->registro['fc_pago_id'], tipo_impuesto: $this->tipo_impuesto);
+        $upd = $this->upd_fc_pago_total(cat_sat_factor: $cat_sat_factor,fc_pago_id:  $r_alta_bd->registro['fc_pago_id'],
+            tipo_impuesto: $this->tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
         }
@@ -92,6 +93,10 @@ class _dr_part extends _modelo_parent{
         return $data;
     }
 
+    /**
+     * @param array $registro
+     * @return array
+     */
     private function descripcion(array $registro): array
     {
         if(!isset($registro['descripcion'])){
@@ -130,16 +135,20 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al maquetar fc_pago_total_upd', data:  $fc_pago_total_upd);
         }
 
+
         return $fc_pago_total_upd;
     }
 
     private function fc_pago_total_upd_factor(stdClass $impuestos, string $key_factor, string $tipo_impuesto): array
     {
+
         $key_base_dr = "total_".$tipo_impuesto."_base_iva_$key_factor";
         $key_importe_dr = "total_".$tipo_impuesto."_impuesto_iva_$key_factor";
 
         $fc_pago_total_upd[$key_base_dr] = round($impuestos->base_dr,2);
         $fc_pago_total_upd[$key_importe_dr] = round($impuestos->importe_dr,2);
+
+
 
         return $fc_pago_total_upd;
     }
