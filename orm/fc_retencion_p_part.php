@@ -12,7 +12,8 @@ class fc_retencion_p_part extends _modelo_parent{
     public function __construct(PDO $link)
     {
         $tabla = 'fc_retencion_p_part';
-        $columnas = array($tabla=>false);
+        $columnas = array($tabla=>false,'fc_retencion_p'=>$tabla,'cat_sat_tipo_factor'=>$tabla,
+            'cat_sat_tipo_impuesto'=>$tabla,'cat_sat_factor'=>$tabla);
         $campos_obligatorios = array();
 
 

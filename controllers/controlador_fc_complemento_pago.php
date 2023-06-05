@@ -303,6 +303,9 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     }
 
     public function fc_docto_rel_alta_bd(bool $header, bool $ws = false){
+
+        $this->link->beginTransaction();
+
         $montos = $_POST['monto'];
         $altas = array();
 
@@ -332,6 +335,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
                 $alta_bd = (new fc_docto_relacionado(link: $this->link))->alta_registro(registro: $fc_docto_relacionado_ins);
                 if (errores::$error) {
+                    $this->link->rollBack();
                     return $this->retorno_error(mensaje: 'Error al insertar', data: $alta_bd, header: $header, ws: $ws);
                 }
                 $altas[] = $alta_bd;
@@ -346,6 +350,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
                 header:  $header, ws: $ws);
         }
 
+        $this->link->commit();
         if($header){
 
             $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
