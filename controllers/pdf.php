@@ -116,7 +116,8 @@ final class pdf
                 return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
             }
 
-            $tables_uuid = $this->integra_relacionadas(name_entidad: $name_entidad);
+
+            $tables_uuid = $this->integra_relacionadas(name_entidad: $name_entidad, relacion: $relacion);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al integrar tables_uuid', data: $tables_uuid);
             }
@@ -208,9 +209,11 @@ final class pdf
         return $table;
     }
 
-    private function integra_relacionada(string $key_relacionadas, string $key_uuid){
+    private function integra_relacionada(string $key_relacionadas, string $key_uuid, array $relacion){
         $table_uuid = '';
+
         if(isset($relacion[$key_relacionadas])) {
+
             foreach ($relacion[$key_relacionadas] as $relacionada) {
 
                 $table_uuid = $this->table_uuid_rel(key_uuid: $key_uuid, relacionada: $relacionada);
@@ -219,24 +222,28 @@ final class pdf
                 }
             }
         }
+
         return $table_uuid;
     }
 
-    private function integra_relacionadas(string $name_entidad){
+    private function integra_relacionadas(string $name_entidad, array $relacion){
         $datas = new stdClass();
-        $table_uuid = $this->integra_relacionada(key_relacionadas: 'fc_facturas_relacionadas', key_uuid: $name_entidad . '_uuid');
+        $table_uuid = $this->integra_relacionada(key_relacionadas: 'fc_facturas_relacionadas',
+            key_uuid: $name_entidad . '_uuid', relacion: $relacion);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al integrar table_uuid', data: $table_uuid);
         }
         $datas->fc_facturas_relacionadas = $table_uuid;
 
-        $table_uuid = $this->integra_relacionada(key_relacionadas: 'fc_facturas_externas_relacionadas', key_uuid: 'fc_uuid_uuid');
+        $table_uuid = $this->integra_relacionada(key_relacionadas: 'fc_facturas_externas_relacionadas',
+            key_uuid: 'fc_uuid_uuid', relacion: $relacion);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al integrar table_uuid', data: $table_uuid);
         }
         $datas->fc_facturas_externas_relacionadas = $table_uuid;
 
-        $table_uuid = $this->integra_relacionada(key_relacionadas: 'fc_facturas_relacionadas_nc', key_uuid: 'fc_factura_uuid');
+        $table_uuid = $this->integra_relacionada(key_relacionadas: 'fc_facturas_relacionadas_nc',
+            key_uuid: 'fc_factura_uuid', relacion: $relacion);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al integrar table_uuid', data: $table_uuid);
         }
@@ -962,11 +969,29 @@ final class pdf
      * @param string $data Datos del contenido de html
      * @param string $class Clase de css para pdf html
      * @param string $propiedades Propiedades estaticas de css
-     * @return string
+     * @return string|array
+     * @version 10.38.2
      */
-    private function html(string $etiqueta, string $data = "", string $class = "", string $propiedades = ""): string
+    private function html(string $etiqueta, string $data = "", string $class = "",
+                          string $propiedades = ""): string|array
     {
-        return "<$etiqueta class='$class' $propiedades>$data</$etiqueta>";
+        $etiqueta = trim($etiqueta);
+        if($etiqueta === ''){
+            return $this->error->error(mensaje: 'Error etiqueta esta vacia',data:  $etiqueta);
+        }
+
+        $class = trim($class);
+        $class_html = '';
+        if($class !== ''){
+            $class_html = "class='$class'";
+        }
+        $propiedades = trim($propiedades);
+        $data = trim($data);
+
+        $html = "<$etiqueta $class_html $propiedades>$data</$etiqueta>";
+
+
+        return trim($html);
     }
 
     private function init_impuesto(array $data_impuesto, string $name_entidad_partida, string $tipo_impuesto){

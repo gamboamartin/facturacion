@@ -49,11 +49,34 @@ class pdfTest extends test {
         $resultado = $pdf->concepto_producto($concepto,'fc_partida');
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals("<tr class='' ><td class='border color negrita' colspan='10'>Descripción</td></tr><tr class='' ><td class='border' colspan='10'>A</td></tr>",$resultado);
+        $this->assertEquals("<tr  ><td class='border color negrita' colspan='10'>Descripción</td></tr><tr  ><td class='border' colspan='10'>A</td></tr>",$resultado);
 
 
         errores::$error = false;
 
+    }
+
+    public function test_html(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+
+        $pdf = new pdf($this->link);
+        $pdf = new liberator($pdf);
+
+        $etiqueta = 'a';
+        $resultado = $pdf->html($etiqueta);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('<a  ></a>',$resultado);
+        errores::$error = false;
     }
 
     public function test_limpia_monto(): void
