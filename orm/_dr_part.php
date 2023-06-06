@@ -34,13 +34,15 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
 
-        $upd = $this->upd_fc_pago_total(cat_sat_factor: $cat_sat_factor,fc_pago_id:  $r_alta_bd->registro['fc_pago_id'],
-            tipo_impuesto: $this->tipo_impuesto);
+
+        $cat_sat_tipo_impuesto_codigo = $r_alta_bd->registro['cat_sat_tipo_impuesto_codigo'];
+
+        $upd = $this->upd_fc_pago_total(cat_sat_factor: $cat_sat_factor,
+            cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo,
+            fc_pago_id: $r_alta_bd->registro['fc_pago_id'], tipo_impuesto: $this->tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
         }
-
-
 
         return $r_alta_bd;
     }
@@ -116,7 +118,8 @@ class _dr_part extends _modelo_parent{
         return $r_pago_total->registros[0];
     }
 
-    private function fc_pago_total_upd(stdClass $cat_sat_factor, int $fc_pago_id, string $tipo_impuesto): array
+    private function fc_pago_total_upd(stdClass $cat_sat_factor, string $cat_sat_tipo_impuesto_codigo,
+                                       int $fc_pago_id, string $tipo_impuesto): array
     {
 
         $impuestos = $this->importes_impuestos_dr_part(cat_sat_factor_id: $cat_sat_factor->cat_sat_factor_id,
@@ -130,7 +133,9 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener key_factor', data:  $key_factor);
         }
 
-        $fc_pago_total_upd = $this->fc_pago_total_upd_factor(impuestos: $impuestos,key_factor:  $key_factor, tipo_impuesto: $tipo_impuesto);
+        $fc_pago_total_upd = $this->fc_pago_total_upd_factor(
+            cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo, impuestos: $impuestos,
+            key_factor: $key_factor, tipo_impuesto: $tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar fc_pago_total_upd', data:  $fc_pago_total_upd);
         }
@@ -139,14 +144,30 @@ class _dr_part extends _modelo_parent{
         return $fc_pago_total_upd;
     }
 
-    private function fc_pago_total_upd_factor(stdClass $impuestos, string $key_factor, string $tipo_impuesto): array
+    private function fc_pago_total_upd_factor(string $cat_sat_tipo_impuesto_codigo, stdClass $impuestos,
+                                              string $key_factor, string $tipo_impuesto): array
     {
 
-        $key_base_dr = "total_".$tipo_impuesto."_base_iva_$key_factor";
-        $key_importe_dr = "total_".$tipo_impuesto."_impuesto_iva_$key_factor";
+        $fc_pago_total_upd = array();
+        if($tipo_impuesto === 'retenciones'){
+            if($cat_sat_tipo_impuesto_codigo === '001'){
+                $fc_pago_total_upd['total_retenciones_isr'] = round($impuestos->importe_dr,2);
+            }
+            if($cat_sat_tipo_impuesto_codigo === '002'){
+                $fc_pago_total_upd['total_retenciones_iva'] = round($impuestos->importe_dr,2);
+            }
+            if($cat_sat_tipo_impuesto_codigo === '003'){
+                $fc_pago_total_upd['total_retenciones_ieps'] = round($impuestos->importe_dr,2);
+            }
+        }
 
-        $fc_pago_total_upd[$key_base_dr] = round($impuestos->base_dr,2);
-        $fc_pago_total_upd[$key_importe_dr] = round($impuestos->importe_dr,2);
+        if($tipo_impuesto === 'traslados'){
+            $key_base_dr = "total_".$tipo_impuesto."_base_iva_$key_factor";
+            $key_importe_dr = "total_".$tipo_impuesto."_impuesto_iva_$key_factor";
+
+            $fc_pago_total_upd[$key_base_dr] = round($impuestos->base_dr,2);
+            $fc_pago_total_upd[$key_importe_dr] = round($impuestos->importe_dr,2);
+        }
 
 
 
@@ -163,6 +184,12 @@ class _dr_part extends _modelo_parent{
      */
     private function filtro_impuestos_dr_part(int $cat_sat_factor_id, int $fc_pago_id): array
     {
+        if($cat_sat_factor_id <= 0){
+            return $this->error->error(mensaje: 'Error cat_sat_factor_id debe sr mayor a 0', data:  $cat_sat_factor_id);
+        }
+        if($fc_pago_id <= 0){
+            return $this->error->error(mensaje: 'Error fc_pago_id debe sr mayor a 0', data:  $fc_pago_id);
+        }
         $filtro['cat_sat_factor.id'] = $cat_sat_factor_id;
         $filtro['fc_pago.id'] = $fc_pago_id;
         return $filtro;
@@ -269,11 +296,16 @@ class _dr_part extends _modelo_parent{
         return $fc_impuestos_dr_part;
     }
 
-    final public function upd_fc_pago_total(stdClass $cat_sat_factor, int $fc_pago_id, string $tipo_impuesto){
-        $fc_pago_total_upd = $this->fc_pago_total_upd(cat_sat_factor: $cat_sat_factor, fc_pago_id: $fc_pago_id, tipo_impuesto: $tipo_impuesto);
+    final public function upd_fc_pago_total(stdClass $cat_sat_factor, string $cat_sat_tipo_impuesto_codigo,
+                                            int $fc_pago_id, string $tipo_impuesto){
+        $fc_pago_total_upd = $this->fc_pago_total_upd(cat_sat_factor: $cat_sat_factor,
+            cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo, fc_pago_id: $fc_pago_id,
+            tipo_impuesto: $tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_pago_total_upd',data:  $fc_pago_total_upd);
         }
+
+
 
         $fc_pago_total = $this->fc_pago_total(fc_pago_id: $fc_pago_id);
         if(errores::$error){

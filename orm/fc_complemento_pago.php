@@ -164,7 +164,7 @@ class fc_complemento_pago extends _transacciones_fc
 
         $this->NAMESPACE = __NAMESPACE__;
 
-        $this->etiqueta = 'Factura';
+        $this->etiqueta = 'Pagos';
 
 
         $this->key_fc_id = 'fc_complemento_pago_id';
@@ -180,7 +180,7 @@ class fc_complemento_pago extends _transacciones_fc
         }
 
         $upd = (new fc_traslado_dr_part(link: $this->link))->upd_fc_pago_total(cat_sat_factor: $cat_sat_factor,
-            fc_pago_id:  $fc_pago_id);
+            fc_pago_id:  $fc_pago_id,tipo_impuesto: '');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
         }

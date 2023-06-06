@@ -62,6 +62,27 @@ class _dr_partTest extends test
         errores::$error = false;
     }
 
+    public function test_filtro_impuestos_dr_part(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_retencion_dr_part(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $fc_pago_id = 1;
+        $cat_sat_factor_id = 1;
+        $resultado = $modelo->filtro_impuestos_dr_part($cat_sat_factor_id, $fc_pago_id);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('1', $resultado['cat_sat_factor.id']);
+        $this->assertEquals('1', $resultado['fc_pago.id']);
+        errores::$error = false;
+
+    }
+
 
 }
 
