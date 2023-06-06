@@ -76,6 +76,29 @@ class _p extends _modelo_parent{
         return $r_alta_bd;
     }
 
+    private function data_p_part(): stdClass
+    {
+        $cat_sat_tipo_impuesto_id = 2;
+        $cat_sat_tipo_factor_id = 5;
+        $cat_sat_factor_id = 11;
+        if($this->tabla === 'fc_retencion_p'){
+            $cat_sat_tipo_impuesto_id = 1;
+            $cat_sat_factor_id = 27;
+
+        }
+        $data = new stdClass();
+        $data->cat_sat_tipo_impuesto_id = $cat_sat_tipo_impuesto_id;
+        $data->cat_sat_tipo_factor_id = $cat_sat_tipo_factor_id;
+        $data->cat_sat_factor_id = $cat_sat_factor_id;
+
+        return $data;
+    }
+
+    /**
+     * Elimina un registro de tipo p_part de complemento de pago previa a la eliminacion de tipo this
+     * @param int $id Identificador de modelo impuesto p de complemento de pago
+     * @return array|stdClass
+     */
     public function elimina_bd(int $id): array|stdClass
     {
         $filtro[$this->key_filtro_id] = $id;

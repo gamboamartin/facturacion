@@ -23,7 +23,7 @@ class fc_uuid_cp extends _uuid_ext {
             LEFT JOIN fc_uuid_etapa ON fc_uuid_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
             WHERE fc_uuid_etapa.fc_uuid_id = fc_uuid.id ORDER BY fc_uuid_etapa.id DESC LIMIT 1)";
 
-        $columnas_extra['fc_uuid_etapa'] = "$fc_uuid_etapa";
+        $columnas_extra['fc_uuid_etapa'] = "IFNULL($fc_uuid_etapa,'SIN ETAPA')";
 
 
         $campos_view = array();

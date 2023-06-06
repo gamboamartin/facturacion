@@ -480,10 +480,35 @@ class _partida extends  _base{
      * @param stdClass $r_fc_registro_partida Registros de partidas
      * @param int $registro_entidad_id Identificador de partida
      * @return array|stdClass
+     * @version
      */
-    private function integra_button_partida(html_controler $html, int $indice, string $name_modelo_entidad, array $partida,
+    PUBLIC function integra_button_partida(html_controler $html, int $indice, string $name_modelo_entidad, array $partida,
                                             stdClass $r_fc_registro_partida, int $registro_entidad_id): array|stdClass
     {
+
+        $name_modelo_entidad = trim($name_modelo_entidad);
+        if($name_modelo_entidad === ''){
+            return $this->error->error(mensaje: 'Error name_modelo_entidad esta vacio', data: $name_modelo_entidad);
+        }
+        if($registro_entidad_id <= 0){
+            return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
+                data: $registro_entidad_id);
+        }
+        if($indice <= 0){
+            return $this->error->error(mensaje: 'Error indice debe ser mayor a 0', data: $indice);
+        }
+
+        $key_id = $this->key_id;
+        if($key_id === ''){
+            return $this->error->error(mensaje: 'Error al partida controler key id esta vacio', data: $key_id);
+        }
+
+        $keys = array($key_id);
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
+
 
         $params = $this->params_button_partida(name_modelo_entidad: $name_modelo_entidad,
             registro_entidad_id: $registro_entidad_id);
@@ -491,7 +516,7 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al obtener params', data: $params);
         }
         $link_elimina_partida = $html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
-            registro_id: $partida[$this->key_id], seccion: $this->tabla, style: 'danger',icon: 'bi bi-trash',
+            registro_id: $partida[$key_id], seccion: $this->tabla, style: 'danger',icon: 'bi bi-trash',
             muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_partida);
