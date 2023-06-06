@@ -116,39 +116,16 @@ final class pdf
                 return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
             }
 
-            foreach ($relacion['fc_facturas_relacionadas'] as $relacionada){
-                $key_uuid = $name_entidad.'_uuid';
-                $body_td_uuid = $this->html(etiqueta: "td", data: "UUID: $relacionada[$key_uuid]");
-                $body_tr_uuid = $this->html(etiqueta: "tr", data: $body_td_uuid);
-                $body_uuid = $this->html(etiqueta: "tbody", data: $body_tr_uuid );
-                $table_uuid = $this->html(etiqueta: "table", data: $body_uuid);
-                try {
-                    $this->pdf->WriteHTML($table_uuid);
-                }
-                catch (Throwable $e){
-                    return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
-                }
+            $tables_uuid = $this->integra_relacionadas(name_entidad: $name_entidad);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al integrar tables_uuid', data: $tables_uuid);
             }
-
-            foreach ($relacion['fc_facturas_externas_relacionadas'] as $relacionada){
-                $key_uuid = 'fc_uuid_uuid';
-                $body_td_uuid = $this->html(etiqueta: "td", data: "UUID: $relacionada[$key_uuid]");
-                $body_tr_uuid = $this->html(etiqueta: "tr", data: $body_td_uuid);
-                $body_uuid = $this->html(etiqueta: "tbody", data: $body_tr_uuid );
-                $table_uuid = $this->html(etiqueta: "table", data: $body_uuid);
-                try {
-                    $this->pdf->WriteHTML($table_uuid);
-                }
-                catch (Throwable $e){
-                    return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
-                }
-            }
-
 
         }
 
 
     }
+
 
     public function header(string $cfdi, string $cod_postal, string $cod_postal_receptor, string $csd, string $efecto,
                            string $exportacion, string $fecha, string $folio, string $folio_fiscal,
@@ -229,6 +206,43 @@ final class pdf
             return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
         }
         return $table;
+    }
+
+    private function integra_relacionada(string $key_relacionadas, string $key_uuid){
+        $table_uuid = '';
+        if(isset($relacion[$key_relacionadas])) {
+            foreach ($relacion[$key_relacionadas] as $relacionada) {
+
+                $table_uuid = $this->table_uuid_rel(key_uuid: $key_uuid, relacionada: $relacionada);
+                if (errores::$error) {
+                    return $this->error->error(mensaje: 'Error al integrar table_uuid', data: $table_uuid);
+                }
+            }
+        }
+        return $table_uuid;
+    }
+
+    private function integra_relacionadas(string $name_entidad){
+        $datas = new stdClass();
+        $table_uuid = $this->integra_relacionada(key_relacionadas: 'fc_facturas_relacionadas', key_uuid: $name_entidad . '_uuid');
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al integrar table_uuid', data: $table_uuid);
+        }
+        $datas->fc_facturas_relacionadas = $table_uuid;
+
+        $table_uuid = $this->integra_relacionada(key_relacionadas: 'fc_facturas_externas_relacionadas', key_uuid: 'fc_uuid_uuid');
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al integrar table_uuid', data: $table_uuid);
+        }
+        $datas->fc_facturas_externas_relacionadas = $table_uuid;
+
+        $table_uuid = $this->integra_relacionada(key_relacionadas: 'fc_facturas_relacionadas_nc', key_uuid: 'fc_factura_uuid');
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al integrar table_uuid', data: $table_uuid);
+        }
+        $datas->fc_facturas_relacionadas_nc = $table_uuid;
+
+        return $datas;
     }
 
     private function concepto_datos(array $concepto, string $name_entidad_partida, PDO $link): string|array
@@ -944,10 +958,10 @@ final class pdf
 
     /**
      * Integra un html para para pdf
-     * @param string $etiqueta
-     * @param string $data
-     * @param string $class
-     * @param string $propiedades
+     * @param string $etiqueta Etiqueta de html
+     * @param string $data Datos del contenido de html
+     * @param string $class Clase de css para pdf html
+     * @param string $propiedades Propiedades estaticas de css
      * @return string
      */
     private function html(string $etiqueta, string $data = "", string $class = "", string $propiedades = ""): string
@@ -1120,6 +1134,34 @@ final class pdf
         }
         $formatter = new NumberFormatter('es_MX',  NumberFormatter::CURRENCY);
         return $formatter->formatCurrency($monto, 'MXN');
+    }
+
+    private function table_uuid_rel(string $key_uuid, array $relacionada){
+        $body_td_uuid = $this->html(etiqueta: "td", data: "UUID: $relacionada[$key_uuid]");
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar body_td_uuid', data: $body_td_uuid);
+        }
+        $body_tr_uuid = $this->html(etiqueta: "tr", data: $body_td_uuid);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar body_tr_uuid', data: $body_tr_uuid);
+        }
+
+        $body_uuid = $this->html(etiqueta: "tbody", data: $body_tr_uuid );
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar body_uuid', data: $body_uuid);
+        }
+        $table_uuid = $this->html(etiqueta: "table", data: $body_uuid);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar table_uuid', data: $table_uuid);
+        }
+
+        try {
+            $this->pdf->WriteHTML($table_uuid);
+        }
+        catch (Throwable $e){
+            return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
+        }
+        return $table_uuid;
     }
 
     private function td_centrado(string $data){

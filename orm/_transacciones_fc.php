@@ -496,6 +496,23 @@ class _transacciones_fc extends modelo
             $relaciones[$indice]['fc_facturas_externas_relacionadas'] = $r_fc_uuid_fc->registros;
         }
 
+        foreach ($relaciones as $indice=>$fc_relacion){
+
+            $cat_sat_tipo_relacion_codigo = trim($fc_relacion['cat_sat_tipo_relacion_codigo']);
+            if($cat_sat_tipo_relacion_codigo === ''){
+                return $this->error->error(mensaje: 'Error cat_sat_tipo_relacion_codigo esta vacio',
+                    data: $cat_sat_tipo_relacion_codigo);
+            }
+            $filtro[$modelo_relacion->key_filtro_id] = $fc_relacion[$modelo_relacion->key_id];
+            $r_fc_nc = (new fc_nc_rel(link: $this->link))->filtro_and(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_nc);
+            }
+
+
+            $relaciones[$indice]['fc_facturas_relacionadas_nc'] = $r_fc_nc->registros;
+        }
+
 
         return $relaciones;
 
