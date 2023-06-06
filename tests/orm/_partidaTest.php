@@ -114,7 +114,7 @@ class _partidaTest extends test
         $temp =  new html();
         $html = (new html_controler(html: $temp));
 
-        $indice = 1;
+        $indice = 0;
 
         $name_modelo_entidad = 'a';
         $partida = array();
@@ -123,11 +123,12 @@ class _partidaTest extends test
         $partida['fc_partida_nc_id'] = 1;
 
         $modelo = new fc_partida_nc(link: $this->link);
+        $modelo = new liberator($modelo);
         $resultado = $modelo->integra_button_partida($html, $indice, $name_modelo_entidad, $partida,
             $r_fc_registro_partida, $registro_entidad_id);
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals("<a role='button' title='Eliminar' href='index.php?seccion=fc_partida_nc&accion=elimina_bd&registro_id=1&session_id=1&adm_menu_id=-1&seccion_retorno=a&accion_retorno=modifica&id_retorno=1' class='btn btn-danger col-sm-12'><span class='bi bi-trash'></span></a>", $resultado->registros[1]['elimina_bd']);
+        $this->assertEquals("<a role='button' title='Eliminar' href='index.php?seccion=fc_partida_nc&accion=elimina_bd&registro_id=1&session_id=1&adm_menu_id=-1&seccion_retorno=a&accion_retorno=modifica&id_retorno=1' class='btn btn-danger col-sm-12'><span class='bi bi-trash'></span></a>", $resultado->registros[0]['elimina_bd']);
         errores::$error = false;
 
 
