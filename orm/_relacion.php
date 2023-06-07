@@ -352,7 +352,14 @@ class _relacion extends _modelo_parent_sin_codigo{
         return $r_fc_relacion->registros;
     }
 
-    private function relaciones_externas(_uuid_ext $modelo_uuid_ext, array $row_relacion){
+    /**
+     * Integra las relaciones externas de documentos
+     * @param _uuid_ext $modelo_uuid_ext Modelo de tipo uuid externo
+     * @param array $row_relacion Registro de relacion
+     * @return array
+     */
+    private function relaciones_externas(_uuid_ext $modelo_uuid_ext, array $row_relacion): array
+    {
         $filtro[$this->key_filtro_id] = $row_relacion[$this->key_id];
 
         $r_fc_uuid_fc = $modelo_uuid_ext->filtro_and(filtro: $filtro);

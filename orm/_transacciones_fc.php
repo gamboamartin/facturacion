@@ -1972,7 +1972,6 @@ class _transacciones_fc extends modelo
 
         $xml_contenido = file_get_contents($xml->doc_documento_ruta_absoluta);
 
-        PRINT_R($xml_contenido);exit;
 
 
         $filtro_files['fc_csd.id'] = $fc_factura['fc_csd_id'];
