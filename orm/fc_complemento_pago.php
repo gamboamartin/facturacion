@@ -252,6 +252,157 @@ class fc_complemento_pago extends _transacciones_fc
         return $upd;
     }
 
+    private function complemento_fc_impuesto_dr(array $Complemento, int $fc_impuesto_dr_id,
+                                                int $indice_fc_docto_relacionado, int $indice_fc_pago,
+                                                int $indice_fc_pago_pago){
+
+        $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR = new stdClass();
+
+        $fc_traslados_dr = $this->fc_traslados_dr(fc_impuesto_dr_id: $fc_impuesto_dr_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener fc_traslados_dr', data: $fc_traslados_dr);
+        }
+
+        foreach ($fc_traslados_dr as $fc_traslado_dr) {
+
+            $Complemento = $this->complemento_fc_traslados_dr_part(Complemento: $Complemento,
+                fc_traslado_dr_id: $fc_traslado_dr['fc_traslado_dr_id'],
+                indice_fc_docto_relacionado:  $indice_fc_docto_relacionado,
+                indice_fc_pago:  $indice_fc_pago, indice_fc_pago_pago: $indice_fc_pago_pago);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener traslado_dr_part', data: $Complemento);
+            }
+        }
+
+        $fc_retenciones_dr = $this->fc_retenciones_dr(fc_impuesto_dr_id: $fc_impuesto_dr_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener fc_traslados_dr', data: $fc_traslados_dr);
+        }
+
+        foreach ($fc_retenciones_dr as $fc_retencion_dr) {
+
+            $Complemento = $this->complemento_fc_retenciones_dr_part(Complemento: $Complemento,
+                fc_retencion_dr_id: $fc_retencion_dr['fc_retencion_dr_id'],
+                indice_fc_docto_relacionado:  $indice_fc_docto_relacionado,
+                indice_fc_pago:  $indice_fc_pago, indice_fc_pago_pago: $indice_fc_pago_pago);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener traslado_dr_part', data: $Complemento);
+            }
+        }
+
+        return $Complemento;
+    }
+
+    private function complemento_fc_impuestos_dr(array $Complemento, int $fc_docto_relacionado_id,
+                                                 int $indice_fc_docto_relacionado, int $indice_fc_pago,
+                                                 int $indice_fc_pago_pago){
+        $fc_impuestos_dr = $this->fc_impuestos_dr(fc_docto_relacionado_id: $fc_docto_relacionado_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener fc_impuestos_dr', data: $fc_impuestos_dr);
+        }
+
+        foreach ($fc_impuestos_dr as $fc_impuesto_dr) {
+
+            $Complemento = $this->complemento_fc_impuesto_dr(Complemento: $Complemento,
+                fc_impuesto_dr_id: $fc_impuesto_dr['fc_impuesto_dr_id'],
+                indice_fc_docto_relacionado: $indice_fc_docto_relacionado,
+                indice_fc_pago: $indice_fc_pago,indice_fc_pago_pago:  $indice_fc_pago_pago);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener traslado_dr_part', data: $Complemento);
+            }
+        }
+        return $Complemento;
+    }
+
+
+
+    private function complemento_fc_impuesto_dr_part(array $Complemento, int $indice_fc_docto_relacionado,
+                                                     int $indice_fc_impuesto_dr_part, int $indice_fc_pago,
+                                                     int $indice_fc_pago_pago, string $key_impuesto_dr,
+                                                     string $nodo_dr_key, array $row_dr_part){
+        $tasa_o_cuota_dr = $this->tasa_o_cuota(row_dr_part: $row_dr_part);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener tasa_o_cuota_dr', data: $tasa_o_cuota_dr);
+        }
+
+        $key_base_dr = 'fc_'.$key_impuesto_dr.'_dr_part';
+
+        $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]
+            ->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR
+            ->$nodo_dr_key[$indice_fc_impuesto_dr_part] = new stdClass();
+
+        $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]
+            ->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->$nodo_dr_key[$indice_fc_impuesto_dr_part]
+            ->BaseDR = $row_dr_part[$key_base_dr.'_base_dr'];
+
+        $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]
+            ->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->$nodo_dr_key[$indice_fc_impuesto_dr_part]
+            ->ImpuestoDR = $row_dr_part['cat_sat_tipo_impuesto_codigo'];
+
+        $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]
+            ->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->$nodo_dr_key[$indice_fc_impuesto_dr_part]
+            ->TipoFactorDR = $row_dr_part['cat_sat_tipo_factor_codigo'];
+
+        $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]
+            ->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->$nodo_dr_key[$indice_fc_impuesto_dr_part]
+            ->TasaOCuotaDR = $tasa_o_cuota_dr;
+
+        $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]
+            ->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->$nodo_dr_key[$indice_fc_impuesto_dr_part]
+            ->ImporteDR = $row_dr_part[$key_base_dr.'_importe_dr'];
+
+        return $Complemento;
+    }
+
+
+    private function complemento_fc_retenciones_dr_part(array $Complemento, int $fc_retencion_dr_id,
+                                                      int $indice_fc_docto_relacionado, int $indice_fc_pago,
+                                                      int $indice_fc_pago_pago){
+        $fc_retenciones_dr_part = $this->fc_retenciones_dr_part(fc_retencion_dr_id: $fc_retencion_dr_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener fc_traslados_dr_part', data: $fc_retenciones_dr_part);
+        }
+
+        foreach ($fc_retenciones_dr_part as $indice_fc_retencion_dr_part=>$fc_retencion_dr_part) {
+
+            $Complemento = $this->complemento_fc_impuesto_dr_part(Complemento: $Complemento,
+                indice_fc_docto_relacionado:  $indice_fc_docto_relacionado,
+                indice_fc_impuesto_dr_part: $indice_fc_retencion_dr_part, indice_fc_pago: $indice_fc_pago,
+                indice_fc_pago_pago: $indice_fc_pago_pago, key_impuesto_dr: 'retencion', nodo_dr_key: 'RetencionesDR',
+                row_dr_part: $fc_retencion_dr_part);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener traslado_dr_part', data: $Complemento);
+            }
+
+        }
+        return $Complemento;
+    }
+
+
+
+    private function complemento_fc_traslados_dr_part(array $Complemento, int $fc_traslado_dr_id,
+                                                      int $indice_fc_docto_relacionado, int $indice_fc_pago,
+                                                      int $indice_fc_pago_pago){
+        $fc_traslados_dr_part = $this->fc_traslados_dr_part(fc_traslado_dr_id: $fc_traslado_dr_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener fc_traslados_dr_part', data: $fc_traslados_dr_part);
+        }
+
+        foreach ($fc_traslados_dr_part as $indice_fc_traslado_dr_part=>$fc_traslado_dr_part) {
+
+            $Complemento = $this->complemento_fc_impuesto_dr_part(Complemento: $Complemento,
+                indice_fc_docto_relacionado:  $indice_fc_docto_relacionado,
+                indice_fc_impuesto_dr_part: $indice_fc_traslado_dr_part, indice_fc_pago: $indice_fc_pago,
+                indice_fc_pago_pago:  $indice_fc_pago_pago, key_impuesto_dr: 'traslado',nodo_dr_key:  'TrasladosDR',
+                row_dr_part:  $fc_traslado_dr_part);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener traslado_dr_part', data: $Complemento);
+            }
+
+        }
+        return $Complemento;
+    }
+
     final protected function data_factura(array $row_entidad): array|stdClass
     {
         $data = parent::data_factura(row_entidad: $row_entidad); // TODO: Change the autogenerated stub
@@ -336,9 +487,43 @@ class fc_complemento_pago extends _transacciones_fc
             }
 
             foreach ($fc_pago_totales as $fc_pago_total) {
-                $Complemento[$indice_fc_pago]->Pagos20->Totales->TotalTrasladosBaseIVA16 = $fc_pago_total['fc_pago_total_total_traslados_base_iva_16'];
-                $Complemento[$indice_fc_pago]->Pagos20->Totales->TotalTrasladosImpuestoIVA16 = $fc_pago_total['fc_pago_total_total_traslados_impuesto_iva_16'];
-                $Complemento[$indice_fc_pago]->Pagos20->Totales->MontoTotalPagos = $fc_pago_total['fc_pago_total_monto_total_pagos'];
+
+
+                if((round($fc_pago_total['fc_pago_total_total_traslados_base_iva_16'],2) > 0.0)){
+                    $Complemento[$indice_fc_pago]->Pagos20->Totales->TotalTrasladosBaseIVA16 = $fc_pago_total['fc_pago_total_total_traslados_base_iva_16'];
+                }
+                if((round($fc_pago_total['fc_pago_total_total_traslados_base_iva_08'],2) > 0.0)){
+                    $Complemento[$indice_fc_pago]->Pagos20->Totales->TotalTrasladosBaseIVA08 = $fc_pago_total['fc_pago_total_total_traslados_base_iva_08'];
+                }
+                if((round($fc_pago_total['fc_pago_total_total_traslados_base_iva_00'],2) > 0.0)){
+                    $Complemento[$indice_fc_pago]->Pagos20->Totales->TotalTrasladosBaseIVA08 = $fc_pago_total['fc_pago_total_total_traslados_base_iva_00'];
+                }
+
+                if((round($fc_pago_total['fc_pago_total_total_traslados_impuesto_iva_16'],2) > 0.0)){
+                    $Complemento[$indice_fc_pago]->Pagos20->Totales->TotalTrasladosImpuestoIVA16 = $fc_pago_total['fc_pago_total_total_traslados_impuesto_iva_16'];
+                }
+                if((round($fc_pago_total['fc_pago_total_total_traslados_impuesto_iva_08'],2) > 0.0)){
+                    $Complemento[$indice_fc_pago]->Pagos20->Totales->TotalTrasladosImpuestoIVA08 = $fc_pago_total['fc_pago_total_total_traslados_impuesto_iva_08'];
+                }
+                if((round($fc_pago_total['fc_pago_total_total_traslados_impuesto_iva_00'],2) > 0.0)){
+                    $Complemento[$indice_fc_pago]->Pagos20->Totales->TotalTrasladosImpuestoIVA00 = $fc_pago_total['fc_pago_total_total_traslados_impuesto_iva_00'];
+                }
+
+                if((round($fc_pago_total['fc_pago_total_total_retenciones_iva'],2) > 0.0)){
+                    $Complemento[$indice_fc_pago]->Pagos20->Totales->TotalRetencionesIVA = $fc_pago_total['fc_pago_total_total_retenciones_iva'];
+                }
+                if((round($fc_pago_total['fc_pago_total_total_retenciones_ieps'],2) > 0.0)){
+                    $Complemento[$indice_fc_pago]->Pagos20->Totales->TotalRetencionesIEPS = $fc_pago_total['fc_pago_total_total_retenciones_ieps'];
+                }
+                if((round($fc_pago_total['fc_pago_total_total_retenciones_isr'],2) > 0.0)){
+                    $Complemento[$indice_fc_pago]->Pagos20->Totales->TotalRetencionesISR = $fc_pago_total['fc_pago_total_total_retenciones_isr'];
+                }
+
+                if((round($fc_pago_total['fc_pago_total_monto_total_pagos'],2) > 0.0)){
+                    $Complemento[$indice_fc_pago]->Pagos20->Totales->MontoTotalPagos = $fc_pago_total['fc_pago_total_monto_total_pagos'];
+                }
+
+
             }
 
             $fc_pago_pagos = $this->fc_pago_pagos(fc_pago_id: $fc_pago['fc_pago_id']);
@@ -384,48 +569,18 @@ class fc_complemento_pago extends _transacciones_fc
                     $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ObjetoImpDR = $fc_docto_relacionado['cat_sat_obj_imp_codigo'];
 
 
-                    $fc_impuestos_dr = $this->fc_impuestos_dr(fc_docto_relacionado_id: $fc_docto_relacionado['fc_docto_relacionado_id']);
+
+                    $Complemento = $this->complemento_fc_impuestos_dr(Complemento: $Complemento,
+                        fc_docto_relacionado_id:  $fc_docto_relacionado['fc_docto_relacionado_id'],
+                        indice_fc_docto_relacionado: $indice_fc_docto_relacionado, indice_fc_pago: $indice_fc_pago,
+                        indice_fc_pago_pago: $indice_fc_pago_pago);
                     if (errores::$error) {
-                        return $this->error->error(mensaje: 'Error al obtener fc_impuestos_dr', data: $fc_impuestos_dr);
+                        return $this->error->error(mensaje: 'Error al obtener traslado_dr_part', data: $Complemento);
                     }
 
-                    foreach ($fc_impuestos_dr as $fc_impuesto_dr) {
 
-                        $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR = new stdClass();
-
-                        $fc_traslados_dr = $this->fc_traslados_dr(fc_impuesto_dr_id: $fc_impuesto_dr['fc_impuesto_dr_id']);
-                        if (errores::$error) {
-                            return $this->error->error(mensaje: 'Error al obtener fc_traslados_dr', data: $fc_traslados_dr);
-                        }
-
-                        foreach ($fc_traslados_dr as $fc_traslado_dr) {
-
-                            $fc_traslados_dr_part = $this->fc_traslados_dr_part(fc_traslado_dr_id: $fc_traslado_dr['fc_traslado_dr_id']);
-                            if (errores::$error) {
-                                return $this->error->error(mensaje: 'Error al obtener fc_traslados_dr_part', data: $fc_traslados_dr_part);
-                            }
-
-                            foreach ($fc_traslados_dr_part as $indice_fc_traslado_dr_part=>$fc_traslado_dr_part) {
-
-                                $tasa_o_cuota_dr = round($fc_traslado_dr_part['cat_sat_factor_factor'],6);
-                                $tasa_o_cuota_dr = number_format($tasa_o_cuota_dr,6,'.','');
-
-                               // print_r($tasa_o_cuota_dr);exit;
-                                $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part] = new stdClass();
-
-                                $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part]->BaseDR = $fc_traslado_dr_part['fc_traslado_dr_part_base_dr'];
-                                $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part]->ImpuestoDR = $fc_traslado_dr_part['cat_sat_tipo_impuesto_codigo'];
-                                $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part]->TipoFactorDR = $fc_traslado_dr_part['cat_sat_tipo_factor_codigo'];
-                                $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part]->TasaOCuotaDR = $tasa_o_cuota_dr;
-                                $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->DoctoRelacionado[$indice_fc_docto_relacionado]->ImpuestosDR->TrasladosDR[$indice_fc_traslado_dr_part]->ImporteDR = $fc_traslado_dr_part['fc_traslado_dr_part_importe_dr'];
-                            }
-
-                        }
-
-                    }
 
                 }
-
 
                 $Complemento = $this->integra_fc_impuestos_p(Complemento: $Complemento,
                     fc_pago_pago_id:  $fc_pago_pago['fc_pago_pago_id'],indice_fc_pago:  $indice_fc_pago,
@@ -542,6 +697,27 @@ class fc_complemento_pago extends _transacciones_fc
         return $fc_partida_cp_ins;
     }
 
+    private function fc_retenciones_dr(int $fc_impuesto_dr_id){
+        $filtro = array();
+        $filtro['fc_impuesto_dr.id'] = $fc_impuesto_dr_id;
+        $r_fc_retencion_dr = (new fc_retencion_dr(link: $this->link))->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener r_fc_retencion_dr', data: $r_fc_retencion_dr);
+        }
+        return $r_fc_retencion_dr->registros;
+    }
+
+    private function fc_retenciones_dr_part(int $fc_retencion_dr_id){
+        $filtro = array();
+        $filtro['fc_retencion_dr.id'] = $fc_retencion_dr_id;
+        $r_fc_retencion_dr_part = (new fc_retencion_dr_part(link: $this->link))->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener r_fc_retencion_dr_part', data: $r_fc_retencion_dr_part);
+        }
+        return $r_fc_retencion_dr_part->registros;
+    }
+
+
     private function fc_traslados_dr(int $fc_impuesto_dr_id){
         $filtro = array();
         $filtro['fc_impuesto_dr.id'] = $fc_impuesto_dr_id;
@@ -562,14 +738,15 @@ class fc_complemento_pago extends _transacciones_fc
         return $r_fc_traslado_dr_part->registros;
     }
 
-    private function fc_traslados_p(int $fc_impuesto_p_id){
+
+    private function get_fc_impuestos_p(int $fc_impuesto_p_id, _p $modelo_p){
         $filtro = array();
         $filtro['fc_impuesto_p.id'] = $fc_impuesto_p_id;
-        $r_fc_traslado_p = (new fc_traslado_p(link: $this->link))->filtro_and(filtro: $filtro);
+        $r_fc_impuesto_p = $modelo_p->filtro_and(filtro: $filtro);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener r_fc_traslado_p', data: $r_fc_traslado_p);
+            return $this->error->error(mensaje: 'Error al obtener r_fc_impuesto_p', data: $r_fc_impuesto_p);
         }
-        return $r_fc_traslado_p->registros;
+        return $r_fc_impuesto_p->registros;
     }
 
     private function integra_fc_impuestos_p(array $Complemento, int $fc_pago_pago_id, int $indice_fc_pago, int $indice_fc_pago_pago){
@@ -587,21 +764,55 @@ class fc_complemento_pago extends _transacciones_fc
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al integrar integra_fc_traslados_p_part', data: $Complemento);
             }
+
+            $Complemento = $this->integra_fc_retenciones_p(Complemento: $Complemento,
+                fc_impuesto_p_id:  $fc_impuesto_p['fc_impuesto_p_id'],indice_fc_pago:  $indice_fc_pago,
+                indice_fc_pago_pago:  $indice_fc_pago_pago);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al integrar integra_fc_retenciones_p_part', data: $Complemento);
+            }
+
+        }
+        return $Complemento;
+    }
+
+    private function integra_fc_retenciones_p(array $Complemento, int $fc_impuesto_p_id, int $indice_fc_pago, int $indice_fc_pago_pago){
+
+        $modelo_p = new fc_retencion_p(link: $this->link);
+
+        $fc_retenciones_p = $this->get_fc_impuestos_p(fc_impuesto_p_id: $fc_impuesto_p_id, modelo_p: $modelo_p);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener fc_retenciones_p', data: $fc_retenciones_p);
+        }
+
+        $modelo_part = new fc_retencion_p_part(link: $this->link);
+        foreach ($fc_retenciones_p as $fc_retencion_p) {
+
+            $Complemento = $this->integra_fc_rows_p_part(Complemento: $Complemento,
+                fc_tipo_impuesto_p_id: $fc_retencion_p['fc_retencion_p_id'], indice_fc_pago: $indice_fc_pago,
+                indice_fc_pago_pago: $indice_fc_pago_pago, modelo_part: $modelo_part, tipo_impuesto: 'retencion');
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al integrar integra_fc_retenciones_p_part', data: $Complemento);
+            }
         }
         return $Complemento;
     }
 
     private function integra_fc_traslados_p(array $Complemento, int $fc_impuesto_p_id, int $indice_fc_pago, int $indice_fc_pago_pago){
-        $fc_traslados_p = $this->fc_traslados_p(fc_impuesto_p_id: $fc_impuesto_p_id);
+
+        $modelo_p = new fc_traslado_p(link: $this->link);
+
+        $fc_traslados_p = $this->get_fc_impuestos_p(fc_impuesto_p_id: $fc_impuesto_p_id, modelo_p: $modelo_p);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener fc_traslados_p_part', data: $fc_traslados_p);
+            return $this->error->error(mensaje: 'Error al obtener fc_traslados_p', data: $fc_traslados_p);
         }
 
+        $modelo_part = new fc_traslado_p_part(link: $this->link);
         foreach ($fc_traslados_p as $fc_traslado_p) {
 
-            $Complemento = $this->integra_fc_traslados_p_part(Complemento: $Complemento,
-                fc_traslado_p_id: $fc_traslado_p['fc_traslado_p_id'], indice_fc_pago:  $indice_fc_pago,
-                indice_fc_pago_pago:  $indice_fc_pago_pago);
+            $Complemento = $this->integra_fc_rows_p_part(Complemento: $Complemento,
+                fc_tipo_impuesto_p_id: $fc_traslado_p['fc_traslado_p_id'], indice_fc_pago: $indice_fc_pago,
+                indice_fc_pago_pago: $indice_fc_pago_pago, modelo_part: $modelo_part, tipo_impuesto: 'traslado');
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al integrar integra_fc_traslados_p_part', data: $Complemento);
             }
@@ -618,15 +829,20 @@ class fc_complemento_pago extends _transacciones_fc
         return $r_fc_traslado_dr_part->registros;
     }
 
-    private function fc_traslados_p_part(int $fc_traslado_p_id){
+
+
+    private function get_fc_impuestos_p_part(int $fc_tipo_impuesto_p_id, string $key_tipo_impuesto,
+                                             fc_traslado_p_part|fc_retencion_p_part $modelo_p_part){
         $filtro = array();
-        $filtro['fc_traslado_p.id'] = $fc_traslado_p_id;
-        $r_fc_traslado_p_part = (new fc_traslado_p_part(link: $this->link))->filtro_and(filtro: $filtro);
+        $filtro[$key_tipo_impuesto.'.id'] = $fc_tipo_impuesto_p_id;
+        $r_fc_impuesto_p_part = $modelo_p_part->filtro_and(filtro: $filtro);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener r_fc_traslado_p_part', data: $r_fc_traslado_p_part);
+            return $this->error->error(mensaje: 'Error al obtener r_fc_impuesto_p_part', data: $r_fc_impuesto_p_part);
         }
-        return $r_fc_traslado_p_part->registros;
+        return $r_fc_impuesto_p_part->registros;
     }
+
+
 
     private function genera_partida_default(int $fc_complemento_pago_id){
         $data_partida = $this->partida_default();
@@ -644,54 +860,72 @@ class fc_complemento_pago extends _transacciones_fc
         return $fc_partida_cp_ins;
     }
 
+
+
+
+
     /**
-     * @param array $fc_traslado_p_part Registro de tipo fc_traslado_p_part
+     * @param array $fc_row_p_part Registro de tipo fc_traslado_p_part
+     * @param string $tipo_impuesto
      * @return stdClass|array
      */
-    private function integra_fc_traslado_p_part(array $fc_traslado_p_part): stdClass|array
+    private function integra_fc_row_p_part(array $fc_row_p_part, string $tipo_impuesto): stdClass|array
     {
-        $keys = array('fc_traslado_p_part_base_p','cat_sat_tipo_impuesto_codigo','cat_sat_tipo_factor_codigo',
-            'cat_sat_factor_factor','fc_traslado_p_part_importe_p');
+        $keys = array('fc_'.$tipo_impuesto.'_p_part_base_p','cat_sat_tipo_impuesto_codigo','cat_sat_tipo_factor_codigo',
+            'cat_sat_factor_factor','fc_'.$tipo_impuesto.'_p_part_importe_p');
 
-        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $fc_traslado_p_part);
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $fc_row_p_part);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar fc_traslado_p_part', data: $valida);
+            return $this->error->error(mensaje: 'Error al validar fc_row_p_part', data: $valida);
         }
 
-        $keys = array('fc_traslado_p_part_base_p','cat_sat_factor_factor','fc_traslado_p_part_importe_p');
+        $keys = array('fc_'.$tipo_impuesto.'_p_part_base_p','cat_sat_factor_factor','fc_'.$tipo_impuesto.'_p_part_importe_p');
 
-        $valida = $this->validacion->valida_numerics(keys: $keys,row:  $fc_traslado_p_part);
+        $valida = $this->validacion->valida_numerics(keys: $keys,row:  $fc_row_p_part);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar fc_traslado_p_part', data: $valida);
+            return $this->error->error(mensaje: 'Error al validar fc_row_p_part', data: $valida);
         }
 
-        $tasa_o_cuota_p = $this->tasa_o_cuota_p($fc_traslado_p_part);
+        $tasa_o_cuota_p = $this->tasa_o_cuota(row_dr_part: $fc_row_p_part);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar tasa_o_cuota_p', data: $tasa_o_cuota_p);
         }
 
 
-        $traslado_p_part = new stdClass();
-        $traslado_p_part->BaseP = $fc_traslado_p_part['fc_traslado_p_part_base_p'];
-        $traslado_p_part->ImpuestoP = $fc_traslado_p_part['cat_sat_tipo_impuesto_codigo'];
-        $traslado_p_part->TipoFactorP = $fc_traslado_p_part['cat_sat_tipo_factor_codigo'];
-        $traslado_p_part->TasaOCuotaP = $tasa_o_cuota_p;
-        $traslado_p_part->ImporteP = $fc_traslado_p_part['fc_traslado_p_part_importe_p'];
-        return $traslado_p_part;
+        $row_p_part = new stdClass();
+        $row_p_part->BaseP = $fc_row_p_part['fc_'.$tipo_impuesto.'_p_part_base_p'];
+        $row_p_part->ImpuestoP = $fc_row_p_part['cat_sat_tipo_impuesto_codigo'];
+        $row_p_part->TipoFactorP = $fc_row_p_part['cat_sat_tipo_factor_codigo'];
+        $row_p_part->TasaOCuotaP = $tasa_o_cuota_p;
+        $row_p_part->ImporteP = $fc_row_p_part['fc_'.$tipo_impuesto.'_p_part_importe_p'];
+        return $row_p_part;
     }
 
-    private function integra_fc_traslados_p_part(array $Complemento, int $fc_traslado_p_id, int $indice_fc_pago, int $indice_fc_pago_pago){
-        $fc_traslados_p_part = $this->fc_traslados_p_part(fc_traslado_p_id: $fc_traslado_p_id);
+    private function integra_fc_rows_p_part(array $Complemento, int $fc_tipo_impuesto_p_id, int $indice_fc_pago,
+                                            int $indice_fc_pago_pago,
+                                            fc_traslado_p_part|fc_retencion_p_part $modelo_part, string $tipo_impuesto){
+
+        $key_tipo_impuesto = 'fc_'.$tipo_impuesto.'_p';
+        $fc_rows_p_part = $this->get_fc_impuestos_p_part(fc_tipo_impuesto_p_id: $fc_tipo_impuesto_p_id,
+            key_tipo_impuesto: $key_tipo_impuesto,modelo_p_part: $modelo_part);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener fc_traslados_p_part', data: $fc_traslados_p_part);
+            return $this->error->error(mensaje: 'Error al obtener fc_rows_p_part', data: $fc_rows_p_part);
         }
 
-        foreach ($fc_traslados_p_part as $indice_traslado_p_part=>$fc_traslado_p_part) {
-            $traslado_p_part = $this->integra_fc_traslado_p_part(fc_traslado_p_part: $fc_traslado_p_part);
+        $key_nodo = '';
+        if($tipo_impuesto === 'retencion'){
+            $key_nodo = 'RetencionesP';
+        }
+        if($tipo_impuesto === 'traslado'){
+            $key_nodo = 'TrasladosP';
+        }
+
+        foreach ($fc_rows_p_part as $indice_row_p_part=>$fc_row_p_part) {
+            $row_p_part = $this->integra_fc_row_p_part(fc_row_p_part: $fc_row_p_part,tipo_impuesto: $tipo_impuesto);
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al integrar traslado_p_part', data: $traslado_p_part);
+                return $this->error->error(mensaje: 'Error al integrar row_p_part', data: $row_p_part);
             }
-            $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->ImpuestosP->TrasladosP[$indice_traslado_p_part] = $traslado_p_part;
+            $Complemento[$indice_fc_pago]->Pagos20->Pago[$indice_fc_pago_pago]->ImpuestosP->$key_nodo[$indice_row_p_part] = $row_p_part;
         }
         return $Complemento;
     }
@@ -734,11 +968,12 @@ class fc_complemento_pago extends _transacciones_fc
 
     }
 
-    private function tasa_o_cuota_p(array $fc_traslado_p_part): string
+    private function tasa_o_cuota(array $row_dr_part): string
     {
-        $tasa_o_cuota_p = round($fc_traslado_p_part['cat_sat_factor_factor'],6);
-        return number_format($tasa_o_cuota_p,6,'.','');
+        $tasa_o_cuota_dr = round($row_dr_part['cat_sat_factor_factor'],6);
+        return number_format($tasa_o_cuota_dr,6,'.','');
     }
+
 
 
 }

@@ -176,7 +176,7 @@ class fc_complemento_pagoTest extends test {
 
 
 
-    public function test_integra_fc_traslado_p_part(): void
+    public function test_integra_fc_row_p_part(): void
     {
         errores::$error = false;
 
@@ -197,7 +197,7 @@ class fc_complemento_pagoTest extends test {
         $fc_traslado_p_part['cat_sat_factor_factor'] = '-1';
         $fc_traslado_p_part['fc_traslado_p_part_importe_p'] = '-1';
 
-        $resultado = $modelo->integra_fc_traslado_p_part($fc_traslado_p_part);
+        $resultado = $modelo->integra_fc_row_p_part($fc_traslado_p_part,'traslado');
 
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);

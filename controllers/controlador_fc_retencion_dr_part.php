@@ -9,11 +9,18 @@
 namespace gamboamartin\facturacion\controllers;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_retencion_dr_part_html;
+use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\facturacion\models\fc_docto_relacionado;
 use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_impuesto_dr;
+use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_retencion_dr;
 use gamboamartin\facturacion\models\fc_retencion_dr_part;
+use gamboamartin\facturacion\models\fc_retenido;
+use gamboamartin\facturacion\models\fc_traslado;
+use gamboamartin\facturacion\models\fc_uuid_fc;
 use gamboamartin\system\_ctl_base;
 use gamboamartin\system\links_menu;
 use gamboamartin\template\html;
@@ -247,7 +254,23 @@ class controlador_fc_retencion_dr_part extends _ctl_base {
             return $this->errores->error(mensaje: 'Error al obtener fc_factura', data: $fc_factura);
         }
 
-        $factura = (new fc_factura(link: $this->link))->get_factura(fc_factura_id: $fc_factura->registros[0]['fc_factura_id']);
+        //$factura = (new fc_factura(link: $this->link))->get_factura(fc_factura_id: $fc_factura->registros[0]['fc_factura_id']);
+
+        $modelo_relacion = new fc_relacion(link: $this->link);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $modelo_predial = new fc_cuenta_predial(link: $this->link);
+        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $modelo_uuid_ext = new fc_uuid_fc(link: $this->link);
+        $registro_id = $fc_factura->registros[0]['fc_factura_id'];
+
+        $factura = (new fc_factura(link: $this->link))->get_factura(
+            $modelo_partida, $modelo_predial, $modelo_relacion, $modelo_relacionada, $modelo_retencion,
+            $modelo_traslado, $modelo_uuid_ext, $registro_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener fc_factura', data: $fc_factura);
+        }
 
         $datos = array();
         $datos['fc_factura_total'] = $factura['fc_factura_total'];
