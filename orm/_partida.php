@@ -647,6 +647,21 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al modificar partida', data: $r_modifica_bd);
         }
 
+        $partida = $this->get_partida(registro_partida_id: $id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener partida', data: $partida);
+        }
+
+        $key_entidad_id = $this->modelo_entidad->key_id;
+
+        $registro_entidad_id = $partida->$key_entidad_id;
+
+        $regenera_total_descuento = $this->regenera_fc_total_descuento(registro_entidad_id: $registro_entidad_id,
+            key_filtro_entidad_id: $this->modelo_entidad->key_filtro_id, modelo_entidad: $this->modelo_entidad);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al modificar entidad base', data: $regenera_total_descuento);
+        }
+
         return $r_modifica_bd;
     }
 
