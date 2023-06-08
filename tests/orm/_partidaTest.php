@@ -43,6 +43,26 @@ class _partidaTest extends test
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_get_partida(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida(link: $this->link);
+        //$modelo = new liberator($modelo);
+
+
+        $registro_partida_id = 1;
+        $resultado = $modelo->get_partida($registro_partida_id);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('1', $resultado['fc_partida_id']);
+        errores::$error = false;
+
+    }
+
     public function test_hijo(): void
     {
         errores::$error = false;

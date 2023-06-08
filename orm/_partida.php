@@ -338,9 +338,10 @@ class _partida extends  _base{
     /**
      * Obtiene una partida
      * @param int $registro_partida_id Partida a validar
-     * @return array|stdClass
+     * @return array
+     * 10.44.3
      */
-    final public function get_partida(int $registro_partida_id): array|stdClass
+    final public function get_partida(int $registro_partida_id): array
     {
         if ($registro_partida_id <= 0) {
             return $this->error->error(mensaje: 'Error registro_partida_id debe ser mayor a 0', data: $registro_partida_id);
