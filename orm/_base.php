@@ -9,6 +9,7 @@ class _base extends _modelo_parent{
     /**
      * Integra los elementos base de un modelo para alta
      * @return array
+     * @version 10.42.3
      */
     protected function init_alta_bd(): array
     {
@@ -23,7 +24,7 @@ class _base extends _modelo_parent{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al inicializar campos base', data: $this->registro);
         }
-        return $this->registros;
+        return $this->registro;
     }
 
 
