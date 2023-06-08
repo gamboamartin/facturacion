@@ -60,12 +60,8 @@ class fc_nota_credito extends _transacciones_fc
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
 
-        $fc_ligue_partida_factura = " fc_partida_nc.fc_nota_credito_id = fc_nota_credito.id ";
 
-
-        $fc_nota_credito_sub_total_base = "ROUND((SELECT SUM( fc_partida_nc.sub_total_base) FROM fc_partida_nc WHERE $fc_ligue_partida_factura),4)";
-
-        $fc_nota_credito_sub_total = "($fc_nota_credito_sub_total_base - $tabla.total_descuento)";
+        $fc_nota_credito_sub_total = "($tabla.sub_total_base - $tabla.total_descuento)";
 
 
         $fc_partida_nc_operacion = "IFNULL(fc_partida_nc_operacion.sub_total_base,0) - IFNULL(fc_partida_nc_operacion.descuento,0)";
@@ -134,8 +130,8 @@ class fc_nota_credito extends _transacciones_fc
             LEFT JOIN fc_nota_credito_etapa ON fc_nota_credito_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
             WHERE fc_nota_credito_etapa.fc_nota_credito_id = fc_nota_credito.id ORDER BY fc_nota_credito_etapa.id DESC LIMIT 1)";
 
-        $columnas_extra['fc_nota_credito_sub_total_base'] = "IFNULL($fc_nota_credito_sub_total_base,0)";
 
+        $columnas_extra['fc_nota_credito_sub_total_base'] = "IFNULL($tabla.sub_total_base,0)";
         $columnas_extra['fc_nota_credito_descuento'] = "IFNULL($tabla.total_descuento,0)";
 
         $columnas_extra['fc_nota_credito_sub_total'] = "IFNULL($fc_nota_credito_sub_total,0)";

@@ -66,12 +66,8 @@ class fc_complemento_pago extends _transacciones_fc
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
 
-        $fc_ligue_partida_factura = " fc_partida_cp.fc_complemento_pago_id = fc_complemento_pago.id ";
 
-
-        $fc_complemento_pago_sub_total_base = "ROUND((SELECT SUM( fc_partida_cp.sub_total_base) FROM fc_partida_cp WHERE $fc_ligue_partida_factura),4)";
-
-        $fc_complemento_pago_sub_total = "($fc_complemento_pago_sub_total_base - $tabla.total_descuento)";
+        $fc_complemento_pago_sub_total = "($tabla.sub_total_base - $tabla.total_descuento)";
 
 
         $fc_partida_cp_operacion = "IFNULL(fc_partida_cp_operacion.sub_total_base,0) - IFNULL(fc_partida_cp_operacion.descuento,0)";
@@ -140,8 +136,8 @@ class fc_complemento_pago extends _transacciones_fc
             LEFT JOIN fc_complemento_pago_etapa ON fc_complemento_pago_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
             WHERE fc_complemento_pago_etapa.fc_complemento_pago_id = fc_complemento_pago.id ORDER BY fc_complemento_pago_etapa.id DESC LIMIT 1)";
 
-        $columnas_extra['fc_complemento_pago_sub_total_base'] = "IFNULL($fc_complemento_pago_sub_total_base,0)";
 
+        $columnas_extra['fc_complemento_pago_sub_total_base'] = "IFNULL($tabla.sub_total_base,0)";
         $columnas_extra['fc_complemento_pago_descuento'] = "$tabla.total_descuento";
 
         $columnas_extra['fc_complemento_pago_sub_total'] = "IFNULL($fc_complemento_pago_sub_total,0)";
