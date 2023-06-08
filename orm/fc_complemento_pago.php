@@ -148,7 +148,7 @@ class fc_complemento_pago extends _transacciones_fc
 
         $columnas_extra['fc_complemento_pago_sub_total_base'] = "IFNULL($fc_complemento_pago_sub_total_base,0)";
 
-        $columnas_extra['fc_complemento_pago_descuento'] = "fc_complemento_pago.total_descuento";
+        $columnas_extra['fc_complemento_pago_descuento'] = "$tabla.total_descuento";
 
         $columnas_extra['fc_complemento_pago_sub_total'] = "IFNULL($fc_complemento_pago_sub_total,0)";
         $columnas_extra['fc_complemento_pago_traslados'] = "IFNULL($fc_complemento_pago_traslados,0)";

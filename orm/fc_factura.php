@@ -73,7 +73,7 @@ class fc_factura extends _transacciones_fc
 
         $fc_partida_cantidad = ' ROUND( IFNULL( fc_partida.cantidad,0 ),2) ';
         $fc_partida_valor_unitario = ' ROUND( IFNULL( fc_partida.valor_unitario,0),2) ';
-        $fc_partida_descuento = ' ROUND( IFNULL(fc_partida.descuento,0 ),2 )';
+
 
         $fc_partida_sub_total_base = "ROUND( $fc_partida_cantidad * $fc_partida_valor_unitario, 2 ) ";
 
@@ -82,8 +82,8 @@ class fc_factura extends _transacciones_fc
 
 
         $fc_factura_sub_total_base = "ROUND((SELECT SUM( $fc_partida_sub_total_base) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
-        $fc_factura_descuento = "ROUND((SELECT SUM( $fc_partida_descuento ) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
-        $fc_factura_sub_total = "($fc_factura_sub_total_base - $fc_factura_descuento)";
+
+        $fc_factura_sub_total = "($fc_factura_sub_total_base - $tabla.total_descuento)";
 
 
         $fc_partida_operacion = "IFNULL(fc_partida_operacion.cantidad,0) * IFNULL(fc_partida_operacion.valor_unitario,0) - IFNULL(fc_partida_operacion.descuento,0)";
@@ -153,7 +153,9 @@ class fc_factura extends _transacciones_fc
             WHERE fc_factura_etapa.fc_factura_id = fc_factura.id ORDER BY fc_factura_etapa.id DESC LIMIT 1)";
 
         $columnas_extra['fc_factura_sub_total_base'] = "IFNULL($fc_factura_sub_total_base,0)";
-        $columnas_extra['fc_factura_descuento'] = "IFNULL($fc_factura_descuento,0)";
+
+        $columnas_extra['fc_factura_descuento'] = "IFNULL($tabla.total_descuento,0)";
+
         $columnas_extra['fc_factura_sub_total'] = "IFNULL($fc_factura_sub_total,0)";
         $columnas_extra['fc_factura_traslados'] = "IFNULL($fc_factura_traslados,0)";
         $columnas_extra['fc_factura_retenciones'] = "IFNULL($fc_factura_retenciones,0)";
