@@ -65,22 +65,16 @@ class fc_complemento_pago extends _transacciones_fc
 
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
-        $fc_partida_cp_cantidad = ' ROUND( IFNULL( fc_partida_cp.cantidad,0 ),2) ';
-        $fc_partida_cp_valor_unitario = ' ROUND( IFNULL( fc_partida_cp.valor_unitario,0),2) ';
-
-
-        $fc_partida_cp_sub_total_base = "ROUND( $fc_partida_cp_cantidad * $fc_partida_cp_valor_unitario, 2 ) ";
-
 
         $fc_ligue_partida_factura = " fc_partida_cp.fc_complemento_pago_id = fc_complemento_pago.id ";
 
 
-        $fc_complemento_pago_sub_total_base = "ROUND((SELECT SUM( $fc_partida_cp_sub_total_base) FROM fc_partida_cp WHERE $fc_ligue_partida_factura),4)";
+        $fc_complemento_pago_sub_total_base = "ROUND((SELECT SUM( fc_partida_cp.sub_total_base) FROM fc_partida_cp WHERE $fc_ligue_partida_factura),4)";
 
         $fc_complemento_pago_sub_total = "($fc_complemento_pago_sub_total_base - $tabla.total_descuento)";
 
 
-        $fc_partida_cp_operacion = "IFNULL(fc_partida_cp_operacion.cantidad,0) * IFNULL(fc_partida_cp_operacion.valor_unitario,0) - IFNULL(fc_partida_cp_operacion.descuento,0)";
+        $fc_partida_cp_operacion = "IFNULL(fc_partida_cp_operacion.sub_total_base,0) - IFNULL(fc_partida_cp_operacion.descuento,0)";
         $where_pc_partida_operacion = "fc_partida_cp_operacion.fc_complemento_pago_id = fc_complemento_pago.id AND fc_partida_cp_operacion.id = fc_partida_cp.id";
 
         $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida_cp', tipo_impuesto: 'fc_traslado_cp');

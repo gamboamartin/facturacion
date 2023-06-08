@@ -26,7 +26,7 @@ class _facturacion
             return $this->error->error(mensaje: 'Error al name_entidad_partida esta vacio', data: $name_entidad_partida);
         }
 
-        return "ROUND((ROUND(IFNULL(".$name_entidad_partida.".cantidad,0),2) * ROUND(IFNULL(".$name_entidad_partida.".valor_unitario,0),2)),2)";
+        return "($name_entidad_partida.sub_total_base)";
     }
 
     /**
@@ -41,13 +41,8 @@ class _facturacion
             return $this->error->error(mensaje: 'Error al name_entidad_partida esta vacio', data: $name_entidad_partida);
         }
 
-        $fc_partida_entidad_importe = $this->fc_partida_importe(name_entidad_partida: $name_entidad_partida);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al generar fc_partida_entidad_importe',
-                data: $fc_partida_entidad_importe);
-        }
 
-        return "ROUND(($fc_partida_entidad_importe - ROUND(IFNULL($name_entidad_partida.descuento,0),2)),2)";
+        return "ROUND(($name_entidad_partida.sub_total_base - ROUND(IFNULL($name_entidad_partida.descuento,0),2)),2)";
     }
 
     /**
@@ -87,7 +82,7 @@ class _facturacion
         }
 
         $data = new stdClass();
-        $data->fc_partida_entidad_importe = $fc_partida_entidad_importe_con_descuento;
+        $data->fc_partida_entidad_importe = $fc_partida_entidad_importe;
         $data->fc_partida_entidad_importe_con_descuento = $fc_partida_entidad_importe_con_descuento;
 
         return $data;

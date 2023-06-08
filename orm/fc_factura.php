@@ -71,22 +71,17 @@ class fc_factura extends _transacciones_fc
 
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
-        $fc_partida_cantidad = ' ROUND( IFNULL( fc_partida.cantidad,0 ),2) ';
-        $fc_partida_valor_unitario = ' ROUND( IFNULL( fc_partida.valor_unitario,0),2) ';
-
-
-        $fc_partida_sub_total_base = "ROUND( $fc_partida_cantidad * $fc_partida_valor_unitario, 2 ) ";
 
 
         $fc_ligue_partida_factura = " fc_partida.fc_factura_id = fc_factura.id ";
 
 
-        $fc_factura_sub_total_base = "ROUND((SELECT SUM( $fc_partida_sub_total_base) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
+        $fc_factura_sub_total_base = "ROUND((SELECT SUM( fc_partida.sub_total_base) FROM fc_partida WHERE $fc_ligue_partida_factura),4)";
 
         $fc_factura_sub_total = "($fc_factura_sub_total_base - $tabla.total_descuento)";
 
 
-        $fc_partida_operacion = "IFNULL(fc_partida_operacion.cantidad,0) * IFNULL(fc_partida_operacion.valor_unitario,0) - IFNULL(fc_partida_operacion.descuento,0)";
+        $fc_partida_operacion = "IFNULL(fc_partida_operacion.sub_total_base,0) - IFNULL(fc_partida_operacion.descuento,0)";
         $where_pc_partida_operacion = "fc_partida_operacion.fc_factura_id = fc_factura.id AND fc_partida_operacion.id = fc_partida.id";
 
         $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida', tipo_impuesto: 'fc_traslado');

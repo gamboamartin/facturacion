@@ -145,6 +145,11 @@ class _partida extends  _base{
         }
 
 
+        $sub_total_base = round(round($this->registro['valor_unitario'],4)
+            * round($this->registro['cantidad'],4),4);
+
+        $this->registro['sub_total_base'] = $sub_total_base;
+
         $r_alta_bd = parent::alta_bd();
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error registrar partida', data: $r_alta_bd);
@@ -198,6 +203,7 @@ class _partida extends  _base{
 
         return $r_alta_bd;
     }
+
 
     final public function calculo_imp_retenido(_data_impuestos $modelo_retencion, int $registro_partida_id)
     {
@@ -670,6 +676,21 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al obtener partida', data: $partida);
         }
 
+        $sub_total_base = round(round($partida[$this->tabla.'_valor_unitario'],4)
+            * round($partida[$this->tabla.'_cantidad'],4),4);
+
+        $registro_stb_upd['sub_total_base'] = $sub_total_base;
+
+        $upd = parent::modifica_bd(registro: $registro_stb_upd,id:  $id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al actualizar sub total base', data: $upd);
+        }
+
+        $partida = $this->get_partida(registro_partida_id: $id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener partida', data: $partida);
+        }
+
         $key_entidad_id = $this->modelo_entidad->key_id;
 
         $registro_entidad_id = $partida->$key_entidad_id;
@@ -767,10 +788,11 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al obtener los registros de la partida', data: $data);
         }
 
-        $key_cantidad = $this->tabla.'_cantidad';
-        $key_valor_unitario = $this->tabla.'_valor_unitario';
+        $key_sub_total_base = $this->tabla.'_sub_total_base';
+        $key_descuento = $this->tabla.'_descuento';
 
-        return round($data->$key_cantidad * $data->$key_valor_unitario, 4);
+
+        return round($data->$key_sub_total_base - $data->$key_descuento, 4);
     }
 
     /**
@@ -810,13 +832,7 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al calcular el subtotal de la partida', data: $subtotal);
         }
 
-        $data = $this->registro(registro_id: $registro_partida_id, retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener los registros de la partida', data: $data);
-        }
-
-        $key_descuento = $this->tabla.'_descuento';
-        return round($subtotal - $data->$key_descuento, 2);
+        return round($subtotal , 2);
     }
 
     private function valida_cantidades(array $data): bool|array

@@ -59,22 +59,16 @@ class fc_nota_credito extends _transacciones_fc
 
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
-        $fc_partida_nc_cantidad = ' ROUND( IFNULL( fc_partida_nc.cantidad,0 ),2) ';
-        $fc_partida_nc_valor_unitario = ' ROUND( IFNULL( fc_partida_nc.valor_unitario,0),2) ';
-        $fc_partida_nc_descuento = ' ROUND( IFNULL(fc_partida_nc.descuento,0 ),2 )';
-
-        $fc_partida_nc_sub_total_base = "ROUND( $fc_partida_nc_cantidad * $fc_partida_nc_valor_unitario, 2 ) ";
-
 
         $fc_ligue_partida_factura = " fc_partida_nc.fc_nota_credito_id = fc_nota_credito.id ";
 
 
-        $fc_nota_credito_sub_total_base = "ROUND((SELECT SUM( $fc_partida_nc_sub_total_base) FROM fc_partida_nc WHERE $fc_ligue_partida_factura),4)";
+        $fc_nota_credito_sub_total_base = "ROUND((SELECT SUM( fc_partida_nc.sub_total_base) FROM fc_partida_nc WHERE $fc_ligue_partida_factura),4)";
 
         $fc_nota_credito_sub_total = "($fc_nota_credito_sub_total_base - $tabla.total_descuento)";
 
 
-        $fc_partida_nc_operacion = "IFNULL(fc_partida_nc_operacion.cantidad,0) * IFNULL(fc_partida_nc_operacion.valor_unitario,0) - IFNULL(fc_partida_nc_operacion.descuento,0)";
+        $fc_partida_nc_operacion = "IFNULL(fc_partida_nc_operacion.sub_total_base,0) - IFNULL(fc_partida_nc_operacion.descuento,0)";
         $where_pc_partida_operacion = "fc_partida_nc_operacion.fc_nota_credito_id = fc_nota_credito.id AND fc_partida_nc_operacion.id = fc_partida_nc.id";
 
         $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida_nc', tipo_impuesto: 'fc_traslado_nc');

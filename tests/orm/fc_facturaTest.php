@@ -282,6 +282,8 @@ class fc_facturaTest extends test {
             modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
             modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
             modelo_uuid_ext: $modelo_uuid_ext, registro_id: $registro_id);
+
+
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(5099, $resultado['fc_factura_sub_total_base']);

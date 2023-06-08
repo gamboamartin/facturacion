@@ -37,8 +37,8 @@ class _facturacionTest extends test
         $modelo = new _facturacion();
         $modelo = new liberator($modelo);
 
-        $salida = "ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ";
-        $salida .= "ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2)";
+
+        $salida = "(fc_partida.sub_total_base)";
         $resultado = $modelo->fc_partida_importe('fc_partida');
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
@@ -56,9 +56,8 @@ class _facturacionTest extends test
         $modelo = new _facturacion();
         $modelo = new liberator($modelo);
 
-        $salida = "ROUND((ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ";
-        $salida .= "ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2) - ";
-        $salida .= "ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
+        $salida = "ROUND((fc_partida.sub_total_base - ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
+
         $resultado = $modelo->fc_partida_importe_con_descuento('fc_partida');
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
@@ -77,10 +76,10 @@ class _facturacionTest extends test
 
         $modelo = new _facturacion();
 
-        $fc_partida_importe = "ROUND((ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2) - ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
+        $fc_partida_importe = "(fc_partida.sub_total_base)";
         //$fc_partida_importe .= "ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2)";
 
-        $fc_partida_importe_con_descuento = "ROUND((ROUND((ROUND(IFNULL(fc_partida.cantidad,0),2) * ROUND(IFNULL(fc_partida.valor_unitario,0),2)),2) - ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
+        $fc_partida_importe_con_descuento = "ROUND((fc_partida.sub_total_base - ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
         //$fc_partida_importe_con_descuento .= "ROUND(IFNULL(fc_partida.descuento,0),2)),2)";
 
         $resultado = (array)$modelo->importes_base('fc_partida');
