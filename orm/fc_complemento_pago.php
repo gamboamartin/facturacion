@@ -67,7 +67,7 @@ class fc_complemento_pago extends _transacciones_fc
 
         $fc_partida_cp_cantidad = ' ROUND( IFNULL( fc_partida_cp.cantidad,0 ),2) ';
         $fc_partida_cp_valor_unitario = ' ROUND( IFNULL( fc_partida_cp.valor_unitario,0),2) ';
-        $fc_partida_cp_descuento = ' ROUND( IFNULL(fc_partida_cp.descuento,0 ),2 )';
+
 
         $fc_partida_cp_sub_total_base = "ROUND( $fc_partida_cp_cantidad * $fc_partida_cp_valor_unitario, 2 ) ";
 
@@ -76,8 +76,8 @@ class fc_complemento_pago extends _transacciones_fc
 
 
         $fc_complemento_pago_sub_total_base = "ROUND((SELECT SUM( $fc_partida_cp_sub_total_base) FROM fc_partida_cp WHERE $fc_ligue_partida_factura),4)";
-        $fc_complemento_pago_descuento = "ROUND((SELECT SUM( $fc_partida_cp_descuento ) FROM fc_partida_cp WHERE $fc_ligue_partida_factura),4)";
-        $fc_complemento_pago_sub_total = "($fc_complemento_pago_sub_total_base - $fc_complemento_pago_descuento)";
+
+        $fc_complemento_pago_sub_total = "($fc_complemento_pago_sub_total_base - $tabla.total_descuento)";
 
 
         $fc_partida_cp_operacion = "IFNULL(fc_partida_cp_operacion.cantidad,0) * IFNULL(fc_partida_cp_operacion.valor_unitario,0) - IFNULL(fc_partida_cp_operacion.descuento,0)";
@@ -147,7 +147,9 @@ class fc_complemento_pago extends _transacciones_fc
             WHERE fc_complemento_pago_etapa.fc_complemento_pago_id = fc_complemento_pago.id ORDER BY fc_complemento_pago_etapa.id DESC LIMIT 1)";
 
         $columnas_extra['fc_complemento_pago_sub_total_base'] = "IFNULL($fc_complemento_pago_sub_total_base,0)";
-        $columnas_extra['fc_complemento_pago_descuento'] = "IFNULL($fc_complemento_pago_descuento,0)";
+
+        $columnas_extra['fc_complemento_pago_descuento'] = "fc_complemento_pago.total_descuento";
+
         $columnas_extra['fc_complemento_pago_sub_total'] = "IFNULL($fc_complemento_pago_sub_total,0)";
         $columnas_extra['fc_complemento_pago_traslados'] = "IFNULL($fc_complemento_pago_traslados,0)";
         $columnas_extra['fc_complemento_pago_retenciones'] = "IFNULL($fc_complemento_pago_retenciones,0)";
