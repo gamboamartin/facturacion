@@ -61,10 +61,7 @@ class fc_nota_credito extends _transacciones_fc
 
 
 
-        $fc_nota_credito_sub_total = "($tabla.sub_total_base - $tabla.total_descuento)";
-
-
-        $fc_partida_nc_operacion = "IFNULL(fc_partida_nc_operacion.sub_total_base,0) - IFNULL(fc_partida_nc_operacion.descuento,0)";
+        $fc_partida_nc_operacion = "IFNULL(fc_partida_nc_operacion.sub_total,0)";
         $where_pc_partida_operacion = "fc_partida_nc_operacion.fc_nota_credito_id = fc_nota_credito.id AND fc_partida_nc_operacion.id = fc_partida_nc.id";
 
         $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida_nc', tipo_impuesto: 'fc_traslado_nc');
@@ -120,7 +117,7 @@ class fc_nota_credito extends _transacciones_fc
 		fc_partida_nc.fc_nota_credito_id = fc_nota_credito.id 
 	)";
 
-        $fc_nota_credito_total = "ROUND(IFNULL($fc_nota_credito_sub_total,0)+IFNULL(ROUND($fc_nota_credito_traslados,2),0)-IFNULL(ROUND($fc_nota_credito_retenciones,2),0),2)";
+        $fc_nota_credito_total = "ROUND(IFNULL($tabla.sub_total,0)+IFNULL(ROUND($fc_nota_credito_traslados,2),0)-IFNULL(ROUND($fc_nota_credito_retenciones,2),0),2)";
 
 
         $fc_nota_credito_uuid = "(SELECT IFNULL(fc_cfdi_sellado_nc.uuid,'') FROM fc_cfdi_sellado_nc WHERE fc_cfdi_sellado_nc.fc_nota_credito_id = fc_nota_credito.id)";
@@ -131,13 +128,11 @@ class fc_nota_credito extends _transacciones_fc
             WHERE fc_nota_credito_etapa.fc_nota_credito_id = fc_nota_credito.id ORDER BY fc_nota_credito_etapa.id DESC LIMIT 1)";
 
 
-        $columnas_extra['fc_nota_credito_sub_total_base'] = "IFNULL($tabla.sub_total_base,0)";
         $columnas_extra['fc_nota_credito_descuento'] = "IFNULL($tabla.total_descuento,0)";
 
-        $columnas_extra['fc_nota_credito_sub_total'] = "IFNULL($fc_nota_credito_sub_total,0)";
         $columnas_extra['fc_nota_credito_traslados'] = "IFNULL($fc_nota_credito_traslados,0)";
         $columnas_extra['fc_nota_credito_retenciones'] = "IFNULL($fc_nota_credito_retenciones,0)";
-        $columnas_extra['fc_nota_credito_total'] = "IFNULL($fc_nota_credito_total,0)";
+        $columnas_extra['fc_nota_credito_total'] = "IFNULL($tabla.sub_total,0)";
         $columnas_extra['fc_nota_credito_uuid'] = "IFNULL($fc_nota_credito_uuid,'SIN UUID')";
         $columnas_extra['fc_nota_credito_etapa'] = "$fc_nota_credito_etapa";
 
