@@ -150,6 +150,13 @@ class _partida extends  _base{
 
         $this->registro['sub_total_base'] = $sub_total_base;
 
+        $descuento = 0.0;
+        if(isset($this->registro['descuento'])){
+            $descuento = round($this->registro['descuento'],2);
+        }
+        $this->registro['sub_total'] = $sub_total_base - $descuento;
+
+
         $r_alta_bd = parent::alta_bd();
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error registrar partida', data: $r_alta_bd);
@@ -714,6 +721,14 @@ class _partida extends  _base{
             * round($partida[$this->tabla.'_cantidad'],4),4);
 
         $registro_stb_upd['sub_total_base'] = $sub_total_base;
+
+
+        $descuento = 0.0;
+        if(isset($partida[$this->tabla.'_descuento'])){
+            $descuento = round($partida[$this->tabla.'_descuento'],2);
+        }
+        $registro_stb_upd['sub_total'] = $sub_total_base - $descuento;
+
 
         $upd = parent::modifica_bd(registro: $registro_stb_upd,id:  $id);
         if (errores::$error) {

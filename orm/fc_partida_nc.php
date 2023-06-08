@@ -18,12 +18,6 @@ class fc_partida_nc extends _partida
 
         $columnas_extra = array();
 
-        $sq_importes = (new _facturacion())->importes_base(name_entidad_partida: 'fc_partida_nc');
-        if (errores::$error) {
-            $error = (new errores())->error(mensaje: 'Error al generar sq_importes', data: $sq_importes);
-            print_r($error);
-            exit;
-        }
 
         $sq_importe_total_traslado = (new _facturacion())->impuesto_partida(
             name_entidad_partida: 'fc_partida_nc', tabla_impuesto: 'fc_traslado_nc');
@@ -42,10 +36,11 @@ class fc_partida_nc extends _partida
 
         // print_r($sq_importes);exit;
         $columnas_extra['fc_partida_nc_importe'] = "$tabla.sub_total_base";
-        $columnas_extra['fc_partida_nc_importe_con_descuento'] = $sq_importes->fc_partida_entidad_importe_con_descuento;
+        $columnas_extra['fc_partida_nc_importe_con_descuento'] = "$tabla.sub_total";
+
         $columnas_extra['fc_partida_nc_importe_total_traslado'] = $sq_importe_total_traslado;
         $columnas_extra['fc_partida_nc_importe_total_retenido'] = $sq_importe_total_retenido;
-        $columnas_extra['fc_partida_nc_importe_total'] = "$sq_importes->fc_partida_entidad_importe_con_descuento 
+        $columnas_extra['fc_partida_nc_importe_total'] = "$tabla.sub_total 
         + $sq_importe_total_traslado - $sq_importe_total_retenido";
 
         $columnas_extra['fc_partida_nc_n_traslados'] = "(SELECT COUNT(*) FROM fc_traslado_nc 

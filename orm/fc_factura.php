@@ -3,10 +3,6 @@
 namespace gamboamartin\facturacion\models;
 
 
-use base\orm\modelo;
-
-use config\generales;
-use config\pac;
 use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
@@ -15,16 +11,8 @@ use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
-use gamboamartin\comercial\models\com_tmp_cte_dp;
-use gamboamartin\comercial\models\com_tmp_prod_cs;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
-use gamboamartin\documento\models\doc_documento;
-use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
-use gamboamartin\plugins\files;
-use gamboamartin\proceso\models\pr_proceso;
-use gamboamartin\xml_cfdi_4\cfdis;
-use gamboamartin\xml_cfdi_4\timbra;
 use PDO;
 use stdClass;
 

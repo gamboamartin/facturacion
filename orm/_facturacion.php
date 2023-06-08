@@ -42,7 +42,7 @@ class _facturacion
         }
 
 
-        return "ROUND(($name_entidad_partida.sub_total_base - ROUND(IFNULL($name_entidad_partida.descuento,0),2)),2)";
+        return "($name_entidad_partida.sub_total)";
     }
 
     /**
