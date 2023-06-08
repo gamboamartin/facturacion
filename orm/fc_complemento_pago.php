@@ -594,6 +594,7 @@ class fc_complemento_pago extends _transacciones_fc
 
         $data->Complemento =$Complemento;
 
+
         return $data;
     }
 

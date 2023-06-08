@@ -44,6 +44,7 @@ class _transacciones_fc extends modelo
 
     protected string $key_fc_id = '';
 
+
     /**
      * @return array|stdClass
      */
@@ -517,6 +518,8 @@ class _transacciones_fc extends modelo
         return $relaciones;
 
     }
+
+
 
     /**
      *
