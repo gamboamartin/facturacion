@@ -213,7 +213,13 @@ class _transacciones_fc extends modelo
         return $data;
     }
 
-    private function data_para_folio(int $fc_csd_id){
+    /**
+     * Obtine los datos para maquetar un folio
+     * @param int $fc_csd_id CSD en ejecucion
+     * @return array|stdClass
+     */
+    private function data_para_folio(int $fc_csd_id): array|stdClass
+    {
         $filtro['fc_csd.id'] = $fc_csd_id;
         $r_registro = $this->filtro_and(filtro: $filtro, limit: 1,order: array($this->tabla.'.folio'=>'DESC'));
         if(errores::$error){
