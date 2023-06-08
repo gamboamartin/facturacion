@@ -7,6 +7,7 @@ use gamboamartin\facturacion\models\_email;
 use gamboamartin\facturacion\models\_facturacion;
 use gamboamartin\facturacion\models\fc_complemento_pago;
 use gamboamartin\facturacion\models\fc_complemento_pago_etapa;
+use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_partida;
@@ -41,6 +42,30 @@ class _partidaTest extends test
         $this->paths_conf->generales = '/var/www/html/facturacion/config/generales.php';
         $this->paths_conf->database = '/var/www/html/facturacion/config/database.php';
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
+    }
+
+    public function test_elimina_dependientes(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida(link: $this->link);
+        $modelo = new liberator($modelo);
+
+
+        $id = 1;
+        $modelo_predial = new fc_cuenta_predial(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+
+        $resultado = $modelo->elimina_dependientes($id, $modelo_predial, $modelo_retencion, $modelo_traslado);
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+
+        errores::$error = false;
+
     }
 
     public function test_get_partida(): void

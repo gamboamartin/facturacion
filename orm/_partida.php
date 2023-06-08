@@ -309,6 +309,7 @@ class _partida extends  _base{
      * @param _data_impuestos $modelo_retencion Modelo de tipo retencion
      * @param _data_impuestos $modelo_traslado Modelo de tipo traslado
      * @return array|stdClass
+     * @version 10.45.3
      */
     private function elimina_dependientes(int $id, _cuenta_predial $modelo_predial, _data_impuestos $modelo_retencion,
                                           _data_impuestos $modelo_traslado): array|stdClass
