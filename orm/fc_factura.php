@@ -60,61 +60,9 @@ class fc_factura extends _transacciones_fc
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
 
-        $fc_partida_operacion = "IFNULL(fc_partida_operacion.sub_total,0)";
-        $where_pc_partida_operacion = "fc_partida_operacion.fc_factura_id = fc_factura.id AND fc_partida_operacion.id = fc_partida.id";
+        $fc_factura_traslados = "(SELECT SUM(fc_partida.total_traslados) FROM fc_partida WHERE fc_partida.fc_factura_id = fc_factura.id)";
+        $fc_factura_retenciones = "(SELECT SUM(fc_partida.total_retenciones) FROM fc_partida WHERE fc_partida.fc_factura_id = fc_factura.id)";
 
-        $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida', tipo_impuesto: 'fc_traslado');
-        if(errores::$error){
-            $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
-            print_r($error);
-            exit;
-        }
-
-        $fc_factura_traslados = "(
-	SELECT
-		SUM((
-			SELECT
-				ROUND(SUM( $fc_partida_operacion ),4) 
-			FROM
-				$from_impuesto
-			WHERE
-				$where_pc_partida_operacion
-				) * cat_sat_factor.factor 
-		) 
-	FROM
-		fc_traslado
-		LEFT JOIN fc_partida ON fc_partida.id = fc_traslado.fc_partida_id
-		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado.cat_sat_factor_id 
-	WHERE
-		fc_partida.fc_factura_id = fc_factura.id 
-	)";
-
-        $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida', tipo_impuesto: 'fc_retenido');
-        if(errores::$error){
-            $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
-            print_r($error);
-            exit;
-        }
-
-
-        $fc_factura_retenciones = "(
-	SELECT
-		SUM((
-			SELECT
-				ROUND(SUM( $fc_partida_operacion ),4) 
-			FROM
-				$from_impuesto
-			WHERE
-				$where_pc_partida_operacion
-				) * cat_sat_factor.factor 
-		) 
-	FROM
-		fc_retenido
-		LEFT JOIN fc_partida ON fc_partida.id = fc_retenido.fc_partida_id
-		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido.cat_sat_factor_id 
-	WHERE
-		fc_partida.fc_factura_id = fc_factura.id 
-	)";
 
         $fc_factura_total = "ROUND(IFNULL($tabla.sub_total,0)+IFNULL(ROUND($fc_factura_traslados,2),0)-IFNULL(ROUND($fc_factura_retenciones,2),0),2)";
 

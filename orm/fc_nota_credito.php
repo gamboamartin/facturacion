@@ -61,61 +61,9 @@ class fc_nota_credito extends _transacciones_fc
 
 
 
-        $fc_partida_nc_operacion = "IFNULL(fc_partida_nc_operacion.sub_total,0)";
-        $where_pc_partida_operacion = "fc_partida_nc_operacion.fc_nota_credito_id = fc_nota_credito.id AND fc_partida_nc_operacion.id = fc_partida_nc.id";
+        $fc_nota_credito_traslados = "(SELECT SUM(fc_partida_nc.total_traslados) FROM fc_partida_nc WHERE fc_partida_nc.fc_nota_credito_id = fc_nota_credito.id)";
+        $fc_nota_credito_retenciones = "(SELECT SUM(fc_partida_nc.total_retenciones) FROM fc_partida_nc WHERE fc_partida_nc.fc_nota_credito_id = fc_nota_credito.id)";
 
-        $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida_nc', tipo_impuesto: 'fc_traslado_nc');
-        if(errores::$error){
-            $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
-            print_r($error);
-            exit;
-        }
-
-        $fc_nota_credito_traslados = "(
-	SELECT
-		SUM((
-			SELECT
-				ROUND(SUM( $fc_partida_nc_operacion ),4) 
-			FROM
-				$from_impuesto
-			WHERE
-				$where_pc_partida_operacion
-				) * cat_sat_factor.factor 
-		) 
-	FROM
-		fc_traslado_nc
-		LEFT JOIN fc_partida_nc ON fc_partida_nc.id = fc_traslado_nc.fc_partida_nc_id
-		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado_nc.cat_sat_factor_id 
-	WHERE
-		fc_partida_nc.fc_nota_credito_id = fc_nota_credito.id 
-	)";
-
-        $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida_nc', tipo_impuesto: 'fc_retenido_nc');
-        if(errores::$error){
-            $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
-            print_r($error);
-            exit;
-        }
-
-
-        $fc_nota_credito_retenciones = "(
-	SELECT
-		SUM((
-			SELECT
-				ROUND(SUM( $fc_partida_nc_operacion ),4) 
-			FROM
-				$from_impuesto
-			WHERE
-				$where_pc_partida_operacion
-				) * cat_sat_factor.factor 
-		) 
-	FROM
-		fc_retenido_nc
-		LEFT JOIN fc_partida_nc ON fc_partida_nc.id = fc_retenido_nc.fc_partida_nc_id
-		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido_nc.cat_sat_factor_id 
-	WHERE
-		fc_partida_nc.fc_nota_credito_id = fc_nota_credito.id 
-	)";
 
         $fc_nota_credito_total = "ROUND(IFNULL($tabla.sub_total,0)+IFNULL(ROUND($fc_nota_credito_traslados,2),0)-IFNULL(ROUND($fc_nota_credito_retenciones,2),0),2)";
 
@@ -132,7 +80,7 @@ class fc_nota_credito extends _transacciones_fc
 
         $columnas_extra['fc_nota_credito_traslados'] = "IFNULL($fc_nota_credito_traslados,0)";
         $columnas_extra['fc_nota_credito_retenciones'] = "IFNULL($fc_nota_credito_retenciones,0)";
-        $columnas_extra['fc_nota_credito_total'] = "IFNULL($tabla.sub_total,0)";
+        $columnas_extra['fc_nota_credito_total'] = "IFNULL($fc_nota_credito_total,0)";
         $columnas_extra['fc_nota_credito_uuid'] = "IFNULL($fc_nota_credito_uuid,'SIN UUID')";
         $columnas_extra['fc_nota_credito_etapa'] = "$fc_nota_credito_etapa";
 

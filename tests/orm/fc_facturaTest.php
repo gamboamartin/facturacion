@@ -289,7 +289,7 @@ class fc_facturaTest extends test {
         $this->assertEquals(5099, $resultado['fc_factura_sub_total_base']);
         $this->assertEquals(5099, $resultado['fc_factura_sub_total']);
         $this->assertEquals(815.84, $resultado['fc_factura_traslados']);
-        $this->assertEquals(63.74, round($resultado['fc_factura_retenciones'],2));
+        $this->assertEquals(63.75, round($resultado['fc_factura_retenciones'],2));
         $this->assertEquals(5851.09, $resultado['fc_factura_total']);
 
 

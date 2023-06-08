@@ -66,64 +66,11 @@ class fc_complemento_pago extends _transacciones_fc
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
 
-        $fc_partida_cp_operacion = "IFNULL(fc_partida_cp_operacion.sub_total,0)";
-        $where_pc_partida_operacion = "fc_partida_cp_operacion.fc_complemento_pago_id = fc_complemento_pago.id AND fc_partida_cp_operacion.id = fc_partida_cp.id";
+        $fc_complemento_pago_traslados = "(SELECT SUM(fc_partida_cp.total_traslados) FROM fc_partida_cp WHERE fc_partida_cp.fc_complemento_pago_id = fc_complemento_pago.id)";
+        $fc_complemento_pago_retenciones = "(SELECT SUM(fc_partida_cp.total_retenciones) FROM fc_partida_cp WHERE fc_partida_cp.fc_complemento_pago_id = fc_complemento_pago.id)";
 
-        $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida_cp', tipo_impuesto: 'fc_traslado_cp');
-        if(errores::$error){
-            $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
-            print_r($error);
-            exit;
-        }
-
-        $fc_complemento_pago_traslados = "(
-	SELECT
-		SUM((
-			SELECT
-				ROUND(SUM( $fc_partida_cp_operacion ),4) 
-			FROM
-				$from_impuesto
-			WHERE
-				$where_pc_partida_operacion
-				) * cat_sat_factor.factor 
-		) 
-	FROM
-		fc_traslado_cp
-		LEFT JOIN fc_partida_cp ON fc_partida_cp.id = fc_traslado_cp.fc_partida_cp_id
-		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_traslado_cp.cat_sat_factor_id 
-	WHERE
-		fc_partida_cp.fc_complemento_pago_id = fc_complemento_pago.id 
-	)";
-
-        $from_impuesto = $this->from_impuesto(entidad_partida: 'fc_partida_cp', tipo_impuesto: 'fc_retenido_cp');
-        if(errores::$error){
-            $error = $this->error->error(mensaje: 'Error al crear from',data:  $from_impuesto);
-            print_r($error);
-            exit;
-        }
-
-
-        $fc_complemento_pago_retenciones = "(
-	SELECT
-		SUM((
-			SELECT
-				ROUND(SUM( $fc_partida_cp_operacion ),4) 
-			FROM
-				$from_impuesto
-			WHERE
-				$where_pc_partida_operacion
-				) * cat_sat_factor.factor 
-		) 
-	FROM
-		fc_retenido_cp
-		LEFT JOIN fc_partida_cp ON fc_partida_cp.id = fc_retenido_cp.fc_partida_cp_id
-		LEFT JOIN cat_sat_factor ON cat_sat_factor.id = fc_retenido_cp.cat_sat_factor_id 
-	WHERE
-		fc_partida_cp.fc_complemento_pago_id = fc_complemento_pago.id 
-	)";
 
         $fc_complemento_pago_total = "ROUND(IFNULL($tabla.sub_total,0)+IFNULL(ROUND($fc_complemento_pago_traslados,2),0)-IFNULL(ROUND($fc_complemento_pago_retenciones,2),0),2)";
-
 
         $fc_complemento_pago_uuid = "(SELECT IFNULL(fc_cfdi_sellado_cp.uuid,'') FROM fc_cfdi_sellado_cp WHERE fc_cfdi_sellado_cp.fc_complemento_pago_id = fc_complemento_pago.id)";
 

@@ -67,6 +67,9 @@ class fc_traslado extends _data_impuestos {
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
+
+
+
         return $r_alta_bd;
     }
 

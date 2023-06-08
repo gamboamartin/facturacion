@@ -241,6 +241,17 @@ class base_test{
             }
         }
 
+        $existe = (new com_producto($link))->existe_by_id(registro_id: $com_producto_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_com_producto(link: $link, id: $com_producto_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+            }
+        }
+
 
         $registro = array();
         $registro['id'] = $id;
