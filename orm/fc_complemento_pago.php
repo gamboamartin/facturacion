@@ -174,15 +174,16 @@ class fc_complemento_pago extends _transacciones_fc
 
     }
 
-    private function actualiza_total(int $cat_sat_factor_id, int $fc_pago_id){
+    private function actualiza_total(int $cat_sat_factor_id, string $cat_sat_tipo_impuesto_codigo, int $fc_pago_id){
         $cat_sat_factor = (new cat_sat_factor(link: $this->link))->registro(
             registro_id: $cat_sat_factor_id, retorno_obj: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener cat_sat_factor',data:  $cat_sat_factor);
         }
 
+
         $upd = (new fc_traslado_dr_part(link: $this->link))->upd_fc_pago_total(cat_sat_factor: $cat_sat_factor,
-            fc_pago_id:  $fc_pago_id,tipo_impuesto: '');
+            cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo, fc_pago_id: $fc_pago_id, tipo_impuesto: '');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
         }
@@ -193,7 +194,8 @@ class fc_complemento_pago extends _transacciones_fc
         $upds = array();
         foreach ($fc_traslados_dr_part as $fc_traslado_dr_part){
             $upd = $this->actualiza_total(cat_sat_factor_id: $fc_traslado_dr_part['cat_sat_factor_id'],
-                fc_pago_id:  $fc_traslado_dr_part['fc_pago_id']);
+                cat_sat_tipo_impuesto_codigo: $fc_traslado_dr_part['cat_sat_tipo_impuesto_codigo'],
+                fc_pago_id: $fc_traslado_dr_part['fc_pago_id']);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
             }

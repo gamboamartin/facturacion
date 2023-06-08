@@ -47,6 +47,10 @@ class _dr_part extends _modelo_parent{
         return $r_alta_bd;
     }
 
+    /**
+     * Obtiene los campos de part
+     * @return array
+     */
     private function campos_dr_impuesto_part(): array
     {
         $campos['base_dr'] = $this->tabla.'.base_dr';
@@ -181,6 +185,7 @@ class _dr_part extends _modelo_parent{
      * @param int $cat_sat_factor_id Factor a verificar
      * @param int $fc_pago_id Pago a verificar
      * @return array
+     * @version 10.48.3
      */
     private function filtro_impuestos_dr_part(int $cat_sat_factor_id, int $fc_pago_id): array
     {
