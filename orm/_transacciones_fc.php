@@ -1174,6 +1174,7 @@ class _transacciones_fc extends modelo
      * Obtiene la serie de un CSD
      * @param int $fc_csd_id CSD de obtencion de serie
      * @return array|string
+     * @version 10.50.3
      */
     private function fc_csd_serie(int $fc_csd_id): array|string
     {

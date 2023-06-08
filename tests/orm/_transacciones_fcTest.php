@@ -136,6 +136,30 @@ class _transacciones_fcTest extends test
         errores::$error = false;
     }
 
+    public function test_fc_csd_serie(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new fc_nota_credito($this->link);
+        $trs = new liberator($trs);
+
+        $fc_csd_id= 1;
+        $resultado = $trs->fc_csd_serie($fc_csd_id);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('1',$resultado);
+
+
+        errores::$error = false;
+
+    }
+
     public function test_integra_fecha(): void
     {
         errores::$error = false;
