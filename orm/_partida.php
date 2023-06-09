@@ -194,17 +194,14 @@ class _partida extends  _base{
             }
         }
 
-        $fc_registro_partida = $this->registro(registro_id: $r_alta_bd->registro_id, columnas_en_bruto: true, retorno_obj: true);
+        $fc_registro_partida = $this->registro(registro_id: $r_alta_bd->registro_id, columnas_en_bruto: true,
+            retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener partida', data: $fc_registro_partida);
         }
 
-        $total = $fc_registro_partida->sub_total + $fc_registro_partida->total_traslados
-            - $fc_registro_partida->total_retenciones;
 
-        $row_partida_upd['total'] = $total;
-
-        $upd = $this->modifica_bd(registro: $row_partida_upd, id: $fc_registro_partida->id);
+        $upd = $this->upd_total_partida(row_partida_id: $r_alta_bd->registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al modificar', data: $upd);
         }
@@ -275,6 +272,30 @@ class _partida extends  _base{
         $registro['sub_total'] = $sub_total_base - $descuento;
 
         return $registro;
+    }
+
+    private function upd_total_partida(int $row_partida_id){
+        $fc_registro_partida = $this->registro(registro_id: $row_partida_id, columnas_en_bruto: true, retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener partida', data: $fc_registro_partida);
+        }
+
+        $keys = array('sub_total','total_traslados','total_retenciones');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $fc_registro_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar fc_registro_partida', data: $valida);
+        }
+
+        $total = $fc_registro_partida->sub_total + $fc_registro_partida->total_traslados
+            - $fc_registro_partida->total_retenciones;
+
+        $row_partida_upd['total'] = $total;
+
+        $upd = $this->modifica_bd(registro: $row_partida_upd, id: $fc_registro_partida->id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al modificar', data: $upd);
+        }
+        return $upd;
     }
 
 

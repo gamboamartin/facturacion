@@ -262,6 +262,12 @@ class _data_impuestos extends _base{
 
         $total = 0.0;
         foreach ($rows_impuestos as $row_impuesto){
+            $keys = array($this->tabla.'_total');
+            $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row_impuesto);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error validar valida', data: $valida);
+            }
+
             $total += round($row_impuesto[$this->tabla.'_total'],2);
 
         }
