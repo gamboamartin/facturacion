@@ -747,6 +747,8 @@ class _transacciones_fc extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
         }
+
+
         if(!isset($data_factura->Complemento)){
             $data_factura->Complemento = array();
         }
@@ -1572,12 +1574,12 @@ class _transacciones_fc extends modelo
 
         $factor_traslado = 0;
         foreach ($traslados as $traslado){
-            $factor_traslado = $traslado['cat_sat_factor_factor'];
+            $factor_traslado = +$traslado['cat_sat_factor_factor'];
         }
 
         $factor_retenido = 0;
         foreach ($retenciones as $retencion){
-            $factor_retenido = $retencion['cat_sat_factor_factor'];
+            $factor_retenido += $retencion['cat_sat_factor_factor'];
         }
 
         $data = new stdClass();
@@ -1592,6 +1594,8 @@ class _transacciones_fc extends modelo
         $data->retencion->aplica = $tiene_retencion;
         $data->retencion->registros = $retenciones;
         $data->retencion->factor = $factor_retenido;
+
+        $data->factor_calculo = $factor_traslado - $factor_retenido;
 
         return $data;
 

@@ -39,60 +39,46 @@ class _p extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
 
-        $key_base_dr = $this->modelo_dr_part->tabla.'.base_dr';
-        $key_importe_dr = $this->modelo_dr_part->tabla.'.importe_dr';
-
-        $filtro['fc_pago_pago.id'] = $r_alta_bd->registro['fc_pago_pago_id'];
-        $campos['base_dr_sum'] = $key_base_dr;
-        $campos['importe_dr_sum'] = $key_importe_dr;
-
-        $fc_impuesto_dr_part = $this->modelo_dr_part->suma(campos: $campos, filtro: $filtro);
+        $r_alta_fc_impuesto_p_part = $this->inserta_p_parts(fc_pago_pago_id: $r_alta_bd->registro['fc_pago_pago_id'],
+            row_p_part_id:  $r_alta_bd->registro_id);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener fc_impuesto_dr_part',data:  $fc_impuesto_dr_part);
-        }
-
-        $cat_sat_tipo_impuesto_id = 2;
-        $cat_sat_tipo_factor_id = 5;
-        $cat_sat_factor_id = 11;
-        if($this->tabla === 'fc_retencion_p'){
-            $cat_sat_tipo_impuesto_id = 1;
-            $cat_sat_factor_id = 27;
-
-        }
-
-        $fc_impuesto_p_part_ins[$this->key_id] = $r_alta_bd->registro_id;
-        $fc_impuesto_p_part_ins['base_p'] = $fc_impuesto_dr_part['base_dr_sum'];
-        $fc_impuesto_p_part_ins['importe_p'] = $fc_impuesto_dr_part['importe_dr_sum'];
-        $fc_impuesto_p_part_ins['cat_sat_tipo_impuesto_id'] = $cat_sat_tipo_impuesto_id;
-        $fc_impuesto_p_part_ins['cat_sat_tipo_factor_id'] = $cat_sat_tipo_factor_id;
-        $fc_impuesto_p_part_ins['cat_sat_factor_id'] = $cat_sat_factor_id;
-
-        $r_alta_fc_impuesto_p_part = $this->modelo_p_part->alta_registro(registro: $fc_impuesto_p_part_ins);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al insertar fc_traslado_dr_part',data:  $r_alta_fc_impuesto_p_part);
+            return $this->error->error(mensaje: 'Error al insertar r_alta_fc_impuesto_p_part',data:  $r_alta_fc_impuesto_p_part);
         }
 
 
         return $r_alta_bd;
     }
 
-    private function data_p_part(): stdClass
-    {
-        $cat_sat_tipo_impuesto_id = 2;
-        $cat_sat_tipo_factor_id = 5;
-        $cat_sat_factor_id = 11;
-        if($this->tabla === 'fc_retencion_p'){
-            $cat_sat_tipo_impuesto_id = 1;
-            $cat_sat_factor_id = 27;
-
+    private function datas_ins_p_part(int $fc_pago_pago_id, int $row_p_part_id){
+        $fc_impuesto_dr_parts = $this->fc_impuesto_dr_p_part(fc_pago_pago_id: $fc_pago_pago_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener r_fc_impuesto_dr_part',data:  $fc_impuesto_dr_parts);
         }
-        $data = new stdClass();
-        $data->cat_sat_tipo_impuesto_id = $cat_sat_tipo_impuesto_id;
-        $data->cat_sat_tipo_factor_id = $cat_sat_tipo_factor_id;
-        $data->cat_sat_factor_id = $cat_sat_factor_id;
 
-        return $data;
+        $datas_ins_p_part = array();
+        foreach ($fc_impuesto_dr_parts as $fc_impuesto_dr_part) {
+            $cat_sat_tipo_impuesto_id = $fc_impuesto_dr_part['cat_sat_tipo_impuesto_id'];
+            $datas_ins_p_part = $this->integra_datas_init_p_part(cat_sat_tipo_impuesto_id: $cat_sat_tipo_impuesto_id,
+                datas_ins_p_part:  $datas_ins_p_part,fc_impuesto_dr_part:  $fc_impuesto_dr_part,
+                row_p_part_id: $row_p_part_id);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener inicializar',data:  $datas_ins_p_part);
+            }
+        }
+        return $datas_ins_p_part;
     }
+
+    private function datas_ins_p_part_init(int $cat_sat_tipo_impuesto_id, array $datas_ins_p_part): array
+    {
+        if(!isset($datas_ins_p_part[$cat_sat_tipo_impuesto_id]['base_p'])){
+            $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['base_p'] = 0.0;
+        }
+        if(!isset($datas_ins_p_part[$cat_sat_tipo_impuesto_id]['importe_p'])){
+            $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['importe_p'] = 0.0;
+        }
+        return $datas_ins_p_part;
+    }
+
 
     /**
      * Elimina un registro de tipo p_part de complemento de pago previa a la eliminacion de tipo this
@@ -112,6 +98,62 @@ class _p extends _modelo_parent{
         }
         return $r_del;
 
+    }
+
+    private function fc_impuesto_dr_p_part(int $fc_pago_pago_id){
+        $filtro['fc_pago_pago.id'] = $fc_pago_pago_id;
+        $r_fc_impuesto_dr_part = $this->modelo_dr_part->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener r_fc_impuesto_dr_part',data:  $r_fc_impuesto_dr_part);
+        }
+        return $r_fc_impuesto_dr_part->registros;
+    }
+
+    private function inserta_p_parts(int $fc_pago_pago_id, int $row_p_part_id){
+        $r_altas_fc_impuesto_p_part = array();
+        $datas_ins_p_part = $this->datas_ins_p_part(fc_pago_pago_id: $fc_pago_pago_id, row_p_part_id: $row_p_part_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener inicializar',data:  $datas_ins_p_part);
+        }
+
+        foreach ($datas_ins_p_part as $data_ins_p_part){
+            $r_alta_fc_impuesto_p_part = $this->modelo_p_part->alta_registro(registro: $data_ins_p_part);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al insertar fc_traslado_dr_part', data: $r_alta_fc_impuesto_p_part);
+            }
+            $r_altas_fc_impuesto_p_part[] = $r_alta_fc_impuesto_p_part;
+        }
+        return $r_altas_fc_impuesto_p_part;
+    }
+
+    private function integra_datas_init_p_part(int $cat_sat_tipo_impuesto_id, array $datas_ins_p_part,
+                                               array $fc_impuesto_dr_part, int $row_p_part_id){
+
+        $key_dr_part_base_dr = '';
+        $key_dr_part_importe_dr = '';
+        if($this->tabla === 'fc_traslado_p'){
+            $key_dr_part_base_dr = 'fc_traslado_dr_part_base_dr';
+            $key_dr_part_importe_dr = 'fc_traslado_dr_part_importe_dr';
+        }
+        if($this->tabla === 'fc_retencion_p'){
+            $key_dr_part_base_dr = 'fc_retencion_dr_part_base_dr';
+            $key_dr_part_importe_dr = 'fc_retencion_dr_part_importe_dr';
+        }
+
+
+        $datas_ins_p_part = $this->datas_ins_p_part_init(cat_sat_tipo_impuesto_id: $cat_sat_tipo_impuesto_id,
+            datas_ins_p_part:  $datas_ins_p_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener inicializar',data:  $datas_ins_p_part);
+        }
+        $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['base_p'] += $fc_impuesto_dr_part[$key_dr_part_base_dr];
+        $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['importe_p'] += $fc_impuesto_dr_part[$key_dr_part_importe_dr];
+        $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['cat_sat_tipo_impuesto_id'] = $cat_sat_tipo_impuesto_id;
+        $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['cat_sat_tipo_factor_id'] = $fc_impuesto_dr_part['cat_sat_tipo_factor_id'];
+        $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['cat_sat_factor_id'] = $fc_impuesto_dr_part['cat_sat_factor_id'];
+        $datas_ins_p_part[$cat_sat_tipo_impuesto_id][$this->key_id] = $row_p_part_id;
+
+        return $datas_ins_p_part;
     }
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,
