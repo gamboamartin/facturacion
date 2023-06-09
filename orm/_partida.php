@@ -145,16 +145,12 @@ class _partida extends  _base{
         }
 
 
-        $sub_total_base = round(round($this->registro['valor_unitario'],4)
-            * round($this->registro['cantidad'],4),4);
-
-        $this->registro['sub_total_base'] = $sub_total_base;
-
-        $descuento = 0.0;
-        if(isset($this->registro['descuento'])){
-            $descuento = round($this->registro['descuento'],2);
+        $registro = $this->integra_calcula_subtotales(registro: $this->registro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error integrar subtotales', data: $registro);
         }
-        $this->registro['sub_total'] = $sub_total_base - $descuento;
+
+        $this->registro = $registro;
 
 
         $r_alta_bd = parent::alta_bd();
@@ -197,6 +193,21 @@ class _partida extends  _base{
             }
         }
 
+        $fc_registro_partida = $this->registro(registro_id: $r_alta_bd->registro_id, columnas_en_bruto: true, retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener partida', data: $fc_registro_partida);
+        }
+
+        $total = $fc_registro_partida->sub_total + $fc_registro_partida->total_traslados
+            - $fc_registro_partida->total_retenciones;
+
+        $row_partida_upd['total'] = $total;
+
+        $upd = $this->modifica_bd(registro: $row_partida_upd, id: $fc_registro_partida->id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al modificar', data: $upd);
+        }
+
         $regenera = $this->regenera_totales(fc_registro_partida: $fc_registro_partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al modificar entidad base', data: $regenera);
@@ -233,6 +244,22 @@ class _partida extends  _base{
         $data->regenera_sub_total_base = $regenera_sub_total_base;
         $data->regenera_sub_total = $regenera_sub_total;
         return $data;
+    }
+
+    private function integra_calcula_subtotales(array $registro): array
+    {
+        $sub_total_base = round(round($registro['valor_unitario'],4)
+            * round($this->registro['cantidad'],4),4);
+
+        $registro['sub_total_base'] = $sub_total_base;
+
+        $descuento = 0.0;
+        if(isset($registro['descuento'])){
+            $descuento = round($registro['descuento'],2);
+        }
+        $registro['sub_total'] = $sub_total_base - $descuento;
+
+        return $registro;
     }
 
 

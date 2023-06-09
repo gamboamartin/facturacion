@@ -606,7 +606,7 @@ class _transacciones_fc extends modelo
             $key_cantidad = $modelo_partida->tabla.'_cantidad';
             $key_descripcion = $modelo_partida->tabla.'_descripcion';
             $key_valor_unitario = $modelo_partida->tabla.'_valor_unitario';
-            $key_importe = $modelo_partida->tabla.'_importe';
+            $key_importe = $modelo_partida->tabla.'_sub_total';
             $key_descuento = $modelo_partida->tabla.'_descuento';
 
             $concepto = new stdClass();
@@ -690,8 +690,8 @@ class _transacciones_fc extends modelo
 
             $conceptos[] = $concepto;
 
-            $key_importe_total_traslado = $modelo_partida->tabla.'_importe_total_traslado';
-            $key_importe_total_retenido = $modelo_partida->tabla.'_importe_total_retenido';
+            $key_importe_total_traslado = $modelo_partida->tabla.'_total_traslados';
+            $key_importe_total_retenido = $modelo_partida->tabla.'_total_retenciones';
 
             $total_impuestos_trasladados += ($partida[$key_importe_total_traslado]);
             $total_impuestos_retenidos += ($partida[$key_importe_total_retenido]);

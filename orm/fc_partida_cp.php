@@ -19,14 +19,6 @@ class fc_partida_cp extends _partida
         $columnas_extra = array();
 
 
-
-        $columnas_extra['fc_partida_cp_importe'] = "$tabla.sub_total_base";
-        $columnas_extra['fc_partida_cp_importe_con_descuento'] = "$tabla.sub_total";
-        $columnas_extra['fc_partida_cp_importe_total_traslado'] = "$tabla.total_traslados";
-        $columnas_extra['fc_partida_cp_importe_total_retenido'] = "$tabla.total_retenciones";
-        $columnas_extra['fc_partida_cp_importe_total'] = "$tabla.sub_total 
-        + $tabla.total_traslados - $tabla.total_retenciones";
-
         $columnas_extra['fc_partida_cp_n_traslados'] = "(SELECT COUNT(*) FROM fc_traslado_cp 
         WHERE fc_traslado_cp.fc_partida_cp_id = fc_partida_cp.id)";
         $columnas_extra['fc_partida_cp_n_retenidos'] = "(SELECT COUNT(*) FROM fc_retenido_cp 
