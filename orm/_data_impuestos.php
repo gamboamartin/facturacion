@@ -52,6 +52,7 @@ class _data_impuestos extends _base{
             return $this->error->error(mensaje: 'Error obtener row_partida', data: $row_partida);
         }
 
+
         $keys = array('sub_total');
         $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row_partida);
         if(errores::$error){
@@ -91,6 +92,8 @@ class _data_impuestos extends _base{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener cat_sat_factor', data: $cat_sat_factor);
         }
+
+
         $keys = array('sub_total');
         $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row_partida);
         if(errores::$error){
@@ -331,6 +334,12 @@ class _data_impuestos extends _base{
         return true;
     }
 
+    /**
+     * Valida los elementos minimos necesarios para un a partida
+     * @param array $data Datos a validar
+     * @param string $name_modelo_partida Nombre dle modelo de la partida
+     * @return array
+     */
     private function validaciones(array $data, string $name_modelo_partida): array
     {
         $keys = array('descripcion','codigo');
@@ -339,8 +348,8 @@ class _data_impuestos extends _base{
             return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
         }
 
-
-        $keys = array($name_modelo_partida.'_id', 'cat_sat_tipo_factor_id', 'cat_sat_factor_id', 'cat_sat_tipo_impuesto_id');
+        $keys = array($name_modelo_partida.'_id', 'cat_sat_tipo_factor_id', 'cat_sat_factor_id',
+            'cat_sat_tipo_impuesto_id');
         $valida = $this->validacion->valida_ids(keys: $keys, registro: $data);
         if(errores::$error){
             return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
