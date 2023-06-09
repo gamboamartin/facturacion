@@ -46,28 +46,24 @@ class _data_impuestos extends _base{
         }
 
 
-        $cat_sat_factor = (new cat_sat_factor(link: $this->link))->registro(registro_id: $this->registro['cat_sat_factor_id'], retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error obtener cat_sat_factor', data: $cat_sat_factor);
-        }
-
-        $cat_sat_tipo_factor = (new cat_sat_tipo_factor(link: $this->link))->registro(registro_id: $this->registro['cat_sat_tipo_factor_id'], retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error obtener cat_sat_tipo_factor', data: $cat_sat_tipo_factor);
-        }
-
-        $row_partida = $this->modelo_partida->registro(registro_id: $this->registro[$this->modelo_partida->key_id], columnas_en_bruto: true, retorno_obj: true);
+        $row_partida = $this->modelo_partida->registro(registro_id: $this->registro[$this->modelo_partida->key_id],
+            columnas_en_bruto: true, retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener row_partida', data: $row_partida);
         }
 
-
-        $total = $this->calcula_total(cat_sat_factor: $cat_sat_factor,row_partida:  $row_partida);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error calcular total', data: $total);
+        $keys = array('sub_total');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row_partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error ejecutar valida', data: $valida);
         }
 
-        $this->registro['total'] = $total;
+        $registro = $this->integra_total(registro: $this->registro, row_partida: $row_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error integrar total', data: $registro);
+        }
+
+        $this->registro = $registro;
 
         $r_alta_bd =  parent::alta_bd();
         if (errores::$error) {
@@ -82,8 +78,25 @@ class _data_impuestos extends _base{
         return $r_alta_bd;
     }
 
-    private function calcula_total(stdClass $cat_sat_factor, stdClass $row_partida): float
+    /**
+     * Calcula el total para una partida de tipo impuesto
+     * @param int $cat_sat_factor_id
+     * @param stdClass $row_partida Partida
+     * @return float|array
+     */
+    private function calcula_total(int $cat_sat_factor_id, stdClass $row_partida): float|array
     {
+        $cat_sat_factor = (new cat_sat_factor(link: $this->link))->registro(
+            registro_id: $cat_sat_factor_id, retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener cat_sat_factor', data: $cat_sat_factor);
+        }
+        $keys = array('sub_total');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row_partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error ejecutar valida', data: $valida);
+        }
+
         return round($row_partida->sub_total * $cat_sat_factor->cat_sat_factor_factor,2);
     }
 
@@ -175,6 +188,23 @@ class _data_impuestos extends _base{
         $data->row_partida = $row_partida;
         return $data;
 
+    }
+
+    private function integra_total(array $registro, stdClass $row_partida){
+
+        $cat_sat_tipo_factor = (new cat_sat_tipo_factor(link: $this->link))->registro(
+            registro_id: $registro['cat_sat_tipo_factor_id'], retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener cat_sat_tipo_factor', data: $cat_sat_tipo_factor);
+        }
+
+        $total = $this->calcula_total(cat_sat_factor_id: $this->registro['cat_sat_factor_id'],row_partida:  $row_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error calcular total', data: $total);
+        }
+
+        $registro['total'] = $total;
+        return $registro;
     }
 
     private function key_total(): string
