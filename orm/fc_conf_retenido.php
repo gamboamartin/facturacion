@@ -77,6 +77,12 @@ class fc_conf_retenido extends _base {
 
         return $data;
     }
+
+    /**
+     * Obtiene las configuraciones de retenciones
+     * @param int $com_producto_id Producto en ejecucion
+     * @return array|stdClass|int
+     */
     public function get_configuraciones(int $com_producto_id): array|stdClass|int
     {
         $filtro['fc_conf_retenido.status'] = 'activo';

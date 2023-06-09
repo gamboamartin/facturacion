@@ -145,6 +145,7 @@ class _partida extends  _base{
         }
 
 
+
         $registro = $this->integra_calcula_subtotales(registro: $this->registro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error integrar subtotales', data: $registro);

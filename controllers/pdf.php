@@ -306,20 +306,12 @@ final class pdf
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_importe);
         }
 
-        $filtro['com_producto.id'] = $concepto['com_producto_id'];
-        $existe_tmp = (new com_tmp_prod_cs(link: $link))->existe(filtro: $filtro);
+
+        $concepto = (new _tmps())->com_tmp_prod_cs(link: $link,partida:  $concepto);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar si existe existe_tmp', data: $existe_tmp);
-        }
-        if($existe_tmp){
-            $r_com_tmp_prod_cs = (new com_tmp_prod_cs(link: $link))->filtro_and(filtro: $filtro);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener producto', data: $r_com_tmp_prod_cs);
-            }
-            $concepto['cat_sat_producto_codigo'] = $r_com_tmp_prod_cs->registros[0]['com_tmp_prod_cs_cat_sat_producto'];
+            return $this->error->error(mensaje: 'Error al obtener concepto tmp', data: $concepto);
         }
 
-        //print_r($concepto);exit;
 
 
         $body_td_1 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_codigo'], class: $class, propiedades: "colspan='2'");

@@ -40,22 +40,16 @@ class _html_factura{
 
     public function data_producto(PDO $link, string $name_entidad_partida, array $partida): string
     {
-        $filtro['com_producto.id'] = $partida['com_producto_id'];
-        $existe_tmp = (new com_tmp_prod_cs(link: $link))->existe(filtro: $filtro);
+
+
+        $partida = (new _tmps())->com_tmp_prod_cs(link: $link,partida:  $partida);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar si existe existe_tmp', data: $existe_tmp);
-        }
-        if($existe_tmp){
-            $r_com_tmp_prod_cs = (new com_tmp_prod_cs(link: $link))->filtro_and(filtro: $filtro);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener producto', data: $r_com_tmp_prod_cs);
-            }
-            $partida['cat_sat_producto_codigo'] = $r_com_tmp_prod_cs->registros[0]['com_tmp_prod_cs_cat_sat_producto'];
+            return $this->error->error(mensaje: 'Error al obtener partida tmp', data: $partida);
         }
 
         $key_cantidad = $name_entidad_partida.'_cantidad';
         $key_valor_unitario = $name_entidad_partida.'_valor_unitario';
-        $key_importe = $name_entidad_partida.'_importe';
+        $key_importe = $name_entidad_partida.'_sub_total';
         $key_descuento = $name_entidad_partida.'_descuento';
 
         return "

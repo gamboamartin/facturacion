@@ -40,17 +40,10 @@ class _html_complemento_pago{
 
     public function data_producto(PDO $link, array $partida): string
     {
-        $filtro['com_producto.id'] = $partida['com_producto_id'];
-        $existe_tmp = (new com_tmp_prod_cs(link: $link))->existe(filtro: $filtro);
+
+        $partida = (new _tmps())->com_tmp_prod_cs(link: $link,partida:  $partida);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar si existe existe_tmp', data: $existe_tmp);
-        }
-        if($existe_tmp){
-            $r_com_tmp_prod_cs = (new com_tmp_prod_cs(link: $link))->filtro_and(filtro: $filtro);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener producto', data: $r_com_tmp_prod_cs);
-            }
-            $partida['cat_sat_producto_codigo'] = $r_com_tmp_prod_cs->registros[0]['com_tmp_prod_cs_cat_sat_producto'];
+            return $this->error->error(mensaje: 'Error al obtener partida tmp', data: $partida);
         }
 
         return "
