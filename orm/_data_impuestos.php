@@ -81,7 +81,7 @@ class _data_impuestos extends _base{
 
         $total = 0.0;
         foreach ($rows_impuestos as $row_impuesto){
-            $total = round($row_impuesto[$this->tabla.'_total'],2);
+            $total += round($row_impuesto[$this->tabla.'_total'],2);
 
         }
 
@@ -142,7 +142,7 @@ class _data_impuestos extends _base{
 
         $total = 0.0;
         foreach ($rows_impuestos as $row_impuesto){
-            $total = round($row_impuesto[$this->tabla.'_total'],2);
+            $total += round($row_impuesto[$this->tabla.'_total'],2);
 
         }
 
