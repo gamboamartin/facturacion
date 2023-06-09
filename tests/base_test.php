@@ -2081,6 +2081,12 @@ class base_test{
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
+
+        $del = $this->del_fc_retenido_nc($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_partida_nc');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
@@ -2092,6 +2098,16 @@ class base_test{
     {
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_traslado_nc');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_retenido_nc(PDO $link): array
+    {
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_retenido_nc');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }

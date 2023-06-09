@@ -304,29 +304,36 @@ class _base_system_fc extends _base_system{
     private function buttons_base(): array|string
     {
         $button_fc_factura_relaciones =  $this->html->button_href(accion: 'relaciones', etiqueta: 'Asignar Relacion',
-            registro_id: $this->registro_id, seccion: $this->seccion, style: 'warning', cols: 3, params: array());
+            registro_id: $this->registro_id, seccion: $this->seccion, style: 'warning', cols: 2, params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_relaciones);
         }
 
         $button_fc_factura_timbra =  $this->html->button_href(accion: 'timbra_xml', etiqueta: 'Timbrar',
-            registro_id: $this->registro_id, seccion: $this->seccion, style: 'danger', cols: 3, params: array());
+            registro_id: $this->registro_id, seccion: $this->seccion, style: 'danger', cols: 2, params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_timbra);
         }
         $button_fc_factura_correo =  $this->html->button_href(accion: 'correo', etiqueta: 'Agregar Correos',
-            registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 3, params: array());
+            registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 2, params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_correo);
         }
 
         $button_fc_factura_envia =  $this->html->button_href(accion: 'envia_cfdi', etiqueta: 'Envia Por Correo',
-            registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 3, params: array());
+            registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 2, params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_envia);
         }
 
-        $buttons = $button_fc_factura_relaciones.$button_fc_factura_timbra.$button_fc_factura_correo.$button_fc_factura_envia;
+        $button_fc_factura_exportar_documentos =  $this->html->button_href(accion: 'exportar_documentos', etiqueta: 'Descargar',
+            registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 2, params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_exportar_documentos);
+        }
+
+        $buttons = $button_fc_factura_relaciones.$button_fc_factura_timbra.$button_fc_factura_correo.
+            $button_fc_factura_envia.$button_fc_factura_exportar_documentos;
 
         return "<div class='col-md-12 buttons-form'>$buttons</div>";
 
@@ -2015,8 +2022,6 @@ class _base_system_fc extends _base_system{
             die('Error');
         }
         $this->inputs->observaciones = $observaciones;
-
-
 
         $filtro = array();
         $filtro[$this->modelo_entidad->key_filtro_id] = $this->registro_id;
