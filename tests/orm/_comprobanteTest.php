@@ -134,7 +134,7 @@ class _comprobanteTest extends test
             exit;
         }
 
-        $resultado = $comp->comprobante(row_entidad: $factura, name_entidad: 'fc_factura');
+        $resultado = $comp->comprobante(name_entidad: 'fc_factura', row_entidad: $factura);
 
 
         $this->assertIsArray($resultado);

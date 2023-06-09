@@ -336,8 +336,6 @@ class _partida extends  _base{
     public function elimina_bd(int $id): array|stdClass
     {
 
-
-
         $init = $this->init_elimina_bd(id: $id,modelo_entidad:  $this->modelo_entidad,
             modelo_etapa:  $this->modelo_etapa,modelo_predial:  $this->modelo_predial,
             modelo_retencion:  $this->modelo_retencion,modelo_traslado:  $this->modelo_traslado);
@@ -355,7 +353,6 @@ class _partida extends  _base{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al eliminar partida', data: $r_elimina_bd);
         }
-
 
 
         $regenera = $this->regenera_totales(fc_registro_partida: $fc_registro_partida);
@@ -778,6 +775,20 @@ class _partida extends  _base{
 
 
         $upd = parent::modifica_bd(registro: $registro_stb_upd,id:  $id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al actualizar sub total base', data: $upd);
+        }
+
+        $fc_registro_partida = $this->registro(registro_id: $id, columnas_en_bruto: true, retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener partida', data: $fc_registro_partida);
+        }
+
+        $total = $fc_registro_partida->sub_total + $fc_registro_partida->total_traslados
+            - $fc_registro_partida->total_retenciones;
+
+        $row_partida_upd['total'] = $total;
+        $upd = parent::modifica_bd(registro: $row_partida_upd,id:  $id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al actualizar sub total base', data: $upd);
         }
