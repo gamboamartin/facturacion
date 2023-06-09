@@ -61,7 +61,11 @@ class _data_impuestos extends _base{
             return $this->error->error(mensaje: 'Error obtener row_partida', data: $row_partida);
         }
 
-        $total = $row_partida->sub_total * $cat_sat_factor->cat_sat_factor_factor;
+
+        $total = $this->calcula_total(cat_sat_factor: $cat_sat_factor,row_partida:  $row_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error calcular total', data: $total);
+        }
 
         $this->registro['total'] = $total;
 
@@ -70,37 +74,17 @@ class _data_impuestos extends _base{
             return $this->error->error(mensaje: 'Error registrar traslados', data: $r_alta_bd);
         }
 
-
-        $filtro[$this->modelo_partida->key_filtro_id] = $row_partida->id;
-        $r_data_impuestos = $this->filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error obtener r_data_impuestos', data: $r_data_impuestos);
-        }
-
-        $rows_impuestos = $r_data_impuestos->registros;
-
-        $total = 0.0;
-        foreach ($rows_impuestos as $row_impuesto){
-            $total += round($row_impuesto[$this->tabla.'_total'],2);
-
-        }
-
-        $key_total = '';
-
-        if($this->tabla === 'fc_traslado' || $this->tabla === 'fc_traslado_nc' || $this->tabla === 'fc_traslado_cp'){
-            $key_total = 'total_traslados';
-        }
-        if($this->tabla === 'fc_retenido' || $this->tabla === 'fc_retenido_nc' || $this->tabla === 'fc_retenido_cp'){
-            $key_total = 'total_retenciones';
-        }
-        $row_partida_upd[$key_total] = $total;
-
-        $upd_partida = $this->modelo_partida->modifica_bd(registro: $row_partida_upd,id:  $row_partida->id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error modificar', data: $upd_partida);
+        $upd_partida = $this->upd_partida(key_filtro_id: $this->modelo_partida->key_filtro_id, row_partida_id: $row_partida->id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error ejecutar upd_partida', data: $upd_partida);
         }
 
         return $r_alta_bd;
+    }
+
+    private function calcula_total(stdClass $cat_sat_factor, stdClass $row_partida): float
+    {
+        return round($row_partida->sub_total * $cat_sat_factor->cat_sat_factor_factor,2);
     }
 
     public function elimina_bd(int $id): array|stdClass
@@ -132,34 +116,11 @@ class _data_impuestos extends _base{
             return $this->error->error(mensaje: 'Error al eliminar', data: $r_elimina_bd);
         }
 
-        $filtro[$this->modelo_partida->key_filtro_id] = $row_partida->id;
-        $r_data_impuestos = $this->filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error obtener r_data_impuestos', data: $r_data_impuestos);
+        $upd_partida = $this->upd_partida(key_filtro_id: $this->modelo_partida->key_filtro_id, row_partida_id: $row_partida->id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error ejecutar upd_partida', data: $upd_partida);
         }
 
-        $rows_impuestos = $r_data_impuestos->registros;
-
-        $total = 0.0;
-        foreach ($rows_impuestos as $row_impuesto){
-            $total += round($row_impuesto[$this->tabla.'_total'],2);
-
-        }
-
-        $key_total = '';
-
-        if($this->tabla === 'fc_traslado' || $this->tabla === 'fc_traslado_nc' || $this->tabla === 'fc_traslado_cp'){
-            $key_total = 'total_traslados';
-        }
-        if($this->tabla === 'fc_retenido' || $this->tabla === 'fc_retenido_nc' || $this->tabla === 'fc_retenido_cp'){
-            $key_total = 'total_retenciones';
-        }
-        $row_partida_upd[$key_total] = $total;
-
-        $upd_partida = $this->modelo_partida->modifica_bd(registro: $row_partida_upd,id:  $row_partida->id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error modificar', data: $upd_partida);
-        }
         return $r_elimina_bd;
 
     }
@@ -203,6 +164,18 @@ class _data_impuestos extends _base{
         return $registro;
     }
 
+    private function key_total(): string
+    {
+        $key_total = '';
+        if($this->tabla === 'fc_traslado' || $this->tabla === 'fc_traslado_nc' || $this->tabla === 'fc_traslado_cp'){
+            $key_total = 'total_traslados';
+        }
+        if($this->tabla === 'fc_retenido' || $this->tabla === 'fc_retenido_nc' || $this->tabla === 'fc_retenido_cp'){
+            $key_total = 'total_retenciones';
+        }
+        return $key_total;
+    }
+
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,
                                 array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
@@ -243,6 +216,57 @@ class _data_impuestos extends _base{
         return $r_modifica_bd;
     }
 
+    private function row_partida_upd(string $key_filtro_id, int $row_partida_id){
+        $total = $this->total(key_filtro_id: $key_filtro_id, row_partida_id: $row_partida_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error obtener total', data: $total);
+        }
+
+        $key_total = $this->key_total();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error obtener key_total', data: $key_total);
+        }
+
+        $row_partida_upd[$key_total] = $total;
+        return $row_partida_upd;
+    }
+
+    /**
+     * Obtiene el total de una partida para impuestos
+     * @param string $key_filtro_id key de filtro de entidad
+     * @param int $row_partida_id Registro id en proceso
+     * @return array|float
+     */
+    private function total(string $key_filtro_id, int $row_partida_id): float|array
+    {
+        $filtro[$key_filtro_id] = $row_partida_id;
+        $r_data_impuestos = $this->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener r_data_impuestos', data: $r_data_impuestos);
+        }
+
+        $rows_impuestos = $r_data_impuestos->registros;
+
+        $total = 0.0;
+        foreach ($rows_impuestos as $row_impuesto){
+            $total += round($row_impuesto[$this->tabla.'_total'],2);
+
+        }
+        return $total;
+    }
+
+    private function upd_partida(string $key_filtro_id, int $row_partida_id){
+        $row_partida_upd = $this->row_partida_upd(key_filtro_id: $key_filtro_id, row_partida_id: $row_partida_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error obtener row_partida_upd', data: $row_partida_upd);
+        }
+
+        $upd_partida = $this->modelo_partida->modifica_bd(registro: $row_partida_upd,id:  $row_partida_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error modificar', data: $upd_partida);
+        }
+        return $upd_partida;
+    }
 
 
     private function validaciones(array $data, string $name_modelo_partida): array
