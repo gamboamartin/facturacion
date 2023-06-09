@@ -285,7 +285,7 @@ final class pdf
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_descuento);
         }
 
-        $fc_partida_importe = $this->fc_partida_double(concepto: $concepto,key: $name_entidad_partida.'_importe');
+        $fc_partida_importe = $this->fc_partida_double(concepto: $concepto,key: $name_entidad_partida.'_sub_total');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_importe);
         }
@@ -940,6 +940,18 @@ final class pdf
     }
 
     private function fc_partida_double(array $concepto, string $key){
+
+        $key = trim($key);
+        if($key === ''){
+            return $this->error->error(mensaje: 'Error key esta vacio',data:  $key);
+        }
+
+        $keys = array($key);
+        $valida = $this->valida->valida_existencia_keys(keys: $keys,registro:  $concepto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar concepto',data:  $valida);
+        }
+
         $fc_monto = $this->limpia_monto(monto: $concepto[$key]);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_monto);
@@ -1105,6 +1117,11 @@ final class pdf
         return $tr;
     }
 
+    /**
+     * Inicializa el descuento
+     * @param array $concepto Concepto en ejecucion
+     * @return array
+     */
     private function keys_no_ob(array $concepto): array
     {
         $keys_no_ob = array('fc_partida_descuento');
