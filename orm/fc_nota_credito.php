@@ -61,11 +61,8 @@ class fc_nota_credito extends _transacciones_fc
 
 
 
-        $fc_nota_credito_traslados = "(SELECT SUM(fc_partida_nc.total_traslados) FROM fc_partida_nc WHERE fc_partida_nc.fc_nota_credito_id = fc_nota_credito.id)";
-        $fc_nota_credito_retenciones = "(SELECT SUM(fc_partida_nc.total_retenciones) FROM fc_partida_nc WHERE fc_partida_nc.fc_nota_credito_id = fc_nota_credito.id)";
 
-
-        $fc_nota_credito_total = "ROUND(IFNULL($tabla.sub_total,0)+IFNULL(ROUND($fc_nota_credito_traslados,2),0)-IFNULL(ROUND($fc_nota_credito_retenciones,2),0),2)";
+        $fc_nota_credito_total = "ROUND(IFNULL($tabla.sub_total,0)+IFNULL(ROUND($tabla.total_traslados,2),0)-IFNULL(ROUND($tabla.total_retenciones,2),0),2)";
 
 
         $fc_nota_credito_uuid = "(SELECT IFNULL(fc_cfdi_sellado_nc.uuid,'') FROM fc_cfdi_sellado_nc WHERE fc_cfdi_sellado_nc.fc_nota_credito_id = fc_nota_credito.id)";
@@ -78,12 +75,9 @@ class fc_nota_credito extends _transacciones_fc
 
         $columnas_extra['fc_nota_credito_descuento'] = "IFNULL($tabla.total_descuento,0)";
 
-        $columnas_extra['fc_nota_credito_traslados'] = "IFNULL($fc_nota_credito_traslados,0)";
-        $columnas_extra['fc_nota_credito_retenciones'] = "IFNULL($fc_nota_credito_retenciones,0)";
         $columnas_extra['fc_nota_credito_total'] = "IFNULL($fc_nota_credito_total,0)";
         $columnas_extra['fc_nota_credito_uuid'] = "IFNULL($fc_nota_credito_uuid,'SIN UUID')";
         $columnas_extra['fc_nota_credito_etapa'] = "$fc_nota_credito_etapa";
-
 
 
 

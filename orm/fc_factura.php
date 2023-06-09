@@ -60,11 +60,9 @@ class fc_factura extends _transacciones_fc
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
 
-        $fc_factura_traslados = "(SELECT SUM(fc_partida.total_traslados) FROM fc_partida WHERE fc_partida.fc_factura_id = fc_factura.id)";
-        $fc_factura_retenciones = "(SELECT SUM(fc_partida.total_retenciones) FROM fc_partida WHERE fc_partida.fc_factura_id = fc_factura.id)";
 
 
-        $fc_factura_total = "ROUND(IFNULL($tabla.sub_total,0)+IFNULL(ROUND($fc_factura_traslados,2),0)-IFNULL(ROUND($fc_factura_retenciones,2),0),2)";
+        $fc_factura_total = "ROUND(IFNULL($tabla.sub_total,0)+IFNULL(ROUND($tabla.total_traslados,2),0)-IFNULL(ROUND($tabla.total_retenciones,2),0),2)";
 
 
         $fc_factura_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_factura_id = fc_factura.id)";
@@ -76,11 +74,6 @@ class fc_factura extends _transacciones_fc
 
 
 
-        $columnas_extra['fc_factura_descuento'] = "IFNULL($tabla.total_descuento,0)";
-
-
-        $columnas_extra['fc_factura_traslados'] = "IFNULL($fc_factura_traslados,0)";
-        $columnas_extra['fc_factura_retenciones'] = "IFNULL($fc_factura_retenciones,0)";
         $columnas_extra['fc_factura_total'] = "IFNULL($fc_factura_total,0)";
         $columnas_extra['fc_factura_uuid'] = "IFNULL($fc_factura_uuid,'SIN UUID')";
         $columnas_extra['fc_factura_etapa'] = "$fc_factura_etapa";

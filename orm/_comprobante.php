@@ -28,7 +28,7 @@ class _comprobante{
 
         $column_sub_total = $name_entidad.'_sub_total';
         $column_total = $name_entidad.'_total';
-        $column_descuento = $name_entidad.'_descuento';
+        $column_descuento = $name_entidad.'_total_descuento';
         $column_exportacion = $name_entidad.'_exportacion';
         $column_folio = $name_entidad.'_folio';
         $column_fecha = $name_entidad.'_fecha';

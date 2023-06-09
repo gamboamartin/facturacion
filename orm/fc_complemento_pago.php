@@ -66,11 +66,8 @@ class fc_complemento_pago extends _transacciones_fc
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
 
-        $fc_complemento_pago_traslados = "(SELECT SUM(fc_partida_cp.total_traslados) FROM fc_partida_cp WHERE fc_partida_cp.fc_complemento_pago_id = fc_complemento_pago.id)";
-        $fc_complemento_pago_retenciones = "(SELECT SUM(fc_partida_cp.total_retenciones) FROM fc_partida_cp WHERE fc_partida_cp.fc_complemento_pago_id = fc_complemento_pago.id)";
 
-
-        $fc_complemento_pago_total = "ROUND(IFNULL($tabla.sub_total,0)+IFNULL(ROUND($fc_complemento_pago_traslados,2),0)-IFNULL(ROUND($fc_complemento_pago_retenciones,2),0),2)";
+        $fc_complemento_pago_total = "ROUND(IFNULL($tabla.sub_total,0)+IFNULL(ROUND($tabla.total_traslados,2),0)-IFNULL(ROUND($tabla.total_retenciones,2),0),2)";
 
         $fc_complemento_pago_uuid = "(SELECT IFNULL(fc_cfdi_sellado_cp.uuid,'') FROM fc_cfdi_sellado_cp WHERE fc_cfdi_sellado_cp.fc_complemento_pago_id = fc_complemento_pago.id)";
 
@@ -82,9 +79,6 @@ class fc_complemento_pago extends _transacciones_fc
 
         $columnas_extra['fc_complemento_pago_descuento'] = "$tabla.total_descuento";
 
-
-        $columnas_extra['fc_complemento_pago_traslados'] = "IFNULL($fc_complemento_pago_traslados,0)";
-        $columnas_extra['fc_complemento_pago_retenciones'] = "IFNULL($fc_complemento_pago_retenciones,0)";
         $columnas_extra['fc_complemento_pago_total'] = "IFNULL($fc_complemento_pago_total,0)";
         $columnas_extra['fc_complemento_pago_uuid'] = "IFNULL($fc_complemento_pago_uuid,'SIN UUID')";
         $columnas_extra['fc_complemento_pago_etapa'] = "$fc_complemento_pago_etapa";

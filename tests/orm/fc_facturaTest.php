@@ -288,8 +288,8 @@ class fc_facturaTest extends test {
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(5099, $resultado['fc_factura_sub_total_base']);
         $this->assertEquals(5099, $resultado['fc_factura_sub_total']);
-        $this->assertEquals(815.84, $resultado['fc_factura_traslados']);
-        $this->assertEquals(63.75, round($resultado['fc_factura_retenciones'],2));
+        $this->assertEquals(815.84, $resultado['fc_factura_total_traslados']);
+        $this->assertEquals(63.75, round($resultado['fc_factura_total_retenciones'],2));
         $this->assertEquals(5851.09, $resultado['fc_factura_total']);
 
 
@@ -313,6 +313,8 @@ class fc_facturaTest extends test {
         $fc_factura_id = 1;
 
         $resultado = $modelo->get_factura_descuento($fc_factura_id);
+
+
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0,$resultado);

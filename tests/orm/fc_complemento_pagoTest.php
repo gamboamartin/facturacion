@@ -147,7 +147,7 @@ class fc_complemento_pagoTest extends test {
         $row_entidad = array();
         $row_entidad['fc_complemento_pago_sub_total'] = '1';
         $row_entidad['fc_complemento_pago_total'] = '1';
-        $row_entidad['fc_complemento_pago_descuento'] = '1';
+        $row_entidad['fc_complemento_pago_total_descuento'] = '1';
         $row_entidad['dp_cp_descripcion'] = '1';
         $row_entidad['cat_sat_tipo_de_comprobante_codigo'] = '1';
         $row_entidad['cat_sat_moneda_codigo'] = '1';
@@ -167,6 +167,7 @@ class fc_complemento_pagoTest extends test {
         $row_entidad['total_impuestos_retenidos'] = '1';
         $resultado = $modelo->data_factura($row_entidad);
 
+       // print_r($resultado);exit;
 
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);

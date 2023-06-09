@@ -1752,7 +1752,7 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
         }
 
-        $key_descuento = $this->tabla.'_descuento';
+        $key_descuento = $this->tabla.'_total_descuento';
 
         $fc_factura = $this->registro(registro_id: $registro_id, columnas: array($key_descuento),
             retorno_obj: true);
