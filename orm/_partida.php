@@ -903,16 +903,17 @@ class _partida extends  _base{
     }
 
     /**
-     * @param html_controler $html
-     * @param _transacciones_fc $modelo_entidad
-     * @param _data_impuestos $modelo_retencion
-     * @param _data_impuestos $modelo_traslado
-     * @param int $registro_entidad_id
-     * @param $hijo
+     * Obtiene las partidas de una entidad de tipo factura
+     * @param html_controler $html Html de template
+     * @param _transacciones_fc $modelo_entidad Modelo de tipo fc_factura, fc_complemento_pago
+     * @param _data_impuestos $modelo_retencion Modelo de tipo retenido
+     * @param _data_impuestos $modelo_traslado Modelo de tipo traslado
+     * @param int $registro_entidad_id Identificador de factura o complemento
+     * @param array $hijo  datos relacionados de partidas
      * @return array|stdClass
      */
     final public function partidas( html_controler $html, _transacciones_fc $modelo_entidad,_data_impuestos $modelo_retencion,
-                              _data_impuestos $modelo_traslado, int $registro_entidad_id, $hijo = array()): array|stdClass
+                              _data_impuestos $modelo_traslado, int $registro_entidad_id,array $hijo = array()): array|stdClass
     {
         if ($registro_entidad_id <= 0) {
             return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0', data: $registro_entidad_id);

@@ -76,6 +76,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     public array $relaciones = array();
 
     public float $saldo_total = 0.0;
+    public bool $tiene_pago = false;
     public array$complementos_pago_cliente = array();
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass()){
@@ -597,6 +598,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $fc_pagos = $r_fc_pago->registros;
 
 
+
         foreach ($fc_pagos as $indice_fc_pagos=>$fc_pago){
             $filtro = array();
             $filtro['fc_pago.id'] = $fc_pago['fc_pago_id'];
@@ -615,6 +617,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             $fc_pago_pagos = $r_fc_pago_pago->registros;
 
             foreach ($fc_pago_pagos as $indice_pago_pago=>$fc_pago_pago){
+                $this->tiene_pago = true;
                 $fc_doctos_relacionados = $this->genera_fc_doctos_relacionados(
                     fc_docto_relacionado_modelo: $fc_docto_relacionado_modelo,fc_factura_modelo:  $fc_factura_modelo,
                     fc_pago_pago:  $fc_pago_pago);

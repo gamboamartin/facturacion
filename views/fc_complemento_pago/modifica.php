@@ -43,6 +43,8 @@
         <?php echo $controlador->buttons_base; ?>
     </div>
 
+
+    <?php if(!$controlador->tiene_pago) { ?>
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
@@ -70,52 +72,23 @@
 
         </div>
     </div>
+    <?php } ?>
+
 
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
                 <div class="widget  widget-box box-container form-main widget-form-cart" id="form">
-                    <h2>Pagos</h2>
+                    <h2>Pago</h2>
                     <div class="table table-responsive">
                         <form method="post" action="<?php echo $controlador->link_fc_docto_relacionado_alta_bd; ?>" class="form-additional">
                             <table class="table table-striped">
-                                <thead>
-                                <tr>
-                                    <th>Id</th>
-                                </tr>
-                                </thead>
                                 <tbody>
                                     <?php foreach ($controlador->fc_pagos as $fc_pago){
                                         $fc_pago_totales = $fc_pago['fc_pago_totales'];
                                         $fc_pago_pagos = $fc_pago['fc_pago_pagos'];
                                         ?>
-                                        <tr>
-                                            <td><?php echo $fc_pago['fc_pago_id'] ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <h3>Totales</h3>
-                                                <div class="table table-responsive">
-                                                    <table class="table table-striped">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Id</th>
-                                                                <th>Monto Total</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <?php foreach ($fc_pago_totales as $fc_pago_total){ ?>
-                                                            <tr>
-                                                                <td><?php echo $fc_pago_total['fc_pago_total_id'] ?></td>
-                                                                <td><?php echo $fc_pago_total['fc_pago_total_monto_total_pagos'] ?></td>
-                                                            </tr>
 
-                                                        <?php }?>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </td>
-                                        </tr>
                                         <tr>
                                             <td>
                                                 <h3>Detalle</h3>
@@ -124,6 +97,7 @@
                                                         <thead>
                                                         <tr>
                                                             <th>Id</th>
+                                                            <th>Fecha Pago</th>
                                                             <th>Forma Pago</th>
                                                             <th>Moneda</th>
                                                             <th>Tipo Cambio</th>
@@ -136,13 +110,14 @@
                                                             ?>
                                                             <tr>
                                                                 <td><?php echo $fc_pago_pago['fc_pago_pago_id'] ?></td>
+                                                                <td><?php echo $fc_pago_pago['fc_pago_pago_fecha_pago'] ?></td>
                                                                 <td><?php echo $fc_pago_pago['cat_sat_forma_pago_codigo'] ?></td>
                                                                 <td><?php echo $fc_pago_pago['cat_sat_moneda_codigo'] ?></td>
                                                                 <td><?php echo $fc_pago_pago['com_tipo_cambio_monto'] ?></td>
                                                                 <td><?php echo $fc_pago_pago['fc_pago_pago_monto'] ?></td>
                                                             </tr>
                                                             <tr>
-                                                                <td colspan="5">
+                                                                <td colspan="6">
                                                                     <h4>Documento</h4>
                                                                     <div class="table table-responsive">
                                                                         <table class="table table-striped">
