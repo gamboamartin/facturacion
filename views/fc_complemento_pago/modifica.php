@@ -155,7 +155,7 @@
                                                             </tr>
 
                                                             <tr>
-                                                                <td colspan="5">
+                                                                <td colspan="6">
                                                                     <h4>Documentos Relacionados</h4>
                                                                     <div class="table table-responsive">
                                                                         <table class="table table-striped">

@@ -27,8 +27,4 @@ class fc_traslado_p extends _p {
     }
 
 
-
-
-
-
 }

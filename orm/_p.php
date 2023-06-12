@@ -10,7 +10,7 @@ use stdClass;
 class _p extends _modelo_parent{
 
     protected _modelo_parent $modelo_dr_part;
-    protected _modelo_parent $modelo_p_part;
+    protected _p_part $modelo_p_part;
 
 
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
@@ -117,9 +117,10 @@ class _p extends _modelo_parent{
         }
 
         foreach ($datas_ins_p_part as $data_ins_p_part){
+
             $r_alta_fc_impuesto_p_part = $this->modelo_p_part->alta_registro(registro: $data_ins_p_part);
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al insertar fc_traslado_dr_part', data: $r_alta_fc_impuesto_p_part);
+                return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_fc_impuesto_p_part);
             }
             $r_altas_fc_impuesto_p_part[] = $r_alta_fc_impuesto_p_part;
         }

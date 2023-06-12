@@ -13,7 +13,14 @@ class _tmps{
         $this->error = new errores();
     }
 
-    final public function com_tmp_prod_cs(PDO $link, array $partida){
+    /**
+     * Verifica si existe un producto de tipo temporal
+     * @param PDO $link Conexion a la base de datos
+     * @param array $partida Partida en proceso
+     * @return array
+     */
+    final public function com_tmp_prod_cs(PDO $link, array $partida): array
+    {
         $filtro['com_producto.id'] = $partida['com_producto_id'];
         $existe_tmp = (new com_tmp_prod_cs(link: $link))->existe(filtro: $filtro);
         if(errores::$error){
