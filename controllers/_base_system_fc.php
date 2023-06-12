@@ -576,14 +576,14 @@ class _base_system_fc extends _base_system{
     {
 
         $columns[$this->modelo->tabla."_folio"]["titulo"] = "Fol";
-        $columns["org_empresa_rfc"]["titulo"] = "RFC";
-        $columns["com_cliente_rfc"]["titulo"] = "Cte";
+        $columns["com_cliente_razon_social"]["titulo"] = "Cliente";
+        $columns["com_cliente_rfc"]["titulo"] = "RFC";
         $columns[$this->modelo->tabla."_fecha"]["titulo"] = "Fecha";
         $columns[$this->modelo->tabla."_total"]["titulo"] = "Total";
         $columns[$this->modelo->tabla."_uuid"]["titulo"] = "UUID";
         $columns[$this->modelo->tabla."_etapa"]["titulo"] = "Estatus";
 
-        $filtro = array($this->modelo->tabla.".folio","org_empresa.rfc",
+        $filtro = array($this->modelo->tabla.".folio","com_cliente.razon_social",
             "com_cliente.rfc",$this->modelo->tabla.'.fecha',$this->modelo->tabla.'_etapa');
 
         $datatables = new stdClass();

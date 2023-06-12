@@ -14,10 +14,10 @@ class fc_pago extends _modelo_parent{
         $tabla = 'fc_pago';
         $columnas = array($tabla=>false,'fc_complemento_pago'=>$tabla);
         $campos_obligatorios = array();
-
+        $no_duplicados[] = 'fc_complemento_pago_id';
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas);
+            columnas: $columnas, no_duplicados: $no_duplicados);
 
         $this->NAMESPACE = __NAMESPACE__;
         $this->etiqueta = 'Pago';
@@ -50,10 +50,23 @@ class fc_pago extends _modelo_parent{
     /**
      * Genera la descripcion basada en version e  identificador de complemento
      * @param array $registro Registro en proceso
-     * @return string
+     * @return string|array
+     * @version 10.73.3
      */
-    private function descripcion(array $registro): string
+    private function descripcion(array $registro): string|array
     {
+        $keys = array('version','fc_complemento_pago_id');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $valida);
+        }
+
+        $keys = array('fc_complemento_pago_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $valida);
+        }
+
         $descripcion = $registro['version'];
         $descripcion .= ' '.$registro['fc_complemento_pago_id'];
         return $descripcion;

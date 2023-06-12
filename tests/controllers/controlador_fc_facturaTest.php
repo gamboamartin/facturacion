@@ -84,6 +84,19 @@ class controlador_fc_facturaTest extends test {
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
+        $del = (new base_test())->del_adm_seccion(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al del', $del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_adm_seccion(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar', $alta);
+            print_r($error);
+            exit;
+        }
 
         $ctl = new controlador_fc_factura(link: $this->link, paths_conf: $this->paths_conf);
         //$ctl = new liberator($ctl);
@@ -96,10 +109,10 @@ class controlador_fc_facturaTest extends test {
         //$this->assertEquals('Id',$resultado->columns['fc_factura_id']['titulo']);
         //$this->assertEquals('Serie',$resultado->columns['fc_factura_serie']['titulo']);
         $this->assertEquals('Fol',$resultado->columns['fc_factura_folio']['titulo']);
-        $this->assertEquals('RFC',$resultado->columns['org_empresa_rfc']['titulo']);
-        $this->assertEquals('Cte',$resultado->columns['com_cliente_rfc']['titulo']);
+        $this->assertEquals('Cliente',$resultado->columns['com_cliente_razon_social']['titulo']);
+        $this->assertEquals('RFC',$resultado->columns['com_cliente_rfc']['titulo']);
         $this->assertEquals('fc_factura.folio',$resultado->filtro[0]);
-        $this->assertEquals('org_empresa.rfc',$resultado->filtro[1]);
+        $this->assertEquals('com_cliente.razon_social',$resultado->filtro[1]);
         $this->assertEquals('com_cliente.rfc',$resultado->filtro[2]);
         $this->assertEquals('fc_factura.fecha',$resultado->filtro[3]);
 

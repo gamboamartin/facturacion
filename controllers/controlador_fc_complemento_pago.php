@@ -122,6 +122,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
     }
 
+
     public function alta_partida_bd(bool $header, bool $ws = false)
     {
         $this->modelo_entidad = $this->modelo;
