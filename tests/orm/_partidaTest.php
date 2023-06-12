@@ -179,6 +179,30 @@ class _partidaTest extends test
 
     }
 
+    public function test_integra_buttons_partida(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida_nc(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $filtro = array();
+        $hijo = array();
+        $html = new html();
+        $html = new html_controler($html);
+        $name_modelo_entidad = '';
+        $registro_entidad_id = -1;
+
+        $resultado = $modelo->integra_buttons_partida($filtro, $hijo, $html, $name_modelo_entidad, $registro_entidad_id);
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+
+        errores::$error = false;
+    }
+
     public function test_integra_relacionado(): void
     {
         errores::$error = false;

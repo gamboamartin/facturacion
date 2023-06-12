@@ -74,6 +74,8 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
 
     public array $relaciones = array();
+
+    public float $saldo_total = 0.0;
     public array$complementos_pago_cliente = array();
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass()){
@@ -182,9 +184,47 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         return $r_template;
     }
 
-    private function data_modifica(cat_sat_forma_pago_html $cat_sat_forma_pago_html,
-                                   fc_complemento_pago_html $fc_complemento_pago_html): array|stdClass
+    private function data_docto_relacionado(array $fc_docto_relacionado, fc_factura $fc_factura_modelo,
+                                            int $registro_id, string $tabla): array|stdClass
     {
+        $fc_factura = $fc_factura_modelo->registro(registro_id: $fc_docto_relacionado['fc_factura_id']);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener fc_factura',data:  $fc_factura);
+        }
+
+        $montos = $this->montos(fc_docto_relacionado: $fc_docto_relacionado,fc_factura_modelo:  $fc_factura_modelo);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener montos',data:  $montos);
+        }
+
+        $params = $this->params_link_elimina(registro_id: $registro_id,tabla:  $tabla);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener params', data:  $params);
+        }
+
+        $link_elimina_bd = $this->html->button_href(accion: 'elimina_bd',etiqueta: 'Elimina',
+            registro_id:  $fc_docto_relacionado['fc_docto_relacionado_id'],seccion: 'fc_docto_relacionado',
+            style: 'danger', params: $params);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener link_elimina_bd',data:  $link_elimina_bd);
+        }
+
+        $data = new stdClass();
+        $data->fc_factura = $fc_factura;
+        $data->montos = $montos;
+        $data->params = $params;
+        $data->link_elimina_bd = $link_elimina_bd;
+
+        return $data;
+
+    }
+
+    private function data_modifica(float $saldo_total): array|stdClass
+    {
+
+        $cat_sat_forma_pago_html = (new cat_sat_forma_pago_html(html: $this->html_base));
+        $fc_complemento_pago_html = (new fc_complemento_pago_html(html: $this->html_base));
+
         $value_fecha_pago = date('Y-m-d H:i:s');
         $fecha_pago = $fc_complemento_pago_html->input_fecha(cols: 6,
             row_upd: new stdClass(), value_vacio: false, name: 'fecha_pago', value: $value_fecha_pago,
@@ -196,7 +236,8 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
         $this->inputs->fecha_pago = $fecha_pago;
 
-        $monto = $fc_complemento_pago_html->input_monto(cols: 6,row_upd: new stdClass(),value_vacio: false);
+        $monto = $fc_complemento_pago_html->input_monto(cols: 6,row_upd: new stdClass(),value_vacio: false,
+            value: $saldo_total);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar monto',data:  $monto);
         }
@@ -253,6 +294,39 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $this->inputs->id_retorno = $id_retorno;
 
         return $this->inputs;
+    }
+
+    private function data_saldos_fc(int $fc_complemento_pago_id): array|stdClass
+    {
+
+        $fc_complemento_pago = (new fc_complemento_pago(link: $this->link))->registro(registro_id: $fc_complemento_pago_id);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener fc_complemento_pago',data:  $fc_complemento_pago);
+        }
+
+        $fc_facturas = $this->fc_facturas(fc_complemento_pago: $fc_complemento_pago);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener fc_facturas',data:  $fc_facturas);
+        }
+
+        $saldos = new stdClass();
+        $saldos->saldo_total = 0.0;
+        foreach ($fc_facturas as $indice_fc_factura=>$fc_factura){
+            $saldos = $this->saldos_factura(fc_factura: $fc_factura, saldo_total: $saldos->saldo_total);
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error al obtener saldos',data:  $saldos);
+            }
+
+            $fc_facturas[$indice_fc_factura]['fc_factura_monto_pagado'] = $saldos->monto_pagado;
+            $fc_facturas[$indice_fc_factura]['fc_factura_saldo'] = $saldos->saldo;
+
+            if($saldos->saldo <= 0.0) {
+                unset($fc_facturas[$indice_fc_factura]);
+            }
+        }
+
+        $saldos->fc_facturas = $fc_facturas;
+        return $saldos;
     }
 
     public function descarga_xml(bool $header, bool $ws = false)
@@ -373,6 +447,17 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
     }
 
+    private function fc_doctos_relacionados(array $fc_doctos_relacionados, array $fc_factura, float $monto_pagado,
+                                            int $indice_fc_doctos_relacionados, string $link_elimina_bd, float $saldo): array
+    {
+        $fc_doctos_relacionados[$indice_fc_doctos_relacionados]['fc_factura_total'] = $fc_factura['fc_factura_total'];
+        $fc_doctos_relacionados[$indice_fc_doctos_relacionados]['fc_factura_monto_pagado'] = $monto_pagado;
+        $fc_doctos_relacionados[$indice_fc_doctos_relacionados]['fc_factura_saldo'] = $saldo;
+        $fc_doctos_relacionados[$indice_fc_doctos_relacionados]['elimina_bd'] = $link_elimina_bd;
+
+        return $fc_doctos_relacionados;
+    }
+
     public function fc_factura_relacionada_alta_bd(bool $header, bool $ws = false)
     {
 
@@ -386,6 +471,42 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         }
         return $r_alta;
 
+    }
+
+    private function fc_facturas(array $fc_complemento_pago){
+        $filtro = array();
+        $filtro['com_cliente.id'] = $fc_complemento_pago['com_cliente_id'];
+        $filtro['org_empresa.id'] = $fc_complemento_pago['org_empresa_id'];
+        $r_fc_facturas = (new fc_factura(link: $this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener r_fc_facturas',data:  $r_fc_facturas);
+        }
+        return $r_fc_facturas->registros;
+    }
+
+    private function genera_fc_doctos_relacionados(fc_docto_relacionado $fc_docto_relacionado_modelo,
+                                                   fc_factura $fc_factura_modelo, array $fc_pago_pago){
+        $fc_doctos_relacionados = $this->get_fc_doctos_relacionados(
+            fc_docto_relacionado_modelo: $fc_docto_relacionado_modelo,fc_pago_pago:  $fc_pago_pago);
+
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener fc_doctos_relacionados',
+                data:  $fc_doctos_relacionados);
+        }
+
+        foreach ($fc_doctos_relacionados as $indice_fc_doctos_relacionados=>$fc_docto_relacionado){
+
+            $fc_doctos_relacionados = $this->integra_fc_docto_relacionado(
+                fc_docto_relacionado: $fc_docto_relacionado, fc_doctos_relacionados: $fc_doctos_relacionados,
+                fc_factura_modelo: $fc_factura_modelo,
+                indice_fc_doctos_relacionados:  $indice_fc_doctos_relacionados,
+                registro_id:  $this->registro_id,tabla:  $this->tabla);
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error al integrar fc_doctos_relacionados',
+                    data:  $fc_doctos_relacionados);
+            }
+        }
+        return $fc_doctos_relacionados;
     }
 
     public function genera_pdf(bool $header, bool $ws = false)
@@ -408,6 +529,42 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         return $r_genera;
     }
 
+    private function get_fc_doctos_relacionados(fc_docto_relacionado $fc_docto_relacionado_modelo,array $fc_pago_pago){
+        $filtro = array();
+        $filtro['fc_pago_pago.id'] = $fc_pago_pago['fc_pago_pago_id'];
+        $r_fc_docto_relacionado = $fc_docto_relacionado_modelo->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->errores->error(
+                mensaje: 'Error al obtener r_fc_docto_relacionado',data:  $r_fc_docto_relacionado);
+        }
+
+        return $r_fc_docto_relacionado->registros;
+    }
+
+    private function integra_fc_docto_relacionado(array $fc_docto_relacionado, array $fc_doctos_relacionados,
+                                                  fc_factura $fc_factura_modelo, int $indice_fc_doctos_relacionados,
+                                                  int $registro_id, string $tabla): array
+    {
+
+        $data_docto = $this->data_docto_relacionado(fc_docto_relacionado: $fc_docto_relacionado,
+            fc_factura_modelo:  $fc_factura_modelo,registro_id:  $registro_id,tabla:  $tabla);
+
+        if(errores::$error){
+            return $this->errores->error(
+                mensaje: 'Error al integrar fc_doctos_relacionados', data:  $fc_doctos_relacionados);
+        }
+
+        $fc_doctos_relacionados = $this->fc_doctos_relacionados(
+            fc_doctos_relacionados: $fc_doctos_relacionados,fc_factura:  $data_docto->fc_factura,
+            monto_pagado:  $data_docto->montos->monto_pagado,indice_fc_doctos_relacionados:  $indice_fc_doctos_relacionados,
+            link_elimina_bd:  $data_docto->link_elimina_bd, saldo: $data_docto->montos->saldo);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al integrar fc_doctos_relacionados',
+                data:  $fc_doctos_relacionados);
+        }
+        return $fc_doctos_relacionados;
+    }
+
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
         $this->ctl_partida = new controlador_fc_partida_cp(link: $this->link);
@@ -418,19 +575,12 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $this->modelo_email = (new fc_email_cp(link: $this->link));
 
 
-        $r_modifica = parent::modifica($header, $ws); // TODO: Change the autogenerated stub
+        $r_modifica = parent::modifica(header: $header,ws:  $ws); // TODO: Change the autogenerated stub
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_modifica,header:  $header, ws: $ws);
         }
 
-        $cat_sat_forma_pago_html = (new cat_sat_forma_pago_html(html: $this->html_base));
-        $fc_complemento_pago_html = (new fc_complemento_pago_html(html: $this->html_base));
 
-        $data = $this->data_modifica(cat_sat_forma_pago_html: $cat_sat_forma_pago_html,
-            fc_complemento_pago_html:  $fc_complemento_pago_html);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar template',data:  $data,header:  $header, ws: $ws);
-        }
 
         $fc_pago_modelo = new fc_pago(link: $this->link);
         $fc_pago_total_modelo = new fc_pago_total(link: $this->link);
@@ -465,50 +615,15 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             $fc_pago_pagos = $r_fc_pago_pago->registros;
 
             foreach ($fc_pago_pagos as $indice_pago_pago=>$fc_pago_pago){
-                $filtro = array();
-                $filtro['fc_pago_pago.id'] = $fc_pago_pago['fc_pago_pago_id'];
-                $r_fc_docto_relacionado = $fc_docto_relacionado_modelo->filtro_and(filtro: $filtro);
+                $fc_doctos_relacionados = $this->genera_fc_doctos_relacionados(
+                    fc_docto_relacionado_modelo: $fc_docto_relacionado_modelo,fc_factura_modelo:  $fc_factura_modelo,
+                    fc_pago_pago:  $fc_pago_pago);
+
                 if(errores::$error){
-                    return $this->retorno_error(mensaje: 'Error al obtener r_fc_docto_relacionado',data:  $r_fc_docto_relacionado,header:  $header, ws: $ws);
+                    return $this->retorno_error(mensaje: 'Error al obtener fc_doctos_relacionados',
+                        data:  $fc_doctos_relacionados,header:  $header, ws: $ws);
                 }
-                $fc_doctos_relacionados = $r_fc_docto_relacionado->registros;
-
-                foreach ($fc_doctos_relacionados as $indice_fc_doctos_relacionados=>$fc_docto_relacionado){
-                    $fc_factura = $fc_factura_modelo->registro(registro_id: $fc_docto_relacionado['fc_factura_id']);
-                    if(errores::$error){
-                        return $this->retorno_error(mensaje: 'Error al obtener fc_factura',data:  $fc_factura,header:  $header, ws: $ws);
-                    }
-
-                    $monto_pagado = $fc_factura_modelo->total_pagos(fc_factura_id: $fc_docto_relacionado['fc_factura_id']);
-                    if(errores::$error){
-                        return $this->retorno_error(mensaje: 'Error al obtener monto_pagado',data:  $monto_pagado,header:  $header, ws: $ws);
-                    }
-
-                    $saldo = $fc_factura_modelo->saldo(fc_factura_id: $fc_docto_relacionado['fc_factura_id']);
-                    if(errores::$error){
-                        return $this->retorno_error(mensaje: 'Error al obtener monto_pagado',data:  $monto_pagado,header:  $header, ws: $ws);
-                    }
-
-                    $params['seccion_retorno'] = $this->tabla;
-                    $params['accion_retorno'] = 'modifica';
-                    $params['id_retorno'] = $this->registro_id;
-
-                    $link_elimina_bd = $this->html->button_href(accion: 'elimina_bd',etiqueta: 'Elimina',
-                        registro_id:  $fc_docto_relacionado['fc_docto_relacionado_id'],seccion: 'fc_docto_relacionado',style: 'danger', params: $params);
-                    if(errores::$error){
-                        return $this->retorno_error(mensaje: 'Error al obtener link_elimina_bd',data:  $link_elimina_bd,header:  $header, ws: $ws);
-                    }
-
-                    $fc_doctos_relacionados[$indice_fc_doctos_relacionados]['fc_factura_total'] = $fc_factura['fc_factura_total'];
-                    $fc_doctos_relacionados[$indice_fc_doctos_relacionados]['fc_factura_monto_pagado'] = $monto_pagado;
-                    $fc_doctos_relacionados[$indice_fc_doctos_relacionados]['fc_factura_saldo'] = $saldo;
-                    $fc_doctos_relacionados[$indice_fc_doctos_relacionados]['elimina_bd'] = $link_elimina_bd;
-
-
-                }
-
                 $fc_pago_pagos[$indice_pago_pago]['fc_doctos_relacionados'] = $fc_doctos_relacionados;
-
 
             }
 
@@ -518,46 +633,51 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
         }
 
-        $fc_complemento_pago = (new fc_complemento_pago(link: $this->link))->registro(registro_id: $this->registro_id);
+
+        $saldos = $this->data_saldos_fc(fc_complemento_pago_id: $this->registro_id);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener fc_complemento_pago',data:  $fc_complemento_pago,header:  $header, ws: $ws);
+            return $this->retorno_error(mensaje: 'Error al obtener saldos',data:  $saldos,header:  $header, ws: $ws);
         }
 
-        $filtro = array();
-        $filtro['com_cliente.id'] = $fc_complemento_pago['com_cliente_id'];
-        $filtro['org_empresa.id'] = $fc_complemento_pago['org_empresa_id'];
-        $r_fc_facturas = (new fc_factura(link: $this->link))->filtro_and(filtro: $filtro);
+
+        $data = $this->data_modifica(saldo_total: $saldos->saldo_total);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener r_fc_facturas',data:  $r_fc_facturas,header:  $header, ws: $ws);
-        }
-        $fc_facturas = $r_fc_facturas->registros;
-
-        foreach ($fc_facturas as $indice_fc_factura=>$fc_factura){
-            $monto_pagado = (new fc_factura(link: $this->link))->total_pagos(fc_factura_id: $fc_factura['fc_factura_id']);
-            if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al obtener monto_pagado',data:  $monto_pagado,header:  $header, ws: $ws);
-            }
-
-            $saldo = $fc_factura['fc_factura_total'] - $monto_pagado;
-
-
-            $fc_facturas[$indice_fc_factura]['fc_factura_monto_pagado'] = $monto_pagado;
-            $fc_facturas[$indice_fc_factura]['fc_factura_saldo'] = $saldo;
-
-            if($saldo <= 0.0) {
-                unset($fc_facturas[$indice_fc_factura]);
-            }
-
-
+            return $this->retorno_error(mensaje: 'Error al generar template',data:  $data,header:  $header, ws: $ws);
         }
 
-        $this->fc_facturas = $fc_facturas;
-
-
+        $this->saldo_total = $saldos->saldo_total;
+        $this->fc_facturas = $saldos->fc_facturas;
         $this->fc_pagos = $fc_pagos;
 
 
         return $r_modifica;
+    }
+
+    private function montos(array $fc_docto_relacionado, fc_factura $fc_factura_modelo): array|stdClass
+    {
+        $monto_pagado = $fc_factura_modelo->total_pagos(fc_factura_id: $fc_docto_relacionado['fc_factura_id']);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener monto_pagado',data:  $monto_pagado);
+        }
+
+        $saldo = $fc_factura_modelo->saldo(fc_factura_id: $fc_docto_relacionado['fc_factura_id']);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener monto_pagado',data:  $monto_pagado);
+        }
+
+        $data = new stdClass();
+        $data->monto_pagado = $monto_pagado;
+        $data->saldo = $saldo;
+        return $data;
+    }
+
+    private function params_link_elimina(int $registro_id, string $tabla): array
+    {
+        $params['seccion_retorno'] = $tabla;
+        $params['accion_retorno'] = 'modifica';
+        $params['id_retorno'] = $registro_id;
+
+        return $params;
     }
 
     public function relaciones(bool $header, bool $ws = false)
@@ -576,6 +696,26 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         }
 
         return $r_modifica;
+    }
+
+    private function saldos_factura(array $fc_factura, float $saldo_total): array|stdClass
+    {
+        $monto_pagado = (new fc_factura(link: $this->link))->total_pagos(fc_factura_id: $fc_factura['fc_factura_id']);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener monto_pagado',data:  $monto_pagado);
+        }
+
+        $saldo = $fc_factura['fc_factura_total'] - $monto_pagado;
+
+        $saldo_total += $saldo;
+
+        $data = new stdClass();
+        $data->saldo = $saldo;
+        $data->monto_pagado = $monto_pagado;
+        $data->saldo_total = $saldo_total;
+
+
+        return $data;
     }
 
     public function timbra_xml(bool $header, bool $ws = false): array|stdClass

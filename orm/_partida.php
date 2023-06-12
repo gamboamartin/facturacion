@@ -735,6 +735,7 @@ class _partida extends  _base{
      * @param string $name_modelo_entidad Nombre de la entidad base
      * @param int $registro_entidad_id Identificador de la entidad base
      * @return array|stdClass
+     * @version 10.74.3
      */
     private function integra_buttons_partida( array $filtro, array $hijo, html_controler $html,
                                               string $name_modelo_entidad, int $registro_entidad_id): array|stdClass
@@ -901,6 +902,15 @@ class _partida extends  _base{
         return $params;
     }
 
+    /**
+     * @param html_controler $html
+     * @param _transacciones_fc $modelo_entidad
+     * @param _data_impuestos $modelo_retencion
+     * @param _data_impuestos $modelo_traslado
+     * @param int $registro_entidad_id
+     * @param $hijo
+     * @return array|stdClass
+     */
     final public function partidas( html_controler $html, _transacciones_fc $modelo_entidad,_data_impuestos $modelo_retencion,
                               _data_impuestos $modelo_traslado, int $registro_entidad_id, $hijo = array()): array|stdClass
     {
