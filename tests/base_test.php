@@ -957,6 +957,10 @@ class base_test{
             if (errores::$error) {
                 return (new errores())->error('Error al insertar factura', $alta);
             }
+            $del = $this->del_fc_partida_cp(link: $link);
+            if (errores::$error) {
+                return (new errores())->error('Error al eliminar', $del);
+            }
         }
 
         $existe = (new com_producto($link))->existe_by_id(registro_id: $com_producto_id);
