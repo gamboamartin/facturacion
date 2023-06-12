@@ -39,6 +39,42 @@ class _transacciones_fcTest extends test
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_data_para_folio(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new fc_complemento_pago($this->link);
+        $trs = new liberator($trs);
+
+        $del = (new base_test())->del_org_empresa(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar', data: $del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_csd(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
+            print_r($error);
+            exit;
+        }
+
+        $fc_csd_id =  1;
+        $resultado = $trs->data_para_folio($fc_csd_id);
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('1',$resultado->fc_csd_serie);
+        errores::$error = false;
+
+    }
+
     public function test_default_alta_emisor_data(): void
     {
         errores::$error = false;

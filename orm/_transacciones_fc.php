@@ -214,12 +214,17 @@ class _transacciones_fc extends modelo
     }
 
     /**
-     * Obtine los datos para maquetar un folio
+     * Obtiene los datos para maquetar un folio
      * @param int $fc_csd_id CSD en ejecucion
      * @return array|stdClass
+     * @version 10.69.3
      */
     private function data_para_folio(int $fc_csd_id): array|stdClass
     {
+        if($fc_csd_id <= 0){
+            return $this->error->error(mensaje: 'Error fc_csd_id debe ser mayor a 0', data: $fc_csd_id);
+        }
+
         $filtro['fc_csd.id'] = $fc_csd_id;
         $r_registro = $this->filtro_and(filtro: $filtro, limit: 1,order: array($this->tabla.'.folio'=>'DESC'));
         if(errores::$error){
@@ -1186,6 +1191,9 @@ class _transacciones_fc extends modelo
      */
     private function fc_csd_serie(int $fc_csd_id): array|string
     {
+        if($fc_csd_id <= 0){
+            return $this->error->error(mensaje: 'Error fc_csd_id debe ser mayor a 0', data: $fc_csd_id);
+        }
         $columnas[] = 'fc_csd_serie';
         $fc_csd = (new fc_csd(link: $this->link))->registro(registro_id: $fc_csd_id, columnas: $columnas);
         if(errores::$error){
