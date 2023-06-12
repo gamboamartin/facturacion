@@ -18,6 +18,7 @@ use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\_base_fc_html;
+use gamboamartin\facturacion\html\fc_csd_html;
 use gamboamartin\facturacion\html\fc_factura_html;
 use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\_cancelacion;
@@ -230,6 +231,31 @@ class _base_system_fc extends _base_system{
         }
 
         $this->inputs->com_tipo_cambio_id = $com_tipo_cambio_id;
+
+
+        $fc_csds = (new fc_csd(link: $this->link))->registros_activos();
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al obtener fc_csds',data:  $fc_csds);
+            print_r($error);
+            die('Error');
+        }
+
+        $id_selected = -1;
+        if(count($fc_csds) === 1){
+            $id_selected = $fc_csds[0]['fc_csd_id'];
+        }
+        $cols = 12;
+        $link = $this->link;
+        $fc_csd_id = (new fc_csd_html(html: $this->html_base))->select_fc_csd_id(cols: $cols,
+            con_registros:  true,id_selected:  $id_selected, link: $link,label: 'Empresa');
+
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al obtener fc_csd_id',data:  $fc_csd_id);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->inputs->fc_csd_id = $fc_csd_id;
 
         return $r_alta;
     }
