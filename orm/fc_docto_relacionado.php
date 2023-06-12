@@ -4,6 +4,7 @@ namespace gamboamartin\facturacion\models;
 
 use base\orm\_modelo_parent;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\controllers\_pagos;
 use PDO;
 use stdClass;
 
@@ -342,7 +343,7 @@ class fc_docto_relacionado extends _modelo_parent{
     }
 
     private function num_parcialidad_alta(array $registro){
-        $n_parcialidades = (new fc_factura(link: $this->link))->n_parcialidades(fc_factura_id: $registro['fc_factura_id']);
+        $n_parcialidades = (new _pagos())->n_parcialidades(fc_factura_id: $registro['fc_factura_id'],link: $this->link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener n_parcialidades',data:  $n_parcialidades);
         }
@@ -373,7 +374,7 @@ class fc_docto_relacionado extends _modelo_parent{
     }
 
     private function saldos_alta(array $registro){
-        $imp_saldo_ant = (new fc_factura(link: $this->link))->saldo(fc_factura_id: $registro['fc_factura_id']);
+        $imp_saldo_ant = (new _pagos())->saldo(fc_factura_id: $registro['fc_factura_id'],link: $this->link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener imp_saldo_ant',data:  $imp_saldo_ant);
         }
