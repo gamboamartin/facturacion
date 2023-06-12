@@ -911,6 +911,7 @@ class _partida extends  _base{
      * @param int $registro_entidad_id Identificador de factura o complemento
      * @param array $hijo  datos relacionados de partidas
      * @return array|stdClass
+     * @version 10.76.3
      */
     final public function partidas( html_controler $html, _transacciones_fc $modelo_entidad,_data_impuestos $modelo_retencion,
                               _data_impuestos $modelo_traslado, int $registro_entidad_id,array $hijo = array()): array|stdClass

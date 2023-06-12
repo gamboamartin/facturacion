@@ -478,7 +478,9 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $filtro = array();
         $filtro['com_cliente.id'] = $fc_complemento_pago['com_cliente_id'];
         $filtro['org_empresa.id'] = $fc_complemento_pago['org_empresa_id'];
-        $r_fc_facturas = (new fc_factura(link: $this->link))->filtro_and(filtro: $filtro);
+        $order = array('fc_factura.id'=>'ASC');
+
+        $r_fc_facturas = (new fc_factura(link: $this->link))->filtro_and(filtro: $filtro, order: $order);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener r_fc_facturas',data:  $r_fc_facturas);
         }
@@ -618,6 +620,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
             foreach ($fc_pago_pagos as $indice_pago_pago=>$fc_pago_pago){
                 $this->tiene_pago = true;
+
                 $fc_doctos_relacionados = $this->genera_fc_doctos_relacionados(
                     fc_docto_relacionado_modelo: $fc_docto_relacionado_modelo,fc_factura_modelo:  $fc_factura_modelo,
                     fc_pago_pago:  $fc_pago_pago);

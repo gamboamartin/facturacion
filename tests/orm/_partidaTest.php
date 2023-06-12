@@ -244,6 +244,31 @@ class _partidaTest extends test
         errores::$error = false;
     }
 
+    public function test_partidas(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida(link: $this->link);
+        //$modelo = new liberator($modelo);
+
+
+        $html = new html();
+        $html = new html_controler($html);
+        $modelo_entidad = new fc_factura(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $registro_entidad_id = 1;
+
+        $resultado = $modelo->partidas($html, $modelo_entidad, $modelo_retencion, $modelo_traslado, $registro_entidad_id);
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+
+        errores::$error = false;
+    }
+
     public function test_valida_restriccion(): void
     {
         errores::$error = false;
