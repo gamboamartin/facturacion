@@ -1555,9 +1555,13 @@ class _transacciones_fc extends modelo
      * @param _data_impuestos $modelo_traslado Modelo para obtencion de traslados
      * @param int $registro_id Registro base de fc_factura o Nota de credito
      * @return array
+     * @version 10.81.3
      */
     final public function traslados(_data_impuestos $modelo_traslado, int $registro_id): array
     {
+        if($registro_id <= 0){
+            return $this->error->error(mensaje: 'Error al registro_id debe ser mayor a 0', data: $registro_id);
+        }
         $filtro[$this->key_filtro_id] = $registro_id;
         $r_traslados = $modelo_traslado->filtro_and(filtro: $filtro);
         if (errores::$error) {
@@ -1567,6 +1571,10 @@ class _transacciones_fc extends modelo
     }
 
     final public function tasas_de_impuestos(_data_impuestos $modelo_traslado, _data_impuestos $modelo_retencion, int $registro_id){
+
+        if($registro_id <= 0){
+            return $this->error->error(mensaje: 'Error al registro_id debe ser mayor a 0', data: $registro_id);
+        }
 
         $traslados = $this->traslados(modelo_traslado: $modelo_traslado,registro_id:  $registro_id);
         if (errores::$error) {
@@ -1587,15 +1595,22 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener tiene_retencion', data: $tiene_retencion);
         }
 
-        $factor_traslado = 0;
+        $factor_traslado = 0.0;
         foreach ($traslados as $traslado){
-            $factor_traslado = +$traslado['cat_sat_factor_factor'];
+            if($factor_traslado !== (float)$traslado['cat_sat_factor_factor']) {
+                $factor_traslado = +(float)$traslado['cat_sat_factor_factor'];
+            }
         }
 
-        $factor_retenido = 0;
+        $factor_retenido = 0.0;
         foreach ($retenciones as $retencion){
-            $factor_retenido += $retencion['cat_sat_factor_factor'];
+
+            if($factor_retenido !== (float)$retencion['cat_sat_factor_factor']) {
+                $factor_retenido += (float)$retencion['cat_sat_factor_factor'];
+            }
         }
+
+
 
         $data = new stdClass();
         $data->traslado = new stdClass();

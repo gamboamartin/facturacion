@@ -15,9 +15,10 @@ class fc_traslado_p extends _p {
         $columnas = array($tabla=>false,'fc_impuesto_p'=>$tabla,'fc_pago_pago'=>'fc_impuesto_p');
         $campos_obligatorios = array();
 
+        $no_duplicados[] = 'fc_impuesto_p_id';
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas);
+            columnas: $columnas, no_duplicados: $no_duplicados);
 
         $this->NAMESPACE = __NAMESPACE__;
         $this->etiqueta = 'Traslado P';

@@ -452,6 +452,30 @@ class _transacciones_fcTest extends test
 
     }
 
+    public function test_traslados(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new fc_factura($this->link);
+        //$trs = new liberator($trs);
+
+
+        $registro_id =  1;
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $resultado = $trs->traslados($modelo_traslado, $registro_id);
+        $this->assertNotTrue(errores::$error);
+        $this->assertIsArray($resultado);
+
+
+        errores::$error = false;
+    }
+
     public function test_valida_permite_transaccion(): void
     {
         errores::$error = false;

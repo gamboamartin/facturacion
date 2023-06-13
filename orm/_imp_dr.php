@@ -129,11 +129,11 @@ class _imp_dr extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al validar fc_row',data:  $valida);
         }
 
-
         $importe_pagado = round($fc_row_dr['fc_docto_relacionado_imp_pagado'],2);
         $factor_calculo = 1 + round(($factor_calculo),6);
         $base_dr = round($importe_pagado / $factor_calculo,2);
         $importe_dr = round($base_dr * $fc_row['cat_sat_factor_factor'],2);
+
 
         $data = new stdClass();
         $data->importe_pagado = $importe_pagado;
@@ -189,12 +189,17 @@ class _imp_dr extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al validar fc_row',data:  $valida);
         }
 
+        if($fc_factura_id <= 0){
+            return $this->error->error(mensaje: 'Error al fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
+        }
+
         $tasas = (new fc_factura(link: $this->link))->tasas_de_impuestos(modelo_traslado: $modelo_traslado,
             modelo_retencion:  $modelo_retencion,registro_id:  $fc_factura_id);
 
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener tasas',data:  $tasas);
         }
+
 
         $data_importes = $this->data_importes(factor_calculo: $tasas->factor_calculo, fc_row: $fc_row, fc_row_dr: $fc_row_dr);
         if(errores::$error){
@@ -224,6 +229,7 @@ class _imp_dr extends _modelo_parent{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_row_dr_part_ins',data:  $fc_row_dr_part_ins);
         }
+
 
         $r_alta_fc_row_dr_part = $modelo_dr_part->alta_registro(registro: $fc_row_dr_part_ins);
         if(errores::$error){
