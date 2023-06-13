@@ -1,6 +1,8 @@
 <?php /** @var  gamboamartin\facturacion\controllers\controlador_fc_complemento_pago $controlador  controlador en ejecucion */ ?>
 <?php use config\views; ?>
 
+<input type="hidden"  value="<?php echo $controlador->total_pagos ?>" id="total_pagos">
+
 <main class="main section-color-primary">
     <div class="container">
         <div class="row">
@@ -130,6 +132,7 @@
                                                                                     <th>Monto Pagado</th>
                                                                                     <th>Saldo</th>
                                                                                     <th>Monto</th>
+                                                                                    <th>Selecciona</th>
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
@@ -144,7 +147,10 @@
                                                                                     <td>
                                                                                         <input type="text" class="form-text"
                                                                                                name="monto[][<?php echo $fc_factura['fc_factura_id'] ?>][<?php echo $fc_pago_pago['fc_pago_pago_id'] ?>]"
-                                                                                        value="<?php echo $fc_factura['fc_factura_saldo'] ?>">
+                                                                                        value="0" id="<?php echo $fc_factura['fc_factura_id'] ?>">
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="checkbox" class="selecciona" value="<?php echo $fc_factura['fc_factura_id'] ?>"  data-saldo="<?php echo $fc_factura['fc_factura_saldo'] ?>">
                                                                                     </td>
                                                                                 </tr>
                                                                             <?php }?>
