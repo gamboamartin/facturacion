@@ -1550,7 +1550,14 @@ class _transacciones_fc extends modelo
         return $tiene_rows;
     }
 
-    final public function traslados(_data_impuestos $modelo_traslado, int $registro_id){
+    /**
+     * Obtiene los traslados de una partida
+     * @param _data_impuestos $modelo_traslado Modelo para obtencion de traslados
+     * @param int $registro_id Registro base de fc_factura o Nota de credito
+     * @return array
+     */
+    final public function traslados(_data_impuestos $modelo_traslado, int $registro_id): array
+    {
         $filtro[$this->key_filtro_id] = $registro_id;
         $r_traslados = $modelo_traslado->filtro_and(filtro: $filtro);
         if (errores::$error) {

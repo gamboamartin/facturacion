@@ -57,7 +57,37 @@ class _imp_dr extends _modelo_parent{
             }
         }
 
+        $rows_ins = array();
         foreach ($fc_rows as $fc_row){
+
+            $cat_sat_tipo_factor_id = $fc_row['cat_sat_tipo_factor_id'];
+            $cat_sat_factor_id = $fc_row['cat_sat_factor_id'];
+            $cat_sat_tipo_impuesto_id = $fc_row['cat_sat_tipo_impuesto_id'];
+            $rows_ins[$cat_sat_tipo_impuesto_id][$cat_sat_factor_id][$cat_sat_tipo_factor_id]['cat_sat_tipo_factor_id'] = $cat_sat_tipo_factor_id;
+            $rows_ins[$cat_sat_tipo_impuesto_id][$cat_sat_factor_id][$cat_sat_tipo_factor_id]['cat_sat_factor_id'] = $cat_sat_factor_id;
+            $rows_ins[$cat_sat_tipo_impuesto_id][$cat_sat_factor_id][$cat_sat_tipo_factor_id]['cat_sat_tipo_impuesto_id'] = $cat_sat_tipo_impuesto_id;
+            $rows_ins[$cat_sat_tipo_impuesto_id][$cat_sat_factor_id][$cat_sat_tipo_factor_id]['cat_sat_factor_factor'] = $fc_row['cat_sat_factor_factor'];
+
+        }
+
+
+        foreach ($rows_ins as $row_ins){
+            $cat_sat_tipo_impuesto_id = key($row_ins);
+            $cat_sat_factor_id = key($row_ins[$cat_sat_tipo_impuesto_id]);
+
+            $fc_row = $row_ins[$cat_sat_tipo_impuesto_id][$cat_sat_factor_id];
+
+            $keys = array('cat_sat_tipo_impuesto_id','cat_sat_tipo_factor_id','cat_sat_factor_id');
+            $valida = $this->validacion->valida_ids(keys: $keys,registro:  $fc_row);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar fc_row',data:  $valida);
+            }
+
+            $keys = array('cat_sat_factor_factor');
+            $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $fc_row);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar fc_row',data:  $valida);
+            }
 
             $r_alta_fc_row_dr_part = $this->inserta_fc_row_dr_part(fc_row: $fc_row,
                 fc_row_dr: $fc_row_dr, modelo_dr_part: $this->modelo_dr_part,
@@ -92,6 +122,14 @@ class _imp_dr extends _modelo_parent{
 
     private function data_importes(float $factor_calculo, array $fc_row, array $fc_row_dr): stdClass
     {
+
+        $keys = array('cat_sat_factor_factor');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $fc_row);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar fc_row',data:  $valida);
+        }
+
+
         $importe_pagado = round($fc_row_dr['fc_docto_relacionado_imp_pagado'],2);
         $factor_calculo = 1 + round(($factor_calculo),6);
         $base_dr = round($importe_pagado / $factor_calculo,2);
@@ -110,6 +148,18 @@ class _imp_dr extends _modelo_parent{
     private function fc_row_dr_part_alta(array $fc_row, array $fc_row_dr, _data_impuestos $modelo_retencion,
                                          _data_impuestos $modelo_traslado){
 
+
+        $keys = array('cat_sat_tipo_impuesto_id','cat_sat_tipo_factor_id','cat_sat_factor_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $fc_row);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar fc_row',data:  $valida);
+        }
+
+        $keys = array('cat_sat_factor_factor');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $fc_row);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar fc_row',data:  $valida);
+        }
 
         $fc_traslado_dr_part_ins['cat_sat_tipo_impuesto_id'] = $fc_row['cat_sat_tipo_impuesto_id'];
         $fc_traslado_dr_part_ins['cat_sat_tipo_factor_id'] = $fc_row['cat_sat_tipo_factor_id'];
@@ -133,6 +183,12 @@ class _imp_dr extends _modelo_parent{
     private function genera_data_importes(int $fc_factura_id, _data_impuestos $modelo_traslado,
                                           _data_impuestos $modelo_retencion, array $fc_row, array $fc_row_dr){
 
+        $keys = array('cat_sat_factor_factor');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $fc_row);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar fc_row',data:  $valida);
+        }
+
         $tasas = (new fc_factura(link: $this->link))->tasas_de_impuestos(modelo_traslado: $modelo_traslado,
             modelo_retencion:  $modelo_retencion,registro_id:  $fc_factura_id);
 
@@ -150,6 +206,19 @@ class _imp_dr extends _modelo_parent{
 
     private function inserta_fc_row_dr_part(array $fc_row, array $fc_row_dr,_dr_part $modelo_dr_part, _data_impuestos $modelo_retencion,
                                             _data_impuestos $modelo_traslado){
+
+        $keys = array('cat_sat_tipo_impuesto_id','cat_sat_tipo_factor_id','cat_sat_factor_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $fc_row);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar fc_row',data:  $valida);
+        }
+
+        $keys = array('cat_sat_factor_factor');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $fc_row);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar fc_row',data:  $valida);
+        }
+
         $fc_row_dr_part_ins = $this->fc_row_dr_part_alta(fc_row: $fc_row, fc_row_dr: $fc_row_dr,
             modelo_retencion:  $modelo_retencion, modelo_traslado: $modelo_traslado);
         if(errores::$error){
