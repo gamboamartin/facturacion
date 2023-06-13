@@ -134,13 +134,7 @@ class fc_complemento_pagoTest extends test {
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_traslado_p_part(link: $this->link, cat_sat_factor_id: 11,
-            cat_sat_tipo_factor_id: 5);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
-            print_r($error);
-            exit;
-        }
+
 
 
 

@@ -89,6 +89,12 @@ class _p extends _modelo_parent{
         return $datas_ins_p_part;
     }
 
+    /**
+     * Inicializa los importes de un registro de tipo p part
+     * @param int $cat_sat_tipo_impuesto_id Tipo impuesto id
+     * @param array $datas_ins_p_part Datos previos de un impuesto
+     * @return array
+     */
     private function datas_ins_p_part_init(int $cat_sat_tipo_impuesto_id, array $datas_ins_p_part): array
     {
         if(!isset($datas_ins_p_part[$cat_sat_tipo_impuesto_id]['base_p'])){
@@ -121,7 +127,13 @@ class _p extends _modelo_parent{
 
     }
 
-    private function fc_impuesto_dr_p_part(int $fc_pago_pago_id){
+    /**
+     * Obtiene los impuestos dr
+     * @param int $fc_pago_pago_id Pago a buscar
+     * @return array
+     */
+    private function fc_impuesto_dr_p_part(int $fc_pago_pago_id): array
+    {
         $filtro['fc_pago_pago.id'] = $fc_pago_pago_id;
         $r_fc_impuesto_dr_part = $this->modelo_dr_part->filtro_and(filtro: $filtro);
         if(errores::$error){
@@ -151,15 +163,10 @@ class _p extends _modelo_parent{
     private function integra_datas_init_p_part(int $cat_sat_tipo_impuesto_id, array $datas_ins_p_part,
                                                array $fc_impuesto_dr_part, int $row_p_part_id){
 
-        $key_dr_part_base_dr = '';
-        $key_dr_part_importe_dr = '';
-        if($this->tabla === 'fc_traslado_p'){
-            $key_dr_part_base_dr = 'fc_traslado_dr_part_base_dr';
-            $key_dr_part_importe_dr = 'fc_traslado_dr_part_importe_dr';
-        }
-        if($this->tabla === 'fc_retencion_p'){
-            $key_dr_part_base_dr = 'fc_retencion_dr_part_base_dr';
-            $key_dr_part_importe_dr = 'fc_retencion_dr_part_importe_dr';
+
+        $keys_dr = $this->keys_dr(tabla: $this->tabla);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener keys_dr',data:  $keys_dr);
         }
 
 
@@ -168,14 +175,35 @@ class _p extends _modelo_parent{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener inicializar',data:  $datas_ins_p_part);
         }
-        $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['base_p'] += $fc_impuesto_dr_part[$key_dr_part_base_dr];
-        $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['importe_p'] += $fc_impuesto_dr_part[$key_dr_part_importe_dr];
+
+        $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['base_p'] += $fc_impuesto_dr_part[$keys_dr->key_dr_part_base_dr];
+        $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['importe_p'] += $fc_impuesto_dr_part[$keys_dr->key_dr_part_importe_dr];
         $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['cat_sat_tipo_impuesto_id'] = $cat_sat_tipo_impuesto_id;
         $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['cat_sat_tipo_factor_id'] = $fc_impuesto_dr_part['cat_sat_tipo_factor_id'];
         $datas_ins_p_part[$cat_sat_tipo_impuesto_id]['cat_sat_factor_id'] = $fc_impuesto_dr_part['cat_sat_factor_id'];
         $datas_ins_p_part[$cat_sat_tipo_impuesto_id][$this->key_id] = $row_p_part_id;
 
         return $datas_ins_p_part;
+    }
+
+    private function keys_dr(string $tabla): stdClass
+    {
+        $key_dr_part_base_dr = '';
+        $key_dr_part_importe_dr = '';
+
+        if($tabla === 'fc_traslado_p'){
+            $key_dr_part_base_dr = 'fc_traslado_dr_part_base_dr';
+            $key_dr_part_importe_dr = 'fc_traslado_dr_part_importe_dr';
+        }
+        if($tabla === 'fc_retencion_p'){
+            $key_dr_part_base_dr = 'fc_retencion_dr_part_base_dr';
+            $key_dr_part_importe_dr = 'fc_retencion_dr_part_importe_dr';
+        }
+
+        $data = new stdClass();
+        $data->key_dr_part_base_dr = $key_dr_part_base_dr;
+        $data->key_dr_part_importe_dr = $key_dr_part_importe_dr;
+        return $data;
     }
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,

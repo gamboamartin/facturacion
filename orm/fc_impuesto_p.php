@@ -12,7 +12,7 @@ class fc_impuesto_p extends _modelo_parent{
     public function __construct(PDO $link)
     {
         $tabla = 'fc_impuesto_p';
-        $columnas = array($tabla=>false,'fc_pago_pago'=>$tabla,'fc_pago'=>'fc_pago_pago');
+        $columnas = array($tabla=>false,'fc_pago_pago'=>$tabla,'fc_pago'=>'fc_pago_pago','fc_complemento_pago'=>'fc_pago');
         $campos_obligatorios = array();
 
         $no_duplicados[] = 'fc_pago_pago_id';
