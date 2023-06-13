@@ -44,6 +44,14 @@ class _transacciones_fc extends modelo
 
     protected string $key_fc_id = '';
 
+    private function acumula_factor(array $factores){
+        $factor_impuesto = 0.0;
+        foreach ($factores as $factor){
+            $factor_impuesto+=$factor;
+        }
+        return $factor_impuesto;
+    }
+
 
     /**
      * @return array|stdClass
@@ -1118,6 +1126,23 @@ class _transacciones_fc extends modelo
         return $r_elimina_factura;
     }
 
+    /**
+     * Verifica si existe un factor en un array de factores
+     * @param float $factor_impuesto_row Factor a comparar
+     * @param array $factores Factores previo guardados
+     * @return bool
+     */
+    private function existe_factor(float $factor_impuesto_row, array $factores): bool
+    {
+        $existe_factor = false;
+        foreach ($factores as $factor){
+            if((float)$factor === $factor_impuesto_row){
+                $existe_factor = true;
+            }
+        }
+        return $existe_factor;
+    }
+
 
 
     /**
@@ -1181,6 +1206,30 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al enviar notificacion',data:  $notifica);
         }
         return $notifica;
+    }
+
+    private function factor_base(array $impuestos){
+        $factores = $this->factores(impuestos: $impuestos);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al integrar factor', data: $factores);
+        }
+
+        $factor = $this->acumula_factor(factores: $factores);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al integrar factor', data: $factor);
+        }
+        return $factor;
+    }
+
+    private function factores(array $impuestos){
+        $factores = array();
+        foreach ($impuestos as $row_impuesto){
+            $factores = $this->integra_factor(factores: $factores,row_impuesto:  $row_impuesto);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al integrar factor', data: $factores);
+            }
+        }
+        return $factores;
     }
 
     /**
@@ -1286,6 +1335,18 @@ class _transacciones_fc extends modelo
         return round($fc_factura->$key,2);
 
 
+    }
+
+    private function integra_factor(array $factores, array $row_impuesto){
+        $factor_impuesto_row = (float)$row_impuesto['cat_sat_factor_factor'];
+        $existe_factor = $this->existe_factor(factor_impuesto_row: $factor_impuesto_row,factores:  $factores);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar si existe factor', data: $existe_factor);
+        }
+        if(!$existe_factor){
+            $factores[] = $factor_impuesto_row;
+        }
+        return $factores;
     }
 
     /**
@@ -1595,21 +1656,15 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener tiene_retencion', data: $tiene_retencion);
         }
 
-        $factor_traslado = 0.0;
-        foreach ($traslados as $traslado){
-            if($factor_traslado !== (float)$traslado['cat_sat_factor_factor']) {
-                $factor_traslado = +(float)$traslado['cat_sat_factor_factor'];
-            }
+
+        $factor_traslado = $this->factor_base(impuestos: $traslados);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al integrar factor', data: $factor_traslado);
         }
-
-        $factor_retenido = 0.0;
-        foreach ($retenciones as $retencion){
-
-            if($factor_retenido !== (float)$retencion['cat_sat_factor_factor']) {
-                $factor_retenido += (float)$retencion['cat_sat_factor_factor'];
-            }
+        $factor_retenido = $this->factor_base(impuestos: $retenciones);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al integrar factor', data: $factor_traslado);
         }
-
 
 
         $data = new stdClass();

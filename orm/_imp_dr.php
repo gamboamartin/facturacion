@@ -173,8 +173,11 @@ class _imp_dr extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener data_importes',data:  $data_importes);
         }
 
+
         $fc_traslado_dr_part_ins['base_dr'] = $data_importes->base_dr;
         $fc_traslado_dr_part_ins['importe_dr'] = $data_importes->importe_dr;
+
+
 
         return $fc_traslado_dr_part_ins;
     }

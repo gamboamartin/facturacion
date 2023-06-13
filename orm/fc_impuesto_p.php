@@ -76,6 +76,52 @@ class fc_impuesto_p extends _modelo_parent{
         return $r_alta_bd;
     }
 
+    private function alta_fc_row_p(array $fc_impuesto_p, _p $modelo_p){
+        $fc_row_p_ins['fc_impuesto_p_id'] = $fc_impuesto_p['fc_impuesto_p_id'];
+        $r_alta_row_p = $modelo_p->alta_registro(registro: $fc_row_p_ins);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar r_alta_row_p',data:  $r_alta_row_p);
+        }
+        return $r_alta_row_p->registro;
+    }
+
+    private function alta_row_p_part(string $key_row_p_id, _p_part $modelo_p_part, array $row_dr_part, int $row_p_id){
+        $fc_row_p_part_ins = $this->fc_row_p_part_ins(key_row_p_id: $key_row_p_id,
+            row_dr_part: $row_dr_part, row_p_id: $row_p_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maquetar fc_row_p_part_ins',data:  $fc_row_p_part_ins);
+        }
+
+        $r_alta_row_p_part = $modelo_p_part->alta_registro(registro: $fc_row_p_part_ins);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar r_alta_row_p_part',data:  $r_alta_row_p_part);
+        }
+        return $r_alta_row_p_part;
+    }
+
+    final public function datas_para_p(array $fc_impuesto_p, string $tabla): stdClass
+    {
+        $filtro = array();
+        $filtro['fc_impuesto_p_id'] = $fc_impuesto_p['fc_impuesto_p_id'];
+        $modelo_p = new stdClass();
+        $modelo_p_part = new stdClass();
+        if($tabla === 'fc_traslado_dr_part'){
+            $modelo_p = new fc_traslado_p(link: $this->link);
+            $modelo_p_part = new fc_traslado_p_part(link: $this->link);
+
+        }
+        if($tabla === 'fc_retencion_dr_part'){
+            $modelo_p = new fc_retencion_p(link: $this->link);
+            $modelo_p_part = new fc_retencion_p_part(link: $this->link);
+        }
+
+        $data = new stdClass();
+        $data->modelo_p = $modelo_p;
+        $data->modelo_p_part = $modelo_p_part;
+        $data->filtro = $filtro;
+        return $data;
+    }
+
     public function elimina_bd(int $id): array|stdClass
     {
 
@@ -94,6 +140,185 @@ class fc_impuesto_p extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al eliminar',data:  $r_elimina_bd);
         }
         return $r_elimina_bd;
+    }
+
+    /**
+     * Verifica si existe un elemento de tip impuesto basado en en identificador de complemento de pago
+     * @param int $fc_complemento_pago_id Identificador del complemento de pago
+     * @return array|bool
+     */
+    private function existe_fc_impuesto_p(int $fc_complemento_pago_id): bool|array
+    {
+        $filtro = array();
+        $filtro['fc_complemento_pago.id'] = $fc_complemento_pago_id;
+        $existe = $this->existe(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si existe',data:  $existe);
+        }
+        return $existe;
+    }
+
+    private function existe_row_p_part(array $fc_row_p, string $key_row_p_id, _p_part $modelo_p_part, array $row_dr_part){
+        $filtro = $this->filtro_row_p_part(fc_row_p: $fc_row_p,key_row_p_id:  $key_row_p_id,row_dr_part:  $row_dr_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener filtro',data:  $filtro);
+        }
+
+        $existe = $modelo_p_part->existe(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al verificar si existe existe',data:  $existe);
+        }
+        return $existe;
+    }
+
+    final public function fc_impuesto_p(int $fc_complemento_pago_id, int $fc_pago_pago_id){
+        $existe = $this->existe_fc_impuesto_p(fc_complemento_pago_id: $fc_complemento_pago_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si existe',data:  $existe);
+        }
+
+        if(!$existe){
+            $fc_impuesto_p = $this->inserta_fc_impuesto_p(fc_pago_pago_id: $fc_pago_pago_id);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al insertar fc_impuesto_p',data:  $fc_impuesto_p);
+            }
+        }
+        else{
+            $fc_impuesto_p = $this->get_fc_impuesto_p(fc_complemento_pago_id: $fc_complemento_pago_id);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener fc_impuesto_p',data:  $fc_impuesto_p);
+            }
+        }
+        return $fc_impuesto_p;
+    }
+
+    final public function fc_row_p(array $fc_impuesto_p, _p $modelo_p){
+        $filtro['fc_impuesto_p.id'] = $fc_impuesto_p['fc_impuesto_p_id'];
+        $existe = $modelo_p->existe(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error de integridad',data:  $existe);
+        }
+        if(!$existe){
+            $fc_row_p = $this->alta_fc_row_p(fc_impuesto_p: $fc_impuesto_p,modelo_p:  $modelo_p);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al insertar r_alta_row_p',data:  $fc_row_p);
+            }
+        }
+        else{
+            $fc_row_p = $this->get_fc_row_p(filtro: $filtro, modelo_p: $modelo_p);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener fc_row_p',data:  $fc_row_p);
+            }
+        }
+        return $fc_row_p;
+    }
+
+    private function fc_row_p_part_ins(string $key_row_p_id, array $row_dr_part, int $row_p_id): array
+    {
+        $fc_row_p_part_ins['base_p'] = 0;
+        $fc_row_p_part_ins['cat_sat_tipo_impuesto_id'] = $row_dr_part['cat_sat_tipo_impuesto_id'];
+        $fc_row_p_part_ins['cat_sat_tipo_factor_id'] = $row_dr_part['cat_sat_tipo_factor_id'];
+        $fc_row_p_part_ins['cat_sat_factor_id'] = $row_dr_part['cat_sat_factor_id'];
+        $fc_row_p_part_ins['importe_p'] = 0;
+        $fc_row_p_part_ins[$key_row_p_id] = $row_p_id;
+        return $fc_row_p_part_ins;
+    }
+
+    private function filtro_row_p_part(array $fc_row_p, string $key_row_p_id, array $row_dr_part): array
+    {
+        $filtro = array();
+        $filtro['cat_sat_tipo_impuesto_id'] = $row_dr_part['cat_sat_tipo_impuesto_id'];
+        $filtro['cat_sat_tipo_factor_id'] = $row_dr_part['cat_sat_tipo_factor_id'];
+        $filtro['cat_sat_factor_id'] = $row_dr_part['cat_sat_factor_id'];
+        $filtro[$key_row_p_id] = $fc_row_p[$key_row_p_id];
+        return$filtro;
+    }
+
+    private function get_fc_impuesto_p(int $fc_complemento_pago_id){
+        $filtro = array();
+        $filtro['fc_complemento_pago.id'] = $fc_complemento_pago_id;
+        $r_fc_impuesto_p = $this->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_impuesto_p',data:  $r_fc_impuesto_p);
+        }
+        if($r_fc_impuesto_p->n_registros === 0){
+
+            return $this->error->error(mensaje: 'Error no existe registro impuesto p',data:  $r_fc_impuesto_p);
+
+        }
+        if($r_fc_impuesto_p->n_registros > 1){
+
+            return $this->error->error(mensaje: 'Error de integridad',data:  $r_fc_impuesto_p);
+
+        }
+        return $r_fc_impuesto_p->registros[0];
+    }
+
+    private function get_fc_row_p(array $filtro, _p $modelo_p){
+        $r_fc_row_p = $modelo_p->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener r_fc_row_p',data:  $r_fc_row_p);
+        }
+        if($r_fc_row_p->n_registros === 0){
+
+            return $this->error->error(mensaje: 'Error no existe registro r_fc_row_p',data:  $r_fc_row_p);
+
+        }
+        if($r_fc_row_p->n_registros > 1){
+            return $this->error->error(mensaje: 'Error de integridad',data:  $r_fc_row_p);
+        }
+        return $r_fc_row_p->registros[0];
+    }
+
+    private function inserta_fc_impuesto_p(int $fc_pago_pago_id){
+        $fc_impuesto_p_ins = array();
+        $fc_impuesto_p_ins['fc_pago_pago_id'] = $fc_pago_pago_id;
+        $r_alta_impuesto_p = $this->alta_registro(registro: $fc_impuesto_p_ins);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar r_alta_impuesto_p',data:  $r_alta_impuesto_p);
+        }
+        return $r_alta_impuesto_p->registro;
+    }
+
+    final public function inserta_row_p_part(array $fc_row_p, _p $modelo_p, _p_part $modelo_p_part, array $row_dr_part){
+
+        $key_row_p_id = $modelo_p->key_id;
+        $row_p_id = $fc_row_p[$key_row_p_id];
+
+        $existe = $this->existe_row_p_part(fc_row_p: $fc_row_p,key_row_p_id:  $key_row_p_id,
+            modelo_p_part:  $modelo_p_part, row_dr_part: $row_dr_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al verificar si existe existe',data:  $existe);
+        }
+        if(!$existe){
+
+            $r_alta_row_p_part = $this->alta_row_p_part(key_row_p_id: $key_row_p_id,modelo_p_part:  $modelo_p_part,
+                row_dr_part: $row_dr_part, row_p_id: $row_p_id);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al insertar r_alta_row_p_part',data:  $r_alta_row_p_part);
+            }
+            $row_p_part = $r_alta_row_p_part->registro;
+        }
+        else{
+            $filtro = $this->filtro_row_p_part(fc_row_p: $fc_row_p,key_row_p_id:  $key_row_p_id,row_dr_part:  $row_dr_part);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener filtro',data:  $filtro);
+            }
+            $r_row_p_part = $modelo_p_part->filtro_and(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al verificar si existe existe',data:  $existe);
+            }
+            if($r_row_p_part->n_registros === 0){
+                return $this->error->error(mensaje: 'Error al r_row_p_part no existe',data:  $r_row_p_part);
+            }
+            if($r_row_p_part->n_registros > 1){
+                return $this->error->error(mensaje: 'Error de integridad',data:  $r_row_p_part);
+            }
+            $row_p_part = $r_row_p_part->registros[0];
+
+        }
+
+        return $row_p_part;
     }
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false, array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
@@ -122,5 +347,7 @@ class fc_impuesto_p extends _modelo_parent{
         }
         return $r_modifica_bd;
     }
+
+
 
 }
