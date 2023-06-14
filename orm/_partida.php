@@ -4,7 +4,7 @@ namespace gamboamartin\facturacion\models;
 use gamboamartin\cat_sat\models\cat_sat_conf_imps;
 use gamboamartin\errores\errores;
 use gamboamartin\system\html_controler;
-use PDO;
+
 use stdClass;
 
 class _partida extends  _base{
@@ -150,6 +150,7 @@ class _partida extends  _base{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error integrar subtotales', data: $registro);
         }
+
 
         $this->registro = $registro;
 

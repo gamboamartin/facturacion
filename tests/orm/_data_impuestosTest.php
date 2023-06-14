@@ -127,7 +127,7 @@ class _data_impuestosTest extends test
 
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals('0.01', $resultado['fc_retenido_total']);
+        $this->assertEquals('0.0125', $resultado['fc_retenido_total']);
 
         errores::$error = false;
     }

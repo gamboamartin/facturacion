@@ -100,7 +100,10 @@ class _data_impuestos extends _base{
             return $this->error->error(mensaje: 'Error ejecutar valida', data: $valida);
         }
 
-        return round($row_partida->sub_total * $cat_sat_factor->cat_sat_factor_factor,2);
+        $row_partida->sub_total = round($row_partida->sub_total,2);
+        $cat_sat_factor->cat_sat_factor_factor = round($cat_sat_factor->cat_sat_factor_factor,6);
+
+        return round($row_partida->sub_total * $cat_sat_factor->cat_sat_factor_factor,6);
     }
 
     public function elimina_bd(int $id): array|stdClass
