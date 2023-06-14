@@ -34,18 +34,10 @@ class fc_traslado_nc extends _data_impuestos {
             exit;
         }
 
-        $fc_impuesto_importe = (new _facturacion())->fc_impuesto_importe(
-            fc_partida_importe_con_descuento: $sq_importes->fc_partida_entidad_importe_con_descuento);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al generar fc_impuesto_importe',data:  $fc_impuesto_importe);
-            print_r($error);
-            exit;
-        }
-
 
         $columnas_extra['fc_partida_nc_importe'] = $sq_importes->fc_partida_entidad_importe;
         $columnas_extra['fc_partida_nc_importe_con_descuento'] = $sq_importes->fc_partida_entidad_importe_con_descuento;
-        $columnas_extra['fc_traslado_nc_importe'] = $fc_impuesto_importe;
+        $columnas_extra['fc_traslado_nc_importe'] = "$tabla.total";
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,

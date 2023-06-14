@@ -2014,6 +2014,7 @@ class _base_system_fc extends _base_system{
             die('Error');
         }
 
+        print_r($partidas);exit;
 
         $this->partidas = $partidas;
 
