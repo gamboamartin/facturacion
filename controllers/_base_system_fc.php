@@ -1230,6 +1230,7 @@ class _base_system_fc extends _base_system{
 
             if($entidad_origen === $this->modelo_entidad->key_id) {
 
+
                 $r_fc_factura_relacionada = $this->inserta_relacionada(
                     key_modelo_base_id: $this->modelo_entidad->key_id,
                     key_modelo_rel_id: $this->modelo_relacion->key_id,modelo_relacionada:  $this->modelo_relacionada,
@@ -1944,6 +1945,14 @@ class _base_system_fc extends _base_system{
     private function inserta_relacionada(string $key_modelo_base_id, string $key_modelo_rel_id, modelo $modelo_relacionada,
                                          int $registro_entidad_id, int $relacion_id): array|stdClass
     {
+
+        $valida = $this->valida_data_relacion(key_modelo_base_id: $key_modelo_base_id,
+            key_modelo_rel_id:  $key_modelo_rel_id,registro_entidad_id:  $registro_entidad_id,
+            relacion_id:  $relacion_id);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al validar datos de relacion',data:  $valida);
+        }
+
         $fc_factura_relacionada_ins = $this->row_relacionada(key_modelo_base_id: $key_modelo_base_id,
             key_modelo_rel_id: $key_modelo_rel_id, registro_entidad_id: $registro_entidad_id, relacion_id: $relacion_id);
 
@@ -2579,10 +2588,19 @@ class _base_system_fc extends _base_system{
      * @param int $registro_entidad_id Registro id de la entidad base
      * @param int $relacion_id Relacion base
      * @return array
+
      */
     private function row_relacionada(string $key_modelo_base_id, string $key_modelo_rel_id,
                                      int $registro_entidad_id, int $relacion_id): array
     {
+
+        $valida = $this->valida_data_relacion(key_modelo_base_id: $key_modelo_base_id,
+            key_modelo_rel_id:  $key_modelo_rel_id,registro_entidad_id:  $registro_entidad_id,
+            relacion_id:  $relacion_id);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al validar datos de relacion',data:  $valida);
+        }
+
         $fc_factura_relacionada_ins[$key_modelo_rel_id] = $relacion_id;
         $fc_factura_relacionada_ins[$key_modelo_base_id] = $registro_entidad_id;
         return $fc_factura_relacionada_ins;
@@ -2733,6 +2751,28 @@ class _base_system_fc extends _base_system{
         }
 
         return $inputs_partida;
+    }
+
+
+    private function valida_data_relacion(string $key_modelo_base_id, string $key_modelo_rel_id,
+                                          int $registro_entidad_id, int $relacion_id): bool|array
+    {
+        $key_modelo_base_id = trim($key_modelo_base_id);
+        if($key_modelo_base_id === ''){
+            return $this->errores->error(mensaje: 'Error key_modelo_base_id esta vacio',data:  $key_modelo_base_id);
+        }
+        $key_modelo_rel_id = trim($key_modelo_rel_id);
+        if($key_modelo_rel_id === ''){
+            return $this->errores->error(mensaje: 'Error key_modelo_rel_id esta vacio',data:  $key_modelo_rel_id);
+        }
+        if($registro_entidad_id <=0){
+            return $this->errores->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
+                data:  $registro_entidad_id);
+        }
+        if($relacion_id <=0){
+            return $this->errores->error(mensaje: 'Error relacion_id debe ser mayor a 0',data:  $relacion_id);
+        }
+        return true;
     }
 
     public function verifica_cancelacion(bool $header, bool $ws = false){

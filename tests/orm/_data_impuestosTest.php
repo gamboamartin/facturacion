@@ -38,6 +38,20 @@ class _data_impuestosTest extends test
         $modelo = new fc_retenido($this->link);
         $modelo = new liberator($modelo);
 
+        $del = (new base_test())->del_cat_sat_factor(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar', $del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_cat_sat_factor(link: $this->link, factor: .0125, id: 2);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar', $alta);
+            print_r($error);
+            exit;
+        }
+
         $cat_sat_factor_id = 2;
         $row_partida = new stdClass();
         $row_partida->sub_total = '850';

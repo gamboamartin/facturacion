@@ -4,6 +4,7 @@ namespace gamboamartin\facturacion\tests\controllers;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
+use gamboamartin\facturacion\controllers\controlador_fc_nota_credito;
 use gamboamartin\facturacion\controllers\pdf;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\tests\base_test;
@@ -73,6 +74,44 @@ class _base_system_fcTest extends test {
         $this->assertIsObject($resultado[8]);
         $this->assertIsObject($resultado[9]);
         $this->assertEquals('cat_sat_uso_cfdi',$resultado[4]->tabla);
+        errores::$error = false;
+    }
+
+    public function test_row_relacionada(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $del = (new base_test())->del_adm_seccion(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',data:  $del);
+            print_r($error);exit;
+        }
+
+        $alta = (new base_test())->alta_adm_seccion(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',data:  $alta);
+            print_r($error);exit;
+        }
+
+
+        $ctl = new controlador_fc_nota_credito(link: $this->link, paths_conf: $this->paths_conf);
+        $ctl = new liberator($ctl);
+
+        $key_modelo_base_id = 'a';
+        $key_modelo_rel_id = 'b';
+        $registro_entidad_id = 1;
+        $relacion_id = 1;
+        $resultado = $ctl->row_relacionada($key_modelo_base_id, $key_modelo_rel_id, $registro_entidad_id, $relacion_id);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(1,$resultado['b']);
+        $this->assertEquals(1,$resultado['a']);
         errores::$error = false;
     }
 
