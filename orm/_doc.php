@@ -85,9 +85,10 @@ class _doc extends _modelo_parent{
     }
 
     /**
-     * @param string $key_entidad_filter_id
-     * @param int $registro_id
-     * @param string $tipo_documento
+     * Obtiene los documentos de tipo cfdi de una entidad factura
+     * @param string $key_entidad_filter_id Key filtro de la entidad base
+     * @param int $registro_id Registro de entidad base
+     * @param string $tipo_documento Tipo de documento a obtener
      * @return array|string
      */
     final public function get_factura_documento(string $key_entidad_filter_id, int $registro_id,

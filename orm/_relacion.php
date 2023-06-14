@@ -360,6 +360,7 @@ class _relacion extends _modelo_parent_sin_codigo{
      */
     private function relaciones_externas(_uuid_ext $modelo_uuid_ext, array $row_relacion): array
     {
+
         $filtro[$this->key_filtro_id] = $row_relacion[$this->key_id];
 
         $r_fc_uuid_fc = $modelo_uuid_ext->filtro_and(filtro: $filtro);
