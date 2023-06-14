@@ -9,13 +9,14 @@
 namespace gamboamartin\facturacion\controllers;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_factura;
-use gamboamartin\template\html;
+use gamboamartin\plugins\exportador;
 use html\adm_reporte_html;
 use stdClass;
 
 class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_adm_reporte {
     public string $filtros = '';
     public string $link_ejecuta_reporte = '';
+    public string $link_exportar_xls ='';
     final public function ejecuta(bool $header, bool $ws = false){
         $descripcion = $this->adm_reporte['adm_reporte_descripcion'];
 
@@ -27,6 +28,8 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         }
 
         $this->link_ejecuta_reporte = $link_ejecuta_reporte;
+
+
 
         if($descripcion === 'Facturas'){
             $hoy = date('Y-m-d');
@@ -57,12 +60,14 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
     final public function ejecuta_reporte(bool $header, bool $ws = false){
         $adm_reporte_descripcion = $this->adm_reporte['adm_reporte_descripcion'];
 
-        $link_ejecuta_reporte = $this->obj_link->link_con_id(accion: 'ejecuta_reporte',link: $this->link,
+        $link_exportar_xls = $this->obj_link->link_con_id(accion: 'exportar_xls',link: $this->link,
             registro_id:  $this->registro_id,seccion:  $this->tabla);
 
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar link',data:  $link_ejecuta_reporte, header: $header, ws: $ws);
+            return $this->retorno_error(mensaje: 'Error al generar link',data:  $link_exportar_xls, header: $header, ws: $ws);
         }
+
+        $this->link_exportar_xls = $link_exportar_xls;
 
         $registros = array();
 
@@ -94,6 +99,51 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
         $this->ths = $ths_html;
         $this->trs = $trs_html;
+
+    }
+
+    final public function exportar_xls(bool $header, bool $ws = false){
+        $adm_reporte_descripcion = $this->adm_reporte['adm_reporte_descripcion'];
+
+        $nombre_hojas = array();
+        $keys_hojas = array();
+        if($adm_reporte_descripcion === 'Facturas'){
+            $filtro_rango = array();
+            if(isset($_POST['fecha_inicial'])){
+                $filtro_rango['fc_factura.fecha']['valor1'] = $_POST['fecha_inicial'];
+                $filtro_rango['fc_factura.fecha']['valor2'] = $_POST['fecha_final'];
+            }
+
+            $r_fc_factura = (new fc_factura(link: $this->link))->filtro_and(filtro_rango: $filtro_rango);
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al obtener fc_facturas',data:  $r_fc_factura, header: $header, ws: $ws);
+            }
+
+            $registros = $r_fc_factura->registros;
+
+
+            $ths = $this->ths_array(adm_reporte_descripcion: $adm_reporte_descripcion);
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error al obtener ths',data:  $ths);
+            }
+            $keys = array();
+
+            foreach ($ths as $data_th){
+                $keys[] = $data_th['campo'];
+            }
+
+            $nombre_hojas[] = 'Facturas';
+            $keys_hojas['Facturas'] = new stdClass();
+            $keys_hojas['Facturas']->keys = $keys;
+            $keys_hojas['Facturas']->registros = $registros;
+
+        }
+
+        $xls = (new exportador())->genera_xls(header: $header,name:  'Facturas',nombre_hojas:  $nombre_hojas,
+            keys_hojas: $keys_hojas, path_base: $this->path_base);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener xls',data:  $xls, header: $header, ws: $ws);
+        }
 
     }
 
