@@ -38,7 +38,14 @@ class _html_factura{
 </tr>";
     }
 
-    public function data_producto(PDO $link, string $name_entidad_partida, array $partida): string
+    /**
+     * Integra los datos de un producto para html views
+     * @param PDO $link Conexion a la base de datos
+     * @param string $name_entidad_partida Nombre de la entidad partida
+     * @param array $partida Registro de tipo partida
+     * @return string
+     */
+    final public function data_producto(PDO $link, string $name_entidad_partida, array $partida): string
     {
 
 
