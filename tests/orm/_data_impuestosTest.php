@@ -27,6 +27,28 @@ class _data_impuestosTest extends test
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_calcula_total(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_retenido($this->link);
+        $modelo = new liberator($modelo);
+
+        $cat_sat_factor_id = 2;
+        $row_partida = new stdClass();
+        $row_partida->sub_total = '850';
+
+        $resultado = $modelo->calcula_total($cat_sat_factor_id, $row_partida);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(10.63, $resultado);
+        errores::$error = false;
+    }
+
     public function test_get_data_row(): void
     {
         errores::$error = false;
@@ -129,6 +151,31 @@ class _data_impuestosTest extends test
         $this->assertNotTrue(errores::$error);
         $this->assertEquals('0.01', $resultado['fc_retenido_total']);
 
+        errores::$error = false;
+    }
+
+    public function test_validaciones(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_retenido($this->link);
+        $modelo = new liberator($modelo);
+
+        $data = array();
+        $data['descripcion'] = 'a';
+        $data['codigo'] = 'a';
+        $data['vc_id'] = '1';
+        $data['cat_sat_tipo_factor_id'] = '1';
+        $data['cat_sat_factor_id'] = '1';
+        $data['cat_sat_tipo_impuesto_id'] = '1';
+        $name_modelo_partida = 'vc';
+        $resultado = $modelo->validaciones($data, $name_modelo_partida);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
         errores::$error = false;
     }
 

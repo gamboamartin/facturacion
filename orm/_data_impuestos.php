@@ -84,15 +84,18 @@ class _data_impuestos extends _base{
      * @param int $cat_sat_factor_id
      * @param stdClass $row_partida Partida
      * @return float|array
+     * @version 10.87.3
      */
     private function calcula_total(int $cat_sat_factor_id, stdClass $row_partida): float|array
     {
+        if($cat_sat_factor_id <= 0){
+            return $this->error->error(mensaje: 'Error cat_sat_factor_id debe ser mayor a 0', data: $cat_sat_factor_id);
+        }
         $cat_sat_factor = (new cat_sat_factor(link: $this->link))->registro(
             registro_id: $cat_sat_factor_id, retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener cat_sat_factor', data: $cat_sat_factor);
         }
-
 
         $keys = array('sub_total');
         $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row_partida);
@@ -342,6 +345,7 @@ class _data_impuestos extends _base{
      * @param array $data Datos a validar
      * @param string $name_modelo_partida Nombre dle modelo de la partida
      * @return array
+     * @version 10.87.3
      */
     private function validaciones(array $data, string $name_modelo_partida): array
     {
@@ -350,6 +354,11 @@ class _data_impuestos extends _base{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
         }
+        $name_modelo_partida = trim($name_modelo_partida);
+        if($name_modelo_partida === ''){
+            return $this->error->error(mensaje: 'Error name_modelo_partida esta vacio', data: $name_modelo_partida);
+        }
+
 
         $keys = array($name_modelo_partida.'_id', 'cat_sat_tipo_factor_id', 'cat_sat_factor_id',
             'cat_sat_tipo_impuesto_id');
