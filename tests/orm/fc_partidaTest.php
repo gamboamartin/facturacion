@@ -134,7 +134,7 @@ class fc_partidaTest extends test
         $_GET['session_id'] = '1';
 
         $modelo = new fc_partida($this->link);
-        //$modelo = new liberator($modelo);
+        $modelo = new liberator($modelo);
 
         $fc_factura_id = -1;
         $resultado = $modelo->get_partidas(key_filtro_entidad_id: 'fc_factura.id', registro_entidad_id: $fc_factura_id);

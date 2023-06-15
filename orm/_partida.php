@@ -215,7 +215,13 @@ class _partida extends  _base{
         return $r_alta_bd;
     }
 
-    private function regenera_totales(stdClass $fc_registro_partida){
+    /**
+     * Refcatorizar para una sola transacion
+     * @param stdClass $fc_registro_partida
+     * @return array|stdClass
+     */
+    private function regenera_totales(stdClass $fc_registro_partida): array|stdClass
+    {
         $key_entidad_id = $this->modelo_entidad->key_id;
 
         $registro_entidad_id = $fc_registro_partida->$key_entidad_id;
@@ -558,13 +564,18 @@ class _partida extends  _base{
      * @param string $key_filtro_entidad_id Jey id para filtro de factura complemento
      * @param int $registro_entidad_id Factura a validar
      * @return array
+     * @version 10.93.3
      */
-    final public function get_partidas(string $key_filtro_entidad_id,int $registro_entidad_id): array
+    private function get_partidas(string $key_filtro_entidad_id,int $registro_entidad_id): array
     {
         if ($registro_entidad_id <= 0) {
-            return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0', data: $registro_entidad_id);
+            return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
+                data: $registro_entidad_id);
         }
-
+        $key_filtro_entidad_id = trim($key_filtro_entidad_id);
+        if($key_filtro_entidad_id === ''){
+            return $this->error->error(mensaje: 'Error key_filtro_entidad_id esta vacio', data: $key_filtro_entidad_id);
+        }
 
         $filtro[$key_filtro_entidad_id] = $registro_entidad_id;
         $r_fc_partida = $this->filtro_and(filtro: $filtro);

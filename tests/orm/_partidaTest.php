@@ -88,6 +88,26 @@ class _partidaTest extends test
 
     }
 
+    public function test_get_partidas(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida_nc(link: $this->link);
+        $modelo = new liberator($modelo);
+
+
+        $key_filtro_entidad_id = 'fc_nota_credito.id';
+        $registro_entidad_id = 1;
+
+        $resultado = $modelo->get_partidas($key_filtro_entidad_id, $registro_entidad_id);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        errores::$error = false;
+    }
+
     public function test_hijo(): void
     {
         errores::$error = false;
