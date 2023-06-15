@@ -250,12 +250,19 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al modificar entidad base', data: $regenera_total_retenciones);
         }
 
+        $regenera_total = $this->regenera_fc_total(registro_entidad_id: $registro_entidad_id,
+            key_filtro_entidad_id: $this->modelo_entidad->key_filtro_id, modelo_entidad: $this->modelo_entidad);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al modificar entidad base', data: $regenera_total);
+        }
+
         $data = new stdClass();
         $data->regenera_total_descuento = $regenera_total_descuento;
         $data->regenera_sub_total_base = $regenera_sub_total_base;
         $data->regenera_sub_total = $regenera_sub_total;
         $data->regenera_total_traslados = $regenera_total_traslados;
         $data->regenera_total_retenciones = $regenera_total_retenciones;
+        $data->regenera_total = $regenera_total;
         return $data;
     }
 
@@ -476,6 +483,21 @@ class _partida extends  _base{
             $total_retenciones += round($fc_partida[$this->tabla.'_total_retenciones'],2);
         }
         return round($total_retenciones,2);
+
+    }
+
+    private function fc_entidad_total(string $key_filtro_entidad_id, int $registro_entidad_id){
+        $fc_partidas = $this->get_partidas(key_filtro_entidad_id: $key_filtro_entidad_id,
+            registro_entidad_id:  $registro_entidad_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener r_fc_partida', data: $fc_partidas);
+        }
+
+        $total = 0.0;
+        foreach ($fc_partidas as $fc_partida){
+            $total += round($fc_partida[$this->tabla.'_total'],2);
+        }
+        return round($total,2);
 
     }
 
@@ -980,6 +1002,23 @@ class _partida extends  _base{
         }
 
         $fc_entidad_upd['total_retenciones'] = $total_retenciones;
+
+        $r_entidad_upd = $modelo_entidad->modifica_bd(registro: $fc_entidad_upd,id:  $registro_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al actualizar sub_total_base', data: $r_entidad_upd);
+        }
+        return $r_entidad_upd;
+    }
+
+    private function regenera_fc_total(int $registro_entidad_id, string $key_filtro_entidad_id,
+                                                   _transacciones_fc $modelo_entidad){
+        $total_retenciones = $this->fc_entidad_total(key_filtro_entidad_id: $key_filtro_entidad_id,
+            registro_entidad_id:  $registro_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener total_retenciones', data: $total_retenciones);
+        }
+
+        $fc_entidad_upd['total'] = $total_retenciones;
 
         $r_entidad_upd = $modelo_entidad->modifica_bd(registro: $fc_entidad_upd,id:  $registro_entidad_id);
         if (errores::$error) {

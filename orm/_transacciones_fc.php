@@ -5,9 +5,17 @@ namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 use config\generales;
 use config\pac;
+use gamboamartin\cat_sat\models\cat_sat_forma_pago;
+use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
+use gamboamartin\cat_sat\models\cat_sat_moneda;
+use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
+use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
+use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_sucursal;
+use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\comercial\models\com_tmp_cte_dp;
 use gamboamartin\comercial\models\com_tmp_prod_cs;
+use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
@@ -15,6 +23,7 @@ use gamboamartin\plugins\files;
 use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\xml_cfdi_4\cfdis;
 use gamboamartin\xml_cfdi_4\timbra;
+use PDO;
 use stdClass;
 
 
@@ -43,6 +52,50 @@ class _transacciones_fc extends modelo
 
 
     protected string $key_fc_id = '';
+
+
+
+    public function __construct(PDO $link, string $tabla, array $columnas_extra)
+    {
+        $columnas = array($tabla => false, 'fc_csd' => $tabla, 'cat_sat_forma_pago' => $tabla, 'cat_sat_metodo_pago' => $tabla,
+            'cat_sat_moneda' => $tabla, 'com_tipo_cambio' => $tabla, 'cat_sat_uso_cfdi' => $tabla,
+            'cat_sat_tipo_de_comprobante' => $tabla, 'cat_sat_regimen_fiscal' => $tabla, 'com_sucursal' => $tabla,
+            'com_cliente' => 'com_sucursal', 'dp_calle_pertenece' => $tabla, 'dp_calle' => 'dp_calle_pertenece',
+            'dp_colonia_postal' => 'dp_calle_pertenece', 'dp_colonia' => 'dp_colonia_postal', 'dp_cp' => 'dp_colonia_postal',
+            'dp_municipio' => 'dp_cp', 'dp_estado' => 'dp_municipio', 'dp_pais' => 'dp_estado', 'org_sucursal' => 'fc_csd',
+            'org_empresa' => 'org_sucursal');
+
+
+        $campos_view['fc_csd_id'] = array('type' => 'selects', 'model' => new fc_csd($link));
+        $campos_view['cat_sat_forma_pago_id'] = array('type' => 'selects', 'model' => new cat_sat_forma_pago($link));
+        $campos_view['cat_sat_metodo_pago_id'] = array('type' => 'selects', 'model' => new cat_sat_metodo_pago($link));
+        $campos_view['cat_sat_moneda_id'] = array('type' => 'selects', 'model' => new cat_sat_moneda($link));
+        $campos_view['com_tipo_cambio_id'] = array('type' => 'selects', 'model' => new com_tipo_cambio($link));
+        $campos_view['cat_sat_uso_cfdi_id'] = array('type' => 'selects', 'model' => new cat_sat_uso_cfdi($link));
+        $campos_view['cat_sat_tipo_de_comprobante_id'] = array('type' => 'selects', 'model' => new cat_sat_tipo_de_comprobante($link));
+        $campos_view['dp_calle_pertenece_id'] = array('type' => 'selects', 'model' => new dp_calle_pertenece($link));
+        $campos_view['cat_sat_regimen_fiscal_id'] = array('type' => 'selects', 'model' => new cat_sat_regimen_fiscal($link));
+        $campos_view['com_sucursal_id'] = array('type' => 'selects', 'model' => new com_sucursal($link));
+
+        $campos_view['folio'] = array('type' => 'inputs');
+        $campos_view['serie'] = array('type' => 'inputs');
+        $campos_view['version'] = array('type' => 'inputs');
+        $campos_view['exportacion'] = array('type' => 'inputs');
+        $campos_view['fecha'] = array('type' => 'dates');
+        $campos_view['subtotal'] = array('type' => 'inputs');
+        $campos_view['descuento'] = array('type' => 'inputs');
+        $campos_view['impuestos_trasladados'] = array('type' => 'inputs');
+        $campos_view['impuestos_retenidos'] = array('type' => 'inputs');
+        $campos_view['total'] = array('type' => 'inputs');
+
+        $campos_obligatorios = array('folio', 'fc_csd_id', 'cat_sat_forma_pago_id', 'cat_sat_metodo_pago_id',
+            'cat_sat_moneda_id', 'com_tipo_cambio_id', 'cat_sat_uso_cfdi_id', 'cat_sat_tipo_de_comprobante_id',
+            'dp_calle_pertenece_id', 'cat_sat_regimen_fiscal_id', 'com_sucursal_id', 'exportacion');
+
+        $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
+        parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios, columnas: $columnas,
+            campos_view: $campos_view, columnas_extra: $columnas_extra, no_duplicados: $no_duplicados);
+    }
 
     private function acumula_factor(array $factores){
         $factor_impuesto = 0.0;
@@ -1431,6 +1484,12 @@ class _transacciones_fc extends modelo
     }
 
 
+    /**
+     * Obtiene el numero de folio de una factura
+     * @param string $fc_csd_serie Serie del CSD
+     * @param stdClass $r_registro Registro previo
+     * @return int
+     */
     private function number_folio(string $fc_csd_serie, stdClass $r_registro): int
     {
         $number_folio = 1;

@@ -2,16 +2,6 @@
 
 namespace gamboamartin\facturacion\models;
 
-
-use gamboamartin\cat_sat\models\cat_sat_forma_pago;
-use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
-use gamboamartin\cat_sat\models\cat_sat_moneda;
-use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
-use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
-use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
-use gamboamartin\comercial\models\com_sucursal;
-use gamboamartin\comercial\models\com_tipo_cambio;
-use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\errores\errores;
 use PDO;
 use stdClass;
@@ -22,48 +12,6 @@ class fc_factura extends _transacciones_fc
     public function __construct(PDO $link)
     {
         $tabla = 'fc_factura';
-        $columnas = array($tabla => false, 'fc_csd' => $tabla, 'cat_sat_forma_pago' => $tabla, 'cat_sat_metodo_pago' => $tabla,
-            'cat_sat_moneda' => $tabla, 'com_tipo_cambio' => $tabla, 'cat_sat_uso_cfdi' => $tabla,
-            'cat_sat_tipo_de_comprobante' => $tabla, 'cat_sat_regimen_fiscal' => $tabla, 'com_sucursal' => $tabla,
-            'com_cliente' => 'com_sucursal', 'dp_calle_pertenece' => $tabla, 'dp_calle' => 'dp_calle_pertenece',
-            'dp_colonia_postal' => 'dp_calle_pertenece', 'dp_colonia' => 'dp_colonia_postal', 'dp_cp' => 'dp_colonia_postal',
-            'dp_municipio' => 'dp_cp', 'dp_estado' => 'dp_municipio', 'dp_pais' => 'dp_estado', 'org_sucursal' => 'fc_csd',
-            'org_empresa' => 'org_sucursal');
-
-
-        $campos_view['fc_csd_id'] = array('type' => 'selects', 'model' => new fc_csd($link));
-        $campos_view['cat_sat_forma_pago_id'] = array('type' => 'selects', 'model' => new cat_sat_forma_pago($link));
-        $campos_view['cat_sat_metodo_pago_id'] = array('type' => 'selects', 'model' => new cat_sat_metodo_pago($link));
-        $campos_view['cat_sat_moneda_id'] = array('type' => 'selects', 'model' => new cat_sat_moneda($link));
-        $campos_view['com_tipo_cambio_id'] = array('type' => 'selects', 'model' => new com_tipo_cambio($link));
-        $campos_view['cat_sat_uso_cfdi_id'] = array('type' => 'selects', 'model' => new cat_sat_uso_cfdi($link));
-        $campos_view['cat_sat_tipo_de_comprobante_id'] = array('type' => 'selects', 'model' => new cat_sat_tipo_de_comprobante($link));
-        $campos_view['dp_calle_pertenece_id'] = array('type' => 'selects', 'model' => new dp_calle_pertenece($link));
-        $campos_view['cat_sat_regimen_fiscal_id'] = array('type' => 'selects', 'model' => new cat_sat_regimen_fiscal($link));
-        $campos_view['com_sucursal_id'] = array('type' => 'selects', 'model' => new com_sucursal($link));
-
-        $campos_view['folio'] = array('type' => 'inputs');
-        $campos_view['serie'] = array('type' => 'inputs');
-        $campos_view['version'] = array('type' => 'inputs');
-        $campos_view['exportacion'] = array('type' => 'inputs');
-        $campos_view['fecha'] = array('type' => 'dates');
-        $campos_view['subtotal'] = array('type' => 'inputs');
-        $campos_view['descuento'] = array('type' => 'inputs');
-        $campos_view['impuestos_trasladados'] = array('type' => 'inputs');
-        $campos_view['impuestos_retenidos'] = array('type' => 'inputs');
-        $campos_view['total'] = array('type' => 'inputs');
-
-        $campos_obligatorios = array('folio', 'fc_csd_id', 'cat_sat_forma_pago_id', 'cat_sat_metodo_pago_id',
-            'cat_sat_moneda_id', 'com_tipo_cambio_id', 'cat_sat_uso_cfdi_id', 'cat_sat_tipo_de_comprobante_id',
-            'dp_calle_pertenece_id', 'cat_sat_regimen_fiscal_id', 'com_sucursal_id', 'exportacion');
-
-        $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
-
-
-
-
-        $fc_factura_total = "ROUND(IFNULL($tabla.sub_total,0)+IFNULL(ROUND($tabla.total_traslados,2),0)-IFNULL(ROUND($tabla.total_retenciones,2),0),2)";
-
 
         $fc_factura_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_factura_id = fc_factura.id)";
 
@@ -74,16 +22,11 @@ class fc_factura extends _transacciones_fc
 
 
 
-        $columnas_extra['fc_factura_total'] = "IFNULL($fc_factura_total,0)";
         $columnas_extra['fc_factura_uuid'] = "IFNULL($fc_factura_uuid,'SIN UUID')";
         $columnas_extra['fc_factura_etapa'] = "$fc_factura_etapa";
 
 
-
-
-        parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
-            no_duplicados: $no_duplicados);
+        parent::__construct(link: $link, tabla: $tabla, columnas_extra: $columnas_extra);
 
         $this->NAMESPACE = __NAMESPACE__;
 
