@@ -68,17 +68,25 @@ class fc_factura extends _transacciones_fc
         return $r_elimina_bd;
     }
 
-    public function get_pagos_nc(int $fc_nota_credito_id){
-        $filtro['fc_nota_credito.id'] = $fc_nota_credito_id;
+    public function get_pagos_nc(int $fc_factura_id){
+        if($fc_factura_id <= 0){
+            return $this->error->error(mensaje: 'Error fc_factura_id debe ser mayor a 0',data:  $fc_factura_id);
+        }
+        $filtro['fc_factura.id'] = $fc_factura_id;
         $r_fc_nc_rel = (new fc_nc_rel(link: $this->link))->filtro_and(filtro: $filtro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relaciones de notas de credito',data:  $r_fc_nc_rel);
         }
         $fc_nc_rels = $r_fc_nc_rel->registros;
 
+        $total_pagos = 0.0;
         foreach ($fc_nc_rels as $fc_nc_rel){
-
+            if($fc_nc_rel['fc_nota_credito_aplica_saldo'] === 'activo') {
+                $total_pagos += round($fc_nc_rel['fc_nc_rel_monto_aplicado_factura'], 2);
+            }
         }
+
+        return $total_pagos;
 
     }
 

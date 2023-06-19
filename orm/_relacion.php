@@ -32,6 +32,13 @@ class _relacion extends _modelo_parent_sin_codigo{
 
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
+
+        $keys = array($this->modelo_entidad->key_id, 'cat_sat_tipo_relacion_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
+        }
+
         $row_entidad = $this->modelo_entidad->registro(registro_id: $this->registro[$this->modelo_entidad->key_id]);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al al obtener row_entidad', data: $row_entidad);

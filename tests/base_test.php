@@ -7,9 +7,11 @@ use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
 use gamboamartin\cat_sat\models\cat_sat_obj_imp;
+use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
 use gamboamartin\cat_sat\models\cat_sat_tipo_impuesto;
 use gamboamartin\cat_sat\models\cat_sat_tipo_relacion;
+use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_producto;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
@@ -23,6 +25,8 @@ use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_impuesto_dr;
 use gamboamartin\facturacion\models\fc_impuesto_p;
+use gamboamartin\facturacion\models\fc_nc_rel;
+use gamboamartin\facturacion\models\fc_nota_credito;
 use gamboamartin\facturacion\models\fc_pago;
 use gamboamartin\facturacion\models\fc_pago_pago;
 use gamboamartin\facturacion\models\fc_partida;
@@ -30,6 +34,7 @@ use gamboamartin\facturacion\models\fc_partida;
 
 use gamboamartin\facturacion\models\fc_partida_cp;
 use gamboamartin\facturacion\models\fc_relacion;
+use gamboamartin\facturacion\models\fc_relacion_nc;
 use gamboamartin\facturacion\models\fc_traslado_dr;
 use gamboamartin\facturacion\models\fc_traslado_dr_part;
 use gamboamartin\facturacion\models\fc_traslado_p;
@@ -935,6 +940,174 @@ class base_test{
 
 
         $alta = (new fc_partida($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_relacion_nc(PDO $link, int $com_sucursal_id = 1,int $fc_nota_credito_id = 1, int $id = 1): array|\stdClass
+    {
+
+        $existe = (new fc_nota_credito($link))->existe_by_id(registro_id: $fc_nota_credito_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_nota_credito(link: $link, com_sucursal_id: $com_sucursal_id, id: $fc_nota_credito_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar nota_credito', $alta);
+            }
+        }
+
+
+
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['fc_nota_credito_id'] = $fc_nota_credito_id;
+        $registro['cat_sat_tipo_relacion_id'] = 1;
+
+
+        $alta = (new fc_relacion_nc($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_nota_credito(PDO $link, int $cat_sat_forma_pago_id = 99, int $cat_sat_metodo_pago_id = 2,
+                                         int $cat_sat_moneda_id = 1, int $cat_sat_uso_cfdi_id = 2,
+                                         int $com_sucursal_id = 1, int $com_tipo_cambio_id = 1,
+                                         int $cat_sat_tipo_de_comprobante_id = 2, string $exportacion = '01',
+                                         int $fc_csd_id = 1, int $id = 1): array|\stdClass
+    {
+
+        $existe = (new fc_csd($link))->existe_by_id(registro_id: $fc_csd_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_csd(link: $link,id: $fc_csd_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar fc_csd', $alta);
+            }
+        }
+
+        $existe = (new com_sucursal($link))->existe_by_id(registro_id: $com_sucursal_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_com_sucursal(link: $link,id: $com_sucursal_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar fc_csd', $alta);
+            }
+        }
+
+        $existe = (new cat_sat_forma_pago($link))->existe_by_id(registro_id: $cat_sat_forma_pago_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_forma_pago(link: $link,id: $cat_sat_forma_pago_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar cat_sat_forma_pago', $alta);
+            }
+        }
+
+        $existe = (new cat_sat_metodo_pago($link))->existe_by_id(registro_id: $cat_sat_metodo_pago_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_metodo_pago(link: $link,id: $cat_sat_metodo_pago_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar cat_sat_metodo_pago_id', $alta);
+            }
+        }
+
+        $existe = (new cat_sat_metodo_pago($link))->existe_by_id(registro_id: $cat_sat_metodo_pago_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_cat_sat_metodo_pago(link: $link,id: $cat_sat_metodo_pago_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar cat_sat_metodo_pago_id', $alta);
+            }
+        }
+
+        $existe = (new com_tipo_cambio($link))->existe_by_id(registro_id: $com_tipo_cambio_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_com_tipo_cambio(link: $link,id: $com_tipo_cambio_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar com_tipo_cambio_id', $alta);
+            }
+        }
+
+
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['fc_csd_id'] = $fc_csd_id;
+        $registro['com_sucursal_id'] = $com_sucursal_id;
+        $registro['cat_sat_forma_pago_id'] = $cat_sat_forma_pago_id;
+        $registro['cat_sat_metodo_pago_id'] = $cat_sat_metodo_pago_id;
+        $registro['cat_sat_moneda_id'] = $cat_sat_moneda_id;
+        $registro['com_tipo_cambio_id'] = $com_tipo_cambio_id;
+        $registro['cat_sat_uso_cfdi_id'] = $cat_sat_uso_cfdi_id;
+        $registro['cat_sat_tipo_de_comprobante_id'] = $cat_sat_tipo_de_comprobante_id;
+        $registro['exportacion'] = $exportacion;
+
+
+
+        $alta = (new fc_nota_credito($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_nc_rel(PDO $link, int $fc_factura_id = 1, int $fc_relacion_nc_id = 1, int $id = 1,
+                                   float $monto_aplicado_factura = 0): array|\stdClass
+    {
+
+        $existe = (new fc_relacion_nc($link))->existe_by_id(registro_id: $fc_relacion_nc_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_relacion_nc(link: $link,id: $fc_relacion_nc_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar relacion_nc', $alta);
+            }
+        }
+
+        $existe = (new fc_factura($link))->existe_by_id(registro_id: $fc_factura_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_factura(link: $link,id: $fc_factura_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar alta_fc_factura', $alta);
+            }
+        }
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['fc_relacion_nc_id'] = $fc_relacion_nc_id;
+        $registro['fc_factura_id'] = $fc_factura_id;
+        $registro['monto_aplicado_factura'] = $monto_aplicado_factura;
+
+        $alta = (new fc_nc_rel($link))->alta_registro($registro);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
 

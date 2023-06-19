@@ -46,6 +46,15 @@ class fc_nc_rel extends _modelo_parent {
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
+
+        $keys = array('fc_relacion_nc_id','fc_factura_id');
+
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $valida);
+        }
+
+
         $fc_relacion_nc = (new fc_relacion_nc(link: $this->link))->registro(
             registro_id: $this->registro['fc_relacion_nc_id'], retorno_obj: true);
 
