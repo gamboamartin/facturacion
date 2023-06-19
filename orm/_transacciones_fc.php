@@ -93,8 +93,22 @@ class _transacciones_fc extends modelo
             'dp_calle_pertenece_id', 'cat_sat_regimen_fiscal_id', 'com_sucursal_id', 'exportacion');
 
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
+
+        $atributos_criticos[] = 'total_descuento';
+        $atributos_criticos[] = 'sub_total_base';
+        $atributos_criticos[] = 'sub_total';
+        $atributos_criticos[] = 'total_traslados';
+        $atributos_criticos[] = 'total_retenciones';
+        $atributos_criticos[] = 'aplica_saldo';
+        $atributos_criticos[] = 'total';
+        $atributos_criticos[] = 'monto_pago_nc';
+        $atributos_criticos[] = 'monto_pago_cp';
+        $atributos_criticos[] = 'saldo';
+        $atributos_criticos[] = 'monto_saldo_aplicado';
+
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios, columnas: $columnas,
-            campos_view: $campos_view, columnas_extra: $columnas_extra, no_duplicados: $no_duplicados);
+            campos_view: $campos_view, columnas_extra: $columnas_extra, no_duplicados: $no_duplicados,
+            atributos_criticos: $atributos_criticos);
     }
 
     private function acumula_factor(array $factores){

@@ -31,9 +31,12 @@ class fc_nc_rel extends _modelo_parent {
 
         $columnas_extra['fc_factura_etapa'] = $fc_factura_etapa;
 
+
+        $atributos_criticos[] = 'monto_aplicado_factura';
+
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
-            no_duplicados: $no_duplicados, tipo_campos: array());
+            no_duplicados: $no_duplicados, atributos_criticos: $atributos_criticos);
 
         $this->NAMESPACE = __NAMESPACE__;
 

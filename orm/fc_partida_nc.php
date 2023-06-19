@@ -48,6 +48,8 @@ class fc_partida_nc extends _partida
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
+
+
         return $r_alta_bd;
     }
 

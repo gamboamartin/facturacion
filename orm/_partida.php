@@ -262,6 +262,7 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al modificar entidad base', data: $regenera_total);
         }
 
+
         $data = new stdClass();
         $data->regenera_total_descuento = $regenera_total_descuento;
         $data->regenera_sub_total_base = $regenera_sub_total_base;
