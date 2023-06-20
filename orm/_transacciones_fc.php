@@ -1476,12 +1476,15 @@ class _transacciones_fc extends modelo
         return $registro;
     }
 
-    public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
+    public function modifica_bd(array $registro, int $id, bool $reactiva = false,
+                                bool $verifica_permite_transaccion = true): array|stdClass
     {
 
-        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa, registro_id: $id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
+        if($verifica_permite_transaccion) {
+            $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa, registro_id: $id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
+            }
         }
 
         $registro = $this->integra_fecha(registro: $registro);

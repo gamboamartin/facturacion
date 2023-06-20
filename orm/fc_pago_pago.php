@@ -168,14 +168,14 @@ class fc_pago_pago extends _modelo_parent{
         return $registro;
     }
 
-    public function modifica_bd(array $registro, int $id, bool $reactiva = false, array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
+    public function modifica_bd(array $registro, int $id, bool $reactiva = false,
+                                array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
 
         $registro_previo = $this->registro(registro_id: $id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener registro_previo',data:  $registro_previo);
         }
-
 
         if(!isset($registro['descripcion'])){
 
@@ -206,7 +206,14 @@ class fc_pago_pago extends _modelo_parent{
         return $r_modifica_bd;
     }
 
-    private function monto_total_pagos(int $fc_pago_id){
+    /**
+     * Obtiene el monto total de pagos aplicados
+     * @param int $fc_pago_id Pago Id
+     * @return array|float
+     * 
+     */
+    private function monto_total_pagos(int $fc_pago_id): float|array
+    {
         $filtro['fc_pago_id'] = $fc_pago_id;
         $campos['monto_total_pagos'] = 'fc_pago_pago.monto';
         $fc_pago_pago = (new fc_pago_pago(link: $this->link))->suma(campos: $campos,filtro: $filtro);
