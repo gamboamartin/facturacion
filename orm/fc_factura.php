@@ -45,6 +45,12 @@ class fc_factura extends _transacciones_fc
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
+
+        $regenera = $this->regenera_saldos(fc_factura_id: $r_alta_bd->registro_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al regenera',data:  $regenera);
+        }
+
         return $r_alta_bd;
     }
 

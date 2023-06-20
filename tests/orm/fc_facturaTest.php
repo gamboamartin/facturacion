@@ -551,7 +551,6 @@ class fc_facturaTest extends test {
         $modelo = new fc_factura($this->link);
         $modelo = new liberator($modelo);
 
-
         $del = (new base_test())->del_fc_factura(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al eliminar',$del);
