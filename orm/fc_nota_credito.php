@@ -56,6 +56,7 @@ class fc_nota_credito extends _transacciones_fc
 
 
 
+
         return $r_alta_bd;
     }
 

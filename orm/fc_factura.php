@@ -68,7 +68,7 @@ class fc_factura extends _transacciones_fc
         return $r_elimina_bd;
     }
 
-    public function get_pagos_nc(int $fc_factura_id){
+    private function get_pagos_nc(int $fc_factura_id){
         if($fc_factura_id <= 0){
             return $this->error->error(mensaje: 'Error fc_factura_id debe ser mayor a 0',data:  $fc_factura_id);
         }
@@ -90,6 +90,28 @@ class fc_factura extends _transacciones_fc
 
     }
 
+    private function get_pagos_cp(int $fc_factura_id){
+        if($fc_factura_id <= 0){
+            return $this->error->error(mensaje: 'Error fc_factura_id debe ser mayor a 0',data:  $fc_factura_id);
+        }
+        $filtro['fc_factura.id'] = $fc_factura_id;
+        $r_fc_docto_relacionado = (new fc_docto_relacionado(link: $this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener relaciones de r_fc_docto_relacionado',data:  $r_fc_docto_relacionado);
+        }
+        $fc_doctos_relacionados = $r_fc_docto_relacionado->registros;
+
+        $total_pagos = 0.0;
+        foreach ($fc_doctos_relacionados as $fc_docto_relacionado){
+            if($fc_docto_relacionado['fc_complemento_pago_aplica_saldo'] === 'activo') {
+                $total_pagos += round($fc_docto_relacionado['fc_docto_relacionado_imp_pagado'], 2);
+            }
+        }
+
+        return $total_pagos;
+
+    }
+
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
         $this->modelo_etapa = new fc_factura_etapa(link: $this->link);
@@ -99,6 +121,39 @@ class fc_factura extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al modificar', data: $r_modifica_bd);
         }
         return $r_modifica_bd;
+    }
+
+    public function regenera_saldos(int $fc_factura_id){
+
+        $this->modelo_etapa = new fc_factura_etapa(link: $this->link);
+
+        $fc_factura = $this->registro($fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener factura',data:  $fc_factura);
+        }
+
+        $total_pagos_nc = $this->get_pagos_nc(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener total pagos nc',data:  $total_pagos_nc);
+        }
+
+        $total_pagos_cp = $this->get_pagos_cp(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener total pagos cp',data:  $total_pagos_cp);
+        }
+
+        $monto_saldo_aplicado = $total_pagos_cp + $total_pagos_nc;
+
+        $fc_factura_upd['monto_pago_nc'] = $total_pagos_nc;
+        $fc_factura_upd['monto_pago_cp'] = $total_pagos_cp;
+        $fc_factura_upd['monto_saldo_aplicado'] = $monto_saldo_aplicado;
+        $fc_factura_upd['saldo'] = $fc_factura['fc_factura_total'] - $monto_saldo_aplicado;
+
+        $upd = parent::modifica_bd(registro: $fc_factura_upd,id:  $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al actualizar saldos',data:  $upd);
+        }
+        return $upd;
     }
 
 }
