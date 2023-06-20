@@ -55,6 +55,8 @@ class controlador_fc_relacion_nc extends _ctl_base {
     }
     public function alta(bool $header, bool $ws = false): array|string
     {
+
+
         $r_alta =  parent::alta(header: false);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar template',data:  $r_alta, header: $header,ws:$ws);

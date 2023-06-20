@@ -21,6 +21,8 @@
                         <?php echo $controlador->inputs->descuento; ?>
                         <?php echo $controlador->inputs->total; ?>
                         <?php echo $controlador->inputs->cat_sat_tipo_relacion_id; ?>
+                        <?php echo $controlador->inputs->aplica_saldo; ?>
+
 
 
                         <div class="control-group btn-alta">

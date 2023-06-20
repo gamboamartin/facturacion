@@ -257,6 +257,7 @@ class _base_system_fc extends _base_system{
 
         $this->inputs->fc_csd_id = $fc_csd_id;
 
+
         return $r_alta;
     }
 
@@ -1299,6 +1300,12 @@ class _base_system_fc extends _base_system{
 
     }
 
+    /**
+     * @param bool $header
+     * @param bool $ws
+     * @return array|stdClass|void
+     * @throws JsonException
+     */
     public function fc_relacion_alta_bd(bool $header, bool $ws = false){
 
 

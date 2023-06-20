@@ -13,6 +13,7 @@
 
                         <?php echo $controlador->inputs_relaciones; ?>
 
+
                         <div class="control-group btn-alta">
                             <div class="controls">
                                 <button type="submit" class="btn btn-success" value="Asigna Tipo Relacion" name="btn_action_next">Asigna Relacion</button><br>
