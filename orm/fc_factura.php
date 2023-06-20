@@ -74,7 +74,19 @@ class fc_factura extends _transacciones_fc
         return $r_elimina_bd;
     }
 
-    private function get_pagos_nc(int $fc_factura_id){
+    private function fc_doctos_relacionados(int $fc_factura_id){
+        if($fc_factura_id <= 0){
+            return $this->error->error(mensaje: 'Error fc_factura_id debe ser mayor a 0',data:  $fc_factura_id);
+        }
+        $filtro['fc_factura.id'] = $fc_factura_id;
+        $r_fc_docto_relacionado = (new fc_docto_relacionado(link: $this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener relaciones de r_fc_docto_relacionado',data:  $r_fc_docto_relacionado);
+        }
+        return $r_fc_docto_relacionado->registros;
+    }
+
+    private function fc_nc_rels(int $fc_factura_id){
         if($fc_factura_id <= 0){
             return $this->error->error(mensaje: 'Error fc_factura_id debe ser mayor a 0',data:  $fc_factura_id);
         }
@@ -83,13 +95,22 @@ class fc_factura extends _transacciones_fc
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relaciones de notas de credito',data:  $r_fc_nc_rel);
         }
-        $fc_nc_rels = $r_fc_nc_rel->registros;
+        return $r_fc_nc_rel->registros;
+    }
 
-        $total_pagos = 0.0;
-        foreach ($fc_nc_rels as $fc_nc_rel){
-            if($fc_nc_rel['fc_nota_credito_aplica_saldo'] === 'activo') {
-                $total_pagos += round($fc_nc_rel['fc_nc_rel_monto_aplicado_factura'], 2);
-            }
+    private function get_pagos_nc(int $fc_factura_id){
+        if($fc_factura_id <= 0){
+            return $this->error->error(mensaje: 'Error fc_factura_id debe ser mayor a 0',data:  $fc_factura_id);
+        }
+        $fc_nc_rels = $this->fc_nc_rels(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_nc_rels',data:  $fc_nc_rels);
+        }
+
+        $total_pagos = $this->total_pagos(key_aplica_saldo: 'fc_nota_credito_aplica_saldo',
+            key_monto:  'fc_nc_rel_monto_aplicado_factura',rows:  $fc_nc_rels);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener total_pagos',data:  $total_pagos);
         }
 
         return $total_pagos;
@@ -100,18 +121,17 @@ class fc_factura extends _transacciones_fc
         if($fc_factura_id <= 0){
             return $this->error->error(mensaje: 'Error fc_factura_id debe ser mayor a 0',data:  $fc_factura_id);
         }
-        $filtro['fc_factura.id'] = $fc_factura_id;
-        $r_fc_docto_relacionado = (new fc_docto_relacionado(link: $this->link))->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener relaciones de r_fc_docto_relacionado',data:  $r_fc_docto_relacionado);
-        }
-        $fc_doctos_relacionados = $r_fc_docto_relacionado->registros;
 
-        $total_pagos = 0.0;
-        foreach ($fc_doctos_relacionados as $fc_docto_relacionado){
-            if($fc_docto_relacionado['fc_complemento_pago_aplica_saldo'] === 'activo') {
-                $total_pagos += round($fc_docto_relacionado['fc_docto_relacionado_imp_pagado'], 2);
-            }
+        $fc_doctos_relacionados = $this->fc_doctos_relacionados(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener relaciones de fc_doctos_relacionados',
+                data:  $fc_doctos_relacionados);
+        }
+
+        $total_pagos = $this->total_pagos(key_aplica_saldo: 'fc_complemento_pago_aplica_saldo',
+            key_monto:  'fc_docto_relacionado_imp_pagado',rows:  $fc_doctos_relacionados);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener total_pagos',data:  $total_pagos);
         }
 
         return $total_pagos;
@@ -163,5 +183,18 @@ class fc_factura extends _transacciones_fc
         }
         return $upd;
     }
+
+    private function total_pagos(string $key_aplica_saldo, string $key_monto, array $rows): float
+    {
+        $total_pagos = 0.0;
+        foreach ($rows as $row){
+            if($row[$key_aplica_saldo] === 'activo') {
+                $total_pagos += round($row[$key_monto], 2);
+            }
+        }
+        return $total_pagos;
+    }
+
+
 
 }

@@ -210,7 +210,7 @@ class fc_pago_pago extends _modelo_parent{
      * Obtiene el monto total de pagos aplicados
      * @param int $fc_pago_id Pago Id
      * @return array|float
-     * 
+     *
      */
     private function monto_total_pagos(int $fc_pago_id): float|array
     {
