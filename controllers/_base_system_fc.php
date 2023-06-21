@@ -66,6 +66,7 @@ use html\com_email_cte_html;
 use html\com_tipo_cambio_html;
 use JsonException;
 use stdClass;
+use Throwable;
 
 class _base_system_fc extends _base_system{
 
@@ -317,7 +318,14 @@ class _base_system_fc extends _base_system{
         }
         if($ws){
             header('Content-Type: application/json');
-            echo json_encode($r_alta_partida_bd, JSON_THROW_ON_ERROR);
+            try {
+                echo json_encode($r_alta_partida_bd, JSON_THROW_ON_ERROR);
+            }
+            catch (Throwable $e){
+                print_r($r_alta_partida_bd);
+                print_r($e);
+            }
+
             exit;
         }
 

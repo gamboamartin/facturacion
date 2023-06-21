@@ -368,6 +368,22 @@ class _relacion extends _modelo_parent_sin_codigo{
     private function relaciones_externas(_uuid_ext $modelo_uuid_ext, array $row_relacion): array
     {
 
+        $this->key_filtro_id = trim($this->key_filtro_id);
+        if($this->key_filtro_id === ''){
+            return $this->error->error(mensaje: 'Error this->key_filtro_id esta vacio', data: $this->key_filtro_id);
+        }
+
+        $this->key_id = trim($this->key_id);
+        if($this->key_id === ''){
+            return $this->error->error(mensaje: 'Error this->key_id esta vacio', data: $this->key_id);
+        }
+
+        $keys = array($this->key_id);
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $row_relacion);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error valida row relacion', data: $valida);
+        }
+
         $filtro[$this->key_filtro_id] = $row_relacion[$this->key_id];
 
         $r_fc_uuid_fc = $modelo_uuid_ext->filtro_and(filtro: $filtro);

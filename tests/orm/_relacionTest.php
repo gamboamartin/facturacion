@@ -6,6 +6,8 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_email;
 use gamboamartin\facturacion\models\_facturacion;
 use gamboamartin\facturacion\models\fc_relacion;
+use gamboamartin\facturacion\models\fc_relacion_nc;
+use gamboamartin\facturacion\models\fc_uuid_nc;
 use gamboamartin\test\liberator;
 use gamboamartin\test\test;
 
@@ -88,6 +90,28 @@ class _relacionTest extends test
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals('z', $resultado['a'][0]);
+        errores::$error = false;
+
+    }
+
+    public function test_relaciones_externas(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_relacion_nc(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $modelo_uuid_ext = new fc_uuid_nc(link: $this->link);
+        $row_relacion = array();
+        $row_relacion['fc_relacion_nc_id'] = 1;
+
+        $resultado = $modelo->relaciones_externas($modelo_uuid_ext, $row_relacion);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+
         errores::$error = false;
 
     }
