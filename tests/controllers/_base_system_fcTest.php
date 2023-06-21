@@ -107,7 +107,7 @@ class _base_system_fcTest extends test {
         $key_modelo_rel_id = 'b';
         $registro_entidad_id = 1;
         $relacion_id = 1;
-        $resultado = $ctl->row_relacionada($key_modelo_base_id, $key_modelo_rel_id, $registro_entidad_id, $relacion_id);
+        $resultado = $ctl->row_relacionada(array(),$key_modelo_base_id, $key_modelo_rel_id, $registro_entidad_id, $relacion_id);
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(1,$resultado['b']);

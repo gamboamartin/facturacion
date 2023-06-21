@@ -32,6 +32,25 @@ use stdClass;
 
 class fc_nota_credito_html extends _base_fc_html {
 
+    public function input_monto_aplicado_factura(int $cols, stdClass $row_upd, bool $value_vacio, bool $disabled = false,
+                                string $name = 'monto_aplicado_factura', string $place_holder = 'Monto'): array|string
+    {
 
+        if($cols<=0){
+            return $this->error->error(mensaje: 'Error cold debe ser mayor a 0', data: $cols);
+        }
+        if($cols>=13){
+            return $this->error->error(mensaje: 'Error cold debe ser menor o igual a  12', data: $cols);
+        }
+
+        $html =$this->directivas->input_text_sin_label(cols: $cols,disabled:  $disabled,name:  $name,
+            place_holder: $place_holder,required: false, row_upd: $row_upd,value_vacio: $value_vacio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input', data: $html);
+        }
+
+
+        return $html;
+    }
 
 }

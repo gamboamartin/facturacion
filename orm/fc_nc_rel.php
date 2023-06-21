@@ -116,6 +116,7 @@ class fc_nc_rel extends _modelo_parent {
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar monto regenera',data:  $regenera);
         }
+        return $r_elimina;
     }
 
     private function init_row_alta(array $registro){

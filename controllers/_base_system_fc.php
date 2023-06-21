@@ -20,6 +20,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\_base_fc_html;
 use gamboamartin\facturacion\html\fc_csd_html;
 use gamboamartin\facturacion\html\fc_factura_html;
+use gamboamartin\facturacion\html\fc_nota_credito_html;
 use gamboamartin\facturacion\html\fc_partida_html;
 use gamboamartin\facturacion\models\_cancelacion;
 use gamboamartin\facturacion\models\_cuenta_predial;
@@ -122,6 +123,8 @@ class _base_system_fc extends _base_system{
     public string $thead_relacion;
 
     public string $inputs_relaciones = '';
+
+    public bool $aplica_monto_relacion = false;
 
     public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
     {
@@ -1222,6 +1225,7 @@ class _base_system_fc extends _base_system{
         $fc_facturas_id = $_POST['fc_facturas_id'];
 
 
+
         $alta = array();
         foreach ($fc_facturas_id as $fc_factura_id=>$fc_relacion){
 
@@ -1246,16 +1250,21 @@ class _base_system_fc extends _base_system{
 
                 if($this->tabla === 'fc_nota_credito' && $entidad_origen === 'fc_factura_id') {
 
+                    $fc_facturas_montos = array();
+                    if(isset($_POST['fc_facturas_id_monto'])){
+                        $fc_facturas_montos = $_POST['fc_facturas_id_monto'];
+                    }
 
                     $modelo_relacionada = new fc_nc_rel(link: $this->link);
 
-                    $r_fc_factura_relacionada = $this->inserta_relacionada(
-                        key_modelo_base_id: 'fc_factura_id',
-                        key_modelo_rel_id: $this->modelo_relacion->key_id,modelo_relacionada:  $modelo_relacionada,
-                        registro_entidad_id: $fc_factura_id, relacion_id: $fc_relacion_id);
+                    $r_fc_factura_relacionada = $this->inserta_relacionada(fc_facturas_montos: $fc_facturas_montos,
+                        key_modelo_base_id: 'fc_factura_id', key_modelo_rel_id: $this->modelo_relacion->key_id,
+                        modelo_relacionada:  $modelo_relacionada, registro_entidad_id: $fc_factura_id,
+                        relacion_id: $fc_relacion_id);
+
                     if (errores::$error) {
-                        return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_factura_relacionada,
-                            header: true, ws: $ws);
+                        return $this->retorno_error(mensaje: 'Error al dar de alta registro',
+                            data: $r_fc_factura_relacionada, header: true, ws: $ws);
                     }
 
                 }
@@ -1949,7 +1958,8 @@ class _base_system_fc extends _base_system{
 
     }
 
-    private function inserta_relacionada(string $key_modelo_base_id, string $key_modelo_rel_id, modelo $modelo_relacionada,
+    private function inserta_relacionada(array $fc_facturas_montos, string $key_modelo_base_id,
+                                         string $key_modelo_rel_id, modelo $modelo_relacionada,
                                          int $registro_entidad_id, int $relacion_id): array|stdClass
     {
 
@@ -1960,8 +1970,9 @@ class _base_system_fc extends _base_system{
             return $this->errores->error(mensaje: 'Error al validar datos de relacion',data:  $valida);
         }
 
-        $fc_factura_relacionada_ins = $this->row_relacionada(key_modelo_base_id: $key_modelo_base_id,
-            key_modelo_rel_id: $key_modelo_rel_id, registro_entidad_id: $registro_entidad_id, relacion_id: $relacion_id);
+        $fc_factura_relacionada_ins = $this->row_relacionada(fc_facturas_montos: $fc_facturas_montos,
+            key_modelo_base_id: $key_modelo_base_id, key_modelo_rel_id: $key_modelo_rel_id,
+            registro_entidad_id: $registro_entidad_id, relacion_id: $relacion_id);
 
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al obtener registro de relacion', data: $fc_factura_relacionada_ins);
@@ -2005,6 +2016,20 @@ class _base_system_fc extends _base_system{
             return $this->errores->error(mensaje: 'Error al generar checkbox', data: $checkbox);
         }
         $factura_cliente['seleccion'] = $checkbox;
+        $relacion_id = $relacion[$key_relacion_id];
+
+        $row_entidad_id = $factura_cliente[$key_entidad_id];
+        $name = "fc_facturas_id_monto[$row_entidad_id][fc_relacion_id][$relacion_id]";
+        $input_monto = (new fc_nota_credito_html(html: $this->html_base))->input_monto_aplicado_factura(
+            cols: 12,row_upd: new stdClass(),value_vacio: false, name: $name);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar monto', data: $input_monto);
+        }
+
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar input_monto', data: $input_monto);
+        }
+        $factura_cliente['input_monto'] = $input_monto;
 
         return $factura_cliente;
     }
@@ -2590,16 +2615,22 @@ class _base_system_fc extends _base_system{
 
     /**
      * Integra un elemento para insercion de una relacion
+     * @param array $fc_facturas_montos
      * @param string $key_modelo_base_id Key del modelo base
      * @param string $key_modelo_rel_id Ker del modelo a relacionar
      * @param int $registro_entidad_id Registro id de la entidad base
      * @param int $relacion_id Relacion base
      * @return array
-
      */
-    private function row_relacionada(string $key_modelo_base_id, string $key_modelo_rel_id,
+    private function row_relacionada(array $fc_facturas_montos, string $key_modelo_base_id, string $key_modelo_rel_id,
                                      int $registro_entidad_id, int $relacion_id): array
     {
+
+        if(isset($fc_facturas_montos[$registro_entidad_id]['fc_relacion_id'][$relacion_id])){
+            $fc_factura_relacionada_ins['monto_aplicado_factura']
+                = round($fc_facturas_montos[$registro_entidad_id]['fc_relacion_id'][$relacion_id],2);
+        }
+
 
         $valida = $this->valida_data_relacion(key_modelo_base_id: $key_modelo_base_id,
             key_modelo_rel_id:  $key_modelo_rel_id,registro_entidad_id:  $registro_entidad_id,
@@ -2628,6 +2659,10 @@ class _base_system_fc extends _base_system{
 
     final protected function thead_relacion(): string
     {
+        $th_aplica_monto = '';
+        if($this->aplica_monto_relacion){
+            $th_aplica_monto = '<th>Monto</th>';
+        }
         $html = '<thead>
                                         <tr>
                                             <th>UUID</th>
@@ -2636,6 +2671,7 @@ class _base_system_fc extends _base_system{
                                             <th>Fecha</th>
                                             <th>Estatus</th>
                                             <th>Tipo de CFDI</th>
+                                            '.$th_aplica_monto.'
                                             <th>Selecciona</th>
                                         </tr>
                                         </thead>';
@@ -2702,7 +2738,8 @@ class _base_system_fc extends _base_system{
         return $tipo_comprobante;
     }
 
-    final public function tr_relacion(array $fc_factura, string $key_etapa, string $key_fecha, string $key_folio,  string $key_uuid): string|array
+    final public function tr_relacion(bool $aplica_monto, array $fc_factura, string $key_etapa,
+                                      string $key_fecha, string $key_folio,  string $key_uuid): string|array
     {
 
         $keys = array($key_uuid,'com_cliente_rfc', $key_folio, $key_fecha, $key_etapa,'cat_sat_tipo_de_comprobante_descripcion','seleccion');
@@ -2713,6 +2750,11 @@ class _base_system_fc extends _base_system{
 
         }
 
+        $td_monto = '';
+        if($aplica_monto){
+            $td_monto = "<td>$fc_factura[input_monto]</td>";
+        }
+
         return "<tr>
                     <td>$fc_factura[$key_uuid]</td>
                     <td>$fc_factura[com_cliente_rfc]</td>
@@ -2720,6 +2762,7 @@ class _base_system_fc extends _base_system{
                     <td>$fc_factura[$key_fecha]</td>
                     <td>$fc_factura[$key_etapa]</td>
                     <td>$fc_factura[cat_sat_tipo_de_comprobante_descripcion]</td>
+                    $td_monto
                     <td>$fc_factura[seleccion]</td>
                     </tr>";
     }
@@ -2761,6 +2804,14 @@ class _base_system_fc extends _base_system{
     }
 
 
+    /**
+     * Valida los elementos de una relacion a entidad de tipo factura
+     * @param string $key_modelo_base_id Key del modelo entidad base
+     * @param string $key_modelo_rel_id Key de la entidad de relacion
+     * @param int $registro_entidad_id Identificador de la entidad base
+     * @param int $relacion_id Identificador del modelo de relacion
+     * @return bool|array
+     */
     private function valida_data_relacion(string $key_modelo_base_id, string $key_modelo_rel_id,
                                           int $registro_entidad_id, int $relacion_id): bool|array
     {
