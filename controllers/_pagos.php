@@ -100,16 +100,20 @@ class _pagos{
         $saldos->saldo_total = 0.0;
 
         foreach ($fc_facturas as $indice_fc_factura=>$fc_factura){
+
+
             $saldos = $this->saldos_factura(fc_factura: $fc_factura, link: $link, saldo_total: $saldos->saldo_total);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al obtener saldos',data:  $saldos);
             }
 
+            $saldos->monto_pagado = $fc_factura['fc_factura_monto_saldo_aplicado'];
+            $saldos->saldo = $fc_factura['fc_factura_saldo'];
 
             $fc_facturas[$indice_fc_factura]['fc_factura_monto_pagado'] = $saldos->monto_pagado;
             $fc_facturas[$indice_fc_factura]['fc_factura_saldo'] = $saldos->saldo;
 
-            if($saldos->saldo <= 0.0) {
+            if($fc_factura['fc_factura_saldo']<=0.0){
                 unset($fc_facturas[$indice_fc_factura]);
             }
         }

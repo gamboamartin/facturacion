@@ -88,7 +88,7 @@ class fc_docto_relacionado extends _modelo_parent{
             }
         }
 
-        $regenera = (new fc_factura(link: $this->link))->regenera_saldos(fc_factura_id:  $this->registro['fc_factura_id']);
+        $regenera = (new _saldos_fc())->regenera_saldos(fc_factura_id:  $this->registro['fc_factura_id'],link: $this->link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar monto regenera',data:  $regenera);
         }
@@ -196,7 +196,7 @@ class fc_docto_relacionado extends _modelo_parent{
         }
 
 
-        $regenera = (new fc_factura(link: $this->link))->regenera_saldos(fc_factura_id:  $registro['fc_factura_id']);
+        $regenera = (new _saldos_fc())->regenera_saldos(fc_factura_id:  $registro['fc_factura_id'],link: $this->link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar monto regenera',data:  $regenera);
         }
