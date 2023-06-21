@@ -509,6 +509,12 @@ class _partida extends  _base{
 
         $total = 0.0;
         foreach ($fc_partidas as $fc_partida){
+            $keys = array($this->tabla.'_total');
+            $valida = $this->validacion->valida_double_mayores_igual_0(keys: $keys,registro:  $fc_partida);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar fc_partida', data: $valida);
+            }
+
             $total += round($fc_partida[$this->tabla.'_total'],2);
         }
         return round($total,2);
@@ -525,6 +531,12 @@ class _partida extends  _base{
 
         $sub_total_base = 0.0;
         foreach ($fc_partidas as $fc_partida){
+            $keys = array($this->tabla.'_sub_total_base');
+            $valida = $this->validacion->valida_double_mayores_igual_0(keys: $keys,registro:  $fc_partida);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar fc_partida', data: $valida);
+            }
+
             $sub_total_base += round($fc_partida[$this->tabla.'_sub_total_base'],2);
         }
         return round($sub_total_base,2);

@@ -42,9 +42,11 @@ class fc_traslado_cp extends _data_impuestos {
         $columnas_extra['fc_partida_cp_importe_con_descuento'] = $sq_importes->fc_partida_entidad_importe_con_descuento;
         $columnas_extra['fc_traslado_cp_importe'] = "$tabla.total";
 
+        $atributos_criticos = array('total');
+
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas, campos_view: $campos_view, columnas_extra: $columnas_extra,
-            no_duplicados: $no_duplicados, tipo_campos: array());
+            no_duplicados: $no_duplicados, atributos_criticos: $atributos_criticos);
 
         $this->NAMESPACE = __NAMESPACE__;
 

@@ -25,9 +25,11 @@ class fc_partida extends _partida
 
         $no_duplicados = array('codigo', 'descripcion_select', 'alias', 'codigo_bis');
 
+        $atributos_criticos = array('sub_total','total_traslados','total_retenciones','sub_total_base','total');
+
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios, columnas: $columnas,
-            columnas_extra: $columnas_extra, no_duplicados: $no_duplicados, tipo_campos: array());
+            columnas_extra: $columnas_extra, no_duplicados: $no_duplicados, atributos_criticos: $atributos_criticos);
 
         $this->NAMESPACE = __NAMESPACE__;
 
