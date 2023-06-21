@@ -75,6 +75,12 @@ class _comprobante{
 
         }
 
+        if(isset($row_entidad['com_tipo_cambio_monto'])){
+            if((float)($row_entidad['com_tipo_cambio_monto']) !== 1.0){
+                $comprobante['tipo_cambio'] = $row_entidad['com_tipo_cambio_monto'];
+            }
+
+        }
         return $comprobante;
     }
 
