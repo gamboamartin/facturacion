@@ -1601,8 +1601,6 @@ class _base_system_fc extends _base_system{
     public function init_links(string $name_modelo_email): array|string
     {
 
-
-
         $this->obj_link->genera_links(controler: $this);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar links para partida',data:  $this->obj_link);
