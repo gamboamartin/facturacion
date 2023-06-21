@@ -102,7 +102,7 @@ class _pagos{
         foreach ($fc_facturas as $indice_fc_factura=>$fc_factura){
 
 
-            $saldos = $this->saldos_factura(fc_factura: $fc_factura, link: $link, saldo_total: $saldos->saldo_total);
+            $saldos = $this->saldos_factura(fc_factura: $fc_factura, saldo_total: $saldos->saldo_total);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al obtener saldos',data:  $saldos);
             }
@@ -319,37 +319,36 @@ class _pagos{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener factura',data:  $fc_factura);
         }
-        $total_pagos = $this->total_pagos(fc_factura_id: $fc_factura_id,link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener total de pagos',data:  $total_pagos);
-        }
 
-        $saldo = round($fc_factura['fc_factura_total'],2) - round($total_pagos,2);
+        $saldo = round($fc_factura['fc_factura_saldo'],2);
         return round($saldo,2);
 
     }
 
-    private function saldos_factura(array $fc_factura, PDO $link, float $saldo_total): array|stdClass
+    private function saldos_factura(array $fc_factura, float $saldo_total): array|stdClass
     {
-        $monto_pagado = $this->total_pagos(fc_factura_id: $fc_factura['fc_factura_id'],link: $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener monto_pagado',data:  $monto_pagado);
-        }
 
-        $saldo = $fc_factura['fc_factura_total'] - $monto_pagado;
+        $saldo = $fc_factura['fc_factura_saldo'];
 
         $saldo_total += $saldo;
 
         $data = new stdClass();
         $data->saldo = $saldo;
-        $data->monto_pagado = $monto_pagado;
+        $data->monto_pagado = $fc_factura['fc_factura_monto_saldo_aplicado'];
         $data->saldo_total = $saldo_total;
 
 
         return $data;
     }
 
-    private function total_pagos(int $fc_factura_id, PDO $link){
+    /**
+     * Obtiene los pagos en sumatoria den base a los doctos relacionados
+     * @param int $fc_factura_id Factura id
+     * @param PDO $link Conexion a la base de datos
+     * @return array|float
+     */
+    private function total_pagos(int $fc_factura_id, PDO $link): float|array
+    {
 
         $filtro['fc_factura.id'] = $fc_factura_id;
         $filtro['fc_docto_relacionado.status'] = 'activo';

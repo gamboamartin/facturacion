@@ -262,6 +262,12 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al modificar entidad base', data: $regenera_total);
         }
 
+        $regenera_saldo = $this->regenera_fc_saldo(registro_entidad_id: $registro_entidad_id,
+            key_filtro_entidad_id: $this->modelo_entidad->key_filtro_id, modelo_entidad: $this->modelo_entidad);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al modificar entidad base', data: $regenera_saldo);
+        }
+
 
         $data = new stdClass();
         $data->regenera_total_descuento = $regenera_total_descuento;
@@ -270,6 +276,7 @@ class _partida extends  _base{
         $data->regenera_total_traslados = $regenera_total_traslados;
         $data->regenera_total_retenciones = $regenera_total_retenciones;
         $data->regenera_total = $regenera_total;
+        $data->regenera_saldo = $regenera_saldo;
         return $data;
     }
 
@@ -1038,6 +1045,24 @@ class _partida extends  _base{
         }
         return $r_entidad_upd;
     }
+
+    private function regenera_fc_saldo(int $registro_entidad_id, string $key_filtro_entidad_id,
+                                       _transacciones_fc $modelo_entidad){
+        $total = $this->fc_entidad_total(key_filtro_entidad_id: $key_filtro_entidad_id,
+            registro_entidad_id:  $registro_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener total_retenciones', data: $total);
+        }
+
+        $fc_entidad_upd['saldo'] = $total;
+
+        $r_entidad_upd = $modelo_entidad->modifica_bd(registro: $fc_entidad_upd,id:  $registro_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al actualizar sub_total_base', data: $r_entidad_upd);
+        }
+        return $r_entidad_upd;
+    }
+
 
     private function regenera_fc_sub_total_base(int $registro_entidad_id, string $key_filtro_entidad_id,
                                                  _transacciones_fc $modelo_entidad){
