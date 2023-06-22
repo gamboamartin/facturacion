@@ -1472,21 +1472,11 @@ class _base_system_fc extends _base_system{
 
         $tipo = (new pac())->tipo;
 
-        $modelo_partida = new fc_partida(link: $this->link);
-        $modelo_predial = new fc_cuenta_predial(link: $this->link);
-        $modelo_relacion = new fc_relacion(link: $this->link);
-        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
-        $modelo_retencion = new fc_retenido(link: $this->link);
-        $modelo_traslado = new fc_traslado(link: $this->link);
-        $modelo_etapa = new fc_factura_etapa(link: $this->link);
-        $modelo_documento = new fc_factura_documento(link: $this->link);
-        $modelo_uuid_ext = new fc_uuid_fc(link: $this->link);
 
-
-        $factura = (new fc_factura(link: $this->link))->genera_xml(modelo_documento: $modelo_documento,
-            modelo_etapa: $modelo_etapa, modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
-            modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
-            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, modelo_uuid_ext: $modelo_uuid_ext,
+        $factura = $this->modelo_entidad->genera_xml(modelo_documento: $this->modelo_documento,
+            modelo_etapa: $this->modelo_etapa, modelo_partida: $this->modelo_partida, modelo_predial: $this->modelo_predial,
+            modelo_relacion: $this->modelo_relacion, modelo_relacionada: $this->modelo_relacionada,
+            modelo_retencion: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado, modelo_uuid_ext: $this->modelo_uuid_ext,
             registro_id: $this->registro_id, tipo: $tipo);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar XML',data:  $factura, header: $header,ws:$ws);
