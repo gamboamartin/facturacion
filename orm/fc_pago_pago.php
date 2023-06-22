@@ -215,12 +215,28 @@ class fc_pago_pago extends _modelo_parent{
     private function monto_total_pagos(int $fc_pago_id): float|array
     {
         $filtro['fc_pago_id'] = $fc_pago_id;
-        $campos['monto_total_pagos'] = 'fc_pago_pago.monto';
+
+       /* $campos['monto_total_pagos'] = 'fc_pago_pago.monto';
         $fc_pago_pago = (new fc_pago_pago(link: $this->link))->suma(campos: $campos,filtro: $filtro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener totales',data:  $fc_pago_pago);
+        }*/
+
+        $r_fc_pagos = (new fc_pago_pago(link: $this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener r_fc_pagos',data:  $r_fc_pagos);
         }
-        return round($fc_pago_pago['monto_total_pagos'],2);
+
+        $fc_pagos = $r_fc_pagos->registros;
+
+        $monto_total_pagos_mxn = 0.0;
+        foreach ($fc_pagos as $fc_pago){
+            $monto_pago = round($fc_pago['fc_pago_pago_monto'],2);
+            $monto_pago_mxn = round($monto_pago * $fc_pago['com_tipo_cambio_monto'],2);
+            $monto_total_pagos_mxn +=$monto_pago_mxn;
+        }
+
+        return round($monto_total_pagos_mxn,2);
     }
 
     private function regenera_totales(int $fc_pago_id){
