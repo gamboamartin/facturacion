@@ -129,8 +129,11 @@
                                                                                     <th>Fecha</th>
                                                                                     <th>UUID</th>
                                                                                     <th>Total</th>
+                                                                                    <th>Total TC</th>
                                                                                     <th>Monto Pagado</th>
+                                                                                    <th>Monto Pagado TC</th>
                                                                                     <th>Saldo</th>
+                                                                                    <th>Saldo TC</th>
                                                                                     <th>Monto</th>
                                                                                     <th>Selecciona</th>
                                                                                 </tr>
@@ -142,15 +145,18 @@
                                                                                     <td><?php echo $fc_factura['fc_factura_fecha'] ?></td>
                                                                                     <td><?php echo $fc_factura['fc_factura_uuid'] ?></td>
                                                                                     <td><?php echo $fc_factura['fc_factura_total'] ?></td>
+                                                                                    <td><?php echo $fc_factura['total_factura_tc'] ?></td>
                                                                                     <td><?php echo $fc_factura['fc_factura_monto_pagado'] ?></td>
+                                                                                    <td><?php echo $fc_factura['imp_pagado_tc'] ?></td>
                                                                                     <td><?php echo $fc_factura['fc_factura_saldo'] ?></td>
+                                                                                    <td><?php echo $fc_factura['saldo_factura_tc'] ?></td>
                                                                                     <td>
                                                                                         <input type="text" class="form-text"
                                                                                                name="monto[][<?php echo $fc_factura['fc_factura_id'] ?>][<?php echo $fc_pago_pago['fc_pago_pago_id'] ?>]"
                                                                                         value="0" id="<?php echo $fc_factura['fc_factura_id'] ?>">
                                                                                     </td>
                                                                                     <td>
-                                                                                        <input type="checkbox" class="selecciona" value="<?php echo $fc_factura['fc_factura_id'] ?>"  data-saldo="<?php echo $fc_factura['fc_factura_saldo'] ?>">
+                                                                                        <input type="checkbox" class="selecciona" value="<?php echo $fc_factura['fc_factura_id'] ?>"  data-saldo="<?php echo $fc_factura['saldo_factura_tc'] ?>">
                                                                                     </td>
                                                                                 </tr>
                                                                             <?php }?>

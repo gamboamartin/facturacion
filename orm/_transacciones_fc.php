@@ -509,7 +509,14 @@ class _transacciones_fc extends modelo
         return $r_alta_bd->registro_id;
     }
 
-    final public function partidas_base(_partida $modelo_partida, int $registro_id){
+    /**
+     * Obtiene las partidas de una entidad de tipo cfdi
+     * @param _partida $modelo_partida Modelo a obtener las partidas
+     * @param int $registro_id Registro en proceso
+     * @return array
+     */
+    final public function partidas_base(_partida $modelo_partida, int $registro_id): array
+    {
         $filtro[$this->key_filtro_id] = $registro_id;
         $r_rows_partidas = $modelo_partida->filtro_and(filtro: $filtro);
         if (errores::$error) {
