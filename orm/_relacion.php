@@ -17,8 +17,17 @@ class _relacion extends _modelo_parent_sin_codigo{
 
     protected array $codigos_rel_permitidos = array();
 
+    /**
+     * Ajusta las relaciones obtenidas de folios externos
+     * @param string $cat_sat_tipo_relacion_codigo Tipo de relacion
+     * @param _uuid_ext $modelo_uuid_ext Modelo externo
+     * @param array $relacionados relaciones previamente cargadas
+     * @param array $row_relacion Registro de relacion nuevo
+     * @return array
+     */
     private function ajusta_relacionados(string $cat_sat_tipo_relacion_codigo, _uuid_ext $modelo_uuid_ext,
-                                         array $relacionados, array $row_relacion){
+                                         array $relacionados, array $row_relacion): array
+    {
         $relaciones = $this->relaciones_externas(modelo_uuid_ext: $modelo_uuid_ext,row_relacion:  $row_relacion);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relacion', data: $relaciones);
@@ -364,6 +373,7 @@ class _relacion extends _modelo_parent_sin_codigo{
      * @param _uuid_ext $modelo_uuid_ext Modelo de tipo uuid externo
      * @param array $row_relacion Registro de relacion
      * @return array
+     * @version 10.109.3
      */
     private function relaciones_externas(_uuid_ext $modelo_uuid_ext, array $row_relacion): array
     {
