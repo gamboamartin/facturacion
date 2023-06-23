@@ -373,8 +373,6 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     }
 
 
-
-
     public function fc_factura_relacionada_alta_bd(bool $header, bool $ws = false)
     {
 

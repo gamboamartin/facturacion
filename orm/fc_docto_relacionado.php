@@ -214,6 +214,12 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al actualizar monto regenera',data:  $regenera);
         }
 
+        $regenera = (new fc_pago_pago(link: $this->link))->regenera_totales(fc_pago_id: $registro['fc_pago_pago_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al actualizar totales',data:  $regenera);
+        }
+
+
 
         return $r_elimina_bd;
 
@@ -288,13 +294,10 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener n_parcialidades',data:  $registro);
         }
 
-
         $registro = $this->saldos_alta(registro: $registro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al integrar registro',data:  $registro);
         }
-
-
 
 
         return $registro;
@@ -398,7 +401,7 @@ class fc_docto_relacionado extends _modelo_parent{
 
         $monto = round($r_fc_docto_relacionados['monto'],2);
 
-        $fc_pago_pago['monto'] = $monto;
+        $fc_pago_pago['monto'] = $monto ;
 
         $r_pago_pago = (new fc_pago_pago(link: $this->link))->modifica_bd(registro: $fc_pago_pago,id: $fc_pago_pago_id);
         if(errores::$error){
