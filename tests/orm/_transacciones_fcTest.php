@@ -220,6 +220,65 @@ class _transacciones_fcTest extends test
         errores::$error = false;
 
     }
+
+    public function test_modifica_bd(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new fc_complemento_pago($this->link);
+        //$trs = new liberator($trs);
+
+        $del = (new base_test())->del_org_empresa(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar', data: $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_com_producto(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar', data: $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_adm_seccion(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar', data: $del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link,adm_seccion_descripcion: 'fc_complemento_pago');
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_complemento_pago(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
+            print_r($error);
+            exit;
+        }
+
+        $registro = array();
+        $registro['observaciones'] = '1';
+        $id = 1;
+        $resultado = $trs->modifica_bd($registro, $id);
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("UPDATE fc_complemento_pago SET observaciones = '1',usuario_update_id=2  WHERE id = 1",$resultado->sql);
+
+        errores::$error = false;
+    }
     public function test_permite_transaccion(): void
     {
         errores::$error = false;

@@ -21,9 +21,14 @@ class fc_traslado_dr_part extends _dr_part {
             'cat_sat_factor'=>$tabla,'fc_complemento_pago'=>'fc_pago');
         $campos_obligatorios = array();
 
+        $renombres['com_tipo_cambio_pago']['nombre_original'] = 'com_tipo_cambio';
+        $renombres['com_tipo_cambio_pago']['enlace'] = 'fc_pago_pago';
+        $renombres['com_tipo_cambio_pago']['key'] = 'id';
+        $renombres['com_tipo_cambio_pago']['key_enlace'] = 'com_tipo_cambio_id';
+
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas);
+            columnas: $columnas, renombres: $renombres);
 
         $this->NAMESPACE = __NAMESPACE__;
         $this->etiqueta = 'Traslado Dr Part';

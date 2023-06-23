@@ -48,16 +48,24 @@ class fc_complemento_pago extends _transacciones_fc
 
     }
 
-    private function actualiza_total(int $cat_sat_factor_id, string $cat_sat_tipo_impuesto_codigo, int $fc_pago_id){
+    private function actualiza_total(int $cat_sat_factor_id, string $cat_sat_tipo_impuesto_codigo,
+                                     float $com_tipo_cambio_monto, int $fc_pago_id){
         $cat_sat_factor = (new cat_sat_factor(link: $this->link))->registro(
             registro_id: $cat_sat_factor_id, retorno_obj: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener cat_sat_factor',data:  $cat_sat_factor);
         }
 
+        $cat_sat_tipo_impuesto_codigo = trim($cat_sat_tipo_impuesto_codigo);
+
+        if($cat_sat_tipo_impuesto_codigo === ''){
+            return $this->error->error(mensaje: 'Error cat_sat_tipo_impuesto_codigo esta vacio',
+                data:  $cat_sat_tipo_impuesto_codigo);
+        }
 
         $upd = (new fc_traslado_dr_part(link: $this->link))->upd_fc_pago_total(cat_sat_factor: $cat_sat_factor,
-            cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo, fc_pago_id: $fc_pago_id, tipo_impuesto: '');
+            cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo, com_tipo_cambio_monto: $com_tipo_cambio_monto,
+            fc_pago_id: $fc_pago_id, tipo_impuesto: 'traslados');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
         }
@@ -67,8 +75,10 @@ class fc_complemento_pago extends _transacciones_fc
     private function actualiza_totales(array $fc_traslados_dr_part){
         $upds = array();
         foreach ($fc_traslados_dr_part as $fc_traslado_dr_part){
+
             $upd = $this->actualiza_total(cat_sat_factor_id: $fc_traslado_dr_part['cat_sat_factor_id'],
                 cat_sat_tipo_impuesto_codigo: $fc_traslado_dr_part['cat_sat_tipo_impuesto_codigo'],
+                com_tipo_cambio_monto: $fc_traslado_dr_part['com_tipo_cambio_pago_monto'],
                 fc_pago_id: $fc_traslado_dr_part['fc_pago_id']);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
@@ -816,6 +826,11 @@ class fc_complemento_pago extends _transacciones_fc
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,
                                 bool $verifica_permite_transaccion = true): array|stdClass
     {
+
+        if($id <= 0){
+            return $this->error->error(mensaje: 'Error id debe ser mayor a 0', data: $id);
+        }
+
         $this->modelo_etapa = new fc_complemento_pago_etapa(link: $this->link);
 
         $r_modifica_bd = parent::modifica_bd(registro: $registro,id:  $id,reactiva:  $reactiva,

@@ -161,6 +161,18 @@ class _dr_part extends _modelo_parent{
                                        float $com_tipo_cambio_monto, int $fc_pago_id, string $tipo_impuesto): array
     {
 
+        $cat_sat_tipo_impuesto_codigo = trim($cat_sat_tipo_impuesto_codigo);
+
+        if($cat_sat_tipo_impuesto_codigo === ''){
+            return $this->error->error(mensaje: 'Error cat_sat_tipo_impuesto_codigo esta vacio',
+                data:  $cat_sat_tipo_impuesto_codigo);
+        }
+
+        $valida = $this->verifica_tipo_impuesto(tipo_impuesto: $tipo_impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar tipo de impuesto', data:  $valida);
+        }
+
         $impuestos = $this->importes_impuestos_dr_part(cat_sat_factor_id: $cat_sat_factor->cat_sat_factor_id,
             fc_pago_id:  $fc_pago_id);
         if(errores::$error){
@@ -180,12 +192,32 @@ class _dr_part extends _modelo_parent{
         }
 
 
+
         return $fc_pago_total_upd;
     }
 
     private function fc_pago_total_upd_factor(string $cat_sat_tipo_impuesto_codigo, stdClass $impuestos,
                                               string $key_factor, float $com_tipo_cambio_monto, string $tipo_impuesto): array
     {
+
+        $cat_sat_tipo_impuesto_codigo = trim($cat_sat_tipo_impuesto_codigo);
+
+        if($cat_sat_tipo_impuesto_codigo === ''){
+            return $this->error->error(mensaje: 'Error cat_sat_tipo_impuesto_codigo esta vacio',
+                data:  $cat_sat_tipo_impuesto_codigo);
+        }
+
+        $key_factor = trim($key_factor);
+
+        if($key_factor === ''){
+            return $this->error->error(mensaje: 'Error key_factor esta vacio',
+                data:  $key_factor);
+        }
+
+        $valida = $this->verifica_tipo_impuesto(tipo_impuesto: $tipo_impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar tipo de impuesto', data:  $valida);
+        }
 
         $fc_pago_total_upd = array();
 
@@ -197,11 +229,14 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error integrar importe_dr_mxn', data:  $fc_pago_total_upd);
         }
 
+
         $fc_pago_total_upd = $this->integra_impuesto_total_traslado(com_tipo_cambio_monto: $com_tipo_cambio_monto,
             fc_pago_total_upd: $fc_pago_total_upd,impuestos:  $impuestos,key_factor:  $key_factor,tipo_impuesto:  $tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error integrar fc_pago_total_upd', data:  $fc_pago_total_upd);
         }
+
+
 
 
         return $fc_pago_total_upd;
@@ -331,6 +366,27 @@ class _dr_part extends _modelo_parent{
     private function integra_importe_dr_total(string $cat_sat_tipo_impuesto_codigo, float $com_tipo_cambio_monto,
                                               array $fc_pago_total_upd, stdClass $impuestos, string $key_factor,
                                               string $tipo_impuesto){
+
+
+        $cat_sat_tipo_impuesto_codigo = trim($cat_sat_tipo_impuesto_codigo);
+
+        if($cat_sat_tipo_impuesto_codigo === ''){
+            return $this->error->error(mensaje: 'Error cat_sat_tipo_impuesto_codigo esta vacio',
+                data:  $cat_sat_tipo_impuesto_codigo);
+        }
+
+        $key_factor = trim($key_factor);
+
+        if($key_factor === ''){
+            return $this->error->error(mensaje: 'Error key_factor esta vacio',
+                data:  $key_factor);
+        }
+
+        $valida = $this->verifica_tipo_impuesto(tipo_impuesto: $tipo_impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar tipo de impuesto', data:  $valida);
+        }
+
         $key_importe_dr = $this->key_importe_dr(cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo,
             key_factor:  $key_factor,tipo_impuesto:  $tipo_impuesto);
 
@@ -373,6 +429,28 @@ class _dr_part extends _modelo_parent{
     }
 
     private function key_importe_dr(string $cat_sat_tipo_impuesto_codigo, string $key_factor, string $tipo_impuesto){
+
+        $cat_sat_tipo_impuesto_codigo = trim($cat_sat_tipo_impuesto_codigo);
+
+        if($cat_sat_tipo_impuesto_codigo === ''){
+            return $this->error->error(mensaje: 'Error cat_sat_tipo_impuesto_codigo esta vacio',
+                data:  $cat_sat_tipo_impuesto_codigo);
+        }
+
+        $key_factor = trim($key_factor);
+
+        if($key_factor === ''){
+            return $this->error->error(mensaje: 'Error key_factor esta vacio',
+                data:  $key_factor);
+        }
+
+        $valida = $this->verifica_tipo_impuesto(tipo_impuesto: $tipo_impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar tipo de impuesto', data:  $valida);
+        }
+
+
+
         $key_importe_dr = '';
 
         $keys_retenciones = $this->keys_retenciones();
@@ -480,8 +558,28 @@ class _dr_part extends _modelo_parent{
         return $dr_part;
     }
 
+    private function tipo_impuestos_validos(): array
+    {
+        $tipos_impuestos_validos[] = 'retenciones';
+        $tipos_impuestos_validos[] = 'traslados';
+        return $tipos_impuestos_validos;
+    }
+
     final public function upd_fc_pago_total(stdClass $cat_sat_factor, string $cat_sat_tipo_impuesto_codigo,
                                             float $com_tipo_cambio_monto, int $fc_pago_id, string $tipo_impuesto){
+
+        $cat_sat_tipo_impuesto_codigo = trim($cat_sat_tipo_impuesto_codigo);
+
+        if($cat_sat_tipo_impuesto_codigo === ''){
+            return $this->error->error(mensaje: 'Error cat_sat_tipo_impuesto_codigo esta vacio',
+                data:  $cat_sat_tipo_impuesto_codigo);
+        }
+
+
+        $valida = $this->verifica_tipo_impuesto(tipo_impuesto: $tipo_impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar tipo de impuesto', data:  $valida);
+        }
 
         $fc_pago_total_upd = $this->fc_pago_total_upd(cat_sat_factor: $cat_sat_factor,
             cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo, com_tipo_cambio_monto: $com_tipo_cambio_monto,
@@ -490,11 +588,11 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener fc_pago_total_upd',data:  $fc_pago_total_upd);
         }
 
-
         $fc_pago_total = $this->fc_pago_total(fc_pago_id: $fc_pago_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_pago_total',data:  $fc_pago_total);
         }
+
 
         $upd = (new fc_pago_total(link: $this->link))->modifica_bd(registro: $fc_pago_total_upd ,
             id: $fc_pago_total['fc_pago_total_id']);
@@ -502,6 +600,34 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
         }
         return $upd;
+    }
+
+    private function valida_tipo_impuesto(string $tipo_impuesto){
+        $tipos_impuestos_validos = $this->tipo_impuestos_validos();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maquetar tipos de impuestos', data:  $tipos_impuestos_validos);
+        }
+
+        if(!in_array($tipo_impuesto, $tipos_impuestos_validos)){
+            return $this->error->error(mensaje: 'Error ingrese un tipo impuesto valido',
+                data:  $tipos_impuestos_validos);
+        }
+        return true;
+    }
+
+    private function verifica_tipo_impuesto(string $tipo_impuesto){
+        $tipo_impuesto = trim($tipo_impuesto);
+
+        if($tipo_impuesto === ''){
+            return $this->error->error(mensaje: 'Error tipo_impuesto esta vacio',
+                data:  $tipo_impuesto);
+        }
+
+        $valida = $this->valida_tipo_impuesto(tipo_impuesto: $tipo_impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar tipo de impuesto', data:  $valida);
+        }
+        return true;
     }
 
 }
