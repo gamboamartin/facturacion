@@ -10,6 +10,7 @@ namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_complemento_pago_html;
+use gamboamartin\facturacion\models\_doctos_rel;
 use gamboamartin\facturacion\models\fc_cancelacion_cp;
 use gamboamartin\facturacion\models\fc_cfdi_sellado_cp;
 use gamboamartin\facturacion\models\fc_complemento_pago;
@@ -161,6 +162,9 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
     }
 
+
+
+
     public function cancela(bool $header, bool $ws = false)
     {
         $this->modelo_entidad = new fc_complemento_pago(link: $this->link);
@@ -199,7 +203,6 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
         return $r_template;
     }
-
 
 
     private function data_modifica(float $saldo_total): array|stdClass
@@ -280,7 +283,6 @@ class controlador_fc_complemento_pago extends _base_system_fc {
     }
 
 
-
     public function descarga_xml(bool $header, bool $ws = false)
     {
         $this->modelo_documento = new fc_complemento_pago_documento(link: $this->link);
@@ -334,40 +336,11 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $this->link->beginTransaction();
 
         $montos = $_POST['monto'];
-        $altas = array();
 
-        //print_r($montos);exit;
-
-        foreach ($montos as $fc_factura){
-            $fc_factura_id = key($fc_factura);
-            $fc_pago_pago_id = key($fc_factura[$fc_factura_id]);
-
-            $existe_monto = false;
-            $monto = 0;
-            if(isset($fc_factura[$fc_factura_id])){
-                if(isset($fc_factura[$fc_factura_id][$fc_pago_pago_id])){
-                    if(trim($fc_factura[$fc_factura_id][$fc_pago_pago_id])!==''){
-                        if((float)trim($fc_factura[$fc_factura_id][$fc_pago_pago_id]) > 0.0){
-                            $monto = $fc_factura[$fc_factura_id][$fc_pago_pago_id];
-                            $existe_monto = true;
-                        }
-                    }
-                }
-            }
-            if($existe_monto) {
-
-                $fc_docto_relacionado_ins['fc_factura_id'] = $fc_factura_id;
-                $fc_docto_relacionado_ins['imp_pagado'] = $monto;
-                $fc_docto_relacionado_ins['fc_pago_pago_id'] = $fc_pago_pago_id;
-
-                $alta_bd = (new fc_docto_relacionado(link: $this->link))->alta_registro(registro: $fc_docto_relacionado_ins);
-                if (errores::$error) {
-                    $this->link->rollBack();
-                    return $this->retorno_error(mensaje: 'Error al insertar', data: $alta_bd, header: $header, ws: $ws);
-                }
-                $altas[] = $alta_bd;
-            }
-
+        $altas = (new _doctos_rel())->inserta_doctos_relacionados(link: $this->link, montos: $montos);
+        if (errores::$error) {
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al insertar', data: $altas, header: $header, ws: $ws);
         }
 
         $siguiente_view = (new actions())->init_alta_bd();
@@ -398,6 +371,8 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
 
     }
+
+
 
 
     public function fc_factura_relacionada_alta_bd(bool $header, bool $ws = false)
@@ -473,7 +448,6 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         }
         return $r_xml;
     }
-
 
 
     public function modifica(bool $header, bool $ws = false): array|stdClass

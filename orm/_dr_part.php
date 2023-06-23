@@ -184,6 +184,7 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener key_factor', data:  $key_factor);
         }
 
+
         $fc_pago_total_upd = $this->fc_pago_total_upd_factor(
             cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo, impuestos: $impuestos,
             key_factor: $key_factor, com_tipo_cambio_monto: $com_tipo_cambio_monto, tipo_impuesto: $tipo_impuesto);
@@ -413,7 +414,12 @@ class _dr_part extends _modelo_parent{
     }
 
 
-    private function key_factor(stdClass $cat_sat_factor): string
+    /**
+     * Obtiene el key de los factores a integrar
+     * @param stdClass $cat_sat_factor factor para calculo de impuestos
+     * @return string|array
+     */
+    private function key_factor(stdClass $cat_sat_factor): string|array
     {
         $key_factor = '';
         if((float)$cat_sat_factor->cat_sat_factor_factor === 0.00){
@@ -425,6 +431,18 @@ class _dr_part extends _modelo_parent{
         if((float)$cat_sat_factor->cat_sat_factor_factor === 0.16){
             $key_factor = '16';
         }
+        if((float)$cat_sat_factor->cat_sat_factor_factor === 0.1066){
+            $key_factor = '1066';
+        }
+        if((float)$cat_sat_factor->cat_sat_factor_factor === 0.0125){
+            $key_factor = '0125';
+        }
+
+
+        if($key_factor === ''){
+            return $this->error->error(mensaje: 'Error key_factor invalido ingrese uno valido', data:  $cat_sat_factor);
+        }
+
         return $key_factor;
     }
 
