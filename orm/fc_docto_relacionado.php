@@ -26,8 +26,20 @@ class fc_docto_relacionado extends _modelo_parent{
             'imp_pagado','imp_saldo_insoluto','cat_sat_obj_imp_id','fc_pago_pago_id','total_factura','total_factura_tc',
             'imp_pagado_tc','saldo_factura_tc');
 
+
+        $renombres['com_tipo_cambio_pago']['nombre_original'] = 'com_tipo_cambio';
+        $renombres['com_tipo_cambio_pago']['enlace'] = 'fc_pago_pago';
+        $renombres['com_tipo_cambio_pago']['key'] = 'id';
+        $renombres['com_tipo_cambio_pago']['key_enlace'] = 'com_tipo_cambio_id';
+
+        $renombres['com_tipo_cambio_factura']['nombre_original'] = 'com_tipo_cambio';
+        $renombres['com_tipo_cambio_factura']['enlace'] = 'fc_factura';
+        $renombres['com_tipo_cambio_factura']['key'] = 'id';
+        $renombres['com_tipo_cambio_factura']['key_enlace'] = 'com_tipo_cambio_id';
+
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
-            columnas: $columnas, columnas_extra: $columnas_extra, atributos_criticos: $atributos_criticos);
+            columnas: $columnas, columnas_extra: $columnas_extra, renombres: $renombres,
+            atributos_criticos: $atributos_criticos);
 
         $this->NAMESPACE = __NAMESPACE__;
         $this->etiqueta = 'Docto Relacionado';
@@ -392,22 +404,72 @@ class fc_docto_relacionado extends _modelo_parent{
     private function regenera_pago_pago_monto(int $fc_pago_pago_id){
 
         $filtro['fc_pago_pago.id'] = $fc_pago_pago_id;
-        $campos['monto'] = 'fc_docto_relacionado.imp_pagado';
 
-        $r_fc_docto_relacionados = $this->suma(campos: $campos, filtro: $filtro);
+        $r_fc_docto_relacionado = $this->filtro_and(filtro: $filtro);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener pagos',data:  $r_fc_docto_relacionados);
+            return $this->error->error(mensaje: 'Error al obtener documentos',data:  $r_fc_docto_relacionado);
         }
 
-        $monto = round($r_fc_docto_relacionados['monto'],2);
+        $fc_doctos_relacionados = $r_fc_docto_relacionado->registros;
 
-        $fc_pago_pago['monto'] = $monto ;
+        $monto_pagado_tc = $this->monto_pagado_tc(fc_doctos_relacionados: $fc_doctos_relacionados);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener monto_pagado_tc',data:  $monto_pagado_tc);
+        }
+
+
+        $fc_pago_pago['monto'] = round($monto_pagado_tc,2) ;
 
         $r_pago_pago = (new fc_pago_pago(link: $this->link))->modifica_bd(registro: $fc_pago_pago,id: $fc_pago_pago_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar pago pago',data:  $r_pago_pago);
         }
         return $r_pago_pago;
+    }
+
+    private function monto_pagado_tc(array $fc_doctos_relacionados){
+        $monto_pagado_tc = 0.0;
+        foreach ($fc_doctos_relacionados as $fc_docto_relacionado){
+            $monto_pagado_tc = $this->acumula_monto_tipo_cambio(fc_docto_relacionado: $fc_docto_relacionado,monto_pagado_tc:  $monto_pagado_tc);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener monto_pagado_tc',data:  $monto_pagado_tc);
+            }
+
+        }
+        return $monto_pagado_tc;
+    }
+
+    private function acumula_monto_tipo_cambio(array $fc_docto_relacionado, float $monto_pagado_tc){
+        $tipo_cambio_diferente = $this->tipo_cambio_diferente(fc_docto_relacionado: $fc_docto_relacionado);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener tipo_cambio_diferente',data:  $tipo_cambio_diferente);
+        }
+
+        $monto_pagado_tc = $this->integra_monto_pagado_tc(fc_docto_relacionado: $fc_docto_relacionado,
+            monto_pagado_tc:  $monto_pagado_tc,tipo_cambio_diferente:  $tipo_cambio_diferente);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener monto_pagado_tc',data:  $monto_pagado_tc);
+        }
+        return $monto_pagado_tc;
+    }
+
+    private function integra_monto_pagado_tc(array $fc_docto_relacionado, float $monto_pagado_tc, bool $tipo_cambio_diferente){
+        if($tipo_cambio_diferente){
+            $monto_pagado_tc = $this->monto_pagado_tc_dif(fc_docto_relacionado: $fc_docto_relacionado,monto_pagado_tc:  $monto_pagado_tc);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener monto_pagado_tc',data:  $monto_pagado_tc);
+            }
+        }
+        else{
+            $monto_pagado_tc += round($fc_docto_relacionado['fc_docto_relacionado_imp_pagado'], 2);
+        }
+        return $monto_pagado_tc;
+    }
+
+    private function monto_pagado_tc_dif(array $fc_docto_relacionado, float $monto_pagado_tc): float|int
+    {
+        $monto_pagado_tc += round($fc_docto_relacionado['fc_docto_relacionado_imp_pagado'], 2) / $fc_docto_relacionado['com_tipo_cambio_pago_monto'];
+        return $monto_pagado_tc;
     }
 
     private function saldos_alta(array $registro){
@@ -423,6 +485,17 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error imp_saldo_insoluto es menor a 0',data:  $registro);
         }
         return $registro;
+    }
+
+    /**
+     * Verifica si el tipo de cambio de pago es diferente al de la factura emitida
+     * @param array $fc_docto_relacionado documento a verificar
+     * @return bool
+     */
+    private function tipo_cambio_diferente(array $fc_docto_relacionado): bool
+    {
+        return (int)$fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] !==
+            (int)$fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'];
     }
 
     private function tiene_un_solo_obj_imp(array $fc_partidas): bool
