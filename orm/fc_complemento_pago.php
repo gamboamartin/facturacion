@@ -49,7 +49,8 @@ class fc_complemento_pago extends _transacciones_fc
     }
 
     private function actualiza_total(int $cat_sat_factor_id, string $cat_sat_tipo_impuesto_codigo,
-                                     float $com_tipo_cambio_monto, int $fc_pago_id){
+                                     float $com_tipo_cambio_factura_monto, float $com_tipo_cambio_pago_monto,
+                                     int $fc_pago_id){
         $cat_sat_factor = (new cat_sat_factor(link: $this->link))->registro(
             registro_id: $cat_sat_factor_id, retorno_obj: true);
         if(errores::$error){
@@ -64,8 +65,8 @@ class fc_complemento_pago extends _transacciones_fc
         }
 
         $upd = (new fc_traslado_dr_part(link: $this->link))->upd_fc_pago_total(cat_sat_factor: $cat_sat_factor,
-            cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo, com_tipo_cambio_monto: $com_tipo_cambio_monto,
-            fc_pago_id: $fc_pago_id, tipo_impuesto: 'traslados');
+            cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo, com_tipo_cambio_factura_monto: $com_tipo_cambio_factura_monto,
+            com_tipo_cambio_pago_monto: $com_tipo_cambio_pago_monto, fc_pago_id: $fc_pago_id, tipo_impuesto: 'traslados');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
         }
@@ -78,7 +79,8 @@ class fc_complemento_pago extends _transacciones_fc
 
             $upd = $this->actualiza_total(cat_sat_factor_id: $fc_traslado_dr_part['cat_sat_factor_id'],
                 cat_sat_tipo_impuesto_codigo: $fc_traslado_dr_part['cat_sat_tipo_impuesto_codigo'],
-                com_tipo_cambio_monto: $fc_traslado_dr_part['com_tipo_cambio_pago_monto'],
+                com_tipo_cambio_factura_monto: $fc_traslado_dr_part['com_tipo_cambio_factura_monto'],
+                com_tipo_cambio_pago_monto: $fc_traslado_dr_part['com_tipo_cambio_pago_monto'],
                 fc_pago_id: $fc_traslado_dr_part['fc_pago_id']);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);

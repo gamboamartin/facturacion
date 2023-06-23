@@ -17,6 +17,7 @@ use gamboamartin\facturacion\models\fc_retencion_dr_part;
 use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_retenido_cp;
 use gamboamartin\facturacion\models\fc_traslado;
+use gamboamartin\facturacion\models\fc_traslado_dr_part;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\js_base\eventos\adm_seccion;
 use gamboamartin\test\liberator;
@@ -81,6 +82,25 @@ class _dr_partTest extends test
         $this->assertEquals('1', $resultado['fc_pago.id']);
         errores::$error = false;
 
+    }
+
+    public function test_tipo_impuestos_validos(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_traslado_dr_part(link: $this->link);
+        $modelo = new liberator($modelo);
+
+
+        $resultado = $modelo->tipo_impuestos_validos();
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('retenciones', $resultado[0]);
+        $this->assertEquals('traslados', $resultado[1]);
+        errores::$error = false;
     }
 
 
