@@ -12,7 +12,8 @@ class fc_traslado_p extends _p {
     public function __construct(PDO $link)
     {
         $tabla = 'fc_traslado_p';
-        $columnas = array($tabla=>false,'fc_impuesto_p'=>$tabla,'fc_pago_pago'=>'fc_impuesto_p');
+        $columnas = array($tabla=>false,'fc_impuesto_p'=>$tabla,'fc_pago_pago'=>'fc_impuesto_p',
+            'com_tipo_cambio'=>'fc_pago_pago');
         $campos_obligatorios = array();
 
         $no_duplicados[] = 'fc_impuesto_p_id';

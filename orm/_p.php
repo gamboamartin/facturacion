@@ -149,7 +149,14 @@ class _p extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener inicializar',data:  $datas_ins_p_part);
         }
 
+        $fc_pago_pago = (new fc_pago_pago(link: $this->link))->registro(registro_id: $fc_pago_pago_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_pago_pago',data:  $fc_pago_pago);
+        }
+
         foreach ($datas_ins_p_part as $data_ins_p_part){
+            $data_ins_p_part['base_p'] = round($data_ins_p_part['base_p'] / $fc_pago_pago['com_tipo_cambio_monto'],2);
+            $data_ins_p_part['importe_p'] = round($data_ins_p_part['importe_p'] / $fc_pago_pago['com_tipo_cambio_monto'],2);
 
             $r_alta_fc_impuesto_p_part = $this->modelo_p_part->alta_registro(registro: $data_ins_p_part);
             if (errores::$error) {

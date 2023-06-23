@@ -70,8 +70,18 @@ class _dr_part extends _modelo_parent{
     {
         $campos['base_dr'] = $this->tabla.'.base_dr';
         $campos['importe_dr'] = $this->tabla.'.importe_dr';
+
         return $campos;
     }
+
+    private function campos_suma(): array
+    {
+        $campos['base_p'] = $this->tabla.'.base_dr';
+        $campos['importe_p'] = $this->tabla.'.importe_dr';
+        return $campos;
+    }
+
+
 
     /**
      * Integra el codigo si no existe de manera automatica
@@ -114,6 +124,12 @@ class _dr_part extends _modelo_parent{
         return $data;
     }
 
+    private function data_upd(array $dr_part, array $fc_row_p): array
+    {
+        $data_upd['base_p'] = round($dr_part['base_p'] / $fc_row_p['com_tipo_cambio_monto'],2);
+        $data_upd['importe_p'] = round($dr_part['importe_p'] / $fc_row_p['com_tipo_cambio_monto'],2);
+        return $data_upd;
+    }
 
 
     /**
@@ -191,6 +207,15 @@ class _dr_part extends _modelo_parent{
         return $fc_pago_total_upd;
     }
 
+    private function filtro_dr_part(array $row_p_part): array
+    {
+        $filtro['cat_sat_tipo_impuesto.id'] = $row_p_part['cat_sat_tipo_impuesto_id'];
+        $filtro['cat_sat_tipo_factor.id'] = $row_p_part['cat_sat_tipo_factor_id'];
+        $filtro['cat_sat_factor.id'] = $row_p_part['cat_sat_factor_id'];
+        $filtro['fc_pago_pago.id'] = $row_p_part['fc_pago_pago_id'];
+        return $filtro;
+    }
+
     /**
      * Maqueta el filtro para obtener las partidas de traslados de un documento
      * @param int $cat_sat_factor_id Factor a verificar
@@ -266,18 +291,15 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al insertar row_p_part',data:  $row_p_part);
         }
 
+        $dr_part = $this->suma_dr_part(row_p_part: $row_p_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener suma de campos',data:  $dr_part);
+        }
 
-        $filtro['cat_sat_tipo_impuesto.id'] = $row_p_part['cat_sat_tipo_impuesto_id'];
-        $filtro['cat_sat_tipo_factor.id'] = $row_p_part['cat_sat_tipo_factor_id'];
-        $filtro['cat_sat_factor.id'] = $row_p_part['cat_sat_factor_id'];
-        $filtro['fc_pago_pago.id'] = $row_p_part['fc_pago_pago_id'];
-
-        $campos['base_p'] = $this->tabla.'.base_dr';
-        $campos['importe_p'] = $this->tabla.'.importe_dr';
-        $dr_part = $this->suma(campos: $campos, filtro: $filtro);
-
-        $data_upd['base_p'] = $dr_part['base_p'];
-        $data_upd['importe_p'] = $dr_part['importe_p'];
+        $data_upd = $this->data_upd(dr_part: $dr_part,fc_row_p:  $fc_row_p);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener datos',data:  $data_upd);
+        }
 
         /**
          * @var _p_part $modelo_p_part
@@ -436,6 +458,26 @@ class _dr_part extends _modelo_parent{
                 data:  $fc_impuestos_dr_part);
         }
         return $fc_impuestos_dr_part;
+    }
+
+    private function suma_dr_part(array $row_p_part){
+        $filtro = $this->filtro_dr_part(row_p_part: $row_p_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maquetar filtro',data:  $filtro);
+        }
+
+        $campos = $this->campos_suma();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al maquetar campos',data:  $campos);
+        }
+
+
+        $dr_part = $this->suma(campos: $campos, filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener dr_part',data:  $dr_part);
+        }
+
+        return $dr_part;
     }
 
     final public function upd_fc_pago_total(stdClass $cat_sat_factor, string $cat_sat_tipo_impuesto_codigo,

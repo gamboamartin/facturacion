@@ -12,7 +12,8 @@ class fc_impuesto_p extends _modelo_parent{
     public function __construct(PDO $link)
     {
         $tabla = 'fc_impuesto_p';
-        $columnas = array($tabla=>false,'fc_pago_pago'=>$tabla,'fc_pago'=>'fc_pago_pago','fc_complemento_pago'=>'fc_pago');
+        $columnas = array($tabla=>false,'fc_pago_pago'=>$tabla,'fc_pago'=>'fc_pago_pago',
+            'fc_complemento_pago'=>'fc_pago','com_tipo_cambio'=>'fc_pago_pago');
         $campos_obligatorios = array();
 
         $no_duplicados[] = 'fc_pago_pago_id';
@@ -146,9 +147,15 @@ class fc_impuesto_p extends _modelo_parent{
      * Verifica si existe un elemento de tip impuesto basado en en identificador de complemento de pago
      * @param int $fc_complemento_pago_id Identificador del complemento de pago
      * @return array|bool
+     * @version 10.112.3
      */
     private function existe_fc_impuesto_p(int $fc_complemento_pago_id): bool|array
     {
+        if($fc_complemento_pago_id <=0){
+            return $this->error->error(mensaje: 'Error fc_complemento_pago_id es menor a 0',
+                data:  $fc_complemento_pago_id);
+        }
+
         $filtro = array();
         $filtro['fc_complemento_pago.id'] = $fc_complemento_pago_id;
         $existe = $this->existe(filtro: $filtro);
@@ -270,7 +277,12 @@ class fc_impuesto_p extends _modelo_parent{
         return $r_fc_row_p->registros[0];
     }
 
-    private function inserta_fc_impuesto_p(int $fc_pago_pago_id){
+    /**
+     * @param int $fc_pago_pago_id
+     * @return array
+     */
+    private function inserta_fc_impuesto_p(int $fc_pago_pago_id): array
+    {
         $fc_impuesto_p_ins = array();
         $fc_impuesto_p_ins['fc_pago_pago_id'] = $fc_pago_pago_id;
         $r_alta_impuesto_p = $this->alta_registro(registro: $fc_impuesto_p_ins);
