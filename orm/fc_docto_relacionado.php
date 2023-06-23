@@ -232,7 +232,6 @@ class fc_docto_relacionado extends _modelo_parent{
         }
 
 
-
         return $r_elimina_bd;
 
     }

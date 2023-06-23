@@ -36,7 +36,8 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
 
-        $com_tipo_cambio_pago = (new com_tipo_cambio(link: $this->link))->registro(registro_id: $r_alta_bd->registro['fc_pago_pago_com_tipo_cambio_id']);
+        $com_tipo_cambio_pago = (new com_tipo_cambio(link: $this->link))->registro(
+            registro_id: $r_alta_bd->registro['fc_pago_pago_com_tipo_cambio_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener com_tipo_cambio_pago',data:  $com_tipo_cambio_pago);
         }
@@ -46,9 +47,9 @@ class _dr_part extends _modelo_parent{
 
         $upd = $this->upd_fc_pago_total(cat_sat_factor: $cat_sat_factor,
             cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo,
-            com_tipo_cambio_monto: $com_tipo_cambio_pago['com_tipo_cambio_monto'],
-            fc_pago_id: $r_alta_bd->registro['fc_pago_id'],
-            tipo_impuesto: $this->tipo_impuesto);
+            com_tipo_cambio_factura_monto: $r_alta_bd->registro['com_tipo_cambio_factura_monto'],
+            com_tipo_cambio_pago_monto: $com_tipo_cambio_pago['com_tipo_cambio_monto'],
+            fc_pago_id: $r_alta_bd->registro['fc_pago_id'], tipo_impuesto: $this->tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar pago_total',data:  $upd);
         }
@@ -121,6 +122,7 @@ class _dr_part extends _modelo_parent{
         $data = new stdClass();
         $data->base_dr = $base_dr;
         $data->importe_dr = $importe_dr;
+        $data->fc_impuesto_dr_part = $fc_impuesto_dr_part;
         return $data;
     }
 
@@ -158,7 +160,8 @@ class _dr_part extends _modelo_parent{
     }
 
     private function fc_pago_total_upd(stdClass $cat_sat_factor, string $cat_sat_tipo_impuesto_codigo,
-                                       float $com_tipo_cambio_monto, int $fc_pago_id, string $tipo_impuesto): array
+                                       float $com_tipo_cambio_factura_monto, float $com_tipo_cambio_pago_monto,
+                                       int $fc_pago_id, string $tipo_impuesto): array
     {
 
         $cat_sat_tipo_impuesto_codigo = trim($cat_sat_tipo_impuesto_codigo);
@@ -187,7 +190,8 @@ class _dr_part extends _modelo_parent{
 
         $fc_pago_total_upd = $this->fc_pago_total_upd_factor(
             cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo, impuestos: $impuestos,
-            key_factor: $key_factor, com_tipo_cambio_monto: $com_tipo_cambio_monto, tipo_impuesto: $tipo_impuesto);
+            key_factor: $key_factor, com_tipo_cambio_factura_monto: $com_tipo_cambio_factura_monto,
+            com_tipo_cambio_pago_monto: $com_tipo_cambio_pago_monto, tipo_impuesto: $tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar fc_pago_total_upd', data:  $fc_pago_total_upd);
         }
@@ -198,7 +202,8 @@ class _dr_part extends _modelo_parent{
     }
 
     private function fc_pago_total_upd_factor(string $cat_sat_tipo_impuesto_codigo, stdClass $impuestos,
-                                              string $key_factor, float $com_tipo_cambio_monto, string $tipo_impuesto): array
+                                              string $key_factor, float $com_tipo_cambio_factura_monto,
+                                              float $com_tipo_cambio_pago_monto, string $tipo_impuesto): array
     {
 
         $cat_sat_tipo_impuesto_codigo = trim($cat_sat_tipo_impuesto_codigo);
@@ -223,7 +228,7 @@ class _dr_part extends _modelo_parent{
         $fc_pago_total_upd = array();
 
         $fc_pago_total_upd = $this->integra_importe_dr_total(
-            cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo,com_tipo_cambio_monto:  $com_tipo_cambio_monto,
+            cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo,com_tipo_cambio_pago_monto:  $com_tipo_cambio_pago_monto,
             fc_pago_total_upd:  $fc_pago_total_upd,impuestos:  $impuestos,key_factor:  $key_factor,tipo_impuesto:  $tipo_impuesto);
 
         if(errores::$error){
@@ -231,8 +236,9 @@ class _dr_part extends _modelo_parent{
         }
 
 
-        $fc_pago_total_upd = $this->integra_impuesto_total_traslado(com_tipo_cambio_monto: $com_tipo_cambio_monto,
-            fc_pago_total_upd: $fc_pago_total_upd,impuestos:  $impuestos,key_factor:  $key_factor,tipo_impuesto:  $tipo_impuesto);
+        $fc_pago_total_upd = $this->integra_impuesto_total_traslado(com_tipo_cambio_factura_monto: $com_tipo_cambio_factura_monto,
+            com_tipo_cambio_pago_monto: $com_tipo_cambio_pago_monto, fc_pago_total_upd: $fc_pago_total_upd,
+            impuestos: $impuestos, key_factor: $key_factor, tipo_impuesto: $tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error integrar fc_pago_total_upd', data:  $fc_pago_total_upd);
         }
@@ -272,17 +278,20 @@ class _dr_part extends _modelo_parent{
         return $filtro;
     }
 
-    private function importe_dr_mxn(float $com_tipo_cambio_monto, stdClass $impuestos): float
+    private function importe_dr_mxn(float $com_tipo_cambio_pago_monto, stdClass $impuestos): float
     {
-        return round(round($impuestos->importe_dr,2) * $com_tipo_cambio_monto,2);
+        return round(round($impuestos->importe_dr,2) * $com_tipo_cambio_pago_monto,2);
     }
 
 
-    private function integra_impuesto_total_traslado(float $com_tipo_cambio_monto, array $fc_pago_total_upd,
+    private function integra_impuesto_total_traslado(float $com_tipo_cambio_factura_monto,
+                                                     float $com_tipo_cambio_pago_monto, array $fc_pago_total_upd,
                                                      stdClass $impuestos, string $key_factor, string $tipo_impuesto){
         if($tipo_impuesto === 'traslados'){
-            $fc_pago_total_upd = $this->integra_total_impuesto(com_tipo_cambio_monto: $com_tipo_cambio_monto,
-                fc_pago_total_upd:  $fc_pago_total_upd,impuestos:  $impuestos,key_factor:  $key_factor,tipo_impuesto:  $tipo_impuesto);
+            $fc_pago_total_upd = $this->integra_total_impuesto(
+                com_tipo_cambio_factura_monto: $com_tipo_cambio_factura_monto,
+                com_tipo_cambio_pago_monto: $com_tipo_cambio_pago_monto, fc_pago_total_upd: $fc_pago_total_upd,
+                impuestos: $impuestos, key_factor: $key_factor, tipo_impuesto: $tipo_impuesto);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error integrar fc_pago_total_upd', data:  $fc_pago_total_upd);
             }
@@ -364,7 +373,7 @@ class _dr_part extends _modelo_parent{
         return $registro;
     }
 
-    private function integra_importe_dr_total(string $cat_sat_tipo_impuesto_codigo, float $com_tipo_cambio_monto,
+    private function integra_importe_dr_total(string $cat_sat_tipo_impuesto_codigo, float $com_tipo_cambio_pago_monto,
                                               array $fc_pago_total_upd, stdClass $impuestos, string $key_factor,
                                               string $tipo_impuesto){
 
@@ -395,7 +404,7 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error obtener key_importe_dr', data:  $key_importe_dr);
         }
 
-        $importe_dr_mxn = $this->importe_dr_mxn(com_tipo_cambio_monto: $com_tipo_cambio_monto,impuestos:  $impuestos);
+        $importe_dr_mxn = $this->importe_dr_mxn(com_tipo_cambio_pago_monto: $com_tipo_cambio_pago_monto,impuestos:  $impuestos);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error obtener importe_dr_mxn', data:  $importe_dr_mxn);
         }
@@ -404,12 +413,17 @@ class _dr_part extends _modelo_parent{
         return $fc_pago_total_upd;
     }
 
-    private function integra_total_impuesto(float $com_tipo_cambio_monto, array $fc_pago_total_upd,
+    private function integra_total_impuesto(float $com_tipo_cambio_factura_monto, float $com_tipo_cambio_pago_monto, array $fc_pago_total_upd,
                                             stdClass $impuestos, string $key_factor, string $tipo_impuesto): array
     {
         $key_base_dr = "total_".$tipo_impuesto."_base_iva_$key_factor";
-        $base_dr_mxn = round(round($impuestos->base_dr,2) * $com_tipo_cambio_monto,2);
+        $base_dr_mxn = round($impuestos->base_dr,2);
+
+        if((float)$com_tipo_cambio_factura_monto !== 1.0){
+            $base_dr_mxn = round(round($impuestos->base_dr,2) * $com_tipo_cambio_pago_monto,2);
+        }
         $fc_pago_total_upd[$key_base_dr] = round($base_dr_mxn,2);
+
         return $fc_pago_total_upd;
     }
 
@@ -576,6 +590,10 @@ class _dr_part extends _modelo_parent{
         return $dr_part;
     }
 
+    /**
+     * Obtiene un array con los tipos de impuesto validos que son retenciones o traslados
+     * @return array
+     */
     private function tipo_impuestos_validos(): array
     {
         $tipos_impuestos_validos[] = 'retenciones';
@@ -584,7 +602,8 @@ class _dr_part extends _modelo_parent{
     }
 
     final public function upd_fc_pago_total(stdClass $cat_sat_factor, string $cat_sat_tipo_impuesto_codigo,
-                                            float $com_tipo_cambio_monto, int $fc_pago_id, string $tipo_impuesto){
+                                            float $com_tipo_cambio_factura_monto, float $com_tipo_cambio_pago_monto,
+                                            int $fc_pago_id, string $tipo_impuesto){
 
         $cat_sat_tipo_impuesto_codigo = trim($cat_sat_tipo_impuesto_codigo);
 
@@ -600,7 +619,8 @@ class _dr_part extends _modelo_parent{
         }
 
         $fc_pago_total_upd = $this->fc_pago_total_upd(cat_sat_factor: $cat_sat_factor,
-            cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo, com_tipo_cambio_monto: $com_tipo_cambio_monto,
+            cat_sat_tipo_impuesto_codigo: $cat_sat_tipo_impuesto_codigo,
+            com_tipo_cambio_factura_monto: $com_tipo_cambio_factura_monto, com_tipo_cambio_pago_monto: $com_tipo_cambio_pago_monto,
             fc_pago_id: $fc_pago_id, tipo_impuesto: $tipo_impuesto);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_pago_total_upd',data:  $fc_pago_total_upd);
