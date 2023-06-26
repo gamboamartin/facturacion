@@ -514,9 +514,17 @@ class _transacciones_fc extends modelo
      * @param _partida $modelo_partida Modelo a obtener las partidas
      * @param int $registro_id Registro en proceso
      * @return array
+     * @version 10.125.4
      */
     final public function partidas_base(_partida $modelo_partida, int $registro_id): array
     {
+        $this->key_filtro_id = trim($this->key_filtro_id);
+        if($this->key_filtro_id === ''){
+            return $this->error->error(mensaje: 'Error key_filtro_id esta vacio', data: $this->key_filtro_id);
+        }
+        if($registro_id <= 0){
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+        }
         $filtro[$this->key_filtro_id] = $registro_id;
         $r_rows_partidas = $modelo_partida->filtro_and(filtro: $filtro);
         if (errores::$error) {

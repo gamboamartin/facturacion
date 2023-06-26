@@ -13,6 +13,7 @@ use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_nota_credito;
 use gamboamartin\facturacion\models\fc_nota_credito_etapa;
+use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\tests\base_test;
@@ -278,6 +279,61 @@ class _transacciones_fcTest extends test
         $this->assertEquals("UPDATE fc_complemento_pago SET observaciones = '1',usuario_update_id=2  WHERE id = 1",$resultado->sql);
 
         errores::$error = false;
+    }
+
+    public function test_partidas_base(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new fc_factura($this->link);
+        //$trs = new liberator($trs);
+
+        $modelo_partida = new fc_partida(link: $this->link);
+        $registro_id = 1;
+
+        $del = (new base_test())->del_fc_factura(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al del', data: $del);
+            print_r($error);
+            exit;
+        }
+
+        $del = (new base_test())->del_adm_seccion(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al del', data: $del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link,adm_seccion_descripcion: 'fc_factura');
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
+            print_r($error);
+            exit;
+        }
+
+
+
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
+            print_r($error);
+            exit;
+        }
+
+        $resultado = $trs->partidas_base($modelo_partida, $registro_id);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(1,$resultado[0]['fc_partida_id']);
+
+        errores::$error = false;
+
     }
     public function test_permite_transaccion(): void
     {
