@@ -86,7 +86,7 @@ class controlador_fc_nota_credito extends _base_system_fc {
         $this->data_selected_alta['cat_sat_metodo_pago_id']['filtro'] = array('cat_sat_metodo_pago.status'=>'activo');
 
         $this->data_selected_alta['cat_sat_moneda_id']['id'] = 161;
-        $this->data_selected_alta['cat_sat_moneda_id']['filtro'] = array('cat_sat_moneda.id'=>161);
+        $this->data_selected_alta['cat_sat_moneda_id']['filtro'] = array();
 
         $this->data_selected_alta['com_tipo_cambio_id']['id'] = -1;
         $this->data_selected_alta['com_tipo_cambio_id']['filtro'] = array();

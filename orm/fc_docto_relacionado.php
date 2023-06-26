@@ -702,6 +702,7 @@ class fc_docto_relacionado extends _modelo_parent{
     /**
      * Valida la entrada de datos de un alta
      * @return array|true
+     * @version 10.124.4
      */
     private function valida_alta_docto(): bool|array
     {

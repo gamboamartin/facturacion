@@ -217,6 +217,37 @@ class fc_docto_relacionadoTest extends test {
 
     }
 
+    public function test_valida_alta_docto(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo = new fc_docto_relacionado($this->link);
+        $modelo->registro['fc_factura_id'] = 1;
+        $modelo->registro['fc_pago_pago_id'] = 1;
+        $modelo->registro['imp_pagado'] = 1;
+
+        $modelo = new liberator($modelo);
+
+
+
+        errores::$error = false;
+
+
+        $resultado = $modelo->valida_alta_docto();
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+        errores::$error = false;
+
+    }
+
 
 
 }
