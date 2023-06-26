@@ -123,6 +123,90 @@ class fc_docto_relacionadoTest extends test {
         errores::$error = false;
     }
 
+    public function test_monto_pagado_tc_dif(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo = new fc_docto_relacionado($this->link);
+        $modelo = new liberator($modelo);
+
+
+        errores::$error = false;
+        $fc_docto_relacionado = array();
+        $monto_pagado_tc = 0;
+        $fc_docto_relacionado['fc_docto_relacionado_imp_pagado'] = 100;
+        $fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] = 1;
+        $fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] = 1;
+        $fc_docto_relacionado['com_tipo_cambio_pago_monto'] = 1;
+        $resultado = $modelo->monto_pagado_tc_dif($fc_docto_relacionado, $monto_pagado_tc);
+        $this->assertIsfloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(100.0,$resultado);
+        errores::$error = false;
+
+        $fc_docto_relacionado = array();
+        $monto_pagado_tc = 0;
+        $fc_docto_relacionado['fc_docto_relacionado_imp_pagado'] = 100;
+        $fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] = 161;
+        $fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] = 2;
+        $fc_docto_relacionado['com_tipo_cambio_pago_monto'] = 20;
+        $resultado = $modelo->monto_pagado_tc_dif($fc_docto_relacionado, $monto_pagado_tc);
+        $this->assertIsfloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(5.0,$resultado);
+        errores::$error = false;
+
+
+        $fc_docto_relacionado = array();
+        $monto_pagado_tc = 0;
+        $fc_docto_relacionado['fc_docto_relacionado_imp_pagado'] = 100;
+        $fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] = 161;
+        $fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] = 161;
+        $fc_docto_relacionado['com_tipo_cambio_pago_monto'] = 20;
+        $resultado = $modelo->monto_pagado_tc_dif($fc_docto_relacionado, $monto_pagado_tc);
+        $this->assertIsfloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(100.0,$resultado);
+        errores::$error = false;
+
+
+
+        $fc_docto_relacionado = array();
+        $monto_pagado_tc = 0;
+        $fc_docto_relacionado['fc_docto_relacionado_imp_pagado'] = 100;
+        $fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] = 164;
+        $fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] = 164;
+        $fc_docto_relacionado['com_tipo_cambio_pago_monto'] = 20;
+        $resultado = $modelo->monto_pagado_tc_dif($fc_docto_relacionado, $monto_pagado_tc);
+        $this->assertIsfloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(100.0,$resultado);
+        errores::$error = false;
+
+
+        $fc_docto_relacionado = array();
+        $monto_pagado_tc = 0;
+        $fc_docto_relacionado['fc_docto_relacionado_imp_pagado'] = 100;
+        $fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] = 164;
+        $fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] = 161;
+        $fc_docto_relacionado['com_tipo_cambio_pago_monto'] = 20;
+        $resultado = $modelo->monto_pagado_tc_dif($fc_docto_relacionado, $monto_pagado_tc);
+        $this->assertIsfloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(2000.0,$resultado);
+        errores::$error = false;
+
+
+
+    }
+
 
 
 }
