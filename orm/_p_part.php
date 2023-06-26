@@ -26,6 +26,7 @@ class _p_part extends _modelo_parent{
         }
 
 
+
         $this->registro = $registro;
 
         $r_alta_bd = new stdClass();

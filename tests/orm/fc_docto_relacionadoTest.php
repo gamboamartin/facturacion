@@ -123,6 +123,10 @@ class fc_docto_relacionadoTest extends test {
         errores::$error = false;
     }
 
+    /**
+     * Esta prueba es base, el resultado se debe de respetar siempre
+     * @return void
+     */
     public function test_monto_pagado_tc_dif(): void
     {
         errores::$error = false;

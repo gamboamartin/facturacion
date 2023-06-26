@@ -129,8 +129,11 @@ class _dr_part extends _modelo_parent{
     private function data_upd(array $dr_part, array $fc_row_p): array
     {
 
-        $data_upd['base_p'] = round($dr_part['base_p'] / $fc_row_p['com_tipo_cambio_monto'],2);
-        $data_upd['importe_p'] = round($dr_part['importe_p'] / $fc_row_p['com_tipo_cambio_monto'],2);
+        //print_r($fc_row_p);exit;
+        //$data_upd['base_p'] = round($dr_part['base_p'] / $fc_row_p['com_tipo_cambio_monto'],2);
+        //$data_upd['importe_p'] = round($dr_part['importe_p'] / $fc_row_p['com_tipo_cambio_monto'],2);
+        $data_upd['base_p'] = round($dr_part['base_p'] ,2);
+        $data_upd['importe_p'] = round($dr_part['importe_p'] ,2);
         return $data_upd;
     }
 
@@ -359,6 +362,7 @@ class _dr_part extends _modelo_parent{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener datos',data:  $data_upd);
         }
+
 
 
         /**
@@ -623,8 +627,8 @@ class _dr_part extends _modelo_parent{
                     $importe_dr = round($importe_dr * $dr_part['com_tipo_cambio_factura_monto'],2);
                 }
             }
-            $base_dr_sum+=$base_dr;
-            $importe_dr_sum+=$importe_dr;
+            $base_dr_sum += $base_dr;
+            $importe_dr_sum += $importe_dr;
 
         }
 
