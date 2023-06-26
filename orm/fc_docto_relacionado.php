@@ -493,14 +493,13 @@ class fc_docto_relacionado extends _modelo_parent{
 
     private function integra_monto_pagado_tc(array $fc_docto_relacionado, float $monto_pagado_tc, bool $tipo_cambio_diferente){
         if($tipo_cambio_diferente){
+
             $monto_pagado_tc = $this->monto_pagado_tc_dif(fc_docto_relacionado: $fc_docto_relacionado,monto_pagado_tc:  $monto_pagado_tc);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al obtener monto_pagado_tc',data:  $monto_pagado_tc);
             }
-
         }
         else{
-
             $monto_pagado_tc += round($fc_docto_relacionado['fc_docto_relacionado_imp_pagado'], 2);
         }
 
@@ -531,6 +530,7 @@ class fc_docto_relacionado extends _modelo_parent{
 
         $monto_pago_docto = round($fc_docto_relacionado['fc_docto_relacionado_imp_pagado'], 2);
 
+
         if((int)$fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] === 161){
 
             if((int)$fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] !== 161) {
@@ -539,13 +539,14 @@ class fc_docto_relacionado extends _modelo_parent{
 
         }
         if((int)$fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] !== 161){
+
             if((int)$fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] === 161) {
-                $monto_pago_docto = round($monto_pago_docto, 2) * $fc_docto_relacionado['com_tipo_cambio_pago_monto'];
+
+                $monto_pago_docto = round($monto_pago_docto, 2) * $fc_docto_relacionado['com_tipo_cambio_factura_monto'];
             }
         }
 
         $monto_pagado_tc+= $monto_pago_docto;
-
 
         return $monto_pagado_tc;
     }

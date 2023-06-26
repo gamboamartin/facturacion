@@ -596,7 +596,7 @@ class _dr_part extends _modelo_parent{
         return $fc_impuestos_dr_part;
     }
 
-    private function suma_dr_part(array $row_p_part){
+    private function dr_parts(array $row_p_part){
         $filtro = $this->filtro_dr_part(row_p_part: $row_p_part);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar filtro',data:  $filtro);
@@ -607,36 +607,166 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener r_dr_part',data:  $r_dr_part);
         }
 
-        $dr_parts = $r_dr_part->registros;
+        return $r_dr_part->registros;
+    }
 
-        $base_dr_sum = 0.0;
-        $importe_dr_sum = 0.0;
-        foreach ($dr_parts as $dr_part){
-            $base_dr = round($dr_part[$this->tabla.'_base_dr'],2);
-            $importe_dr =  round($dr_part[$this->tabla.'_importe_dr'],2);
+    private function suma_dr_part(array $row_p_part){
 
-            if((int)$dr_part['com_tipo_cambio_factura_cat_sat_moneda_id'] === 161){
-                if((int)$dr_part['com_tipo_cambio_pago_cat_sat_moneda_id'] !== 161){
-                    $base_dr = round($base_dr / $dr_part['com_tipo_cambio_pago_monto'],2);
-                    $importe_dr =  round($importe_dr / $dr_part['com_tipo_cambio_pago_monto'],2);
-                }
-            }
-            if((int)$dr_part['com_tipo_cambio_factura_cat_sat_moneda_id'] !== 161){
-                if((int)$dr_part['com_tipo_cambio_pago_cat_sat_moneda_id'] === 161){
-                    $base_dr = round($base_dr * $dr_part['com_tipo_cambio_factura_monto'],2);
-                    $importe_dr = round($importe_dr * $dr_part['com_tipo_cambio_factura_monto'],2);
-                }
-            }
-            $base_dr_sum += $base_dr;
-            $importe_dr_sum += $importe_dr;
-
+        $dr_parts = $this->dr_parts(row_p_part: $row_p_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener dr_parts',data:  $dr_parts);
         }
 
-        $dr_part_rs['base_p'] = $base_dr_sum;
-        $dr_part_rs['importe_p'] = $importe_dr_sum;
+        $importes = $this->genera_importes_p_part(dr_parts: $dr_parts);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener importes',data:  $importes);
+        }
+
+        $dr_part_rs['base_p'] = $importes->base_dr_sum;
+        $dr_part_rs['importe_p'] = $importes->importe_dr_sum;
 
 
         return $dr_part_rs;
+    }
+
+    private function genera_importes_p_part(array $dr_parts){
+        $base_dr_sum = 0.0;
+        $importe_dr_sum = 0.0;
+        foreach ($dr_parts as $dr_part){
+
+            $importes = $this->importes_p_part(dr_part: $dr_part);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener importes',data:  $importes);
+            }
+            $base_dr_sum += $importes->base_dr;
+            $importe_dr_sum += $importes->importe_dr;
+
+        }
+        $data = new stdClass();
+        $data->base_dr_sum = $base_dr_sum;
+        $data->importe_dr_sum = $importe_dr_sum;
+        return $data;
+    }
+
+    private function importes_p_part(array $dr_part){
+        $importes = $this->importes_p_init(dr_part: $dr_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener importes',data:  $importes);
+        }
+
+        $importes = $this->importes_monedas_diferentes(dr_part: $dr_part,importes:  $importes);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener importes',data:  $importes);
+        }
+        return $importes;
+    }
+
+    private function importes_monedas_diferentes(array $dr_part, stdClass $importes){
+
+        $keys = array('com_tipo_cambio_factura_cat_sat_moneda_id','com_tipo_cambio_pago_cat_sat_moneda_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $dr_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar dr_part',data:  $valida);
+        }
+
+        $keys = array('com_tipo_cambio_pago_monto','com_tipo_cambio_factura_monto');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $dr_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar $valida',data:  $valida);
+        }
+
+        $keys = array('base_dr','importe_dr');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $importes);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar importes',data:  $valida);
+        }
+
+
+        if((int)$dr_part['com_tipo_cambio_factura_cat_sat_moneda_id'] === 161){
+            if((int)$dr_part['com_tipo_cambio_pago_cat_sat_moneda_id'] !== 161){
+                $importes = $this->importe_mxn_otra_moneda(dr_part: $dr_part,importes:  $importes);
+                if(errores::$error){
+                    return $this->error->error(mensaje: 'Error al obtener importes',data:  $importes);
+                }
+            }
+
+        }
+        if((int)$dr_part['com_tipo_cambio_factura_cat_sat_moneda_id'] !== 161){
+            if((int)$dr_part['com_tipo_cambio_pago_cat_sat_moneda_id'] === 161){
+                $importes = $this->importe_otra_moneda_mxn(dr_part: $dr_part,importes:  $importes);
+                if(errores::$error){
+                    return $this->error->error(mensaje: 'Error al obtener importes',data:  $importes);
+                }
+            }
+        }
+        return $importes;
+    }
+
+    private function importe_otra_moneda_mxn(array $dr_part, stdClass $importes): stdClass|array
+    {
+        $keys = array('com_tipo_cambio_factura_monto');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $dr_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar $valida',data:  $valida);
+        }
+
+        $keys = array('base_dr','importe_dr');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $importes);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar importes',data:  $valida);
+        }
+
+        $importes->base_dr = round($importes->base_dr * $dr_part['com_tipo_cambio_factura_monto'],2);
+        $importes->importe_dr = round($importes->importe_dr * $dr_part['com_tipo_cambio_factura_monto'],2);
+        return $importes;
+    }
+
+    /**
+     *
+     * @param array $dr_part
+     * @param stdClass $importes
+     * @return stdClass|array
+     */
+    private function importe_mxn_otra_moneda(array $dr_part, stdClass $importes): stdClass|array
+    {
+        $keys = array('com_tipo_cambio_pago_monto');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $dr_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar $valida',data:  $valida);
+        }
+
+        $keys = array('base_dr','importe_dr');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $importes);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar importes',data:  $valida);
+        }
+
+        $importes->base_dr = round($importes->base_dr / $dr_part['com_tipo_cambio_pago_monto'],2);
+        $importes->importe_dr =  round($importes->importe_dr / $dr_part['com_tipo_cambio_pago_monto'],2);
+
+        return $importes;
+    }
+
+
+    /**
+     * @param array $dr_part
+     * @return stdClass|array
+     */
+    private function importes_p_init(array $dr_part): stdClass|array
+    {
+        $keys = array($this->tabla.'_base_dr', $this->tabla.'_importe_dr');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $dr_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar importes',data:  $valida);
+        }
+
+        $base_dr = round($dr_part[$this->tabla.'_base_dr'],2);
+        $importe_dr =  round($dr_part[$this->tabla.'_importe_dr'],2);
+
+        $data = new stdClass();
+        $data->base_dr = $base_dr;
+        $data->importe_dr = $importe_dr;
+        return $data;
     }
 
     /**
