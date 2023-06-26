@@ -452,13 +452,24 @@ class _dr_part extends _modelo_parent{
             if($com_tipo_cambio_pago_monto === 1.0) {
                 $base_dr_mxn = round(round($impuestos->base_dr, 2) * $com_tipo_cambio_factura_monto, 2);
             }
-        }
-
-        if((float)$com_tipo_cambio_factura_monto !== 1.0){
             if($com_tipo_cambio_pago_monto !== 1.0){
                 $base_dr_mxn = round(round($impuestos->base_dr,2) * $com_tipo_cambio_pago_monto,2);
             }
         }
+
+        if((float)$com_tipo_cambio_pago_monto !== 1.0){
+
+            if($com_tipo_cambio_factura_monto === 1.0) {
+                $base_dr_mxn = round(round($impuestos->base_dr, 2) * $com_tipo_cambio_pago_monto, 2);
+            }
+            if($com_tipo_cambio_factura_monto !== 1.0) {
+                $base_dr_mxn = round(round($impuestos->base_dr, 2) * $com_tipo_cambio_pago_monto, 2);
+            }
+
+        }
+
+
+
 
         $fc_pago_total_upd[$key_base_dr] = round($base_dr_mxn,2);
 

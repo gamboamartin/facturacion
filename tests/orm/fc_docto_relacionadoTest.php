@@ -149,6 +149,7 @@ class fc_docto_relacionadoTest extends test {
         $fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] = 1;
         $fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] = 1;
         $fc_docto_relacionado['com_tipo_cambio_pago_monto'] = 1;
+        $fc_docto_relacionado['com_tipo_cambio_factura_monto'] = 1;
         $resultado = $modelo->monto_pagado_tc_dif($fc_docto_relacionado, $monto_pagado_tc);
         $this->assertIsfloat($resultado);
         $this->assertNotTrue(errores::$error);
@@ -161,6 +162,7 @@ class fc_docto_relacionadoTest extends test {
         $fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] = 161;
         $fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] = 2;
         $fc_docto_relacionado['com_tipo_cambio_pago_monto'] = 20;
+        $fc_docto_relacionado['com_tipo_cambio_factura_monto'] = 1;
         $resultado = $modelo->monto_pagado_tc_dif($fc_docto_relacionado, $monto_pagado_tc);
         $this->assertIsfloat($resultado);
         $this->assertNotTrue(errores::$error);
@@ -173,7 +175,8 @@ class fc_docto_relacionadoTest extends test {
         $fc_docto_relacionado['fc_docto_relacionado_imp_pagado'] = 100;
         $fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] = 161;
         $fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] = 161;
-        $fc_docto_relacionado['com_tipo_cambio_pago_monto'] = 20;
+        $fc_docto_relacionado['com_tipo_cambio_pago_monto'] = 1;
+        $fc_docto_relacionado['com_tipo_cambio_factura_monto'] = 1;
         $resultado = $modelo->monto_pagado_tc_dif($fc_docto_relacionado, $monto_pagado_tc);
         $this->assertIsfloat($resultado);
         $this->assertNotTrue(errores::$error);
@@ -188,6 +191,7 @@ class fc_docto_relacionadoTest extends test {
         $fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] = 164;
         $fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] = 164;
         $fc_docto_relacionado['com_tipo_cambio_pago_monto'] = 20;
+        $fc_docto_relacionado['com_tipo_cambio_factura_monto'] = 20;
         $resultado = $modelo->monto_pagado_tc_dif($fc_docto_relacionado, $monto_pagado_tc);
         $this->assertIsfloat($resultado);
         $this->assertNotTrue(errores::$error);
@@ -200,8 +204,10 @@ class fc_docto_relacionadoTest extends test {
         $fc_docto_relacionado['fc_docto_relacionado_imp_pagado'] = 100;
         $fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] = 164;
         $fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] = 161;
-        $fc_docto_relacionado['com_tipo_cambio_pago_monto'] = 20;
+        $fc_docto_relacionado['com_tipo_cambio_pago_monto'] = 1;
+        $fc_docto_relacionado['com_tipo_cambio_factura_monto'] = 20;
         $resultado = $modelo->monto_pagado_tc_dif($fc_docto_relacionado, $monto_pagado_tc);
+
         $this->assertIsfloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(2000.0,$resultado);

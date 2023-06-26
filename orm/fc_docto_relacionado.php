@@ -523,7 +523,7 @@ class fc_docto_relacionado extends _modelo_parent{
      */
     private function monto_pagado_tc_dif(array $fc_docto_relacionado, float $monto_pagado_tc): float|int|array
     {
-        $keys = array('fc_docto_relacionado_imp_pagado','com_tipo_cambio_pago_monto');
+        $keys = array('fc_docto_relacionado_imp_pagado','com_tipo_cambio_pago_monto','com_tipo_cambio_factura_monto');
         $valida = $this->validacion->valida_double_mayores_0(keys: $keys,registro:  $fc_docto_relacionado);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar fc_docto_relacionado', data: $valida);
@@ -535,30 +535,105 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al validar fc_docto_relacionado', data: $valida);
         }
 
-        /**
-         * REFACTORIZA PRUEBA
-         */
-        $monto_pago_docto = round($fc_docto_relacionado['fc_docto_relacionado_imp_pagado'], 2);
-
-
-        if((int)$fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] === 161){
-
-            if((int)$fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] !== 161) {
-                $monto_pago_docto = round($monto_pago_docto, 2) / $fc_docto_relacionado['com_tipo_cambio_pago_monto'];
-            }
-
-        }
-        if((int)$fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] !== 161){
-
-            if((int)$fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] === 161) {
-
-                $monto_pago_docto = round($monto_pago_docto, 2) * $fc_docto_relacionado['com_tipo_cambio_factura_monto'];
-            }
+        $monto_pago_docto = $this->monto_pago_docto(fc_docto_relacionado: $fc_docto_relacionado);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener monto_pago_docto', data: $monto_pago_docto);
         }
 
         $monto_pagado_tc+= $monto_pago_docto;
 
         return $monto_pagado_tc;
+    }
+
+    /**
+     * PROBAR MONTO CRITICA
+     * @param array $fc_docto_relacionado
+     * @return array|float
+     */
+    private function monto_pago_docto(array $fc_docto_relacionado): float|array
+    {
+        $monto_pago_docto = round($fc_docto_relacionado['fc_docto_relacionado_imp_pagado'], 2);
+
+        $monto_pago_docto = $this->monto_pago_mon_diferentes(fc_docto_relacionado: $fc_docto_relacionado,monto_pago_docto:  $monto_pago_docto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener monto_pago_docto', data: $monto_pago_docto);
+        }
+        return $monto_pago_docto;
+    }
+
+    /**
+     * PROBAR MONTO CRITICA
+     * @param array $fc_docto_relacionado
+     * @param float $monto_pago_docto
+     * @return array|float
+     */
+    private function monto_pago_mon_diferentes(array $fc_docto_relacionado, float $monto_pago_docto): float|array
+    {
+        $monto_pago_docto = $this->get_monto_pago_mxn_otro(fc_docto_relacionado: $fc_docto_relacionado,monto_pago_docto:  $monto_pago_docto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener monto_pago_docto', data: $monto_pago_docto);
+        }
+
+        $monto_pago_docto = $this->get_monto_pago_otro_mxn(fc_docto_relacionado: $fc_docto_relacionado,monto_pago_docto:  $monto_pago_docto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener monto_pago_docto', data: $monto_pago_docto);
+        }
+        return $monto_pago_docto;
+    }
+
+    /**
+     * PROBAR MONTO CRITICA
+     * @param array $fc_docto_relacionado
+     * @param float $monto_pago_docto
+     * @return array|float
+     */
+    private function get_monto_pago_mxn_otro(array $fc_docto_relacionado, float $monto_pago_docto): float|array
+    {
+        if((int)$fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] === 161){
+
+            if((int)$fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] !== 161) {
+                $monto_pago_docto = $this->monto_pago_docto_mxn_otro(fc_docto_relacionado: $fc_docto_relacionado,monto_pago_docto:  $monto_pago_docto);
+                if(errores::$error){
+                    return $this->error->error(mensaje: 'Error al obtener monto_pago_docto', data: $monto_pago_docto);
+                }
+            }
+        }
+        return $monto_pago_docto;
+    }
+
+    private function get_monto_pago_otro_mxn(array $fc_docto_relacionado, float $monto_pago_docto){
+        if((int)$fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] !== 161){
+            if((int)$fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] === 161) {
+                $monto_pago_docto = $this->monto_pago_docto_otro_mxn(fc_docto_relacionado: $fc_docto_relacionado,monto_pago_docto:  $monto_pago_docto);
+                if(errores::$error){
+                    return $this->error->error(mensaje: 'Error al obtener monto_pago_docto', data: $monto_pago_docto);
+                }
+            }
+        }
+        return $monto_pago_docto;
+    }
+
+    /**
+     * Obtiene el monto del pago de documento relacionado para fc_pago_pago
+     * PROBAR MONTO CRITICA
+     * @param array $fc_docto_relacionado Documento relacionado registro
+     * @param float $monto_pago_docto Monto previamente acumulado
+     * @return float
+     */
+    private function monto_pago_docto_mxn_otro(array $fc_docto_relacionado, float $monto_pago_docto): float
+    {
+        return round(round($monto_pago_docto, 2) / round($fc_docto_relacionado['com_tipo_cambio_pago_monto'],2),2);
+    }
+
+    /**
+     * PROBAR MONTO CRITICA
+     * @param array $fc_docto_relacionado
+     * @param float $monto_pago_docto
+     * @return float
+     */
+    private function monto_pago_docto_otro_mxn(array $fc_docto_relacionado, float $monto_pago_docto): float
+    {
+        return round(round($monto_pago_docto, 2) * round($fc_docto_relacionado['com_tipo_cambio_factura_monto'],2),2);
     }
 
     private function saldos_alta(array $registro){
