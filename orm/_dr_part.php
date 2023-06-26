@@ -295,6 +295,12 @@ class _dr_part extends _modelo_parent{
                 $importe_dr = round(round($impuestos->importe_dr,2) * $com_tipo_cambio_factura_monto,2);
             }
         }
+        if((float)$com_tipo_cambio_factura_monto !== 1.0){
+            if($com_tipo_cambio_pago_monto !== 1.0){
+                $importe_dr = round(round($impuestos->importe_dr,2) * $com_tipo_cambio_pago_monto,2);
+            }
+        }
+
 
         return $importe_dr;
     }
@@ -442,9 +448,15 @@ class _dr_part extends _modelo_parent{
         $base_dr_mxn = round($impuestos->base_dr,2);
 
         if((float)$com_tipo_cambio_factura_monto !== 1.0){
-            ;
+
             if($com_tipo_cambio_pago_monto === 1.0) {
                 $base_dr_mxn = round(round($impuestos->base_dr, 2) * $com_tipo_cambio_factura_monto, 2);
+            }
+        }
+
+        if((float)$com_tipo_cambio_factura_monto !== 1.0){
+            if($com_tipo_cambio_pago_monto !== 1.0){
+                $base_dr_mxn = round(round($impuestos->base_dr,2) * $com_tipo_cambio_pago_monto,2);
             }
         }
 

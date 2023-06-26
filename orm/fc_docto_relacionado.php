@@ -242,15 +242,22 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al actualizar totales',data:  $regenera);
         }
 
-
         return $r_elimina_bd;
 
     }
 
+    /**
+     * @param array $fc_factura
+     * @param array $fc_pago_pago
+     * @return float
+     */
     private function equivalencia_dr(array $fc_factura, array $fc_pago_pago): float
     {
-        $equivalencia_dr = round($fc_pago_pago['com_tipo_cambio_monto'],6)
-            / round($fc_factura['com_tipo_cambio_monto'],6) ;
+        $equivalencia_dr = 1.0;
+        if($fc_pago_pago['com_tipo_cambio_cat_sat_moneda_id'] !== $fc_factura['com_tipo_cambio_cat_sat_moneda_id']) {
+            $equivalencia_dr = round($fc_pago_pago['com_tipo_cambio_monto'], 6)
+                / round($fc_factura['com_tipo_cambio_monto'], 6);
+        }
 
         return round($equivalencia_dr,6);
     }
@@ -528,6 +535,9 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al validar fc_docto_relacionado', data: $valida);
         }
 
+        /**
+         * REFACTORIZA PRUEBA
+         */
         $monto_pago_docto = round($fc_docto_relacionado['fc_docto_relacionado_imp_pagado'], 2);
 
 
