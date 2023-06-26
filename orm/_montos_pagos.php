@@ -109,6 +109,7 @@ class _montos_pagos{
 
         $fc_pago_total_upd['total_retenciones_isr'] = $total_retenciones_isr_mxn;
 
+
         return $fc_pago_total_upd;
     }
 

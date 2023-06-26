@@ -58,8 +58,16 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener fc_pago_pago',data:  $fc_pago_pago);
         }
 
+        $fc_factura = (new fc_factura(link: $this->link))->registro(registro_id: $this->registro['fc_factura_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_factura',data:  $fc_factura);
+        }
 
-        $registro = $this->init_alta(com_tipo_cambio_monto: $fc_pago_pago['com_tipo_cambio_monto'],
+
+        $registro = $this->init_alta(cat_sat_moneda_factura_id: $fc_factura['cat_sat_moneda_id'],
+            cat_sat_moneda_pago_id: $fc_pago_pago['cat_sat_moneda_id'],
+            com_tipo_cambio_factura_monto: $fc_factura['com_tipo_cambio_monto'],
+            com_tipo_cambio_pago_monto: $fc_pago_pago['com_tipo_cambio_monto'],
             fc_factura_id: $this->registro['fc_factura_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al integrar registro',data:  $registro);
@@ -267,7 +275,8 @@ class fc_docto_relacionado extends _modelo_parent{
         return $transacciones;
     }
 
-    private function init_alta(float $com_tipo_cambio_monto, int $fc_factura_id){
+    private function init_alta(int $cat_sat_moneda_factura_id, int $cat_sat_moneda_pago_id,
+                               float $com_tipo_cambio_factura_monto, float $com_tipo_cambio_pago_monto, int $fc_factura_id){
 
         $modelo_partida = new fc_partida(link: $this->link);
         $fc_partidas = (new fc_factura(link: $this->link))->partidas_base(modelo_partida: $modelo_partida,
@@ -286,7 +295,14 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al integrar codigo',data:  $registro);
         }
 
-        $importe_pagado = round($registro['imp_pagado'] * $com_tipo_cambio_monto,2);
+        $importe_pagado = round($registro['imp_pagado'],2);
+
+        if($cat_sat_moneda_factura_id !== $cat_sat_moneda_pago_id){
+
+            if($cat_sat_moneda_factura_id !== 161){
+                $importe_pagado = round($importe_pagado / $com_tipo_cambio_factura_monto,2);
+            }
+        }
 
         $registro['imp_pagado'] = $importe_pagado;
 
@@ -415,8 +431,7 @@ class fc_docto_relacionado extends _modelo_parent{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener monto_pagado_tc',data:  $monto_pagado_tc);
         }
-
-
+        
         $fc_pago_pago['monto'] = round($monto_pagado_tc,2) ;
 
         $r_pago_pago = (new fc_pago_pago(link: $this->link))->modifica_bd(registro: $fc_pago_pago,id: $fc_pago_pago_id);
@@ -444,6 +459,7 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener tipo_cambio_diferente',data:  $tipo_cambio_diferente);
         }
 
+
         $monto_pagado_tc = $this->integra_monto_pagado_tc(fc_docto_relacionado: $fc_docto_relacionado,
             monto_pagado_tc:  $monto_pagado_tc,tipo_cambio_diferente:  $tipo_cambio_diferente);
         if(errores::$error){
@@ -467,7 +483,17 @@ class fc_docto_relacionado extends _modelo_parent{
 
     private function monto_pagado_tc_dif(array $fc_docto_relacionado, float $monto_pagado_tc): float|int
     {
-        $monto_pagado_tc += round($fc_docto_relacionado['fc_docto_relacionado_imp_pagado'], 2) / $fc_docto_relacionado['com_tipo_cambio_pago_monto'];
+        $monto_pago_docto = round($fc_docto_relacionado['fc_docto_relacionado_imp_pagado'], 2);
+        if($fc_docto_relacionado['com_tipo_cambio_factura_cat_sat_moneda_id'] !== $fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id']){
+            if((int)$fc_docto_relacionado['com_tipo_cambio_pago_cat_sat_moneda_id'] === 161){
+                $monto_pago_docto = round($monto_pago_docto, 2) * $fc_docto_relacionado['com_tipo_cambio_factura_monto'];
+            }
+            else{
+                $monto_pago_docto = round($monto_pago_docto, 2) / $fc_docto_relacionado['com_tipo_cambio_pago_monto'];
+            }
+        }
+        $monto_pagado_tc+= $monto_pago_docto;
+
         return $monto_pagado_tc;
     }
 

@@ -82,7 +82,8 @@ class _pagos{
 
     }
 
-    final public function data_saldos_fc(float $com_tipo_cambio_monto, int $fc_complemento_pago_id,
+    final public function data_saldos_fc(int $com_tipo_cambio_pago_cat_sat_moneda_id, float $com_tipo_cambio_pago_monto,
+                                         int $fc_complemento_pago_id,
                                          PDO $link, float $total_pagos): array|stdClass
     {
 
@@ -102,12 +103,16 @@ class _pagos{
 
         foreach ($fc_facturas as $indice_fc_factura=>$fc_factura){
 
-
-            $saldos = $this->saldos_factura(com_tipo_cambio_monto: $com_tipo_cambio_monto, fc_factura: $fc_factura,
-                saldo_total: $saldos->saldo_total);
+            $saldos = $this->saldos_factura(
+                com_tipo_cambio_factura_cat_sat_moneda_id: $fc_factura['cat_sat_moneda_id'],
+                com_tipo_cambio_pago_cat_sat_moneda_id: $com_tipo_cambio_pago_cat_sat_moneda_id,
+                com_tipo_cambio_factura_monto: $fc_factura['com_tipo_cambio_monto'],
+                com_tipo_cambio_pago_monto: $com_tipo_cambio_pago_monto,
+                fc_factura: $fc_factura, saldo_total: $saldos->saldo_total);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al obtener saldos',data:  $saldos);
             }
+
 
             $saldos->monto_pagado = $fc_factura['fc_factura_monto_saldo_aplicado'];
             $saldos->saldo = $fc_factura['fc_factura_saldo'];
@@ -123,6 +128,7 @@ class _pagos{
                 unset($fc_facturas[$indice_fc_factura]);
             }
         }
+
 
         $saldos->fc_facturas = $fc_facturas;
         return $saldos;
@@ -334,7 +340,10 @@ class _pagos{
 
     }
 
-    private function saldos_factura(float $com_tipo_cambio_monto, array $fc_factura, float $saldo_total): array|stdClass
+    private function saldos_factura(float $com_tipo_cambio_factura_cat_sat_moneda_id,
+                                    int $com_tipo_cambio_pago_cat_sat_moneda_id, float $com_tipo_cambio_factura_monto,
+                                    float $com_tipo_cambio_pago_monto,
+                                    array $fc_factura, float $saldo_total): array|stdClass
     {
 
         $saldo = $fc_factura['fc_factura_saldo'];
@@ -346,9 +355,24 @@ class _pagos{
         $data->monto_pagado = $fc_factura['fc_factura_monto_saldo_aplicado'];
         $data->saldo_total = $saldo_total;
 
-        $data->total_factura_tc = round($fc_factura['fc_factura_total'] / $com_tipo_cambio_monto,2);
-        $data->imp_pagado_tc = round($fc_factura['fc_factura_monto_saldo_aplicado'] / $com_tipo_cambio_monto,2);
-        $data->saldo_factura_tc = round($fc_factura['fc_factura_saldo'] / $com_tipo_cambio_monto,2);
+        $data->total_factura_tc = round($fc_factura['fc_factura_total'], 2);
+        $data->imp_pagado_tc = round($fc_factura['fc_factura_monto_saldo_aplicado'] ,2);
+        $data->saldo_factura_tc = round($fc_factura['fc_factura_saldo'] ,2);
+
+        if((int)$com_tipo_cambio_factura_cat_sat_moneda_id !== $com_tipo_cambio_pago_cat_sat_moneda_id){
+
+            if((int)$com_tipo_cambio_factura_cat_sat_moneda_id === 161) {
+                $data->total_factura_tc = round($fc_factura['fc_factura_total'] / $com_tipo_cambio_pago_monto, 2);
+                $data->imp_pagado_tc = round($fc_factura['fc_factura_monto_saldo_aplicado'] / $com_tipo_cambio_pago_monto, 2);
+                $data->saldo_factura_tc = round($fc_factura['fc_factura_saldo'] / $com_tipo_cambio_pago_monto, 2);
+
+            }
+            if((int)$com_tipo_cambio_factura_cat_sat_moneda_id !== 161) {
+                $data->total_factura_tc = round($fc_factura['fc_factura_total'] * $com_tipo_cambio_factura_monto, 2);
+                $data->imp_pagado_tc = round($fc_factura['fc_factura_monto_saldo_aplicado'] * $com_tipo_cambio_factura_monto, 2);
+                $data->saldo_factura_tc = round($fc_factura['fc_factura_saldo'] * $com_tipo_cambio_factura_monto, 2);
+            }
+        }
 
 
         return $data;

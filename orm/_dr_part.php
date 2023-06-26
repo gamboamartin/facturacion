@@ -128,6 +128,7 @@ class _dr_part extends _modelo_parent{
 
     private function data_upd(array $dr_part, array $fc_row_p): array
     {
+
         $data_upd['base_p'] = round($dr_part['base_p'] / $fc_row_p['com_tipo_cambio_monto'],2);
         $data_upd['importe_p'] = round($dr_part['importe_p'] / $fc_row_p['com_tipo_cambio_monto'],2);
         return $data_upd;
@@ -198,6 +199,7 @@ class _dr_part extends _modelo_parent{
 
 
 
+
         return $fc_pago_total_upd;
     }
 
@@ -247,6 +249,7 @@ class _dr_part extends _modelo_parent{
 
 
 
+
         return $fc_pago_total_upd;
     }
 
@@ -281,10 +284,15 @@ class _dr_part extends _modelo_parent{
 
     private function importe_dr_mxn(float $com_tipo_cambio_factura_monto, float $com_tipo_cambio_pago_monto, stdClass $impuestos): float
     {
+
         $importe_dr = round($impuestos->importe_dr,2);
+
         if((float)$com_tipo_cambio_factura_monto !== 1.0){
-            $importe_dr = round(round($impuestos->importe_dr,2) * $com_tipo_cambio_pago_monto,2);
+            if($com_tipo_cambio_pago_monto === 1.0){
+                $importe_dr = round(round($impuestos->importe_dr,2) * $com_tipo_cambio_factura_monto,2);
+            }
         }
+
         return $importe_dr;
     }
 
@@ -300,6 +308,7 @@ class _dr_part extends _modelo_parent{
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error integrar fc_pago_total_upd', data:  $fc_pago_total_upd);
             }
+
         }
         return $fc_pago_total_upd;
     }
@@ -350,6 +359,7 @@ class _dr_part extends _modelo_parent{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener datos',data:  $data_upd);
         }
+
 
         /**
          * @var _p_part $modelo_p_part
@@ -416,6 +426,7 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error obtener importe_dr_mxn', data:  $importe_dr_mxn);
         }
 
+
         $fc_pago_total_upd[$key_importe_dr] = round($importe_dr_mxn,2);
         return $fc_pago_total_upd;
     }
@@ -427,8 +438,12 @@ class _dr_part extends _modelo_parent{
         $base_dr_mxn = round($impuestos->base_dr,2);
 
         if((float)$com_tipo_cambio_factura_monto !== 1.0){
-            $base_dr_mxn = round(round($impuestos->base_dr,2) * $com_tipo_cambio_pago_monto,2);
+            ;
+            if($com_tipo_cambio_pago_monto === 1.0) {
+                $base_dr_mxn = round(round($impuestos->base_dr, 2) * $com_tipo_cambio_factura_monto, 2);
+            }
         }
+
         $fc_pago_total_upd[$key_base_dr] = round($base_dr_mxn,2);
 
         return $fc_pago_total_upd;
@@ -583,18 +598,41 @@ class _dr_part extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al maquetar filtro',data:  $filtro);
         }
 
-        $campos = $this->campos_suma();
+        $r_dr_part = $this->filtro_and(filtro: $filtro);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al maquetar campos',data:  $campos);
+            return $this->error->error(mensaje: 'Error al obtener r_dr_part',data:  $r_dr_part);
         }
 
+        $dr_parts = $r_dr_part->registros;
 
-        $dr_part = $this->suma(campos: $campos, filtro: $filtro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener dr_part',data:  $dr_part);
+        $base_dr_sum = 0.0;
+        $importe_dr_sum = 0.0;
+        foreach ($dr_parts as $dr_part){
+            $base_dr = round($dr_part[$this->tabla.'_base_dr'],2);
+            $importe_dr =  round($dr_part[$this->tabla.'_importe_dr'],2);
+
+            if((int)$dr_part['com_tipo_cambio_factura_cat_sat_moneda_id'] === 161){
+                if((int)$dr_part['com_tipo_cambio_pago_cat_sat_moneda_id'] !== 161){
+                    $base_dr = round($base_dr / $dr_part['com_tipo_cambio_pago_monto'],2);
+                    $importe_dr =  round($importe_dr / $dr_part['com_tipo_cambio_pago_monto'],2);
+                }
+            }
+            if((int)$dr_part['com_tipo_cambio_factura_cat_sat_moneda_id'] !== 161){
+                if((int)$dr_part['com_tipo_cambio_pago_cat_sat_moneda_id'] === 161){
+                    $base_dr = round($base_dr * $dr_part['com_tipo_cambio_factura_monto'],2);
+                    $importe_dr = round($importe_dr * $dr_part['com_tipo_cambio_factura_monto'],2);
+                }
+            }
+            $base_dr_sum+=$base_dr;
+            $importe_dr_sum+=$importe_dr;
+
         }
 
-        return $dr_part;
+        $dr_part_rs['base_p'] = $base_dr_sum;
+        $dr_part_rs['importe_p'] = $importe_dr_sum;
+
+
+        return $dr_part_rs;
     }
 
     /**
@@ -633,6 +671,7 @@ class _dr_part extends _modelo_parent{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_pago_total_upd',data:  $fc_pago_total_upd);
         }
+
 
         $fc_pago_total = $this->fc_pago_total(fc_pago_id: $fc_pago_id);
         if(errores::$error){

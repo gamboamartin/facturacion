@@ -488,19 +488,22 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $this->total_pagos = $total_pagos;
 
 
-        $com_tipo_cambio_monto = 1;
+        $com_tipo_cambio_pago_monto = 1;
+        $com_tipo_cambio_pago_cat_sat_moneda_id = 161;
 
 
         foreach ($fc_pagos as $fc_pago){
             $fc_pago_pagos = $fc_pago['fc_pago_pagos'];
             foreach ($fc_pago_pagos as $fc_pago_pago){
-                $com_tipo_cambio_monto = $fc_pago_pago['com_tipo_cambio_monto'];
+                $com_tipo_cambio_pago_monto = $fc_pago_pago['com_tipo_cambio_monto'];
+                $com_tipo_cambio_pago_cat_sat_moneda_id = $fc_pago_pago['cat_sat_moneda_id'];
             }
         }
 
 
-        $saldos = (new _pagos())->data_saldos_fc(com_tipo_cambio_monto: $com_tipo_cambio_monto,
-            fc_complemento_pago_id: $this->registro_id, link: $this->link, total_pagos: $total_pagos);
+        $saldos = (new _pagos())->data_saldos_fc(com_tipo_cambio_pago_cat_sat_moneda_id: $com_tipo_cambio_pago_cat_sat_moneda_id,
+            com_tipo_cambio_pago_monto: $com_tipo_cambio_pago_monto, fc_complemento_pago_id: $this->registro_id, link: $this->link,
+            total_pagos: $total_pagos);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener saldos',data:  $saldos,header:  $header, ws: $ws);
         }
