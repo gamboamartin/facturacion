@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\tests\orm;
 
 
+use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
@@ -64,7 +65,6 @@ class fc_facturaTest extends test {
             exit;
         }
 
-
         $del = (new base_test())->del_org_empresa($this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al eliminar',$del);
@@ -93,7 +93,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida($this->link);
+        $alta = (new base_test())->alta_fc_partida($this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar partida',$alta);
             print_r($error);
@@ -144,7 +144,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida($this->link,);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
@@ -211,7 +211,8 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 2, valor_unitario: 2425.8);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 2, cat_sat_metodo_pago_codigo: 'PPD',
+            cat_sat_metodo_pago_id: 2, valor_unitario: 2425.8);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
@@ -338,7 +339,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link,id: 999);
+        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2, id: 999);
         if(errores::$error){
             $error = (new errores())->error('Error al dar de alta factura',$alta_fc_factura);
             print_r($error);
@@ -375,7 +376,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link,id: 999);
+        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: '2', id: 999);
         if(errores::$error){
             $error = (new errores())->error('Error al dar de alta factura',$alta_fc_factura);
             print_r($error);
@@ -423,7 +424,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 2, valor_unitario: 2425.8);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 2, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2, valor_unitario: 2425.8);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
@@ -459,7 +460,7 @@ class fc_facturaTest extends test {
          * CRITICA
          */
 
-        $alta = (new base_test())->alta_fc_factura(link: $this->link);
+        $alta = (new base_test())->alta_fc_factura(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
@@ -519,7 +520,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 2, valor_unitario: 2425.8);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 2, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2, valor_unitario: 2425.8);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
@@ -651,7 +652,7 @@ class fc_facturaTest extends test {
         }
 
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar', $alta);
             print_r($error);
@@ -718,7 +719,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida($this->link,);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
@@ -757,7 +758,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida($this->link,);
+        $alta = (new base_test())->alta_fc_partida(link:$this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
@@ -795,7 +796,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida($this->link,);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
@@ -853,7 +854,7 @@ class fc_facturaTest extends test {
 
 
 
-        $alta = (new base_test())->alta_fc_partida($this->link);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
         if(errores::$error){
             $error = (new errores())->error('error al insertar', $alta);
             print_r($error);
@@ -903,7 +904,7 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, fc_factura_folio: '1-1');
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2, fc_factura_folio: '1-1');
         if(errores::$error){
             $error = (new errores())->error('error al insertar', $alta);
             print_r($error);

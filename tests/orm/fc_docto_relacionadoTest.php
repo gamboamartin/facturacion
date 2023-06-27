@@ -80,7 +80,7 @@ class fc_docto_relacionadoTest extends test {
             print_r($error);exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
             print_r($error);exit;

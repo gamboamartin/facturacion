@@ -183,6 +183,11 @@ class fc_docto_relacionado extends _modelo_parent{
         return $registro;
     }
 
+    /**
+     * Obtiene el codigo de alta de un docto
+     * @param array $registro registro en proceso
+     * @return array
+     */
     private function codigo_alta(array $registro): array
     {
         if(!isset($registro['codigo'])){

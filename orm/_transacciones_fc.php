@@ -47,11 +47,9 @@ class _transacciones_fc extends modelo
 
     public bool $valida_restriccion = true;
 
-
-
-
-
     protected string $key_fc_id = '';
+
+    private array $metodo_pago_permitido = array();
 
 
 
@@ -109,6 +107,13 @@ class _transacciones_fc extends modelo
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios, columnas: $columnas,
             campos_view: $campos_view, columnas_extra: $columnas_extra, no_duplicados: $no_duplicados,
             atributos_criticos: $atributos_criticos);
+
+
+        $this->metodo_pago_permitido['PUE'] = array('01','02','03','04','05','06','08','12','13','14',
+            '15','17','23','24','25','26','27','28','29','30','31');
+
+        $this->metodo_pago_permitido['PPD'] = array('99');
+
     }
 
     private function acumula_factor(array $factores){
@@ -148,6 +153,11 @@ class _transacciones_fc extends modelo
         }
         if($es_fecha){
             $registro['fecha'] =  $registro['fecha'].' '.date('H:i:s');
+        }
+
+        $verifica = $this->valida_metodo_pago(registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al verifica registro', data: $verifica);
         }
 
         $this->registro = $registro;
@@ -1524,6 +1534,18 @@ class _transacciones_fc extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al modificar', data: $r_modifica_bd);
         }
+
+        $registro = $this->registro(registro_id: $id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener registro', data: $registro);
+        }
+
+        $verifica = $this->valida_metodo_pago(registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al verifica registro', data: $verifica);
+        }
+
+
         return $r_modifica_bd;
     }
 
@@ -2313,6 +2335,44 @@ class _transacciones_fc extends modelo
 
         return $total;
 
+    }
+
+    private function valida_metodo_pago(array $registro){
+        $cat_sat_metodo_pago = (new cat_sat_metodo_pago(link: $this->link))->registro(
+            registro_id: $registro['cat_sat_metodo_pago_id'], columnas_en_bruto: true,retorno_obj: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener cat_sat_metodo_pago', data: $cat_sat_metodo_pago);
+        }
+
+        $cat_sat_forma_pago = (new cat_sat_forma_pago(link: $this->link))->registro(
+            registro_id: $registro['cat_sat_forma_pago_id'], columnas_en_bruto: true,retorno_obj: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener cat_sat_forma_pago', data: $cat_sat_forma_pago);
+        }
+
+        $verifica = $this->verifica_forma_pago(cat_sat_forma_pago: $cat_sat_forma_pago,cat_sat_metodo_pago:  $cat_sat_metodo_pago,registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al verifica registro', data: $verifica);
+        }
+        return $verifica;
+    }
+
+    private function verifica_forma_pago(stdClass $cat_sat_forma_pago, stdClass $cat_sat_metodo_pago, array $registro): bool|array
+    {
+        $cat_sat_metodo_pago_codigo = trim($cat_sat_metodo_pago->codigo);
+        if($cat_sat_metodo_pago_codigo === ''){
+            return $this->error->error(mensaje: 'Error cat_sat_metodo_pago_codigo esta vacio',
+                data: $cat_sat_metodo_pago_codigo);
+        }
+        if(!isset($this->metodo_pago_permitido[$cat_sat_metodo_pago_codigo])){
+            return $this->error->error(mensaje: 'Error cat_sat_metodo_pago_codigo no existe en validacion',
+                data: $cat_sat_metodo_pago_codigo);
+
+        }
+        if((!in_array($cat_sat_forma_pago->codigo, $this->metodo_pago_permitido[$cat_sat_metodo_pago_codigo]))){
+            return $this->error->error(mensaje: 'Error al metodo o forma de pago incorrecto', data: $registro);
+        }
+        return true;
     }
 
 

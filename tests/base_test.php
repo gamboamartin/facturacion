@@ -77,9 +77,10 @@ class base_test{
         return $alta;
     }
 
-    public function alta_cat_sat_metodo_pago(PDO $link, int $id): array|\stdClass
+    public function alta_cat_sat_metodo_pago(PDO $link, int $id = 1, string $codigo = 'PUE'): array|\stdClass
     {
-        $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_metodo_pago(link: $link, id: $id);
+        $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_metodo_pago(link: $link,
+            codigo: $codigo, id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -440,7 +441,7 @@ class base_test{
             return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
         }
         if(!$existe) {
-            $alta = $this->alta_fc_factura(link: $link,  id: $fc_factura_id);
+            $alta = $this->alta_fc_factura(link: $link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2, id: $fc_factura_id);
             if (errores::$error) {
                 return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
             }
@@ -568,7 +569,8 @@ class base_test{
         return $alta;
     }
 
-    public function alta_fc_factura(PDO $link, int $cat_sat_forma_pago_id = 1, int $cat_sat_metodo_pago_id = 2,
+    public function alta_fc_factura(PDO $link, int $cat_sat_forma_pago_id = 1,
+                                    string $cat_sat_metodo_pago_codigo = 'PUE', int $cat_sat_metodo_pago_id = 1,
                                     int $cat_sat_moneda_id = 999, string $codigo = '1', int $com_sucursal_id = 1,
                                     int $com_tipo_cambio_id = 1, int $fc_csd_id = 1, string $folio = 'A-000001',
                                     int $id = 1): array|\stdClass
@@ -624,7 +626,8 @@ class base_test{
             return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
         }
         if(!$existe) {
-            $alta = $this->alta_cat_sat_metodo_pago(link: $link, id: $cat_sat_metodo_pago_id);
+            $alta = $this->alta_cat_sat_metodo_pago(link: $link, id: $cat_sat_metodo_pago_id,
+                codigo: $cat_sat_metodo_pago_codigo);
             if (errores::$error) {
                 return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
             }
@@ -673,10 +676,13 @@ class base_test{
     }
 
 
-    public function alta_fc_complemento_pago(PDO $link, int $cat_sat_forma_pago_id = 1, int $cat_sat_metodo_pago_id = 2,
-                                    int $cat_sat_moneda_id = 999, string $codigo = '1', int $com_sucursal_id = 1,
-                                    int $com_tipo_cambio_id = 1, int $fc_csd_id = 1, string $folio = 'A-000001',
-                                    int $id = 1): array|\stdClass
+    public function alta_fc_complemento_pago(PDO $link, int $cat_sat_forma_pago_id = 1,
+                                             string $cat_sat_metodo_pago_codigo = 'PUE',
+                                             int $cat_sat_metodo_pago_id = 2, int $cat_sat_moneda_id = 999,
+                                             string $codigo = '1', int $com_sucursal_id = 1,
+                                             int $com_tipo_cambio_id = 1,
+                                             int $fc_csd_id = 1, string $folio = 'A-000001',
+                                             int $id = 1): array|\stdClass
     {
 
 
@@ -729,7 +735,8 @@ class base_test{
             return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
         }
         if(!$existe) {
-            $alta = $this->alta_cat_sat_metodo_pago(link: $link, id: $cat_sat_metodo_pago_id);
+            $alta = $this->alta_cat_sat_metodo_pago(link: $link, id: $cat_sat_metodo_pago_id,
+                codigo: $cat_sat_metodo_pago_codigo);
             if (errores::$error) {
                 return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
             }
@@ -834,7 +841,7 @@ class base_test{
             return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
         }
         if(!$existe) {
-            $alta = $this->alta_fc_complemento_pago(link: $link, id: $fc_complemento_pago_id);
+            $alta = $this->alta_fc_complemento_pago(link: $link, cat_sat_metodo_pago_id: 2, id: $fc_complemento_pago_id, cat_sat_metodo_pago_codigo: 'PPD');
             if (errores::$error) {
                 return (new errores())->error(mensaje: 'Error al insertar ', data: $alta);
             }
@@ -899,7 +906,9 @@ class base_test{
         return $alta;
     }
 
-    public function alta_fc_partida(PDO $link, string $codigo = '1', float $cantidad = 1, int $com_producto_id = 1,
+    public function alta_fc_partida(PDO $link, string $codigo = '1', float $cantidad = 1,
+                                    string $cat_sat_metodo_pago_codigo = 'PUE', int $cat_sat_metodo_pago_id = 1,
+                                    int $com_producto_id = 1,
                                     string $descripcion = '1', float $descuento = 0,
                                     string $fc_factura_folio = 'A-000001', int $fc_factura_id = 1,
                                     int $id = 1, float $valor_unitario = 1): array|\stdClass
@@ -910,7 +919,8 @@ class base_test{
             return (new errores())->error('Error al validar si existe', $existe);
         }
         if(!$existe) {
-            $alta = $this->alta_fc_factura(link: $link, folio: $fc_factura_folio);
+            $alta = $this->alta_fc_factura(link: $link, cat_sat_metodo_pago_codigo: $cat_sat_metodo_pago_codigo,
+                cat_sat_metodo_pago_id: $cat_sat_metodo_pago_id, folio: $fc_factura_folio);
             if (errores::$error) {
                 return (new errores())->error('Error al insertar factura', $alta);
             }
@@ -978,7 +988,7 @@ class base_test{
         return $alta;
     }
 
-    public function alta_fc_nota_credito(PDO $link, int $cat_sat_forma_pago_id = 99, int $cat_sat_metodo_pago_id = 2,
+    public function alta_fc_nota_credito(PDO $link, int $cat_sat_forma_pago_id = 1, int $cat_sat_metodo_pago_id = 2,
                                          int $cat_sat_moneda_id = 1, int $cat_sat_uso_cfdi_id = 2,
                                          int $com_sucursal_id = 1, int $com_tipo_cambio_id = 1,
                                          int $cat_sat_tipo_de_comprobante_id = 2, string $exportacion = '01',
@@ -1126,7 +1136,7 @@ class base_test{
             return (new errores())->error('Error al validar si existe', $existe);
         }
         if(!$existe) {
-            $alta = $this->alta_fc_complemento_pago(link: $link, folio: $fc_complemento_pago_folio);
+            $alta = $this->alta_fc_complemento_pago(link: $link, cat_sat_metodo_pago_id: 2, folio: $fc_complemento_pago_folio);
             if (errores::$error) {
                 return (new errores())->error('Error al insertar factura', $alta);
             }
