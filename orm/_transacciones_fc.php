@@ -5,6 +5,7 @@ namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 use config\generales;
 use config\pac;
+use gamboamartin\cat_sat\models\_validacion;
 use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
@@ -48,10 +49,6 @@ class _transacciones_fc extends modelo
     public bool $valida_restriccion = true;
 
     protected string $key_fc_id = '';
-
-    private array $metodo_pago_permitido = array();
-
-
 
     public function __construct(PDO $link, string $tabla, array $columnas_extra)
     {
@@ -109,10 +106,6 @@ class _transacciones_fc extends modelo
             atributos_criticos: $atributos_criticos);
 
 
-        $this->metodo_pago_permitido['PUE'] = array('01','02','03','04','05','06','08','12','13','14',
-            '15','17','23','24','25','26','27','28','29','30','31');
-
-        $this->metodo_pago_permitido['PPD'] = array('99');
 
     }
 
@@ -155,7 +148,7 @@ class _transacciones_fc extends modelo
             $registro['fecha'] =  $registro['fecha'].' '.date('H:i:s');
         }
 
-        $verifica = $this->valida_metodo_pago(registro:  $registro);
+        $verifica = (new _validacion())->valida_metodo_pago(link: $this->link, registro: $registro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al verifica registro', data: $verifica);
         }
@@ -1540,7 +1533,7 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener registro', data: $registro);
         }
 
-        $verifica = $this->valida_metodo_pago(registro:  $registro);
+        $verifica = (new _validacion())->valida_metodo_pago(link: $this->link, registro: $registro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al verifica registro', data: $verifica);
         }
@@ -2337,43 +2330,7 @@ class _transacciones_fc extends modelo
 
     }
 
-    private function valida_metodo_pago(array $registro){
-        $cat_sat_metodo_pago = (new cat_sat_metodo_pago(link: $this->link))->registro(
-            registro_id: $registro['cat_sat_metodo_pago_id'], columnas_en_bruto: true,retorno_obj: true);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener cat_sat_metodo_pago', data: $cat_sat_metodo_pago);
-        }
 
-        $cat_sat_forma_pago = (new cat_sat_forma_pago(link: $this->link))->registro(
-            registro_id: $registro['cat_sat_forma_pago_id'], columnas_en_bruto: true,retorno_obj: true);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener cat_sat_forma_pago', data: $cat_sat_forma_pago);
-        }
-
-        $verifica = $this->verifica_forma_pago(cat_sat_forma_pago: $cat_sat_forma_pago,cat_sat_metodo_pago:  $cat_sat_metodo_pago,registro:  $registro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al verifica registro', data: $verifica);
-        }
-        return $verifica;
-    }
-
-    private function verifica_forma_pago(stdClass $cat_sat_forma_pago, stdClass $cat_sat_metodo_pago, array $registro): bool|array
-    {
-        $cat_sat_metodo_pago_codigo = trim($cat_sat_metodo_pago->codigo);
-        if($cat_sat_metodo_pago_codigo === ''){
-            return $this->error->error(mensaje: 'Error cat_sat_metodo_pago_codigo esta vacio',
-                data: $cat_sat_metodo_pago_codigo);
-        }
-        if(!isset($this->metodo_pago_permitido[$cat_sat_metodo_pago_codigo])){
-            return $this->error->error(mensaje: 'Error cat_sat_metodo_pago_codigo no existe en validacion',
-                data: $cat_sat_metodo_pago_codigo);
-
-        }
-        if((!in_array($cat_sat_forma_pago->codigo, $this->metodo_pago_permitido[$cat_sat_metodo_pago_codigo]))){
-            return $this->error->error(mensaje: 'Error al metodo o forma de pago incorrecto', data: $registro);
-        }
-        return true;
-    }
 
 
 }
