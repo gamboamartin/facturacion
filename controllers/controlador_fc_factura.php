@@ -66,6 +66,7 @@ class controlador_fc_factura extends _base_system_fc {
         $this->data_selected_alta['cat_sat_forma_pago_id']['id'] = -1;
         $this->data_selected_alta['cat_sat_forma_pago_id']['filtro'] = array();
 
+
         $this->data_selected_alta['cat_sat_metodo_pago_id']['id'] = -1;
         $this->data_selected_alta['cat_sat_metodo_pago_id']['filtro'] = array();
 

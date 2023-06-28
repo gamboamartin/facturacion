@@ -623,13 +623,16 @@ class _base_system_fc extends _base_system{
         $identificador = "cat_sat_forma_pago_id";
         $propiedades = array("label" => "Forma Pago",
             'id_selected'=>$this->data_selected_alta['cat_sat_forma_pago_id']['id'],
-            'filtro'=>$this->data_selected_alta['cat_sat_forma_pago_id']['filtro']);
+            'filtro'=>$this->data_selected_alta['cat_sat_forma_pago_id']['filtro'],
+            'extra_params_keys'=>array('cat_sat_forma_pago_codigo')
+            );
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "cat_sat_metodo_pago_id";
         $propiedades = array("label" => "Metodo Pago",
             'id_selected'=>$this->data_selected_alta['cat_sat_metodo_pago_id']['id'],
-            'filtro'=>$this->data_selected_alta['cat_sat_metodo_pago_id']['filtro']);
+            'filtro'=>$this->data_selected_alta['cat_sat_metodo_pago_id']['filtro'],
+            'extra_params_keys'=>array('cat_sat_metodo_pago_codigo'));
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $identificador = "cat_sat_moneda_id";
