@@ -123,6 +123,35 @@ class fc_docto_relacionadoTest extends test {
         errores::$error = false;
     }
 
+    public function test_codigo_alta(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo = new fc_docto_relacionado($this->link);
+        $modelo = new liberator($modelo);
+
+
+        errores::$error = false;
+        $registro = array();
+        $registro['fc_factura_id'] = 1;
+        $registro['imp_pagado'] = 0.1;
+        $registro['fc_pago_pago_id'] = 1;
+        $resultado = $modelo->codigo_alta($registro);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('1',$resultado['fc_pago_pago_id']);
+        $this->assertStringContainsStringIgnoringCase('1-0.1-1-',$resultado['codigo']);
+        errores::$error = false;
+
+    }
+
     /**
      * Esta prueba es base, el resultado se debe de respetar siempre
      * @return void

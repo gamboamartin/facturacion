@@ -20,12 +20,30 @@ let txt_descuento = $(".partidas #descuento");
 let txt_subtotal = $(".partidas #subtotal");
 let txt_total = $(".partidas #total");
 let txt_cuenta_predial = $("#cuenta_predial");
+let frm_partida = $("#frm-partida");
 
 sl_fc_csd.change(function () {
     let selected = $(this).find('option:selected');
     let serie = selected.data(`fc_csd_serie`);
 
     txt_serie.val(serie);
+});
+
+frm_partida.submit(function () {
+    let cantidad = txt_cantidad.val();
+    let valor_unitario = txt_valor_unitario.val();
+    if(cantidad <=0.0){
+        alert('La cantidad debe ser mayor a 0');
+        txt_cantidad.focus();
+        return false;
+    }
+    if(valor_unitario <=0.0){
+        alert('La valor unitario debe ser mayor a 0');
+        valor_unitario.focus();
+        return false;
+    }
+
+
 });
 
 sl_com_sucursal.change(function () {

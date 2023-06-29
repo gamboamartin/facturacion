@@ -82,10 +82,10 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
 
-        $regenera_monto = $this->regenera_pago_pago_monto(fc_pago_pago_id: $registro['fc_pago_pago_id']);
+        /*$regenera_monto = $this->regenera_pago_pago_monto(fc_pago_pago_id: $registro['fc_pago_pago_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar monto de pago',data:  $regenera_monto);
-        }
+        }*/
 
 
         $transacciones = $this->genera_impuestos(fc_docto_relacionado_id: $r_alta_bd->registro_id,
@@ -187,14 +187,33 @@ class fc_docto_relacionado extends _modelo_parent{
      * Obtiene el codigo de alta de un docto
      * @param array $registro registro en proceso
      * @return array
+     * @version 10.129.4
      */
     private function codigo_alta(array $registro): array
     {
+        $keys = array('fc_factura_id','imp_pagado','fc_pago_pago_id');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $valida);
+        }
+
+        $keys = array('imp_pagado');
+        $valida = $this->validacion->valida_double_mayores_0(keys: $keys,registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $valida);
+        }
+
+        $keys = array('fc_factura_id','fc_pago_pago_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $valida);
+        }
+
         if(!isset($registro['codigo'])){
             $codigo = $registro['fc_factura_id'];
-            $codigo .= $registro['imp_pagado'];
-            $codigo .= $registro['fc_pago_pago_id'];
-            $codigo .= mt_rand(1000,9999);
+            $codigo .= "-".$registro['imp_pagado'];
+            $codigo .= "-".$registro['fc_pago_pago_id'];
+            $codigo .= "-".date('Y.m.d.H.i.s');
             $registro['codigo'] = $codigo;
         }
         return $registro;
@@ -229,10 +248,10 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al eliminar',data:  $r_elimina_bd);
         }
 
-        $regenera_monto = $this->regenera_pago_pago_monto(fc_pago_pago_id: $registro['fc_pago_pago_id']);
+        /*$regenera_monto = $this->regenera_pago_pago_monto(fc_pago_pago_id: $registro['fc_pago_pago_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar monto de pago',data:  $regenera_monto);
-        }
+        }*/
 
 
         $regenera = (new _saldos_fc())->regenera_saldos(fc_factura_id:  $registro['fc_factura_id'],link: $this->link);
@@ -430,10 +449,10 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al obtener registro',data:  $registro);
         }
 
-        $regenera_monto = $this->regenera_pago_pago_monto(fc_pago_pago_id: $registro['fc_pago_pago_id']);
+        /*$regenera_monto = $this->regenera_pago_pago_monto(fc_pago_pago_id: $registro['fc_pago_pago_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar monto de pago',data:  $regenera_monto);
-        }
+        }*/
 
         return $r_modifica_bd;
     }
@@ -459,6 +478,7 @@ class fc_docto_relacionado extends _modelo_parent{
 
         $fc_doctos_relacionados = $r_fc_docto_relacionado->registros;
 
+
         $monto_pagado_tc = $this->monto_pagado_tc(fc_doctos_relacionados: $fc_doctos_relacionados);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener monto_pagado_tc',data:  $monto_pagado_tc);
@@ -471,6 +491,7 @@ class fc_docto_relacionado extends _modelo_parent{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar pago pago',data:  $r_pago_pago);
         }
+
         return $r_pago_pago;
     }
 

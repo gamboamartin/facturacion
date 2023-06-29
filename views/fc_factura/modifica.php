@@ -55,7 +55,7 @@
                     <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
                         <h2>Partidas</h2>
                     </div>
-                    <form method="post" action="<?php echo $controlador->link_fc_partida_alta_bd; ?>" class="form-additional">
+                    <form method="post" action="<?php echo $controlador->link_fc_partida_alta_bd; ?>" class="form-additional" id="frm-partida">
 
                         <?php echo $controlador->inputs->partidas->com_producto_id; ?>
                         <?php echo $controlador->inputs->partidas->unidad; ?>
