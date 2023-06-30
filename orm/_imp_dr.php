@@ -43,15 +43,15 @@ class _imp_dr extends _modelo_parent{
         $fc_rows = array();
 
         if($this->tabla === 'fc_traslado_dr') {
-            $fc_rows = (new fc_factura(link: $this->link))->traslados(modelo_traslado: $modelo_traslado,
-                registro_id: $fc_row_dr['fc_factura_id']);
+            $fc_rows = (new _calculo_imps())->traslados(modelo_traslado: $modelo_traslado,
+                key_filtro_id: 'fc_factura_id', registro_id: $fc_row_dr['fc_factura_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener fc_rows', data: $fc_rows);
             }
         }
         if($this->tabla === 'fc_retencion_dr') {
-            $fc_rows = (new fc_factura(link: $this->link))->retenciones(modelo_retencion: $modelo_retencion,
-                registro_id: $fc_row_dr['fc_factura_id']);
+            $fc_rows = (new _calculo_imps())->retenciones(modelo_retencion: $modelo_retencion,
+                key_filtro_id: 'fc_factura_id', registro_id: $fc_row_dr['fc_factura_id']);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener fc_rows', data: $fc_rows);
             }
@@ -196,8 +196,8 @@ class _imp_dr extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
         }
 
-        $tasas = (new fc_factura(link: $this->link))->tasas_de_impuestos(modelo_traslado: $modelo_traslado,
-            modelo_retencion:  $modelo_retencion,registro_id:  $fc_factura_id);
+        $tasas = (new _calculo_imps())->tasas_de_impuestos(key_filtro_id: 'fc_factura_id',
+            modelo_traslado: $modelo_traslado, modelo_retencion: $modelo_retencion, registro_id: $fc_factura_id);
 
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener tasas',data:  $tasas);

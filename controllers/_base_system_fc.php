@@ -1452,7 +1452,8 @@ class _base_system_fc extends _base_system{
     private function genera_relaciones(int $com_cliente_id, _uuid_ext $modelo_uuid_ext, string $name_entidad,  int $org_empresa_id): array
     {
         $relaciones = $this->modelo_entidad->get_data_relaciones(modelo_relacion: $this->modelo_relacion,
-            modelo_relacionada: $this->modelo_relacionada, modelo_uuid_ext: $modelo_uuid_ext, registro_entidad_id: $this->registro_id);
+            modelo_relacionada: $this->modelo_relacionada, modelo_uuid_ext: $modelo_uuid_ext,
+            registro_entidad_id: $this->registro_id);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
 

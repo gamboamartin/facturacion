@@ -53,8 +53,8 @@ class fc_impuesto_dr extends _modelo_parent{
 
         $modelo_traslado = new fc_traslado(link: $this->link);
 
-        $tiene_traslados = (new fc_factura(link: $this->link))->tiene_traslados(modelo_traslado: $modelo_traslado,
-            registro_id: $fc_impuesto_dr->fc_factura_id);
+        $tiene_traslados = (new _calculo_imps())->tiene_traslados(modelo_traslado: $modelo_traslado,
+            key_filtro_id: 'fc_factura_id', registro_id: $fc_impuesto_dr->fc_factura_id);
 
         if($tiene_traslados){
             $fc_traslado_dr_ins['fc_impuesto_dr_id'] = $r_alta_bd->registro_id;
@@ -66,8 +66,8 @@ class fc_impuesto_dr extends _modelo_parent{
 
         $modelo_retencion = new fc_retenido(link: $this->link);
 
-        $tiene_retenciones = (new fc_factura(link: $this->link))->tiene_retenciones(modelo_retencion: $modelo_retencion,
-            registro_id: $fc_impuesto_dr->fc_factura_id);
+        $tiene_retenciones = (new _calculo_imps())->tiene_retenciones(modelo_retencion: $modelo_retencion,
+            key_filtro_id: 'fc_factura_id', registro_id: $fc_impuesto_dr->fc_factura_id);
 
         if($tiene_retenciones){
 

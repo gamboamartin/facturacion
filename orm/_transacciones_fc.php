@@ -109,13 +109,7 @@ class _transacciones_fc extends modelo
 
     }
 
-    private function acumula_factor(array $factores){
-        $factor_impuesto = 0.0;
-        foreach ($factores as $factor){
-            $factor_impuesto+=$factor;
-        }
-        return $factor_impuesto;
-    }
+
 
 
     /**
@@ -320,22 +314,77 @@ class _transacciones_fc extends modelo
         return $data;
     }
 
-    final public function doc_tipo_documento_id(string $extension)
+    /**
+     * Inicializa los datos del emisor para alta
+     * @param array $registro Registro en proceso
+     * @param stdClass $registro_csd Registro de tipo CSD
+     * @return array
+     * @version 10.6.0
+     */
+    private function default_alta_emisor_data(array $registro, stdClass $registro_csd): array
     {
-        $filtro['doc_extension.descripcion'] = $extension;
-        $existe_extension = (new doc_extension_permitido($this->link))->existe(filtro: $filtro);
+        $keys = array('dp_calle_pertenece_id','cat_sat_regimen_fiscal_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $registro_csd);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar extension del documento', data: $existe_extension);
-        }
-        if (!$existe_extension) {
-            return $this->error->error(mensaje: "Error la extension: $extension no esta permitida", data: $existe_extension);
+            return $this->error->error(mensaje: 'Error al validar registro_csd', data: $valida);
         }
 
-        $r_doc_extension_permitido = (new doc_extension_permitido($this->link))->filtro_and(filtro: $filtro, limit: 1);
+        $registro['dp_calle_pertenece_id'] = $registro_csd->dp_calle_pertenece_id;
+        $registro['cat_sat_regimen_fiscal_id'] = $registro_csd->cat_sat_regimen_fiscal_id;
+        return $registro;
+    }
+
+    private function defaults_alta_bd(array $registro, stdClass $registro_csd): array
+    {
+
+        $keys = array('com_sucursal_id');
+        $valida = $this->validacion->valida_ids(keys: $keys, registro: $registro);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar extension del documento', data: $r_doc_extension_permitido);
+            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
         }
-        return $r_doc_extension_permitido->registros[0]['doc_tipo_documento_id'];
+
+        $keys = array('serie', 'folio');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys, registro: $registro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
+        }
+
+        $registro_com_sucursal = (new com_sucursal($this->link))->registro(
+            registro_id: $registro['com_sucursal_id'], retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener sucursal', data: $registro_com_sucursal);
+        }
+        if (!isset($registro['codigo'])) {
+            $registro['codigo'] = $registro['serie'] . ' ' . $registro['folio'];
+        }
+        if (!isset($registro['codigo_bis'])) {
+            $registro['codigo_bis'] = $registro['serie'] . ' ' . $registro['folio'];
+        }
+        if (!isset($registro['descripcion'])) {
+            $descripcion = $this->descripcion_select_default(registro: $registro, registro_csd: $registro_csd,
+                registro_com_sucursal: $registro_com_sucursal);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error generar descripcion', data: $descripcion);
+            }
+            $registro['descripcion'] = $descripcion;
+        }
+        if (!isset($registro['descripcion_select'])) {
+            $descripcion_select = $this->descripcion_select_default(registro: $registro, registro_csd: $registro_csd,
+                registro_com_sucursal: $registro_com_sucursal);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error generar descripcion', data: $descripcion_select);
+            }
+            $registro['descripcion_select'] = $descripcion_select;
+        }
+        if (!isset($registro['alias'])) {
+            $registro['alias'] = $registro['descripcion_select'];
+        }
+
+        $hora = date('h:i:s');
+        if (isset($registro['fecha'])) {
+            $registro['fecha'] = $registro['fecha'] . ' ' . $hora;
+        }
+        return $registro;
     }
 
     /**
@@ -351,6 +400,15 @@ class _transacciones_fc extends modelo
             $dels[] = $del;
         }
         return $dels;
+    }
+
+    private function descripcion_select_default(array    $registro, stdClass $registro_csd,
+                                                stdClass $registro_com_sucursal): string
+    {
+        $descripcion_select = $registro['folio'] . ' ';
+        $descripcion_select .= $registro_csd->org_empresa_razon_social . ' ';
+        $descripcion_select .= $registro_com_sucursal->com_cliente_razon_social;
+        return $descripcion_select;
     }
 
     /**
@@ -379,6 +437,24 @@ class _transacciones_fc extends modelo
 
     }
 
+    final public function doc_tipo_documento_id(string $extension)
+    {
+        $filtro['doc_extension.descripcion'] = $extension;
+        $existe_extension = (new doc_extension_permitido($this->link))->existe(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar extension del documento', data: $existe_extension);
+        }
+        if (!$existe_extension) {
+            return $this->error->error(mensaje: "Error la extension: $extension no esta permitida", data: $existe_extension);
+        }
+
+        $r_doc_extension_permitido = (new doc_extension_permitido($this->link))->filtro_and(filtro: $filtro, limit: 1);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar extension del documento', data: $r_doc_extension_permitido);
+        }
+        return $r_doc_extension_permitido->registros[0]['doc_tipo_documento_id'];
+    }
+
     final public function duplica(_partida $modelo_partida, int $registro_id){
         $row_entidad_id = $this->inserta_row_entidad(registro_id:  $registro_id);
         if (errores::$error) {
@@ -393,6 +469,132 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_bd_part);
         }
         return $row_entidad_id;
+    }
+
+    public function elimina_bd(int $id): array|stdClass
+    {
+
+
+        $this->modelo_documento->valida_restriccion = $this->valida_restriccion;
+        $this->modelo_sello->valida_restriccion = $this->valida_restriccion;
+        $this->modelo_relacionada->valida_restriccion = $this->valida_restriccion;
+
+        if($this->valida_restriccion) {
+            $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa, registro_id: $id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
+            }
+        }
+
+        $del = $this->elimina_partidas(modelo_etapa: $this->modelo_etapa, modelo_partida: $this->modelo_partida,
+            name_entidad: $this->tabla, registro_id: $id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar partida', data: $del);
+        }
+
+        $filtro = array();
+        $filtro[$this->key_filtro_id] = $id;
+
+        $r_fc_factura_documento = $this->modelo_documento->elimina_con_filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_documento);
+        }
+        $r_fc_email = $this->modelo_email->elimina_con_filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_email);
+        }
+        $r_fc_factura_etapa = $this->modelo_etapa->elimina_con_filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_etapa);
+        }
+
+
+        $r_cfdi_sellado = $this->modelo_sello->elimina_con_filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_cfdi_sellado);
+        }
+        $r_fc_factura_relacionada = $this->modelo_relacionada->elimina_con_filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_relacionada);
+        }
+        $r_fc_relacion = $this->modelo_relacion->elimina_con_filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_relacion);
+        }
+
+        $r_fc_notificacion = $this->modelo_notificacion->elimina_con_filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_notificacion);
+        }
+
+        $r_elimina_factura = parent::elimina_bd($id); // TODO: Change the autogenerated stub
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar factura', data: $r_elimina_factura);
+        }
+        return $r_elimina_factura;
+    }
+
+    /**
+     */
+    private function elimina_partidas(_etapa $modelo_etapa, _partida $modelo_partida, string $name_entidad,
+                                      int $registro_id): array
+    {
+        $modelo_partida->valida_restriccion = $this->valida_restriccion;
+
+        if($this->valida_restriccion){
+            $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
+            }
+        }
+        $fc_partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida,
+            registro_entidad_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener partidas', data: $fc_partidas);
+        }
+
+        $del = $this->del_partidas(fc_partidas: $fc_partidas, modelo_partida: $modelo_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al eliminar partida', data: $del);
+        }
+        return $del;
+    }
+
+    /**
+     * Obtiene el emisor de una factura
+     * @param array $row_entidad Factura a integrar
+     * @return array
+     * @version 10.25.0
+     */
+    private function emisor(array $row_entidad): array
+    {
+        $keys = array('org_empresa_rfc','org_empresa_razon_social','cat_sat_regimen_fiscal_codigo');
+
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row_entidad);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar $row_entidad',data:  $valida);
+        }
+
+        $valida = $this->validacion->valida_rfc(key: 'org_empresa_rfc', registro: $row_entidad);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar $row_entidad',data:  $valida);
+        }
+
+
+        $emisor = array();
+        $emisor['rfc'] = $row_entidad['org_empresa_rfc'];
+        $emisor['nombre'] = $row_entidad['org_empresa_razon_social'];
+        $emisor['regimen_fiscal'] = $row_entidad['cat_sat_regimen_fiscal_codigo'];
+        return $emisor;
+    }
+
+    final public function envia_factura(_notificacion $modelo_notificacion, int $registro_id){
+        $notifica = (new _email())->envia_factura(key_filter_entidad_id: $this->key_filtro_id, link: $this->link,
+            modelo_notificacion: $modelo_notificacion, registro_id: $registro_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al enviar notificacion',data:  $notifica);
+        }
+        return $notifica;
     }
 
 
@@ -422,6 +624,27 @@ class _transacciones_fc extends modelo
         return $r_etapa->registros;
     }
 
+
+    /**
+     * Obtiene la serie de un CSD
+     * @param int $fc_csd_id CSD de obtencion de serie
+     * @return array|string
+     * @version 10.50.3
+     */
+    private function fc_csd_serie(int $fc_csd_id): array|string
+    {
+        if($fc_csd_id <= 0){
+            return $this->error->error(mensaje: 'Error fc_csd_id debe ser mayor a 0', data: $fc_csd_id);
+        }
+        $columnas[] = 'fc_csd_serie';
+        $fc_csd = (new fc_csd(link: $this->link))->registro(registro_id: $fc_csd_id, columnas: $columnas);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener csd', data: $fc_csd);
+        }
+
+        return trim($fc_csd['fc_csd_serie']);
+    }
+
     private function fc_partida_ins(string $name_entidad_partida, array $row, int $row_entidad_id): array
     {
         $fc_partida_ins['com_producto_id'] = $row[$name_entidad_partida . '_com_producto_id'];
@@ -432,6 +655,29 @@ class _transacciones_fc extends modelo
         $fc_partida_ins[$this->key_id] = $row_entidad_id;
 
         return $fc_partida_ins;
+    }
+
+    private function folio_str(string $number_folio): string
+    {
+        $long_nf = strlen($number_folio);
+        $n_ceros = 6;
+        $i = $long_nf;
+        $folio_str = '';
+
+        while($i<$n_ceros){
+            $folio_str.='0';
+            $i++;
+        }
+
+        $folio_str.=$number_folio;
+        return $folio_str;
+    }
+
+    final protected function from_impuesto(string $entidad_partida, string $tipo_impuesto): string
+    {
+        $key_id = $entidad_partida.'_id';
+        $base = $entidad_partida.'_operacion';
+        return "$entidad_partida AS $base LEFT JOIN $tipo_impuesto ON $tipo_impuesto.$key_id = $base.id";
     }
 
     private function genera_partidas(_partida $modelo_partida, int $registro_id, int $row_entidad_id): array
@@ -464,102 +710,149 @@ class _transacciones_fc extends modelo
         return $row_entidad_ins;
     }
 
-    private function inserta_partida(_partida $modelo_partida, string $name_entidad_partida, array $row,
-                                     int $row_entidad_id): array|stdClass
+    final public function genera_ruta_archivo_tmp(): array|string
     {
-        $fc_partida_ins = $this->fc_partida_ins(name_entidad_partida: $name_entidad_partida, row: $row,
-            row_entidad_id: $row_entidad_id);
+        $ruta_archivos = $this->ruta_archivos();
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al generar registro', data: $fc_partida_ins);
+            return $this->error->error(mensaje: 'Error al generar ruta de archivos', data: $ruta_archivos);
         }
 
-
-        $r_alta_bd_part = $modelo_partida->alta_registro(registro: $fc_partida_ins);
+        $ruta_archivos_tmp = $this->ruta_archivos_tmp(ruta_archivos: $ruta_archivos);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_bd_part);
+            return $this->error->error(mensaje: 'Error al generar ruta de archivos', data: $ruta_archivos_tmp);
         }
-        return $r_alta_bd_part;
+        return $ruta_archivos_tmp;
     }
 
-    private function inserta_partidas(_partida $modelo_partida, string $name_entidad_partida, int $row_entidad_id,
-                                      array $rows_partidas): array
+    public function genera_xml(_doc $modelo_documento, _etapa $modelo_etapa, _partida $modelo_partida,
+                               _cuenta_predial$modelo_predial, _relacion $modelo_relacion,
+                               _relacionada $modelo_relacionada, _data_impuestos $modelo_retencion,
+                               _data_impuestos $modelo_traslado, _uuid_ext $modelo_uuid_ext, int $registro_id, string $tipo): array|stdClass
     {
 
-        $altas = array();
-        foreach ($rows_partidas as $row){
+        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
+        }
+        $factura = $this->get_factura(modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
+            modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
+            modelo_uuid_ext: $modelo_uuid_ext, registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
+        }
 
-            $r_alta_bd_part = $this->inserta_partida(modelo_partida:  $modelo_partida,
-                name_entidad_partida:  $name_entidad_partida,row:  $row, row_entidad_id:  $row_entidad_id);
+
+        $data_factura = $this->data_factura(row_entidad: $factura);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
+        }
+
+
+        if(!isset($data_factura->Complemento)){
+            $data_factura->Complemento = array();
+        }
+
+
+        if($tipo === 'xml') {
+            $ingreso = (new cfdis())->ingreso(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
+                emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor,
+                relacionados: $data_factura->relacionados);
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_bd_part);
+                return $this->error->error(mensaje: 'Error al generar xml', data: $ingreso);
             }
-            $altas[] = $r_alta_bd_part;
         }
-        return $altas;
-    }
+        else{
+            $ingreso = (new cfdis())->ingreso_json(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
+                emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor,
+                complemento: $data_factura->Complemento, relacionados: $data_factura->relacionados);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al generar xml', data: $ingreso);
+            }
+        }
 
-    private function inserta_row_entidad(int $registro_id){
-        $row_entidad_ins = $this->genera_row_entidad_ins(registro_id: $registro_id);
+
+        $ruta_archivos_tmp = $this->genera_ruta_archivo_tmp();
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al generar registro', data: $row_entidad_ins);
+            return $this->error->error(mensaje: 'Error al obtener ruta de archivos', data: $ruta_archivos_tmp);
         }
 
+        $documento = array();
+        $file = array();
+        $file_xml_st = $ruta_archivos_tmp . '/' . $this->registro_id . '.st.xml';
+        file_put_contents($file_xml_st, $ingreso);
 
-        $r_alta_bd = $this->alta_registro(registro: $row_entidad_ins);
+        $existe = $modelo_documento->existe(array($this->key_filtro_id => $this->registro_id));
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_bd);
+            return $this->error->error(mensaje: 'Error al validar si existe documento', data: $existe);
         }
-        return $r_alta_bd->registro_id;
-    }
 
-    /**
-     * Obtiene las partidas de una entidad de tipo cfdi
-     * @param _partida $modelo_partida Modelo a obtener las partidas
-     * @param int $registro_id Registro en proceso
-     * @return array
-     * @version 10.125.4
-     */
-    final public function partidas_base(_partida $modelo_partida, int $registro_id): array
-    {
-        $this->key_filtro_id = trim($this->key_filtro_id);
-        if($this->key_filtro_id === ''){
-            return $this->error->error(mensaje: 'Error key_filtro_id esta vacio', data: $this->key_filtro_id);
-        }
-        if($registro_id <= 0){
-            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
-        }
-        $filtro[$this->key_filtro_id] = $registro_id;
-        $r_rows_partidas = $modelo_partida->filtro_and(filtro: $filtro);
+        $doc_tipo_documento_id = $this->doc_tipo_documento_id(extension: "xml");
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener rows_partidas', data: $r_rows_partidas);
+            return $this->error->error(mensaje: 'Error al validar extension del documento', data: $doc_tipo_documento_id);
         }
-        return $r_rows_partidas->registros;
-    }
 
-    /**
-     * Maqueta el registro para insersion
-     * @param stdClass $row_entidad Registro base de operacion
-     * @return array
-     */
-    private function row_entidad_ins(stdClass $row_entidad): array
-    {
-        $row_entidad_ins['fc_csd_id'] = $row_entidad->fc_csd_id;
-        $row_entidad_ins['cat_sat_forma_pago_id'] = $row_entidad->cat_sat_forma_pago_id;
-        $row_entidad_ins['cat_sat_metodo_pago_id'] = $row_entidad->cat_sat_metodo_pago_id;
-        $row_entidad_ins['cat_sat_moneda_id'] = $row_entidad->cat_sat_moneda_id;
-        $row_entidad_ins['com_tipo_cambio_id'] = $row_entidad->com_tipo_cambio_id;
-        $row_entidad_ins['cat_sat_uso_cfdi_id'] = $row_entidad->cat_sat_uso_cfdi_id;
-        $row_entidad_ins['cat_sat_tipo_de_comprobante_id'] = $row_entidad->cat_sat_tipo_de_comprobante_id;
-        $row_entidad_ins['dp_calle_pertenece_id'] = $row_entidad->dp_calle_pertenece_id;
-        $row_entidad_ins['exportacion'] = $row_entidad->exportacion;
-        $row_entidad_ins['cat_sat_regimen_fiscal_id'] = $row_entidad->cat_sat_regimen_fiscal_id;
-        $row_entidad_ins['com_sucursal_id'] = $row_entidad->com_sucursal_id;
+        if (!$existe) {
 
-        if(isset($row_entidad->observaciones)) {
-            $row_entidad->observaciones = trim($row_entidad->observaciones);
-            $row_entidad_ins['observaciones'] = $row_entidad->observaciones;
+            $file['name'] = $file_xml_st;
+            $file['tmp_name'] = $file_xml_st;
+
+            $documento['doc_tipo_documento_id'] = $doc_tipo_documento_id;
+            $documento['descripcion'] = $ruta_archivos_tmp;
+
+            $documento = (new doc_documento(link: $this->link))->alta_documento(registro: $documento, file: $file);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al guardar xml', data: $documento);
+            }
+
+            $fc_factura_documento = array();
+            $fc_factura_documento[$this->key_id] = $this->registro_id;
+            $fc_factura_documento['doc_documento_id'] = $documento->registro_id;
+
+            $fc_factura_documento = $modelo_documento->alta_registro(registro: $fc_factura_documento);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al dar de alta factura documento', data: $fc_factura_documento);
+            }
         }
-        return $row_entidad_ins;
+        else {
+            $r_fc_factura_documento = $modelo_documento->filtro_and(
+                filtro: array($this->key_filtro_id => $this->registro_id));
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener factura documento', data: $r_fc_factura_documento);
+            }
+
+            if ($r_fc_factura_documento->n_registros > 1) {
+                return $this->error->error(mensaje: 'Error solo debe existir una factura_documento', data: $r_fc_factura_documento);
+            }
+            if ($r_fc_factura_documento->n_registros === 0) {
+                return $this->error->error(mensaje: 'Error  debe existir al menos una factura_documento', data: $r_fc_factura_documento);
+            }
+            $fc_factura_documento = $r_fc_factura_documento->registros[0];
+
+            $doc_documento_id = $fc_factura_documento['doc_documento_id'];
+
+            $registro['descripcion'] = $ruta_archivos_tmp;
+            $registro['doc_tipo_documento_id'] = $doc_tipo_documento_id;
+            $_FILES['name'] = $file_xml_st;
+            $_FILES['tmp_name'] = $file_xml_st;
+
+            $documento = (new doc_documento(link: $this->link))->modifica_bd(registro: $registro, id: $doc_documento_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error  al modificar documento', data: $documento);
+            }
+
+
+            $documento->registro = (new doc_documento(link: $this->link))->registro(registro_id: $documento->registro_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error  al obtener documento', data: $documento);
+            }
+        }
+
+        $rutas = new stdClass();
+        $rutas->file_xml_st = $file_xml_st;
+        $rutas->doc_documento_ruta_absoluta = $documento->registro['doc_documento_ruta_absoluta'];
+
+        return $rutas;
     }
 
     /**
@@ -601,21 +894,23 @@ class _transacciones_fc extends modelo
             $relaciones[$indice]['fc_facturas_externas_relacionadas'] = $r_fc_uuid_fc->registros;
         }
 
-        foreach ($relaciones as $indice=>$fc_relacion){
+        if($modelo_relacion->tabla === 'fc_relacion_nc') {
+            foreach ($relaciones as $indice => $fc_relacion) {
 
-            $cat_sat_tipo_relacion_codigo = trim($fc_relacion['cat_sat_tipo_relacion_codigo']);
-            if($cat_sat_tipo_relacion_codigo === ''){
-                return $this->error->error(mensaje: 'Error cat_sat_tipo_relacion_codigo esta vacio',
-                    data: $cat_sat_tipo_relacion_codigo);
+                $cat_sat_tipo_relacion_codigo = trim($fc_relacion['cat_sat_tipo_relacion_codigo']);
+                if ($cat_sat_tipo_relacion_codigo === '') {
+                    return $this->error->error(mensaje: 'Error cat_sat_tipo_relacion_codigo esta vacio',
+                        data: $cat_sat_tipo_relacion_codigo);
+                }
+
+                $filtro[$modelo_relacion->key_filtro_id] = $fc_relacion[$modelo_relacion->key_id];
+                $r_fc_nc = (new fc_nc_rel(link: $this->link))->filtro_and(filtro: $filtro);
+                if (errores::$error) {
+                    return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_nc);
+                }
+
+                $relaciones[$indice]['fc_facturas_relacionadas_nc'] = $r_fc_nc->registros;
             }
-            $filtro[$modelo_relacion->key_filtro_id] = $fc_relacion[$modelo_relacion->key_id];
-            $r_fc_nc = (new fc_nc_rel(link: $this->link))->filtro_and(filtro: $filtro);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_nc);
-            }
-
-
-            $relaciones[$indice]['fc_facturas_relacionadas_nc'] = $r_fc_nc->registros;
         }
 
 
@@ -623,7 +918,36 @@ class _transacciones_fc extends modelo
 
     }
 
+    private function get_datos_xml(string $ruta_xml = ""): array
+    {
+        $xml = simplexml_load_file($ruta_xml);
+        $ns = $xml->getNamespaces(true);
+        $xml->registerXPathNamespace('c', $ns['cfdi']);
+        $xml->registerXPathNamespace('t', $ns['tfd']);
 
+        $xml_data = array();
+        $xml_data['cfdi_comprobante'] = array();
+        $xml_data['cfdi_emisor'] = array();
+        $xml_data['cfdi_receptor'] = array();
+        $xml_data['cfdi_conceptos'] = array();
+        $xml_data['tfd'] = array();
+
+        $nodos = array();
+        $nodos[] = '//cfdi:Comprobante';
+        $nodos[] = '//cfdi:Comprobante//cfdi:Emisor';
+        $nodos[] = '//cfdi:Comprobante//cfdi:Receptor';
+        $nodos[] = '//cfdi:Comprobante//cfdi:Conceptos//cfdi:Concepto';
+        $nodos[] = '//t:TimbreFiscalDigital';
+
+        foreach ($nodos as $key => $nodo) {
+            foreach ($xml->xpath($nodo) as $value) {
+                $data = (array)$value->attributes();
+                $data = $data['@attributes'];
+                $xml_data[array_keys($xml_data)[$key]] = $data;
+            }
+        }
+        return $xml_data;
+    }
 
     /**
      *
@@ -822,138 +1146,128 @@ class _transacciones_fc extends modelo
         return $registro;
     }
 
-    public function genera_xml(_doc $modelo_documento, _etapa $modelo_etapa, _partida $modelo_partida,
-                               _cuenta_predial$modelo_predial, _relacion $modelo_relacion,
-                               _relacionada $modelo_relacionada, _data_impuestos $modelo_retencion,
-                               _data_impuestos $modelo_traslado, _uuid_ext $modelo_uuid_ext, int $registro_id, string $tipo): array|stdClass
+    /**
+     * Obtiene el total de descuento de una factura
+     * @param int $registro_id Identificador de factura
+     * @return float|array
+     * @version 6.10.0
+     */
+    final public function get_factura_descuento(int $registro_id): float|array
     {
+        if ($registro_id <= 0) {
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+        }
 
-        $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
+        $key_descuento = $this->tabla.'_total_descuento';
+
+        $fc_factura = $this->registro(registro_id: $registro_id, columnas: array($key_descuento),
+            retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
-        }
-        $factura = $this->get_factura(modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
-            modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
-            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
-            modelo_uuid_ext: $modelo_uuid_ext, registro_id: $registro_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
         }
 
+        return round($fc_factura->$key_descuento,2);
 
-        $data_factura = $this->data_factura(row_entidad: $factura);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
-        }
-
-
-        if(!isset($data_factura->Complemento)){
-            $data_factura->Complemento = array();
-        }
-
-
-        if($tipo === 'xml') {
-            $ingreso = (new cfdis())->ingreso(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
-                emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor,
-                relacionados: $data_factura->relacionados);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al generar xml', data: $ingreso);
-            }
-        }
-        else{
-            $ingreso = (new cfdis())->ingreso_json(comprobante: $data_factura->comprobante, conceptos: $data_factura->conceptos,
-                emisor: $data_factura->emisor, impuestos: $data_factura->impuestos, receptor: $data_factura->receptor,
-                complemento: $data_factura->Complemento, relacionados: $data_factura->relacionados);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al generar xml', data: $ingreso);
-            }
-        }
-
-
-        $ruta_archivos_tmp = $this->genera_ruta_archivo_tmp();
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener ruta de archivos', data: $ruta_archivos_tmp);
-        }
-
-        $documento = array();
-        $file = array();
-        $file_xml_st = $ruta_archivos_tmp . '/' . $this->registro_id . '.st.xml';
-        file_put_contents($file_xml_st, $ingreso);
-
-        $existe = $modelo_documento->existe(array($this->key_filtro_id => $this->registro_id));
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar si existe documento', data: $existe);
-        }
-
-        $doc_tipo_documento_id = $this->doc_tipo_documento_id(extension: "xml");
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar extension del documento', data: $doc_tipo_documento_id);
-        }
-
-        if (!$existe) {
-
-            $file['name'] = $file_xml_st;
-            $file['tmp_name'] = $file_xml_st;
-
-            $documento['doc_tipo_documento_id'] = $doc_tipo_documento_id;
-            $documento['descripcion'] = $ruta_archivos_tmp;
-
-            $documento = (new doc_documento(link: $this->link))->alta_documento(registro: $documento, file: $file);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al guardar xml', data: $documento);
-            }
-
-            $fc_factura_documento = array();
-            $fc_factura_documento[$this->key_id] = $this->registro_id;
-            $fc_factura_documento['doc_documento_id'] = $documento->registro_id;
-
-            $fc_factura_documento = $modelo_documento->alta_registro(registro: $fc_factura_documento);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al dar de alta factura documento', data: $fc_factura_documento);
-            }
-        }
-        else {
-            $r_fc_factura_documento = $modelo_documento->filtro_and(
-                filtro: array($this->key_filtro_id => $this->registro_id));
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener factura documento', data: $r_fc_factura_documento);
-            }
-
-            if ($r_fc_factura_documento->n_registros > 1) {
-                return $this->error->error(mensaje: 'Error solo debe existir una factura_documento', data: $r_fc_factura_documento);
-            }
-            if ($r_fc_factura_documento->n_registros === 0) {
-                return $this->error->error(mensaje: 'Error  debe existir al menos una factura_documento', data: $r_fc_factura_documento);
-            }
-            $fc_factura_documento = $r_fc_factura_documento->registros[0];
-
-            $doc_documento_id = $fc_factura_documento['doc_documento_id'];
-
-            $registro['descripcion'] = $ruta_archivos_tmp;
-            $registro['doc_tipo_documento_id'] = $doc_tipo_documento_id;
-            $_FILES['name'] = $file_xml_st;
-            $_FILES['tmp_name'] = $file_xml_st;
-
-            $documento = (new doc_documento(link: $this->link))->modifica_bd(registro: $registro, id: $doc_documento_id);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error  al modificar documento', data: $documento);
-            }
-
-
-            $documento->registro = (new doc_documento(link: $this->link))->registro(registro_id: $documento->registro_id);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error  al obtener documento', data: $documento);
-            }
-        }
-
-        $rutas = new stdClass();
-        $rutas->file_xml_st = $file_xml_st;
-        $rutas->doc_documento_ruta_absoluta = $documento->registro['doc_documento_ruta_absoluta'];
-
-        return $rutas;
     }
 
+    public function get_factura_imp_retenidos(_partida $modelo_partida, _data_impuestos $modelo_retencion,
+                                              string $name_entidad, int $registro_entidad_id): float|array
+    {
+        $partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida,
+            registro_entidad_id: $registro_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
+        }
 
+        $imp_traslado = 0.0;
+
+
+        foreach ($partidas as $valor) {
+
+            $importe = $modelo_partida->calculo_imp_retenido(modelo_retencion: $modelo_retencion,
+                registro_partida_id: $valor[$modelo_partida->key_id]);
+
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $importe);
+            }
+
+            $imp_traslado += $importe;
+        }
+
+        return $imp_traslado;
+    }
+
+    /**
+     * Calcula los impuestos trasladados de una factura
+     * @param int $registro_entidad_id Factura a calcular
+     * @param _partida $modelo_partida
+     * @param _data_impuestos $modelo_traslado
+     * @param string $name_entidad
+     * @return float|array
+     * @version 4.14.0
+     */
+    public function get_factura_imp_trasladados(_partida $modelo_partida, _data_impuestos $modelo_traslado,
+                                                string $name_entidad, int $registro_entidad_id): float|array
+    {
+        $partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida, registro_entidad_id: $registro_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
+        }
+        $imp_traslado = 0.0;
+
+        foreach ($partidas as $partida) {
+            $imp_traslado += $modelo_partida->calculo_imp_trasladado(
+                modelo_traslado: $modelo_traslado, registro_partida_id: $partida[$modelo_partida->key_id]);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
+            }
+        }
+
+        return $imp_traslado;
+    }
+
+    /**
+     * Obtiene el subtotal de una factura
+     * @param int $registro_id Factura o complemento de pago o NC a obtener info
+     * @return float|array
+     * @version 6.7.0
+     */
+    final public function get_factura_sub_total(int $registro_id): float|array
+    {
+        if ($registro_id <= 0) {
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+        }
+        $key = $this->tabla.'_sub_total';
+        $fc_factura = $this->registro(registro_id: $registro_id, columnas: array($key),
+            retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
+        }
+
+
+        return round($fc_factura->$key,2);
+
+
+    }
+
+    /**
+     * Obtiene el total de una factura
+     * @param int $fc_factura_id Factura a obtener total
+     * @return float|array
+     */
+    final public function get_factura_total(int $fc_factura_id): float|array
+    {
+        if ($fc_factura_id <= 0) {
+            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
+        }
+        $key_total = $this->tabla.'_total';
+        $fc_factura = $this->registro(registro_id: $fc_factura_id, columnas: array($key_total),
+            retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
+        }
+        return round($fc_factura->$key_total,2);
+    }
 
     /**
      * Obtiene las partidas de una factura
@@ -979,24 +1293,46 @@ class _transacciones_fc extends modelo
         return $r_fc_partida_cp->registros;
     }
 
-    final public function inserta_notificacion(_data_mail $modelo_email, _notificacion $modelo_notificacion,
-                                               int $registro_id){
-        $notificaciones = (new _email())->crear_notificaciones(registro_entidad_id: $registro_id,
-            modelo_email:  $modelo_email,modelo_entidad:  $this,modelo_notificacion:  $modelo_notificacion,
-            link:  $this->link);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al insertar notificaciones', data: $notificaciones);
-        }
-        return $notificaciones;
-    }
-
-
-
-    final protected function from_impuesto(string $entidad_partida, string $tipo_impuesto): string
+    private function guarda_documento(string $directorio, string $extension, string $contenido,
+                                      _doc $modelo_documento, int $registro_id): array|stdClass
     {
-        $key_id = $entidad_partida.'_id';
-        $base = $entidad_partida.'_operacion';
-        return "$entidad_partida AS $base LEFT JOIN $tipo_impuesto ON $tipo_impuesto.$key_id = $base.id";
+        $ruta_archivos = $this->ruta_archivos(directorio: $directorio);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener ruta de archivos', data: $ruta_archivos);
+        }
+
+        $ruta_archivo = "$ruta_archivos/$this->registro_id.$extension";
+
+        $guarda_archivo = (new files())->guarda_archivo_fisico(contenido_file: $contenido, ruta_file: $ruta_archivo);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al guardar archivo', data: $guarda_archivo);
+        }
+
+        $tipo_documento = $this->doc_tipo_documento_id(extension: $extension);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar extension del documento', data: $tipo_documento);
+        }
+
+        $file['name'] = $guarda_archivo;
+        $file['tmp_name'] = $guarda_archivo;
+
+        $documento['doc_tipo_documento_id'] = $tipo_documento;
+        $documento['descripcion'] = "$this->registro_id.$extension";
+        $documento['descripcion_select'] = "$this->registro_id.$extension";
+
+        $documento = (new doc_documento(link: $this->link))->alta_documento(registro: $documento, file: $file);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al guardar jpg', data: $documento);
+        }
+
+        $registro[$this->key_id] = $registro_id;
+        $registro['doc_documento_id'] = $documento->registro_id;
+        $factura_documento = $modelo_documento->alta_registro(registro: $registro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al guardar relacion factura con documento', data: $factura_documento);
+        }
+
+        return $documento;
     }
 
     /**
@@ -1065,374 +1401,65 @@ class _transacciones_fc extends modelo
         return $registro;
     }
 
-
-    /**
-     * Inicializa los datos del emisor para alta
-     * @param array $registro Registro en proceso
-     * @param stdClass $registro_csd Registro de tipo CSD
-     * @return array
-     * @version 10.6.0
-     */
-    private function default_alta_emisor_data(array $registro, stdClass $registro_csd): array
-    {
-        $keys = array('dp_calle_pertenece_id','cat_sat_regimen_fiscal_id');
-        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $registro_csd);
+    final public function inserta_notificacion(_data_mail $modelo_email, _notificacion $modelo_notificacion,
+                                               int $registro_id){
+        $notificaciones = (new _email())->crear_notificaciones(registro_entidad_id: $registro_id,
+            modelo_email:  $modelo_email,modelo_entidad:  $this,modelo_notificacion:  $modelo_notificacion,
+            link:  $this->link);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar registro_csd', data: $valida);
+            return $this->error->error(mensaje: 'Error al insertar notificaciones', data: $notificaciones);
         }
-
-        $registro['dp_calle_pertenece_id'] = $registro_csd->dp_calle_pertenece_id;
-        $registro['cat_sat_regimen_fiscal_id'] = $registro_csd->cat_sat_regimen_fiscal_id;
-        return $registro;
+        return $notificaciones;
     }
 
-    private function defaults_alta_bd(array $registro, stdClass $registro_csd): array
+    private function inserta_partida(_partida $modelo_partida, string $name_entidad_partida, array $row,
+                                     int $row_entidad_id): array|stdClass
+    {
+        $fc_partida_ins = $this->fc_partida_ins(name_entidad_partida: $name_entidad_partida, row: $row,
+            row_entidad_id: $row_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar registro', data: $fc_partida_ins);
+        }
+
+
+        $r_alta_bd_part = $modelo_partida->alta_registro(registro: $fc_partida_ins);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_bd_part);
+        }
+        return $r_alta_bd_part;
+    }
+
+    private function inserta_partidas(_partida $modelo_partida, string $name_entidad_partida, int $row_entidad_id,
+                                      array $rows_partidas): array
     {
 
-        $keys = array('com_sucursal_id');
-        $valida = $this->validacion->valida_ids(keys: $keys, registro: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
-        }
+        $altas = array();
+        foreach ($rows_partidas as $row){
 
-        $keys = array('serie', 'folio');
-        $valida = $this->validacion->valida_existencia_keys(keys: $keys, registro: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar registro', data: $valida);
-        }
-
-        $registro_com_sucursal = (new com_sucursal($this->link))->registro(
-            registro_id: $registro['com_sucursal_id'], retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener sucursal', data: $registro_com_sucursal);
-        }
-        if (!isset($registro['codigo'])) {
-            $registro['codigo'] = $registro['serie'] . ' ' . $registro['folio'];
-        }
-        if (!isset($registro['codigo_bis'])) {
-            $registro['codigo_bis'] = $registro['serie'] . ' ' . $registro['folio'];
-        }
-        if (!isset($registro['descripcion'])) {
-            $descripcion = $this->descripcion_select_default(registro: $registro, registro_csd: $registro_csd,
-                registro_com_sucursal: $registro_com_sucursal);
+            $r_alta_bd_part = $this->inserta_partida(modelo_partida:  $modelo_partida,
+                name_entidad_partida:  $name_entidad_partida,row:  $row, row_entidad_id:  $row_entidad_id);
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error generar descripcion', data: $descripcion);
+                return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_bd_part);
             }
-            $registro['descripcion'] = $descripcion;
+            $altas[] = $r_alta_bd_part;
         }
-        if (!isset($registro['descripcion_select'])) {
-            $descripcion_select = $this->descripcion_select_default(registro: $registro, registro_csd: $registro_csd,
-                registro_com_sucursal: $registro_com_sucursal);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error generar descripcion', data: $descripcion_select);
-            }
-            $registro['descripcion_select'] = $descripcion_select;
-        }
-        if (!isset($registro['alias'])) {
-            $registro['alias'] = $registro['descripcion_select'];
-        }
-
-        $hora = date('h:i:s');
-        if (isset($registro['fecha'])) {
-            $registro['fecha'] = $registro['fecha'] . ' ' . $hora;
-        }
-        return $registro;
+        return $altas;
     }
 
-    private function descripcion_select_default(array    $registro, stdClass $registro_csd,
-                                                stdClass $registro_com_sucursal): string
-    {
-        $descripcion_select = $registro['folio'] . ' ';
-        $descripcion_select .= $registro_csd->org_empresa_razon_social . ' ';
-        $descripcion_select .= $registro_com_sucursal->com_cliente_razon_social;
-        return $descripcion_select;
+    private function inserta_row_entidad(int $registro_id){
+        $row_entidad_ins = $this->genera_row_entidad_ins(registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar registro', data: $row_entidad_ins);
+        }
+
+
+        $r_alta_bd = $this->alta_registro(registro: $row_entidad_ins);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar registro', data: $r_alta_bd);
+        }
+        return $r_alta_bd->registro_id;
     }
 
-    public function elimina_bd(int $id): array|stdClass
-    {
-
-
-        $this->modelo_documento->valida_restriccion = $this->valida_restriccion;
-        $this->modelo_sello->valida_restriccion = $this->valida_restriccion;
-        $this->modelo_relacionada->valida_restriccion = $this->valida_restriccion;
-
-        if($this->valida_restriccion) {
-            $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa, registro_id: $id);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
-            }
-        }
-
-        $del = $this->elimina_partidas(modelo_etapa: $this->modelo_etapa, modelo_partida: $this->modelo_partida,
-            name_entidad: $this->tabla, registro_id: $id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar partida', data: $del);
-        }
-
-        $filtro = array();
-        $filtro[$this->key_filtro_id] = $id;
-
-        $r_fc_factura_documento = $this->modelo_documento->elimina_con_filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_documento);
-        }
-        $r_fc_email = $this->modelo_email->elimina_con_filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_email);
-        }
-        $r_fc_factura_etapa = $this->modelo_etapa->elimina_con_filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_etapa);
-        }
-
-
-        $r_cfdi_sellado = $this->modelo_sello->elimina_con_filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar', data: $r_cfdi_sellado);
-        }
-        $r_fc_factura_relacionada = $this->modelo_relacionada->elimina_con_filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_factura_relacionada);
-        }
-        $r_fc_relacion = $this->modelo_relacion->elimina_con_filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_relacion);
-        }
-
-        $r_fc_notificacion = $this->modelo_notificacion->elimina_con_filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar', data: $r_fc_notificacion);
-        }
-
-        $r_elimina_factura = parent::elimina_bd($id); // TODO: Change the autogenerated stub
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar factura', data: $r_elimina_factura);
-        }
-        return $r_elimina_factura;
-    }
-
-    /**
-     * Verifica si existe un factor en un array de factores
-     * @param float $factor_impuesto_row Factor a comparar
-     * @param array $factores Factores previo guardados
-     * @return bool
-     */
-    private function existe_factor(float $factor_impuesto_row, array $factores): bool
-    {
-        $existe_factor = false;
-        foreach ($factores as $factor){
-            if((float)$factor === $factor_impuesto_row){
-                $existe_factor = true;
-            }
-        }
-        return $existe_factor;
-    }
-
-
-
-    /**
-     */
-    private function elimina_partidas(_etapa $modelo_etapa, _partida $modelo_partida, string $name_entidad,
-                                      int $registro_id): array
-    {
-        $modelo_partida->valida_restriccion = $this->valida_restriccion;
-
-        if($this->valida_restriccion){
-            $permite_transaccion = $this->verifica_permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
-            }
-        }
-        $fc_partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida,
-            registro_entidad_id: $registro_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas', data: $fc_partidas);
-        }
-
-        $del = $this->del_partidas(fc_partidas: $fc_partidas, modelo_partida: $modelo_partida);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al eliminar partida', data: $del);
-        }
-        return $del;
-    }
-
-    /**
-     * Obtiene el emisor de una factura
-     * @param array $row_entidad Factura a integrar
-     * @return array
-     * @version 10.25.0
-     */
-    private function emisor(array $row_entidad): array
-    {
-        $keys = array('org_empresa_rfc','org_empresa_razon_social','cat_sat_regimen_fiscal_codigo');
-
-        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row_entidad);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar $row_entidad',data:  $valida);
-        }
-
-        $valida = $this->validacion->valida_rfc(key: 'org_empresa_rfc', registro: $row_entidad);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar $row_entidad',data:  $valida);
-        }
-
-
-        $emisor = array();
-        $emisor['rfc'] = $row_entidad['org_empresa_rfc'];
-        $emisor['nombre'] = $row_entidad['org_empresa_razon_social'];
-        $emisor['regimen_fiscal'] = $row_entidad['cat_sat_regimen_fiscal_codigo'];
-        return $emisor;
-    }
-
-    final public function envia_factura(_notificacion $modelo_notificacion, int $registro_id){
-        $notifica = (new _email())->envia_factura(key_filter_entidad_id: $this->key_filtro_id, link: $this->link,
-            modelo_notificacion: $modelo_notificacion, registro_id: $registro_id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al enviar notificacion',data:  $notifica);
-        }
-        return $notifica;
-    }
-
-    private function factor_base(array $impuestos){
-        $factores = $this->factores(impuestos: $impuestos);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al integrar factor', data: $factores);
-        }
-
-        $factor = $this->acumula_factor(factores: $factores);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al integrar factor', data: $factor);
-        }
-        return $factor;
-    }
-
-    private function factores(array $impuestos){
-        $factores = array();
-        foreach ($impuestos as $row_impuesto){
-            $factores = $this->integra_factor(factores: $factores,row_impuesto:  $row_impuesto);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al integrar factor', data: $factores);
-            }
-        }
-        return $factores;
-    }
-
-    /**
-     * Obtiene la serie de un CSD
-     * @param int $fc_csd_id CSD de obtencion de serie
-     * @return array|string
-     * @version 10.50.3
-     */
-    private function fc_csd_serie(int $fc_csd_id): array|string
-    {
-        if($fc_csd_id <= 0){
-            return $this->error->error(mensaje: 'Error fc_csd_id debe ser mayor a 0', data: $fc_csd_id);
-        }
-        $columnas[] = 'fc_csd_serie';
-        $fc_csd = (new fc_csd(link: $this->link))->registro(registro_id: $fc_csd_id, columnas: $columnas);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener csd', data: $fc_csd);
-        }
-
-        return trim($fc_csd['fc_csd_serie']);
-    }
-
-    private function folio_str(string $number_folio): string
-    {
-        $long_nf = strlen($number_folio);
-        $n_ceros = 6;
-        $i = $long_nf;
-        $folio_str = '';
-
-        while($i<$n_ceros){
-            $folio_str.='0';
-            $i++;
-        }
-
-        $folio_str.=$number_folio;
-        return $folio_str;
-    }
-
-    final public function genera_ruta_archivo_tmp(): array|string
-    {
-        $ruta_archivos = $this->ruta_archivos();
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al generar ruta de archivos', data: $ruta_archivos);
-        }
-
-        $ruta_archivos_tmp = $this->ruta_archivos_tmp(ruta_archivos: $ruta_archivos);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al generar ruta de archivos', data: $ruta_archivos_tmp);
-        }
-        return $ruta_archivos_tmp;
-    }
-
-    private function get_datos_xml(string $ruta_xml = ""): array
-    {
-        $xml = simplexml_load_file($ruta_xml);
-        $ns = $xml->getNamespaces(true);
-        $xml->registerXPathNamespace('c', $ns['cfdi']);
-        $xml->registerXPathNamespace('t', $ns['tfd']);
-
-        $xml_data = array();
-        $xml_data['cfdi_comprobante'] = array();
-        $xml_data['cfdi_emisor'] = array();
-        $xml_data['cfdi_receptor'] = array();
-        $xml_data['cfdi_conceptos'] = array();
-        $xml_data['tfd'] = array();
-
-        $nodos = array();
-        $nodos[] = '//cfdi:Comprobante';
-        $nodos[] = '//cfdi:Comprobante//cfdi:Emisor';
-        $nodos[] = '//cfdi:Comprobante//cfdi:Receptor';
-        $nodos[] = '//cfdi:Comprobante//cfdi:Conceptos//cfdi:Concepto';
-        $nodos[] = '//t:TimbreFiscalDigital';
-
-        foreach ($nodos as $key => $nodo) {
-            foreach ($xml->xpath($nodo) as $value) {
-                $data = (array)$value->attributes();
-                $data = $data['@attributes'];
-                $xml_data[array_keys($xml_data)[$key]] = $data;
-            }
-        }
-        return $xml_data;
-    }
-
-    /**
-     * Obtiene el subtotal de una factura
-     * @param int $registro_id Factura o complemento de pago o NC a obtener info
-     * @return float|array
-     * @version 6.7.0
-     */
-    final public function get_factura_sub_total(int $registro_id): float|array
-    {
-        if ($registro_id <= 0) {
-            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
-        }
-        $key = $this->tabla.'_sub_total';
-        $fc_factura = $this->registro(registro_id: $registro_id, columnas: array($key),
-            retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
-        }
-
-
-        return round($fc_factura->$key,2);
-
-
-    }
-
-    private function integra_factor(array $factores, array $row_impuesto){
-        $factor_impuesto_row = (float)$row_impuesto['cat_sat_factor_factor'];
-        $existe_factor = $this->existe_factor(factor_impuesto_row: $factor_impuesto_row,factores:  $factores);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar si existe factor', data: $existe_factor);
-        }
-        if(!$existe_factor){
-            $factores[] = $factor_impuesto_row;
-        }
-        return $factores;
-    }
 
     /**
      * Ajusta la fecha dependiendo la entrada de fecha
@@ -1441,7 +1468,7 @@ class _transacciones_fc extends modelo
      * @version 10.31.0
      *
      */
-     private function integra_fecha(array $registro): array
+    private function integra_fecha(array $registro): array
     {
         if(isset($registro['fecha'])){
             $es_fecha = $this->validacion->valida_pattern(key:'fecha', txt: $registro['fecha']);
@@ -1474,6 +1501,9 @@ class _transacciones_fc extends modelo
 
         return $registro;
     }
+
+
+
 
     /**
      * Limpia un key de un registro si es que existe
@@ -1568,6 +1598,30 @@ class _transacciones_fc extends modelo
     }
 
     /**
+     * Obtiene las partidas de una entidad de tipo cfdi
+     * @param _partida $modelo_partida Modelo a obtener las partidas
+     * @param int $registro_id Registro en proceso
+     * @return array
+     * @version 10.125.4
+     */
+    final public function partidas_base(_partida $modelo_partida, int $registro_id): array
+    {
+        $this->key_filtro_id = trim($this->key_filtro_id);
+        if($this->key_filtro_id === ''){
+            return $this->error->error(mensaje: 'Error key_filtro_id esta vacio', data: $this->key_filtro_id);
+        }
+        if($registro_id <= 0){
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+        }
+        $filtro[$this->key_filtro_id] = $registro_id;
+        $r_rows_partidas = $modelo_partida->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener rows_partidas', data: $r_rows_partidas);
+        }
+        return $r_rows_partidas->registros;
+    }
+
+    /**
      * Verifica si se permite o no una transaccion dependiendo la etapa en la que se encuentre la entidad
      * @param _etapa $modelo_etapa Modelo de etapa
      * @param int $registro_id Registro en proceso
@@ -1589,6 +1643,7 @@ class _transacciones_fc extends modelo
         }
         return $permite_transaccion;
     }
+
 
     private function receptor(array $row_entidad): array
     {
@@ -1633,13 +1688,32 @@ class _transacciones_fc extends modelo
         return $receptor;
     }
 
-    final public function retenciones(_data_impuestos $modelo_retencion, int $registro_id){
-        $filtro[$this->key_filtro_id] = $registro_id;
-        $r_retenciones = $modelo_retencion->filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $r_retenciones);
+
+
+    /**
+     * Maqueta el registro para insersion
+     * @param stdClass $row_entidad Registro base de operacion
+     * @return array
+     */
+    private function row_entidad_ins(stdClass $row_entidad): array
+    {
+        $row_entidad_ins['fc_csd_id'] = $row_entidad->fc_csd_id;
+        $row_entidad_ins['cat_sat_forma_pago_id'] = $row_entidad->cat_sat_forma_pago_id;
+        $row_entidad_ins['cat_sat_metodo_pago_id'] = $row_entidad->cat_sat_metodo_pago_id;
+        $row_entidad_ins['cat_sat_moneda_id'] = $row_entidad->cat_sat_moneda_id;
+        $row_entidad_ins['com_tipo_cambio_id'] = $row_entidad->com_tipo_cambio_id;
+        $row_entidad_ins['cat_sat_uso_cfdi_id'] = $row_entidad->cat_sat_uso_cfdi_id;
+        $row_entidad_ins['cat_sat_tipo_de_comprobante_id'] = $row_entidad->cat_sat_tipo_de_comprobante_id;
+        $row_entidad_ins['dp_calle_pertenece_id'] = $row_entidad->dp_calle_pertenece_id;
+        $row_entidad_ins['exportacion'] = $row_entidad->exportacion;
+        $row_entidad_ins['cat_sat_regimen_fiscal_id'] = $row_entidad->cat_sat_regimen_fiscal_id;
+        $row_entidad_ins['com_sucursal_id'] = $row_entidad->com_sucursal_id;
+
+        if(isset($row_entidad->observaciones)) {
+            $row_entidad->observaciones = trim($row_entidad->observaciones);
+            $row_entidad_ins['observaciones'] = $row_entidad->observaciones;
         }
-        return $r_retenciones->registros;
+        return $row_entidad_ins;
     }
 
     final public function ruta_archivos(string $directorio = ""): array|string
@@ -1666,330 +1740,6 @@ class _transacciones_fc extends modelo
         }
         return $ruta_archivos_tmp;
     }
-
-    /**
-     * Suma el conjunto de partidas para descuento
-     * @param _partida $modelo_partida Modelo de tipo partida
-     * @param array $partidas Partidas de una factura
-     * @return float|array|int
-     * @version 0.118.26
-     */
-    private function suma_descuento_partida(_partida $modelo_partida, array $partidas): float|array|int
-    {
-        $descuento = 0;
-        foreach ($partidas as $partida) {
-            if (!is_array($partida)) {
-                return $this->error->error(mensaje: 'Error partida debe ser un array', data: $partida);
-            }
-
-            $descuento_partida = $this->descuento_partida(modelo_partida: $modelo_partida,
-                registro_partida_id: $partida[$modelo_partida->key_id]);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener descuento partida', data: $descuento_partida);
-            }
-            $descuento += $descuento_partida;
-        }
-        return $descuento;
-    }
-
-    final public function tiene_impuestos(_data_impuestos $modelo_traslado, _data_impuestos $modelo_retencion, int $registro_id){
-        $tiene_retenciones = $this->tiene_retenciones(modelo_retencion: $modelo_retencion,registro_id:  $registro_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $tiene_retenciones);
-        }
-        $tiene_traslados = $this->tiene_traslados(modelo_traslado: $modelo_traslado,registro_id:  $registro_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $tiene_traslados);
-        }
-
-        $tiene_impuestos = false;
-        if($tiene_retenciones || $tiene_traslados){
-            $tiene_impuestos = true;
-        }
-        return $tiene_impuestos;
-
-    }
-
-    final public function tiene_retenciones(_data_impuestos $modelo_retencion, int $registro_id){
-        $filtro[$this->key_filtro_id] = $registro_id;
-        $tiene_rows = $modelo_retencion->existe(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $tiene_rows);
-        }
-        return $tiene_rows;
-    }
-
-
-    final public function tiene_traslados(_data_impuestos $modelo_traslado, int $registro_id){
-        $filtro[$this->key_filtro_id] = $registro_id;
-        $tiene_rows = $modelo_traslado->existe(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $tiene_rows);
-        }
-        return $tiene_rows;
-    }
-
-    /**
-     * Obtiene los traslados de una partida
-     * @param _data_impuestos $modelo_traslado Modelo para obtencion de traslados
-     * @param int $registro_id Registro base de fc_factura o Nota de credito
-     * @return array
-     * @version 10.81.3
-     */
-    final public function traslados(_data_impuestos $modelo_traslado, int $registro_id): array
-    {
-        if($registro_id <= 0){
-            return $this->error->error(mensaje: 'Error al registro_id debe ser mayor a 0', data: $registro_id);
-        }
-        $filtro[$this->key_filtro_id] = $registro_id;
-        $r_traslados = $modelo_traslado->filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar si tiene registros', data: $r_traslados);
-        }
-        return $r_traslados->registros;
-    }
-
-    final public function tasas_de_impuestos(_data_impuestos $modelo_traslado, _data_impuestos $modelo_retencion, int $registro_id){
-
-        if($registro_id <= 0){
-            return $this->error->error(mensaje: 'Error al registro_id debe ser mayor a 0', data: $registro_id);
-        }
-
-        $traslados = $this->traslados(modelo_traslado: $modelo_traslado,registro_id:  $registro_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener traslados', data: $traslados);
-        }
-
-        $tiene_traslado = $this->tiene_traslados(modelo_traslado: $modelo_traslado,registro_id:  $registro_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener traslados', data: $tiene_traslado);
-        }
-
-        $retenciones = $this->retenciones(modelo_retencion: $modelo_retencion,registro_id:  $registro_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener retenciones', data: $retenciones);
-        }
-        $tiene_retencion = $this->tiene_retenciones(modelo_retencion: $modelo_retencion,registro_id:  $registro_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener tiene_retencion', data: $tiene_retencion);
-        }
-
-
-        $factor_traslado = $this->factor_base(impuestos: $traslados);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al integrar factor', data: $factor_traslado);
-        }
-        $factor_retenido = $this->factor_base(impuestos: $retenciones);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al integrar factor', data: $factor_traslado);
-        }
-
-
-        $data = new stdClass();
-        $data->traslado = new stdClass();
-
-        $data->traslado->aplica = $tiene_traslado;
-        $data->traslado->registros = $traslados;
-        $data->traslado->factor = $factor_traslado;
-
-        $data->retencion = new stdClass();
-
-        $data->retencion->aplica = $tiene_retencion;
-        $data->retencion->registros = $retenciones;
-        $data->retencion->factor = $factor_retenido;
-
-        $data->factor_calculo = $factor_traslado - $factor_retenido;
-
-        return $data;
-
-    }
-
-    private function ultimo_folio(int $fc_csd_id){
-
-        $data = $this->data_para_folio(fc_csd_id: $fc_csd_id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener data para folio', data: $data);
-        }
-        $number_folio = $this->number_folio(fc_csd_serie: $data->fc_csd_serie,r_registro:  $data->r_registro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener number_folio', data: $number_folio);
-        }
-
-        $folio_str = $this->folio_str(number_folio: $number_folio);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener folio_str', data: $folio_str);
-        }
-
-        return $data->fc_csd_serie.'-'.$folio_str;
-
-    }
-
-    /**
-     * Valida si una entidad relacionada de facturacion puede ser o no eliminada
-     * @param array $etapas Etapas a verificar
-     * @return bool
-     * @version 9.3.0
-     */
-    private function valida_permite_transaccion(array $etapas): bool
-    {
-        $permite_transaccion = true;
-        foreach ($etapas as $etapa){
-            /**
-             * AJUSTAR MEDIANTE CONF
-             */
-            if($etapa['pr_etapa_descripcion'] === 'TIMBRADO'){
-                $permite_transaccion = false;
-            }
-            if($etapa['pr_etapa_descripcion'] === 'CANCELADO'){
-                $permite_transaccion = false;
-            }
-        }
-        return $permite_transaccion;
-    }
-
-
-
-    /**
-     * Calcula los impuestos trasladados de una factura
-     * @param int $registro_entidad_id Factura a calcular
-     * @param _partida $modelo_partida
-     * @param _data_impuestos $modelo_traslado
-     * @param string $name_entidad
-     * @return float|array
-     * @version 4.14.0
-     */
-    public function get_factura_imp_trasladados(_partida $modelo_partida, _data_impuestos $modelo_traslado,
-                                                string $name_entidad, int $registro_entidad_id): float|array
-    {
-        $partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida, registro_entidad_id: $registro_entidad_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
-        }
-        $imp_traslado = 0.0;
-
-        foreach ($partidas as $partida) {
-            $imp_traslado += $modelo_partida->calculo_imp_trasladado(
-                modelo_traslado: $modelo_traslado, registro_partida_id: $partida[$modelo_partida->key_id]);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
-            }
-        }
-
-        return $imp_traslado;
-    }
-
-    public function get_factura_imp_retenidos(_partida $modelo_partida, _data_impuestos $modelo_retencion,
-                                              string $name_entidad, int $registro_entidad_id): float|array
-    {
-        $partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida,
-            registro_entidad_id: $registro_entidad_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
-        }
-
-        $imp_traslado = 0.0;
-
-
-        foreach ($partidas as $valor) {
-
-            $importe = $modelo_partida->calculo_imp_retenido(modelo_retencion: $modelo_retencion,
-                registro_partida_id: $valor[$modelo_partida->key_id]);
-
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $importe);
-            }
-
-            $imp_traslado += $importe;
-        }
-
-        return $imp_traslado;
-    }
-
-    private function guarda_documento(string $directorio, string $extension, string $contenido,
-                                      _doc $modelo_documento, int $registro_id): array|stdClass
-    {
-        $ruta_archivos = $this->ruta_archivos(directorio: $directorio);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener ruta de archivos', data: $ruta_archivos);
-        }
-
-        $ruta_archivo = "$ruta_archivos/$this->registro_id.$extension";
-
-        $guarda_archivo = (new files())->guarda_archivo_fisico(contenido_file: $contenido, ruta_file: $ruta_archivo);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al guardar archivo', data: $guarda_archivo);
-        }
-
-        $tipo_documento = $this->doc_tipo_documento_id(extension: $extension);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al validar extension del documento', data: $tipo_documento);
-        }
-
-        $file['name'] = $guarda_archivo;
-        $file['tmp_name'] = $guarda_archivo;
-
-        $documento['doc_tipo_documento_id'] = $tipo_documento;
-        $documento['descripcion'] = "$this->registro_id.$extension";
-        $documento['descripcion_select'] = "$this->registro_id.$extension";
-
-        $documento = (new doc_documento(link: $this->link))->alta_documento(registro: $documento, file: $file);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al guardar jpg', data: $documento);
-        }
-
-        $registro[$this->key_id] = $registro_id;
-        $registro['doc_documento_id'] = $documento->registro_id;
-        $factura_documento = $modelo_documento->alta_registro(registro: $registro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al guardar relacion factura con documento', data: $factura_documento);
-        }
-
-        return $documento;
-    }
-
-    /**
-     * Obtiene el total de descuento de una factura
-     * @param int $registro_id Identificador de factura
-     * @return float|array
-     * @version 6.10.0
-     */
-    final public function get_factura_descuento(int $registro_id): float|array
-    {
-        if ($registro_id <= 0) {
-            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
-        }
-
-        $key_descuento = $this->tabla.'_total_descuento';
-
-        $fc_factura = $this->registro(registro_id: $registro_id, columnas: array($key_descuento),
-            retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
-        }
-
-        return round($fc_factura->$key_descuento,2);
-
-    }
-
-    /**
-     * Obtiene el total de una factura
-     * @param int $fc_factura_id Factura a obtener total
-     * @return float|array
-     */
-    final public function get_factura_total(int $fc_factura_id): float|array
-    {
-        if ($fc_factura_id <= 0) {
-            return $this->error->error(mensaje: 'Error $fc_factura_id debe ser mayor a 0', data: $fc_factura_id);
-        }
-        $key_total = $this->tabla.'_total';
-        $fc_factura = $this->registro(registro_id: $fc_factura_id, columnas: array($key_total),
-            retorno_obj: true);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
-        }
-        return round($fc_factura->$key_total,2);
-    }
-
 
     final public function status(string $campo, int $registro_id): array|stdClass
     {
@@ -2042,33 +1792,6 @@ class _transacciones_fc extends modelo
     }
 
     /**
-     * Suma los subtotales acumulando por partida
-     * @param array $fc_partidas Partidas de una factura
-     * @return array|float
-     * @version 5.7.1
-     */
-    private function suma_sub_totales(array $fc_partidas): float|array
-    {
-        $subtotal = 0.0;
-        foreach ($fc_partidas as $fc_partida) {
-            if(!is_array($fc_partida)){
-                return $this->error->error(mensaje: 'Error fc_partida debe ser un array', data: $fc_partida);
-            }
-            $keys = array('fc_partida_id');
-            $valida = $this->validacion->valida_ids(keys: $keys, registro: $fc_partida);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al validar fc_partida ', data: $valida);
-            }
-
-            $subtotal = $this->suma_sub_total(fc_partida: $fc_partida,subtotal:  $subtotal);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $subtotal);
-            }
-        }
-        return $subtotal;
-    }
-
-    /**
      * Calcula el subtotal de una partida
      * @param int $fc_partida_id Partida a verificar sub total
      * @return float|array
@@ -2104,6 +1827,31 @@ class _transacciones_fc extends modelo
     }
 
     /**
+     * Suma el conjunto de partidas para descuento
+     * @param _partida $modelo_partida Modelo de tipo partida
+     * @param array $partidas Partidas de una factura
+     * @return float|array|int
+     * @version 0.118.26
+     */
+    private function suma_descuento_partida(_partida $modelo_partida, array $partidas): float|array|int
+    {
+        $descuento = 0;
+        foreach ($partidas as $partida) {
+            if (!is_array($partida)) {
+                return $this->error->error(mensaje: 'Error partida debe ser un array', data: $partida);
+            }
+
+            $descuento_partida = $this->descuento_partida(modelo_partida: $modelo_partida,
+                registro_partida_id: $partida[$modelo_partida->key_id]);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener descuento partida', data: $descuento_partida);
+            }
+            $descuento += $descuento_partida;
+        }
+        return $descuento;
+    }
+
+    /**
      * Suma un subtotal al previo
      * @param array $fc_partida Partida a integrar
      * @param float $subtotal subtotal previo
@@ -2129,30 +1877,31 @@ class _transacciones_fc extends modelo
     }
 
     /**
-     * Verifica si se puede generar de una transaccion de afectacion de registro
-     * @param _etapa $modelo_etapa Modelo de etapa
-     * @param int $registro_id registro de entidad
-     * @return array|bool
-     * @version 9.35.3
+     * Suma los subtotales acumulando por partida
+     * @param array $fc_partidas Partidas de una factura
+     * @return array|float
+     * @version 5.7.1
      */
-    final public function verifica_permite_transaccion(_etapa $modelo_etapa, int $registro_id): bool|array
+    private function suma_sub_totales(array $fc_partidas): float|array
     {
-        if($registro_id <= 0){
-            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
-        }
+        $subtotal = 0.0;
+        foreach ($fc_partidas as $fc_partida) {
+            if(!is_array($fc_partida)){
+                return $this->error->error(mensaje: 'Error fc_partida debe ser un array', data: $fc_partida);
+            }
+            $keys = array('fc_partida_id');
+            $valida = $this->validacion->valida_ids(keys: $keys, registro: $fc_partida);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al validar fc_partida ', data: $valida);
+            }
 
-        $permite_transaccion = $this->permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
+            $subtotal = $this->suma_sub_total(fc_partida: $fc_partida,subtotal:  $subtotal);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $subtotal);
+            }
         }
-
-        if(!$permite_transaccion){
-            return $this->error->error(mensaje: 'Error no se permite la eliminacion', data: $permite_transaccion);
-        }
-        return $permite_transaccion;
+        return $subtotal;
     }
-
-
 
     public function timbra_xml(_doc $modelo_documento, _etapa $modelo_etapa, _partida $modelo_partida,
                                _cuenta_predial $modelo_predial, _relacion $modelo_relacion,
@@ -2292,8 +2041,6 @@ class _transacciones_fc extends modelo
         return $cfdi_sellado;
     }
 
-
-
     /**
      * Obtiene el total de una factura
      * @param int $registro_id Identificador de factura
@@ -2328,6 +2075,75 @@ class _transacciones_fc extends modelo
 
         return $total;
 
+    }
+
+
+
+    private function ultimo_folio(int $fc_csd_id){
+
+        $data = $this->data_para_folio(fc_csd_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener data para folio', data: $data);
+        }
+        $number_folio = $this->number_folio(fc_csd_serie: $data->fc_csd_serie,r_registro:  $data->r_registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener number_folio', data: $number_folio);
+        }
+
+        $folio_str = $this->folio_str(number_folio: $number_folio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener folio_str', data: $folio_str);
+        }
+
+        return $data->fc_csd_serie.'-'.$folio_str;
+
+    }
+
+    /**
+     * Valida si una entidad relacionada de facturacion puede ser o no eliminada
+     * @param array $etapas Etapas a verificar
+     * @return bool
+     * @version 9.3.0
+     */
+    private function valida_permite_transaccion(array $etapas): bool
+    {
+        $permite_transaccion = true;
+        foreach ($etapas as $etapa){
+            /**
+             * AJUSTAR MEDIANTE CONF
+             */
+            if($etapa['pr_etapa_descripcion'] === 'TIMBRADO'){
+                $permite_transaccion = false;
+            }
+            if($etapa['pr_etapa_descripcion'] === 'CANCELADO'){
+                $permite_transaccion = false;
+            }
+        }
+        return $permite_transaccion;
+    }
+
+    /**
+     * Verifica si se puede generar de una transaccion de afectacion de registro
+     * @param _etapa $modelo_etapa Modelo de etapa
+     * @param int $registro_id registro de entidad
+     * @return array|bool
+     * @version 9.35.3
+     */
+    final public function verifica_permite_transaccion(_etapa $modelo_etapa, int $registro_id): bool|array
+    {
+        if($registro_id <= 0){
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+        }
+
+        $permite_transaccion = $this->permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
+        }
+
+        if(!$permite_transaccion){
+            return $this->error->error(mensaje: 'Error no se permite la eliminacion', data: $permite_transaccion);
+        }
+        return $permite_transaccion;
     }
 
 

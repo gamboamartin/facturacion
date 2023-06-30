@@ -97,8 +97,8 @@ class fc_docto_relacionado extends _modelo_parent{
 
         $modelo_traslado = new fc_traslado(link: $this->link);
 
-        $tiene_traslado = (new fc_factura(link: $this->link))->tiene_traslados(modelo_traslado: $modelo_traslado,
-            registro_id:  $r_alta_bd->registro['fc_factura_id']);
+        $tiene_traslado = (new _calculo_imps())->tiene_traslados(modelo_traslado: $modelo_traslado,
+            key_filtro_id: 'fc_factura_id', registro_id: $r_alta_bd->registro['fc_factura_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar si existe traslado',data:  $tiene_traslado);
         }
@@ -111,8 +111,8 @@ class fc_docto_relacionado extends _modelo_parent{
         }
 
         $modelo_retencion = new fc_retenido(link: $this->link);
-        $tiene_retencion = (new fc_factura(link: $this->link))->tiene_retenciones(modelo_retencion: $modelo_retencion,
-            registro_id:  $r_alta_bd->registro['fc_factura_id']);
+        $tiene_retencion = (new _calculo_imps())->tiene_retenciones(modelo_retencion: $modelo_retencion,
+            key_filtro_id: 'fc_factura_id', registro_id: $r_alta_bd->registro['fc_factura_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar si existe traslado',data:  $tiene_traslado);
         }
@@ -300,8 +300,8 @@ class fc_docto_relacionado extends _modelo_parent{
         $modelo_traslado = new fc_traslado(link: $this->link);
         $modelo_retencion = new fc_retenido(link: $this->link);
 
-        $tiene_impuestos = (new fc_factura(link: $this->link))->tiene_impuestos(modelo_traslado: $modelo_traslado,
-            modelo_retencion:  $modelo_retencion, registro_id: $fc_factura_id);
+        $tiene_impuestos = (new _calculo_imps())->tiene_impuestos(key_filtro_id: 'fc_factura_id',
+            modelo_traslado: $modelo_traslado, modelo_retencion: $modelo_retencion, registro_id: $fc_factura_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar si existen impuestos',data:  $tiene_impuestos);
         }
