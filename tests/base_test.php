@@ -33,6 +33,7 @@ use gamboamartin\facturacion\models\fc_partida;
 
 
 use gamboamartin\facturacion\models\fc_partida_cp;
+use gamboamartin\facturacion\models\fc_partida_nc;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_relacion_nc;
 use gamboamartin\facturacion\models\fc_traslado_dr;
@@ -950,6 +951,55 @@ class base_test{
 
 
         $alta = (new fc_partida($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_partida_nc(PDO $link, string $codigo = '1', float $cantidad = 1,
+                                       int $cat_sat_metodo_pago_id = 1, int $com_producto_id = 1,
+                                    string $descripcion = '1', float $descuento = 0, int $fc_nota_credito_id = 1,
+                                    int $id = 1, float $valor_unitario = 1): array|\stdClass
+    {
+
+        $existe = (new fc_nota_credito($link))->existe_by_id(registro_id: $fc_nota_credito_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_fc_nota_credito(link: $link,
+                cat_sat_metodo_pago_id: $cat_sat_metodo_pago_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar factura', $alta);
+            }
+        }
+
+        $existe = (new com_producto($link))->existe_by_id(registro_id: $com_producto_id);
+        if(errores::$error){
+            return (new errores())->error('Error al validar si existe', $existe);
+        }
+        if(!$existe) {
+            $alta = $this->alta_com_producto(link: $link,id: $com_producto_id);
+            if (errores::$error) {
+                return (new errores())->error('Error al insertar com_producto', $alta);
+            }
+        }
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['codigo'] = $codigo;
+        $registro['descripcion'] = $descripcion;
+        $registro['cantidad'] = $cantidad;
+        $registro['valor_unitario'] = $valor_unitario;
+        $registro['fc_nota_credito_id'] = $fc_nota_credito_id;
+        $registro['com_producto_id'] = $com_producto_id;
+        $registro['codigo_bis'] = $codigo;
+        $registro['descuento'] = $descuento;
+
+
+        $alta = (new fc_partida_nc($link))->alta_registro($registro);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
 

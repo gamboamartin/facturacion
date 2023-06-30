@@ -5,6 +5,7 @@ use gamboamartin\cat_sat\models\cat_sat_conf_imps;
 use gamboamartin\errores\errores;
 use gamboamartin\system\html_controler;
 
+use gamboamartin\system\links_menu;
 use stdClass;
 
 class _partida extends  _base{
@@ -21,10 +22,10 @@ class _partida extends  _base{
 
 
     private function acciones_conf_retenido(bool $aplica_cat_sat_conf_imps, int $cat_sat_conf_imps_id,
-                                            stdClass $fc_registro_partida, _data_impuestos $modelo_retencion): array|stdClass
+                                            stdClass $fc_registro_partida, _data_impuestos $modelo_retencion, array $registro): array|stdClass
     {
         $conf_retenidos = (new fc_conf_retenido($this->link))->get_configuraciones(
-            com_producto_id: $this->registro["com_producto_id"]);
+            com_producto_id: $registro["com_producto_id"]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener conf. retenciones', data: $conf_retenidos);
         }
@@ -46,7 +47,7 @@ class _partida extends  _base{
 
         foreach ($conf_retenidos->registros as $configuracion) {
             $retenido = $this->maqueta_datos(configuracion: $configuracion,
-                conf_descripcion: $conf_descripcion, fc_registro_partida: $fc_registro_partida);
+                conf_descripcion: $conf_descripcion, fc_registro_partida: $fc_registro_partida, registro: $registro);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar datos retenidos', data: $retenido);
             }
@@ -61,10 +62,18 @@ class _partida extends  _base{
     }
 
     private function acciones_conf_traslado(bool $aplica_cat_sat_conf_imps, int $cat_sat_conf_imps_id,
-                                            stdClass $fc_registro_partida, _data_impuestos $modelo_traslado): array|stdClass
+                                            stdClass $fc_registro_partida, _data_impuestos $modelo_traslado,
+                                            array $registro): array|stdClass
     {
+
+        $keys = array('com_producto_id');
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $registro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar $registro', data: $valida);
+        }
+
         $conf_traslados = (new fc_conf_traslado($this->link))->get_configuraciones(
-            com_producto_id: $this->registro["com_producto_id"]);
+            com_producto_id: $registro["com_producto_id"]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener conf. traslados', data: $conf_traslados);
         }
@@ -85,7 +94,7 @@ class _partida extends  _base{
 
         foreach ($conf_traslados->registros as $configuracion) {
             $traslado = $this->maqueta_datos(configuracion: $configuracion,
-                conf_descripcion: $conf_descripcion, fc_registro_partida: $fc_registro_partida);
+                conf_descripcion: $conf_descripcion, fc_registro_partida: $fc_registro_partida, registro: $registro);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar datos traslados', data: $traslado);
             }
@@ -109,8 +118,22 @@ class _partida extends  _base{
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
 
+        $modelo_entidad_tabla = trim($this->modelo_entidad->tabla);
+
+        if($modelo_entidad_tabla === ''){
+            return $this->error->error(mensaje: 'Error modelo_entidad_tabla esta vacia', data: $modelo_entidad_tabla);
+        }
+
+        $key_id_tabla = $modelo_entidad_tabla.'_id';
+
+        $keys = array($key_id_tabla);
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $this->registro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error validar registro', data: $valida);
+        }
+
         $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(
-            modelo_etapa: $this->modelo_etapa, registro_id: $this->registro[$this->modelo_entidad->tabla.'_id']);
+            modelo_etapa: $this->modelo_etapa, registro_id: $this->registro[$key_id_tabla]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -168,14 +191,14 @@ class _partida extends  _base{
 
         $traslado = $this->acciones_conf_traslado(aplica_cat_sat_conf_imps: $aplica_cat_sat_conf_imps,
             cat_sat_conf_imps_id: $cat_sat_conf_imps_id, fc_registro_partida: $fc_registro_partida,
-            modelo_traslado: $this->modelo_traslado);
+            modelo_traslado: $this->modelo_traslado, registro: (array)$fc_registro_partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al realizar acciones de conf. traslado', data: $traslado);
         }
 
         $retenido = $this->acciones_conf_retenido(aplica_cat_sat_conf_imps: $aplica_cat_sat_conf_imps,
             cat_sat_conf_imps_id: $cat_sat_conf_imps_id,fc_registro_partida: $fc_registro_partida,
-            modelo_retencion: $this->modelo_retencion);
+            modelo_retencion: $this->modelo_retencion, registro: (array)$fc_registro_partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al realizar acciones de conf. retenido', data: $retenido);
         }
@@ -704,6 +727,7 @@ class _partida extends  _base{
      * @param _data_impuestos $modelo_retencion Modelo de la retencion
      * @param _data_impuestos $modelo_traslado Modelo del traslado
      * @return array|stdClass
+     * @version 10.136.4
      */
     private function init_elimina_bd(int $id,_transacciones_fc $modelo_entidad, _etapa $modelo_etapa,
                                      _cuenta_predial $modelo_predial, _data_impuestos $modelo_retencion,
@@ -737,7 +761,6 @@ class _partida extends  _base{
      * @param int $registro_entidad_id Identificador de partida
      * @return array|stdClass
      * @version 10.37.1
-     *
      */
     private function integra_button_partida(html_controler $html, int $indice, string $name_modelo_entidad, array $partida,
                                             stdClass $r_fc_registro_partida, int $registro_entidad_id): array|stdClass
@@ -772,13 +795,28 @@ class _partida extends  _base{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener params', data: $params);
         }
+
         $link_elimina_partida = $html->button_href(accion: 'elimina_bd', etiqueta: 'Eliminar',
             registro_id: $partida[$key_id], seccion: $this->tabla, style: 'danger',icon: 'bi bi-trash',
             muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al generar link elimina_bd para partida', data: $link_elimina_partida);
+            return $this->error->error(mensaje: 'Error al generar link elimina_bd para partida',
+                data: $link_elimina_partida);
         }
         $r_fc_registro_partida->registros[$indice]['elimina_bd'] = $link_elimina_partida;
+
+        $params = array();
+        $params['registro_partida_id'] = $partida[$key_id];
+        $link_modifica_partida_bd = (new links_menu(link: $this->link,registro_id: -1))->link_con_id(
+            accion: 'modifica_partida_bd',link:  $this->link,registro_id:  $registro_entidad_id,
+            seccion: $name_modelo_entidad,params: $params);
+
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar link para modificar partida',
+                data: $link_modifica_partida_bd);
+        }
+
+        $r_fc_registro_partida->registros[$indice]['link_modifica_partida_bd'] = $link_modifica_partida_bd;
         return $r_fc_registro_partida;
     }
 
@@ -795,6 +833,15 @@ class _partida extends  _base{
     private function integra_buttons_partida( array $filtro, array $hijo, html_controler $html,
                                               string $name_modelo_entidad, int $registro_entidad_id): array|stdClass
     {
+
+        $name_modelo_entidad = trim($name_modelo_entidad);
+        if($name_modelo_entidad === ''){
+            return $this->error->error(mensaje: 'Error name_modelo_entidad esta vacio', data: $name_modelo_entidad);
+        }
+        if($registro_entidad_id <= 0){
+            return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
+                data: $registro_entidad_id);
+        }
 
         $r_fc_partida = $this->filtro_and(filtro: $filtro, hijo: $hijo);
         if (errores::$error) {
@@ -827,11 +874,12 @@ class _partida extends  _base{
         }
         return $registro;
     }
-    private function maqueta_datos(array $configuracion, string $conf_descripcion, stdClass $fc_registro_partida): array
+    private function maqueta_datos(array $configuracion, string $conf_descripcion, stdClass $fc_registro_partida,
+                                   array $registro): array
     {
         $traslado = array();
         $traslado['descripcion'] = $configuracion[$conf_descripcion];
-        $traslado['descripcion'] .= " " . $this->registro['descripcion'];
+        $traslado['descripcion'] .= " " . $registro[$this->tabla.'_descripcion'];
         $traslado['cat_sat_tipo_factor_id'] = $configuracion['cat_sat_tipo_factor_id'];
         $traslado['cat_sat_factor_id'] = $configuracion['cat_sat_factor_id'];
         $traslado['cat_sat_tipo_impuesto_id'] = $configuracion['cat_sat_tipo_impuesto_id'];
@@ -921,6 +969,8 @@ class _partida extends  _base{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener partida', data: $fc_registro_partida);
         }
+
+
 
         $regenera = $this->regenera_totales(fc_registro_partida: $fc_registro_partida);
         if (errores::$error) {

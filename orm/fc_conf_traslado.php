@@ -89,6 +89,9 @@ class fc_conf_traslado extends _base {
 
     public function get_configuraciones(int $com_producto_id): array|stdClass|int
     {
+        if($com_producto_id <= 0){
+            return $this->error->error(mensaje: 'Error com_producto_id debe ser mayor a 0',data:  $com_producto_id);
+        }
         $filtro['fc_conf_traslado.status'] = 'activo';
         $filtro['com_producto.id'] = $com_producto_id;
         $registro = $this->filtro_and(filtro: $filtro);

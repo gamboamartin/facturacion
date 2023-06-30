@@ -8,15 +8,20 @@ use gamboamartin\facturacion\models\_facturacion;
 use gamboamartin\facturacion\models\fc_complemento_pago;
 use gamboamartin\facturacion\models\fc_complemento_pago_etapa;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
+use gamboamartin\facturacion\models\fc_cuenta_predial_nc;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_etapa;
+use gamboamartin\facturacion\models\fc_nota_credito;
+use gamboamartin\facturacion\models\fc_nota_credito_etapa;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_partida_cp;
 use gamboamartin\facturacion\models\fc_partida_nc;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_retenido_cp;
+use gamboamartin\facturacion\models\fc_retenido_nc;
 use gamboamartin\facturacion\models\fc_traslado;
+use gamboamartin\facturacion\models\fc_traslado_nc;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\js_base\eventos\adm_seccion;
 use gamboamartin\system\html_controler;
@@ -169,6 +174,57 @@ class _partidaTest extends test
 
     }
 
+    public function test_init_elimina_bd(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida_nc(link: $this->link);
+        $modelo = new liberator($modelo);
+
+
+        $id = 1;
+        $modelo_entidad = new fc_nota_credito(link: $this->link);
+        $modelo_etapa = new fc_nota_credito_etapa(link: $this->link);
+        $modelo_predial = new fc_cuenta_predial_nc(link: $this->link);
+        $modelo_retencion = new fc_retenido_nc(link: $this->link);
+        $modelo_traslado = new fc_traslado_nc(link: $this->link);
+
+        $del = (new base_test())->del_adm_seccion(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
+            print_r($error);exit;
+        }
+
+        $del = (new base_test())->del_fc_nota_credito(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
+            print_r($error);exit;
+        }
+
+        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link, adm_seccion_descripcion: 'fc_nota_credito');
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
+            print_r($error);exit;
+        }
+
+        $alta = (new base_test())->alta_fc_partida_nc(link: $this->link, cat_sat_metodo_pago_id: 2);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
+            print_r($error);exit;
+        }
+
+        $resultado = $modelo->init_elimina_bd($id, $modelo_entidad, $modelo_etapa, $modelo_predial, $modelo_retencion,
+            $modelo_traslado);
+
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+
+        errores::$error = false;
+    }
+
     public function test_integra_button_partida(): void
     {
         errores::$error = false;
@@ -213,10 +269,11 @@ class _partidaTest extends test
         $hijo = array();
         $html = new html();
         $html = new html_controler($html);
-        $name_modelo_entidad = '';
-        $registro_entidad_id = -1;
+        $name_modelo_entidad = 'a';
+        $registro_entidad_id = 1;
 
         $resultado = $modelo->integra_buttons_partida($filtro, $hijo, $html, $name_modelo_entidad, $registro_entidad_id);
+
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
 
