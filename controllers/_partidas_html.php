@@ -199,7 +199,15 @@ class _partidas_html{
         $key_descripcion = $modelo_partida->tabla.'_descripcion';
         $key_descripcion_html = $modelo_partida->tabla.'descripcion_html';
 
-        $fc_partida_descripcion = "<tbody><tr><td>$partida[$key_descripcion]</td></tr></tbody>";
+        $row_upd = new stdClass();
+        $row_upd->descripcion = $partida[$key_descripcion];
+        $input_descripcion = $html_controler->input_descripcion(cols: 12,row_upd: $row_upd,value_vacio:  false,
+            con_label: false);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar input', data: $input_descripcion);
+        }
+
+        $fc_partida_descripcion = "<tbody><tr><td>$input_descripcion</td></tr></tbody>";
 
         $t_head_producto = "<thead><tr><th>Descripcion</th></tr></thead>";
 
