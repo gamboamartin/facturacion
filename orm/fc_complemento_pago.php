@@ -27,11 +27,14 @@ class fc_complemento_pago extends _transacciones_fc
             LEFT JOIN fc_complemento_pago_etapa ON fc_complemento_pago_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
             WHERE fc_complemento_pago_etapa.fc_complemento_pago_id = fc_complemento_pago.id ORDER BY fc_complemento_pago_etapa.id DESC LIMIT 1)";
 
+        $fc_complemento_pago_total_pagos = "(SELECT SUM(fc_pago_pago.monto) FROM fc_pago_pago LEFT JOIN fc_pago 
+            ON fc_pago.id = fc_pago_pago.fc_pago_id WHERE fc_pago.fc_complemento_pago_id = fc_complemento_pago.id)";
 
         $columnas_extra['fc_complemento_pago_descuento'] = "$tabla.total_descuento";
-
         $columnas_extra['fc_complemento_pago_uuid'] = "IFNULL($fc_complemento_pago_uuid,'SIN UUID')";
         $columnas_extra['fc_complemento_pago_etapa'] = "$fc_complemento_pago_etapa";
+        $columnas_extra['fc_complemento_pago_total_pagos'] = "$fc_complemento_pago_total_pagos";
+        $columnas_extra['fc_complemento_pago_total_pagos'] = "$fc_complemento_pago_total_pagos";
 
 
 

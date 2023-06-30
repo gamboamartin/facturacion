@@ -844,7 +844,14 @@ class _dr_part extends _modelo_parent{
         return $upd;
     }
 
-    private function valida_tipo_impuesto(string $tipo_impuesto){
+    /**
+     * Valida que un tipo de impuesto sea Valido
+     * @param string $tipo_impuesto Tipo de impuesto a validar Retenciones o Traslados
+     * @return array|true
+     *
+     */
+    private function valida_tipo_impuesto(string $tipo_impuesto): bool|array
+    {
         $tipos_impuestos_validos = $this->tipo_impuestos_validos();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar tipos de impuestos', data:  $tipos_impuestos_validos);

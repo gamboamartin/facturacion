@@ -587,7 +587,7 @@ class _base_system_fc extends _base_system{
         return $tipo_comprobante->registros[0]['cat_sat_tipo_de_comprobante_id'];
     }
 
-    final public function init_datatable(): stdClass
+    public function init_datatable(): stdClass
     {
 
         $columns[$this->modelo->tabla."_id"]["titulo"] = "Id";
