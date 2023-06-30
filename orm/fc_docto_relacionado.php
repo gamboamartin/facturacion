@@ -223,9 +223,16 @@ class fc_docto_relacionado extends _modelo_parent{
      * Integra una descripcion default alta
      * @param array $registro Registro en proceso
      * @return array
+     * @version 10.132.4
      */
     private function descripcion_alta(array $registro): array
     {
+        $keys = array('codigo');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $valida);
+        }
+
         if(!isset($registro['descripcion'])){
             $descripcion = $registro['codigo'];
             $registro['descripcion'] = $descripcion;
