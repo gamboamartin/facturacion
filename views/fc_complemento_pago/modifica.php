@@ -13,24 +13,7 @@
                         <?php include (new views())->ruta_templates."head/subtitulo.php"; ?>
                         <?php include (new views())->ruta_templates."mensajes.php"; ?>
 
-                        <?php echo $controlador->inputs->fc_csd_id; ?>
-                        <?php echo $controlador->inputs->com_sucursal_id; ?>
-                        <?php echo $controlador->inputs->serie; ?>
-                        <?php echo $controlador->inputs->folio; ?>
-                        <?php echo $controlador->inputs->exportacion; ?>
-                        <?php echo $controlador->inputs->fecha; ?>
-                        <?php echo $controlador->inputs->impuestos_trasladados; ?>
-                        <?php echo $controlador->inputs->impuestos_retenidos; ?>
-                        <?php echo $controlador->inputs->subtotal; ?>
-                        <?php echo $controlador->inputs->descuento; ?>
-                        <?php echo $controlador->inputs->total; ?>
-                        <?php echo $controlador->inputs->cat_sat_tipo_de_comprobante_id; ?>
-                        <?php echo $controlador->inputs->cat_sat_forma_pago_id; ?>
-                        <?php echo $controlador->inputs->cat_sat_metodo_pago_id; ?>
-                        <?php echo $controlador->inputs->cat_sat_moneda_id; ?>
-                        <?php echo $controlador->inputs->com_tipo_cambio_id; ?>
-                        <?php echo $controlador->inputs->cat_sat_uso_cfdi_id; ?>
-                        <?php echo $controlador->inputs->observaciones; ?>
+                        <?php echo $controlador->form_data_fc; ?>
                         <?php include (new views())->ruta_templates.'botons/submit/modifica_bd.php';?>
 
                     </form>

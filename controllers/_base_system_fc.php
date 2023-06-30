@@ -127,6 +127,8 @@ class _base_system_fc extends _base_system{
 
     public bool $aplica_monto_relacion = false;
 
+    public string $form_data_fc = '';
+
     public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
     {
 
@@ -1035,7 +1037,7 @@ class _base_system_fc extends _base_system{
 
     }
 
-    private function existe_factura_rel(string $name_entidad_ejecucion, array $factura_cliente, string $key_entidad_id, array $relacion): bool
+    private function existe_factura_rel(string $name_entidad_ejecucion, array $factura_cliente, string $key_entidad_id, array $relacion): bool|array
     {
         $existe_factura_rel = false;
 
@@ -1076,8 +1078,7 @@ class _base_system_fc extends _base_system{
     private function existe_uuid_externo(array $fc_uuid, string $name_entidad_relacion, _uuid_ext $modelo_uuid_ext,
                                          array $row_relacion_ext): bool|array
     {
-        //print_r($key_relacion_id);exit;
-        //print_r($filtro);exit;
+
         $key_filtro_id = $name_entidad_relacion.'.id';
 
         $key_relacion_id = $name_entidad_relacion.'_id';
@@ -2131,6 +2132,28 @@ class _base_system_fc extends _base_system{
         }
 
         $this->buttons_base = $buttons;
+
+
+        $form_data_fc = $this->inputs->fc_csd_id;
+        $form_data_fc.= $this->inputs->com_sucursal_id;
+        $form_data_fc.= $this->inputs->serie;
+        $form_data_fc.= $this->inputs->folio;
+        $form_data_fc.= $this->inputs->exportacion;
+        $form_data_fc.= $this->inputs->fecha;
+        $form_data_fc.= $this->inputs->impuestos_trasladados;
+        $form_data_fc.= $this->inputs->impuestos_retenidos;
+        $form_data_fc.= $this->inputs->subtotal;
+        $form_data_fc.= $this->inputs->descuento;
+        $form_data_fc.= $this->inputs->total;
+        $form_data_fc.= $this->inputs->cat_sat_tipo_de_comprobante_id;
+        $form_data_fc.= $this->inputs->cat_sat_forma_pago_id;
+        $form_data_fc.= $this->inputs->cat_sat_metodo_pago_id;
+        $form_data_fc.= $this->inputs->cat_sat_moneda_id;
+        $form_data_fc.= $this->inputs->com_tipo_cambio_id;
+        $form_data_fc.= $this->inputs->cat_sat_uso_cfdi_id;
+        $form_data_fc.= $this->inputs->observaciones;
+
+        $this->form_data_fc = $form_data_fc;
 
 
 

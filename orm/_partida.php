@@ -696,12 +696,13 @@ class _partida extends  _base{
     }
 
     /**
-     * @param int $id
-     * @param _transacciones_fc $modelo_entidad
-     * @param _etapa $modelo_etapa
-     * @param _cuenta_predial $modelo_predial
-     * @param _data_impuestos $modelo_retencion
-     * @param _data_impuestos $modelo_traslado
+     * Inicializa lo elementos para eliminaciones
+     * @param int $id Identificador de partida
+     * @param _transacciones_fc $modelo_entidad Entidad base
+     * @param _etapa $modelo_etapa Modelo de la etapa
+     * @param _cuenta_predial $modelo_predial Modelo del predial
+     * @param _data_impuestos $modelo_retencion Modelo de la retencion
+     * @param _data_impuestos $modelo_traslado Modelo del traslado
      * @return array|stdClass
      */
     private function init_elimina_bd(int $id,_transacciones_fc $modelo_entidad, _etapa $modelo_etapa,
