@@ -113,7 +113,8 @@ class fc_impuesto_dr extends _modelo_parent{
 
     }
 
-    public function modifica_bd(array $registro, int $id, bool $reactiva = false, array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
+    public function modifica_bd(array $registro, int $id, bool $reactiva = false,
+                                array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
 
         $registro_previo = $this->registro(registro_id: $id);

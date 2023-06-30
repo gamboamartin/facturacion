@@ -82,10 +82,10 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al insertar',data:  $r_alta_bd);
         }
 
-        /*$regenera_monto = $this->regenera_pago_pago_monto(fc_pago_pago_id: $registro['fc_pago_pago_id']);
+        $valida = $this->valida_pago_pago_monto(fc_pago_pago_id: $registro['fc_pago_pago_id']);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al actualizar monto de pago',data:  $regenera_monto);
-        }*/
+            return $this->error->error(mensaje: 'Error al validar',data:  $valida);
+        }
 
 
         $transacciones = $this->genera_impuestos(fc_docto_relacionado_id: $r_alta_bd->registro_id,
@@ -253,10 +253,10 @@ class fc_docto_relacionado extends _modelo_parent{
             return $this->error->error(mensaje: 'Error al eliminar',data:  $r_elimina_bd);
         }
 
-        /*$regenera_monto = $this->regenera_pago_pago_monto(fc_pago_pago_id: $registro['fc_pago_pago_id']);
+        $valida = $this->valida_pago_pago_monto(fc_pago_pago_id: $registro['fc_pago_pago_id']);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al actualizar monto de pago',data:  $regenera_monto);
-        }*/
+            return $this->error->error(mensaje: 'Error al validar pago',data:  $valida);
+        }
 
 
         $regenera = (new _saldos_fc())->regenera_saldos(fc_factura_id:  $registro['fc_factura_id'],link: $this->link);
@@ -368,7 +368,8 @@ class fc_docto_relacionado extends _modelo_parent{
     }
 
     private function importe_pagado_documento(int $cat_sat_moneda_factura_id, int $cat_sat_moneda_pago_id, float $com_tipo_cambio_factura_monto,
-                                              float $com_tipo_cambio_pago_monto, array $registro){
+                                              float $com_tipo_cambio_pago_monto, array $registro): float
+    {
         $importe_pagado = round($registro['imp_pagado'],2);
 
         if($cat_sat_moneda_factura_id === 161){
@@ -498,6 +499,38 @@ class fc_docto_relacionado extends _modelo_parent{
         }
 
         return $r_pago_pago;
+    }
+
+    private function valida_pago_pago_monto(int $fc_pago_pago_id){
+
+        $filtro['fc_pago_pago.id'] = $fc_pago_pago_id;
+
+        $r_fc_docto_relacionado = $this->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener documentos',data:  $r_fc_docto_relacionado);
+        }
+
+        $fc_doctos_relacionados = $r_fc_docto_relacionado->registros;
+
+
+        $monto_pagado_tc = $this->monto_pagado_tc(fc_doctos_relacionados: $fc_doctos_relacionados);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener monto_pagado_tc',data:  $monto_pagado_tc);
+        }
+
+
+        $fc_pago_pago = (new fc_pago_pago(link: $this->link))->registro(registro_id: $fc_pago_pago_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener pago',data:  $fc_pago_pago);
+        }
+
+        $fc_pago_pago_monto = round($fc_pago_pago['fc_pago_pago_monto'], 2);
+
+        if($monto_pagado_tc > $fc_pago_pago_monto){
+            return $this->error->error(mensaje: 'Error monto_pagado de los documentos es mayor al pago',data:  $monto_pagado_tc);
+        }
+
+        return true;
     }
 
     private function monto_pagado_tc(array $fc_doctos_relacionados){
