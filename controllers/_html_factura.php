@@ -3,7 +3,9 @@ namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\comercial\models\com_tmp_prod_cs;
 use gamboamartin\errores\errores;
+use gamboamartin\system\html_controler;
 use PDO;
+use stdClass;
 
 class _html_factura{
     private errores $error;
@@ -40,12 +42,13 @@ class _html_factura{
 
     /**
      * Integra los datos de un producto para html views
+     * @param html_controler $html_controler
      * @param PDO $link Conexion a la base de datos
      * @param string $name_entidad_partida Nombre de la entidad partida
      * @param array $partida Registro de tipo partida
      * @return string
      */
-    final public function data_producto(PDO $link, string $name_entidad_partida, array $partida): string
+    final public function data_producto(html_controler $html_controler, PDO $link, string $name_entidad_partida, array $partida): string
     {
 
 
@@ -59,13 +62,27 @@ class _html_factura{
         $key_importe = $name_entidad_partida.'_sub_total';
         $key_descuento = $name_entidad_partida.'_descuento';
 
+        $input_cantidad = $html_controler->input_monto(cols: 12, row_upd: new stdClass(), value_vacio: false,
+            con_label: false, name: 'cantidad', place_holder: 'Cantidad', value: $partida[$key_cantidad]);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input', data: $input_cantidad);
+        }
+
+        $input_valor_unitario = $html_controler->input_monto(cols: 12, row_upd: new stdClass(), value_vacio: false,
+            con_label: false, name: 'valor_unitario', place_holder: 'Valor Unitario',
+            value: $partida[$key_valor_unitario]);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar input', data: $input_cantidad);
+        }
+
+
         return "
             <tr>
                 <td>$partida[cat_sat_producto_codigo]</td>
                 <td>$partida[com_producto_codigo]</td>
-                <td>$partida[$key_cantidad]</td>
+                <td>$input_cantidad</td>
                 <td>$partida[cat_sat_unidad_descripcion]</td>
-                <td>$partida[$key_valor_unitario]</td>
+                <td>$input_valor_unitario</td>
                 <td>$partida[$key_importe]</td>
                 <td>$partida[$key_descuento]</td>
                 <td>$partida[cat_sat_obj_imp_descripcion]</td>
