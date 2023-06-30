@@ -1252,11 +1252,10 @@ class _base_system_fc extends _base_system{
 
             if($entidad_origen === $this->modelo_entidad->key_id) {
 
-
                 $r_fc_factura_relacionada = $this->inserta_relacionada(
-                    key_modelo_base_id: $this->modelo_entidad->key_id,
-                    key_modelo_rel_id: $this->modelo_relacion->key_id,modelo_relacionada:  $this->modelo_relacionada,
-                    registro_entidad_id: $fc_factura_id, relacion_id: $fc_relacion_id);
+                    fc_facturas_montos: array(),
+                    key_modelo_base_id: $this->modelo_entidad->key_id, key_modelo_rel_id: $this->modelo_relacion->key_id,
+                    modelo_relacionada: $this->modelo_relacionada, registro_entidad_id: $fc_factura_id, relacion_id: $fc_relacion_id);
                 if (errores::$error) {
                     return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_factura_relacionada,
                         header: true, ws: $ws);
@@ -1287,12 +1286,13 @@ class _base_system_fc extends _base_system{
                 }
                 else{
 
+
                     $modelo_relacionada = $this->modelo_uuid_ext;
 
                     $r_fc_factura_relacionada = $this->inserta_relacionada(
-                        key_modelo_base_id: 'fc_uuid_id',
-                        key_modelo_rel_id: $this->modelo_relacion->key_id,modelo_relacionada:  $modelo_relacionada,
-                        registro_entidad_id: $fc_factura_id, relacion_id: $fc_relacion_id);
+                        fc_facturas_montos: array(),
+                        key_modelo_base_id: 'fc_uuid_id', key_modelo_rel_id: $this->modelo_relacion->key_id,
+                        modelo_relacionada: $modelo_relacionada, registro_entidad_id: $fc_factura_id, relacion_id: $fc_relacion_id);
                     if (errores::$error) {
                         return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_factura_relacionada,
                             header: true, ws: $ws);
@@ -1447,6 +1447,18 @@ class _base_system_fc extends _base_system{
         }
         return $r_fc_factura_documento;
 
+    }
+
+    /**
+     * Genera input de tipo checkbox array para con variable facturas_id
+     * @param string $entidad_origen_key  key de base ej fc_factura_id
+     * @param int $relacion_id Identificador de relacion
+     * @param int $row_entidad_id Registro id de entidad base
+     * @return string
+     */
+    private function input_chk_rel(string $entidad_origen_key, int $relacion_id, int $row_entidad_id): string
+    {
+        return "<input type='checkbox' name='fc_facturas_id[$row_entidad_id][$entidad_origen_key]' value='$relacion_id'>";
     }
 
     private function genera_relaciones(int $com_cliente_id, _uuid_ext $modelo_uuid_ext, string $name_entidad,  int $org_empresa_id): array
@@ -1814,11 +1826,12 @@ class _base_system_fc extends _base_system{
     }
 
     /**
-     * @param _transacciones_fc $modelo_entidad
-     * @param _partida $modelo_partida
-     * @param _data_impuestos $modelo_retencion
-     * @param _data_impuestos $modelo_traslado
-     * @param int $registro_entidad_id
+     * Inicializa los elementos para views de modificacion
+     * @param _transacciones_fc $modelo_entidad Modelo base factura complemento etc
+     * @param _partida $modelo_partida Modelo partida fc_partida
+     * @param _data_impuestos $modelo_retencion modelos de tipo impuestos
+     * @param _data_impuestos $modelo_traslado modelos de tipo impuestos
+     * @param int $registro_entidad_id Identificador base
      * @return array|stdClass
      */
     private function init_upd(_transacciones_fc $modelo_entidad, _partida $modelo_partida,
@@ -1843,17 +1856,7 @@ class _base_system_fc extends _base_system{
         return $data;
     }
 
-    /**
-     * Genera input de tipo checkbox array para con variable facturas_id
-     * @param string $entidad_origen_key  key de base ej fc_factura_id
-     * @param int $relacion_id Identificador de relacion
-     * @param int $row_entidad_id Registro id de entidad base
-     * @return string
-     */
-    private function input_chk_rel(string $entidad_origen_key, int $relacion_id, int $row_entidad_id): string
-    {
-        return "<input type='checkbox' name='fc_facturas_id[$row_entidad_id][$entidad_origen_key]' value='$relacion_id'>";
-    }
+
 
     private function inputs_partida(fc_partida_html $html, stdClass $fc_partida,
                                     stdClass         $params = new stdClass()): array|stdClass{
@@ -2870,6 +2873,7 @@ class _base_system_fc extends _base_system{
      * @param int $registro_entidad_id Identificador de la entidad base
      * @param int $relacion_id Identificador del modelo de relacion
      * @return bool|array
+
      */
     private function valida_data_relacion(string $key_modelo_base_id, string $key_modelo_rel_id,
                                           int $registro_entidad_id, int $relacion_id): bool|array
