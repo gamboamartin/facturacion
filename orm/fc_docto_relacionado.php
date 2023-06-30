@@ -219,6 +219,11 @@ class fc_docto_relacionado extends _modelo_parent{
         return $registro;
     }
 
+    /**
+     * Integra una descripcion default alta
+     * @param array $registro Registro en proceso
+     * @return array
+     */
     private function descripcion_alta(array $registro): array
     {
         if(!isset($registro['descripcion'])){

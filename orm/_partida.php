@@ -1227,7 +1227,8 @@ class _partida extends  _base{
      * @return array|bool
      * @version 10.5.0
      */
-    private function valida_restriccion_partida(int $id, _transacciones_fc $modelo_entidad, _etapa $modelo_etapa): bool|array
+    private function valida_restriccion_partida(int $id, _transacciones_fc $modelo_entidad,
+                                                _etapa $modelo_etapa): bool|array
     {
         if($id <= 0){
             return $this->error->error(mensaje: 'Error id debe ser mayor a 0', data: $id);
