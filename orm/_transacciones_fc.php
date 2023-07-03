@@ -274,6 +274,7 @@ class _transacciones_fc extends modelo
         }
 
 
+
         $data = new stdClass();
         $data->comprobante = $comprobante;
         $data->emisor = $emisor;
@@ -756,6 +757,8 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
         }
 
+        print_r($data_factura);exit;
+
 
         if(!isset($data_factura->Complemento)){
             $data_factura->Complemento = array();
@@ -777,6 +780,7 @@ class _transacciones_fc extends modelo
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al generar xml', data: $ingreso);
             }
+
         }
 
 
@@ -1945,7 +1949,10 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al generar XML', data: $xml);
         }
 
+
         $xml_contenido = file_get_contents($xml->doc_documento_ruta_absoluta);
+
+
 
 
 
