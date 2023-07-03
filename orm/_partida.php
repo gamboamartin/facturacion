@@ -566,7 +566,14 @@ class _partida extends  _base{
 
     }
 
-    private function fc_entidad_total_descuento(string $key_filtro_entidad_id, int $registro_entidad_id){
+    /**
+     * Obtiene los descuentos de una factura con datos de las partidas
+     * @param string $key_filtro_entidad_id Jey de la entidad para uso de filtros
+     * @param int $registro_entidad_id Registro en proceso
+     * @return array|float
+     */
+    private function fc_entidad_total_descuento(string $key_filtro_entidad_id, int $registro_entidad_id): float|array
+    {
         $fc_partidas = $this->get_partidas(key_filtro_entidad_id: $key_filtro_entidad_id,
             registro_entidad_id:  $registro_entidad_id);
         if(errores::$error){

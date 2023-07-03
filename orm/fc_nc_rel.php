@@ -112,7 +112,7 @@ class fc_nc_rel extends _modelo_parent {
             return $this->error->error(mensaje: 'Error al eliminar',data:  $r_elimina);
         }
 
-        $regenera = (new fc_factura(link: $this->link))->regenera_saldos(fc_factura_id:  $registro_previo['fc_factura_id']);
+        $regenera = (new _saldos_fc())->regenera_saldos(fc_factura_id:  $registro_previo['fc_factura_id'],link: $this->link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar monto regenera',data:  $regenera);
         }
