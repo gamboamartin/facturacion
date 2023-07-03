@@ -757,9 +757,7 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
         }
 
-        print_r($data_factura);exit;
-
-
+        
         if(!isset($data_factura->Complemento)){
             $data_factura->Complemento = array();
         }
