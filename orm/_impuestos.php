@@ -74,7 +74,7 @@ class _impuestos{
         }
 
 
-        $es_exento = false;
+        /*$es_exento = false;
         if(isset($row_entidad['traslados'])){
             if(isset($row_entidad['traslados']['9.9.2'])){
                 if($row_entidad['traslados']['9.9.2']->tipo_factor === 'Exento'){
@@ -82,13 +82,13 @@ class _impuestos{
                 }
             }
 
-        }
+        }*/
 
 
         $impuestos = new stdClass();
-        if(!$es_exento) {
-            $impuestos->total_impuestos_trasladados = $row_entidad['total_impuestos_trasladados'];
-        }
+        //if(!$es_exento) {*/
+        $impuestos->total_impuestos_trasladados = $row_entidad['total_impuestos_trasladados'];
+        //}
         $impuestos->total_impuestos_retenidos = $row_entidad['total_impuestos_retenidos'];
         $impuestos->traslados = $row_entidad['traslados'];
         $impuestos->retenciones = $row_entidad['retenidos'];
