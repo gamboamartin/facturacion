@@ -58,6 +58,10 @@ class _impuestos{
         return $imp_global;
     }
 
+    /**
+     * @param array $row_entidad
+     * @return stdClass|array
+     */
     final public function impuestos(array $row_entidad): stdClass|array
     {
         $keys = array('total_impuestos_trasladados','total_impuestos_retenidos');
@@ -74,26 +78,20 @@ class _impuestos{
         }
 
 
-        $es_exento = false;
-        if(isset($row_entidad['traslados'])){
-            if(isset($row_entidad['traslados']['9.9.2'])){
-                if($row_entidad['traslados']['9.9.2']->tipo_factor === 'Exento'){
-                    $es_exento = true;
-                }
-            }
-
+        $tiene_tasa = $this->tiene_tasa(row_entidad: $row_entidad);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si tiene tasa', data: $tiene_tasa);
         }
 
 
         $impuestos = new stdClass();
-        if(!$es_exento) {
+        if($tiene_tasa) {
             $impuestos->total_impuestos_trasladados = $row_entidad['total_impuestos_trasladados'];
         }
         $impuestos->total_impuestos_retenidos = $row_entidad['total_impuestos_retenidos'];
         $impuestos->traslados = $row_entidad['traslados'];
         $impuestos->retenciones = $row_entidad['retenidos'];
 
-        //print_r($impuestos);exit;
         return $impuestos;
     }
 
@@ -198,5 +196,19 @@ class _impuestos{
         }
 
         return $imp;
+    }
+
+    private function tiene_tasa(array $row_entidad): bool
+    {
+        $tiene_tasa = false;
+        if(isset($row_entidad['traslados'])){
+            foreach ($row_entidad['traslados'] as $imp_traslado){
+                if ($imp_traslado->tipo_factor !=='Exento'){
+                    $tiene_tasa = true;
+                    break;
+                }
+            }
+        }
+        return $tiene_tasa;
     }
 }
