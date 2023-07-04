@@ -31,6 +31,29 @@ class _relacionTest extends test
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_ajusta_relacionados(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_relacion_nc(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $cat_sat_tipo_relacion_codigo = '';
+        $modelo_uuid_ext = new fc_uuid_nc(link: $this->link);
+        $relacionados = array();
+        $row_relacion = array();
+        $row_relacion['fc_relacion_nc_id'] = 1;
+
+        $resultado = $modelo->ajusta_relacionados($cat_sat_tipo_relacion_codigo, $modelo_uuid_ext, $relacionados, $row_relacion);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        errores::$error = false;
+
+    }
+
     public function test_integra_relacion_nc(): void
     {
         errores::$error = false;

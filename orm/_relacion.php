@@ -24,10 +24,16 @@ class _relacion extends _modelo_parent_sin_codigo{
      * @param array $relacionados relaciones previamente cargadas
      * @param array $row_relacion Registro de relacion nuevo
      * @return array
+     * @version 10.143.5
      */
     private function ajusta_relacionados(string $cat_sat_tipo_relacion_codigo, _uuid_ext $modelo_uuid_ext,
                                          array $relacionados, array $row_relacion): array
     {
+        $valida = $this->valida_data_rel(row_relacion: $row_relacion);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error valida row relacion', data: $valida);
+        }
+
         $relaciones = $this->relaciones_externas(modelo_uuid_ext: $modelo_uuid_ext,row_relacion:  $row_relacion);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener relacion', data: $relaciones);
@@ -378,18 +384,7 @@ class _relacion extends _modelo_parent_sin_codigo{
     private function relaciones_externas(_uuid_ext $modelo_uuid_ext, array $row_relacion): array
     {
 
-        $this->key_filtro_id = trim($this->key_filtro_id);
-        if($this->key_filtro_id === ''){
-            return $this->error->error(mensaje: 'Error this->key_filtro_id esta vacio', data: $this->key_filtro_id);
-        }
-
-        $this->key_id = trim($this->key_id);
-        if($this->key_id === ''){
-            return $this->error->error(mensaje: 'Error this->key_id esta vacio', data: $this->key_id);
-        }
-
-        $keys = array($this->key_id);
-        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $row_relacion);
+        $valida = $this->valida_data_rel(row_relacion: $row_relacion);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error valida row relacion', data: $valida);
         }
@@ -427,6 +422,25 @@ class _relacion extends _modelo_parent_sin_codigo{
 
 
         return $relacionados;
+    }
+
+    private function valida_data_rel(array $row_relacion){
+        $this->key_filtro_id = trim($this->key_filtro_id);
+        if($this->key_filtro_id === ''){
+            return $this->error->error(mensaje: 'Error this->key_filtro_id esta vacio', data: $this->key_filtro_id);
+        }
+
+        $this->key_id = trim($this->key_id);
+        if($this->key_id === ''){
+            return $this->error->error(mensaje: 'Error this->key_id esta vacio', data: $this->key_id);
+        }
+
+        $keys = array($this->key_id);
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $row_relacion);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error valida row relacion', data: $valida);
+        }
+        return true;
     }
 
 }
