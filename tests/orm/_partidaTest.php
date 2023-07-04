@@ -73,6 +73,28 @@ class _partidaTest extends test
 
     }
 
+    public function test_fc_entidad_total_descuento(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+
+        $modelo = new fc_partida(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $key_filtro_entidad_id = 'fc_factura.id';
+        $registro_entidad_id = 1;
+        $resultado = $modelo->fc_entidad_total_descuento($key_filtro_entidad_id, $registro_entidad_id);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(0.0, $resultado);
+        errores::$error = false;
+
+    }
+
     public function test_get_partida(): void
     {
         errores::$error = false;
@@ -218,6 +240,7 @@ class _partidaTest extends test
 
         $resultado = $modelo->init_elimina_bd($id, $modelo_entidad, $modelo_etapa, $modelo_predial, $modelo_retencion,
             $modelo_traslado);
+
 
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);

@@ -571,9 +571,20 @@ class _partida extends  _base{
      * @param string $key_filtro_entidad_id Jey de la entidad para uso de filtros
      * @param int $registro_entidad_id Registro en proceso
      * @return array|float
+     * @version 10.145.5
      */
     private function fc_entidad_total_descuento(string $key_filtro_entidad_id, int $registro_entidad_id): float|array
     {
+
+        if ($registro_entidad_id <= 0) {
+            return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
+                data: $registro_entidad_id);
+        }
+        $key_filtro_entidad_id = trim($key_filtro_entidad_id);
+        if($key_filtro_entidad_id === ''){
+            return $this->error->error(mensaje: 'Error key_filtro_entidad_id esta vacio', data: $key_filtro_entidad_id);
+        }
+
         $fc_partidas = $this->get_partidas(key_filtro_entidad_id: $key_filtro_entidad_id,
             registro_entidad_id:  $registro_entidad_id);
         if(errores::$error){
@@ -1153,6 +1164,16 @@ class _partida extends  _base{
 
     private function regenera_fc_total_descuento(int $registro_entidad_id, string $key_filtro_entidad_id,
                                                  _transacciones_fc $modelo_entidad){
+
+        if ($registro_entidad_id <= 0) {
+            return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
+                data: $registro_entidad_id);
+        }
+        $key_filtro_entidad_id = trim($key_filtro_entidad_id);
+        if($key_filtro_entidad_id === ''){
+            return $this->error->error(mensaje: 'Error key_filtro_entidad_id esta vacio', data: $key_filtro_entidad_id);
+        }
+
         $total_descuento = $this->fc_entidad_total_descuento(key_filtro_entidad_id: $key_filtro_entidad_id,
             registro_entidad_id:  $registro_entidad_id);
         if (errores::$error) {
