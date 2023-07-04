@@ -198,17 +198,47 @@ class _impuestos{
         return $imp;
     }
 
-    private function tiene_tasa(array $row_entidad): bool
+    /**
+     * Verifica si el tipo de impuestos de traslado tienen o no una tasa de impuestos diferente a exento
+     * @param array $row_entidad Registro en proceso
+     * @return bool|array
+     */
+    private function tiene_tasa(array $row_entidad): bool|array
     {
         $tiene_tasa = false;
         if(isset($row_entidad['traslados'])){
+            if(!is_array($row_entidad['traslados'])){
+                return $this->error->error(mensaje: 'Error $row_entidad[traslados] debe ser un array' ,
+                    data: $row_entidad);
+            }
             foreach ($row_entidad['traslados'] as $imp_traslado){
+                $valida = $this->valida_tasa_cuota(imp_traslado: $imp_traslado);
+                if(errores::$error){
+                    return $this->error->error(mensaje: 'Error al validar impuesto' ,
+                        data: $valida);
+                }
                 if ($imp_traslado->tipo_factor !=='Exento'){
                     $tiene_tasa = true;
                     break;
                 }
             }
+
         }
         return $tiene_tasa;
+    }
+
+    private function valida_tasa_cuota(mixed $imp_traslado){
+        if(!is_object($imp_traslado)){
+            return $this->error->error(mensaje: 'Error $row_entidad[traslados][] debe ser un objeto' ,
+                data: $imp_traslado);
+        }
+        $keys = array('tipo_factor');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys, registro: $imp_traslado);
+
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error $row_entidad[traslados][] al validar' ,
+                data: $valida);
+        }
+        return true;
     }
 }
