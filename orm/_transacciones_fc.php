@@ -1704,9 +1704,26 @@ class _transacciones_fc extends modelo
      * Maqueta el registro para insersion
      * @param stdClass $row_entidad Registro base de operacion
      * @return array
+     * @version 10.144.5
      */
     private function row_entidad_ins(stdClass $row_entidad): array
     {
+        $keys = array('fc_csd_id','cat_sat_forma_pago_id','cat_sat_metodo_pago_id','cat_sat_moneda_id',
+            'com_tipo_cambio_id','cat_sat_uso_cfdi_id','cat_sat_tipo_de_comprobante_id','dp_calle_pertenece_id',
+            'cat_sat_regimen_fiscal_id','cat_sat_regimen_fiscal_id','com_sucursal_id');
+
+        $valida = $this->validacion->valida_ids(keys: $keys,registro:  $row_entidad);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar row entidad',data:  $valida);
+        }
+
+        $keys = array('exportacion');
+
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row_entidad);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar row entidad',data:  $valida);
+        }
+
         $row_entidad_ins['fc_csd_id'] = $row_entidad->fc_csd_id;
         $row_entidad_ins['cat_sat_forma_pago_id'] = $row_entidad->cat_sat_forma_pago_id;
         $row_entidad_ins['cat_sat_metodo_pago_id'] = $row_entidad->cat_sat_metodo_pago_id;

@@ -371,6 +371,41 @@ class _transacciones_fcTest extends test
 
     }
 
+    public function test_row_entidad_ins(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo = new fc_nota_credito(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $row_entidad = new stdClass();
+        $row_entidad->fc_csd_id = 1;
+        $row_entidad->cat_sat_forma_pago_id = 1;
+        $row_entidad->cat_sat_metodo_pago_id = 1;
+        $row_entidad->cat_sat_moneda_id = 1;
+        $row_entidad->com_tipo_cambio_id = 1;
+        $row_entidad->cat_sat_uso_cfdi_id = 1;
+        $row_entidad->dp_calle_pertenece_id = 1;
+        $row_entidad->cat_sat_tipo_de_comprobante_id = 1;
+        $row_entidad->exportacion = 1;
+        $row_entidad->cat_sat_regimen_fiscal_id = 1;
+        $row_entidad->com_sucursal_id = 1;
+        $resultado = $modelo->row_entidad_ins($row_entidad);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+
+
+        errores::$error = false;
+
+    }
+
 
 
     public function test_valida_permite_transaccion(): void
