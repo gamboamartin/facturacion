@@ -374,24 +374,88 @@ class fc_docto_relacionado extends _modelo_parent{
         return $registro;
     }
 
-    private function importe_pagado_documento(int $cat_sat_moneda_factura_id, int $cat_sat_moneda_pago_id, float $com_tipo_cambio_factura_monto,
-                                              float $com_tipo_cambio_pago_monto, array $registro): float
+    /**
+     * Obtiene el importe pagado de un documento
+     * @param int $cat_sat_moneda_factura_id Moneda de factura
+     * @param int $cat_sat_moneda_pago_id Moneda de pago
+     * @param float $com_tipo_cambio_factura_monto Tipo de cambio de factura
+     * @param float $com_tipo_cambio_pago_monto tipo de cambio de pago
+     * @param array $registro registro en proceso
+     * @return float
+     */
+    private function importe_pagado_documento(int $cat_sat_moneda_factura_id, int $cat_sat_moneda_pago_id,
+                                              float $com_tipo_cambio_factura_monto, float $com_tipo_cambio_pago_monto,
+                                              array $registro): float
     {
         $importe_pagado = round($registro['imp_pagado'],2);
 
-        if($cat_sat_moneda_factura_id === 161){
+        $importe_pagado = $this->importe_pagado_fc_peso_pago_dif(cat_sat_moneda_factura_id: $cat_sat_moneda_factura_id,
+            cat_sat_moneda_pago_id:  $cat_sat_moneda_pago_id, com_tipo_cambio_pago_monto: $com_tipo_cambio_pago_monto,
+            importe_pagado:  $importe_pagado);
 
-            if($cat_sat_moneda_pago_id !== 161){
-
-                $importe_pagado = round($importe_pagado * $com_tipo_cambio_pago_monto,2);
-            }
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener importe_pagado',data:  $importe_pagado);
         }
+
+        $importe_pagado = $this->importe_pagado_dif_peso(cat_sat_moneda_factura_id: $cat_sat_moneda_factura_id,
+            cat_sat_moneda_pago_id: $cat_sat_moneda_pago_id,
+            com_tipo_cambio_factura_monto:  $com_tipo_cambio_factura_monto, importe_pagado: $importe_pagado);
+
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener importe_pagado',data:  $importe_pagado);
+        }
+
+
+
+        return $importe_pagado;
+    }
+
+    private function importe_pagado_dif_peso(int $cat_sat_moneda_factura_id, int $cat_sat_moneda_pago_id,
+                                             float $com_tipo_cambio_factura_monto, float $importe_pagado){
         if($cat_sat_moneda_factura_id !== 161){
             if($cat_sat_moneda_pago_id === 161){
-                $importe_pagado = round($importe_pagado / $com_tipo_cambio_factura_monto,2);
+                $importe_pagado = $this->importe_pagado_tc_factura(com_tipo_cambio_factura_monto: $com_tipo_cambio_factura_monto,
+                    importe_pagado:  $importe_pagado);
+                if(errores::$error){
+                    return $this->error->error(mensaje: 'Error al obtener importe_pagado',data:  $importe_pagado);
+                }
             }
         }
         return $importe_pagado;
+    }
+
+    private function importe_pagado_fc_peso_pago_dif(int $cat_sat_moneda_factura_id, int $cat_sat_moneda_pago_id,
+                                                     float $com_tipo_cambio_pago_monto, float $importe_pagado){
+        if($cat_sat_moneda_factura_id === 161){
+            if($cat_sat_moneda_pago_id !== 161){
+                $importe_pagado = $this->importe_pagado_tc_pago(com_tipo_cambio_pago_monto: $com_tipo_cambio_pago_monto,
+                    importe_pagado:  $importe_pagado);
+
+                if(errores::$error){
+                    return $this->error->error(mensaje: 'Error al obtener importe_pagado',data:  $importe_pagado);
+                }
+            }
+        }
+        return $importe_pagado;
+    }
+
+
+
+    private function importe_pagado_tc_factura(float $com_tipo_cambio_factura_monto, float $importe_pagado): float
+    {
+        return round($importe_pagado / $com_tipo_cambio_factura_monto,2);
+    }
+
+    /**
+     * Obtiene el importe convertido al tipo de cambio del pago cuando la factura esta en mxn y el pago con otro
+     * tipo de cambio
+     * @param float $com_tipo_cambio_pago_monto Tipo de cambio del pago
+     * @param float $importe_pagado Importe pagado con moneda original del pago sin conversion
+     * @return float
+     */
+    private function importe_pagado_tc_pago(float $com_tipo_cambio_pago_monto, float $importe_pagado): float
+    {
+        return round($importe_pagado * $com_tipo_cambio_pago_monto,2);
     }
 
     private function inserta_fc_impuesto_dr(int $fc_docto_relacionado_id){
