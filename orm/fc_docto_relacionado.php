@@ -381,13 +381,23 @@ class fc_docto_relacionado extends _modelo_parent{
      * @param float $com_tipo_cambio_factura_monto Tipo de cambio de factura
      * @param float $com_tipo_cambio_pago_monto tipo de cambio de pago
      * @param array $registro registro en proceso
-     * @return float
+     * @return float|array
      */
     private function importe_pagado_documento(int $cat_sat_moneda_factura_id, int $cat_sat_moneda_pago_id,
                                               float $com_tipo_cambio_factura_monto, float $com_tipo_cambio_pago_monto,
-                                              array $registro): float
+                                              array $registro): float|array
     {
         $importe_pagado = round($registro['imp_pagado'],2);
+
+        if($com_tipo_cambio_pago_monto <= 0.0){
+            return $this->error->error(mensaje: 'Error com_tipo_cambio_pago_monto debe ser mayor a 0',
+                data:  $com_tipo_cambio_pago_monto);
+        }
+
+        if($importe_pagado <= 0.0){
+            return $this->error->error(mensaje: 'Error importe_pagado debe ser mayor a 0',
+                data:  $importe_pagado);
+        }
 
         $importe_pagado = $this->importe_pagado_fc_peso_pago_dif(cat_sat_moneda_factura_id: $cat_sat_moneda_factura_id,
             cat_sat_moneda_pago_id:  $cat_sat_moneda_pago_id, com_tipo_cambio_pago_monto: $com_tipo_cambio_pago_monto,
@@ -426,6 +436,18 @@ class fc_docto_relacionado extends _modelo_parent{
 
     private function importe_pagado_fc_peso_pago_dif(int $cat_sat_moneda_factura_id, int $cat_sat_moneda_pago_id,
                                                      float $com_tipo_cambio_pago_monto, float $importe_pagado){
+
+        if($com_tipo_cambio_pago_monto <= 0.0){
+            return $this->error->error(mensaje: 'Error com_tipo_cambio_pago_monto debe ser mayor a 0',
+                data:  $com_tipo_cambio_pago_monto);
+        }
+
+        if($importe_pagado <= 0.0){
+            return $this->error->error(mensaje: 'Error importe_pagado debe ser mayor a 0',
+                data:  $importe_pagado);
+        }
+
+
         if($cat_sat_moneda_factura_id === 161){
             if($cat_sat_moneda_pago_id !== 161){
                 $importe_pagado = $this->importe_pagado_tc_pago(com_tipo_cambio_pago_monto: $com_tipo_cambio_pago_monto,
@@ -451,10 +473,20 @@ class fc_docto_relacionado extends _modelo_parent{
      * tipo de cambio
      * @param float $com_tipo_cambio_pago_monto Tipo de cambio del pago
      * @param float $importe_pagado Importe pagado con moneda original del pago sin conversion
-     * @return float
+     * @return float|array
      */
-    private function importe_pagado_tc_pago(float $com_tipo_cambio_pago_monto, float $importe_pagado): float
+    private function importe_pagado_tc_pago(float $com_tipo_cambio_pago_monto, float $importe_pagado): float|array
     {
+        if($com_tipo_cambio_pago_monto <= 0.0){
+            return $this->error->error(mensaje: 'Error com_tipo_cambio_pago_monto debe ser mayor a 0',
+                data:  $com_tipo_cambio_pago_monto);
+        }
+
+        if($importe_pagado <= 0.0){
+            return $this->error->error(mensaje: 'Error importe_pagado debe ser mayor a 0',
+                data:  $importe_pagado);
+        }
+
         return round($importe_pagado * $com_tipo_cambio_pago_monto,2);
     }
 

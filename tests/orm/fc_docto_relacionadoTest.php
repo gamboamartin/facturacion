@@ -182,6 +182,33 @@ class fc_docto_relacionadoTest extends test {
 
     }
 
+    public function test_importe_pagado_tc_pago(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo = new fc_docto_relacionado($this->link);
+        $modelo = new liberator($modelo);
+
+
+        errores::$error = false;
+
+        $com_tipo_cambio_pago_monto = 10;
+        $importe_pagado = 10;
+        $resultado = $modelo->importe_pagado_tc_pago($com_tipo_cambio_pago_monto, $importe_pagado);
+        $this->assertIsfloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(100.0,$resultado);
+
+        errores::$error = false;
+    }
+
     /**
      * Esta prueba es base, el resultado se debe de respetar siempre
      * @return void
