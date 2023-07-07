@@ -108,6 +108,8 @@ class _calculo_impsTest extends test
             exit;
         }
 
+
+
         $alta = (new base_test())->alta_fc_conf_traslado(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
@@ -122,6 +124,13 @@ class _calculo_impsTest extends test
         }
 
         $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_cat_sat_conf_reg_tp(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
             print_r($error);
