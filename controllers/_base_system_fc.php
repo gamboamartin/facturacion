@@ -2102,9 +2102,56 @@ class _base_system_fc extends _base_system{
         $this->inputs->partidas = $inputs;
 
 
+        $fc_entidad = $this->modelo_entidad->registro(registro_id: $this->registro_id);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener entidad', data: $fc_entidad);
+            print_r($error);
+            die('Error');
+        }
+
+        $cat_sat_regimen_fiscal_empresa_codigo = $fc_entidad['cat_sat_regimen_fiscal_empresa_codigo'];
+        $cat_sat_regimen_fiscal_cliente_codigo = $fc_entidad['cat_sat_regimen_fiscal_cliente_codigo'];
+        $cat_sat_tipo_persona_empresa_codigo = $fc_entidad['cat_sat_tipo_persona_empresa_codigo'];
+        $cat_sat_tipo_persona_cliente_codigo = $fc_entidad['cat_sat_tipo_persona_cliente_codigo'];
+
+        $configuraciones['601']['PM']['permitidos'] = array(1,3);
+        $configuraciones['601']['PM']['default'] = 1;
+
+        $configuraciones['601']['PF']['permitidos'] = array(1,3);
+        $configuraciones['601']['PF']['default'] = 1;
+
+        $configuraciones['612']['PM']['permitidos'] = array(1,3);
+        $configuraciones['612']['PM']['default'] = 1;
+
+        $configuraciones['612']['PF']['permitidos'] = array(1,3);
+        $configuraciones['612']['PF']['default'] = 1;
+
+        $configuraciones['626']['PM']['permitidos'] = array(2,4,998);
+        $configuraciones['626']['PM']['default'] = 2;
+
+        $configuraciones['626']['PF']['permitidos'] = array(1,3);
+        $configuraciones['626']['PF']['default'] = 1;
+
+        $in = array();
+        $default = -1;
+        if(isset($configuraciones[$cat_sat_regimen_fiscal_empresa_codigo])){
+            if(isset($configuraciones[$cat_sat_regimen_fiscal_empresa_codigo][$cat_sat_tipo_persona_cliente_codigo])){
+                $in['llave'] = 'cat_sat_conf_imps.id';
+                $in['values'] = $configuraciones[$cat_sat_regimen_fiscal_empresa_codigo][$cat_sat_tipo_persona_cliente_codigo]['permitidos'];
+                $default = $configuraciones[$cat_sat_regimen_fiscal_empresa_codigo][$cat_sat_tipo_persona_cliente_codigo]['default'];
+            }
+        }
+
+        $r_cat_sat_conf_imps = (new cat_sat_conf_imps(link: $this->link))->filtro_and(in: $in);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener configuraciones', data: $r_cat_sat_conf_imps);
+            print_r($error);
+            die('Error');
+        }
+
 
         $cat_sat_conf_imps_id = (new cat_sat_conf_imps_html(html: $this->html_base))->select_cat_sat_conf_imps_id(
-            cols: 12,con_registros:  true,id_selected: -1,link: $this->link);
+            cols: 12,con_registros:  true,id_selected: $default,link: $this->link,registros: $r_cat_sat_conf_imps->registros);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al inicializar input', data: $cat_sat_conf_imps_id);
             print_r($error);

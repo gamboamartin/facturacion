@@ -60,6 +60,26 @@ class _transacciones_fc extends modelo
             'dp_municipio' => 'dp_cp', 'dp_estado' => 'dp_municipio', 'dp_pais' => 'dp_estado', 'org_sucursal' => 'fc_csd',
             'org_empresa' => 'org_sucursal');
 
+        $renombres['cat_sat_tipo_persona_cliente']['nombre_original'] = 'cat_sat_tipo_persona';
+        $renombres['cat_sat_tipo_persona_cliente']['enlace'] = 'com_cliente';
+        $renombres['cat_sat_tipo_persona_cliente']['key'] = 'id';
+        $renombres['cat_sat_tipo_persona_cliente']['key_enlace'] = 'cat_sat_tipo_persona_id';
+
+        $renombres['cat_sat_tipo_persona_empresa']['nombre_original'] = 'cat_sat_tipo_persona';
+        $renombres['cat_sat_tipo_persona_empresa']['enlace'] = 'org_empresa';
+        $renombres['cat_sat_tipo_persona_empresa']['key'] = 'id';
+        $renombres['cat_sat_tipo_persona_empresa']['key_enlace'] = 'cat_sat_tipo_persona_id';
+
+        $renombres['cat_sat_regimen_fiscal_cliente']['nombre_original'] = 'cat_sat_regimen_fiscal';
+        $renombres['cat_sat_regimen_fiscal_cliente']['enlace'] = 'com_cliente';
+        $renombres['cat_sat_regimen_fiscal_cliente']['key'] = 'id';
+        $renombres['cat_sat_regimen_fiscal_cliente']['key_enlace'] = 'cat_sat_regimen_fiscal_id';
+
+        $renombres['cat_sat_regimen_fiscal_empresa']['nombre_original'] = 'cat_sat_regimen_fiscal';
+        $renombres['cat_sat_regimen_fiscal_empresa']['enlace'] = 'org_empresa';
+        $renombres['cat_sat_regimen_fiscal_empresa']['key'] = 'id';
+        $renombres['cat_sat_regimen_fiscal_empresa']['key_enlace'] = 'cat_sat_regimen_fiscal_id';
+
 
         $campos_view['fc_csd_id'] = array('type' => 'selects', 'model' => new fc_csd($link));
         $campos_view['cat_sat_forma_pago_id'] = array('type' => 'selects', 'model' => new cat_sat_forma_pago($link));
@@ -103,7 +123,7 @@ class _transacciones_fc extends modelo
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios, columnas: $columnas,
             campos_view: $campos_view, columnas_extra: $columnas_extra, no_duplicados: $no_duplicados,
-            atributos_criticos: $atributos_criticos);
+            renombres: $renombres, atributos_criticos: $atributos_criticos);
 
 
 

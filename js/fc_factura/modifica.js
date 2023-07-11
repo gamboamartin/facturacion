@@ -77,8 +77,8 @@ sl_com_producto.change(function () {
     if(aplica_predial === 'activo'){
         txt_cuenta_predial.prop( "disabled", false );
     }
-    sl_cat_sat_conf_imps_id.val(cat_sat_conf_imps_id);
-    sl_cat_sat_conf_imps_id.selectpicker('refresh');
+    //sl_cat_sat_conf_imps_id.val(cat_sat_conf_imps_id);
+    //sl_cat_sat_conf_imps_id.selectpicker('refresh');
 
     txt_descripcion.val(descripcion);
     txt_unidad.val(unidad);
