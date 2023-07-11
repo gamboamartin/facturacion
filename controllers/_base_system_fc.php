@@ -66,6 +66,7 @@ use html\com_cliente_html;
 use html\com_email_cte_html;
 use html\com_tipo_cambio_html;
 use JsonException;
+use PDO;
 use stdClass;
 use Throwable;
 
@@ -129,6 +130,33 @@ class _base_system_fc extends _base_system{
     public bool $aplica_monto_relacion = false;
 
     public string $form_data_fc = '';
+
+    private array $configuraciones_impuestos = array();
+
+
+    public function __construct(html_controler $html_, PDO $link, modelo $modelo, stdClass $paths_conf = new stdClass())
+    {
+        parent::__construct(html_: $html_,link:  $link,modelo:  $modelo,paths_conf:  $paths_conf);
+
+        $this->configuraciones_impuestos['601']['PM']['permitidos'] = array(1,3);
+        $this->configuraciones_impuestos['601']['PM']['default'] = 1;
+
+        $this->configuraciones_impuestos['601']['PF']['permitidos'] = array(1,3);
+        $this->configuraciones_impuestos['601']['PF']['default'] = 1;
+
+        $this->configuraciones_impuestos['612']['PM']['permitidos'] = array(1,3);
+        $this->configuraciones_impuestos['612']['PM']['default'] = 1;
+
+        $this->configuraciones_impuestos['612']['PF']['permitidos'] = array(1,3);
+        $this->configuraciones_impuestos['612']['PF']['default'] = 1;
+
+        $this->configuraciones_impuestos['626']['PM']['permitidos'] = array(2,4,998);
+        $this->configuraciones_impuestos['626']['PM']['default'] = 2;
+
+        $this->configuraciones_impuestos['626']['PF']['permitidos'] = array(1,3);
+        $this->configuraciones_impuestos['626']['PF']['default'] = 1;
+
+    }
 
     public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
     {
@@ -587,6 +615,8 @@ class _base_system_fc extends _base_system{
         return $tipo_comprobante->registros[0]['cat_sat_tipo_de_comprobante_id'];
     }
 
+
+
     public function init_datatable(): stdClass
     {
 
@@ -853,6 +883,8 @@ class _base_system_fc extends _base_system{
 
     }
 
+
+
     private function checkbox_relaciona(array $factura_cliente, string $key_entidad_id, string $key_relacion_id, array $relacion): string|array
     {
         $row_entidad_id = $factura_cliente[$key_entidad_id];
@@ -880,6 +912,8 @@ class _base_system_fc extends _base_system{
 
         return $data;
     }
+
+
 
     public function descarga_xml(bool $header, bool $ws = false){
         $ruta_xml = $this->modelo_documento->get_factura_documento(key_entidad_filter_id: $this->tabla.'.id',
@@ -1037,6 +1071,8 @@ class _base_system_fc extends _base_system{
         return $notifica;
 
     }
+
+
 
     private function existe_factura_rel(string $name_entidad_ejecucion, array $factura_cliente, string $key_entidad_id, array $relacion): bool|array
     {
@@ -2102,56 +2138,9 @@ class _base_system_fc extends _base_system{
         $this->inputs->partidas = $inputs;
 
 
-        $fc_entidad = $this->modelo_entidad->registro(registro_id: $this->registro_id);
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al obtener entidad', data: $fc_entidad);
-            print_r($error);
-            die('Error');
-        }
-
-        $cat_sat_regimen_fiscal_empresa_codigo = $fc_entidad['cat_sat_regimen_fiscal_empresa_codigo'];
-        $cat_sat_regimen_fiscal_cliente_codigo = $fc_entidad['cat_sat_regimen_fiscal_cliente_codigo'];
-        $cat_sat_tipo_persona_empresa_codigo = $fc_entidad['cat_sat_tipo_persona_empresa_codigo'];
-        $cat_sat_tipo_persona_cliente_codigo = $fc_entidad['cat_sat_tipo_persona_cliente_codigo'];
-
-        $configuraciones['601']['PM']['permitidos'] = array(1,3);
-        $configuraciones['601']['PM']['default'] = 1;
-
-        $configuraciones['601']['PF']['permitidos'] = array(1,3);
-        $configuraciones['601']['PF']['default'] = 1;
-
-        $configuraciones['612']['PM']['permitidos'] = array(1,3);
-        $configuraciones['612']['PM']['default'] = 1;
-
-        $configuraciones['612']['PF']['permitidos'] = array(1,3);
-        $configuraciones['612']['PF']['default'] = 1;
-
-        $configuraciones['626']['PM']['permitidos'] = array(2,4,998);
-        $configuraciones['626']['PM']['default'] = 2;
-
-        $configuraciones['626']['PF']['permitidos'] = array(1,3);
-        $configuraciones['626']['PF']['default'] = 1;
-
-        $in = array();
-        $default = -1;
-        if(isset($configuraciones[$cat_sat_regimen_fiscal_empresa_codigo])){
-            if(isset($configuraciones[$cat_sat_regimen_fiscal_empresa_codigo][$cat_sat_tipo_persona_cliente_codigo])){
-                $in['llave'] = 'cat_sat_conf_imps.id';
-                $in['values'] = $configuraciones[$cat_sat_regimen_fiscal_empresa_codigo][$cat_sat_tipo_persona_cliente_codigo]['permitidos'];
-                $default = $configuraciones[$cat_sat_regimen_fiscal_empresa_codigo][$cat_sat_tipo_persona_cliente_codigo]['default'];
-            }
-        }
-
-        $r_cat_sat_conf_imps = (new cat_sat_conf_imps(link: $this->link))->filtro_and(in: $in);
-        if (errores::$error) {
-            $error = $this->errores->error(mensaje: 'Error al obtener configuraciones', data: $r_cat_sat_conf_imps);
-            print_r($error);
-            die('Error');
-        }
-
-
-        $cat_sat_conf_imps_id = (new cat_sat_conf_imps_html(html: $this->html_base))->select_cat_sat_conf_imps_id(
-            cols: 12,con_registros:  true,id_selected: $default,link: $this->link,registros: $r_cat_sat_conf_imps->registros);
+        $cat_sat_conf_imps_id = (new fc_factura_html(html: $this->html_base))->select_cat_sat_imp_id(
+            configuraciones_impuestos: $this->configuraciones_impuestos,modelo_entidad:  $this->modelo_entidad,
+            registro_entidad_id:  $this->registro_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al inicializar input', data: $cat_sat_conf_imps_id);
             print_r($error);
@@ -2450,6 +2439,8 @@ class _base_system_fc extends _base_system{
         $params['id_retorno'] = $registro_entidad_id;
         return $params;
     }
+
+
 
     /*
      * POR REVISAR

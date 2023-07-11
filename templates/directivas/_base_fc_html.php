@@ -1,6 +1,7 @@
 <?php
 namespace gamboamartin\facturacion\html;
 
+use gamboamartin\cat_sat\models\cat_sat_conf_imps;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\_base_system_fc;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
@@ -8,6 +9,7 @@ use gamboamartin\facturacion\models\_transacciones_fc;
 use gamboamartin\facturacion\models\limpieza;
 use gamboamartin\system\html_controler;
 use gamboamartin\validacion\validacion;
+use html\cat_sat_conf_imps_html;
 use html\cat_sat_factor_html;
 use html\cat_sat_forma_pago_html;
 use html\cat_sat_metodo_pago_html;
@@ -30,6 +32,99 @@ use PDO;
 use stdClass;
 
 class _base_fc_html extends html_controler{
+
+    private function cat_sat_conf_imps(array $configuraciones_impuestos, _transacciones_fc $modelo_entidad,
+                                       int $registro_entidad_id): array|stdClass
+    {
+        $params = $this->params_imps(configuraciones_impuestos: $configuraciones_impuestos,
+            modelo_entidad: $modelo_entidad, registro_entidad_id: $registro_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener parametros', data: $params);
+        }
+
+        $r_cat_sat_conf_imps = (new cat_sat_conf_imps(link: $modelo_entidad->link))->filtro_and(in: $params->in);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener configuraciones', data: $r_cat_sat_conf_imps);
+        }
+        $params->cat_sat_conf_imps = $r_cat_sat_conf_imps->registros;
+
+        return $params;
+
+    }
+
+    private function data_param_imp(_transacciones_fc $modelo_entidad, int $registro_id): array|stdClass
+    {
+        $fc_entidad = $modelo_entidad->registro(registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener entidad', data: $fc_entidad);
+        }
+        $data = new stdClass();
+        $data->cat_sat_regimen_fiscal_empresa_codigo = $fc_entidad['cat_sat_regimen_fiscal_empresa_codigo'];
+        $data->cat_sat_tipo_persona_cliente_codigo = $fc_entidad['cat_sat_tipo_persona_cliente_codigo'];
+
+        return $data;
+    }
+
+    private function data_params_imps(array $configuraciones_impuestos, _transacciones_fc $modelo_entidad,
+                                      int $registro_entidad_id): array|stdClass
+    {
+        $data_param = $this->data_param_imp(modelo_entidad: $modelo_entidad, registro_id: $registro_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener param', data: $data_param);
+        }
+
+        $existe_conf_imps = $this->existe_conf_imps(
+            cat_sat_regimen_fiscal_empresa_codigo: $data_param->cat_sat_regimen_fiscal_empresa_codigo,
+            cat_sat_tipo_persona_cliente_codigo:  $data_param->cat_sat_tipo_persona_cliente_codigo,
+            configuraciones_impuestos: $configuraciones_impuestos);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar si existe conf impuestos', data: $existe_conf_imps);
+        }
+        $data_param->existe_conf_imps = $existe_conf_imps;
+        return $data_param;
+    }
+
+    /**
+     * Obtiene el elemento default de una configuracion de impuestos forzosa la existencia de los keys
+     * @param string $cat_sat_regimen_fiscal_empresa_codigo
+     * @param string $cat_sat_tipo_persona_cliente_codigo
+     * @param array $configuraciones_impuestos
+     * @return int
+     */
+    private function default_conf_imps(string $cat_sat_regimen_fiscal_empresa_codigo,
+                                       string $cat_sat_tipo_persona_cliente_codigo, array $configuraciones_impuestos): int
+    {
+        return $configuraciones_impuestos[$cat_sat_regimen_fiscal_empresa_codigo][$cat_sat_tipo_persona_cliente_codigo]['default'];
+    }
+
+    private function existe_conf_imps(string $cat_sat_regimen_fiscal_empresa_codigo,
+                                      string $cat_sat_tipo_persona_cliente_codigo,
+                                      array $configuraciones_impuestos): bool
+    {
+        $existe = false;
+        if(isset($configuraciones_impuestos[$cat_sat_regimen_fiscal_empresa_codigo])) {
+            if (isset($configuraciones_impuestos[$cat_sat_regimen_fiscal_empresa_codigo][$cat_sat_tipo_persona_cliente_codigo])) {
+                $existe = true;
+            }
+        }
+        return $existe;
+
+    }
+
+    /**
+     * Obtiene el parametro in para obtencion de configuraciones de impuestos, forza existencia de keys
+     * @param string $cat_sat_regimen_fiscal_empresa_codigo
+     * @param string $cat_sat_tipo_persona_cliente_codigo
+     * @param array $configuraciones_impuestos
+     * @return array
+     */
+    private function in_configuracion_imp(string $cat_sat_regimen_fiscal_empresa_codigo,
+                                          string $cat_sat_tipo_persona_cliente_codigo, array $configuraciones_impuestos): array
+    {
+        $in['llave'] = 'cat_sat_conf_imps.id';
+        $in['values'] = $configuraciones_impuestos[$cat_sat_regimen_fiscal_empresa_codigo][$cat_sat_tipo_persona_cliente_codigo]['permitidos'];
+        return $in;
+    }
 
 
     public function input_observaciones(int $cols, stdClass $row_upd, bool $value_vacio): array|string
@@ -307,6 +402,77 @@ class _base_fc_html extends html_controler{
         return $div;
     }
 
+    private function params_conf_imps(string $cat_sat_regimen_fiscal_empresa_codigo,
+                                      string $cat_sat_tipo_persona_cliente_codigo,
+                                      array $configuraciones_impuestos): array|stdClass
+    {
+        $params = new stdClass();
+        $in = $this->in_configuracion_imp(
+            cat_sat_regimen_fiscal_empresa_codigo: $cat_sat_regimen_fiscal_empresa_codigo,
+            cat_sat_tipo_persona_cliente_codigo:  $cat_sat_tipo_persona_cliente_codigo,configuraciones_impuestos: $configuraciones_impuestos);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener parametro in', data: $in);
+
+        }
+
+        $default = $this->default_conf_imps(
+            cat_sat_regimen_fiscal_empresa_codigo: $cat_sat_regimen_fiscal_empresa_codigo,
+            cat_sat_tipo_persona_cliente_codigo:  $cat_sat_tipo_persona_cliente_codigo,
+            configuraciones_impuestos: $configuraciones_impuestos);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener parametro default', data: $default);
+
+        }
+
+        $params->in = $in;
+        $params->default = $default;
+
+        return $params;
+
+    }
+
+    private function params_conf_impuestos(string $cat_sat_regimen_fiscal_empresa_codigo,
+                                           string $cat_sat_tipo_persona_cliente_codigo,
+                                           array $configuraciones_impuestos, bool $existe_conf_imps): array|stdClass
+    {
+        $params = new stdClass();
+        $params->in = array();
+        $params->default = -1;
+
+        if($existe_conf_imps){
+            $params = $this->params_conf_imps(
+                cat_sat_regimen_fiscal_empresa_codigo: $cat_sat_regimen_fiscal_empresa_codigo,
+                cat_sat_tipo_persona_cliente_codigo: $cat_sat_tipo_persona_cliente_codigo,configuraciones_impuestos: $configuraciones_impuestos);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener parametros', data: $params);
+
+            }
+        }
+        return $params;
+
+    }
+
+    private function params_imps(array $configuraciones_impuestos, _transacciones_fc $modelo_entidad, int $registro_entidad_id): array|stdClass
+    {
+        $data_param = $this->data_params_imps(configuraciones_impuestos: $configuraciones_impuestos,
+            modelo_entidad: $modelo_entidad, registro_entidad_id: $registro_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener param', data: $data_param);
+        }
+
+
+
+        $params = $this->params_conf_impuestos(
+            cat_sat_regimen_fiscal_empresa_codigo: $data_param->cat_sat_regimen_fiscal_empresa_codigo,
+            cat_sat_tipo_persona_cliente_codigo: $data_param->cat_sat_tipo_persona_cliente_codigo,
+            configuraciones_impuestos: $configuraciones_impuestos, existe_conf_imps: $data_param->existe_conf_imps);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener parametros', data: $params);
+
+        }
+        return $params;
+    }
+
     private function selects_alta_fc_partida(PDO $link): array|stdClass
     {
         $selects = new stdClass();
@@ -347,6 +513,21 @@ class _base_fc_html extends html_controler{
         $selects->cat_sat_tipo_impuesto_id = $select;
 
         return $selects;
+    }
+
+    final public function select_cat_sat_imp_id(array $configuraciones_impuestos, _transacciones_fc $modelo_entidad,
+                                                int $registro_entidad_id){
+        $params = $this->cat_sat_conf_imps(configuraciones_impuestos: $configuraciones_impuestos, modelo_entidad: $modelo_entidad, registro_entidad_id: $registro_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener params', data: $params);
+        }
+
+        $cat_sat_conf_imps_id = (new cat_sat_conf_imps_html(html: $this->html_base))->select_cat_sat_conf_imps_id(
+            cols: 12,con_registros:  true,id_selected: $params->default,link: $modelo_entidad->link,registros: $params->cat_sat_conf_imps);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al inicializar input', data: $cat_sat_conf_imps_id);
+        }
+        return $cat_sat_conf_imps_id;
     }
 
     private function selects_modifica_fc_partida(PDO $link, stdClass $row_upd): array|stdClass
