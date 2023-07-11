@@ -153,11 +153,12 @@ class _relacion extends _modelo_parent_sin_codigo{
 
 
     /**
-     * @param _relacionada $modelo_relacionada
-     * @param _uuid_ext $modelo_uuid_ext
-     * @param string $name_entidad
-     * @param array $relacionados
-     * @param array $row_relacion
+     * Genera los elementos relacionados de una entidad de tipo factura
+     * @param _relacionada $modelo_relacionada Modelo de relacion directa
+     * @param _uuid_ext $modelo_uuid_ext Modelo uuid directo
+     * @param string $name_entidad Nombre de la entidad
+     * @param array $relacionados Elementos previamente relacionados
+     * @param array $row_relacion Registro nuevo de relacion a integrar
      * @return array
      */
     private function genera_relacionado(_relacionada $modelo_relacionada, _uuid_ext $modelo_uuid_ext,

@@ -130,7 +130,7 @@ class _calculo_impsTest extends test
             exit;
         }
 
-        $alta = (new base_test())->alta_cat_sat_conf_reg_tp(link: $this->link);
+        $alta = (new base_test())->alta_cat_sat_conf_reg_tp(link: $this->link,id: 1000);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
             print_r($error);

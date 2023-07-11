@@ -2101,6 +2101,8 @@ class _base_system_fc extends _base_system{
 
         $this->inputs->partidas = $inputs;
 
+
+
         $cat_sat_conf_imps_id = (new cat_sat_conf_imps_html(html: $this->html_base))->select_cat_sat_conf_imps_id(
             cols: 12,con_registros:  true,id_selected: -1,link: $this->link);
         if (errores::$error) {
