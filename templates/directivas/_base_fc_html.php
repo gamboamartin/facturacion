@@ -65,21 +65,11 @@ class _base_fc_html extends html_controler{
             return $this->error->error(mensaje: 'Error al obtener entidad', data: $fc_entidad);
         }
 
-        $cat_sat_regimen_fiscal_empresa_codigo = '';
-        if(isset($fc_entidad['cat_sat_regimen_fiscal_empresa_codigo'])){
-            $cat_sat_regimen_fiscal_empresa_codigo = trim($fc_entidad['cat_sat_regimen_fiscal_empresa_codigo']);
+        $keys_codes = array('cat_sat_regimen_fiscal_empresa_codigo','cat_sat_tipo_persona_cliente_codigo');
+        $data = $this->normaliza_codigos(keys: $keys_codes,row:  $fc_entidad);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al normalizar', data: $data);
         }
-
-        $cat_sat_tipo_persona_cliente_codigo = '';
-        if(isset($fc_entidad['cat_sat_tipo_persona_cliente_codigo'])){
-            $cat_sat_tipo_persona_cliente_codigo = trim($fc_entidad['cat_sat_tipo_persona_cliente_codigo']);
-        }
-
-
-
-        $data = new stdClass();
-        $data->cat_sat_regimen_fiscal_empresa_codigo = $cat_sat_regimen_fiscal_empresa_codigo;
-        $data->cat_sat_tipo_persona_cliente_codigo = $cat_sat_tipo_persona_cliente_codigo;
 
         return $data;
     }
@@ -322,6 +312,25 @@ class _base_fc_html extends html_controler{
         $alta_inputs->texts = $texts;
 
         return $alta_inputs;
+    }
+
+    private function normaliza_codigos(array $keys, array $row){
+        $result = new stdClass();
+        foreach ($keys as $key){
+
+            $key = trim($key);
+            if($key === ''){
+                return $this->error->error(mensaje: 'Error key esta vacio',data:  $key);
+            }
+
+            $txt = $this->txt_null_normalizado(key: $key, row: $row);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al normalizar', data: $txt);
+            }
+            $result->$key = $txt;
+
+        }
+        return $result;
     }
 
     private function texts_alta_fc_partida(stdClass $row_upd, bool $value_vacio, stdClass $params = new stdClass()): array|stdClass
@@ -1095,6 +1104,27 @@ class _base_fc_html extends html_controler{
         $texts->fecha = $in_fecha;
 
         return $texts;
+    }
+
+    /**
+     * Normaliza un texto de un array si este viene nulo lo integra como vacio
+     * @param string $key Key a verificar
+     * @param array $row registro a verificar
+     * @return string|array
+     * @version 10.155.6
+     */
+    private function txt_null_normalizado(string $key, array $row): string|array
+    {
+        $key = trim($key);
+        if($key === ''){
+            return $this->error->error(mensaje: 'Error key esta vacio',data:  $key);
+        }
+
+        $txt = '';
+        if(isset($row[$key])){
+            $txt = trim($row[$key]);
+        }
+        return $txt;
     }
 
 }
