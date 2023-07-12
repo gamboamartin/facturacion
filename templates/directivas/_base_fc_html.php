@@ -52,15 +52,34 @@ class _base_fc_html extends html_controler{
 
     }
 
+    /**
+     * Obtiene los codigos de regimen fiscal y tipo de persona del cliente y empresa
+     * @param _transacciones_fc $modelo_entidad Modelo base de ejecucion
+     * @param int $registro_id Registro en proceso
+     * @return array|stdClass
+     */
     private function data_param_imp(_transacciones_fc $modelo_entidad, int $registro_id): array|stdClass
     {
         $fc_entidad = $modelo_entidad->registro(registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener entidad', data: $fc_entidad);
         }
+
+        $cat_sat_regimen_fiscal_empresa_codigo = '';
+        if(isset($fc_entidad['cat_sat_regimen_fiscal_empresa_codigo'])){
+            $cat_sat_regimen_fiscal_empresa_codigo = trim($fc_entidad['cat_sat_regimen_fiscal_empresa_codigo']);
+        }
+
+        $cat_sat_tipo_persona_cliente_codigo = '';
+        if(isset($fc_entidad['cat_sat_tipo_persona_cliente_codigo'])){
+            $cat_sat_tipo_persona_cliente_codigo = trim($fc_entidad['cat_sat_tipo_persona_cliente_codigo']);
+        }
+
+
+
         $data = new stdClass();
-        $data->cat_sat_regimen_fiscal_empresa_codigo = $fc_entidad['cat_sat_regimen_fiscal_empresa_codigo'];
-        $data->cat_sat_tipo_persona_cliente_codigo = $fc_entidad['cat_sat_tipo_persona_cliente_codigo'];
+        $data->cat_sat_regimen_fiscal_empresa_codigo = $cat_sat_regimen_fiscal_empresa_codigo;
+        $data->cat_sat_tipo_persona_cliente_codigo = $cat_sat_tipo_persona_cliente_codigo;
 
         return $data;
     }
@@ -517,7 +536,8 @@ class _base_fc_html extends html_controler{
 
     final public function select_cat_sat_imp_id(array $configuraciones_impuestos, _transacciones_fc $modelo_entidad,
                                                 int $registro_entidad_id){
-        $params = $this->cat_sat_conf_imps(configuraciones_impuestos: $configuraciones_impuestos, modelo_entidad: $modelo_entidad, registro_entidad_id: $registro_entidad_id);
+        $params = $this->cat_sat_conf_imps(configuraciones_impuestos: $configuraciones_impuestos,
+            modelo_entidad: $modelo_entidad, registro_entidad_id: $registro_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener params', data: $params);
         }
