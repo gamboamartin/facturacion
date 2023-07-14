@@ -113,14 +113,15 @@ cat_sat_forma_pago_id_sl.change(function() {
             // código a ejecutar si la petición es satisfactoria;
             // la respuesta es pasada como argumento a la función
             success : function(json) {
-            console.log(json);
-            sl_com_tipo_cambio.empty();
-            integra_new_option(sl_com_tipo_cambio,'Seleccione un tipo de cambio','-1');
+                console.log(json);
+                sl_com_tipo_cambio.empty();
+                integra_new_option(sl_com_tipo_cambio,'Seleccione un tipo de cambio','-1');
+
 
             $.each(json.registros, function( index, com_tipo_cambio ) {
-            integra_new_option(sl_com_tipo_cambio,com_tipo_cambio.cat_sat_moneda_codigo+' '+com_tipo_cambio.com_tipo_cambio_monto,
-            com_tipo_cambio.com_tipo_cambio_id);
-            sl_com_tipo_cambio.val(com_tipo_cambio.com_tipo_cambio_id);
+                integra_new_option(sl_com_tipo_cambio,com_tipo_cambio.cat_sat_moneda_codigo+' '+com_tipo_cambio.com_tipo_cambio_monto,
+                com_tipo_cambio.com_tipo_cambio_id);
+                sl_com_tipo_cambio.val(com_tipo_cambio.com_tipo_cambio_id);
         });
 
             sl_com_tipo_cambio.selectpicker('refresh');
