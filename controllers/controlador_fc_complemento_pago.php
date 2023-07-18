@@ -8,6 +8,7 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
+use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_complemento_pago_html;
 use gamboamartin\facturacion\models\_doctos_rel;
@@ -105,6 +106,25 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
         $this->data_selected_alta['cat_sat_uso_cfdi_id']['id'] = 23;
         $this->data_selected_alta['cat_sat_uso_cfdi_id']['filtro'] = array('cat_sat_uso_cfdi.id'=>23);
+
+        $com_tipo_cambio_id = -1;
+        $filtro['com_tipo_cambio.fecha'] = date('Y-m-d');
+        $filtro['cat_sat_moneda.id'] = 163;
+
+        $r_com_tipo_cambio = (new com_tipo_cambio(link: $this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al OBTENER TIPO DE CAMBIO',data:  $r_com_tipo_cambio);
+            print_r($error);
+            die('Error');
+        }
+        if($r_com_tipo_cambio->n_registros > 0){
+            $com_tipo_cambio_id = $r_com_tipo_cambio->registros[0]['com_tipo_cambio_id'];
+        }
+
+       
+
+        $this->data_selected_alta['com_tipo_cambio_id']['id'] = $com_tipo_cambio_id;
+        $this->data_selected_alta['com_tipo_cambio_id']['filtro'] = array('cat_sat_moneda.id'=>163);
 
 
         $init_ctl = (new _fc_base())->init_base_fc(controler: $this,name_modelo_email: 'fc_email_cp');
