@@ -40,6 +40,7 @@ class fc_traslado extends _data_impuestos {
         $columnas_extra['fc_partida_importe_con_descuento'] = $sq_importes->fc_partida_entidad_importe_con_descuento;
         $columnas_extra['fc_traslado_importe'] = "$tabla.total";
 
+
         $atributos_criticos = array('total');
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,

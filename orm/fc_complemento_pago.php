@@ -33,7 +33,7 @@ class fc_complemento_pago extends _transacciones_fc
         $columnas_extra['fc_complemento_pago_descuento'] = "$tabla.total_descuento";
         $columnas_extra['fc_complemento_pago_uuid'] = "IFNULL($fc_complemento_pago_uuid,'SIN UUID')";
         $columnas_extra['fc_complemento_pago_etapa'] = "$fc_complemento_pago_etapa";
-        $columnas_extra['fc_complemento_pago_total_pagos'] = "$fc_complemento_pago_total_pagos";
+
         $columnas_extra['fc_complemento_pago_total_pagos'] = "$fc_complemento_pago_total_pagos";
 
 

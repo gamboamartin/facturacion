@@ -26,7 +26,7 @@ class _comprobante{
             return $this->error->error(mensaje: 'Error la factura pasada no tiene registros', data: $row_entidad);
         }
 
-        $column_sub_total = $name_entidad.'_sub_total';
+        $column_sub_total = $name_entidad.'_sub_total_base';
         $column_total = $name_entidad.'_total';
         $column_descuento = $name_entidad.'_total_descuento';
         $column_exportacion = $name_entidad.'_exportacion';

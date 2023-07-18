@@ -115,7 +115,7 @@ class _impuestos{
                                    string $name_tabla_partida): stdClass
     {
         $global_nodo[$key] = new stdClass();
-        $base = round($impuesto[$name_tabla_partida.'_importe'],2);
+        $base = round($impuesto[$name_tabla_partida.'_importe_con_descuento'],2);
         $importe = round($impuesto[$key_importe],2);
         $cat_sat_factor_factor = round($impuesto['cat_sat_factor_factor'],6);
 
@@ -181,7 +181,7 @@ class _impuestos{
         foreach ($impuestos->registros as $impuesto) {
 
             $impuesto_obj = new stdClass();
-            $impuesto_obj->base = number_format($impuesto[$name_tabla_partida.'_importe'], 2,'.','');
+            $impuesto_obj->base = number_format($impuesto[$name_tabla_partida.'_importe_con_descuento'], 2,'.','');
             $impuesto_obj->impuesto = $impuesto['cat_sat_tipo_impuesto_codigo'];
             $impuesto_obj->tipo_factor = $impuesto['cat_sat_tipo_factor_descripcion'];
             $impuesto_obj->tasa_o_cuota = number_format($impuesto['cat_sat_factor_factor'], 6,'.','');

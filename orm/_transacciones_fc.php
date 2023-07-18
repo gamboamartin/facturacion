@@ -1058,7 +1058,7 @@ class _transacciones_fc extends modelo
             $key_cantidad = $modelo_partida->tabla.'_cantidad';
             $key_descripcion = $modelo_partida->tabla.'_descripcion';
             $key_valor_unitario = $modelo_partida->tabla.'_valor_unitario';
-            $key_importe = $modelo_partida->tabla.'_sub_total';
+            $key_importe = $modelo_partida->tabla.'_sub_total_base';
             $key_descuento = $modelo_partida->tabla.'_descuento';
 
             $concepto = new stdClass();
@@ -1975,6 +1975,7 @@ class _transacciones_fc extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
         }
+
 
         $xml = $this->genera_xml(modelo_documento: $modelo_documento, modelo_etapa: $modelo_etapa,
             modelo_partida: $modelo_partida, modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion,

@@ -140,6 +140,7 @@ class fc_complemento_pagoTest extends test {
 
         $row_entidad = array();
         $row_entidad['fc_complemento_pago_sub_total'] = '1';
+        $row_entidad['fc_complemento_pago_sub_total_base'] = '1';
         $row_entidad['fc_complemento_pago_total'] = '1';
         $row_entidad['fc_complemento_pago_total_descuento'] = '1';
         $row_entidad['dp_cp_descripcion'] = '1';

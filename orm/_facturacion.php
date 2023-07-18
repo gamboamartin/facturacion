@@ -85,6 +85,7 @@ class _facturacion
         $data->fc_partida_entidad_importe = $fc_partida_entidad_importe;
         $data->fc_partida_entidad_importe_con_descuento = $fc_partida_entidad_importe_con_descuento;
 
+
         return $data;
     }
 
