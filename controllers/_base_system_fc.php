@@ -250,23 +250,6 @@ class _base_system_fc extends _base_system{
             die('Error');
         }
 
-        $id_selected = -1;
-        if(count($com_tipos_cambio) === 1){
-            $id_selected = $com_tipos_cambio[0]['com_tipo_cambio_id'];
-        }
-        $cols = 6;
-        $link = $this->link;
-        $com_tipo_cambio_id = (new com_tipo_cambio_html(html: $this->html_base))->select_com_tipo_cambio_id(cols: $cols,
-            con_registros:  true,id_selected:  $id_selected, link: $link);
-
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al obtener com_tipo_cambio',data:  $com_tipo_cambio_id);
-            print_r($error);
-            die('Error');
-        }
-
-        $this->inputs->com_tipo_cambio_id = $com_tipo_cambio_id;
-
 
         $fc_csds = (new fc_csd(link: $this->link))->registros_activos();
         if(errores::$error){
@@ -678,7 +661,13 @@ class _base_system_fc extends _base_system{
         $propiedades = array("label" => "Tipo Cambio",
             'id_selected'=>$this->data_selected_alta['com_tipo_cambio_id']['id'],
             'filtro'=>$this->data_selected_alta['com_tipo_cambio_id']['filtro']);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+
+        $prop = $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
+        }
 
         $identificador = "cat_sat_uso_cfdi_id";
         $propiedades = array("label" => "Uso CFDI",

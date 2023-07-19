@@ -109,7 +109,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
         $com_tipo_cambio_id = -1;
         $filtro['com_tipo_cambio.fecha'] = date('Y-m-d');
-        $filtro['cat_sat_moneda.id'] = 163;
+
 
         $r_com_tipo_cambio = (new com_tipo_cambio(link: $this->link))->filtro_and(filtro: $filtro);
         if(errores::$error){
@@ -121,11 +121,9 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             $com_tipo_cambio_id = $r_com_tipo_cambio->registros[0]['com_tipo_cambio_id'];
         }
 
-       
 
         $this->data_selected_alta['com_tipo_cambio_id']['id'] = $com_tipo_cambio_id;
-        $this->data_selected_alta['com_tipo_cambio_id']['filtro'] = array('cat_sat_moneda.id'=>163);
-
+        $this->data_selected_alta['com_tipo_cambio_id']['filtro'] = array();
 
         $init_ctl = (new _fc_base())->init_base_fc(controler: $this,name_modelo_email: 'fc_email_cp');
         if(errores::$error){
