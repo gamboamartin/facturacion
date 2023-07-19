@@ -20,7 +20,7 @@ class fc_complemento_pago extends _transacciones_fc
         $tabla = 'fc_complemento_pago';
 
 
-        $fc_complemento_pago_uuid = "(SELECT IFNULL(fc_cfdi_sellado_cp.uuid,'') FROM fc_cfdi_sellado_cp WHERE fc_cfdi_sellado_cp.fc_complemento_pago_id = fc_complemento_pago.id)";
+        $fc_complemento_pago_uuid = "IFNULL($tabla.folio_fiscal,'SIN UUID')";
 
         $fc_complemento_pago_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa 
             LEFT JOIN pr_etapa_proceso ON pr_etapa_proceso.pr_etapa_id = pr_etapa.id 
@@ -31,12 +31,10 @@ class fc_complemento_pago extends _transacciones_fc
             ON fc_pago.id = fc_pago_pago.fc_pago_id WHERE fc_pago.fc_complemento_pago_id = fc_complemento_pago.id)";
 
         $columnas_extra['fc_complemento_pago_descuento'] = "$tabla.total_descuento";
-        $columnas_extra['fc_complemento_pago_uuid'] = "IFNULL($fc_complemento_pago_uuid,'SIN UUID')";
+        $columnas_extra['fc_complemento_pago_uuid'] = $fc_complemento_pago_uuid;
         $columnas_extra['fc_complemento_pago_etapa'] = "$fc_complemento_pago_etapa";
 
         $columnas_extra['fc_complemento_pago_total_pagos'] = "$fc_complemento_pago_total_pagos";
-
-
 
 
         parent::__construct(link: $link, tabla: $tabla, columnas_extra: $columnas_extra);

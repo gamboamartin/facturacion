@@ -15,7 +15,7 @@ class fc_nota_credito extends _transacciones_fc
         $tabla = 'fc_nota_credito';
 
 
-        $fc_nota_credito_uuid = "(SELECT IFNULL(fc_cfdi_sellado_nc.uuid,'') FROM fc_cfdi_sellado_nc WHERE fc_cfdi_sellado_nc.fc_nota_credito_id = fc_nota_credito.id)";
+        $fc_nota_credito_uuid = "IFNULL($tabla.folio_fiscal,'SIN UUID')";
 
         $fc_nota_credito_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa 
             LEFT JOIN pr_etapa_proceso ON pr_etapa_proceso.pr_etapa_id = pr_etapa.id 
@@ -25,9 +25,8 @@ class fc_nota_credito extends _transacciones_fc
 
         $columnas_extra['fc_nota_credito_descuento'] = "IFNULL($tabla.total_descuento,0)";
 
-        $columnas_extra['fc_nota_credito_uuid'] = "IFNULL($fc_nota_credito_uuid,'SIN UUID')";
+        $columnas_extra['fc_nota_credito_uuid'] = $fc_nota_credito_uuid;
         $columnas_extra['fc_nota_credito_etapa'] = "$fc_nota_credito_etapa";
-
 
 
         parent::__construct(link: $link, tabla: $tabla, columnas_extra: $columnas_extra);

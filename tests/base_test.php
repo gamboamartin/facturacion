@@ -2045,6 +2045,11 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
         }
 
+        $del = $this->del_fc_nc_rel($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_relacion_nc');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);

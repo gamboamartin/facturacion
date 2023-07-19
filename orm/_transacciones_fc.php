@@ -120,6 +120,7 @@ class _transacciones_fc extends modelo
         $atributos_criticos[] = 'monto_pago_cp';
         $atributos_criticos[] = 'saldo';
         $atributos_criticos[] = 'monto_saldo_aplicado';
+        $atributos_criticos[] = 'folio_fiscal';
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios, columnas: $columnas,
             campos_view: $campos_view, columnas_extra: $columnas_extra, no_duplicados: $no_duplicados,

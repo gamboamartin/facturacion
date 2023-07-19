@@ -13,7 +13,7 @@ class fc_factura extends _transacciones_fc
     {
         $tabla = 'fc_factura';
 
-        $fc_factura_uuid = "(SELECT IFNULL(fc_cfdi_sellado.uuid,'') FROM fc_cfdi_sellado WHERE fc_cfdi_sellado.fc_factura_id = fc_factura.id)";
+        $fc_factura_uuid = "IFNULL($tabla.folio_fiscal,'SIN UUID')";
 
         $fc_factura_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa 
             LEFT JOIN pr_etapa_proceso ON pr_etapa_proceso.pr_etapa_id = pr_etapa.id 
@@ -21,7 +21,7 @@ class fc_factura extends _transacciones_fc
             WHERE fc_factura_etapa.fc_factura_id = fc_factura.id ORDER BY fc_factura_etapa.id DESC LIMIT 1)";
 
 
-        $columnas_extra['fc_factura_uuid'] = "IFNULL($fc_factura_uuid,'SIN UUID')";
+        $columnas_extra['fc_factura_uuid'] = $fc_factura_uuid;
         $columnas_extra['fc_factura_etapa'] = "$fc_factura_etapa";
 
 
