@@ -206,7 +206,6 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al obtener relacionadas',data:  $relacionadas);
         }
 
-        //print_r($relacionadas);exit;
         $rs = $pdf->data_relacionados(name_entidad: $modelo_entidad->tabla, relacionadas: $relacionadas);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar relacionadas',data:  $rs);
@@ -247,8 +246,6 @@ class _pdf{
                 return $this->error->error(mensaje: 'Error al maquetar conceptos', data: $rs);
             }
         }
-
-
 
 
         $key_sub_total = $modelo_entidad->tabla.'_sub_total';

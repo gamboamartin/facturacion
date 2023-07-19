@@ -49,7 +49,7 @@ class pdfTest extends test {
         $resultado = $pdf->concepto_producto($concepto,'fc_partida');
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals("<tr  ><td class='border color negrita' colspan='10'>Descripción</td></tr><tr  ><td class='border' colspan='10'>A</td></tr>",$resultado);
+        $this->assertEquals("<tr  ><td class='border color negrita' colspan='11'>Descripción</td></tr><tr  ><td class='border' colspan='11'>A</td></tr>",$resultado);
 
 
         errores::$error = false;
@@ -76,6 +76,31 @@ class pdfTest extends test {
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals('<a  ></a>',$resultado);
+        errores::$error = false;
+    }
+
+    public function test_keys_no_ob(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+
+        $pdf = new pdf();
+        $pdf = new liberator($pdf);
+
+        $concepto = array();
+        $resultado = $pdf->keys_no_ob($concepto);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(0,$resultado['fc_partida_descuento']);
+
+
         errores::$error = false;
     }
 

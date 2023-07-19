@@ -270,7 +270,8 @@ final class pdf
 
         $class = "txt-center border";
 
-        $fc_partida_valor_unitario = $this->fc_partida_double(concepto: $concepto,key: $name_entidad_partida.'_valor_unitario');
+        $fc_partida_valor_unitario = $this->fc_partida_double(concepto: $concepto,
+            key: $name_entidad_partida.'_valor_unitario');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_partida_valor_unitario',data:  $fc_partida_valor_unitario);
         }
@@ -285,9 +286,14 @@ final class pdf
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_descuento);
         }
 
-        $fc_partida_importe = $this->fc_partida_double(concepto: $concepto,key: $name_entidad_partida.'_sub_total');
+        $fc_partida_importe = $this->fc_partida_double(concepto: $concepto,key: $name_entidad_partida.'_sub_total_base');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_importe);
+        }
+
+        $fc_partida_sub_total = $this->fc_partida_double(concepto: $concepto,key: $name_entidad_partida.'_sub_total');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_sub_total);
         }
 
 
@@ -306,6 +312,11 @@ final class pdf
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_importe);
         }
 
+        $fc_partida_sub_total = $this->monto_moneda(monto: $fc_partida_sub_total);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $fc_partida_sub_total);
+        }
+
 
         $concepto = (new _tmps())->com_tmp_prod_cs(link: $link,partida:  $concepto);
         if(errores::$error){
@@ -322,10 +333,11 @@ final class pdf
         $body_td_6 = $this->html(etiqueta: "td", data: $fc_partida_valor_unitario, class: $class);
         $body_td_7 = $this->html(etiqueta: "td", data: $fc_partida_importe, class: $class);
         $body_td_8 = $this->html(etiqueta: "td", data: $fc_partida_descuento, class: $class);
-        $body_td_9 = $this->html(etiqueta: "td", data: $concepto['cat_sat_obj_imp_descripcion'], class: $class);
+        $body_td_9 = $this->html(etiqueta: "td", data: $fc_partida_sub_total, class: $class);
+        $body_td_10 = $this->html(etiqueta: "td", data: $concepto['cat_sat_obj_imp_descripcion'], class: $class);
 
         return $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2 . $body_td_3 . $body_td_4 . $body_td_5 . $body_td_6 .
-            $body_td_7 . $body_td_8 . $body_td_9);
+            $body_td_7 . $body_td_8 . $body_td_9. $body_td_10);
     }
 
     private function columnas_impuestos(): string
@@ -390,12 +402,12 @@ final class pdf
             return $this->error->error(mensaje: 'Error al validar concepto', data: $valida);
         }
 
-        $body_td_1 = $this->html(etiqueta: "td", data: "Descripción", class: "border color negrita", propiedades: "colspan='10'");
+        $body_td_1 = $this->html(etiqueta: "td", data: "Descripción", class: "border color negrita", propiedades: "colspan='11'");
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al genera dato', data: $body_td_1);
         }
         $body_td_2 = $this->html(etiqueta: "td", data: $concepto[$name_entidad_partida.'_descripcion'], class: "border",
-            propiedades: "colspan='10'");
+            propiedades: "colspan='11'");
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al genera dato', data: $body_td_1);
         }
@@ -467,26 +479,27 @@ final class pdf
             return $this->error->error(mensaje: 'Error al generar pdf',data:  $e);
         }
         $head_td_clave_prod_serv = $this->html(etiqueta: "th",
-            data: "Clave del producto y/o servicio", class: "negrita border color", propiedades: "colspan='2'");;
-        $head_td_no_identificacion = $this->html(etiqueta: "th", data: "No. identificación", class: "negrita border color");
-        $head_td_cantidad = $this->html(etiqueta: "th", data: "Cantidad", class: "negrita border color");
-        $head_td_cve_unidad = $this->html(etiqueta: "th", data: "Clave de unidad", class: "negrita border color");
+            data: "Clave Prod/Serv", class: "negrita border color", propiedades: "colspan='2'");;
+        $head_td_no_identificacion = $this->html(etiqueta: "th", data: "No. Ident", class: "negrita border color");
+        $head_td_cantidad = $this->html(etiqueta: "th", data: "Cant", class: "negrita border color");
+        $head_td_cve_unidad = $this->html(etiqueta: "th", data: "Cve Unidad", class: "negrita border color");
         $head_td_unidad = $this->html(etiqueta: "th", data: "Unidad", class: "negrita border color");
-        $head_td_valor_unitario = $this->html(etiqueta: "th", data: "Valor unitario", class: "negrita border color");
+        $head_td_valor_unitario = $this->html(etiqueta: "th", data: "Valor Unitario", class: "negrita border color");
         $head_td_importe = $this->html(etiqueta: "th", data: "Importe", class: "negrita border color");
         $head_td_descuento = $this->html(etiqueta: "th", data: "Descuento", class: "negrita border color");
-        $head_td_obj_imp = $this->html(etiqueta: "th", data: "Objeto impuesto", class: "negrita border color");
+        $head_td_sub_total = $this->html(etiqueta: "th", data: "Sub Total", class: "negrita border color");
+        $head_td_obj_imp = $this->html(etiqueta: "th", data: "Objeto Impuesto", class: "negrita border color");
 
         $head_tr_1 = $this->html(etiqueta: "tr", data: $head_td_clave_prod_serv . $head_td_no_identificacion
             . $head_td_cantidad . $head_td_cve_unidad . $head_td_unidad . $head_td_valor_unitario .
-            $head_td_importe . $head_td_descuento . $head_td_obj_imp);
+            $head_td_importe . $head_td_descuento. $head_td_sub_total . $head_td_obj_imp);
 
         $body_tr = "";
 
         foreach ($conceptos as $concepto) {
 
-
-            $concepto_pdf = $this->concepto_datos(concepto: $concepto, name_entidad_partida: $name_entidad_partida, link: $link);
+            $concepto_pdf = $this->concepto_datos(concepto: $concepto,
+                name_entidad_partida: $name_entidad_partida, link: $link);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al generar concepto',data:  $concepto_pdf);
             }
@@ -931,7 +944,13 @@ final class pdf
         return $base_imp;
     }
 
-    private function fc_partida_double(array $concepto, string $key){
+    /**
+     * @param array $concepto
+     * @param string $key
+     * @return array|float
+     */
+    private function fc_partida_double(array $concepto, string $key): float|array
+    {
 
         $key = trim($key);
         if($key === ''){
@@ -1113,16 +1132,16 @@ final class pdf
      * Inicializa el descuento
      * @param array $concepto Concepto en ejecucion
      * @return array
+     * @version 10.163.6
      */
     private function keys_no_ob(array $concepto): array
     {
+
         $keys_no_ob = array('fc_partida_descuento');
         foreach ($keys_no_ob as $key_no_ob){
-
-            if(isset($concepto[$key_no_ob])){
+            if(!isset($concepto[$key_no_ob])){
                 $concepto[$key_no_ob] = 0;
             }
-
         }
         return $concepto;
     }
