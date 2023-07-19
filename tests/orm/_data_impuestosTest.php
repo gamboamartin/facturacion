@@ -168,6 +168,28 @@ class _data_impuestosTest extends test
         errores::$error = false;
     }
 
+    public function test_get_data_rows(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_retenido($this->link);
+        $modelo = new liberator($modelo);
+
+        $name_modelo_partida = 'fc_partida';
+        $registro_partida_id = 1;
+
+        $resultado = $modelo->get_data_rows($name_modelo_partida, $registro_partida_id);
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('1', $resultado->registros[0]['fc_partida_id']);
+
+        errores::$error = false;
+    }
+
     public function test_validaciones(): void
     {
         errores::$error = false;

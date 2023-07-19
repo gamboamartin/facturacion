@@ -130,6 +130,27 @@ class _transacciones_fc extends modelo
     }
 
 
+    private function ajusta_traslado_exento(string $indice, array $registro, stdClass $value){
+        if($value->tipo_factor === 'Exento'){
+            $registro = $this->limpia_traslado_exento(indice: $indice,registro:  $registro);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al limpiar registro', data: $registro);
+            }
+
+        }
+        return $registro;
+    }
+
+    private function ajusta_traslados_exentos(array $registro){
+        foreach ($registro['traslados'] as $indice=>$value){
+            $registro = $this->ajusta_traslado_exento(indice: $indice,registro:  $registro,value:  $value);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al limpiar registro', data: $registro);
+            }
+        }
+        return $registro;
+
+    }
 
 
     /**
@@ -255,6 +276,17 @@ class _transacciones_fc extends modelo
         return round($descuento + $descuento_nuevo, 2);
     }
 
+    private function cuenta_predial(stdClass $concepto, _cuenta_predial $modelo_predial, array $partida, int $registro_id){
+        if(isset($partida['com_producto_aplica_predial']) && $partida['com_producto_aplica_predial'] === 'activo'){
+            $fc_cuenta_predial_numero = $this->fc_cuenta_predial_numero(modelo_predial: $modelo_predial,registro_id:  $registro_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al obtener cuenta predial', data: $fc_cuenta_predial_numero);
+            }
+            $concepto->cuenta_predial = $fc_cuenta_predial_numero;
+        }
+        return $concepto;
+    }
+
     protected function data_factura(array $row_entidad): array|stdClass
     {
         if(count($row_entidad) === 0){
@@ -333,6 +365,21 @@ class _transacciones_fc extends modelo
         $data->fc_csd_serie = $fc_csd_serie;
 
         return $data;
+    }
+
+    private function data_partida(_partida $modelo_partida, _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado, array $partida){
+        $imp_partida = $this->get_impuestos_partida(modelo_partida: $modelo_partida,
+            modelo_retencion:  $modelo_retencion,modelo_traslado:  $modelo_traslado,partida:  $partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener el impuestos de la partida', data: $imp_partida);
+        }
+
+        $partida = $this->integra_producto_tmp(partida: $partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar producto temporal', data: $partida);
+        }
+        $imp_partida->partida = $partida;
+        return $imp_partida;
     }
 
     /**
@@ -430,6 +477,19 @@ class _transacciones_fc extends modelo
         $descripcion_select .= $registro_csd->org_empresa_razon_social . ' ';
         $descripcion_select .= $registro_com_sucursal->com_cliente_razon_social;
         return $descripcion_select;
+    }
+
+    private function descuento(stdClass $data_partida, string $key_descuento){
+        $descuento = 0.0;
+        if(isset($data_partida->partida[$key_descuento])){
+            $descuento = $data_partida->partida[$key_descuento];
+        }
+
+        $descuento = (new _comprobante())->monto_dos_dec(monto: $descuento);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al maquetar descuento', data: $descuento);
+        }
+        return $descuento;
     }
 
     /**
@@ -672,6 +732,16 @@ class _transacciones_fc extends modelo
         }
 
         return trim($fc_csd['fc_csd_serie']);
+    }
+
+    private function fc_cuenta_predial_numero(_cuenta_predial $modelo_predial, int $registro_id){
+        $r_fc_cuenta_predial = $this->r_fc_cuenta_predial(modelo_predial: $modelo_predial,
+            registro_id:  $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener cuenta predial', data: $r_fc_cuenta_predial);
+        }
+        $key_cuenta_predial_descripcion = $modelo_predial->tabla.'_descripcion';
+        return $r_fc_cuenta_predial->registros[0][$key_cuenta_predial_descripcion];
     }
 
     private function fc_partida_ins(string $name_entidad_partida, array $row, int $row_entidad_id): array
@@ -1024,36 +1094,15 @@ class _transacciones_fc extends modelo
         $ret_global= array();
         foreach ($registro['partidas'] as $key => $partida) {
 
-            $traslados = $modelo_traslado->get_data_rows(name_modelo_partida: $modelo_partida->tabla,
-                registro_partida_id: $partida[$modelo_partida->key_id]);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener el traslados de la partida', data: $traslados);
-            }
 
-            $retenidos = $modelo_retencion->get_data_rows(name_modelo_partida: $modelo_partida->tabla,
-                registro_partida_id: $partida[$modelo_partida->key_id]);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida', data: $retenidos);
-            }
-
-            $filtro['com_producto.id'] = $partida['com_producto_id'];
-            $existe_tmp = (new com_tmp_prod_cs(link: $this->link))->existe(filtro: $filtro);
+            $data_partida = $this->data_partida(modelo_partida: $modelo_partida,modelo_retencion:  $modelo_retencion,
+                modelo_traslado:  $modelo_traslado,partida:  $partida);
             if(errores::$error){
-                return $this->error->error(mensaje: 'Error al validar si existe existe_tmp', data: $existe_tmp);
-            }
-            if($existe_tmp){
-                $r_com_tmp_prod_cs = (new com_tmp_prod_cs(link: $this->link))->filtro_and(filtro: $filtro);
-                if(errores::$error){
-                    return $this->error->error(mensaje: 'Error al obtener producto', data: $r_com_tmp_prod_cs);
-                }
-                $partida['cat_sat_producto_codigo'] = $r_com_tmp_prod_cs->registros[0]['com_tmp_prod_cs_cat_sat_producto'];
+                return $this->error->error(mensaje: 'Error al integrar producto temporal', data: $partida);
             }
 
-
-
-
-            $registro['partidas'][$key]['traslados'] = $traslados->registros;
-            $registro['partidas'][$key]['retenidos'] = $retenidos->registros;
+            $registro['partidas'][$key]['traslados'] = $data_partida->traslados->registros;
+            $registro['partidas'][$key]['retenidos'] = $data_partida->retenidos->registros;
 
             $key_cantidad = $modelo_partida->tabla.'_cantidad';
             $key_descripcion = $modelo_partida->tabla.'_descripcion';
@@ -1062,49 +1111,46 @@ class _transacciones_fc extends modelo
             $key_descuento = $modelo_partida->tabla.'_descuento';
 
             $concepto = new stdClass();
-            $concepto->clave_prod_serv = $partida['cat_sat_producto_codigo'];
-            $concepto->cantidad = $partida[$key_cantidad];
-            $concepto->clave_unidad = $partida['cat_sat_unidad_codigo'];
-            $concepto->descripcion = $partida[$key_descripcion];
-            $concepto->valor_unitario = number_format($partida[$key_valor_unitario], 2);
-            $concepto->importe = number_format($partida[$key_importe], 2);
-            $concepto->objeto_imp = $partida['cat_sat_obj_imp_codigo'];
-            $concepto->no_identificacion = $partida['com_producto_codigo'];
-            $concepto->unidad = $partida['cat_sat_unidad_descripcion'];
+            $concepto->clave_prod_serv = $data_partida->partida['cat_sat_producto_codigo'];
+            $concepto->cantidad = $data_partida->partida[$key_cantidad];
+            $concepto->clave_unidad = $data_partida->partida['cat_sat_unidad_codigo'];
+            $concepto->descripcion = $data_partida->partida[$key_descripcion];
+            $concepto->valor_unitario = number_format($data_partida->partida[$key_valor_unitario], 2);
+            $concepto->importe = number_format($data_partida->partida[$key_importe], 2);
+            $concepto->objeto_imp = $data_partida->partida['cat_sat_obj_imp_codigo'];
+            $concepto->no_identificacion = $data_partida->partida['com_producto_codigo'];
+            $concepto->unidad = $data_partida->partida['cat_sat_unidad_descripcion'];
 
-            $descuento = 0.0;
-            if(isset($partida[$key_descuento])){
-                $descuento = $partida[$key_descuento];
-            }
 
-            $descuento = (new _comprobante())->monto_dos_dec(monto: $descuento);
+
+            $descuento = $this->descuento(data_partida: $data_partida,key_descuento:  $key_descuento);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar descuento', data: $descuento);
             }
 
             $concepto->descuento = $descuento;
 
-            $concepto->impuestos = array();
-            $concepto->impuestos[0] = new stdClass();
-            $concepto->impuestos[0]->traslados = array();
-            $concepto->impuestos[0]->retenciones = array();
+            $concepto = $this->inicializa_impuestos_de_concepto(concepto: $concepto);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al maquetar impuestos', data: $concepto);
+            }
 
             $key_traslado_importe = $modelo_traslado->tabla.'_importe';
 
-            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $traslados,
+            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $data_partida->traslados,
                 key_importe_impuesto: $key_traslado_importe,name_tabla_partida: $modelo_partida->tabla);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar traslados', data: $impuestos);
             }
 
-            $trs_global = (new _impuestos())->impuestos_globales(impuestos: $traslados, global_imp: $trs_global,
+            $trs_global = (new _impuestos())->impuestos_globales(impuestos: $data_partida->traslados, global_imp: $trs_global,
                 key_importe: $key_traslado_importe, name_tabla_partida: $modelo_partida->tabla);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $trs_global);
             }
 
             $key_retenido_importe = $modelo_retencion->tabla.'_importe';
-            $ret_global = (new _impuestos())->impuestos_globales(impuestos: $retenidos, global_imp: $ret_global,
+            $ret_global = (new _impuestos())->impuestos_globales(impuestos: $data_partida->retenidos, global_imp: $ret_global,
                 key_importe: $key_retenido_importe, name_tabla_partida: $modelo_partida->tabla);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $ret_global);
@@ -1112,7 +1158,7 @@ class _transacciones_fc extends modelo
 
             $concepto->impuestos[0]->traslados = $impuestos;
 
-            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $retenidos,
+            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $data_partida->retenidos,
                 key_importe_impuesto: $key_retenido_importe, name_tabla_partida: $modelo_partida->tabla);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar retenciones', data: $impuestos);
@@ -1120,23 +1166,10 @@ class _transacciones_fc extends modelo
 
             $concepto->impuestos[0]->retenciones = $impuestos;
 
-            if(isset($partida['com_producto_aplica_predial']) && $partida['com_producto_aplica_predial'] === 'activo'){
-                $r_fc_cuenta_predial = $modelo_predial->filtro_and(filtro: array($this->key_filtro_id=>$registro_id));
-                if (errores::$error) {
-                    return $this->error->error(mensaje: 'Error al obtener cuenta predial', data: $r_fc_cuenta_predial);
-                }
-                if($r_fc_cuenta_predial->n_registros === 0){
-                    return $this->error->error(mensaje: 'Error no existe predial asignado', data: $r_fc_cuenta_predial);
-                }
-                if($r_fc_cuenta_predial->n_registros > 1){
-                    return $this->error->error(mensaje: 'Error de integridad en predial', data: $r_fc_cuenta_predial);
-                }
-
-                $key_cuenta_predial_descripcion = $modelo_predial->tabla.'_descripcion';
-                $fc_cuenta_predial_numero = $r_fc_cuenta_predial->registros[0][$key_cuenta_predial_descripcion];
-
-                $concepto->cuenta_predial = $fc_cuenta_predial_numero;
-
+            $concepto = $this->cuenta_predial(concepto: $concepto,modelo_predial:  $modelo_predial,
+                partida:  $data_partida->partida,registro_id:  $registro_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al integrar cuenta predial', data: $concepto);
             }
 
 
@@ -1145,8 +1178,8 @@ class _transacciones_fc extends modelo
             $key_importe_total_traslado = $modelo_partida->tabla.'_total_traslados';
             $key_importe_total_retenido = $modelo_partida->tabla.'_total_retenciones';
 
-            $total_impuestos_trasladados += ($partida[$key_importe_total_traslado]);
-            $total_impuestos_retenidos += ($partida[$key_importe_total_retenido]);
+            $total_impuestos_trasladados += ($data_partida->partida[$key_importe_total_traslado]);
+            $total_impuestos_retenidos += ($data_partida->partida[$key_importe_total_retenido]);
 
         }
 
@@ -1158,17 +1191,14 @@ class _transacciones_fc extends modelo
         $registro['traslados'] = $trs_global;
         $registro['retenidos'] = $ret_global;
 
-        foreach ($registro['traslados'] as $indice=>$value){
-            if($value->tipo_factor === 'Exento'){
-                unset($registro['traslados'][$indice]->tasa_o_cuota);
-                unset($registro['traslados'][$indice]->importe);
-            }
+
+        $registro = $this->ajusta_traslados_exentos(registro: $registro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al ajustar registro', data: $registro);
         }
 
-
-
-
         $registro['conceptos'] = $conceptos;
+
         $registro['total_impuestos_trasladados'] = number_format($total_impuestos_trasladados, 2);
         $registro['total_impuestos_retenidos'] = number_format($total_impuestos_retenidos, 2);
         $registro['relacionados'] = $relacionados;
@@ -1299,6 +1329,26 @@ class _transacciones_fc extends modelo
         return round($fc_factura->$key_total,2);
     }
 
+    private function get_impuestos_partida(_partida $modelo_partida,_data_impuestos $modelo_retencion,
+                                           _data_impuestos $modelo_traslado, array $partida){
+
+        $traslados = $modelo_traslado->get_data_rows(name_modelo_partida: $modelo_partida->tabla,
+            registro_partida_id: $partida[$modelo_partida->key_id]);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener el traslados de la partida', data: $traslados);
+        }
+
+        $retenidos = $modelo_retencion->get_data_rows(name_modelo_partida: $modelo_partida->tabla,
+            registro_partida_id: $partida[$modelo_partida->key_id]);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida', data: $retenidos);
+        }
+        $data = new stdClass();
+        $data->traslados = $traslados;
+        $data->retenidos = $retenidos;
+        return $data;
+    }
+
     /**
      * Obtiene las partidas de una factura
      * @param string $name_entidad
@@ -1363,6 +1413,16 @@ class _transacciones_fc extends modelo
         }
 
         return $documento;
+    }
+
+    private function inicializa_impuestos_de_concepto(stdClass $concepto): stdClass
+    {
+        $concepto->impuestos = array();
+        $concepto->impuestos[0] = new stdClass();
+        $concepto->impuestos[0]->traslados = array();
+        $concepto->impuestos[0]->retenciones = array();
+        return $concepto;
+
     }
 
     /**
@@ -1512,6 +1572,23 @@ class _transacciones_fc extends modelo
         return $registro;
     }
 
+    private function integra_producto_tmp(array $partida){
+        $filtro['com_producto.id'] = $partida['com_producto_id'];
+        $existe_tmp = (new com_tmp_prod_cs(link: $this->link))->existe(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si existe existe_tmp', data: $existe_tmp);
+        }
+        if($existe_tmp){
+            $r_com_tmp_prod_cs = (new com_tmp_prod_cs(link: $this->link))->filtro_and(filtro: $filtro);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener producto', data: $r_com_tmp_prod_cs);
+            }
+            $partida['cat_sat_producto_codigo'] = $r_com_tmp_prod_cs->registros[0]['com_tmp_prod_cs_cat_sat_producto'];
+        }
+        return $partida;
+
+    }
+
     /**
      * Limpia los parametros de una factura
      * @param array $registro registro en proceso
@@ -1533,8 +1610,6 @@ class _transacciones_fc extends modelo
     }
 
 
-
-
     /**
      * Limpia un key de un registro si es que existe
      * @param string $key Key a limpiar
@@ -1551,6 +1626,13 @@ class _transacciones_fc extends modelo
         if (isset($registro[$key])) {
             unset($registro[$key]);
         }
+        return $registro;
+    }
+
+    private function limpia_traslado_exento(string $indice, array $registro): array
+    {
+        unset($registro['traslados'][$indice]->tasa_o_cuota);
+        unset($registro['traslados'][$indice]->importe);
         return $registro;
     }
 
@@ -1672,6 +1754,20 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener permite_transaccion', data: $permite_transaccion);
         }
         return $permite_transaccion;
+    }
+
+    private function r_fc_cuenta_predial(_cuenta_predial $modelo_predial, int $registro_id){
+        $r_fc_cuenta_predial = $modelo_predial->filtro_and(filtro: array($this->key_filtro_id=>$registro_id));
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener cuenta predial', data: $r_fc_cuenta_predial);
+        }
+        if($r_fc_cuenta_predial->n_registros === 0){
+            return $this->error->error(mensaje: 'Error no existe predial asignado', data: $r_fc_cuenta_predial);
+        }
+        if($r_fc_cuenta_predial->n_registros > 1){
+            return $this->error->error(mensaje: 'Error de integridad en predial', data: $r_fc_cuenta_predial);
+        }
+        return $r_fc_cuenta_predial;
     }
 
 

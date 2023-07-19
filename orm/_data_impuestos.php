@@ -151,17 +151,21 @@ class _data_impuestos extends _base{
 
     /**
      * Obtiene los impuestos trasladados de una partida
-     * @param string $name_modelo_partida Nombre del modelo de tipo impuestopuede ser retenido traslado
+     * @param string $name_modelo_partida Nombre del modelo de tipo impuesto puede ser retenido traslado
      * @param int $registro_partida_id partida
      * @return array|stdClass|int
-     *
+     * @version 10.162.6
      */
     final public function get_data_rows(string $name_modelo_partida, int $registro_partida_id): array|stdClass|int
     {
 
         $name_modelo_partida = trim($name_modelo_partida);
         if($name_modelo_partida === ''){
-            return $this->error->error(mensaje: 'Error name_modelo_partida esta inicializado',data:  $name_modelo_partida);
+            return $this->error->error(mensaje: 'Error name_modelo_partida esta inicializado',
+                data:  $name_modelo_partida);
+        }
+        if($registro_partida_id <= 0){
+            return $this->error->error(mensaje: 'Error registro_partida_id es menor a 0', data:  $registro_partida_id);
         }
         $key_id = $name_modelo_partida.'.id';
         $filtro[$key_id]  = $registro_partida_id;
