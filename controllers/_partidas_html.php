@@ -189,7 +189,7 @@ class _partidas_html{
                                   string $name_entidad_retenido, string $name_entidad_traslado,
                                   string $name_modelo_entidad, array $partida, stdClass $partidas): array|stdClass
     {
-        
+
         $data_producto_html = (new _html_factura())->data_producto(html_controler:$html_controler, link: $link,
             name_entidad_partida: $modelo_partida->tabla, partida: $partida);
         if (errores::$error) {

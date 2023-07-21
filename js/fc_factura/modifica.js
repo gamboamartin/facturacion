@@ -50,6 +50,8 @@ frm_partida.submit(function () {
 
 });
 
+/*
+
 btn_alta_partida.click(function () {
 
     let cantidad = txt_cantidad.val();
@@ -118,7 +120,32 @@ btn_alta_partida.click(function () {
             txt_total.val(0);
             sl_cat_sat_conf_imps_id.val(-1);
             sl_cat_sat_conf_imps_id.selectpicker('refresh');
-            location.reload();
+
+            console.log(json);
+            let fc_partida_id = json.registro_id;
+
+
+            let td_fc_partida_descripcion = "<tr><td colspan='5'><b>"+json.registro_obj.fc_partida_descripcion+"</b></td></tr>";
+            let td_com_producto_codigo = "<td><b>CVE SAT: </b><td>"+json.registro_obj.com_producto_codigo+"</td>";
+            let td_cat_sat_unidad_descripcion = "<td><b>Unidad: </b>"+json.registro_obj.cat_sat_unidad_descripcion+"</td>";
+            let td_cat_sat_obj_imp_descripcion = "<td><b>Obj Imp: </b>"+json.registro_obj.cat_sat_obj_imp_descripcion+"</td>";
+            let td_fc_partida_cantidad = "<tr><td><b>Cant: </b>"+json.registro_obj.fc_partida_cantidad+"</td>";
+            let td_fc_partida_valor_unitario = "<td><b>Valor Unitario: </b>"+json.registro_obj.fc_partida_valor_unitario+"</td>";
+            let td_fc_partida_importe = "<td><b>Importe: </b>"+json.registro_obj.fc_partida_sub_total_base+"</td>";
+            let td_fc_partida_descuento = "<td><b>Descuento: </b>"+json.registro_obj.fc_partida_descuento+"</td></tr>";
+            let td_fc_partida_sub_total = "<tr><td><b>Sub Total: </b>"+json.registro_obj.fc_partida_sub_total+"</td>";
+            let td_fc_partida_traslados = "<td><b>Traslados: </b>"+json.registro_obj.fc_partida_total_traslados+"</td>";
+            let td_fc_partida_retenciones = "<td><b>Retenciones: </b>"+json.registro_obj.fc_partida_total_retenciones+"</td>";
+            let td_fc_partida_total = "<td><b>Total: </b>"+json.registro_obj.fc_partida_total+"</td></tr>";
+
+
+            let tr_data_producto = "<tr>"+td_com_producto_codigo+td_cat_sat_unidad_descripcion+td_cat_sat_obj_imp_descripcion+"</tr>";
+            let tr_montos = "<tr>"+td_fc_partida_cantidad+td_fc_partida_valor_unitario+td_fc_partida_importe+td_fc_partida_descuento+td_fc_partida_sub_total+td_fc_partida_traslados+td_fc_partida_retenciones+td_fc_partida_total+"</tr>";
+            let tr_buttons = "<tr><td colspan='5'><a role='button' title='Eliminar' href='index.php?seccion=fc_partida&accion=elimina_bd&registro_id="+fc_partida_id+"&session_id="+session_id+"&adm_menu_id="+adm_menu_id+"&seccion_retorno=fc_factura&accion_retorno=modifica&id_retorno="+registro_id+"' class='btn btn-danger col-sm-12'><span class='bi bi-trash'></span></a></td></tr>";
+
+            let table_full = "<table class='table table-striped data-partida' style='border: 2px solid'><tbody>"+td_fc_partida_descripcion+tr_data_producto+tr_montos+tr_buttons+"</tbody></table>";
+            console.log(json.registro_obj);
+            $("#row-partida").append(table_full);
 
         },
 
@@ -146,7 +173,7 @@ btn_alta_partida.click(function () {
         }
     });
 
-});
+});*/
 
 sl_com_sucursal.change(function () {
     let selected = $(this).find('option:selected');

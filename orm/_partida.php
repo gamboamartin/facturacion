@@ -235,6 +235,14 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al modificar entidad base', data: $regenera);
         }
 
+        $fc_registro_partida = $this->registro(registro_id: $r_alta_bd->registro_id, columnas_en_bruto: false,
+            retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener partida', data: $fc_registro_partida);
+        }
+
+        $r_alta_bd->registro_obj = $fc_registro_partida;
+
         return $r_alta_bd;
     }
 

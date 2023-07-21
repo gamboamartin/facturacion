@@ -38,7 +38,7 @@
                     <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
                         <h2>Partidas</h2>
                     </div>
-                    <form method="post" action="#" class="form-additional" id="frm-partida">
+                    <form method="post" action="<?php echo $controlador->link_fc_partida_alta_bd; ?>" class="form-additional" id="frm-partida">
 
                         <?php echo $controlador->inputs->partidas->com_producto_id; ?>
                         <?php echo $controlador->inputs->partidas->unidad; ?>
@@ -55,7 +55,7 @@
 
                         <div class="control-group btn-alta">
                             <div class="controls">
-                                <button type="button" class="btn btn-success" value="modifica" name="btn_action_next" id="btn-alta-partida">Alta</button><br>
+                                <button type="submit" class="btn btn-success" value="modifica" name="btn_action_next" id="btn-alta-partida">Alta</button><br>
                             </div>
                         </div>
 
@@ -77,7 +77,7 @@
                     </div>
                     <div class="table table-responsive">
 
-                        <?php foreach ($controlador->partidas->registros as $partida){ ?>
+                        <?php   foreach ($controlador->partidas->registros as $partida){ ?>
                         <form method="post" action="<?php echo $partida['link_modifica_partida_bd']; ?>">
 
                         <table id="fc_partida" class="table table-striped" style="font-size: 12px;">
@@ -102,7 +102,9 @@
 
                     </div>
 
-                </div>
+                    <div class="table table-responsive" id="row-partida">
+
+                    </div>
             </div>
         </div>
 
