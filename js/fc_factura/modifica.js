@@ -23,6 +23,8 @@ let txt_total = $(".partidas #total");
 let txt_cuenta_predial = $("#cuenta_predial");
 let txt_fecha = $("#fecha");
 let frm_partida = $("#frm-partida");
+let btn_alta_partida = $("#btn-alta-partida");
+let hidden_registro_id = $("input[name='registro_id']");
 
 sl_fc_csd.change(function () {
     let selected = $(this).find('option:selected');
@@ -45,6 +47,104 @@ frm_partida.submit(function () {
         return false;
     }
 
+
+});
+
+btn_alta_partida.click(function () {
+
+    let cantidad = txt_cantidad.val();
+    let valor_unitario = txt_valor_unitario.val();
+    let com_producto_id = sl_com_producto.val();
+    let descripcion = txt_descripcion.val();
+    let descuento = txt_descuento.val();
+    let cat_sat_conf_imps_id = sl_cat_sat_conf_imps_id.val();
+    let registro_id = hidden_registro_id.val();
+
+    if(cantidad <=0.0){
+        alert('La cantidad debe ser mayor a 0');
+        txt_cantidad.focus();
+        return false;
+    }
+    if(valor_unitario <= 0.0){
+        alert('La valor unitario debe ser mayor a 0');
+        txt_valor_unitario.focus();
+        return false;
+    }
+    if(com_producto_id === ''){
+        alert('La seleccione un producto');
+        sl_com_producto.focus();
+        return false;
+    }
+    if(cat_sat_conf_imps_id === ''){
+        alert('La seleccione una Configuracion');
+        sl_cat_sat_conf_imps_id.focus();
+        return false;
+    }
+    if(descripcion === ''){
+        alert('Integre una descripcion');
+        txt_descripcion.focus();
+        return false;
+    }
+    if(descuento === ''){
+        descuento = 0;
+    }
+
+
+    let url = get_url("fc_partida","alta_bd", {});
+    $.ajax({
+        // la URL para la petición
+        url : url,
+        // la información a enviar
+        // (también es posible utilizar una cadena de datos)
+        data : {com_producto_id: com_producto_id, descripcion: descripcion,cantidad: cantidad,
+            valor_unitario: valor_unitario, descuento: descuento,cat_sat_conf_imps_id:cat_sat_conf_imps_id,fc_factura_id:registro_id } ,
+
+        // especifica si será una petición POST o GET
+        type : 'POST',
+
+        // el tipo de información que se espera de respuesta
+
+
+        // código a ejecutar si la petición es satisfactoria;
+        // la respuesta es pasada como argumento a la función
+        success : function(json) {
+            alert(json.mensaje);
+            sl_com_producto.val(-1);
+            sl_com_producto.selectpicker('refresh');
+            txt_descripcion.val('');
+            txt_cantidad.val(0);
+            txt_valor_unitario.val(0);
+            txt_subtotal.val(0);
+            txt_total.val(0);
+            sl_cat_sat_conf_imps_id.val(-1);
+            sl_cat_sat_conf_imps_id.selectpicker('refresh');
+            location.reload();
+
+        },
+
+        // código a ejecutar si la petición falla;
+        // son pasados como argumentos a la función
+        // el objeto de la petición en crudo y código de estatus de la petición
+        error : function(xhr, status) {
+            alert('Disculpe, existió un problema');
+            console.log(xhr);
+            console.log(status);
+            sl_com_producto.val(-1);
+            sl_com_producto.selectpicker('refresh');
+            txt_descripcion.val('');
+            txt_cantidad.val(0);
+            txt_valor_unitario.val(0);
+            txt_subtotal.val(0);
+            txt_total.val(0);
+            sl_cat_sat_conf_imps_id.val(-1);
+            sl_cat_sat_conf_imps_id.selectpicker('refresh');
+        },
+
+        // código a ejecutar sin importar si la petición falló o no
+        complete : function(xhr, status) {
+            //alert('Petición realizada');
+        }
+    });
 
 });
 

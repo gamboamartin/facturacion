@@ -2195,6 +2195,13 @@ class _base_system_fc extends _base_system{
 
         $this->form_data_fc = $form_data_fc;
 
+        $input_registro_id = (new html_controler(html: $this->html_base))->hidden(name: 'registro_id',value:  $this->registro_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener input_registro_id', data: $input_registro_id);
+        }
+
+        $this->inputs->registro_id = $input_registro_id;
+
 
 
         return $base->template;

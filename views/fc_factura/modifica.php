@@ -1,6 +1,8 @@
 <?php /** @var  \gamboamartin\facturacion\controllers\controlador_fc_factura $controlador  controlador en ejecucion */ ?>
 <?php use config\views; ?>
 
+
+<?php echo $controlador->inputs->registro_id; ?>
 <main class="main section-color-primary">
     <div class="container">
 
@@ -36,7 +38,7 @@
                     <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
                         <h2>Partidas</h2>
                     </div>
-                    <form method="post" action="<?php echo $controlador->link_fc_partida_alta_bd; ?>" class="form-additional" id="frm-partida">
+                    <form method="post" action="#" class="form-additional" id="frm-partida">
 
                         <?php echo $controlador->inputs->partidas->com_producto_id; ?>
                         <?php echo $controlador->inputs->partidas->unidad; ?>
@@ -53,7 +55,7 @@
 
                         <div class="control-group btn-alta">
                             <div class="controls">
-                                <button type="submit" class="btn btn-success" value="modifica" name="btn_action_next">Alta</button><br>
+                                <button type="button" class="btn btn-success" value="modifica" name="btn_action_next" id="btn-alta-partida">Alta</button><br>
                             </div>
                         </div>
 

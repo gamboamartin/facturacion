@@ -47,11 +47,15 @@ class _html_factura{
      * @param PDO $link Conexion a la base de datos
      * @param string $name_entidad_partida Nombre de la entidad partida
      * @param array $partida Registro de tipo partida
-     * @return string
+     * @return string|array
      */
-    final public function data_producto(html_controler $html_controler, PDO $link, string $name_entidad_partida, array $partida): string
+    final public function data_producto(html_controler $html_controler, PDO $link, string $name_entidad_partida, array $partida): string|array
     {
 
+        $name_entidad_partida = trim($name_entidad_partida);
+        if($name_entidad_partida === ''){
+            return $this->error->error(mensaje: 'Error name_entidad_partida esta vacia', data: $name_entidad_partida);
+        }
 
         $partida = (new _tmps())->com_tmp_prod_cs(link: $link,partida:  $partida);
         if(errores::$error){
@@ -121,18 +125,30 @@ class _html_factura{
      * Genera un name key para producto
      * @param string $campo Campo a integrar
      * @param string $name_entidad_partida Nombre de la entidad
-     * @return string
+     * @return string|array
+     * @version 10.166.6
      */
-    private function integra_key(string $campo, string $name_entidad_partida): string
+    private function integra_key(string $campo, string $name_entidad_partida): string|array
     {
-
+        $name_entidad_partida = trim($name_entidad_partida);
+        if($name_entidad_partida === ''){
+            return $this->error->error(mensaje: 'Error name_entidad_partida esta vacia', data: $name_entidad_partida);
+        }
+        $campo = trim($campo);
+        if($campo === ''){
+            return $this->error->error(mensaje: 'Error campo esta vacia', data: $campo);
+        }
         return $name_entidad_partida.'_'.$campo;
 
     }
 
 
-    private function keys_producto(string $name_entidad_partida): stdClass
+    private function keys_producto(string $name_entidad_partida): stdClass|array
     {
+        $name_entidad_partida = trim($name_entidad_partida);
+        if($name_entidad_partida === ''){
+            return $this->error->error(mensaje: 'Error name_entidad_partida esta vacia', data: $name_entidad_partida);
+        }
 
         $key_cantidad = $this->integra_key(campo: 'cantidad',name_entidad_partida:  $name_entidad_partida);
         if(errores::$error){
