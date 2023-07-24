@@ -11,6 +11,8 @@ use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\organigrama\models\org_empresa;
 use gamboamartin\organigrama\models\org_sucursal;
+use gamboamartin\system\html_controler;
+use gamboamartin\template_1\html;
 use gamboamartin\test\liberator;
 use gamboamartin\test\test;
 use gamboamartin\facturacion\models\fc_factura;
@@ -73,6 +75,7 @@ class _html_facturaTest extends test {
         $name_entidad_partida = 'a';
 
         $resultado = $html->keys_producto($name_entidad_partida);
+
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals('a_cantidad',$resultado->key_cantidad);
@@ -81,6 +84,33 @@ class _html_facturaTest extends test {
         $this->assertEquals('a_descuento',$resultado->key_descuento);
         errores::$error = false;
 
+    }
+
+    public function test_inputs_producto(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _html_factura();
+        $html = new liberator($html);
+
+        $html_ = new html();
+        $html_controler = new html_controler(html: $html_);
+
+        $key_cantidad = 'a';
+        $key_valor_unitario = 'b';
+        $partida = array();
+        $resultado = $html->inputs_producto($html_controler, $key_cantidad, $key_valor_unitario, $partida);
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("<div class='control-group col-sm-12'><input type='text' name='cantidad' value='0' class='form-control' required id='cantidad' placeholder='Cantidad' /></div>",$resultado->input_cantidad);
+        $this->assertEquals("<div class='control-group col-sm-12'><input type='text' name='valor_unitario' value='0' class='form-control' required id='valor_unitario' placeholder='Valor Unitario' /></div>",$resultado->input_valor_unitario);
+        errores::$error = false;
     }
 
 

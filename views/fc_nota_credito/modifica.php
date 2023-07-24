@@ -69,32 +69,68 @@
                     <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
                         <h2>Partidas</h2>
                     </div>
-                    <div class="">
 
-                        <?php foreach ($controlador->partidas->registros as $partida){
+                    <div class="table table-responsive" id="row-partida">
+
+                        <?php    foreach ($controlador->partidas->registros as $partida){ ?>
+
+                            <table class='table table-striped data-partida' style='border: 2px solid'>
+                                <tbody>
+                                <tr class="tr_fc_partida_descripcion">
+                                    <td colspan='5' class="td_fc_partida_descripcion" data-fc_partida_factura_id="<?php echo $partida['fc_partida_nc_id']; ?>">
+                                        <input type="text" class="form-control form-control-sm fc_partida_descripcion" name="descripcion" value="<?php echo $partida['fc_partida_nc_descripcion']; ?>" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td><b>CVE SAT: </b><td><?php echo $partida['com_producto_codigo']; ?></td>
+                                    <td><b>Unidad: </b><?php echo $partida['cat_sat_unidad_descripcion']; ?></td>
+                                    <td><b>Obj Imp: </b><?php echo $partida['cat_sat_obj_imp_descripcion']; ?></td>
+                                </tr>
+
+                                <tr>
+                                    <td><b>Cantidad</b></td>
+                                    <td><b>Valor Unitario</b></td>
+                                    <td><b>Importe</b></td>
+                                    <td><b>Descuento</b></td>
+                                </tr>
+
+                                <tr class="tr_data_partida">
+                                    <td class="td_fc_partida_cantidad">
+                                        <input type="text" class="form-control form-control-sm fc_partida_cantidad" name="cantidad" value="<?php echo $partida['fc_partida_nc_cantidad']; ?>" />
+                                    </td>
+                                    <td class="td_fc_partida_valor_unitario">
+                                        <input type="text" class="form-control form-control-sm fc_partida_valor_unitario" name="valor_unitario" value="<?php echo $partida['fc_partida_nc_valor_unitario']; ?>" />
+                                    </td>
+                                    <td class="td_fc_partida_sub_total_base">
+                                        <input type="text" class="form-control form-control-sm fc_partida_sub_total_base" disabled value="<?php echo $partida['fc_partida_nc_sub_total_base']; ?>" />
+                                    </td>
+                                    <td class="td_fc_partida_descuento">
+                                        <input type="text" class="form-control form-control-sm fc_partida_descuento" name="descuento" value="<?php echo $partida['fc_partida_nc_descuento']; ?>" />
+                                    </td>
+
+                                </tr>
+
+                                <tr>
+                                    <td><b>Sub Total: </b><?php echo $partida['fc_partida_nc_sub_total']; ?></td>
+                                    <td><b>Traslados: </b><?php echo $partida['fc_partida_nc_total_traslados']; ?></td>
+                                    <td><b>Retenciones: </b><?php echo $partida['fc_partida_nc_total_retenciones']; ?></td>
+                                    <td><b>Total: </b><?php echo $partida['fc_partida_nc_total']; ?></td>
+                                </tr>
+                                <tr class='tr_elimina_partida'>
+                                    <td colspan='5' class='td_elimina_partida'>
+                                        <button type='button' class='btn btn-danger col-md-12 elimina_partida' data-fc_partida_factura_id='<?php echo $partida['fc_partida_nc_id']; ?>' value='elimina' name='btn_action_next'>Elimina</button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
 
 
-                        ?>
-                        <table id="fc_partida" class="table table-striped" style="font-size: 12px;">
-                            <?php echo $controlador->t_head_producto; ?>
-                            <tbody>
-                            <?php echo $partida['data_producto_html']; ?>
-
-                            <?php echo $partida['descripcion_html']; ?>
-
-                            <?php echo $partida['impuesto_traslado_html']; ?>
-                            <?php echo $partida['impuesto_retenido_html']; ?>
-
-                            </tbody>
-                        </table>
-                        <?php } ?>
-
+                        <?php }  ?>
 
                     </div>
-
                 </div>
             </div>
-        </div>
 
 
         <div class="row">

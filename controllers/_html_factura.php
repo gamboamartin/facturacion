@@ -5,6 +5,7 @@ use gamboamartin\comercial\models\com_tmp_prod_cs;
 use gamboamartin\errores\errores;
 use gamboamartin\system\html_controler;
 use gamboamartin\template\html;
+use gamboamartin\validacion\validacion;
 use PDO;
 use stdClass;
 
@@ -106,10 +107,27 @@ class _html_factura{
      * @param string $key_valor_unitario Key de valor unitario
      * @param array $partida Partida datos
      * @return array|stdClass
+     * @version 10.172.6
      */
     private function inputs_producto(html_controler $html_controler, string $key_cantidad, string $key_valor_unitario,
                                      array $partida): array|stdClass
     {
+        $key_cantidad = trim($key_cantidad);
+        if($key_cantidad === ''){
+            return $this->error->error(mensaje: 'Error key_cantidad esta vacia', data: $key_cantidad);
+        }
+        $key_valor_unitario = trim($key_valor_unitario);
+        if($key_valor_unitario === ''){
+            return $this->error->error(mensaje: 'Error key_valor_unitario esta vacia', data: $key_valor_unitario);
+        }
+
+        $keys = array($key_cantidad, $key_valor_unitario);
+        foreach ($keys as $key){
+            if(!isset($partida[$key])){
+                $partida[$key] = 0;
+            }
+        }
+
         $input_cantidad = $html_controler->input_monto(cols: 12, row_upd: new stdClass(), value_vacio: false,
             con_label: false, name: 'cantidad', place_holder: 'Cantidad', value: $partida[$key_cantidad]);
         if(errores::$error){
@@ -218,6 +236,15 @@ class _html_factura{
         return $html;
     }
 
+    /**
+     * Integra un tr de producto
+     * @param string $input_cantidad Input de cantidad
+     * @param string $input_valor_unitario Input de valor unitario
+     * @param string $key_descuento Key de descuento basado en partida
+     * @param string $key_importe Key importe basado en partida
+     * @param array $partida Partida con datos
+     * @return string
+     */
     private function tr_producto(string $input_cantidad, string $input_valor_unitario, string $key_descuento,
                                  string $key_importe, array $partida): string
     {

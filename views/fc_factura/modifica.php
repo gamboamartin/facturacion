@@ -75,32 +75,6 @@
                     <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
                         <h2>Partidas</h2>
                     </div>
-                    <div class="table table-responsive">
-
-                        <?php /*   foreach ($controlador->partidas->registros as $partida){ ?>
-                        <form method="post" action="<?php echo $partida['link_modifica_partida_bd']; ?>">
-
-                        <table id="fc_partida" class="table table-striped" style="font-size: 12px;">
-                            <?php echo $controlador->t_head_producto; ?>
-                            <tbody>
-                            <?php echo $partida['data_producto_html']; ?>
-                            <?php echo $partida['descripcion_html']; ?>
-                            <?php echo $partida['impuesto_traslado_html']; ?>
-                            <?php echo $partida['impuesto_retenido_html']; ?>
-                            </tbody>
-                        </table>
-                            <div class="control-group btn-alta">
-                                <div class="controls">
-                                    <button type="submit" class="btn btn-success col-md-12" value="modifica" name="btn_action_next">Modifica</button>
-                                    <?php echo $partida['elimina_bd'];?>
-                                </div>
-                            </div>
-
-                        </form>
-                        <?php } */ ?>
-
-
-                    </div>
 
                     <div class="table table-responsive" id="row-partida">
 
