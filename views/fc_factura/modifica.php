@@ -106,7 +106,6 @@
 
                         <?php    foreach ($controlador->partidas->registros as $partida){ ?>
 
-                        <form method="post" action="<?php echo $partida['link_modifica_partida_bd']; ?>">
                             <table class='table table-striped data-partida' style='border: 2px solid'>
                                 <tbody>
                                     <tr class="tr_fc_partida_descripcion">
@@ -150,18 +149,13 @@
                                         <td><b>Retenciones: </b><?php echo $partida['fc_partida_total_retenciones']; ?></td>
                                         <td><b>Total: </b><?php echo $partida['fc_partida_total']; ?></td>
                                     </tr>
-                                <tr>
-                                    <td colspan="5">
-
-                                        <div class="col-md-12">
-                                            <?php echo $partida['elimina_bd']; ?>
-                                        </div>
+                                <tr class='tr_elimina_partida'>
+                                    <td colspan='5' class='td_elimina_partida'>
+                                        <button type='button' class='btn btn-danger col-md-12 elimina_partida' data-fc_partida_factura_id='<?php echo $partida['fc_partida_id']; ?>' value='elimina' name='btn_action_next'>Elimina</button>
                                     </td>
                                 </tr>
                                 </tbody>
                             </table>
-
-                        </form>
 
 
                         <?php }  ?>

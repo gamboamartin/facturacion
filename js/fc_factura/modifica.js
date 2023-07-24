@@ -128,11 +128,12 @@ function tds(contenedor){
     let td_fc_partida_valor_unitario = cte_formulario.children(".tr_data_partida").children(".td_fc_partida_valor_unitario");
     let td_fc_partida_descuento = cte_formulario.children(".tr_data_partida").children(".td_fc_partida_descuento");
     let td_fc_partida_descripcion = cte_formulario.children(".tr_fc_partida_descripcion").children(".td_fc_partida_descripcion");
+    let td_elimina_partida = cte_formulario.children(".tr_elimina_partida").children(".td_elimina_partida");
 
     return {
         cte_formulario: cte_formulario, td_fc_partida_cantidad: td_fc_partida_cantidad,
         td_fc_partida_valor_unitario: td_fc_partida_valor_unitario, td_fc_partida_descuento: td_fc_partida_descuento,
-        td_fc_partida_descripcion: td_fc_partida_descripcion
+        td_fc_partida_descripcion: td_fc_partida_descripcion,td_elimina_partida: td_elimina_partida
     };
 }
 
@@ -235,6 +236,51 @@ txt_fc_partida_descuento.change(function () {
 
 });
 
+$(".elimina_partida").click(function () {
+
+    let registro_partida_id = $(this).data('fc_partida_factura_id');
+    let url = get_url("fc_partida","elimina_bd", {});
+    url = url+"&registro_id="+registro_partida_id;
+
+    let ct = $(this).parent().parent().parent();
+    $.ajax({
+
+        url : url,
+        type : 'GET',
+
+        success : function(json) {
+            console.log(json);
+            alert(json.mensaje);
+
+            if(!isNaN(json.error)){
+                alert(url);
+                if(json.error === 1) {
+                    return false;
+                }
+            }
+            ct.hide();
+
+        },
+
+        error : function(xhr, status) {
+            alert('Disculpe, existió un problema');
+            console.log(xhr);
+            console.log(status);
+            return false;
+
+        },
+
+        // código a ejecutar sin importar si la petición falló o no
+        complete : function(xhr, status) {
+            //alert('Petición realizada');
+        }
+
+    });
+    return true;
+
+
+});
+
 function input_txt(name_class, name_input, valor){
     return "<input type='text' class='form-control form-control-sm " + name_class + "' " +
         "name='" + name_input + "' value='" + valor + "'/>";
@@ -304,7 +350,7 @@ btn_alta_partida.click(function () {
     let aplica_predial = selected_producto.data('com_producto_aplica_predial');
 
 
-    if(aplica_predial){
+    if(aplica_predial === 'activo'){
         if(txt_cuenta_predial.val() === ''){
             alert('Agregue una cuenta predial');
             txt_cuenta_predial.focus();
@@ -381,12 +427,10 @@ btn_alta_partida.click(function () {
 
             let tr_data_producto = "<tr>"+td_com_producto_codigo+td_cat_sat_unidad_descripcion+td_cat_sat_obj_imp_descripcion+"</tr>";
             let tr_montos = tr_inputs_montos+"<tr>"+td_fc_partida_sub_total+td_fc_partida_traslados+td_fc_partida_retenciones+td_fc_partida_total+"</tr>";
-            let tr_buttons = "<tr><td colspan='5'>" +
-                "<div class='col-md-12'>" +
-                    "<a role='button' title='Eliminar' href='index.php?seccion=fc_partida&accion=elimina_bd&registro_id="+fc_partida_id+"&session_id="+session_id+"&adm_menu_id="+adm_menu_id+"&seccion_retorno=fc_factura&accion_retorno=modifica&id_retorno="+registro_id+"' class='btn btn-danger col-sm-12'><span class='bi bi-trash'></span>" +
-                    "</a>" +
-                "</div>" +
-                "</td></tr>";
+            let tr_buttons = "<tr class='tr_elimina_partida'>"+
+                "<td colspan='5' class='td_elimina_partida'>"+
+                "<button type='button' class='btn btn-danger col-md-12 elimina_partida' data-fc_partida_factura_id='"+json.registro_obj.fc_partida_descuento+"' value='elimina' name='btn_action_next'>Elimina</button>"+
+        "</td> </tr>";
 
             let table_full = "" +
                 "<form method='post' action='./index.php?seccion=fc_factura&accion=modifica_partida_bd&registro_id="+registro_id+"&adm_menu_id="+adm_menu_id+"&session_id="+session_id+"&registro_partida_id="+fc_partida_id+"'>"+
@@ -456,6 +500,51 @@ btn_alta_partida.click(function () {
                     return false;
                 }
                 modifica_partida_bd(contenedores, data);
+
+
+            });
+
+            $(".elimina_partida").click(function () {
+
+                let registro_partida_id = fc_partida_id;
+                let url = get_url("fc_partida","elimina_bd", {});
+                url = url+"&registro_id="+registro_partida_id;
+
+                let ct = $(this).parent().parent().parent();
+                $.ajax({
+
+                    url : url,
+                    type : 'GET',
+
+                    success : function(json) {
+                        console.log(json);
+                        alert(json.mensaje);
+
+                        if(!isNaN(json.error)){
+                            alert(url);
+                            if(json.error === 1) {
+                                return false;
+                            }
+                        }
+                        ct.hide();
+
+                    },
+
+                    error : function(xhr, status) {
+                        alert('Disculpe, existió un problema');
+                        console.log(xhr);
+                        console.log(status);
+                        return false;
+
+                    },
+
+                    // código a ejecutar sin importar si la petición falló o no
+                    complete : function(xhr, status) {
+                        //alert('Petición realizada');
+                    }
+
+                });
+                return true;
 
 
             });
@@ -576,6 +665,7 @@ txt_descuento.on('input', function () {
     txt_subtotal.val(subtotal);
     txt_total.val(total);
 });
+
 
 function change_moneda(){
 

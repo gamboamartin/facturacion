@@ -100,10 +100,11 @@ class _html_factura{
 
     /**
      *
-     * @param html_controler $html_controler
-     * @param string $key_cantidad
-     * @param string $key_valor_unitario
-     * @param array $partida
+     * Genera los inputs de un producto para su alta
+     * @param html_controler $html_controler Html
+     * @param string $key_cantidad Key de partida
+     * @param string $key_valor_unitario Key de valor unitario
+     * @param array $partida Partida datos
      * @return array|stdClass
      */
     private function inputs_producto(html_controler $html_controler, string $key_cantidad, string $key_valor_unitario,
