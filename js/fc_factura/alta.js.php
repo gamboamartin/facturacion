@@ -94,7 +94,6 @@ cat_sat_forma_pago_id_sl.change(function() {
 
     function change_moneda(){
 
-
             let cat_sat_moneda_id = sl_cat_sat_moneda.val();
             let fecha = txt_fecha.val();
             let url = get_url("com_tipo_cambio","get", {});
@@ -115,7 +114,18 @@ cat_sat_forma_pago_id_sl.change(function() {
             // código a ejecutar si la petición es satisfactoria;
             // la respuesta es pasada como argumento a la función
             success : function(json) {
+
                 console.log(json);
+
+
+                if(!isNaN(json.error)){
+                    alert(url);
+                    alert(json.mensaje);
+                    if(json.error === 1) {
+                        return false;
+                    }
+                }
+
                 sl_com_tipo_cambio.empty();
                 integra_new_option(sl_com_tipo_cambio,'Seleccione un tipo de cambio','-1');
 

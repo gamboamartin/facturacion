@@ -2266,16 +2266,35 @@ class _base_system_fc extends _base_system{
             unset($_POST['btn_action_next']);
         }
 
-        $fc_partida = $this->modelo_partida->registro(registro_id: $_GET['registro_partida_id']);
+        $registro_partida_id = -1;
+        if(!isset($_GET['registro_partida_id'])){
+            if(isset($_POST['registro_partida_id'])){
+                $registro_partida_id = $_POST['registro_partida_id'];
+            }
+            else{
+                $this->link->rollBack();
+                return $this->retorno_error(mensaje: 'Error al no existe registro_partida_id', data: $registro_partida_id,
+                    header:  true, ws: $ws);
+            }
+        }
+        else{
+            $registro_partida_id = $_GET['registro_partida_id'];
+        }
+
+
+
+        $fc_partida = $this->modelo_partida->registro(registro_id: $registro_partida_id);
         if(errores::$error){
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al obtener partida', data: $fc_partida,
                 header:  true, ws: $ws);
         }
 
+        if($this->registro_id === -1){
+            $this->registro_id = $fc_partida[$this->tabla.'_id'];
+        }
 
-
-        $del = $this->modelo_partida->elimina_bd(id: $_GET['registro_partida_id']);
+        $del = $this->modelo_partida->elimina_bd(id: $registro_partida_id);
         if(errores::$error){
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al eliminar partida', data: $del,

@@ -109,9 +109,9 @@
                         <form method="post" action="<?php echo $partida['link_modifica_partida_bd']; ?>">
                             <table class='table table-striped data-partida' style='border: 2px solid'>
                                 <tbody>
-                                    <tr>
-                                        <td colspan='5'>
-                                            <input type="text" class="form-control form-control-sm" name="descripcion" value="<?php echo $partida['fc_partida_descripcion']; ?>" />
+                                    <tr class="tr_fc_partida_descripcion">
+                                        <td colspan='5' class="td_fc_partida_descripcion" data-fc_partida_factura_id="<?php echo $partida['fc_partida_id']; ?>">
+                                            <input type="text" class="form-control form-control-sm fc_partida_descripcion" name="descripcion" value="<?php echo $partida['fc_partida_descripcion']; ?>" />
                                         </td>
                                     </tr>
 
@@ -128,21 +128,22 @@
                                         <td><b>Descuento</b></td>
                                     </tr>
 
-                                    <tr>
-                                        <td>
-                                            <input type="text" class="form-control form-control-sm" name="cantidad" value="<?php echo $partida['fc_partida_cantidad']; ?>" />
+                                    <tr class="tr_data_partida">
+                                        <td class="td_fc_partida_cantidad">
+                                            <input type="text" class="form-control form-control-sm fc_partida_cantidad" name="cantidad" value="<?php echo $partida['fc_partida_cantidad']; ?>" />
                                         </td>
-                                        <td>
-                                            <input type="text" class="form-control form-control-sm" name="valor_unitario" value="<?php echo $partida['fc_partida_valor_unitario']; ?>" />
+                                        <td class="td_fc_partida_valor_unitario">
+                                            <input type="text" class="form-control form-control-sm fc_partida_valor_unitario" name="valor_unitario" value="<?php echo $partida['fc_partida_valor_unitario']; ?>" />
                                         </td>
-                                        <td>
-                                            <input type="text" class="form-control form-control-sm" disabled value="<?php echo $partida['fc_partida_sub_total_base']; ?>" />
+                                        <td class="td_fc_partida_sub_total_base">
+                                            <input type="text" class="form-control form-control-sm fc_partida_sub_total_base" disabled value="<?php echo $partida['fc_partida_sub_total_base']; ?>" />
                                         </td>
-                                        <td>
-                                            <input type="text" class="form-control form-control-sm" name="descuento" value="<?php echo $partida['fc_partida_descuento']; ?>" />
+                                        <td class="td_fc_partida_descuento">
+                                            <input type="text" class="form-control form-control-sm fc_partida_descuento" name="descuento" value="<?php echo $partida['fc_partida_descuento']; ?>" />
                                         </td>
 
                                     </tr>
+
                                     <tr>
                                         <td><b>Sub Total: </b><?php echo $partida['fc_partida_sub_total']; ?></td>
                                         <td><b>Traslados: </b><?php echo $partida['fc_partida_total_traslados']; ?></td>
@@ -151,10 +152,8 @@
                                     </tr>
                                 <tr>
                                     <td colspan="5">
-                                        <div class="col-md-6">
-                                            <button type="submit" class="btn btn-success col-md-12" value="modifica" name="btn_action_next">Modifica</button>
-                                        </div>
-                                        <div class="col-md-6">
+
+                                        <div class="col-md-12">
                                             <?php echo $partida['elimina_bd']; ?>
                                         </div>
                                     </td>

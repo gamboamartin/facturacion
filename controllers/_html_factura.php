@@ -99,6 +99,7 @@ class _html_factura{
     }
 
     /**
+     *
      * @param html_controler $html_controler
      * @param string $key_cantidad
      * @param string $key_valor_unitario
@@ -106,7 +107,8 @@ class _html_factura{
      * @return array|stdClass
      */
     private function inputs_producto(html_controler $html_controler, string $key_cantidad, string $key_valor_unitario,
-                                     array $partida){
+                                     array $partida): array|stdClass
+    {
         $input_cantidad = $html_controler->input_monto(cols: 12, row_upd: new stdClass(), value_vacio: false,
             con_label: false, name: 'cantidad', place_holder: 'Cantidad', value: $partida[$key_cantidad]);
         if(errores::$error){
