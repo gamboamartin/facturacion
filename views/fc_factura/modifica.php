@@ -38,7 +38,7 @@
                     <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
                         <h2>Partidas</h2>
                     </div>
-                    <form method="post" action="<?php echo $controlador->link_fc_partida_alta_bd; ?>" class="form-additional" id="frm-partida">
+                    <form method="post" action="#" class="form-additional" id="frm-partida">
 
                         <?php echo $controlador->inputs->partidas->com_producto_id; ?>
                         <?php echo $controlador->inputs->partidas->unidad; ?>
@@ -55,7 +55,7 @@
 
                         <div class="control-group btn-alta">
                             <div class="controls">
-                                <button type="submit" class="btn btn-success" value="modifica" name="btn_action_next" id="btn-alta-partida">Alta</button><br>
+                                <button type="button" class="btn btn-success" value="modifica" name="btn_action_next" id="btn-alta-partida">Alta</button><br>
                             </div>
                         </div>
 
@@ -77,7 +77,7 @@
                     </div>
                     <div class="table table-responsive">
 
-                        <?php   foreach ($controlador->partidas->registros as $partida){ ?>
+                        <?php /*   foreach ($controlador->partidas->registros as $partida){ ?>
                         <form method="post" action="<?php echo $partida['link_modifica_partida_bd']; ?>">
 
                         <table id="fc_partida" class="table table-striped" style="font-size: 12px;">
@@ -97,12 +97,75 @@
                             </div>
 
                         </form>
-                        <?php } ?>
+                        <?php } */ ?>
 
 
                     </div>
 
                     <div class="table table-responsive" id="row-partida">
+
+                        <?php    foreach ($controlador->partidas->registros as $partida){ ?>
+
+                        <form method="post" action="<?php echo $partida['link_modifica_partida_bd']; ?>">
+                            <table class='table table-striped data-partida' style='border: 2px solid'>
+                                <tbody>
+                                    <tr>
+                                        <td colspan='5'>
+                                            <input type="text" class="form-control form-control-sm" name="descripcion" value="<?php echo $partida['fc_partida_descripcion']; ?>" />
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td><b>CVE SAT: </b><td><?php echo $partida['com_producto_codigo']; ?></td>
+                                        <td><b>Unidad: </b><?php echo $partida['cat_sat_unidad_descripcion']; ?></td>
+                                        <td><b>Obj Imp: </b><?php echo $partida['cat_sat_obj_imp_descripcion']; ?></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td><b>Cantidad</b></td>
+                                        <td><b>Valor Unitario</b></td>
+                                        <td><b>Importe</b></td>
+                                        <td><b>Descuento</b></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" name="cantidad" value="<?php echo $partida['fc_partida_cantidad']; ?>" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" name="valor_unitario" value="<?php echo $partida['fc_partida_valor_unitario']; ?>" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" disabled value="<?php echo $partida['fc_partida_sub_total_base']; ?>" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" name="descuento" value="<?php echo $partida['fc_partida_descuento']; ?>" />
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td><b>Sub Total: </b><?php echo $partida['fc_partida_sub_total']; ?></td>
+                                        <td><b>Traslados: </b><?php echo $partida['fc_partida_total_traslados']; ?></td>
+                                        <td><b>Retenciones: </b><?php echo $partida['fc_partida_total_retenciones']; ?></td>
+                                        <td><b>Total: </b><?php echo $partida['fc_partida_total']; ?></td>
+                                    </tr>
+                                <tr>
+                                    <td colspan="5">
+                                        <div class="col-md-6">
+                                            <button type="submit" class="btn btn-success col-md-12" value="modifica" name="btn_action_next">Modifica</button>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <?php echo $partida['elimina_bd']; ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                        </form>
+
+
+                        <?php }  ?>
 
                     </div>
             </div>

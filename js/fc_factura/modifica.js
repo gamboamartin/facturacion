@@ -1,3 +1,5 @@
+let session_id = getParameterByName('session_id');
+let adm_menu_id = getParameterByName('adm_menu_id');
 let sl_fc_csd = $("#fc_csd_id");
 let sl_cat_sat_forma_pago = $("#cat_sat_forma_pago_id");
 let sl_cat_sat_metodo_pago = $("#cat_sat_metodo_pago_id");
@@ -50,7 +52,7 @@ frm_partida.submit(function () {
 
 });
 
-/*
+
 
 btn_alta_partida.click(function () {
 
@@ -110,7 +112,9 @@ btn_alta_partida.click(function () {
         // código a ejecutar si la petición es satisfactoria;
         // la respuesta es pasada como argumento a la función
         success : function(json) {
+            console.log(json);
             alert(json.mensaje);
+
             sl_com_producto.val(-1);
             sl_com_producto.selectpicker('refresh');
             txt_descripcion.val('');
@@ -118,34 +122,60 @@ btn_alta_partida.click(function () {
             txt_valor_unitario.val(0);
             txt_subtotal.val(0);
             txt_total.val(0);
-            sl_cat_sat_conf_imps_id.val(-1);
-            sl_cat_sat_conf_imps_id.selectpicker('refresh');
 
-            console.log(json);
+            if(!isNaN(json.error)){
+                alert(url);
+                if(json.error === 1) {
+                    return false;
+                }
+            }
+
+
             let fc_partida_id = json.registro_id;
 
 
-            let td_fc_partida_descripcion = "<tr><td colspan='5'><b>"+json.registro_obj.fc_partida_descripcion+"</b></td></tr>";
+            let td_fc_partida_descripcion = "<tr><td colspan='5'><input type='text' class='form-control form-control-sm' name='descripcion' value='"+json.registro_obj.fc_partida_descripcion+"' /> </td></tr>";
             let td_com_producto_codigo = "<td><b>CVE SAT: </b><td>"+json.registro_obj.com_producto_codigo+"</td>";
             let td_cat_sat_unidad_descripcion = "<td><b>Unidad: </b>"+json.registro_obj.cat_sat_unidad_descripcion+"</td>";
             let td_cat_sat_obj_imp_descripcion = "<td><b>Obj Imp: </b>"+json.registro_obj.cat_sat_obj_imp_descripcion+"</td>";
-            let td_fc_partida_cantidad = "<tr><td><b>Cant: </b>"+json.registro_obj.fc_partida_cantidad+"</td>";
-            let td_fc_partida_valor_unitario = "<td><b>Valor Unitario: </b>"+json.registro_obj.fc_partida_valor_unitario+"</td>";
-            let td_fc_partida_importe = "<td><b>Importe: </b>"+json.registro_obj.fc_partida_sub_total_base+"</td>";
-            let td_fc_partida_descuento = "<td><b>Descuento: </b>"+json.registro_obj.fc_partida_descuento+"</td></tr>";
+            let td_fc_partida_cantidad = "<td><input type='text' class='form-control form-control-sm' name='cantidad' value='"+json.registro_obj.fc_partida_cantidad+"' /></td>";
+            let td_fc_partida_valor_unitario = "<td><input type='text' class='form-control form-control-sm' name='valor_unitario' value='"+json.registro_obj.fc_partida_valor_unitario+"' /></td>";
+            let td_fc_partida_importe = "<td><input type='text' class='form-control form-control-sm'  value='"+json.registro_obj.fc_partida_sub_total_base+"' /></td>";
+            let td_fc_partida_descuento = "<td><input type='text' class='form-control form-control-sm' name='descuento' value='"+json.registro_obj.fc_partida_descuento+"' /></tr>";
             let td_fc_partida_sub_total = "<tr><td><b>Sub Total: </b>"+json.registro_obj.fc_partida_sub_total+"</td>";
             let td_fc_partida_traslados = "<td><b>Traslados: </b>"+json.registro_obj.fc_partida_total_traslados+"</td>";
             let td_fc_partida_retenciones = "<td><b>Retenciones: </b>"+json.registro_obj.fc_partida_total_retenciones+"</td>";
-            let td_fc_partida_total = "<td><b>Total: </b>"+json.registro_obj.fc_partida_total+"</td></tr>";
+            let td_fc_partida_total = "<td><b>Total: </b>"+json.registro_obj.fc_partida_total+"</td>";
+
+            let tr_tags = "<tr>\n" +
+                "                                        <td><b>Cantidad</b></td>\n" +
+                "                                        <td><b>Valor Unitario</b></td>\n" +
+                "                                        <td><b>Importe</b></td>\n" +
+                "                                        <td><b>Descuento</b></td>\n" +
+                "                                    </tr>"
 
 
             let tr_data_producto = "<tr>"+td_com_producto_codigo+td_cat_sat_unidad_descripcion+td_cat_sat_obj_imp_descripcion+"</tr>";
             let tr_montos = "<tr>"+td_fc_partida_cantidad+td_fc_partida_valor_unitario+td_fc_partida_importe+td_fc_partida_descuento+td_fc_partida_sub_total+td_fc_partida_traslados+td_fc_partida_retenciones+td_fc_partida_total+"</tr>";
-            let tr_buttons = "<tr><td colspan='5'><a role='button' title='Eliminar' href='index.php?seccion=fc_partida&accion=elimina_bd&registro_id="+fc_partida_id+"&session_id="+session_id+"&adm_menu_id="+adm_menu_id+"&seccion_retorno=fc_factura&accion_retorno=modifica&id_retorno="+registro_id+"' class='btn btn-danger col-sm-12'><span class='bi bi-trash'></span></a></td></tr>";
+            let tr_buttons = "<tr><td colspan='5'>" +
+                "<div class=\"col-md-6\">\n" +
+                "                                            <button type=\"submit\" class=\"btn btn-success col-md-12\" value=\"modifica\" name=\"btn_action_next\">Modifica</button>\n" +
+                "                                        </div>"+
+                "<div class='col-md-6'>" +
+                    "<a role='button' title='Eliminar' href='index.php?seccion=fc_partida&accion=elimina_bd&registro_id="+fc_partida_id+"&session_id="+session_id+"&adm_menu_id="+adm_menu_id+"&seccion_retorno=fc_factura&accion_retorno=modifica&id_retorno="+registro_id+"' class='btn btn-danger col-sm-12'><span class='bi bi-trash'></span>" +
+                    "</a>" +
+                "</div>" +
+                "</td></tr>";
 
-            let table_full = "<table class='table table-striped data-partida' style='border: 2px solid'><tbody>"+td_fc_partida_descripcion+tr_data_producto+tr_montos+tr_buttons+"</tbody></table>";
+            let table_full = "" +
+                "<form method='post' action='./index.php?seccion=fc_factura&accion=modifica_partida_bd&registro_id="+registro_id+"&adm_menu_id="+adm_menu_id+"&session_id="+session_id+"&registro_partida_id="+fc_partida_id+"'>"+
+                "<table class='table table-striped data-partida' style='border: 2px solid'><tbody>"+
+                td_fc_partida_descripcion+tr_data_producto+tr_tags+tr_montos+tr_buttons+
+                "</tbody>" +
+                "</table>"+
+                "</form>";
             console.log(json.registro_obj);
-            $("#row-partida").append(table_full);
+            $("#row-partida").prepend(table_full);
 
         },
 
@@ -153,6 +183,7 @@ btn_alta_partida.click(function () {
         // son pasados como argumentos a la función
         // el objeto de la petición en crudo y código de estatus de la petición
         error : function(xhr, status) {
+            alert('x');
             alert('Disculpe, existió un problema');
             console.log(xhr);
             console.log(status);
@@ -163,8 +194,7 @@ btn_alta_partida.click(function () {
             txt_valor_unitario.val(0);
             txt_subtotal.val(0);
             txt_total.val(0);
-            sl_cat_sat_conf_imps_id.val(-1);
-            sl_cat_sat_conf_imps_id.selectpicker('refresh');
+
         },
 
         // código a ejecutar sin importar si la petición falló o no
@@ -173,7 +203,7 @@ btn_alta_partida.click(function () {
         }
     });
 
-});*/
+});
 
 sl_com_sucursal.change(function () {
     let selected = $(this).find('option:selected');

@@ -351,6 +351,7 @@ class controlador_fc_factura extends _base_system_fc {
 
     public function modifica_partida_bd(bool $header, bool $ws = false): array|stdClass
     {
+
         $this->modelo_partida = new fc_partida(link: $this->link);
         $this->modelo_entidad = new fc_factura(link: $this->link);
 

@@ -12,6 +12,7 @@ use config\generales;
 use gamboamartin\errores\errores;
 use JsonException;
 use stdClass;
+use Throwable;
 
 final class controlador_adm_session extends \gamboamartin\controllers\controlador_adm_session {
     public bool $existe_msj = false;
@@ -32,8 +33,18 @@ final class controlador_adm_session extends \gamboamartin\controllers\controlado
         $this->include_menu = (new generales())->path_base;
         $this->include_menu .= 'templates/inicio.php';
 
+        if($ws){
+            $error = $this->errores->error(mensaje: 'Acceso denegado',data: array());
+            header('Content-Type: application/json');
+            try {
+                echo json_encode($error, JSON_THROW_ON_ERROR);
+            }
+            catch (Throwable $e){
+                echo print_r($e, true);
+            }
+            exit;
+        }
         return array();
-
     }
 
     /**

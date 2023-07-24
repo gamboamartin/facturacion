@@ -94,9 +94,11 @@ cat_sat_forma_pago_id_sl.change(function() {
 
     function change_moneda(){
 
+
             let cat_sat_moneda_id = sl_cat_sat_moneda.val();
             let fecha = txt_fecha.val();
             let url = get_url("com_tipo_cambio","get", {});
+
             $.ajax({
             // la URL para la petición
             url : url,
@@ -131,6 +133,7 @@ cat_sat_forma_pago_id_sl.change(function() {
             // son pasados como argumentos a la función
             // el objeto de la petición en crudo y código de estatus de la petición
             error : function(xhr, status) {
+
             alert('Disculpe, existió un problema');
             console.log(xhr);
             console.log(status);

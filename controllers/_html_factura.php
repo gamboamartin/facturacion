@@ -98,6 +98,13 @@ class _html_factura{
                     </tr>";
     }
 
+    /**
+     * @param html_controler $html_controler
+     * @param string $key_cantidad
+     * @param string $key_valor_unitario
+     * @param array $partida
+     * @return array|stdClass
+     */
     private function inputs_producto(html_controler $html_controler, string $key_cantidad, string $key_valor_unitario,
                                      array $partida){
         $input_cantidad = $html_controler->input_monto(cols: 12, row_upd: new stdClass(), value_vacio: false,
@@ -143,6 +150,12 @@ class _html_factura{
     }
 
 
+    /**
+     * Integra un key del catalogo de productos para frontend
+     * @param string $name_entidad_partida Nombre de la entidad base
+     * @return stdClass|array
+     * @version 10.168.6
+     */
     private function keys_producto(string $name_entidad_partida): stdClass|array
     {
         $name_entidad_partida = trim($name_entidad_partida);
