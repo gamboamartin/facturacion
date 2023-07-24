@@ -2282,12 +2282,40 @@ class _base_system_fc extends _base_system{
         }
 
 
-
         $fc_partida = $this->modelo_partida->registro(registro_id: $registro_partida_id);
         if(errores::$error){
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al obtener partida', data: $fc_partida,
                 header:  true, ws: $ws);
+        }
+
+        $existe_cuenta_predial = $this->modelo_predial->existe(
+            filtro: array($this->modelo_partida->key_filtro_id=>$registro_partida_id));
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al validar si existe predial', data: $existe_cuenta_predial,
+                header:  true, ws: $ws);
+        }
+        $cuenta_predial = '';
+        if($existe_cuenta_predial){
+            $r_fc_cuenta_predial = $this->modelo_predial->filtro_and(columnas_en_bruto: true,
+                filtro: array($this->modelo_partida->key_filtro_id=>$registro_partida_id));
+            if(errores::$error){
+                $this->link->rollBack();
+                return $this->retorno_error(mensaje: 'Error al obtener predial', data: $r_fc_cuenta_predial,
+                    header:  true, ws: $ws);
+            }
+            if($r_fc_cuenta_predial->n_registros > 1){
+                $this->link->rollBack();
+                return $this->retorno_error(mensaje: 'Error existe mas de un predial', data: $r_fc_cuenta_predial,
+                    header:  true, ws: $ws);
+            }
+            if($r_fc_cuenta_predial->n_registros === 0){
+                $this->link->rollBack();
+                return $this->retorno_error(mensaje: 'Error no existe  predial', data: $r_fc_cuenta_predial,
+                    header:  true, ws: $ws);
+            }
+            $cuenta_predial = $r_fc_cuenta_predial->registros[0]['descripcion'];
         }
 
         if($this->registro_id === -1){
@@ -2306,6 +2334,9 @@ class _base_system_fc extends _base_system{
         $fc_partida_ins[$this->modelo_entidad->key_id] = $this->registro_id;
         $fc_partida_ins['com_producto_id'] = $fc_partida['com_producto_id'];
         $fc_partida_ins['cat_sat_conf_imps_id'] = $fc_partida['com_producto_cat_sat_conf_imps_id'];
+        if($existe_cuenta_predial) {
+            $fc_partida_ins['cuenta_predial'] = $cuenta_predial;
+        }
 
         $alta = $this->modelo_partida->alta_registro(registro: $fc_partida_ins);
         if(errores::$error){

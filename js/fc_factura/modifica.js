@@ -263,6 +263,7 @@ btn_alta_partida.click(function () {
     let com_producto_id = sl_com_producto.val();
     let descripcion = txt_descripcion.val();
     let descuento = txt_descuento.val();
+    let cuenta_predial = txt_cuenta_predial.val();
     let cat_sat_conf_imps_id = sl_cat_sat_conf_imps_id.val();
     let registro_id = hidden_registro_id.val();
 
@@ -295,6 +296,22 @@ btn_alta_partida.click(function () {
         descuento = 0;
     }
 
+    let selected_producto = sl_com_producto.find('option:selected');
+    let unidad = selected_producto.data(`cat_sat_unidad_descripcion`);
+    let impuesto = selected_producto.data(`cat_sat_obj_imp_descripcion`);
+    let tipo_factor = selected_producto.data(`cat_sat_tipo_factor_descripcion`);
+    let factor = selected_producto.data(`cat_sat_factor_factor`);
+    let aplica_predial = selected_producto.data('com_producto_aplica_predial');
+
+
+    if(aplica_predial){
+        if(txt_cuenta_predial.val() === ''){
+            alert('Agregue una cuenta predial');
+            txt_cuenta_predial.focus();
+            return false;
+        }
+    }
+
 
     let url = get_url("fc_partida","alta_bd", {});
     $.ajax({
@@ -303,7 +320,8 @@ btn_alta_partida.click(function () {
         // la información a enviar
         // (también es posible utilizar una cadena de datos)
         data : {com_producto_id: com_producto_id, descripcion: descripcion,cantidad: cantidad,
-            valor_unitario: valor_unitario, descuento: descuento,cat_sat_conf_imps_id:cat_sat_conf_imps_id,fc_factura_id:registro_id } ,
+            valor_unitario: valor_unitario, descuento: descuento,cat_sat_conf_imps_id:cat_sat_conf_imps_id,
+            fc_factura_id:registro_id,cuenta_predial: cuenta_predial } ,
 
         // especifica si será una petición POST o GET
         type : 'POST',
