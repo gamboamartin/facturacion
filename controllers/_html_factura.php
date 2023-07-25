@@ -268,8 +268,18 @@ class _html_factura{
             </tr>";
     }
 
+    /**
+     * Valida los elementos de un tr para partida
+     * @param string $key_descuento
+     * @param string $key_importe
+     * @param string $input_cantidad
+     * @param string $input_valor_unitario
+     * @param array $partida
+     * @return array|true
+     */
     private function valida_tr(string $key_descuento, string $key_importe, string $input_cantidad,
-                               string $input_valor_unitario, array $partida){
+                               string $input_valor_unitario, array $partida): bool|array
+    {
         $key_descuento = trim($key_descuento);
         if($key_descuento === ''){
             return $this->error->error(mensaje: 'Error key_descuento esta vacio', data: $key_descuento);

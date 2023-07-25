@@ -1,14 +1,13 @@
 let session_id = getParameterByName('session_id');
 let adm_menu_id = getParameterByName('adm_menu_id');
 
-let sl_fc_csd = $("#fc_csd_id");
+
 let sl_cat_sat_forma_pago = $("#cat_sat_forma_pago_id");
 let sl_cat_sat_metodo_pago = $("#cat_sat_metodo_pago_id");
 let sl_cat_sat_moneda = $("#cat_sat_moneda_id");
 let sl_cat_sat_uso_cfdi = $("#cat_sat_uso_cfdi_id");
 let sl_com_sucursal = $("#com_sucursal_id");
 
-let txt_serie = $("#serie");
 
 let sl_com_producto = $("#com_producto_id");
 let sl_com_tipo_cambio = $("#com_tipo_cambio_id");
@@ -25,41 +24,29 @@ let txt_subtotal = $(".partidas #subtotal");
 let txt_total = $(".partidas #total");
 let txt_cuenta_predial = $("#cuenta_predial");
 let txt_fecha = $("#fecha");
-let frm_partida = $("#frm-partida");
 let btn_alta_partida = $("#btn-alta-partida");
 let hidden_registro_id = $("input[name='registro_id']");
 
-
-sl_fc_csd.change(function () {
+sl_com_sucursal.change(function () {
     let selected = $(this).find('option:selected');
-    let serie = selected.data(`fc_csd_serie`);
+    let cat_sat_forma_pago = selected.data(`com_cliente_cat_sat_forma_pago_id`);
+    let cat_sat_metodo_pago = selected.data(`com_cliente_cat_sat_metodo_pago_id`);
+    let cat_sat_moneda = selected.data(`com_cliente_cat_sat_moneda_id`);
+    let cat_sat_uso_cfdi = selected.data(`com_cliente_cat_sat_uso_cfdi_id`);
 
-    txt_serie.val(serie);
+    sl_cat_sat_forma_pago.val(cat_sat_forma_pago);
+    sl_cat_sat_forma_pago.selectpicker('refresh');
+    sl_cat_sat_metodo_pago.val(cat_sat_metodo_pago);
+    sl_cat_sat_metodo_pago.selectpicker('refresh');
+    sl_cat_sat_moneda.val(cat_sat_moneda);
+    sl_cat_sat_moneda.selectpicker('refresh');
+    sl_cat_sat_uso_cfdi.val(cat_sat_uso_cfdi);
+    sl_cat_sat_uso_cfdi.selectpicker('refresh');
+    change_moneda();
 });
 
+ejecuciones_partida('fc_factura','fc_partida');
 
-
-
-function input_txt(name_class, name_input, valor){
-    return "<input type='text' class='form-control form-control-sm " + name_class + "' " +
-        "name='" + name_input + "' value='" + valor + "'/>";
-}
-
-function td_input(name_class, name_input, valor){
-    let input_data = input_txt(name_class,name_input,valor);
-    return "<td class='td_" + name_class + "'>" + input_data + "</td>";
-}
-
-function tr_tags_partida(){
-
-    return "<tr>" +
-        "<td><b>Cantidad</b></td>" +
-        "<td><b>Valor Unitario</b></td>" +
-        "<td><b>Importe</b></td>" +
-        "<td><b>Descuento</b></td>" +
-        "</tr>";
-
-}
 
 btn_alta_partida.click(function () {
 
@@ -231,25 +218,6 @@ btn_alta_partida.click(function () {
 
 });
 
-ejecuciones_partida('fc_factura','fc_partida');
-
-sl_com_sucursal.change(function () {
-    let selected = $(this).find('option:selected');
-    let cat_sat_forma_pago = selected.data(`com_cliente_cat_sat_forma_pago_id`);
-    let cat_sat_metodo_pago = selected.data(`com_cliente_cat_sat_metodo_pago_id`);
-    let cat_sat_moneda = selected.data(`com_cliente_cat_sat_moneda_id`);
-    let cat_sat_uso_cfdi = selected.data(`com_cliente_cat_sat_uso_cfdi_id`);
-
-    sl_cat_sat_forma_pago.val(cat_sat_forma_pago);
-    sl_cat_sat_forma_pago.selectpicker('refresh');
-    sl_cat_sat_metodo_pago.val(cat_sat_metodo_pago);
-    sl_cat_sat_metodo_pago.selectpicker('refresh');
-    sl_cat_sat_moneda.val(cat_sat_moneda);
-    sl_cat_sat_moneda.selectpicker('refresh');
-    sl_cat_sat_uso_cfdi.val(cat_sat_uso_cfdi);
-    sl_cat_sat_uso_cfdi.selectpicker('refresh');
-    change_moneda();
-});
 
 
 sl_cat_sat_moneda.change(function () {

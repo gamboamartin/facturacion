@@ -1,7 +1,7 @@
 let session_id = getParameterByName('session_id');
 let adm_menu_id = getParameterByName('adm_menu_id');
 
-let sl_fc_csd = $("#fc_csd_id");
+
 let sl_cat_sat_forma_pago = $("#cat_sat_forma_pago_id");
 let sl_cat_sat_metodo_pago = $("#cat_sat_metodo_pago_id");
 let sl_cat_sat_moneda = $("#cat_sat_moneda_id");
@@ -10,7 +10,6 @@ let sl_com_sucursal = $("#com_sucursal_id");
 let txt_fecha = $("#fecha");
 let sl_com_tipo_cambio = $("#com_tipo_cambio_id");
 
-let txt_serie = $("#serie");
 
 let sl_com_producto = $("#com_producto_id");
 let sl_cat_sat_conf_imps_id = $("#cat_sat_conf_imps_id");
@@ -27,29 +26,13 @@ let txt_total = $(".partidas #total");
 let txt_cuenta_predial = $("#cuenta_predial");
 let hidden_registro_id = $("input[name='registro_id']");
 
-sl_fc_csd.change(function () {
-    let selected = $(this).find('option:selected');
-    let serie = selected.data(`fc_csd_serie`);
 
-    txt_serie.val(serie);
-});
 
 sl_com_sucursal.change(function () {
-    /*let selected = $(this).find('option:selected');
-    let cat_sat_forma_pago = selected.data(`com_cliente_cat_sat_forma_pago_id`);
-    let cat_sat_metodo_pago = selected.data(`com_cliente_cat_sat_metodo_pago_id`);
-    let cat_sat_moneda = selected.data(`com_cliente_cat_sat_moneda_id`);
-    let cat_sat_uso_cfdi = selected.data(`com_cliente_cat_sat_uso_cfdi_id`);
-
-    sl_cat_sat_forma_pago.val(cat_sat_forma_pago);
-    sl_cat_sat_forma_pago.selectpicker('refresh');
-    sl_cat_sat_metodo_pago.val(cat_sat_metodo_pago);
-    sl_cat_sat_metodo_pago.selectpicker('refresh');
-    sl_cat_sat_moneda.val(cat_sat_moneda);
-    sl_cat_sat_moneda.selectpicker('refresh');
-    sl_cat_sat_uso_cfdi.val(cat_sat_uso_cfdi);
-    sl_cat_sat_uso_cfdi.selectpicker('refresh');*/
+    change_moneda();
 });
+
+ejecuciones_partida('fc_nota_credito','fc_partida_nc');
 
 sl_com_producto.change(function () {
     let selected = $(this).find('option:selected');
@@ -172,8 +155,4 @@ function change_moneda(){
 
 }
 
-$(".elimina_partida").click(function () {
-    elimina_partida_bd($(this),'fc_partida_nc');
-});
 
-ejecuciones_partida('fc_nota_credito','fc_partida_nc');

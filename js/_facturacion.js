@@ -144,6 +144,11 @@ function init_data(data){
     return data;
 }
 
+function input_txt(name_class, name_input, valor){
+    return "<input type='text' class='form-control form-control-sm " + name_class + "' " +
+        "name='" + name_input + "' value='" + valor + "'/>";
+}
+
 function modifica_partida_bd(contenedores, data, entidad_factura){
 
     let url = get_url(entidad_factura,"modifica_partida_bd", {});
@@ -165,7 +170,10 @@ function modifica_partida_bd(contenedores, data, entidad_factura){
                 }
             }
             registro_partida_id = json.registro_id;
+
+            contenedores.td_elimina_partida.children('.elimina_partida').data('fc_partida_factura_id', registro_partida_id);
             contenedores.td_fc_partida_descripcion.data('fc_partida_factura_id', registro_partida_id);
+
             return registro_partida_id;
 
         },
@@ -187,6 +195,11 @@ function modifica_partida_bd(contenedores, data, entidad_factura){
     return true;
 }
 
+function td_input(name_class, name_input, valor){
+    let input_data = input_txt(name_class,name_input,valor);
+    return "<td class='td_" + name_class + "'>" + input_data + "</td>";
+}
+
 function tds(contenedor){
     let cte_formulario = contenedor.parent().parent().parent();
     let td_fc_partida_cantidad = cte_formulario.children(".tr_data_partida").children(".td_fc_partida_cantidad");
@@ -200,6 +213,17 @@ function tds(contenedor){
         td_fc_partida_valor_unitario: td_fc_partida_valor_unitario, td_fc_partida_descuento: td_fc_partida_descuento,
         td_fc_partida_descripcion: td_fc_partida_descripcion,td_elimina_partida: td_elimina_partida
     };
+}
+
+function tr_tags_partida(){
+
+    return "<tr>" +
+        "<td><b>Cantidad</b></td>" +
+        "<td><b>Valor Unitario</b></td>" +
+        "<td><b>Importe</b></td>" +
+        "<td><b>Descuento</b></td>" +
+        "</tr>";
+
 }
 
 
@@ -224,3 +248,12 @@ function valores_partida(contenedor){
 
     return data;
 }
+
+window.onload = function() {
+    $("#fc_csd_id").change(function () {
+        let selected = $(this).find('option:selected');
+        let serie = selected.data(`fc_csd_serie`);
+
+        $("#serie").val(serie);
+    });
+};
