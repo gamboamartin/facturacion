@@ -113,6 +113,41 @@ class _html_facturaTest extends test {
         errores::$error = false;
     }
 
+    public function test_tr_producto(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _html_factura();
+        $html = new liberator($html);
+
+
+        $input_cantidad = 'c';
+        $input_valor_unitario = 'd';
+        $key_descuento = 'a';
+        $key_importe = 'b';
+        $partida = array();
+        $partida['cat_sat_producto_codigo'] = 'z';
+        $partida['com_producto_codigo'] = 'y';
+        $partida['cat_sat_unidad_descripcion'] = 'x';
+        $partida['b'] = 'l';
+        $partida['a'] = 'm';
+        $partida['cat_sat_obj_imp_descripcion'] = 'n';
+        $partida['elimina_bd'] = 'd';
+        $resultado = $html->tr_producto($input_cantidad, $input_valor_unitario, $key_descuento, $key_importe, $partida);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertStringContainsStringIgnoringCase("<td>z</td>",$resultado);
+        $this->assertStringContainsStringIgnoringCase("<td>y</td>",$resultado);
+        $this->assertStringContainsStringIgnoringCase("<td>n</td>",$resultado);
+        errores::$error = false;
+    }
+
 
 
 }

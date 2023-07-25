@@ -1,7 +1,5 @@
 <?php /** @var  \gamboamartin\facturacion\controllers\controlador_fc_factura $controlador  controlador en ejecucion */ ?>
 <?php use config\views; ?>
-
-
 <?php echo $controlador->inputs->registro_id; ?>
 <main class="main section-color-primary">
     <div class="container">
@@ -180,10 +178,10 @@
         </div>
 
     </div>
-
-
-
 </main>
+
+<script src="<?php echo (new \config\generales())->url_base."js/_facturacion.js" ?>"></script>
+
 
 
 

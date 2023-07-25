@@ -1,5 +1,6 @@
 let session_id = getParameterByName('session_id');
 let adm_menu_id = getParameterByName('adm_menu_id');
+
 let sl_fc_csd = $("#fc_csd_id");
 let sl_cat_sat_forma_pago = $("#cat_sat_forma_pago_id");
 let sl_cat_sat_metodo_pago = $("#cat_sat_metodo_pago_id");
@@ -39,22 +40,6 @@ sl_fc_csd.change(function () {
     txt_serie.val(serie);
 });
 
-frm_partida.submit(function () {
-    let cantidad = txt_cantidad.val();
-    let valor_unitario = txt_valor_unitario.val();
-    if(cantidad <=0.0){
-        alert('La cantidad debe ser mayor a 0');
-        txt_cantidad.focus();
-        return false;
-    }
-    if(valor_unitario <=0.0){
-        alert('La valor unitario debe ser mayor a 0');
-        valor_unitario.focus();
-        return false;
-    }
-
-
-});
 
 function modifica_partida_bd(contenedores, data){
 
@@ -185,8 +170,6 @@ txt_fc_partida_descripcion.change(function () {
     }
     modifica_partida_bd(contenedores, data);
 
-
-
 });
 
 txt_fc_partida_cantidad.change(function () {
@@ -238,46 +221,7 @@ txt_fc_partida_descuento.change(function () {
 
 $(".elimina_partida").click(function () {
 
-    let registro_partida_id = $(this).data('fc_partida_factura_id');
-    let url = get_url("fc_partida","elimina_bd", {});
-    url = url+"&registro_id="+registro_partida_id;
-
-    let ct = $(this).parent().parent().parent();
-    $.ajax({
-
-        url : url,
-        type : 'GET',
-
-        success : function(json) {
-            console.log(json);
-            alert(json.mensaje);
-
-            if(!isNaN(json.error)){
-                alert(url);
-                if(json.error === 1) {
-                    return false;
-                }
-            }
-            ct.hide();
-
-        },
-
-        error : function(xhr, status) {
-            alert('Disculpe, existió un problema');
-            console.log(xhr);
-            console.log(status);
-            return false;
-
-        },
-
-        // código a ejecutar sin importar si la petición falló o no
-        complete : function(xhr, status) {
-            //alert('Petición realizada');
-        }
-
-    });
-    return true;
-
+    elimina_partida_bd($(this),'fc_partida');
 
 });
 
@@ -429,7 +373,7 @@ btn_alta_partida.click(function () {
             let tr_montos = tr_inputs_montos+"<tr>"+td_fc_partida_sub_total+td_fc_partida_traslados+td_fc_partida_retenciones+td_fc_partida_total+"</tr>";
             let tr_buttons = "<tr class='tr_elimina_partida'>"+
                 "<td colspan='5' class='td_elimina_partida'>"+
-                "<button type='button' class='btn btn-danger col-md-12 elimina_partida' data-fc_partida_factura_id='"+json.registro_obj.fc_partida_descuento+"' value='elimina' name='btn_action_next'>Elimina</button>"+
+                "<button type='button' class='btn btn-danger col-md-12 elimina_partida' data-fc_partida_factura_id='"+json.registro_obj.fc_partida_id+"' value='elimina' name='btn_action_next'>Elimina</button>"+
         "</td> </tr>";
 
             let table_full = "" +
@@ -501,54 +445,12 @@ btn_alta_partida.click(function () {
                 }
                 modifica_partida_bd(contenedores, data);
 
-
             });
 
             $(".elimina_partida").click(function () {
-
-                let registro_partida_id = fc_partida_id;
-                let url = get_url("fc_partida","elimina_bd", {});
-                url = url+"&registro_id="+registro_partida_id;
-
-                let ct = $(this).parent().parent().parent();
-                $.ajax({
-
-                    url : url,
-                    type : 'GET',
-
-                    success : function(json) {
-                        console.log(json);
-                        alert(json.mensaje);
-
-                        if(!isNaN(json.error)){
-                            alert(url);
-                            if(json.error === 1) {
-                                return false;
-                            }
-                        }
-                        ct.hide();
-
-                    },
-
-                    error : function(xhr, status) {
-                        alert('Disculpe, existió un problema');
-                        console.log(xhr);
-                        console.log(status);
-                        return false;
-
-                    },
-
-                    // código a ejecutar sin importar si la petición falló o no
-                    complete : function(xhr, status) {
-                        //alert('Petición realizada');
-                    }
-
-                });
-                return true;
-
+                elimina_partida_bd($(this),'fc_partida');
 
             });
-
 
         },
 

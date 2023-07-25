@@ -50,7 +50,8 @@ class _html_factura{
      * @param array $partida Registro de tipo partida
      * @return string|array
      */
-    final public function data_producto(html_controler $html_controler, PDO $link, string $name_entidad_partida, array $partida): string|array
+    final public function data_producto(html_controler $html_controler, PDO $link, string $name_entidad_partida,
+                                        array $partida): string|array
     {
 
         $name_entidad_partida = trim($name_entidad_partida);
@@ -62,7 +63,6 @@ class _html_factura{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener partida tmp', data: $partida);
         }
-
 
         $keys = $this->keys_producto(name_entidad_partida: $name_entidad_partida);
         if(errores::$error){
@@ -243,11 +243,18 @@ class _html_factura{
      * @param string $key_descuento Key de descuento basado en partida
      * @param string $key_importe Key importe basado en partida
      * @param array $partida Partida con datos
-     * @return string
+     * @return string|array
      */
     private function tr_producto(string $input_cantidad, string $input_valor_unitario, string $key_descuento,
-                                 string $key_importe, array $partida): string
+                                 string $key_importe, array $partida): string|array
     {
+
+        $valida = $this->valida_tr(key_descuento: $key_descuento,key_importe:  $key_importe,
+            input_cantidad:  $input_cantidad,input_valor_unitario:  $input_valor_unitario,partida:  $partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
+
         return "<tr>
                 <td>$partida[cat_sat_producto_codigo]</td>
                 <td>$partida[com_producto_codigo]</td>
@@ -259,5 +266,35 @@ class _html_factura{
                 <td>$partida[cat_sat_obj_imp_descripcion]</td>
                 <td>$partida[elimina_bd]</td>
             </tr>";
+    }
+
+    private function valida_tr(string $key_descuento, string $key_importe, string $input_cantidad,
+                               string $input_valor_unitario, array $partida){
+        $key_descuento = trim($key_descuento);
+        if($key_descuento === ''){
+            return $this->error->error(mensaje: 'Error key_descuento esta vacio', data: $key_descuento);
+        }
+        $key_importe = trim($key_importe);
+        if($key_importe === ''){
+            return $this->error->error(mensaje: 'Error key_importe esta vacio', data: $key_importe);
+        }
+        $input_cantidad = trim($input_cantidad);
+        if($input_cantidad === ''){
+            return $this->error->error(mensaje: 'Error input_cantidad esta vacio', data: $input_cantidad);
+        }
+        $input_valor_unitario = trim($input_valor_unitario);
+        if($input_valor_unitario === ''){
+            return $this->error->error(mensaje: 'Error input_valor_unitario esta vacio', data: $input_valor_unitario);
+        }
+
+
+        $keys = array('cat_sat_producto_codigo','com_producto_codigo','cat_sat_unidad_descripcion',$key_importe,
+            $key_descuento,'cat_sat_obj_imp_descripcion','elimina_bd');
+
+        $valida = (new validacion())->valida_existencia_keys(keys: $keys,registro:  $partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
+        return true;
     }
 }

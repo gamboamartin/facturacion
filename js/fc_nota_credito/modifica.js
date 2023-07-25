@@ -1,3 +1,5 @@
+
+
 let sl_fc_csd = $("#fc_csd_id");
 let sl_cat_sat_forma_pago = $("#cat_sat_forma_pago_id");
 let sl_cat_sat_metodo_pago = $("#cat_sat_metodo_pago_id");
@@ -167,3 +169,9 @@ function change_moneda(){
     });
 
 }
+
+$(".elimina_partida").click(function () {
+
+    elimina_partida_bd($(this),'fc_partida_nc');
+
+});
