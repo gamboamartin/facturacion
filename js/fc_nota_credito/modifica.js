@@ -1,4 +1,5 @@
-
+let session_id = getParameterByName('session_id');
+let adm_menu_id = getParameterByName('adm_menu_id');
 
 let sl_fc_csd = $("#fc_csd_id");
 let sl_cat_sat_forma_pago = $("#cat_sat_forma_pago_id");
@@ -24,6 +25,7 @@ let txt_descuento = $(".partidas #descuento");
 let txt_subtotal = $(".partidas #subtotal");
 let txt_total = $(".partidas #total");
 let txt_cuenta_predial = $("#cuenta_predial");
+let hidden_registro_id = $("input[name='registro_id']");
 
 sl_fc_csd.change(function () {
     let selected = $(this).find('option:selected');
@@ -171,7 +173,7 @@ function change_moneda(){
 }
 
 $(".elimina_partida").click(function () {
-
     elimina_partida_bd($(this),'fc_partida_nc');
-
 });
+
+ejecuciones_partida('fc_nota_credito','fc_partida_nc');
