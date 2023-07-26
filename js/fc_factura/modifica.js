@@ -146,11 +146,6 @@ btn_alta_partida.click(function () {
 
             let td_fc_partida_descripcion_html = td_fc_partida_descripcion(json);
 
-            let td_com_producto_codigo = "<td><b>CVE SAT: </b><td>"+json.registro_obj.com_producto_codigo+"</td>";
-            let td_cat_sat_unidad_descripcion = "<td><b>Unidad: </b>"+json.registro_obj.cat_sat_unidad_descripcion+"</td>";
-            let td_cat_sat_obj_imp_descripcion = "<td><b>Obj Imp: </b>"+json.registro_obj.cat_sat_obj_imp_descripcion+"</td>";
-
-
 
             let td_fc_partida_cantidad =td_input('fc_partida_cantidad','cantidad',json.registro_puro.cantidad);
             let td_fc_partida_valor_unitario =td_input('fc_partida_valor_unitario','valor_unitario',json.registro_puro.valor_unitario);
@@ -169,7 +164,7 @@ btn_alta_partida.click(function () {
             let tr_tags =tr_tags_partida();
             let tr_inputs_montos = "<tr class='tr_data_partida'>"+td_fc_partida_cantidad+td_fc_partida_valor_unitario+td_fc_partida_importe+td_fc_partida_descuento+"</tr>";
 
-            let tr_data_producto = "<tr>"+td_com_producto_codigo+td_cat_sat_unidad_descripcion+td_cat_sat_obj_imp_descripcion+"</tr>";
+            let tr_data_producto_html = tr_data_producto(json);
             let tr_montos = tr_inputs_montos+"<tr>"+td_fc_partida_sub_total+td_fc_partida_traslados+td_fc_partida_retenciones+td_fc_partida_total+"</tr>";
             let tr_buttons = "<tr class='tr_elimina_partida'>"+
                 "<td colspan='5' class='td_elimina_partida'>"+
@@ -179,7 +174,7 @@ btn_alta_partida.click(function () {
             let table_full = "" +
                 "<form method='post' action='./index.php?seccion="+entidad_factura+"&accion=modifica_partida_bd&registro_id="+registro_id+"&adm_menu_id="+adm_menu_id+"&session_id="+session_id+"&registro_partida_id="+fc_partida_id+"'>"+
                 "<table class='table table-striped data-partida' style='border: 2px solid'><tbody>"+
-                td_fc_partida_descripcion_html+tr_data_producto+tr_tags+tr_montos+tr_buttons+
+                td_fc_partida_descripcion_html+tr_data_producto_html+tr_tags+tr_montos+tr_buttons+
                 "</tbody>" +
                 "</table>"+
                 "</form>";

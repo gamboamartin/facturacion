@@ -171,6 +171,26 @@ function elimina_partida_bd(boton, entidad_partida){
     return true;
 }
 
+function tr_data_producto(json){
+    let td_com_producto_codigo = "<td>" +
+                                            "<b>CVE SAT: </b>"+json.registro_obj.com_producto_codigo+
+                                        "</td>";
+
+    let td_cat_sat_unidad_descripcion = "<td>" +
+        "                                           <b>Unidad: </b>"+json.registro_obj.cat_sat_unidad_descripcion+
+                                                "</td>";
+
+    let td_cat_sat_obj_imp_descripcion = "<td colspan='2'>" +
+        "                                           <b>Obj Imp: </b>"+json.registro_obj.cat_sat_obj_imp_descripcion+
+                                                "</td>";
+
+    return "<tr>"
+                + td_com_producto_codigo +
+                td_cat_sat_unidad_descripcion +
+                td_cat_sat_obj_imp_descripcion +
+            "</tr>";
+}
+
 function td_fc_partida_descripcion(json){
     let input_descripcion = input_txt('fc_partida_descripcion','descripcion',
         json.registro_puro.descripcion);
