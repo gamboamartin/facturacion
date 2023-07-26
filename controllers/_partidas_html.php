@@ -28,16 +28,20 @@ class _partidas_html{
      * @param string $tipo fc_traslado o fc_retenido
      * @param array $partida Partida de factura
      * @return bool|array
+     * @version 11.0.0
      */
     private function aplica_aplica_impuesto(string  $tipo, array $partida): bool|array
     {
         $tipo = trim($tipo);
         if($tipo === ''){
-            return $this->error->error(mensaje: 'Error tipo no existe', data: $tipo);
+            return $this->error->error(mensaje: 'Error tipo no existe o esta vacio', data: $tipo);
         }
         $valida = (new validacion())->valida_existencia_keys(keys: array($tipo),registro:  $partida);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
+        if(!is_array($partida[$tipo])){
+            return $this->error->error(mensaje: 'Error partida[tipo] debe ser un array', data: $partida);
         }
         $aplica = false;
         if(count($partida[$tipo])>0) {

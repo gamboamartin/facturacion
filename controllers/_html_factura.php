@@ -103,6 +103,7 @@ class _html_factura{
     }
 
     /**
+     * Integra un tr con los datos del impuesto
      * @param string $button_del
      * @param array $impuesto
      * @param string $key
