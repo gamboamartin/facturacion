@@ -24,6 +24,7 @@ class _partidas_html{
     }
 
     /**
+     * Valida si la partida contiene impuestos
      * @param string $tipo fc_traslado o fc_retenido
      * @param array $partida Partida de factura
      * @return bool|array

@@ -148,6 +148,56 @@ class _html_facturaTest extends test {
         errores::$error = false;
     }
 
+    public function test_valida_tr(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _html_factura();
+        $html = new liberator($html);
+
+
+        $input_cantidad = '';
+        $input_valor_unitario = '';
+        $key_descuento = '';
+        $key_importe = '';
+        $partida = array();
+        $partida['cat_sat_producto_codigo'] = '';
+        $partida['com_producto_codigo'] = '';
+        $partida['cat_sat_unidad_descripcion'] = '';
+        $partida['b'] = '';
+        $partida['a'] = '';
+        $partida['cat_sat_obj_imp_descripcion'] = '';
+        $partida['elimina_bd'] = '';
+        $resultado = $html->valida_tr($key_descuento, $key_importe, $input_cantidad, $input_valor_unitario, $partida);
+        $this->assertIsArray($resultado);
+        $this->assertTrue(errores::$error);
+        $this->assertEquals("Error key_descuento esta vacio",$resultado['mensaje_limpio']);
+        errores::$error = false;
+
+        $input_cantidad = 'c';
+        $input_valor_unitario = 'd';
+        $key_descuento = 'a';
+        $key_importe = 'b';
+        $partida = array();
+        $partida['cat_sat_producto_codigo'] = 'e';
+        $partida['com_producto_codigo'] = 'f';
+        $partida['cat_sat_unidad_descripcion'] = 'g';
+        $partida['b'] = 'h';
+        $partida['a'] = 'i';
+        $partida['cat_sat_obj_imp_descripcion'] = 'j';
+        $partida['elimina_bd'] = 'k';
+        $resultado = $html->valida_tr($key_descuento, $key_importe, $input_cantidad, $input_valor_unitario, $partida);
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+    }
+
 
 
 }

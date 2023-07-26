@@ -88,6 +88,12 @@ class _html_factura{
         return $tr_producto;
     }
 
+    /**
+     * @param string $button_del
+     * @param array $impuesto
+     * @param string $key
+     * @return string
+     */
     public function data_impuesto(string $button_del, array $impuesto, string $key): string
     {
         return "<tr style='font-size: 12px;'>
@@ -276,6 +282,7 @@ class _html_factura{
      * @param string $input_valor_unitario Input de valor unitario de partida
      * @param array $partida Datos de la partida
      * @return array|true
+     * @version 10.177.8
      */
     private function valida_tr(string $key_descuento, string $key_importe, string $input_cantidad,
                                string $input_valor_unitario, array $partida): bool|array
