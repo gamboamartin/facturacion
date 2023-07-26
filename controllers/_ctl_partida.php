@@ -21,7 +21,7 @@ class _ctl_partida extends _base{
                 ws: $ws);
         }
 
-        $this->row_upd->cantidad = 0;
+        $this->row_upd->cantidad = 1;
         $this->row_upd->valor_unitario = 0;
         $this->row_upd->descuento = 0;
         $this->row_upd->subtotal = 0;
@@ -156,7 +156,7 @@ class _ctl_partida extends _base{
         }
         $keys_selects['com_producto_id']->extra_params_keys = array("com_producto_codigo", "com_producto_descripcion",
             "cat_sat_unidad_descripcion","cat_sat_obj_imp_descripcion",'com_producto_aplica_predial',
-            'cat_sat_conf_imps_id');
+            'cat_sat_conf_imps_id','com_producto_precio');
 
         $keys_selects = $this->init_selects(keys_selects: $keys_selects, key: "fc_factura_id", label: "Factura");
         if(errores::$error){
@@ -167,8 +167,6 @@ class _ctl_partida extends _base{
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
         }
-
-
 
         return $keys_selects;
     }

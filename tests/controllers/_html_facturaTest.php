@@ -34,6 +34,36 @@ class _html_facturaTest extends test {
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_data_impuesto(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _html_factura();
+
+        $button_del = 'c';
+
+        $impuesto = array();
+        $impuesto['cat_sat_tipo_impuesto_descripcion'] = 'a';
+        $impuesto['cat_sat_tipo_factor_descripcion'] = 'a';
+        $impuesto['cat_sat_factor_factor'] = 'a';
+        $impuesto['z'] = 'a';
+        $key = 'z';
+
+
+        $resultado = $html->data_impuesto($button_del, $impuesto, $key);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertStringContainsStringIgnoringCase("<td>a</td>",$resultado);
+        errores::$error = false;
+
+    }
+
     public function test_data_producto(): void
     {
         errores::$error = false;

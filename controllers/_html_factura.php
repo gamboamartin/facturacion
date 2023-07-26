@@ -107,10 +107,25 @@ class _html_factura{
      * @param string $button_del Boton de eliminacion de partida
      * @param array $impuesto Datos del impuesto
      * @param string $key Key del tipo de impuesto
-     * @return string
+     * @return string|array
+     * @version 11.2.0
      */
-    final public function data_impuesto(string $button_del, array $impuesto, string $key): string
+    final public function data_impuesto(string $button_del, array $impuesto, string $key): string|array
     {
+        $key = trim($key);
+        if($key === ''){
+            return $this->error->error(mensaje: 'Error key esta vacio', data: $key);
+        }
+        $button_del = trim($button_del);
+        if($button_del === ''){
+            return $this->error->error(mensaje: 'Error button_del esta vacio', data: $button_del);
+        }
+        $keys = array('cat_sat_tipo_impuesto_descripcion','cat_sat_tipo_factor_descripcion',
+            'cat_sat_factor_factor',$key);
+        $valida = (new validacion())->valida_existencia_keys(keys: $keys,registro:  $impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar impuesto', data: $valida);
+        }
         return "<tr style='font-size: 12px;'>
                     <td>$impuesto[cat_sat_tipo_impuesto_descripcion]</td>
                     <td>$impuesto[cat_sat_tipo_factor_descripcion]</td>

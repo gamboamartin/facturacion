@@ -226,7 +226,7 @@ sl_com_producto.change(function () {
     let tipo_factor = selected.data(`cat_sat_tipo_factor_descripcion`);
     let factor = selected.data(`cat_sat_factor_factor`);
     let aplica_predial = selected.data('com_producto_aplica_predial');
-    let cat_sat_conf_imps_id = selected.data('cat_sat_conf_imps_id');
+    let precio = selected.data('com_producto_precio');
 
     txt_cuenta_predial.prop( "disabled", true );
     if(aplica_predial === 'activo'){
@@ -240,6 +240,7 @@ sl_com_producto.change(function () {
     txt_impuesto.val(impuesto);
     txt_tipo_factor.val(tipo_factor);
     txt_factor.val(factor);
+    txt_valor_unitario.val(precio);
 });
 
 txt_cantidad.on('input', function () {
