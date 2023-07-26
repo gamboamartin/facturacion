@@ -104,12 +104,12 @@ class _html_factura{
 
     /**
      * Integra un tr con los datos del impuesto
-     * @param string $button_del
-     * @param array $impuesto
-     * @param string $key
+     * @param string $button_del Boton de eliminacion de partida
+     * @param array $impuesto Datos del impuesto
+     * @param string $key Key del tipo de impuesto
      * @return string
      */
-    public function data_impuesto(string $button_del, array $impuesto, string $key): string
+    final public function data_impuesto(string $button_del, array $impuesto, string $key): string
     {
         return "<tr style='font-size: 12px;'>
                     <td>$impuesto[cat_sat_tipo_impuesto_descripcion]</td>

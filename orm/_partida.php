@@ -109,6 +109,40 @@ class _partida extends  _base{
         return $conf_traslados;
     }
 
+    private function actualiza_descripcion_aut(stdClass $com_producto, array $fc_registro_partida, int $registro_id){
+        $descripcion = $com_producto->descripcion;
+        $descripcion = $this->descripcion_automatica(descripcion: $descripcion,fc_registro_partida:  $fc_registro_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al ajustar descripcion', data: $descripcion);
+        }
+
+        $upd_desc['descripcion'] = $descripcion;
+
+        $upd = $this->modifica_bd(registro: $upd_desc,id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error actualizar descripcion', data: $upd);
+        }
+        return $upd;
+    }
+
+    private function ajusta_descripcion(string $campo, string $descripcion, mixed $value): array|string
+    {
+        if(is_null($value)){
+            $value = '';
+        }
+        return str_replace("{{".$campo."}}", $value, $descripcion);
+    }
+
+    private function ajusta_descripcion_campos(string $descripcion, array $fc_registro_partida){
+        foreach ($fc_registro_partida as $campo=>$value){
+            $descripcion = $this->ajusta_descripcion(campo: $campo,descripcion:  $descripcion,value:  $value);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al ajustar descripcion', data: $descripcion);
+            }
+        }
+        return $descripcion;
+    }
+
 
     /**
      * SOBRRESCRIBIR
@@ -147,11 +181,7 @@ class _partida extends  _base{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar datos', data: $validacion);
         }
-        $data_predial = array();
-        if(isset($this->registro['cuenta_predial'])){
-            $data_predial['cuenta_predial'] = $this->registro['cuenta_predial'];
-            unset($this->registro['cuenta_predial']);
-        }
+
 
 
         $this->registro = $this->limpia_campos(registro: $this->registro,
@@ -167,11 +197,15 @@ class _partida extends  _base{
             $aplica_cat_sat_conf_imps = true;
         }
 
-
-
         $registro = $this->integra_calcula_subtotales(registro: $this->registro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error integrar subtotales', data: $registro);
+        }
+
+        $data_predial = array();
+        if(isset($registro['cuenta_predial'])){
+            $data_predial['cuenta_predial'] = $registro['cuenta_predial'];
+            unset($registro['cuenta_predial']);
         }
 
 
@@ -204,19 +238,11 @@ class _partida extends  _base{
         }
 
 
-        if(count($data_predial)>0){
-
-            if($fc_registro_partida->com_producto_aplica_predial === 'activo'){
-                $key_id = $this->tabla.'_id';
-                $data_predial[$key_id] = $fc_registro_partida->$key_id;
-
-                $r_fc_cuenta_predial = $this->modelo_predial->alta_registro(registro: $data_predial);
-                if (errores::$error) {
-                    return $this->error->error(mensaje: 'Error al insertar predial', data: $r_fc_cuenta_predial);
-                }
-
-            }
+        $r_fc_cuenta_predial = $this->integra_predial(data_predial: $data_predial,fc_registro_partida:  $fc_registro_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar predial', data: $r_fc_cuenta_predial);
         }
+
 
         $fc_registro_partida = $this->registro(registro_id: $r_alta_bd->registro_id, columnas_en_bruto: true,
             retorno_obj: true);
@@ -235,6 +261,12 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al modificar entidad base', data: $regenera);
         }
 
+
+        $upd = $this->integra_descripcion_automatica(registro_id: $r_alta_bd->registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error actualizar descripcion', data: $upd);
+        }
+
         $fc_registro_partida = $this->registro(registro_id: $r_alta_bd->registro_id, retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener partida', data: $fc_registro_partida);
@@ -250,6 +282,109 @@ class _partida extends  _base{
         $r_alta_bd->registro_puro = $fc_registro_partida_puro;
 
         return $r_alta_bd;
+    }
+
+    private function data_descripcion_aut(int $registro_id){
+        $fc_registro_partida = $this->registro(registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener partida', data: $fc_registro_partida);
+        }
+
+        $com_producto = (new com_producto(link: $this->link))->registro(registro_id: $fc_registro_partida['com_producto_id'],
+            columnas_en_bruto: true, retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener producto', data: $com_producto);
+        }
+        $data = new stdClass();
+        $data->fc_registro_partida = $fc_registro_partida;
+        $data->com_producto = $com_producto;
+        return $data;
+
+    }
+
+    private function descripcion_automatica(string $descripcion, array $fc_registro_partida){
+        $descripcion = $this->descripcion_generales(descripcion: $descripcion);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al ajustar descripcion', data: $descripcion);
+        }
+
+        $descripcion = $this->ajusta_descripcion_campos(descripcion: $descripcion,fc_registro_partida:  $fc_registro_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al ajustar descripcion', data: $descripcion);
+        }
+        return $descripcion;
+    }
+
+    private function descripcion_generales(string $descripcion){
+        $descripcion = $this->descripcion_mes_letra(descripcion: $descripcion);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al ajustar descripcion', data: $descripcion);
+        }
+        $descripcion = $this->descripcion_year(descripcion: $descripcion);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al ajustar descripcion', data: $descripcion);
+        }
+        return $descripcion;
+    }
+
+    private function descripcion_mes_letra(string $descripcion): array|string
+    {
+        $mes = date('m');
+        $mes_letra = $this->mes['espaniol'][$mes]['nombre'];
+        return str_replace("{{MES_LETRA}}", $mes_letra, $descripcion);
+    }
+
+    private function descripcion_year(string $descripcion): array|string
+    {
+        $year = (int)date('Y');
+
+        return str_replace("{{YEAR}}", $year, $descripcion);
+    }
+
+
+    private function inserta_predial(stdClass $fc_registro_partida){
+        $key_id = $this->tabla.'_id';
+        $data_predial[$key_id] = $fc_registro_partida->$key_id;
+
+        $r_fc_cuenta_predial = $this->modelo_predial->alta_registro(registro: $data_predial);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar predial', data: $r_fc_cuenta_predial);
+        }
+        return $r_fc_cuenta_predial;
+    }
+
+    private function integra_descripcion_automatica(int $registro_id){
+        $data_desc_aut = $this->data_descripcion_aut(registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener datos', data: $data_desc_aut);
+        }
+        $upd = new stdClass();
+
+        if($data_desc_aut->com_producto->es_automatico === 'activo'){
+
+            $upd = $this->actualiza_descripcion_aut(com_producto: $data_desc_aut->com_producto,
+                fc_registro_partida:  $data_desc_aut->fc_registro_partida,registro_id:  $registro_id);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error actualizar descripcion', data: $upd);
+            }
+        }
+        return $upd;
+    }
+
+    private function integra_predial(array $data_predial, stdClass $fc_registro_partida){
+
+        if(count($data_predial)>0){
+
+            if($fc_registro_partida->com_producto_aplica_predial === 'activo'){
+
+                $r_fc_cuenta_predial = $this->inserta_predial(fc_registro_partida: $fc_registro_partida);
+                if (errores::$error) {
+                    return $this->error->error(mensaje: 'Error al insertar predial', data: $r_fc_cuenta_predial);
+                }
+
+            }
+        }
+        return $data_predial;
     }
 
     /**
@@ -893,8 +1028,8 @@ class _partida extends  _base{
 
     /**
      * Por mover a base previos si existe algo asi
-     * @param array $registro
-     * @param array $campos_limpiar
+     * @param array $registro Registro en proceso
+     * @param array $campos_limpiar Campos a limpiar
      * @return array
      */
     private function limpia_campos(array $registro, array $campos_limpiar): array

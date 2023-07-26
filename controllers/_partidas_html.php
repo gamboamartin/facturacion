@@ -50,7 +50,7 @@ class _partidas_html{
         return $aplica;
     }
 
-    private function genera_impuesto(html_controler $html_controler, PDO $link, _partida $modelo_partida,
+    private function genera_impuesto(html_controler $html_controler, _partida $modelo_partida,
                                      string $name_modelo_entidad, array $partida, string $tag_tipo_impuesto,
                                      string $tipo){
         $aplica = $this->aplica_aplica_impuesto(tipo: $tipo,partida:  $partida);
@@ -58,13 +58,39 @@ class _partidas_html{
             return $this->error->error(mensaje: 'Error al verificar aplica impuesto', data: $aplica);
         }
         $impuesto_html = $this->integra_impuesto_html(aplica: $aplica, html_controler: $html_controler,
-            link: $link, modelo_partida: $modelo_partida, name_entidad_impuesto: $tipo,
+            modelo_partida: $modelo_partida, name_entidad_impuesto: $tipo,
             name_modelo_entidad: $name_modelo_entidad, partida: $partida, tag_tipo_impuesto: $tag_tipo_impuesto);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar html', data: $impuesto_html);
         }
         return $impuesto_html;
     }
+
+    private function genera_impuesto_html(html_controler $html_controler, array $impuesto, string $key_importe, _partida $modelo_partida,
+                                          string $name_entidad_impuesto, string $name_modelo_entidad){
+        $key_registro_id = $name_entidad_impuesto.'_id';
+        $registro_id = $impuesto[$key_registro_id];
+
+        $params = $modelo_partida->params_button_partida(name_modelo_entidad: $name_modelo_entidad,
+            registro_entidad_id: $impuesto[$name_modelo_entidad.'_id']);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener params', data: $params);
+        }
+
+        $button = $html_controler->button_href(accion: 'elimina_bd', etiqueta: 'Elimina',
+            registro_id:  $registro_id,seccion:  $name_entidad_impuesto,style: 'danger',icon: 'bi bi-trash',
+            muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar button', data: $button);
+        }
+
+        $impuesto_html = (new _html_factura())->data_impuesto(button_del: $button, impuesto: $impuesto, key: $key_importe);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar html', data: $impuesto_html);
+        }
+        return $impuesto_html;
+    }
+
 
     final function genera_partidas_html(html_controler $html, PDO $link, _transacciones_fc $modelo_entidad,
                                         _partida $modelo_partida,_data_impuestos $modelo_retencion,
@@ -112,7 +138,7 @@ class _partidas_html{
      * @param array $partida
      * @return array|string
      */
-    private function impuesto_html_completo(html_controler $html_controler, string $impuesto_html_completo, PDO $link,
+    private function impuesto_html_completo(html_controler $html_controler, string $impuesto_html_completo,
                                             _partida $modelo_partida, string $name_entidad_impuesto,
                                             string $name_modelo_entidad, array $partida): array|string
     {
@@ -120,42 +146,29 @@ class _partidas_html{
         $key_importe = $name_entidad_impuesto.'_importe';
 
         foreach($partida[$name_entidad_impuesto] as $impuesto){
-            $key_registro_id = $name_entidad_impuesto.'_id';
-            $registro_id = $impuesto[$key_registro_id];
-
-            $params = $modelo_partida->params_button_partida(name_modelo_entidad: $name_modelo_entidad,
-                registro_entidad_id: $impuesto[$name_modelo_entidad.'_id']);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener params', data: $params);
-            }
-
-            $button = $html_controler->button_href(accion: 'elimina_bd', etiqueta: 'Elimina',
-                registro_id:  $registro_id,seccion:  $name_entidad_impuesto,style: 'danger',icon: 'bi bi-trash',
-                muestra_icono_btn: true, muestra_titulo_btn: false, params: $params);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al generar button', data: $button);
-            }
-
-            $impuesto_html = (new _html_factura())->data_impuesto(button_del: $button, impuesto: $impuesto, key: $key_importe);
+            $impuesto_html = $this->genera_impuesto_html(html_controler: $html_controler,impuesto:  $impuesto,
+                key_importe:  $key_importe, modelo_partida: $modelo_partida,
+                name_entidad_impuesto:  $name_entidad_impuesto,name_modelo_entidad:  $name_modelo_entidad);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al generar html', data: $impuesto_html);
             }
             $impuesto_html_completo.=$impuesto_html;
         }
+
         return $impuesto_html_completo;
     }
 
-    private function impuestos_html(html_controler $html_controler, PDO $link, _partida $modelo_partida,
+    private function impuestos_html(html_controler $html_controler, _partida $modelo_partida,
                                     string $name_entidad_retenido, string $name_entidad_traslado,
                                     string $name_modelo_entidad, array $partida): array|stdClass
     {
-        $impuesto_traslado_html = $this->genera_impuesto(html_controler: $html_controler, link: $link,
+        $impuesto_traslado_html = $this->genera_impuesto(html_controler: $html_controler,
             modelo_partida: $modelo_partida, name_modelo_entidad: $name_modelo_entidad, partida: $partida,
             tag_tipo_impuesto: 'Traslados', tipo: $name_entidad_traslado);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar html', data: $impuesto_traslado_html);
         }
-        $impuesto_retenido_html = $this->genera_impuesto(html_controler: $html_controler, link: $link,
+        $impuesto_retenido_html = $this->genera_impuesto(html_controler: $html_controler,
             modelo_partida: $modelo_partida, name_modelo_entidad: $name_modelo_entidad, partida: $partida,
             tag_tipo_impuesto: 'Retenciones', tipo: $name_entidad_retenido);
         if (errores::$error) {
@@ -167,13 +180,13 @@ class _partidas_html{
         return $data;
     }
 
-    private function integra_impuesto_html(bool $aplica, html_controler $html_controler, PDO $link,
+    private function integra_impuesto_html(bool $aplica, html_controler $html_controler,
                                            _partida $modelo_partida, string $name_entidad_impuesto,
                                            string $name_modelo_entidad, array $partida, string $tag_tipo_impuesto){
         $impuesto_html_completo = '';
         if($aplica){
             $impuesto_html_completo = $this->impuesto_html_completo(html_controler: $html_controler,
-                impuesto_html_completo: $impuesto_html_completo, link: $link, modelo_partida: $modelo_partida,
+                impuesto_html_completo: $impuesto_html_completo, modelo_partida: $modelo_partida,
                 name_entidad_impuesto: $name_entidad_impuesto, name_modelo_entidad: $name_modelo_entidad,
                 partida: $partida);
             if (errores::$error) {
@@ -232,7 +245,7 @@ class _partidas_html{
         $partidas->registros[$indice]['descripcion_html'] = $descripcion_html;
 
 
-        $impuestos_html = $this->impuestos_html(html_controler: $html_controler, link: $link,
+        $impuestos_html = $this->impuestos_html(html_controler: $html_controler,
             modelo_partida: $modelo_partida, name_entidad_retenido: $name_entidad_retenido,
             name_entidad_traslado: $name_entidad_traslado,
             name_modelo_entidad: $name_modelo_entidad, partida: $partida);

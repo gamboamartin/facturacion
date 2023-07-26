@@ -13,7 +13,8 @@ class fc_partida_nc extends _partida
     {
         $tabla = 'fc_partida_nc';
         $columnas = array($tabla => false, 'fc_nota_credito' => $tabla, 'com_producto' => $tabla,
-            'cat_sat_producto' => 'com_producto', 'cat_sat_unidad' => 'com_producto', 'cat_sat_obj_imp' => 'com_producto');
+            'cat_sat_producto' => 'com_producto', 'cat_sat_unidad' => 'com_producto',
+            'cat_sat_obj_imp' => 'com_producto','com_sucursal'=>'fc_nota_credito','com_cliente'=>'com_sucursal');
         $campos_obligatorios = array('codigo', 'com_producto_id');
 
         $columnas_extra = array();
