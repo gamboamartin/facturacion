@@ -48,7 +48,7 @@ class _sellado extends _modelo_parent{
         }
 
         $fc_factura_upd['folio_fiscal'] = $this->registro['uuid'];
-        $upd = $this->modelo_entidad->modifica_bd(registro: $fc_factura_upd, id: $this->registro['fc_factura_id']);
+        $upd = $this->modelo_entidad->modifica_bd(registro: $fc_factura_upd, id: $this->registro[$this->modelo_entidad->key_id]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al integrar uuid', data: $upd);
         }
@@ -164,6 +164,12 @@ class _sellado extends _modelo_parent{
         return $r_status;
     }
 
+    /**
+     * Valida los elementos de un alta base
+     * @param array $data Datos a validar
+     * @param string $key_entidad_id Key de la entidad base
+     * @return array
+     */
     private function validaciones(array $data, string $key_entidad_id): array
     {
         $keys = array('descripcion', 'codigo');
