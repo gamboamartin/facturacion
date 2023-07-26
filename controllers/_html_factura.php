@@ -270,11 +270,11 @@ class _html_factura{
 
     /**
      * Valida los elementos de un tr para partida
-     * @param string $key_descuento
-     * @param string $key_importe
-     * @param string $input_cantidad
-     * @param string $input_valor_unitario
-     * @param array $partida
+     * @param string $key_descuento Key de partida descuento
+     * @param string $key_importe Key de partida importe
+     * @param string $input_cantidad Input de partida cantidad
+     * @param string $input_valor_unitario Input de valor unitario de partida
+     * @param array $partida Datos de la partida
      * @return array|true
      */
     private function valida_tr(string $key_descuento, string $key_importe, string $input_cantidad,

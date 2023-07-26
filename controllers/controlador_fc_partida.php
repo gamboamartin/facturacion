@@ -21,6 +21,7 @@ class controlador_fc_partida extends _ctl_partida {
     public controlador_fc_traslado $controlador_fc_traslado;
     public string $link_fc_traslado_alta_bd = '';
 
+
     public function __construct(PDO      $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass())
     {
@@ -42,6 +43,7 @@ class controlador_fc_partida extends _ctl_partida {
             print_r($error);
             die('Error');
         }
+        $this->name_entidad_factura = 'fc_factura';
     }
 
 

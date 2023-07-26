@@ -42,6 +42,7 @@ class controlador_fc_partida_nc extends _ctl_partida {
             print_r($error);
             die('Error');
         }
+        $this->name_entidad_factura = 'fc_nota_credito';
     }
 
 

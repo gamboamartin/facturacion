@@ -50,7 +50,7 @@
 
                         <div class="control-group btn-alta">
                             <div class="controls">
-                                <button type="submit" class="btn btn-success" value="modifica" name="btn_action_next">Alta</button><br>
+                                <button type="button" class="btn btn-success" value="modifica" name="btn_action_next" id="btn-alta-partida">Alta</button><br>
                             </div>
                         </div>
 

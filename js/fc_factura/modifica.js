@@ -25,7 +25,9 @@ let txt_total = $(".partidas #total");
 let txt_cuenta_predial = $("#cuenta_predial");
 let txt_fecha = $("#fecha");
 let btn_alta_partida = $("#btn-alta-partida");
+let entidad_partida = 'fc_partida';
 let hidden_registro_id = $("input[name='registro_id']");
+let entidad_factura = 'fc_factura';
 
 sl_com_sucursal.change(function () {
     let selected = $(this).find('option:selected');
@@ -45,7 +47,7 @@ sl_com_sucursal.change(function () {
     change_moneda();
 });
 
-ejecuciones_partida('fc_factura','fc_partida');
+ejecuciones_partida(entidad_factura,entidad_partida);
 
 
 btn_alta_partida.click(function () {
@@ -89,10 +91,6 @@ btn_alta_partida.click(function () {
     }
 
     let selected_producto = sl_com_producto.find('option:selected');
-    let unidad = selected_producto.data(`cat_sat_unidad_descripcion`);
-    let impuesto = selected_producto.data(`cat_sat_obj_imp_descripcion`);
-    let tipo_factor = selected_producto.data(`cat_sat_tipo_factor_descripcion`);
-    let factor = selected_producto.data(`cat_sat_factor_factor`);
     let aplica_predial = selected_producto.data('com_producto_aplica_predial');
 
 
@@ -105,7 +103,7 @@ btn_alta_partida.click(function () {
     }
 
 
-    let url = get_url("fc_partida","alta_bd", {});
+    let url = get_url(entidad_partida,"alta_bd", {});
     $.ajax({
         // la URL para la petición
         url : url,
@@ -113,7 +111,7 @@ btn_alta_partida.click(function () {
         // (también es posible utilizar una cadena de datos)
         data : {com_producto_id: com_producto_id, descripcion: descripcion,cantidad: cantidad,
             valor_unitario: valor_unitario, descuento: descuento,cat_sat_conf_imps_id:cat_sat_conf_imps_id,
-            fc_factura_id:registro_id,cuenta_predial: cuenta_predial } ,
+            key_entidad_factura_id:registro_id,cuenta_predial: cuenta_predial } ,
 
         // especifica si será una petición POST o GET
         type : 'POST',
@@ -145,8 +143,8 @@ btn_alta_partida.click(function () {
 
             let fc_partida_id = json.registro_id;
 
-            let input_descripcion = input_txt('fc_partida_descripcion','descripcion',json.registro_obj.fc_partida_descripcion);
-            let td_fc_partida_descripcion = "<tr class='tr_fc_partida_descripcion'><td colspan='5' class='td_fc_partida_descripcion' data-fc_partida_factura_id='"+json.registro_obj.fc_partida_id+"'>"+input_descripcion+"</td></tr>";
+
+            let td_fc_partida_descripcion_html = td_fc_partida_descripcion(json);
 
             let td_com_producto_codigo = "<td><b>CVE SAT: </b><td>"+json.registro_obj.com_producto_codigo+"</td>";
             let td_cat_sat_unidad_descripcion = "<td><b>Unidad: </b>"+json.registro_obj.cat_sat_unidad_descripcion+"</td>";
@@ -154,19 +152,19 @@ btn_alta_partida.click(function () {
 
 
 
-            let td_fc_partida_cantidad =td_input('fc_partida_cantidad','cantidad',json.registro_obj.fc_partida_cantidad);
-            let td_fc_partida_valor_unitario =td_input('fc_partida_valor_unitario','valor_unitario',json.registro_obj.fc_partida_valor_unitario);
+            let td_fc_partida_cantidad =td_input('fc_partida_cantidad','cantidad',json.registro_puro.cantidad);
+            let td_fc_partida_valor_unitario =td_input('fc_partida_valor_unitario','valor_unitario',json.registro_puro.valor_unitario);
 
-            let td_fc_partida_importe = "<td><input type='text' class='form-control form-control-sm' disabled value='"+json.registro_obj.fc_partida_sub_total_base+"' /></td>";
-
-
-            let td_fc_partida_descuento =td_input('fc_partida_descuento','descuento',json.registro_obj.fc_partida_descuento);
+            let td_fc_partida_importe = "<td><input type='text' class='form-control form-control-sm' disabled value='"+json.registro_puro.sub_total_base+"' /></td>";
 
 
-            let td_fc_partida_sub_total = "<tr><td><b>Sub Total: </b>"+json.registro_obj.fc_partida_sub_total+"</td>";
-            let td_fc_partida_traslados = "<td><b>Traslados: </b>"+json.registro_obj.fc_partida_total_traslados+"</td>";
-            let td_fc_partida_retenciones = "<td><b>Retenciones: </b>"+json.registro_obj.fc_partida_total_retenciones+"</td>";
-            let td_fc_partida_total = "<td><b>Total: </b>"+json.registro_obj.fc_partida_total+"</td>";
+            let td_fc_partida_descuento =td_input('fc_partida_descuento','descuento',json.registro_puro.descuento);
+
+
+            let td_fc_partida_sub_total = "<tr><td><b>Sub Total: </b>"+json.registro_puro.sub_total+"</td>";
+            let td_fc_partida_traslados = "<td><b>Traslados: </b>"+json.registro_puro.total_traslados+"</td>";
+            let td_fc_partida_retenciones = "<td><b>Retenciones: </b>"+json.registro_puro.total_retenciones+"</td>";
+            let td_fc_partida_total = "<td><b>Total: </b>"+json.registro_puro.total+"</td>";
 
             let tr_tags =tr_tags_partida();
             let tr_inputs_montos = "<tr class='tr_data_partida'>"+td_fc_partida_cantidad+td_fc_partida_valor_unitario+td_fc_partida_importe+td_fc_partida_descuento+"</tr>";
@@ -175,20 +173,20 @@ btn_alta_partida.click(function () {
             let tr_montos = tr_inputs_montos+"<tr>"+td_fc_partida_sub_total+td_fc_partida_traslados+td_fc_partida_retenciones+td_fc_partida_total+"</tr>";
             let tr_buttons = "<tr class='tr_elimina_partida'>"+
                 "<td colspan='5' class='td_elimina_partida'>"+
-                "<button type='button' class='btn btn-danger col-md-12 elimina_partida' data-fc_partida_factura_id='"+json.registro_obj.fc_partida_id+"' value='elimina' name='btn_action_next'>Elimina</button>"+
+                "<button type='button' class='btn btn-danger col-md-12 elimina_partida' data-fc_partida_factura_id='"+json.registro_puro.id+"' value='elimina' name='btn_action_next'>Elimina</button>"+
         "</td> </tr>";
 
             let table_full = "" +
-                "<form method='post' action='./index.php?seccion=fc_factura&accion=modifica_partida_bd&registro_id="+registro_id+"&adm_menu_id="+adm_menu_id+"&session_id="+session_id+"&registro_partida_id="+fc_partida_id+"'>"+
+                "<form method='post' action='./index.php?seccion="+entidad_factura+"&accion=modifica_partida_bd&registro_id="+registro_id+"&adm_menu_id="+adm_menu_id+"&session_id="+session_id+"&registro_partida_id="+fc_partida_id+"'>"+
                 "<table class='table table-striped data-partida' style='border: 2px solid'><tbody>"+
-                td_fc_partida_descripcion+tr_data_producto+tr_tags+tr_montos+tr_buttons+
+                td_fc_partida_descripcion_html+tr_data_producto+tr_tags+tr_montos+tr_buttons+
                 "</tbody>" +
                 "</table>"+
                 "</form>";
             console.log(json.registro_obj);
             $("#row-partida").prepend(table_full);
 
-            ejecuciones_partida('fc_factura','fc_partida');
+            ejecuciones_partida(entidad_factura,entidad_partida);
 
         },
 
@@ -290,54 +288,5 @@ txt_descuento.on('input', function () {
 });
 
 
-function change_moneda(){
 
-    let cat_sat_moneda_id = sl_cat_sat_moneda.val();
-    let fecha = txt_fecha.val();
-    let url = get_url("com_tipo_cambio","get", {});
-    $.ajax({
-        // la URL para la petición
-        url : url,
-        // la información a enviar
-        // (también es posible utilizar una cadena de datos)
-        data : { filtros : {'cat_sat_moneda.id': cat_sat_moneda_id,'com_tipo_cambio.fecha': fecha} },
-
-        // especifica si será una petición POST o GET
-        type : 'POST',
-
-        // el tipo de información que se espera de respuesta
-
-
-        // código a ejecutar si la petición es satisfactoria;
-        // la respuesta es pasada como argumento a la función
-        success : function(json) {
-            console.log(json);
-            sl_com_tipo_cambio.empty();
-            integra_new_option(sl_com_tipo_cambio,'Seleccione un tipo de cambio','-1');
-
-            $.each(json.registros, function( index, com_tipo_cambio ) {
-                integra_new_option(sl_com_tipo_cambio,com_tipo_cambio.cat_sat_moneda_codigo+' '+com_tipo_cambio.com_tipo_cambio_monto,
-                    com_tipo_cambio.com_tipo_cambio_id);
-                sl_com_tipo_cambio.val(com_tipo_cambio.com_tipo_cambio_id);
-            });
-
-            sl_com_tipo_cambio.selectpicker('refresh');
-        },
-
-        // código a ejecutar si la petición falla;
-        // son pasados como argumentos a la función
-        // el objeto de la petición en crudo y código de estatus de la petición
-        error : function(xhr, status) {
-            alert('Disculpe, existió un problema');
-            console.log(xhr);
-            console.log(status);
-        },
-
-        // código a ejecutar sin importar si la petición falló o no
-        complete : function(xhr, status) {
-            //alert('Petición realizada');
-        }
-    });
-
-}
 
