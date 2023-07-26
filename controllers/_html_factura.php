@@ -49,6 +49,8 @@ class _html_factura{
      * @param string $name_entidad_partida Nombre de la entidad partida
      * @param array $partida Registro de tipo partida
      * @return string|array
+     * @version 10.178.8
+     *
      */
     final public function data_producto(html_controler $html_controler, PDO $link, string $name_entidad_partida,
                                         array $partida): string|array
@@ -57,6 +59,18 @@ class _html_factura{
         $name_entidad_partida = trim($name_entidad_partida);
         if($name_entidad_partida === ''){
             return $this->error->error(mensaje: 'Error name_entidad_partida esta vacia', data: $name_entidad_partida);
+        }
+        $keys = array('com_producto_id');
+        $valida = (new validacion())->valida_ids(keys: $keys,registro:  $partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
+        $keys = array('cat_sat_producto_codigo','com_producto_codigo','cat_sat_unidad_descripcion',
+            'cat_sat_obj_imp_descripcion','elimina_bd');
+
+        $valida = (new validacion())->valida_existencia_keys(keys: $keys,registro:  $partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
         }
 
         $partida = (new _tmps())->com_tmp_prod_cs(link: $link,partida:  $partida);
@@ -250,6 +264,7 @@ class _html_factura{
      * @param string $key_importe Key importe basado en partida
      * @param array $partida Partida con datos
      * @return string|array
+     * @version 10.178.8
      */
     private function tr_producto(string $input_cantidad, string $input_valor_unitario, string $key_descuento,
                                  string $key_importe, array $partida): string|array

@@ -34,6 +34,41 @@ class _html_facturaTest extends test {
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_data_producto(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _html_factura();
+        //$html = new liberator($html);
+
+        $html_ = new html();
+        $html_controler = new html_controler(html: $html_);
+
+        $name_entidad_partida = 'a';
+
+        $partida = array();
+        $partida['com_producto_id'] = 1;
+        $partida['cat_sat_producto_codigo'] = 1;
+        $partida['com_producto_codigo'] = 1;
+        $partida['cat_sat_unidad_descripcion'] = 1;
+        $partida['cat_sat_obj_imp_descripcion'] = 1;
+        $partida['elimina_bd'] = 1;
+        $partida['a_sub_total'] = 1;
+        $partida['a_descuento'] = 1;
+
+        $resultado = $html->data_producto($html_controler, $this->link, $name_entidad_partida, $partida);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertStringContainsStringIgnoringCase("name='cantidad' value='0' class='form-control' ",$resultado);
+        errores::$error = false;
+    }
+
     public function test_integra_key(): void
     {
         errores::$error = false;
