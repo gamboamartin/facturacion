@@ -890,6 +890,7 @@ class _base_system_fc extends _base_system{
     }
 
 
+
     private function data_partida(int $fc_partida_id): array|stdClass
     {
         $data_partida = (new fc_partida($this->link))->data_partida_obj(registro_partida_id: $fc_partida_id);
@@ -1061,7 +1062,6 @@ class _base_system_fc extends _base_system{
         return $notifica;
 
     }
-
 
 
     private function existe_factura_rel(string $name_entidad_ejecucion, array $factura_cliente, string $key_entidad_id, array $relacion): bool|array
@@ -2119,9 +2119,9 @@ class _base_system_fc extends _base_system{
         $this->ctl_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
 
-        $com_tipo_cliente_id = $this->registro['com_tipo_cliente_id'];
+        $com_cliente_id = $this->registro['com_cliente_id'];
 
-        $inputs = $this->nueva_partida_inicializa(com_tipo_cliente_id: $com_tipo_cliente_id);
+        $inputs = $this->nueva_partida_inicializa(com_cliente_id: $com_cliente_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al inicializar partida', data: $inputs);
             print_r($error);
@@ -2381,7 +2381,7 @@ class _base_system_fc extends _base_system{
             die('Error');
         }
 
-        $this->inputs = $this->nueva_partida_inicializa(com_tipo_cliente_id: $row['com_tipo_cliente_id']);
+        $this->inputs = $this->nueva_partida_inicializa(com_cliente_id: $row['com_cliente_id']);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al inicializar partida', data: $this->inputs);
             print_r($error);
@@ -2391,7 +2391,7 @@ class _base_system_fc extends _base_system{
         return $this->inputs;
     }
 
-    private function nueva_partida_inicializa(int $com_tipo_cliente_id): array|stdClass{
+    private function nueva_partida_inicializa(int $com_cliente_id): array|stdClass{
 
         $r_template = $this->ctl_partida->alta(header: false);
         if (errores::$error) {
@@ -2417,26 +2417,12 @@ class _base_system_fc extends _base_system{
         }
 
         foreach ($com_productos as $indice=>$com_producto){
-            $filtro['com_producto.id'] = $com_producto['com_producto_id'];
-            $filtro['com_tipo_cliente.id'] = $com_tipo_cliente_id;
-            $existe = (new com_conf_precio(link: $this->link))->existe(filtro: $filtro);
+            $precio = (new com_producto(link: $this->link))->precio(com_cliente_id: $com_cliente_id,
+                com_producto_id:  $com_producto['com_producto_id']);
             if (errores::$error) {
-                return $this->errores->error(mensaje: 'Error al validar si existe conf de precio', data: $existe);
+                return $this->errores->error(mensaje: 'Error al obtener precio', data: $precio);
             }
-            if($existe){
-                $r_com_conf_precio = (new com_conf_precio(link: $this->link))->filtro_and(filtro: $filtro);
-                if (errores::$error) {
-                    return $this->errores->error(mensaje: 'Error al obtener r_com_conf_precio', data: $r_com_conf_precio);
-                }
-                if($r_com_conf_precio->n_registros === 0){
-                    return $this->errores->error(mensaje: 'Error no existe configuracion de precio', data: $r_com_conf_precio);
-                }
-                if($r_com_conf_precio->n_registros > 1){
-                    return $this->errores->error(mensaje: 'Error  existe mas de una configuracion de precio', data: $r_com_conf_precio);
-                }
-                $com_conf_precio = $r_com_conf_precio->registros[0];
-                $com_productos[$indice]['com_producto_precio'] = $com_conf_precio['com_conf_precio_precio'];
-            }
+            $com_productos[$indice]['com_producto_precio'] = $precio;
         }
 
         $keys_selects['com_producto_id']->registros = $com_productos;

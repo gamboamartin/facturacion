@@ -172,12 +172,12 @@ class _partidas_html{
 
     /**
      * Integra el html de un impuesto completo
-     * @param html_controler $html_controler
-     * @param string $impuesto_html_completo
-     * @param _partida $modelo_partida
+     * @param html_controler $html_controler html base
+     * @param string $impuesto_html_completo impuesto previo cargado
+     * @param _partida $modelo_partida Modelo de la partida
      * @param string $name_entidad_impuesto fc_traslado o fc_retenido
-     * @param string $name_modelo_entidad
-     * @param array $partida
+     * @param string $name_modelo_entidad Nombre de la tabla base
+     * @param array $partida Partida a integrar
      * @return array|string
      */
     private function impuesto_html_completo(html_controler $html_controler, string $impuesto_html_completo,
