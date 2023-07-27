@@ -1805,6 +1805,11 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
 
         }
+        $del = (new base_test())->del_fc_conf_automatico($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_csd');
         if(errores::$error){
@@ -2544,14 +2549,26 @@ class base_test{
 
     public function del_fc_conf_automatico(PDO $link): array
     {
-
-
         $del = $this->del_fc_conf_aut_producto($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        $del = $this->del_fc_ejecucion_automatica($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_conf_automatico');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar retenido', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_ejecucion_automatica(PDO $link): array
+    {
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_ejecucion_automatica');
         if(errores::$error){
             return (new errores())->error('Error al eliminar retenido', $del);
         }
@@ -2602,11 +2619,6 @@ class base_test{
         if (errores::$error) {
             return (new errores())->error('Error al eliminar', $del);
         }
-        $del = $this->del_fc_conf_automatico($link);
-        if (errores::$error) {
-            return (new errores())->error('Error al eliminar', $del);
-        }
-
 
 
         $del = (new \gamboamartin\organigrama\tests\base_test())->del_org_empresa($link);

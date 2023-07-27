@@ -178,6 +178,26 @@ class _html_facturaTest extends test {
         errores::$error = false;
     }
 
+    public function test_thead_impuesto(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _html_factura();
+        $html = new liberator($html);
+
+        $resultado = $html->thead_impuesto();
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("<tr><th>Tipo Impuesto</th><th>Tipo Factor</th><th>Factor</th><th>Importe</th><th>Elimina</th></tr>",$resultado);
+        errores::$error = false;
+    }
+
     public function test_tr_producto(): void
     {
         errores::$error = false;

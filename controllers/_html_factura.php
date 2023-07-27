@@ -34,16 +34,12 @@ class _html_factura{
     /**
      * Genera el encabezado de impuestos a mostrar en las partidas
      * @return string
+     * @version 11.7.0
      */
     private function thead_impuesto(): string
     {
-        return "<tr>
-    <th>Tipo Impuesto</th>
-    <th>Tipo Factor</th>
-    <th>Factor</th>
-    <th>Importe</th>
-    <th>Elimina</th>
-</tr>";
+        return "<tr><th>Tipo Impuesto</th><th>Tipo Factor</th><th>Factor</th><th>Importe</th><th>Elimina</th></tr>";
+
     }
 
     /**
