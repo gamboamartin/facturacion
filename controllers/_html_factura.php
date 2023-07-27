@@ -31,6 +31,10 @@ class _html_factura{
             </thead>";
     }
 
+    /**
+     * Genera el encabezado de impuestos a mostrar en las partidas
+     * @return string
+     */
     private function thead_impuesto(): string
     {
         return "<tr>

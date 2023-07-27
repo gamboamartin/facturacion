@@ -2546,7 +2546,23 @@ class base_test{
     {
 
 
+        $del = $this->del_fc_conf_aut_producto($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_conf_automatico');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar retenido', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_conf_aut_producto(PDO $link): array
+    {
+
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_conf_aut_producto');
         if(errores::$error){
             return (new errores())->error('Error al eliminar retenido', $del);
         }
