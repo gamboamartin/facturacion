@@ -12,6 +12,7 @@ use gamboamartin\cat_sat\models\cat_sat_moneda;
 use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
+use gamboamartin\comercial\models\com_conf_precio;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\compresor\compresor;
@@ -2117,7 +2118,10 @@ class _base_system_fc extends _base_system{
         $propiedades = array("cols" => 12);
         $this->ctl_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
-        $inputs = $this->nueva_partida_inicializa();
+
+        $com_tipo_cliente_id = $this->registro['com_tipo_cliente_id'];
+
+        $inputs = $this->nueva_partida_inicializa(com_tipo_cliente_id: $com_tipo_cliente_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al inicializar partida', data: $inputs);
             print_r($error);
@@ -2369,7 +2373,15 @@ class _base_system_fc extends _base_system{
 
     public function nueva_partida(bool $header, bool $ws = false): array|stdClass
     {
-        $this->inputs = $this->nueva_partida_inicializa();
+
+        $row = $this->modelo->registro(registro_id: $this->registro_id);
+        if (errores::$error) {
+            $error = $this->errores->error(mensaje: 'Error al obtener partida', data: $row);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->inputs = $this->nueva_partida_inicializa(com_tipo_cliente_id: $row['com_tipo_cliente_id']);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al inicializar partida', data: $this->inputs);
             print_r($error);
@@ -2379,7 +2391,7 @@ class _base_system_fc extends _base_system{
         return $this->inputs;
     }
 
-    private function nueva_partida_inicializa(): array|stdClass{
+    private function nueva_partida_inicializa(int $com_tipo_cliente_id): array|stdClass{
 
         $r_template = $this->ctl_partida->alta(header: false);
         if (errores::$error) {
@@ -2398,10 +2410,43 @@ class _base_system_fc extends _base_system{
         $keys_selects['com_producto_id']->cols = 12;
         $keys_selects['cat_sat_conf_imps_id']->cols = 12;
 
+
+        $com_productos = (new com_producto(link: $this->link))->registros_activos();
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener productos', data: $com_productos);
+        }
+
+        foreach ($com_productos as $indice=>$com_producto){
+            $filtro['com_producto.id'] = $com_producto['com_producto_id'];
+            $filtro['com_tipo_cliente.id'] = $com_tipo_cliente_id;
+            $existe = (new com_conf_precio(link: $this->link))->existe(filtro: $filtro);
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al validar si existe conf de precio', data: $existe);
+            }
+            if($existe){
+                $r_com_conf_precio = (new com_conf_precio(link: $this->link))->filtro_and(filtro: $filtro);
+                if (errores::$error) {
+                    return $this->errores->error(mensaje: 'Error al obtener r_com_conf_precio', data: $r_com_conf_precio);
+                }
+                if($r_com_conf_precio->n_registros === 0){
+                    return $this->errores->error(mensaje: 'Error no existe configuracion de precio', data: $r_com_conf_precio);
+                }
+                if($r_com_conf_precio->n_registros > 1){
+                    return $this->errores->error(mensaje: 'Error  existe mas de una configuracion de precio', data: $r_com_conf_precio);
+                }
+                $com_conf_precio = $r_com_conf_precio->registros[0];
+                $com_productos[$indice]['com_producto_precio'] = $com_conf_precio['com_conf_precio_precio'];
+            }
+        }
+
+        $keys_selects['com_producto_id']->registros = $com_productos;
+
         $inputs = $this->ctl_partida->inputs(keys_selects: $keys_selects);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al obtener inputs', data: $inputs);
         }
+
+
 
 
 

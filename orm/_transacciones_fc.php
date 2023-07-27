@@ -52,13 +52,14 @@ class _transacciones_fc extends modelo
 
     public function __construct(PDO $link, string $tabla, array $columnas_extra)
     {
-        $columnas = array($tabla => false, 'fc_csd' => $tabla, 'cat_sat_forma_pago' => $tabla, 'cat_sat_metodo_pago' => $tabla,
-            'cat_sat_moneda' => $tabla, 'com_tipo_cambio' => $tabla, 'cat_sat_uso_cfdi' => $tabla,
-            'cat_sat_tipo_de_comprobante' => $tabla, 'cat_sat_regimen_fiscal' => $tabla, 'com_sucursal' => $tabla,
-            'com_cliente' => 'com_sucursal', 'dp_calle_pertenece' => $tabla, 'dp_calle' => 'dp_calle_pertenece',
-            'dp_colonia_postal' => 'dp_calle_pertenece', 'dp_colonia' => 'dp_colonia_postal', 'dp_cp' => 'dp_colonia_postal',
-            'dp_municipio' => 'dp_cp', 'dp_estado' => 'dp_municipio', 'dp_pais' => 'dp_estado', 'org_sucursal' => 'fc_csd',
-            'org_empresa' => 'org_sucursal');
+        $columnas = array($tabla => false, 'fc_csd' => $tabla, 'cat_sat_forma_pago' => $tabla,
+            'cat_sat_metodo_pago' => $tabla, 'cat_sat_moneda' => $tabla, 'com_tipo_cambio' => $tabla,
+            'cat_sat_uso_cfdi' => $tabla, 'cat_sat_tipo_de_comprobante' => $tabla, 'cat_sat_regimen_fiscal' => $tabla,
+            'com_sucursal' => $tabla, 'com_cliente' => 'com_sucursal', 'dp_calle_pertenece' => $tabla,
+            'dp_calle' => 'dp_calle_pertenece', 'dp_colonia_postal' => 'dp_calle_pertenece',
+            'dp_colonia' => 'dp_colonia_postal', 'dp_cp' => 'dp_colonia_postal', 'dp_municipio' => 'dp_cp',
+            'dp_estado' => 'dp_municipio', 'dp_pais' => 'dp_estado', 'org_sucursal' => 'fc_csd',
+            'org_empresa' => 'org_sucursal','com_tipo_cliente'=>'com_cliente');
 
         $renombres['cat_sat_tipo_persona_cliente']['nombre_original'] = 'cat_sat_tipo_persona';
         $renombres['cat_sat_tipo_persona_cliente']['enlace'] = 'com_cliente';

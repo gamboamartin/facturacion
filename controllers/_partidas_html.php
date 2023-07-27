@@ -66,13 +66,54 @@ class _partidas_html{
         return $impuesto_html;
     }
 
-    private function genera_impuesto_html(html_controler $html_controler, array $impuesto, string $key_importe, _partida $modelo_partida,
-                                          string $name_entidad_impuesto, string $name_modelo_entidad){
+    /**
+     * Genera un impuesto en forma de html
+     * @param html_controler $html_controler
+     * @param array $impuesto
+     * @param string $key_importe
+     * @param _partida $modelo_partida
+     * @param string $name_entidad_impuesto
+     * @param string $name_modelo_entidad
+     * @return array|string
+     * @version 11.3.0
+     */
+    private function genera_impuesto_html(html_controler $html_controler, array $impuesto, string $key_importe,
+                                          _partida $modelo_partida, string $name_entidad_impuesto,
+                                          string $name_modelo_entidad): array|string
+    {
+        $name_entidad_impuesto = trim($name_entidad_impuesto);
+        if($name_entidad_impuesto === ''){
+            return $this->error->error(mensaje: 'Error name_entidad_impuesto esta vacio', data: $name_entidad_impuesto);
+        }
+        $name_modelo_entidad = trim($name_modelo_entidad);
+        if($name_modelo_entidad === ''){
+            return $this->error->error(mensaje: 'Error name_modelo_entidad esta vacio', data: $name_modelo_entidad);
+        }
+        $key_importe = trim($key_importe);
+        if($key_importe === ''){
+            return $this->error->error(mensaje: 'Error key_importe esta vacio', data: $key_importe);
+        }
+
         $key_registro_id = $name_entidad_impuesto.'_id';
+        $key_modelo_entidad_id = $name_modelo_entidad.'_id';
+
+        $keys = array($key_registro_id,$key_modelo_entidad_id);
+        $valida = (new validacion())->valida_ids(keys: $keys, registro: $impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar impuesto', data: $valida);
+        }
+
+        $keys = array($key_registro_id,$key_modelo_entidad_id,$key_importe,'cat_sat_tipo_impuesto_descripcion',
+            'cat_sat_tipo_factor_descripcion','cat_sat_factor_factor');
+        $valida = (new validacion())->valida_existencia_keys(keys: $keys, registro: $impuesto);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar impuesto', data: $valida);
+        }
+
         $registro_id = $impuesto[$key_registro_id];
 
         $params = $modelo_partida->params_button_partida(name_modelo_entidad: $name_modelo_entidad,
-            registro_entidad_id: $impuesto[$name_modelo_entidad.'_id']);
+            registro_entidad_id: $impuesto[$key_modelo_entidad_id]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener params', data: $params);
         }
@@ -84,7 +125,8 @@ class _partidas_html{
             return $this->error->error(mensaje: 'Error al generar button', data: $button);
         }
 
-        $impuesto_html = (new _html_factura())->data_impuesto(button_del: $button, impuesto: $impuesto, key: $key_importe);
+        $impuesto_html = (new _html_factura())->data_impuesto(button_del: $button, impuesto: $impuesto,
+            key: $key_importe);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar html', data: $impuesto_html);
         }
@@ -129,9 +171,9 @@ class _partidas_html{
     }
 
     /**
+     * Integra el html de un impuesto completo
      * @param html_controler $html_controler
      * @param string $impuesto_html_completo
-     * @param PDO $link
      * @param _partida $modelo_partida
      * @param string $name_entidad_impuesto fc_traslado o fc_retenido
      * @param string $name_modelo_entidad
