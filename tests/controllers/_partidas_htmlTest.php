@@ -108,6 +108,43 @@ class _partidas_htmlTest extends test {
         errores::$error = false;
     }
 
+    public function test_impuesto_html_completo(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _partidas_html();
+        $html = new liberator($html);
+
+        $html_ = new html();
+        $html_controler = new html_controler($html_);
+
+
+        $modelo_partida = new fc_partida(link: $this->link);
+        $name_entidad_impuesto = 'a';
+        $name_modelo_entidad = 'b';
+        $impuesto_html_completo = '';
+        $partida = array();
+        $partida['a'][0]['a_id'] = 1;
+        $partida['a'][0]['b_id'] = 1;
+        $partida['a'][0]['a_importe'] = 1;
+        $partida['a'][0]['cat_sat_tipo_impuesto_descripcion'] = 1;
+        $partida['a'][0]['cat_sat_tipo_factor_descripcion'] = 1;
+        $partida['a'][0]['cat_sat_factor_factor'] = 1;
+
+        $resultado = $html->impuesto_html_completo($html_controler, $impuesto_html_completo, $modelo_partida,
+            $name_entidad_impuesto, $name_modelo_entidad, $partida);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertStringContainsStringIgnoringCase("seccion=a&accion=elimina_bd&re",$resultado);
+        errores::$error = false;
+    }
+
 
 
 }

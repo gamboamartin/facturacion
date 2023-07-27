@@ -2542,6 +2542,17 @@ class base_test{
         return $del;
     }
 
+    public function del_fc_conf_automatico(PDO $link): array
+    {
+
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_conf_automatico');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar retenido', $del);
+        }
+        return $del;
+    }
+
     public function del_fc_uuid_cancela(PDO $link): array
     {
 
@@ -2572,6 +2583,10 @@ class base_test{
         }
 
         $del = $this->del_fc_uuid($link);
+        if (errores::$error) {
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        $del = $this->del_fc_conf_automatico($link);
         if (errores::$error) {
             return (new errores())->error('Error al eliminar', $del);
         }

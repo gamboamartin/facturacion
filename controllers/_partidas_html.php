@@ -179,15 +179,38 @@ class _partidas_html{
      * @param string $name_modelo_entidad Nombre de la tabla base
      * @param array $partida Partida a integrar
      * @return array|string
+     * @version 11.5.0
      */
     private function impuesto_html_completo(html_controler $html_controler, string $impuesto_html_completo,
                                             _partida $modelo_partida, string $name_entidad_impuesto,
                                             string $name_modelo_entidad, array $partida): array|string
     {
 
+        $name_entidad_impuesto = trim($name_entidad_impuesto);
+        if($name_entidad_impuesto === ''){
+            return $this->error->error(mensaje: 'Error name_entidad_impuesto esta vacio', data: $name_entidad_impuesto);
+        }
+        $name_modelo_entidad = trim($name_modelo_entidad);
+        if($name_modelo_entidad === ''){
+            return $this->error->error(mensaje: 'Error name_modelo_entidad esta vacio', data: $name_modelo_entidad);
+        }
+
+        $keys = array($name_entidad_impuesto);
+        $valida = (new validacion())->valida_existencia_keys(keys: $keys,registro:  $partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
+        if(!is_iterable($partida[$name_entidad_impuesto])){
+            return $this->error->error(mensaje: 'Error partida[name_entidad_impuesto] no es iterable',
+                data: $valida);
+        }
+
         $key_importe = $name_entidad_impuesto.'_importe';
 
         foreach($partida[$name_entidad_impuesto] as $impuesto){
+            if(!is_array($impuesto)){
+                return $this->error->error(mensaje: 'Error impuesto debe ser un array', data: $impuesto);
+            }
             $impuesto_html = $this->genera_impuesto_html(html_controler: $html_controler,impuesto:  $impuesto,
                 key_importe:  $key_importe, modelo_partida: $modelo_partida,
                 name_entidad_impuesto:  $name_entidad_impuesto,name_modelo_entidad:  $name_modelo_entidad);
@@ -225,6 +248,16 @@ class _partidas_html{
     private function integra_impuesto_html(bool $aplica, html_controler $html_controler,
                                            _partida $modelo_partida, string $name_entidad_impuesto,
                                            string $name_modelo_entidad, array $partida, string $tag_tipo_impuesto){
+
+        $name_entidad_impuesto = trim($name_entidad_impuesto);
+        if($name_entidad_impuesto === ''){
+            return $this->error->error(mensaje: 'Error name_entidad_impuesto esta vacio', data: $name_entidad_impuesto);
+        }
+        $name_modelo_entidad = trim($name_modelo_entidad);
+        if($name_modelo_entidad === ''){
+            return $this->error->error(mensaje: 'Error name_modelo_entidad esta vacio', data: $name_modelo_entidad);
+        }
+
         $impuesto_html_completo = '';
         if($aplica){
             $impuesto_html_completo = $this->impuesto_html_completo(html_controler: $html_controler,
