@@ -25,12 +25,14 @@ use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\models\fc_uuid_fc;
+use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\out_permisos;
 use gamboamartin\system\system;
 use gamboamartin\template\html;
 use PDO;
 use stdClass;
+use Throwable;
 
 class controlador_fc_ejecucion_automatica extends system{
 
@@ -209,22 +211,67 @@ class controlador_fc_ejecucion_automatica extends system{
             }
 
             if($fc_factura['fc_factura_etapa'] !=='TIMBRADO'){
-
+                $this->link->beginTransaction();
                 $timbra = (new fc_factura(link: $this->link))->timbra_xml(modelo_documento: $modelo_documento,modelo_etapa:  $modelo_etapa,
                     modelo_partida: $modelo_partida,modelo_predial:  $modelo_predial,modelo_relacion:  $modelo_relacion,
                     modelo_relacionada:  $modelo_relacionada,modelo_retencion:  $modelo_retencion,
                     modelo_sello: $modelo_sello,modelo_traslado:  $modelo_traslado,modelo_uuid_ext:  $modelo_uuid_ext,registro_id:  $fc_factura_id);
 
                 if(errores::$error){
+                    $this->link->rollBack();
                     return $this->retorno_error(mensaje: 'Error al timbrar',data:  $timbra,header:  $header,ws:  $ws);
                 }
-
-                print_r($timbra);
+                $this->link->commit();
             }
 
         }
-        EXIT;
 
+        if(isset($_GET['accion_retorno'])){
+            $siguiente_view = $_GET['accion_retorno'];
+        }
+        else{
+            $siguiente_view = (new actions())->init_alta_bd(siguiente_view: 'facturas');
+            if(errores::$error){
+
+                return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
+                    header:  $header, ws: $ws);
+            }
+        }
+        $seccion_retorno = $this->tabla;
+        if(isset($_GET['seccion_retorno'])){
+            $seccion_retorno = $_GET['seccion_retorno'];
+        }
+        $id_retorno = -1;
+        if(isset($_GET['id_retorno'])){
+            $id_retorno = $_GET['id_retorno'];
+        }
+
+        $header_retorno = $this->header_retorno(accion: $siguiente_view, seccion: $seccion_retorno, id_retorno: $id_retorno);
+        if(errores::$error){
+
+            return $this->retorno_error(mensaje: 'Error al maquetar retorno', data: $header_retorno,
+                header:  $header, ws: $ws);
+        }
+
+        if($header){
+            header('Location:' . $header_retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            try {
+                echo json_encode($fc_facturas, JSON_THROW_ON_ERROR);
+            }
+            catch (Throwable $e){
+                $error = $this->errores->error(mensaje: 'Error al dar salida json', data: $e);
+                print_r($error);
+                exit;
+            }
+            exit;
+        }
+        $fc_facturas->siguiente_view = $siguiente_view;
+
+        return $fc_facturas;
     }
 
 

@@ -290,7 +290,8 @@ class _partidas_html{
     }
 
     /**
-     * @param bool $aplica
+     * Genera un html de impuestos
+     * @param bool $aplica 
      * @param html_controler $html_controler
      * @param _partida $modelo_partida
      * @param string $name_entidad_impuesto
