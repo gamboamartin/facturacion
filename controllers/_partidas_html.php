@@ -51,6 +51,7 @@ class _partidas_html{
     }
 
     /**
+     * Genera el html de un impuesto
      * @param html_controler $html_controler
      * @param _partida $modelo_partida
      * @param string $name_modelo_entidad
@@ -291,13 +292,13 @@ class _partidas_html{
 
     /**
      * Genera un html de impuestos
-     * @param bool $aplica 
-     * @param html_controler $html_controler
-     * @param _partida $modelo_partida
-     * @param string $name_entidad_impuesto
-     * @param string $name_modelo_entidad
-     * @param array $partida
-     * @param string $tag_tipo_impuesto
+     * @param bool $aplica si aplica integra el impuesto
+     * @param html_controler $html_controler Html base
+     * @param _partida $modelo_partida modelo de tipo partida
+     * @param string $name_entidad_impuesto nombre de la entidad de impuesto
+     * @param string $name_modelo_entidad nombre base de factura
+     * @param array $partida partida datos
+     * @param string $tag_tipo_impuesto tipo de impuesto
      * @return array|string
      */
     private function integra_impuesto_html(bool $aplica, html_controler $html_controler,

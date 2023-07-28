@@ -241,7 +241,7 @@ class controlador_fc_ejecucion_automatica extends system{
         if(isset($_GET['seccion_retorno'])){
             $seccion_retorno = $_GET['seccion_retorno'];
         }
-        $id_retorno = -1;
+        $id_retorno = $this->registro_id;
         if(isset($_GET['id_retorno'])){
             $id_retorno = $_GET['id_retorno'];
         }
