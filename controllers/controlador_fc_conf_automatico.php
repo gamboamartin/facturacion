@@ -9,14 +9,11 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\comercial\models\com_sucursal;
-use gamboamartin\comercial\models\com_tipo_cliente;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_conf_automatico_html;
 use gamboamartin\facturacion\html\fc_csd_html;
 use gamboamartin\facturacion\models\fc_conf_automatico;
 use gamboamartin\facturacion\models\fc_csd;
-use gamboamartin\organigrama\html\org_empresa_html;
-use gamboamartin\organigrama\models\org_empresa;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template\html;

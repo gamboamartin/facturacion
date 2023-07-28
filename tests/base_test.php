@@ -1900,6 +1900,11 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
         }
 
+        $del = $this->del_fc_factura_automatica($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_factura');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
@@ -2207,6 +2212,16 @@ class base_test{
         }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_docto_relacionado');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_factura_automatica(PDO $link): array
+    {
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_factura_automatica');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
         }

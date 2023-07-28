@@ -44,6 +44,21 @@ class fc_ejecucion_automatica extends _modelo_parent_sin_codigo
             return $this->error->error(mensaje: 'Error al insertar registro',data:  $r_alta);
         }
 
+        $fc_ejecucion_automatica_id = $r_alta->registro_id;
+
+        $facturas = $data->facturas;
+
+        foreach ($facturas as $fc_factura){
+            $fc_factura_automatica_ins = array();
+            $fc_factura_automatica_ins['fc_factura_id'] = $fc_factura->fc_factura_id;
+            $fc_factura_automatica_ins['fc_ejecucion_automatica_id'] = $fc_ejecucion_automatica_id;
+
+            $r_alta_fc_aut = (new fc_factura_automatica(link: $this->link))->alta_registro(registro: $fc_factura_automatica_ins);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al insertar factura automatica',data:  $r_alta_fc_aut);
+            }
+        }
+
         return $r_alta;
 
     }

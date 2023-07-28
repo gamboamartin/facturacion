@@ -247,15 +247,22 @@ class _html_factura{
         return $data;
     }
 
-    public function tr_impuestos_html(string $impuesto_html, string $tag_tipo_impuesto){
+    /**
+     * Integra los impuesto via html
+     * @param string $impuesto_html
+     * @param string $tag_tipo_impuesto
+     * @return array|string
+     */
+    public function tr_impuestos_html(string $impuesto_html, string $tag_tipo_impuesto): array|string
+    {
         $t_head_impuesto = $this->thead_impuesto();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar t head', data: $t_head_impuesto);
         }
-        $html = "
+        return "
             <tr>
-                <td class='nested' colspan='9' style='padding: 0;'>
-                    <table class='table table-striped' style='font-size: 14px;'>
+                <td class='nested' colspan='9'>
+                    <table class='table table-striped'>
                         <thead >
                             <tr>
                                 <th colspan='5'>$tag_tipo_impuesto</th>
@@ -268,8 +275,6 @@ class _html_factura{
                     </table>
                 </td>
             </tr>";
-
-        return $html;
     }
 
     /**
