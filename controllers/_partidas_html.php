@@ -52,12 +52,12 @@ class _partidas_html{
 
     /**
      * Genera el html de un impuesto
-     * @param html_controler $html_controler
-     * @param _partida $modelo_partida
-     * @param string $name_modelo_entidad
-     * @param array $partida
-     * @param string $tag_tipo_impuesto
-     * @param string $tipo
+     * @param html_controler $html_controler Html base
+     * @param _partida $modelo_partida modelo de tipo partida
+     * @param string $name_modelo_entidad nombre de la entidad base
+     * @param array $partida partida en ejecucion
+     * @param string $tag_tipo_impuesto Tag de tipo impuesto
+     * @param string $tipo Tipo de impuesto
      * @return array|string
      */
     private function genera_impuesto(html_controler $html_controler, _partida $modelo_partida,
@@ -260,6 +260,7 @@ class _partidas_html{
     }
 
     /**
+     * Integra los impuestos via html
      * @param html_controler $html_controler
      * @param _partida $modelo_partida
      * @param string $name_entidad_retenido
@@ -300,6 +301,7 @@ class _partidas_html{
      * @param array $partida partida datos
      * @param string $tag_tipo_impuesto tipo de impuesto
      * @return array|string
+     * @version 11.12.0
      */
     private function integra_impuesto_html(bool $aplica, html_controler $html_controler,
                                            _partida $modelo_partida, string $name_entidad_impuesto,
@@ -317,6 +319,19 @@ class _partidas_html{
 
         $impuesto_html_completo = '';
         if($aplica){
+            $keys = array($name_entidad_impuesto);
+            $valida = (new validacion())->valida_existencia_keys(keys: $keys,registro:  $partida);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+            }
+            if(!is_iterable($partida[$name_entidad_impuesto])){
+                return $this->error->error(mensaje: 'Error partida[name_entidad_impuesto] no es iterable',
+                    data: $valida);
+            }
+            $tag_tipo_impuesto = trim($tag_tipo_impuesto);
+            if($tag_tipo_impuesto === ''){
+                return $this->error->error(mensaje: 'Error tag_tipo_impuesto esta vacio', data: $tag_tipo_impuesto);
+            }
             $impuesto_html_completo = $this->impuesto_html_completo(html_controler: $html_controler,
                 impuesto_html_completo: $impuesto_html_completo, modelo_partida: $modelo_partida,
                 name_entidad_impuesto: $name_entidad_impuesto, name_modelo_entidad: $name_modelo_entidad,

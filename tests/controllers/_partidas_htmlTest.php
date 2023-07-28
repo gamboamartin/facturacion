@@ -169,6 +169,37 @@ class _partidas_htmlTest extends test {
         errores::$error = false;
     }
 
+    public function test_integra_impuesto_html(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _partidas_html();
+        $html = new liberator($html);
+
+        $aplica = true;
+        $tag_tipo_impuesto = 'c';
+        $html_ = new html();
+        $html_controler = new html_controler($html_);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $name_entidad_impuesto = 'a';
+        $name_modelo_entidad = 'b';
+        $partida = array();
+        $partida['a'] = array();
+
+        $resultado = $html->integra_impuesto_html($aplica, $html_controler, $modelo_partida, $name_entidad_impuesto,
+            $name_modelo_entidad, $partida, $tag_tipo_impuesto);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertStringContainsStringIgnoringCase("<th>Importe</th><th>Elimina",$resultado);
+        errores::$error = false;
+    }
+
 
 
 }

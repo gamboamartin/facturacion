@@ -257,11 +257,6 @@ class _html_factura{
     final public function tr_impuestos_html(string $impuesto_html, string $tag_tipo_impuesto): array|string
     {
 
-        $impuesto_html = trim($impuesto_html);
-        if($impuesto_html === ''){
-            return $this->error->error(mensaje: 'Error impuesto_html esta vacio', data: $impuesto_html);
-        }
-
         $tag_tipo_impuesto = trim($tag_tipo_impuesto);
         if($tag_tipo_impuesto === ''){
             return $this->error->error(mensaje: 'Error tag_tipo_impuesto esta vacio', data: $tag_tipo_impuesto);
