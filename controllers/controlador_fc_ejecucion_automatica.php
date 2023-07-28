@@ -8,6 +8,9 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
+use gamboamartin\administrador\models\adm_accion;
+use gamboamartin\administrador\models\adm_accion_grupo;
+use gamboamartin\administrador\models\adm_grupo;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_conf_aut_producto_html;
 use gamboamartin\facturacion\html\fc_conf_automatico_html;
@@ -16,7 +19,9 @@ use gamboamartin\facturacion\models\com_producto;
 use gamboamartin\facturacion\models\fc_conf_aut_producto;
 use gamboamartin\facturacion\models\fc_conf_automatico;
 use gamboamartin\facturacion\models\fc_ejecucion_automatica;
+use gamboamartin\facturacion\models\fc_factura_automatica;
 use gamboamartin\system\links_menu;
+use gamboamartin\system\out_permisos;
 use gamboamartin\system\system;
 use gamboamartin\template\html;
 use html\com_producto_html;
@@ -97,6 +102,57 @@ class controlador_fc_ejecucion_automatica extends system{
         $this->inputs->descripcion = $descripcion;
         return $r_alta;
     }
+    public function facturas(bool $header, bool $ws = false): array|stdClass
+    {
+        $fc_ejecucion_automatica = $this->modelo->registro(registro_id: $this->registro_id,retorno_obj: true);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener fc_ejecucion_automatica',
+                data:  $fc_ejecucion_automatica,header:  $header,ws:  $ws);
+        }
+        $filtro['fc_ejecucion_automatica.id'] = $this->registro_id;
+        $r_facturas_automaticas = (new fc_factura_automatica(link: $this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener facturas',
+                data:  $r_facturas_automaticas,header:  $header,ws:  $ws);
+        }
+        $facturas_automaticas = $r_facturas_automaticas->registros;
+
+        $acciones = (new adm_grupo(link: $this->link))->acciones_permitidas(grupo_id: $_SESSION['grupo_id'],seccion: 'fc_factura');
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener acciones',
+                data: $acciones, header: $header, ws: $ws);
+        }
+        $acciones_lista = array();
+        foreach ($acciones as $adm_accion){
+            if($adm_accion['adm_accion_es_lista'] === 'activo'){
+                $acciones_lista[] = $adm_accion;
+            }
+        }
+        $controlador_fc_factura = new controlador_fc_factura(link: $this->link);
+        $controlador_fc_factura->seccion = 'fc_factura';
+
+        foreach ($facturas_automaticas as $indice=>$fc_factura){
+
+            $controlador_fc_factura->registro_id = $fc_factura['fc_factura_id'];
+
+            $buttons = (new out_permisos())->buttons_view(controler:$controlador_fc_factura,
+                not_actions: array(), params: array());
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al obtener botones',
+                    data: $buttons, header: $header, ws: $ws);
+            }
+
+            $buttons_html = implode('', $buttons);
+
+            $facturas_automaticas[$indice]['fc_factura_acciones'] = $buttons_html;
+
+        }
+
+        $this->registros = $facturas_automaticas;
+
+        return $r_facturas_automaticas;
+    }
+
 
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {

@@ -14,10 +14,17 @@ class fc_factura_automatica extends _modelo_parent_sin_codigo
     {
         $tabla = 'fc_factura_automatica';
         $columnas = array($tabla => false, 'fc_factura' => $tabla,'fc_ejecucion_automatica'=>$tabla,
-            'fc_conf_automatico'=>'fc_ejecucion_automatica');
+            'fc_conf_automatico'=>'fc_ejecucion_automatica','fc_csd'=>'fc_factura','org_sucursal'=>'fc_csd',
+            'org_empresa'=>'org_sucursal');
+
         $campos_obligatorios = array('fc_factura_id','fc_ejecucion_automatica_id');
 
-        $columnas_extra = array();
+        $fc_factura_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa 
+            LEFT JOIN pr_etapa_proceso ON pr_etapa_proceso.pr_etapa_id = pr_etapa.id 
+            LEFT JOIN fc_factura_etapa ON fc_factura_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
+            WHERE fc_factura_etapa.fc_factura_id = fc_factura.id ORDER BY fc_factura_etapa.id DESC LIMIT 1)";
+
+        $columnas_extra['fc_factura_etapa'] = $fc_factura_etapa;
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios,
             columnas: $columnas,  columnas_extra: $columnas_extra);

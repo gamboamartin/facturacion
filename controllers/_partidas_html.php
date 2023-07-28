@@ -50,9 +50,19 @@ class _partidas_html{
         return $aplica;
     }
 
+    /**
+     * @param html_controler $html_controler
+     * @param _partida $modelo_partida
+     * @param string $name_modelo_entidad
+     * @param array $partida
+     * @param string $tag_tipo_impuesto
+     * @param string $tipo
+     * @return array|string
+     */
     private function genera_impuesto(html_controler $html_controler, _partida $modelo_partida,
                                      string $name_modelo_entidad, array $partida, string $tag_tipo_impuesto,
-                                     string $tipo){
+                                     string $tipo): array|string
+    {
         $aplica = $this->aplica_aplica_impuesto(tipo: $tipo,partida:  $partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al verificar aplica impuesto', data: $aplica);
@@ -134,6 +144,16 @@ class _partidas_html{
     }
 
 
+    /**
+     * @param html_controler $html
+     * @param PDO $link
+     * @param _transacciones_fc $modelo_entidad
+     * @param _partida $modelo_partida
+     * @param _data_impuestos $modelo_retencion
+     * @param _data_impuestos $modelo_traslado
+     * @param int $registro_entidad_id
+     * @return array|stdClass
+     */
     final function genera_partidas_html(html_controler $html, PDO $link, _transacciones_fc $modelo_entidad,
                                         _partida $modelo_partida,_data_impuestos $modelo_retencion,
                                         _data_impuestos $modelo_traslado, int $registro_entidad_id): array|stdClass
@@ -158,7 +178,15 @@ class _partidas_html{
         return $partidas;
     }
 
-    private function impuesto_html(bool $aplica, string $impuesto_html_completo, string $tag_tipo_impuesto){
+    /**
+     * Integra un impuesto html si aplica o existe en la partida
+     * @param bool $aplica
+     * @param string $impuesto_html_completo
+     * @param string $tag_tipo_impuesto
+     * @return array|string
+     */
+    private function impuesto_html(bool $aplica, string $impuesto_html_completo, string $tag_tipo_impuesto): array|string
+    {
         $impuesto_html = '';
         if($aplica) {
             $impuesto_html = (new _html_factura())->tr_impuestos_html(
@@ -223,6 +251,15 @@ class _partidas_html{
         return $impuesto_html_completo;
     }
 
+    /**
+     * @param html_controler $html_controler
+     * @param _partida $modelo_partida
+     * @param string $name_entidad_retenido
+     * @param string $name_entidad_traslado
+     * @param string $name_modelo_entidad
+     * @param array $partida
+     * @return array|stdClass
+     */
     private function impuestos_html(html_controler $html_controler, _partida $modelo_partida,
                                     string $name_entidad_retenido, string $name_entidad_traslado,
                                     string $name_modelo_entidad, array $partida): array|stdClass
@@ -245,9 +282,20 @@ class _partidas_html{
         return $data;
     }
 
+    /**
+     * @param bool $aplica
+     * @param html_controler $html_controler
+     * @param _partida $modelo_partida
+     * @param string $name_entidad_impuesto
+     * @param string $name_modelo_entidad
+     * @param array $partida
+     * @param string $tag_tipo_impuesto
+     * @return array|string
+     */
     private function integra_impuesto_html(bool $aplica, html_controler $html_controler,
                                            _partida $modelo_partida, string $name_entidad_impuesto,
-                                           string $name_modelo_entidad, array $partida, string $tag_tipo_impuesto){
+                                           string $name_modelo_entidad, array $partida, string $tag_tipo_impuesto): array|string
+    {
 
         $name_entidad_impuesto = trim($name_entidad_impuesto);
         if($name_entidad_impuesto === ''){
@@ -269,7 +317,6 @@ class _partidas_html{
             }
         }
 
-
         $impuesto_html = $this->impuesto_html(aplica: $aplica,
             impuesto_html_completo: $impuesto_html_completo, tag_tipo_impuesto: $tag_tipo_impuesto);
         if (errores::$error) {
@@ -278,6 +325,18 @@ class _partidas_html{
         return $impuesto_html;
     }
 
+    /**
+     * @param html_controler $html_controler
+     * @param int $indice
+     * @param PDO $link
+     * @param _partida $modelo_partida
+     * @param string $name_entidad_retenido
+     * @param string $name_entidad_traslado
+     * @param string $name_modelo_entidad
+     * @param array $partida
+     * @param stdClass $partidas
+     * @return array|stdClass
+     */
     private function partida_html(html_controler $html_controler, int $indice, PDO $link, _partida $modelo_partida,
                                   string $name_entidad_retenido, string $name_entidad_traslado,
                                   string $name_modelo_entidad, array $partida, stdClass $partidas): array|stdClass

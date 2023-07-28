@@ -249,12 +249,24 @@ class _html_factura{
 
     /**
      * Integra los impuesto via html
-     * @param string $impuesto_html
-     * @param string $tag_tipo_impuesto
+     * @param string $impuesto_html Html de datos de impuesto
+     * @param string $tag_tipo_impuesto Tag a mostrar
      * @return array|string
+     * @version 11.9.0
      */
-    public function tr_impuestos_html(string $impuesto_html, string $tag_tipo_impuesto): array|string
+    final public function tr_impuestos_html(string $impuesto_html, string $tag_tipo_impuesto): array|string
     {
+
+        $impuesto_html = trim($impuesto_html);
+        if($impuesto_html === ''){
+            return $this->error->error(mensaje: 'Error impuesto_html esta vacio', data: $impuesto_html);
+        }
+
+        $tag_tipo_impuesto = trim($tag_tipo_impuesto);
+        if($tag_tipo_impuesto === ''){
+            return $this->error->error(mensaje: 'Error tag_tipo_impuesto esta vacio', data: $tag_tipo_impuesto);
+        }
+
         $t_head_impuesto = $this->thead_impuesto();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar t head', data: $t_head_impuesto);
