@@ -180,15 +180,22 @@ class _partidas_html{
 
     /**
      * Integra un impuesto html si aplica o existe en la partida
-     * @param bool $aplica
-     * @param string $impuesto_html_completo
-     * @param string $tag_tipo_impuesto
+     * @param bool $aplica Si aplica integra el html del impuesto
+     * @param string $impuesto_html_completo Html del contenedor
+     * @param string $tag_tipo_impuesto Tipo de impuesto
      * @return array|string
+     * @version 11.10.0
      */
     private function impuesto_html(bool $aplica, string $impuesto_html_completo, string $tag_tipo_impuesto): array|string
     {
         $impuesto_html = '';
         if($aplica) {
+
+            $tag_tipo_impuesto = trim($tag_tipo_impuesto);
+            if($tag_tipo_impuesto === ''){
+                return $this->error->error(mensaje: 'Error tag_tipo_impuesto esta vacio', data: $tag_tipo_impuesto);
+            }
+
             $impuesto_html = (new _html_factura())->tr_impuestos_html(
                 impuesto_html: $impuesto_html_completo, tag_tipo_impuesto: $tag_tipo_impuesto);
             if (errores::$error) {

@@ -108,6 +108,30 @@ class _partidas_htmlTest extends test {
         errores::$error = false;
     }
 
+    public function test_impuesto_html(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _partidas_html();
+        $html = new liberator($html);
+
+        $aplica = true;
+        $impuesto_html_completo = 'a';
+        $tag_tipo_impuesto = 'v';
+
+        $resultado = $html->impuesto_html($aplica, $impuesto_html_completo, $tag_tipo_impuesto);
+
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertStringContainsStringIgnoringCase("<td class='nested' colspan='9'>",$resultado);
+        errores::$error = false;
+    }
     public function test_impuesto_html_completo(): void
     {
         errores::$error = false;

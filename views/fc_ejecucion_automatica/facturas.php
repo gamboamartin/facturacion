@@ -7,6 +7,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="widget widget-box box-container widget-mylistings">
+                    <form method="post" action="<?php echo $controlador->link_timbra; ?>" class="form-additional">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -17,6 +18,7 @@
                             <th>Total</th>
                             <th>UUID</th>
                             <th>Estatus</th>
+                            <th>Selecciona</th>
                             <th>Accion</th>
                         </tr>
                         </thead>
@@ -32,6 +34,7 @@
                             <td><?php echo $fc_factura['fc_factura_total'] ?></td>
                             <td><?php echo $fc_factura['fc_factura_folio_fiscal'] ?></td>
                             <td><?php echo $fc_factura['fc_factura_etapa'] ?></td>
+                            <td><?php echo $fc_factura['fc_factura_selecciona'] ?></td>
                             <td>
                                 <?php echo $fc_factura['fc_factura_acciones'] ?>
                             </td>
@@ -39,6 +42,8 @@
                         <?php } ?>
                         </tbody>
                     </table>
+                    <?php echo $controlador->buttons['button_timbra']; ?>
+                    </form>
                 </div> <!-- /. widget-table-->
             </div><!-- /.center-content -->
         </div>
