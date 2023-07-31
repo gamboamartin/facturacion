@@ -32,16 +32,9 @@ class _partidas_html{
      */
     private function aplica_aplica_impuesto(string  $tipo, array $partida): bool|array
     {
-        $tipo = trim($tipo);
-        if($tipo === ''){
-            return $this->error->error(mensaje: 'Error tipo no existe o esta vacio', data: $tipo);
-        }
-        $valida = (new validacion())->valida_existencia_keys(keys: array($tipo),registro:  $partida);
+        $valida = $this->valida_impuesto_partida(partida: $partida,tipo:  $tipo);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
-        }
-        if(!is_array($partida[$tipo])){
-            return $this->error->error(mensaje: 'Error partida[tipo] debe ser un array', data: $partida);
         }
         $aplica = false;
         if(count($partida[$tipo])>0) {
@@ -64,6 +57,17 @@ class _partidas_html{
                                      string $name_modelo_entidad, array $partida, string $tag_tipo_impuesto,
                                      string $tipo): array|string
     {
+
+        $name_modelo_entidad = trim($name_modelo_entidad);
+        if($name_modelo_entidad === ''){
+            return $this->error->error(mensaje: 'Error name_modelo_entidad esta vacio', data: $name_modelo_entidad);
+        }
+
+        $valida = $this->valida_impuesto_partida(partida: $partida,tipo:  $tipo);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
+
         $aplica = $this->aplica_aplica_impuesto(tipo: $tipo,partida:  $partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al verificar aplica impuesto', data: $aplica);
@@ -146,6 +150,7 @@ class _partidas_html{
 
 
     /**
+     * Genera las partidas en html
      * @param html_controler $html
      * @param PDO $link
      * @param _transacciones_fc $modelo_entidad
@@ -261,12 +266,12 @@ class _partidas_html{
 
     /**
      * Integra los impuestos via html
-     * @param html_controler $html_controler
-     * @param _partida $modelo_partida
-     * @param string $name_entidad_retenido
-     * @param string $name_entidad_traslado
-     * @param string $name_modelo_entidad
-     * @param array $partida
+     * @param html_controler $html_controler Html base
+     * @param _partida $modelo_partida Modelo de tipo partida
+     * @param string $name_entidad_retenido entidad de impuesto retenido
+     * @param string $name_entidad_traslado entidad de impuesto trasladado
+     * @param string $name_modelo_entidad Nombre de la entidad base
+     * @param array $partida Partida en proceso
      * @return array|stdClass
      */
     private function impuestos_html(html_controler $html_controler, _partida $modelo_partida,
@@ -350,6 +355,7 @@ class _partidas_html{
     }
 
     /**
+     * Integra los datos de una partida en html
      * @param html_controler $html_controler
      * @param int $indice
      * @param PDO $link
@@ -415,5 +421,20 @@ class _partidas_html{
         $partidas->registros[$indice]['impuesto_traslado_html'] = $impuestos_html->traslados;
         $partidas->registros[$indice]['impuesto_retenido_html'] = $impuestos_html->retenidos;
         return $partidas;
+    }
+
+    private function valida_impuesto_partida(array $partida, string $tipo){
+        $tipo = trim($tipo);
+        if($tipo === ''){
+            return $this->error->error(mensaje: 'Error tipo no existe o esta vacio', data: $tipo);
+        }
+        $valida = (new validacion())->valida_existencia_keys(keys: array($tipo),registro:  $partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
+        if(!is_array($partida[$tipo])){
+            return $this->error->error(mensaje: 'Error partida[tipo] debe ser un array', data: $partida);
+        }
+        return true;
     }
 }

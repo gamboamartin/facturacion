@@ -72,6 +72,42 @@ class _partidas_htmlTest extends test {
         errores::$error = false;
     }
 
+    public function test_genera_impuesto(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _partidas_html();
+        $html = new liberator($html);
+
+
+        $tag_tipo_impuesto = 'c';
+        $html_ = new html();
+        $html_controler = new html_controler($html_);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $name_modelo_entidad = 'b';
+        $partida = array();
+        $partida['a'][0]['a_id'] = '1';
+        $partida['a'][0]['b_id'] = '1';
+        $partida['a'][0]['a_importe'] = '1';
+        $partida['a'][0]['cat_sat_tipo_impuesto_descripcion'] = '1';
+        $partida['a'][0]['cat_sat_tipo_factor_descripcion'] = '1';
+        $partida['a'][0]['cat_sat_factor_factor'] = '1';
+        $tipo = 'a';
+
+        $resultado = $html->genera_impuesto($html_controler, $modelo_partida, $name_modelo_entidad, $partida,
+            $tag_tipo_impuesto, $tipo);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertStringContainsStringIgnoringCase("mpuesto</th><th>Tipo Factor</th><th",$resultado);
+        errores::$error = false;
+    }
+
     public function test_genera_impuesto_html(): void
     {
         errores::$error = false;
