@@ -44,6 +44,36 @@ class _partidas_html{
     }
 
     /**
+     * Integra la descripcion en la partida
+     * @param string $fc_partida_descripcion Descripcion de la partida
+     * @param string $t_head_producto Encabezado de partida
+     * @return string
+     */
+    private function descripcion_html(string $fc_partida_descripcion, string $t_head_producto): string
+    {
+        return "<tr>
+                                <td class='nested' colspan='9'>
+                                    <table class='table table-striped' style='font-size: 14px;'>
+                                        $fc_partida_descripcion
+                                        $t_head_producto
+                                    </table>
+                                </td>
+                            </tr>";
+    }
+
+    private function genera_descripcion_html(string $input_descripcion){
+        $fc_partida_descripcion = "<tbody><tr><td>$input_descripcion</td></tr></tbody>";
+
+        $t_head_producto = "<thead><tr><th>Descripcion</th></tr></thead>";
+
+        $descripcion_html = $this->descripcion_html(fc_partida_descripcion: $fc_partida_descripcion, t_head_producto: $t_head_producto);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar descripcion_html', data: $descripcion_html);
+        }
+        return $descripcion_html;
+    }
+
+    /**
      * Genera el html de un impuesto
      * @param html_controler $html_controler Html base
      * @param _partida $modelo_partida modelo de tipo partida
@@ -395,7 +425,7 @@ class _partidas_html{
         $partidas->registros[$indice]['data_producto_html'] = $data_producto_html;
 
         $key_descripcion = $modelo_partida->tabla.'_descripcion';
-        $key_descripcion_html = $modelo_partida->tabla.'descripcion_html';
+
 
         $row_upd = new stdClass();
         $row_upd->descripcion = $partida[$key_descripcion];
@@ -405,22 +435,11 @@ class _partidas_html{
             return $this->error->error(mensaje: 'Error al generar input', data: $input_descripcion);
         }
 
-        $fc_partida_descripcion = "<tbody><tr><td>$input_descripcion</td></tr></tbody>";
+        $descripcion_html = $this->genera_descripcion_html(input_descripcion: $input_descripcion);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar descripcion_html', data: $descripcion_html);
+        }
 
-        $t_head_producto = "<thead><tr><th>Descripcion</th></tr></thead>";
-
-        $descripcion_html = "<tr>
-                                <td class='nested' colspan='9'>
-                                    <table class='table table-striped' style='font-size: 14px;'>
-                                        $fc_partida_descripcion
-                                        $t_head_producto
-                                    </table>
-                                </td>
-                            </tr>";
-
-
-        $partidas->registros[$indice][$key_descripcion_html] = $fc_partida_descripcion;
-        $partidas->registros[$indice]['t_head_producto'] = $t_head_producto;
         $partidas->registros[$indice]['descripcion_html'] = $descripcion_html;
 
 

@@ -350,14 +350,14 @@ class _base_system_fc extends _base_system{
 
     }
 
-    private function asigna_por_relacionar(array $class_css, bool $existe_factura_rel, array $factura_cliente,
+    private function asigna_por_relacionar(array $class_css_chk, array $class_css_monto, bool $existe_factura_rel, array $factura_cliente,
                                            array $facturas_cliente_, string $key_entidad_id, string $key_entidad_saldo,
                                            string $key_entidad_total, array $relacion): array
     {
         if(!$existe_factura_rel){
-            $factura_cliente = $this->integra_seleccion(class_css: $class_css, factura_cliente: $factura_cliente,
-                key_entidad_id: $key_entidad_id, key_entidad_saldo: $key_entidad_saldo,
-                key_entidad_total: $key_entidad_total, relacion: $relacion);
+            $factura_cliente = $this->integra_seleccion(class_css_chk: $class_css_chk,
+                class_css_monto: $class_css_monto, factura_cliente: $factura_cliente, key_entidad_id: $key_entidad_id,
+                key_entidad_saldo: $key_entidad_saldo, key_entidad_total: $key_entidad_total, relacion: $relacion);
 
             $facturas_cliente_[] = $factura_cliente;
         }
@@ -1512,7 +1512,7 @@ class _base_system_fc extends _base_system{
             $extra_params_html.=" data-$key='$value' ";
         }
 
-        return "<input type='checkbox' $class_css_html $extra_params_html, name='fc_facturas_id[$row_entidad_id][$entidad_origen_key]' value='$relacion_id'>";
+        return "<input type='checkbox' $class_css_html $extra_params_html name='fc_facturas_id[$row_entidad_id][$entidad_origen_key]' value='$relacion_id'>";
     }
 
     private function genera_relaciones(int $com_cliente_id, _uuid_ext $modelo_uuid_ext, string $name_entidad,  int $org_empresa_id): array
@@ -2067,11 +2067,13 @@ class _base_system_fc extends _base_system{
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al verificar si existe relacion', data: $existe_factura_rel);
         }
-        $class_css[] = 'chk_relacion';
+        $class_css_chk[] = 'chk_relacion';
+        $class_css_monto[] = 'inp_monto';
+        $class_css_monto[] = 'form-control';
 
-        $facturas_cliente_ = $this->asigna_por_relacionar(class_css: $class_css,
-            existe_factura_rel: $existe_factura_rel, factura_cliente: $factura_cliente,
-            facturas_cliente_: $facturas_cliente_, key_entidad_id: $key_entidad_id,
+        $facturas_cliente_ = $this->asigna_por_relacionar(class_css_chk: $class_css_chk,
+            class_css_monto: $class_css_monto, existe_factura_rel: $existe_factura_rel,
+            factura_cliente: $factura_cliente, facturas_cliente_: $facturas_cliente_, key_entidad_id: $key_entidad_id,
             key_entidad_saldo: $key_entidad_saldo, key_entidad_total: $key_entidad_total, relacion: $relacion);
 
         if (errores::$error) {
@@ -2082,15 +2084,16 @@ class _base_system_fc extends _base_system{
     }
 
 
-    private function integra_seleccion(array $class_css, array $factura_cliente, string $key_entidad_id,
-                                       string $key_entidad_saldo, string $key_entidad_total, array $relacion): array
+    private function integra_seleccion(array $class_css_chk, array $class_css_monto, array $factura_cliente,
+                                       string $key_entidad_id, string $key_entidad_saldo, string $key_entidad_total,
+                                       array $relacion): array
     {
         $key_relacion_id = $this->key_relacion_id;
 
         $extra_params['total'] = $factura_cliente[$key_entidad_total];
         $extra_params['saldo'] = $factura_cliente[$key_entidad_saldo];
 
-        $checkbox = $this->checkbox_relaciona(class_css: $class_css, extra_params: $extra_params,
+        $checkbox = $this->checkbox_relaciona(class_css: $class_css_chk, extra_params: $extra_params,
             factura_cliente: $factura_cliente, key_entidad_id: $key_entidad_id, key_relacion_id: $key_relacion_id,
             relacion: $relacion);
         if (errores::$error) {
@@ -2101,8 +2104,9 @@ class _base_system_fc extends _base_system{
 
         $row_entidad_id = $factura_cliente[$key_entidad_id];
         $name = "fc_facturas_id_monto[$row_entidad_id][fc_relacion_id][$relacion_id]";
+
         $input_monto = (new fc_nota_credito_html(html: $this->html_base))->input_monto_aplicado_factura(
-            cols: 12,row_upd: new stdClass(),value_vacio: false, name: $name);
+            class_css: $class_css_monto, cols: 12, row_upd: new stdClass(), value_vacio: false, name: $name);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar monto', data: $input_monto);
         }
@@ -2992,7 +2996,7 @@ class _base_system_fc extends _base_system{
                     <td>$fc_factura[$key_etapa]</td>
                     <td>$fc_factura[cat_sat_tipo_de_comprobante_descripcion]</td>
                     $td_monto
-                    <td>$fc_factura[seleccion]</td>
+                    <td class='td_chk'>$fc_factura[seleccion]</td>
                     </tr>";
     }
 
