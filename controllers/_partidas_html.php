@@ -428,6 +428,7 @@ class _partidas_html{
      * @param array $partida Partida en ejecucion
      * @param string $tipo Tipo de impuesto puede ser retencion o traslado
      * @return array|true
+     * @version 11.16.0
      */
     private function valida_impuesto_partida(array $partida, string $tipo): bool|array
     {

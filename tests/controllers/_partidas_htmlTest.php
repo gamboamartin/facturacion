@@ -236,6 +236,31 @@ class _partidas_htmlTest extends test {
         errores::$error = false;
     }
 
+    public function test_valida_impuesto_partida(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _partidas_html();
+        $html = new liberator($html);
+
+
+        $partida = array();
+        $tipo = 'a';
+        $partida['a'] = array();
+
+        $resultado = $html->valida_impuesto_partida($partida, $tipo);
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+        errores::$error = false;
+    }
+
 
 
 }

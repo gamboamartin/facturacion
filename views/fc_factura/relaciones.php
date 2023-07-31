@@ -69,9 +69,10 @@
 
                                             <?php echo $controlador->tr_relacion(
                                                     aplica_monto: $controlador->aplica_monto_relacion,
-                                                fc_factura: $fc_factura, key_etapa: 'fc_factura_etapa',
-                                                key_fecha: 'fc_factura_fecha', key_folio: 'fc_factura_folio',
-                                                key_total: 'fc_factura_total', key_uuid: 'fc_factura_uuid'); ?>
+                                                    fc_factura: $fc_factura, key_etapa: 'fc_factura_etapa',
+                                                    key_fecha: 'fc_factura_fecha', key_folio: 'fc_factura_folio',
+                                                    key_saldo: 'fc_factura_saldo', key_total: 'fc_factura_total',
+                                                    key_uuid: 'fc_factura_uuid'); ?>
 
                                         <?php } ?>
 
@@ -117,7 +118,7 @@
                                             <?php echo $controlador->tr_relacion(aplica_monto: $controlador->aplica_monto_relacion,
                                                 fc_factura: $fc_factura, key_etapa: 'fc_uuid_etapa',
                                                 key_fecha: 'fc_uuid_fecha', key_folio: 'fc_uuid_folio',
-                                                key_total: 'fc_factura_total', key_uuid: 'fc_uuid_uuid'); ?>
+                                                key_saldo: 'fc_uuid_saldo', key_total: 'fc_uuid_total', key_uuid: 'fc_uuid_uuid'); ?>
 
                                         <?php } ?>
 

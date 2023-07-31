@@ -119,6 +119,7 @@ class _base_system_fc extends _base_system{
     public string $key_fecha = '';
     public string $key_etapa = '';
     public string $key_total = '';
+    public string $key_saldo = '';
     public string $key_relacion_id = '';
     public string $key_entidad_id = '';
 
@@ -350,12 +351,13 @@ class _base_system_fc extends _base_system{
     }
 
     private function asigna_por_relacionar(array $class_css, bool $existe_factura_rel, array $factura_cliente,
-                                           array $facturas_cliente_, string $key_entidad_id, string $key_entidad_total,
-                                           array $relacion): array
+                                           array $facturas_cliente_, string $key_entidad_id, string $key_entidad_saldo,
+                                           string $key_entidad_total, array $relacion): array
     {
         if(!$existe_factura_rel){
             $factura_cliente = $this->integra_seleccion(class_css: $class_css, factura_cliente: $factura_cliente,
-                key_entidad_id: $key_entidad_id, key_entidad_total: $key_entidad_total, relacion: $relacion);
+                key_entidad_id: $key_entidad_id, key_entidad_saldo: $key_entidad_saldo,
+                key_entidad_total: $key_entidad_total, relacion: $relacion);
 
             $facturas_cliente_[] = $factura_cliente;
         }
@@ -803,6 +805,7 @@ class _base_system_fc extends _base_system{
         $key_folio = $this->tabla.'_folio';
         $key_total = $this->tabla.'_total';
         $key_fecha = $this->tabla.'_fecha';
+        $key_saldo = $this->tabla.'_saldo';
 
         $filtro[$key_filter_id] = $this->registro_id;
         $columns_ds = array($key_folio,'com_cliente_rfc',$key_total,$key_fecha);
@@ -1200,9 +1203,11 @@ class _base_system_fc extends _base_system{
                 $factura_cliente['key_fecha'] = $this->key_fecha;
                 $factura_cliente['key_etapa'] = $this->key_etapa;
                 $factura_cliente['key_total'] = $this->key_total;
+                $factura_cliente['key_saldo'] = $this->key_saldo;
                 $facturas_cliente_ = $this->integra_facturas_cliente(factura_cliente: $factura_cliente,
                     facturas_cliente_: $facturas_cliente_, key_entidad_id: $key_entidad_id,
-                    name_entidad_ejecucion: $this->tabla, key_entidad_total: $this->key_total, relacion: $relacion);
+                    name_entidad_ejecucion: $this->tabla, key_entidad_saldo: $this->key_saldo,
+                    key_entidad_total: $this->key_total, relacion: $relacion);
 
                 if (errores::$error) {
                     return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
@@ -1226,9 +1231,10 @@ class _base_system_fc extends _base_system{
                 $fc_factura['key_etapa'] = 'fc_factura_etapa';
                 $fc_factura['key_entidad_id'] = 'fc_factura_id';
                 $fc_factura['key_total'] = 'fc_factura_total';
+                $fc_factura['key_saldo'] = 'fc_factura_saldo';
                 $facturas_cliente_ = $this->integra_facturas_cliente(factura_cliente: $fc_factura,
                     facturas_cliente_: $facturas_cliente_, key_entidad_id: 'fc_factura_id',
-                    name_entidad_ejecucion: $this->tabla, key_entidad_total: 'fc_factura_total', relacion: $relacion);
+                    name_entidad_ejecucion: $this->tabla, key_entidad_saldo: 'fc_factura_saldo', key_entidad_total: 'fc_factura_total', relacion: $relacion);
 
                 if (errores::$error) {
                     return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
@@ -2052,7 +2058,8 @@ class _base_system_fc extends _base_system{
     }
 
     private function integra_facturas_cliente(array $factura_cliente, array $facturas_cliente_, string $key_entidad_id,
-                                              string $name_entidad_ejecucion, string $key_entidad_total, array $relacion): array
+                                              string $name_entidad_ejecucion, string $key_entidad_saldo,
+                                              string $key_entidad_total, array $relacion): array
     {
         $existe_factura_rel = $this->existe_factura_rel(name_entidad_ejecucion: $name_entidad_ejecucion,
             factura_cliente: $factura_cliente, key_entidad_id: $key_entidad_id, relacion: $relacion);
@@ -2065,7 +2072,7 @@ class _base_system_fc extends _base_system{
         $facturas_cliente_ = $this->asigna_por_relacionar(class_css: $class_css,
             existe_factura_rel: $existe_factura_rel, factura_cliente: $factura_cliente,
             facturas_cliente_: $facturas_cliente_, key_entidad_id: $key_entidad_id,
-            key_entidad_total: $key_entidad_total, relacion: $relacion);
+            key_entidad_saldo: $key_entidad_saldo, key_entidad_total: $key_entidad_total, relacion: $relacion);
 
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
@@ -2075,12 +2082,13 @@ class _base_system_fc extends _base_system{
     }
 
 
-    private function integra_seleccion(array $class_css, array $factura_cliente,
-                                       string $key_entidad_id, string $key_entidad_total, array $relacion): array
+    private function integra_seleccion(array $class_css, array $factura_cliente, string $key_entidad_id,
+                                       string $key_entidad_saldo, string $key_entidad_total, array $relacion): array
     {
         $key_relacion_id = $this->key_relacion_id;
 
         $extra_params['total'] = $factura_cliente[$key_entidad_total];
+        $extra_params['saldo'] = $factura_cliente[$key_entidad_saldo];
 
         $checkbox = $this->checkbox_relaciona(class_css: $class_css, extra_params: $extra_params,
             factura_cliente: $factura_cliente, key_entidad_id: $key_entidad_id, key_relacion_id: $key_relacion_id,
@@ -2598,6 +2606,7 @@ class _base_system_fc extends _base_system{
         $this->key_folio = $this->modelo_entidad->tabla.'_folio';
         $this->key_fecha = $this->modelo_entidad->tabla.'_fecha';
         $this->key_total = $this->modelo_entidad->tabla.'_total';
+        $this->key_saldo = $this->modelo_entidad->tabla.'_saldo';
         $this->key_etapa = $this->modelo_etapa->tabla;
         $this->key_relacion_id = $this->modelo_relacion->key_id;
         $this->key_entidad_id = $this->modelo_entidad->key_id;
@@ -2716,8 +2725,12 @@ class _base_system_fc extends _base_system{
 
 
                 if(!$existe) {
-                    $checkbox = $this->input_chk_rel(entidad_origen_key: 'fc_uuid',
-                        relacion_id: $relacion[$key_relacion_id], row_entidad_id: $fc_uuid['fc_uuid_id']);
+                    /**
+                     * POR REVISAR EXTRA PARAMS CLASESS CSS
+                     */
+                    $checkbox = $this->input_chk_rel(clases_css: array(),
+                        entidad_origen_key: 'fc_uuid', extra_params: array(), relacion_id: $relacion[$key_relacion_id],
+                        row_entidad_id: $fc_uuid['fc_uuid_id']);
                     if (errores::$error) {
                         return $this->errores->error(mensaje: 'Error al generar checkbox', data: $checkbox);
                     }
@@ -2880,6 +2893,7 @@ class _base_system_fc extends _base_system{
                                             <th>Folio</th>
                                             <th>Fecha</th>
                                             <th>Total</th>
+                                            <th>Saldo</th>
                                             <th>Estatus</th>
                                             <th>Tipo de CFDI</th>
                                             '.$th_aplica_monto.'
@@ -2950,11 +2964,12 @@ class _base_system_fc extends _base_system{
     }
 
     final public function tr_relacion(bool $aplica_monto, array $fc_factura, string $key_etapa, string $key_fecha,
-                                      string $key_folio, string $key_total,  string $key_uuid): string|array
+                                      string $key_folio, string $key_saldo, string $key_total,
+                                      string $key_uuid): string|array
     {
 
         $keys = array($key_uuid,'com_cliente_rfc', $key_folio, $key_fecha, $key_etapa,
-            'cat_sat_tipo_de_comprobante_descripcion','seleccion', $key_total);
+            'cat_sat_tipo_de_comprobante_descripcion','seleccion', $key_total, $key_saldo);
 
         $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $fc_factura);
         if(errores::$error){
@@ -2973,6 +2988,7 @@ class _base_system_fc extends _base_system{
                     <td>$fc_factura[$key_folio]</td>
                     <td>$fc_factura[$key_fecha]</td>
                     <td>$fc_factura[$key_total]</td>
+                    <td>$fc_factura[$key_saldo]</td>
                     <td>$fc_factura[$key_etapa]</td>
                     <td>$fc_factura[cat_sat_tipo_de_comprobante_descripcion]</td>
                     $td_monto
