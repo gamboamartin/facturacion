@@ -423,7 +423,14 @@ class _partidas_html{
         return $partidas;
     }
 
-    private function valida_impuesto_partida(array $partida, string $tipo){
+    /**
+     * valida que los datos de un html de impuesto sean los correctos
+     * @param array $partida
+     * @param string $tipo
+     * @return array|true
+     */
+    private function valida_impuesto_partida(array $partida, string $tipo): bool|array
+    {
         $tipo = trim($tipo);
         if($tipo === ''){
             return $this->error->error(mensaje: 'Error tipo no existe o esta vacio', data: $tipo);

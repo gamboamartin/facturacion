@@ -118,6 +118,7 @@ class _base_system_fc extends _base_system{
 
     public string $key_fecha = '';
     public string $key_etapa = '';
+    public string $key_total = '';
     public string $key_relacion_id = '';
     public string $key_entidad_id = '';
 
@@ -1196,6 +1197,7 @@ class _base_system_fc extends _base_system{
                 $factura_cliente['key_folio'] = $this->key_folio;
                 $factura_cliente['key_fecha'] = $this->key_fecha;
                 $factura_cliente['key_etapa'] = $this->key_etapa;
+                $factura_cliente['key_total'] = $this->key_total;
                 $facturas_cliente_ = $this->integra_facturas_cliente(factura_cliente: $factura_cliente,
                     facturas_cliente_: $facturas_cliente_, key_entidad_id: $key_entidad_id,
                     name_entidad_ejecucion: $this->tabla, relacion: $relacion);
@@ -1221,6 +1223,7 @@ class _base_system_fc extends _base_system{
                 $fc_factura['key_fecha'] = 'fc_factura_fecha';
                 $fc_factura['key_etapa'] = 'fc_factura_etapa';
                 $fc_factura['key_entidad_id'] = 'fc_factura_id';
+                $fc_factura['key_total'] = 'fc_factura_total';
                 $facturas_cliente_ = $this->integra_facturas_cliente(factura_cliente: $fc_factura,
                     facturas_cliente_: $facturas_cliente_, key_entidad_id: 'fc_factura_id', name_entidad_ejecucion: $this->tabla, relacion: $relacion);
 
@@ -2567,6 +2570,7 @@ class _base_system_fc extends _base_system{
         $this->key_uuid = $this->modelo_entidad->tabla.'_uuid';
         $this->key_folio = $this->modelo_entidad->tabla.'_folio';
         $this->key_fecha = $this->modelo_entidad->tabla.'_fecha';
+        $this->key_total = $this->modelo_entidad->tabla.'_total';
         $this->key_etapa = $this->modelo_etapa->tabla;
         $this->key_relacion_id = $this->modelo_relacion->key_id;
         $this->key_entidad_id = $this->modelo_entidad->key_id;
@@ -2848,6 +2852,7 @@ class _base_system_fc extends _base_system{
                                             <th>Cliente</th>
                                             <th>Folio</th>
                                             <th>Fecha</th>
+                                            <th>Total</th>
                                             <th>Estatus</th>
                                             <th>Tipo de CFDI</th>
                                             '.$th_aplica_monto.'
@@ -2917,11 +2922,12 @@ class _base_system_fc extends _base_system{
         return $tipo_comprobante;
     }
 
-    final public function tr_relacion(bool $aplica_monto, array $fc_factura, string $key_etapa,
-                                      string $key_fecha, string $key_folio,  string $key_uuid): string|array
+    final public function tr_relacion(bool $aplica_monto, array $fc_factura, string $key_etapa, string $key_fecha,
+                                      string $key_folio, string $key_total,  string $key_uuid): string|array
     {
 
-        $keys = array($key_uuid,'com_cliente_rfc', $key_folio, $key_fecha, $key_etapa,'cat_sat_tipo_de_comprobante_descripcion','seleccion');
+        $keys = array($key_uuid,'com_cliente_rfc', $key_folio, $key_fecha, $key_etapa,
+            'cat_sat_tipo_de_comprobante_descripcion','seleccion', $key_total);
 
         $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $fc_factura);
         if(errores::$error){
@@ -2939,6 +2945,7 @@ class _base_system_fc extends _base_system{
                     <td>$fc_factura[com_cliente_rfc]</td>
                     <td>$fc_factura[$key_folio]</td>
                     <td>$fc_factura[$key_fecha]</td>
+                    <td>$fc_factura[$key_total]</td>
                     <td>$fc_factura[$key_etapa]</td>
                     <td>$fc_factura[cat_sat_tipo_de_comprobante_descripcion]</td>
                     $td_monto

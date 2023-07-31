@@ -81,7 +81,8 @@
 
                                             <?php echo $controlador->tr_relacion(aplica_monto: $controlador->aplica_monto_relacion,
                                                 fc_factura: $fc_factura, key_etapa: $fc_factura['key_etapa'],
-                                                key_fecha: $fc_factura['key_fecha'], key_folio: $fc_factura['key_folio'], key_uuid: $fc_factura['key_uuid']); ?>
+                                                key_fecha: $fc_factura['key_fecha'], key_folio: $fc_factura['key_folio'],
+                                                key_total: $fc_factura['key_total'], key_uuid: $fc_factura['key_uuid']); ?>
 
                                         <?php } ?>
 
@@ -91,6 +92,7 @@
                                                 <td><?php echo $fc_factura['com_cliente_rfc']; ?></td>
                                                 <td><?php echo $fc_factura[$controlador->key_folio]; ?></td>
                                                 <td><?php echo $fc_factura[$controlador->key_fecha]; ?></td>
+                                                <td><?php echo $fc_factura[$controlador->key_total]; ?></td>
                                                 <td><?php echo $fc_factura[$controlador->key_etapa]; ?></td>
                                                 <td><?php echo $fc_factura['cat_sat_tipo_de_comprobante_descripcion']; ?></td>
                                                 <td><?php echo $fc_factura['elimina_bd']; ?></td>
@@ -104,6 +106,7 @@
                                                 <td><?php echo $fc_factura['com_cliente_rfc']; ?></td>
                                                 <td><?php echo $fc_factura['fc_factura_folio']; ?></td>
                                                 <td><?php echo $fc_factura['fc_factura_fecha']; ?></td>
+                                                <td><?php echo $fc_factura['fc_factura_total']; ?></td>
                                                 <td><?php echo $fc_factura['fc_factura_etapa']; ?></td>
                                                 <td><?php echo $fc_factura['cat_sat_tipo_de_comprobante_descripcion']; ?></td>
                                                 <td><?php echo $fc_factura['elimina_bd']; ?></td>
@@ -133,7 +136,7 @@
                                                         <?php echo $controlador->tr_relacion(aplica_monto: $controlador->aplica_monto_relacion,
                                                             fc_factura: $fc_factura, key_etapa: 'fc_uuid_etapa',
                                                             key_fecha: 'fc_uuid_fecha', key_folio: 'fc_uuid_folio',
-                                                            key_uuid: 'fc_uuid_uuid'); ?>
+                                                            key_total: 'fc_uuid_total', key_uuid: 'fc_uuid_uuid'); ?>
 
                                                     <?php } ?>
 
