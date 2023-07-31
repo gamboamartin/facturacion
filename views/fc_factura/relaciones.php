@@ -81,6 +81,7 @@
                                                 <td><?php echo $fc_factura['com_cliente_rfc']; ?></td>
                                                 <td><?php echo $fc_factura['fc_factura_folio']; ?></td>
                                                 <td><?php echo $fc_factura['fc_factura_fecha']; ?></td>
+                                                <td><?php echo $fc_factura['fc_factura_total']; ?></td>
                                                 <td><?php echo $fc_factura['fc_factura_etapa']; ?></td>
                                                 <td><?php echo $fc_factura['elimina_bd']; ?></td>
                                             </tr>

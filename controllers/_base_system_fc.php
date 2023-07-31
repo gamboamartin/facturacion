@@ -349,12 +349,13 @@ class _base_system_fc extends _base_system{
 
     }
 
-    private function asigna_por_relacionar(bool $existe_factura_rel, array $factura_cliente,
-                                           array $facturas_cliente_, string $key_entidad_id, array $relacion): array
+    private function asigna_por_relacionar(array $class_css, bool $existe_factura_rel, array $factura_cliente,
+                                           array $facturas_cliente_, string $key_entidad_id, string $key_entidad_total,
+                                           array $relacion): array
     {
         if(!$existe_factura_rel){
-            $factura_cliente = $this->integra_seleccion(factura_cliente: $factura_cliente,
-                key_entidad_id:  $key_entidad_id,relacion:  $relacion);
+            $factura_cliente = $this->integra_seleccion(class_css: $class_css, factura_cliente: $factura_cliente,
+                key_entidad_id: $key_entidad_id, key_entidad_total: $key_entidad_total, relacion: $relacion);
 
             $facturas_cliente_[] = $factura_cliente;
         }
@@ -876,13 +877,14 @@ class _base_system_fc extends _base_system{
 
 
 
-    private function checkbox_relaciona(array $factura_cliente, string $key_entidad_id, string $key_relacion_id, array $relacion): string|array
+    private function checkbox_relaciona(array $class_css, array $extra_params, array $factura_cliente, string $key_entidad_id,
+                                        string $key_relacion_id, array $relacion): string|array
     {
         $row_entidad_id = $factura_cliente[$key_entidad_id];
         $entidad_origen_key = $key_entidad_id;
 
-        $chk = $this->input_chk_rel(entidad_origen_key: $entidad_origen_key,
-            relacion_id:  $relacion[$key_relacion_id], row_entidad_id: $row_entidad_id);
+        $chk = $this->input_chk_rel(clases_css: $class_css, entidad_origen_key: $entidad_origen_key,
+            extra_params: $extra_params, relacion_id: $relacion[$key_relacion_id], row_entidad_id: $row_entidad_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar chk',data:  $chk);
         }
@@ -1200,7 +1202,7 @@ class _base_system_fc extends _base_system{
                 $factura_cliente['key_total'] = $this->key_total;
                 $facturas_cliente_ = $this->integra_facturas_cliente(factura_cliente: $factura_cliente,
                     facturas_cliente_: $facturas_cliente_, key_entidad_id: $key_entidad_id,
-                    name_entidad_ejecucion: $this->tabla, relacion: $relacion);
+                    name_entidad_ejecucion: $this->tabla, key_entidad_total: $this->key_total, relacion: $relacion);
 
                 if (errores::$error) {
                     return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
@@ -1225,7 +1227,8 @@ class _base_system_fc extends _base_system{
                 $fc_factura['key_entidad_id'] = 'fc_factura_id';
                 $fc_factura['key_total'] = 'fc_factura_total';
                 $facturas_cliente_ = $this->integra_facturas_cliente(factura_cliente: $fc_factura,
-                    facturas_cliente_: $facturas_cliente_, key_entidad_id: 'fc_factura_id', name_entidad_ejecucion: $this->tabla, relacion: $relacion);
+                    facturas_cliente_: $facturas_cliente_, key_entidad_id: 'fc_factura_id',
+                    name_entidad_ejecucion: $this->tabla, key_entidad_total: 'fc_factura_total', relacion: $relacion);
 
                 if (errores::$error) {
                     return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
@@ -1480,14 +1483,30 @@ class _base_system_fc extends _base_system{
 
     /**
      * Genera input de tipo checkbox array para con variable facturas_id
-     * @param string $entidad_origen_key  key de base ej fc_factura_id
+     * @param array $clases_css Clases css
+     * @param string $entidad_origen_key key de base ej fc_factura_id
+     * @param array $extra_params Parametros para data extra
      * @param int $relacion_id Identificador de relacion
      * @param int $row_entidad_id Registro id de entidad base
      * @return string
      */
-    private function input_chk_rel(string $entidad_origen_key, int $relacion_id, int $row_entidad_id): string
+    private function input_chk_rel(array $clases_css, string $entidad_origen_key, array $extra_params,
+                                   int $relacion_id, int $row_entidad_id): string
     {
-        return "<input type='checkbox' name='fc_facturas_id[$row_entidad_id][$entidad_origen_key]' value='$relacion_id'>";
+        $class_css_html = '';
+        foreach ($clases_css as $class_css){
+            $class_css_html.= " $class_css ";
+        }
+        if($class_css_html!==''){
+            $class_css_html = "class='$class_css_html'";
+        }
+
+        $extra_params_html = '';
+        foreach ($extra_params as $key=>$value){
+            $extra_params_html.=" data-$key='$value' ";
+        }
+
+        return "<input type='checkbox' $class_css_html $extra_params_html, name='fc_facturas_id[$row_entidad_id][$entidad_origen_key]' value='$relacion_id'>";
     }
 
     private function genera_relaciones(int $com_cliente_id, _uuid_ext $modelo_uuid_ext, string $name_entidad,  int $org_empresa_id): array
@@ -2033,7 +2052,7 @@ class _base_system_fc extends _base_system{
     }
 
     private function integra_facturas_cliente(array $factura_cliente, array $facturas_cliente_, string $key_entidad_id,
-                                              string $name_entidad_ejecucion, array $relacion): array
+                                              string $name_entidad_ejecucion, string $key_entidad_total, array $relacion): array
     {
         $existe_factura_rel = $this->existe_factura_rel(name_entidad_ejecucion: $name_entidad_ejecucion,
             factura_cliente: $factura_cliente, key_entidad_id: $key_entidad_id, relacion: $relacion);
@@ -2041,10 +2060,12 @@ class _base_system_fc extends _base_system{
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al verificar si existe relacion', data: $existe_factura_rel);
         }
+        $class_css[] = 'chk_relacion';
 
-        $facturas_cliente_ = $this->asigna_por_relacionar(existe_factura_rel: $existe_factura_rel,
-            factura_cliente:  $factura_cliente,facturas_cliente_:  $facturas_cliente_,
-            key_entidad_id:  $key_entidad_id,relacion:  $relacion);
+        $facturas_cliente_ = $this->asigna_por_relacionar(class_css: $class_css,
+            existe_factura_rel: $existe_factura_rel, factura_cliente: $factura_cliente,
+            facturas_cliente_: $facturas_cliente_, key_entidad_id: $key_entidad_id,
+            key_entidad_total: $key_entidad_total, relacion: $relacion);
 
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
@@ -2053,11 +2074,17 @@ class _base_system_fc extends _base_system{
         return $facturas_cliente_;
     }
 
-    private function integra_seleccion(array $factura_cliente, string $key_entidad_id, array $relacion): array
+
+    private function integra_seleccion(array $class_css, array $factura_cliente,
+                                       string $key_entidad_id, string $key_entidad_total, array $relacion): array
     {
         $key_relacion_id = $this->key_relacion_id;
-        $checkbox = $this->checkbox_relaciona(factura_cliente: $factura_cliente,
-            key_entidad_id:  $key_entidad_id,key_relacion_id:  $key_relacion_id, relacion: $relacion);
+
+        $extra_params['total'] = $factura_cliente[$key_entidad_total];
+
+        $checkbox = $this->checkbox_relaciona(class_css: $class_css, extra_params: $extra_params,
+            factura_cliente: $factura_cliente, key_entidad_id: $key_entidad_id, key_relacion_id: $key_relacion_id,
+            relacion: $relacion);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar checkbox', data: $checkbox);
         }
