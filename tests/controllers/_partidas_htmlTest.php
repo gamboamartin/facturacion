@@ -10,6 +10,7 @@ use gamboamartin\facturacion\controllers\controlador_fc_factura;
 use gamboamartin\facturacion\controllers\pdf;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_partida_nc;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\organigrama\models\org_empresa;
 use gamboamartin\organigrama\models\org_sucursal;
@@ -202,6 +203,40 @@ class _partidas_htmlTest extends test {
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertStringContainsStringIgnoringCase("seccion=a&accion=elimina_bd&re",$resultado);
+        errores::$error = false;
+    }
+
+    public function test_impuestos_html(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _partidas_html();
+        $html = new liberator($html);
+
+
+        $html_ = new html();
+        $html_controler = new html_controler($html_);
+        $modelo_partida = new fc_partida_nc(link: $this->link);
+        $name_entidad_retenido = 'c';
+        $name_entidad_traslado = 'b';
+        $name_modelo_entidad = 'a';
+        $partida = array();
+        $partida['b'] = array();
+        $partida['c'] = array();
+
+        $resultado = $html->impuestos_html($html_controler, $modelo_partida, $name_entidad_retenido,
+            $name_entidad_traslado, $name_modelo_entidad, $partida);
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("",$resultado->traslados);
+        $this->assertEquals("",$resultado->retenidos);
+
         errores::$error = false;
     }
 

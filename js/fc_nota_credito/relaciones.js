@@ -14,7 +14,16 @@ aplica_saldo_sel.click(function () {
 });
 
 chk_relacion.click(function () {
-    saldo = $(this).data("saldo");
-    //alert(saldo);
+    saldo = '';
+
+    if( $(this).prop('checked') ) {
+        saldo = $(this).data("saldo");
+    }
+    else{
+        saldo = '';
+    }
+
+    let selector_monto = $(this).parent().parent().children('.td_monto').children('.control-group').children('.form-control').val(saldo);
+
 
 });

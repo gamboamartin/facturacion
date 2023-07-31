@@ -2979,7 +2979,7 @@ class _base_system_fc extends _base_system{
 
         $td_monto = '';
         if($aplica_monto){
-            $td_monto = "<td>$fc_factura[input_monto]</td>";
+            $td_monto = "<td class='td_monto'>$fc_factura[input_monto]</td>";
         }
 
         return "<tr>

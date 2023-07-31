@@ -52,6 +52,7 @@ class _partidas_html{
      * @param string $tag_tipo_impuesto Tag de tipo impuesto
      * @param string $tipo Tipo de impuesto
      * @return array|string
+     * @version 11.17.0
      */
     private function genera_impuesto(html_controler $html_controler, _partida $modelo_partida,
                                      string $name_modelo_entidad, array $partida, string $tag_tipo_impuesto,
@@ -273,11 +274,25 @@ class _partidas_html{
      * @param string $name_modelo_entidad Nombre de la entidad base
      * @param array $partida Partida en proceso
      * @return array|stdClass
+     * @version 11.17.0
      */
     private function impuestos_html(html_controler $html_controler, _partida $modelo_partida,
                                     string $name_entidad_retenido, string $name_entidad_traslado,
                                     string $name_modelo_entidad, array $partida): array|stdClass
     {
+        $name_modelo_entidad = trim($name_modelo_entidad);
+        if($name_modelo_entidad === ''){
+            return $this->error->error(mensaje: 'Error name_modelo_entidad esta vacio', data: $name_modelo_entidad);
+        }
+        $valida = $this->valida_impuesto_partida(partida: $partida,tipo:  $name_entidad_traslado);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida Traslados', data: $valida);
+        }
+        $valida = $this->valida_impuesto_partida(partida: $partida,tipo:  $name_entidad_retenido);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida Retenciones', data: $valida);
+        }
+
         $impuesto_traslado_html = $this->genera_impuesto(html_controler: $html_controler,
             modelo_partida: $modelo_partida, name_modelo_entidad: $name_modelo_entidad, partida: $partida,
             tag_tipo_impuesto: 'Traslados', tipo: $name_entidad_traslado);
