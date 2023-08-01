@@ -1469,6 +1469,12 @@ class base_test{
 
         }
 
+        $del = (new base_test())->del_fc_retencion_p_part($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
         $del = (new base_test())->del_fc_traslado_nc($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
