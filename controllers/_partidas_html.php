@@ -75,9 +75,14 @@ class _partidas_html{
      * Genera una descripcion de producto via html
      * @param string $input_descripcion Input de descripcion
      * @return array|string
+     * @version 12.3.1
      */
     private function genera_descripcion_html(string $input_descripcion): array|string
     {
+        $input_descripcion = trim($input_descripcion);
+        if($input_descripcion === ''){
+            return $this->error->error(mensaje: 'Error input_descripcion esta vacia', data: $input_descripcion);
+        }
         $fc_partida_descripcion = "<tbody><tr><td>$input_descripcion</td></tr></tbody>";
 
         $t_head_producto = "<thead><tr><th>Descripcion</th></tr></thead>";
@@ -201,7 +206,7 @@ class _partidas_html{
      * Genera las partidas en html
      * @param html_controler $html Html base
      * @param PDO $link Conexion a la base de datos
-     * @param _transacciones_fc $modelo_entidad
+     * @param _transacciones_fc $modelo_entidad Nombre de la entidad base fc_factura, fc_nota_credito, etc
      * @param _partida $modelo_partida
      * @param _data_impuestos $modelo_retencion
      * @param _data_impuestos $modelo_traslado
@@ -422,7 +427,7 @@ class _partidas_html{
      * @param int $indice Indice de la partida
      * @param PDO $link Conexion a la base de datos
      * @param _partida $modelo_partida Modelo de tipo partida
-     * @param string $name_entidad_retenido
+     * @param string $name_entidad_retenido Nombre de la entidad de impuestos retenidos
      * @param string $name_entidad_traslado
      * @param string $name_modelo_entidad
      * @param array $partida
