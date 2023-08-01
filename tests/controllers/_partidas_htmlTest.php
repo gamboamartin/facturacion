@@ -390,6 +390,36 @@ class _partidas_htmlTest extends test {
         errores::$error = false;
     }
 
+    public function test_valida_partida_html(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _partidas_html();
+        //$html = new liberator($html);
+
+
+
+        $partida = array();
+        $partida['com_producto_id'] = 1;
+        $partida['cat_sat_producto_codigo'] = 1;
+        $partida['com_producto_codigo'] = 1;
+        $partida['cat_sat_unidad_descripcion'] = 1;
+        $partida['cat_sat_obj_imp_descripcion'] = 1;
+        $partida['elimina_bd'] = 1;
+
+        $resultado = $html->valida_partida_html($partida);
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+        errores::$error = false;
+    }
+
 
 
 }

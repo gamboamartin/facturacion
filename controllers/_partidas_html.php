@@ -530,6 +530,7 @@ class _partidas_html{
      * Valida la entrada de datos para una partida html
      * @param array $partida Partida a validar
      * @return array|true
+     * @version 12.6.2
      */
     final public function valida_partida_html(array $partida): bool|array
     {
