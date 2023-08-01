@@ -207,17 +207,16 @@ class _partidas_html{
      * @param html_controler $html Html base
      * @param PDO $link Conexion a la base de datos
      * @param _transacciones_fc $modelo_entidad Nombre de la entidad base fc_factura, fc_nota_credito, etc
-     * @param _partida $modelo_partida
-     * @param _data_impuestos $modelo_retencion
-     * @param _data_impuestos $modelo_traslado
-     * @param int $registro_entidad_id
+     * @param _partida $modelo_partida Modelo de la entidad partida
+     * @param _data_impuestos $modelo_retencion Modelo de retenciones
+     * @param _data_impuestos $modelo_traslado Modelo de traslados
+     * @param int $registro_entidad_id identificador de entidad base
      * @return array|stdClass
      */
     final function genera_partidas_html(html_controler $html, PDO $link, _transacciones_fc $modelo_entidad,
                                         _partida $modelo_partida,_data_impuestos $modelo_retencion,
                                         _data_impuestos $modelo_traslado, int $registro_entidad_id): array|stdClass
     {
-
 
         $partidas  = $modelo_partida->partidas(html: $html, modelo_entidad: $modelo_entidad,
             modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $registro_entidad_id);
@@ -428,16 +427,36 @@ class _partidas_html{
      * @param PDO $link Conexion a la base de datos
      * @param _partida $modelo_partida Modelo de tipo partida
      * @param string $name_entidad_retenido Nombre de la entidad de impuestos retenidos
-     * @param string $name_entidad_traslado
-     * @param string $name_modelo_entidad
-     * @param array $partida
-     * @param stdClass $partidas
+     * @param string $name_entidad_traslado Nombre de la entidad de impuestos trasladados
+     * @param string $name_modelo_entidad Nombre de la entidad base
+     * @param array $partida partida ej ejecucion
+     * @param stdClass $partidas Partidas en proceso
      * @return array|stdClass
      */
     private function partida_html(html_controler $html_controler, int $indice, PDO $link, _partida $modelo_partida,
                                   string $name_entidad_retenido, string $name_entidad_traslado,
                                   string $name_modelo_entidad, array $partida, stdClass $partidas): array|stdClass
     {
+
+        $valida = $this->valida_partida_html(partida: $partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
+        $name_modelo_entidad = trim($name_modelo_entidad);
+        if($name_modelo_entidad === ''){
+            return $this->error->error(mensaje: 'Error name_modelo_entidad esta vacio', data: $name_modelo_entidad);
+        }
+        $name_entidad_traslado = trim($name_entidad_traslado);
+        if($name_entidad_traslado === ''){
+            return $this->error->error(mensaje: 'Error name_entidad_traslado esta vacio', data: $name_entidad_traslado);
+        }
+        $name_entidad_retenido = trim($name_entidad_retenido);
+        if($name_entidad_retenido === ''){
+            return $this->error->error(mensaje: 'Error name_entidad_retenido esta vacio', data: $name_entidad_retenido);
+        }
+        if($indice <0 ){
+            return $this->error->error(mensaje: 'Error indice debe ser mayor a 0', data: $indice);
+        }
 
         $data_producto_html = (new _html_factura())->data_producto(html_controler:$html_controler, link: $link,
             name_entidad_partida: $modelo_partida->tabla, partida: $partida);
@@ -448,6 +467,11 @@ class _partidas_html{
 
         $key_descripcion = $modelo_partida->tabla.'_descripcion';
 
+        $keys = array($key_descripcion);
+        $valida = (new validacion())->valida_existencia_keys(keys: $keys,registro:  $partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
 
         $row_upd = new stdClass();
         $row_upd->descripcion = $partida[$key_descripcion];
@@ -498,6 +522,22 @@ class _partidas_html{
         }
         if(!is_array($partida[$tipo])){
             return $this->error->error(mensaje: 'Error partida[tipo] debe ser un array', data: $partida);
+        }
+        return true;
+    }
+
+    final public function valida_partida_html(array $partida){
+        $keys = array('com_producto_id');
+        $valida = (new validacion())->valida_ids(keys: $keys,registro:  $partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+        }
+        $keys = array('cat_sat_producto_codigo','com_producto_codigo','cat_sat_unidad_descripcion',
+            'cat_sat_obj_imp_descripcion','elimina_bd');
+
+        $valida = (new validacion())->valida_existencia_keys(keys: $keys,registro:  $partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
         }
         return true;
     }

@@ -266,7 +266,7 @@ class base_test{
             return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
         }
         if(!$existe) {
-            $alta = $this->alta_com_producto(link: $link, id: $com_producto_id);
+            $alta = $this->alta_com_producto(link: $link, codigo: mt_rand(1000,9999), id: $com_producto_id);
             if (errores::$error) {
                 return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
             }

@@ -22,17 +22,13 @@ class fc_complemento_pago extends _transacciones_fc
 
         $fc_complemento_pago_uuid = "IFNULL($tabla.folio_fiscal,'SIN UUID')";
 
-        $fc_complemento_pago_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa 
-            LEFT JOIN pr_etapa_proceso ON pr_etapa_proceso.pr_etapa_id = pr_etapa.id 
-            LEFT JOIN fc_complemento_pago_etapa ON fc_complemento_pago_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
-            WHERE fc_complemento_pago_etapa.fc_complemento_pago_id = fc_complemento_pago.id ORDER BY fc_complemento_pago_etapa.id DESC LIMIT 1)";
 
         $fc_complemento_pago_total_pagos = "(SELECT SUM(fc_pago_pago.monto) FROM fc_pago_pago LEFT JOIN fc_pago 
             ON fc_pago.id = fc_pago_pago.fc_pago_id WHERE fc_pago.fc_complemento_pago_id = fc_complemento_pago.id)";
 
         $columnas_extra['fc_complemento_pago_descuento'] = "$tabla.total_descuento";
         $columnas_extra['fc_complemento_pago_uuid'] = $fc_complemento_pago_uuid;
-        $columnas_extra['fc_complemento_pago_etapa'] = "$fc_complemento_pago_etapa";
+
 
         $columnas_extra['fc_complemento_pago_total_pagos'] = "$fc_complemento_pago_total_pagos";
 

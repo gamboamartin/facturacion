@@ -17,17 +17,11 @@ class fc_nota_credito extends _transacciones_fc
 
         $fc_nota_credito_uuid = "IFNULL($tabla.folio_fiscal,'SIN UUID')";
 
-        $fc_nota_credito_etapa = "(SELECT pr_etapa.descripcion FROM pr_etapa 
-            LEFT JOIN pr_etapa_proceso ON pr_etapa_proceso.pr_etapa_id = pr_etapa.id 
-            LEFT JOIN fc_nota_credito_etapa ON fc_nota_credito_etapa.pr_etapa_proceso_id = pr_etapa_proceso.id
-            WHERE fc_nota_credito_etapa.fc_nota_credito_id = fc_nota_credito.id ORDER BY fc_nota_credito_etapa.id DESC LIMIT 1)";
 
 
         $columnas_extra['fc_nota_credito_descuento'] = "IFNULL($tabla.total_descuento,0)";
 
         $columnas_extra['fc_nota_credito_uuid'] = $fc_nota_credito_uuid;
-        $columnas_extra['fc_nota_credito_etapa'] = "$fc_nota_credito_etapa";
-
 
         parent::__construct(link: $link, tabla: $tabla, columnas_extra: $columnas_extra);
 

@@ -319,6 +319,52 @@ class _partidas_htmlTest extends test {
         errores::$error = false;
     }
 
+    public function test_partida_html(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _partidas_html();
+        $html = new liberator($html);
+
+        $html_ = new html();
+        $html_controler = new html_controler(html: $html_);
+
+        $indice = 0;
+        $link = $this->link;
+        $modelo_partida = new fc_partida(link: $this->link);
+        $name_entidad_retenido = 'a';
+        $name_entidad_traslado = 'b';
+        $name_modelo_entidad = 'a';
+        $partida = array();
+        $partida['com_producto_id'] = 1;
+        $partida['cat_sat_producto_codigo'] = 1;
+        $partida['com_producto_codigo'] = 1;
+        $partida['cat_sat_unidad_descripcion'] = 1;
+        $partida['cat_sat_obj_imp_descripcion'] = 1;
+        $partida['elimina_bd'] = 1;
+        $partida['fc_partida_sub_total'] = 1;
+        $partida['fc_partida_descuento'] = 1;
+        $partida['fc_partida_descripcion'] = 1;
+        $partida['b'] = array();
+        $partida['a'] = array();
+
+        $partidas = new stdClass();
+
+        $resultado = $html->partida_html($html_controler, $indice, $link, $modelo_partida, $name_entidad_retenido,
+            $name_entidad_traslado, $name_modelo_entidad, $partida, $partidas);
+        //print_r($resultado);exit;
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertStringContainsString(" name='cantidad' value='0'",$resultado->registros[0]['data_producto_html']);
+        errores::$error = false;
+    }
+
     public function test_valida_impuesto_partida(): void
     {
         errores::$error = false;

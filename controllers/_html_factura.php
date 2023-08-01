@@ -60,15 +60,7 @@ class _html_factura{
         if($name_entidad_partida === ''){
             return $this->error->error(mensaje: 'Error name_entidad_partida esta vacia', data: $name_entidad_partida);
         }
-        $keys = array('com_producto_id');
-        $valida = (new validacion())->valida_ids(keys: $keys,registro:  $partida);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
-        }
-        $keys = array('cat_sat_producto_codigo','com_producto_codigo','cat_sat_unidad_descripcion',
-            'cat_sat_obj_imp_descripcion','elimina_bd');
-
-        $valida = (new validacion())->valida_existencia_keys(keys: $keys,registro:  $partida);
+        $valida = (new _partidas_html())->valida_partida_html(partida: $partida);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
         }
