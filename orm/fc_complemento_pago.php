@@ -576,8 +576,27 @@ class fc_complemento_pago extends _transacciones_fc
         return $r_fc_pago->registros;
     }
 
+    /**
+     * Integra una partida default para complementos
+     * @param int $cat_sat_unidad_id Unidad id
+     * @param int $com_producto_id Producto id
+     * @param int $fc_complemento_pago_id complemento pago a integrar
+     * @return array
+     * @version 12.4.3
+     */
     private function fc_partida_cp_ins(int $cat_sat_unidad_id, int $com_producto_id, int $fc_complemento_pago_id): array
     {
+        if($cat_sat_unidad_id <= 0){
+            return $this->error->error(mensaje: 'Error cat_sat_unidad_id es menor a 0', data: $cat_sat_unidad_id);
+        }
+        if($com_producto_id <= 0){
+            return $this->error->error(mensaje: 'Error com_producto_id es menor a 0', data: $com_producto_id);
+        }
+        if($fc_complemento_pago_id <= 0){
+            return $this->error->error(mensaje: 'Error fc_complemento_pago_id es menor a 0',
+                data: $fc_complemento_pago_id);
+        }
+
         $fc_partida_cp_ins['com_producto_id'] = $com_producto_id;
         $fc_partida_cp_ins['cantidad'] = 1;
         $fc_partida_cp_ins['descripcion'] = 'Pago';
@@ -585,6 +604,7 @@ class fc_complemento_pago extends _transacciones_fc
         $fc_partida_cp_ins['descuento'] = 0;
         $fc_partida_cp_ins['cat_sat_unidad_id'] = $cat_sat_unidad_id;
         $fc_partida_cp_ins['fc_complemento_pago_id'] = $fc_complemento_pago_id;
+        $fc_partida_cp_ins['cat_sat_conf_imps_id'] = 999;
 
         return $fc_partida_cp_ins;
     }
@@ -847,7 +867,12 @@ class fc_complemento_pago extends _transacciones_fc
         return $r_modifica_bd;
     }
 
-    private function partida_default(){
+    /**
+     * Obtiene los datos de una partida default
+     * @return array|stdClass
+     */
+    private function partida_default(): array|stdClass
+    {
         $com_producto = (new com_producto(link: $this->link))->registro_by_codigo(
             codigo: $this->com_producto_codigo_default);
         if(errores::$error){

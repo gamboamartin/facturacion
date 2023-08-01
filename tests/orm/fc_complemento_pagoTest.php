@@ -170,6 +170,38 @@ class fc_complemento_pagoTest extends test {
         errores::$error = false;
     }
 
+    public function test_fc_partida_cp_ins(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo = new fc_complemento_pago($this->link);
+        $modelo = new liberator($modelo);
+
+        $cat_sat_unidad_id = 1;
+        $com_producto_id = 1;
+        $fc_complemento_pago_id = 1;
+
+        $resultado = $modelo->fc_partida_cp_ins($cat_sat_unidad_id, $com_producto_id, $fc_complemento_pago_id);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(1,$resultado['com_producto_id']);
+        $this->assertEquals(1,$resultado['cantidad']);
+        $this->assertEquals('Pago',$resultado['descripcion']);
+        $this->assertEquals(0,$resultado['valor_unitario']);
+        $this->assertEquals(0,$resultado['descuento']);
+        $this->assertEquals(1,$resultado['cat_sat_unidad_id']);
+        $this->assertEquals(1,$resultado['fc_complemento_pago_id']);
+        $this->assertEquals(999,$resultado['cat_sat_conf_imps_id']);
+        errores::$error = false;
+    }
+
 
 
     public function test_integra_fc_row_p_part(): void
