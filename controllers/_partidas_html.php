@@ -526,7 +526,13 @@ class _partidas_html{
         return true;
     }
 
-    final public function valida_partida_html(array $partida){
+    /**
+     * Valida la entrada de datos para una partida html
+     * @param array $partida Partida a validar
+     * @return array|true
+     */
+    final public function valida_partida_html(array $partida): bool|array
+    {
         $keys = array('com_producto_id');
         $valida = (new validacion())->valida_ids(keys: $keys,registro:  $partida);
         if(errores::$error){
