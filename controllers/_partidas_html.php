@@ -72,7 +72,8 @@ class _partidas_html{
     }
 
     /**
-     * @param string $input_descripcion
+     * Genera una descripcion de producto via html
+     * @param string $input_descripcion Input de descripcion
      * @return array|string
      */
     private function genera_descripcion_html(string $input_descripcion): array|string
@@ -199,7 +200,7 @@ class _partidas_html{
     /**
      * Genera las partidas en html
      * @param html_controler $html Html base
-     * @param PDO $link
+     * @param PDO $link Conexion a la base de datos
      * @param _transacciones_fc $modelo_entidad
      * @param _partida $modelo_partida
      * @param _data_impuestos $modelo_retencion
@@ -420,7 +421,7 @@ class _partidas_html{
      * @param html_controler $html_controler Html base
      * @param int $indice Indice de la partida
      * @param PDO $link Conexion a la base de datos
-     * @param _partida $modelo_partida
+     * @param _partida $modelo_partida Modelo de tipo partida
      * @param string $name_entidad_retenido
      * @param string $name_entidad_traslado
      * @param string $name_modelo_entidad
