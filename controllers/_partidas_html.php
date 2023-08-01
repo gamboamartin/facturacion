@@ -47,10 +47,20 @@ class _partidas_html{
      * Integra la descripcion en la partida
      * @param string $fc_partida_descripcion Descripcion de la partida
      * @param string $t_head_producto Encabezado de partida
-     * @return string
+     * @return string|array
+     * @version 12.0.0
      */
-    private function descripcion_html(string $fc_partida_descripcion, string $t_head_producto): string
+    private function descripcion_html(string $fc_partida_descripcion, string $t_head_producto): string|array
     {
+        $fc_partida_descripcion = trim($fc_partida_descripcion);
+        if($fc_partida_descripcion === ''){
+            return $this->error->error(mensaje: 'Error fc_partida_descripcion esta vacia',
+                data: $fc_partida_descripcion);
+        }
+        $t_head_producto = trim($t_head_producto);
+        if($t_head_producto === ''){
+            return $this->error->error(mensaje: 'Error t_head_producto esta vacia', data: $t_head_producto);
+        }
         return "<tr>
                                 <td class='nested' colspan='9'>
                                     <table class='table table-striped' style='font-size: 14px;'>
@@ -61,12 +71,18 @@ class _partidas_html{
                             </tr>";
     }
 
-    private function genera_descripcion_html(string $input_descripcion){
+    /**
+     * @param string $input_descripcion
+     * @return array|string
+     */
+    private function genera_descripcion_html(string $input_descripcion): array|string
+    {
         $fc_partida_descripcion = "<tbody><tr><td>$input_descripcion</td></tr></tbody>";
 
         $t_head_producto = "<thead><tr><th>Descripcion</th></tr></thead>";
 
-        $descripcion_html = $this->descripcion_html(fc_partida_descripcion: $fc_partida_descripcion, t_head_producto: $t_head_producto);
+        $descripcion_html = $this->descripcion_html(fc_partida_descripcion: $fc_partida_descripcion,
+            t_head_producto: $t_head_producto);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al generar descripcion_html', data: $descripcion_html);
         }
@@ -182,7 +198,7 @@ class _partidas_html{
 
     /**
      * Genera las partidas en html
-     * @param html_controler $html
+     * @param html_controler $html Html base
      * @param PDO $link
      * @param _transacciones_fc $modelo_entidad
      * @param _partida $modelo_partida
@@ -401,9 +417,9 @@ class _partidas_html{
 
     /**
      * Integra los datos de una partida en html
-     * @param html_controler $html_controler
-     * @param int $indice
-     * @param PDO $link
+     * @param html_controler $html_controler Html base
+     * @param int $indice Indice de la partida
+     * @param PDO $link Conexion a la base de datos
      * @param _partida $modelo_partida
      * @param string $name_entidad_retenido
      * @param string $name_entidad_traslado

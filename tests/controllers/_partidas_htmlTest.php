@@ -73,6 +73,30 @@ class _partidas_htmlTest extends test {
         errores::$error = false;
     }
 
+    public function test_descripcion_html(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _partidas_html();
+        $html = new liberator($html);
+
+
+        $t_head_producto = 'v';
+        $fc_partida_descripcion = 'a';
+
+        $resultado = $html->descripcion_html($fc_partida_descripcion, $t_head_producto);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertStringContainsStringIgnoringCase("<table class='table table-striped' style='font-size: 14px;'>",$resultado);
+        errores::$error = false;
+    }
+
     public function test_genera_impuesto(): void
     {
         errores::$error = false;
