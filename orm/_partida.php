@@ -1171,9 +1171,29 @@ class _partida extends  _base{
         return $r_modifica_bd;
     }
 
-    private function operacion_factor(float $subtotal, array $row): float
+    /**
+     * Ejecuta multiplicacion de resultado
+     * @param float $subtotal Subtotal de la partida
+     * @param array $row Registro de impuesto
+     * @return float|array
+     * @version 12.13.2
+     */
+    private function operacion_factor(float $subtotal, array $row): float|array
     {
-        return round($subtotal * (float)$row['cat_sat_factor_factor'],2);
+        $keys = array('cat_sat_factor_factor');
+        $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $row);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar row',data:  $valida);
+        }
+        $valida = $this->validacion->valida_double_mayores_igual_0(keys: $keys,registro:  $row);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar row',data:  $valida);
+        }
+        if($subtotal<0.0){
+            return $this->error->error(mensaje: 'Error subtotal debe ser mayor o igual a 0',data:  $subtotal);
+        }
+
+        return round($subtotal * round($row['cat_sat_factor_factor'],6),2);
     }
 
     /**
@@ -1203,7 +1223,15 @@ class _partida extends  _base{
         return $params;
     }
 
-    private function params_calculo(array $filtro,_data_impuestos $modelo_imp, int $registro_partida_id){
+    /**
+     * Obtiene los parametros para calcular retenciones y traslados
+     * @param array $filtro Filtro de datos
+     * @param _data_impuestos $modelo_imp Modelo de tipo impuesto
+     * @param int $registro_partida_id Partida identificador
+     * @return array|stdClass
+     */
+    private function params_calculo(array $filtro,_data_impuestos $modelo_imp, int $registro_partida_id): array|stdClass
+    {
         $data_imp = $modelo_imp->filtro_and(filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener los registros', data: $data_imp);
@@ -1382,7 +1410,13 @@ class _partida extends  _base{
         return $r_entidad_upd;
     }
 
-    private function resultado_operacion_imp(stdClass $params){
+    /**
+     * Obtiene el resultado de una operacion de calculo de impuestos
+     * @param stdClass $params parametros a integrar subtotal y registro de impuestos
+     * @return array|float
+     */
+    private function resultado_operacion_imp(stdClass $params): float|array
+    {
         $resultado = 0.0;
 
         if ((int)$params->data_imp->n_registros > 0) {
@@ -1417,8 +1451,10 @@ class _partida extends  _base{
         $key_sub_total_base = $this->tabla.'_sub_total_base';
         $key_descuento = $this->tabla.'_descuento';
 
+        $data->$key_sub_total_base = round($data->$key_sub_total_base,2);
+        $data->$key_descuento = round($data->$key_descuento,2);
 
-        return round($data->$key_sub_total_base - $data->$key_descuento, 4);
+        return round($data->$key_sub_total_base - $data->$key_descuento, 2);
     }
 
     /**

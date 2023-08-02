@@ -323,6 +323,56 @@ class _partidaTest extends test
         errores::$error = false;
     }
 
+    public function test_operacion_factor(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $subtotal = 100;
+        $row = array();
+        $row['cat_sat_factor_factor'] = .16;
+        $resultado = $modelo->operacion_factor($subtotal, $row);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(16,$resultado);
+        errores::$error = false;
+
+        $subtotal = 100;
+        $row = array();
+        $row['cat_sat_factor_factor'] = 0.0125;
+        $resultado = $modelo->operacion_factor($subtotal, $row);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(1.25,$resultado);
+        errores::$error = false;
+
+
+        $subtotal = 100;
+        $row = array();
+        $row['cat_sat_factor_factor'] = 0.106666;
+        $resultado = $modelo->operacion_factor($subtotal, $row);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(10.67,$resultado);
+        errores::$error = false;
+
+
+        $subtotal = 9440.56;
+        $row = array();
+        $row['cat_sat_factor_factor'] = 0.106666;
+        $resultado = $modelo->operacion_factor($subtotal, $row);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(1006.99,$resultado);
+        errores::$error = false;
+
+    }
+
     public function test_params_button_partida(): void
     {
         errores::$error = false;
