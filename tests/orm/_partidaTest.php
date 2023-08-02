@@ -369,6 +369,49 @@ class _partidaTest extends test
         errores::$error = false;
     }
 
+    public function test_subtotal_partida(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida_nc(link: $this->link);
+        //$modelo = new liberator($modelo);
+
+        $del = (new base_test())->del_adm_seccion(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
+            print_r($error);exit;
+        }
+
+        $del = (new base_test())->del_fc_nota_credito(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
+            print_r($error);exit;
+        }
+
+        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link, adm_seccion_descripcion: 'fc_nota_credito');
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
+            print_r($error);exit;
+        }
+
+        $alta = (new base_test())->alta_fc_partida_nc(link: $this->link, cat_sat_metodo_pago_id: 2);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
+            print_r($error);exit;
+        }
+
+        $registro_partida_id = 1;
+
+        $resultado = $modelo->subtotal_partida($registro_partida_id);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(1,$resultado);
+        errores::$error = false;
+    }
+
     public function test_valida_restriccion(): void
     {
         errores::$error = false;

@@ -1231,7 +1231,14 @@ class _transacciones_fc extends modelo
 
     }
 
-    public function get_factura_imp_retenidos(_partida $modelo_partida, _data_impuestos $modelo_retencion,
+    /**
+     * @param _partida $modelo_partida
+     * @param _data_impuestos $modelo_retencion
+     * @param string $name_entidad
+     * @param int $registro_entidad_id
+     * @return float|array
+     */
+    final public function get_factura_imp_retenidos(_partida $modelo_partida, _data_impuestos $modelo_retencion,
                                               string $name_entidad, int $registro_entidad_id): float|array
     {
         $partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida,

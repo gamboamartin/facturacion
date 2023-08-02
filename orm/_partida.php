@@ -519,7 +519,13 @@ class _partida extends  _base{
     }
 
 
-    final public function calculo_imp_retenido(_data_impuestos $modelo_retencion, int $registro_partida_id)
+    /**
+     * Calcula el impuesto retenido de una partida
+     * @param _data_impuestos $modelo_retencion
+     * @param int $registro_partida_id
+     * @return array|float|int
+     */
+    final public function calculo_imp_retenido(_data_impuestos $modelo_retencion, int $registro_partida_id): float|array|int
     {
         $filtro[$this->key_filtro_id] = $registro_partida_id;
         $retenido = $modelo_retencion->filtro_and(filtro: $filtro);
@@ -1368,6 +1374,7 @@ class _partida extends  _base{
      * Calcula el subtotal de una partida
      * @param int $registro_partida_id Partida a validar
      * @return float|array
+     * @version 12.11.2
      */
     final public function subtotal_partida(int $registro_partida_id): float|array
     {
