@@ -527,22 +527,27 @@ class _partida extends  _base{
      */
     final public function calculo_imp_retenido(_data_impuestos $modelo_retencion, int $registro_partida_id): float|array|int
     {
+        $resultado = $this->calcula_impuesto(modelo_imp: $modelo_retencion, registro_partida_id: $registro_partida_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener los operacion', data: $resultado);
+        }
+        return $resultado;
+    }
+
+    private function calcula_impuesto(_data_impuestos $modelo_imp, int $registro_partida_id){
         $filtro[$this->key_filtro_id] = $registro_partida_id;
-        $retenido = $modelo_retencion->filtro_and(filtro: $filtro);
+
+
+        $params = $this->params_calculo(filtro: $filtro, modelo_imp: $modelo_imp,registro_partida_id:  $registro_partida_id);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener los registros', data: $retenido);
+            return $this->error->error(mensaje: 'Error al obtener parametros', data: $params);
         }
 
-        $subtotal = $this->subtotal_partida(registro_partida_id: $registro_partida_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener los registros', data: $subtotal);
+        $resultado = $this->resultado_operacion_imp(params: $params);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener los operacion', data: $resultado);
         }
-
-        if ((int)$retenido->n_registros > 0) {
-            return round($subtotal * (float)$retenido->registros[0]['cat_sat_factor_factor'],2);
-        }
-
-        return 0;
+        return $resultado;
     }
 
     /**
@@ -553,25 +558,12 @@ class _partida extends  _base{
      */
     final public function calculo_imp_trasladado(_data_impuestos $modelo_traslado, int $registro_partida_id):float
     {
-        $filtro[$this->key_filtro_id] = $registro_partida_id;
-
-
-        $traslado = $modelo_traslado->filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener los registros', data: $traslado);
+        $resultado = $this->calcula_impuesto(modelo_imp: $modelo_traslado, registro_partida_id: $registro_partida_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener los operacion', data: $resultado);
         }
 
-        $subtotal = $this->subtotal_partida(registro_partida_id: $registro_partida_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener los registros', data: $subtotal);
-        }
-
-
-        if ((int)$traslado->n_registros > 0) {
-            return round($subtotal * (float)$traslado->registros[0]['cat_sat_factor_factor'],2);
-        }
-
-        return 0;
+        return $resultado;
     }
 
     final public function data_partida_obj(int $registro_partida_id): array|stdClass
@@ -1179,6 +1171,11 @@ class _partida extends  _base{
         return $r_modifica_bd;
     }
 
+    private function operacion_factor(float $subtotal, array $row): float
+    {
+        return round($subtotal * (float)$row['cat_sat_factor_factor'],2);
+    }
+
     /**
      * Integra los parametros por get para retorno
      * @param string $name_modelo_entidad Nombre del modelo o entidad de retorno
@@ -1204,6 +1201,22 @@ class _partida extends  _base{
         $params['accion_retorno'] = 'modifica';
         $params['id_retorno'] = $registro_entidad_id;
         return $params;
+    }
+
+    private function params_calculo(array $filtro,_data_impuestos $modelo_imp, int $registro_partida_id){
+        $data_imp = $modelo_imp->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener los registros', data: $data_imp);
+        }
+
+        $subtotal = $this->subtotal_partida(registro_partida_id: $registro_partida_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener los registros', data: $subtotal);
+        }
+        $data = new stdClass();
+        $data->data_imp = $data_imp;
+        $data->subtotal = $subtotal;
+        return $data;
     }
 
     /**
@@ -1367,6 +1380,20 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al actualizar total_descuento', data: $r_entidad_upd);
         }
         return $r_entidad_upd;
+    }
+
+    private function resultado_operacion_imp(stdClass $params){
+        $resultado = 0.0;
+
+        if ((int)$params->data_imp->n_registros > 0) {
+
+            $resultado = $this->operacion_factor(subtotal: $params->subtotal,row:  $params->data_imp->registros[0]);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener los operacion', data: $resultado);
+            }
+
+        }
+        return $resultado;
     }
 
 
