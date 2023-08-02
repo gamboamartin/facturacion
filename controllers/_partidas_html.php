@@ -212,14 +212,20 @@ class _partidas_html{
      * @param _data_impuestos $modelo_traslado Modelo de traslados
      * @param int $registro_entidad_id identificador de entidad base
      * @return array|stdClass
+     * @version 12.7.2
      */
     final function genera_partidas_html(html_controler $html, PDO $link, _transacciones_fc $modelo_entidad,
                                         _partida $modelo_partida,_data_impuestos $modelo_retencion,
                                         _data_impuestos $modelo_traslado, int $registro_entidad_id): array|stdClass
     {
+        if ($registro_entidad_id <= 0) {
+            return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
+                data: $registro_entidad_id);
+        }
 
         $partidas  = $modelo_partida->partidas(html: $html, modelo_entidad: $modelo_entidad,
-            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_entidad_id: $registro_entidad_id);
+            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
+            registro_entidad_id: $registro_entidad_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
         }
@@ -432,6 +438,7 @@ class _partidas_html{
      * @param array $partida partida ej ejecucion
      * @param stdClass $partidas Partidas en proceso
      * @return array|stdClass
+     * @version 12.7.2
      */
     private function partida_html(html_controler $html_controler, int $indice, PDO $link, _partida $modelo_partida,
                                   string $name_entidad_retenido, string $name_entidad_traslado,

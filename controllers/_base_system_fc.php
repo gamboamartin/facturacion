@@ -147,7 +147,7 @@ class _base_system_fc extends _base_system{
         $this->configuraciones_impuestos['601']['PF']['permitidos'] = array(1,3);
         $this->configuraciones_impuestos['601']['PF']['default'] = 1;
 
-        $this->configuraciones_impuestos['612']['PM']['permitidos'] = array(1,3);
+        $this->configuraciones_impuestos['612']['PM']['permitidos'] = array(1,3,5);
         $this->configuraciones_impuestos['612']['PM']['default'] = 1;
 
         $this->configuraciones_impuestos['612']['PF']['permitidos'] = array(1,3);
@@ -2122,6 +2122,8 @@ class _base_system_fc extends _base_system{
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
 
+
+
         $controladores = $this->init_controladores(ctl_partida: $this->ctl_partida, paths_conf: $this->paths_conf);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
@@ -2133,6 +2135,8 @@ class _base_system_fc extends _base_system{
             modelo_entidad: $this->modelo_entidad, modelo_partida: $this->modelo_partida,
             modelo_retencion: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado,
             registro_entidad_id: $this->registro_id);
+
+
 
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al generar html', data: $partidas);

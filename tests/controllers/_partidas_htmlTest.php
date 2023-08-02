@@ -11,6 +11,8 @@ use gamboamartin\facturacion\controllers\pdf;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_partida_nc;
+use gamboamartin\facturacion\models\fc_retenido;
+use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\organigrama\models\org_empresa;
 use gamboamartin\organigrama\models\org_sucursal;
@@ -190,6 +192,38 @@ class _partidas_htmlTest extends test {
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertStringContainsStringIgnoringCase("seccion=a&accion=elimina_bd&re",$resultado);
+        errores::$error = false;
+    }
+
+    public function test_genera_partidas_html(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $html = new _partidas_html();
+        //$html = new liberator($html);
+
+        $html_ = new html();
+        $html_controler = new html_controler(html: $html_);
+
+        $link = $this->link;
+        $modelo_partida = new fc_partida(link: $this->link);
+
+        $modelo_entidad = new fc_factura(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $registro_entidad_id = 1;
+
+        $resultado = $html->genera_partidas_html($html_controler, $link, $modelo_entidad, $modelo_partida, $modelo_retencion,
+            $modelo_traslado, $registro_entidad_id);
+
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
         errores::$error = false;
     }
 
