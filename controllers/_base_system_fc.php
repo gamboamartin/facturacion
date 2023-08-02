@@ -1715,7 +1715,8 @@ class _base_system_fc extends _base_system{
             return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
         }
         if(!$fecha_original) {
-            $es_fecha_hora_min_sec_esp = $this->validacion->valida_pattern(key: 'fecha_hora_min_sec_esp', txt: $this->row_upd->fecha);
+            $es_fecha_hora_min_sec_esp = $this->validacion->valida_pattern(key: 'fecha_hora_min_sec_esp',
+                txt: $this->row_upd->fecha);
             if (errores::$error) {
                 return $this->errores->error(mensaje: 'Error al validar fecha', data: $es_fecha_hora_min_sec_esp);
             }
