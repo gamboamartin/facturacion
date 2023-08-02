@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\models;
 
 use gamboamartin\cat_sat\models\cat_sat_conf_imps;
+use gamboamartin\comercial\models\com_precio_cliente;
 use gamboamartin\errores\errores;
 use gamboamartin\system\html_controler;
 
@@ -195,6 +196,31 @@ class _partida extends  _base{
         if(isset($this->registro['cat_sat_conf_imps_id']) && $this->registro['cat_sat_conf_imps_id']>0){
             $cat_sat_conf_imps_id = $this->registro['cat_sat_conf_imps_id'];
             $aplica_cat_sat_conf_imps = true;
+        }
+        else{
+            $row_entidad = $this->modelo_entidad->registro(registro_id: $registro[$this->modelo_entidad->key_id]);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error obtener entidad', data: $row_entidad);
+            }
+            $filtro = array();
+            $filtro['com_producto.id'] = $registro['com_producto_id'];
+            $filtro['com_cliente.id'] = $row_entidad['com_cliente_id'];
+
+            $existe_com_precio_cliente = (new com_precio_cliente(link: $this->link))->existe(filtro: $filtro);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error validar si existe entidad',
+                    data: $existe_com_precio_cliente);
+            }
+            if($existe_com_precio_cliente){
+                $r_com_precio_cliente = (new com_precio_cliente(link: $this->link))->filtro_and(filtro: $filtro);
+                if (errores::$error) {
+                    return $this->error->error(mensaje: 'Error obtener configuracion',
+                        data: $r_com_precio_cliente);
+                }
+                $cat_sat_conf_imps_id = $r_com_precio_cliente->registros[0]['cat_sat_conf_imps_id'];
+                $aplica_cat_sat_conf_imps = true;
+            }
+
         }
 
         $registro = $this->integra_calcula_subtotales(registro: $this->registro);

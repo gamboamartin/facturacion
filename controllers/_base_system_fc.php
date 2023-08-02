@@ -2122,8 +2122,6 @@ class _base_system_fc extends _base_system{
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
 
-
-
         $controladores = $this->init_controladores(ctl_partida: $this->ctl_partida, paths_conf: $this->paths_conf);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
