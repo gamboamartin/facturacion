@@ -2468,6 +2468,15 @@ class _base_system_fc extends _base_system{
                 return $this->errores->error(mensaje: 'Error al obtener precio', data: $precio);
             }
             $com_productos[$indice]['com_producto_precio'] = $precio;
+
+            $cat_sat_conf_imps_id = $com_producto['cat_sat_conf_imps_id'];
+            $precio_cliente_row = (new com_producto(link: $this->link))->precio_cliente_row(
+                com_cliente_id: $com_cliente_id,com_producto_id:  $com_producto['com_producto_id']);
+            if(count($precio_cliente_row)>0){
+                $cat_sat_conf_imps_id = $precio_cliente_row['cat_sat_conf_imps_id'];
+            }
+            $com_productos[$indice]['cat_sat_conf_imps_id']  = $cat_sat_conf_imps_id;
+            
         }
 
         $keys_selects['com_producto_id']->registros = $com_productos;
