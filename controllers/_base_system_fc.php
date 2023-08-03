@@ -162,7 +162,7 @@ class _base_system_fc extends _base_system{
 
     }
 
-    protected function ajusta_hora(bool $header, bool $ws = false): array|stdClass
+    public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
     {
 
         $controladores = $this->init_controladores(ctl_partida: $this->ctl_partida, paths_conf: $this->paths_conf);
@@ -298,7 +298,8 @@ class _base_system_fc extends _base_system{
         $extra_params_keys[] = $this->modelo_entidad->key_id;
         $select_plantilla = (new html_controler(html: $this->html_base))->select_catalogo(cols: $cols,
             con_registros: true, id_selected: -1, modelo: $this->modelo_entidad, columns_ds: $columnas_ds,
-            disabled: $disabled, extra_params_keys: $extra_params_keys, label: 'Plantilla', registros: $plantillas);
+            disabled: $disabled, extra_params_keys: $extra_params_keys, label: 'Plantilla', name: 'plantilla',
+            registros: $plantillas);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al obtener selector',data:  $select_plantilla);
             print_r($error);

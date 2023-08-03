@@ -262,7 +262,7 @@ class _base_fc_html extends html_controler{
         return $inputs_asignados;
     }
 
-    public function genera_inputs_fc_partida_modifica(controlador_fc_factura $controler, PDO $link): array|stdClass
+    public function genera_inputs_fc_partida_modifica(_base_system_fc $controler, PDO $link): array|stdClass
     {
         $inputs = $this->init_modifica_fc_partida(link: $link, row_upd: $controler->row_upd);
         if(errores::$error){

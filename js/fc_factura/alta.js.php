@@ -1,11 +1,20 @@
 <script>
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        const regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
 let sl_fc_csd = $("#fc_csd_id");
 let sl_cat_sat_forma_pago = $("#cat_sat_forma_pago_id");
 let sl_cat_sat_metodo_pago = $("#cat_sat_metodo_pago_id");
 let sl_cat_sat_moneda = $("#cat_sat_moneda_id");
 let sl_cat_sat_uso_cfdi = $("#cat_sat_uso_cfdi_id");
 let sl_com_sucursal = $("#com_sucursal_id");
-    let sl_com_tipo_cambio = $("#com_tipo_cambio_id");
+let sl_com_tipo_cambio = $("#com_tipo_cambio_id");
+let sl_plantilla = $('select[name="plantilla"]')
+
 
 let txt_serie = $("#serie");
     let txt_fecha = $("#fecha");
@@ -15,6 +24,19 @@ sl_fc_csd.change(function () {
     let serie = selected.data(`fc_csd_serie`);
 
     txt_serie.val(serie);
+});
+    sl_plantilla.change(function () {
+        let session_id = getParameterByName('session_id');
+        let adm_menu_id = getParameterByName('adm_menu_id');
+        let row_entidad_id = $(this).val();
+        let genera_factura = confirm('Deseas generar la factura basado en la plantilla?');
+        if(genera_factura){
+            let  url = "index.php?seccion=fc_factura&accion=inserta_factura_plantilla_bd&fc_factura_id="+row_entidad_id+"&session_id="+session_id+"&adm_menu_id="+adm_menu_id;
+            window.location.href = url;
+        }
+        sl_plantilla.val(-1);
+        sl_plantilla.selectpicker('refresh');
+
 });
 
 sl_com_sucursal.change(function () {
