@@ -28,12 +28,6 @@ class controlador_com_producto extends  \gamboamartin\comercial\controllers\cont
 
         $this->modelo = new com_producto(link: $this->link);
 
-        /*$controladores = $this->init_controladores(paths_conf: $paths_conf);
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar controladores',data:  $controladores);
-            print_r($error);
-            die('Error');
-        }*/
 
         $links = $this->init_links();
         if(errores::$error){

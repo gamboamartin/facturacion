@@ -332,6 +332,13 @@ class fc_facturaTest extends test {
 
         $modelo = new fc_factura($this->link);
 
+        $del = (new base_test())->del_org_empresa(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
         $del = (new base_test())->del_fc_factura(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al eliminar',$del);
@@ -339,18 +346,17 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2, id: 999);
+        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD',
+            cat_sat_metodo_pago_id: 2, id: 999);
         if(errores::$error){
             $error = (new errores())->error('Error al dar de alta factura',$alta_fc_factura);
             print_r($error);
             exit;
         }
 
-        $modelo_traslado = new fc_traslado(link: $this->link);
-        $modelo_partida = new fc_partida(link: $this->link);
 
-        $resultado = $modelo->get_factura_imp_trasladados($modelo_partida, $modelo_traslado, 'fc_factura',
-            1);
+        $resultado = $modelo->get_factura_imp_trasladados(999);
+
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0,$resultado);

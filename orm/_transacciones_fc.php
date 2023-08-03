@@ -123,6 +123,7 @@ class _transacciones_fc extends modelo
         $atributos_criticos[] = 'monto_saldo_aplicado';
         $atributos_criticos[] = 'folio_fiscal';
         $atributos_criticos[] = 'etapa';
+        $atributos_criticos[] = 'es_plantilla';
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios, columnas: $columnas,
             campos_view: $campos_view, columnas_extra: $columnas_extra, no_duplicados: $no_duplicados,
@@ -1234,66 +1235,52 @@ class _transacciones_fc extends modelo
     /**
      * Obtiene los impuestos retenidos de una partida
      * Cambiar por campo de impuestos retenidos
-     * @param _partida $modelo_partida
-     * @param _data_impuestos $modelo_retencion
-     * @param string $name_entidad
-     * @param int $registro_entidad_id
+     * @param int $registro_id
      * @return float|array
      */
-    final public function get_factura_imp_retenidos(_partida $modelo_partida, _data_impuestos $modelo_retencion,
-                                              string $name_entidad, int $registro_entidad_id): float|array
+    final public function get_factura_imp_retenidos(int $registro_id): float|array
     {
-        $partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida,
-            registro_entidad_id: $registro_entidad_id);
+
+        if ($registro_id <= 0) {
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+        }
+
+        $key_retenciones = $this->tabla.'_total_retenciones';
+
+        $fc_factura = $this->registro(registro_id: $registro_id, columnas: array($key_retenciones),
+            retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
         }
 
-        $imp_traslado = 0.0;
+        return round($fc_factura->$key_retenciones,2);
 
 
-        foreach ($partidas as $valor) {
-
-            $importe = $modelo_partida->calculo_imp_retenido(modelo_retencion: $modelo_retencion,
-                registro_partida_id: $valor[$modelo_partida->key_id]);
-
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $importe);
-            }
-
-            $imp_traslado += $importe;
-        }
-
-        return $imp_traslado;
     }
 
     /**
      * Calcula los impuestos trasladados de una factura
-     * @param int $registro_entidad_id Factura a calcular
-     * @param _partida $modelo_partida
-     * @param _data_impuestos $modelo_traslado
-     * @param string $name_entidad
+     * @param int $registro_id Registro en proceso
      * @return float|array
      * @version 4.14.0
      */
-    public function get_factura_imp_trasladados(_partida $modelo_partida, _data_impuestos $modelo_traslado,
-                                                string $name_entidad, int $registro_entidad_id): float|array
+    public function get_factura_imp_trasladados(int $registro_id): float|array
     {
-        $partidas = $this->get_partidas(name_entidad: $name_entidad, modelo_partida: $modelo_partida, registro_entidad_id: $registro_entidad_id);
+        if ($registro_id <= 0) {
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+        }
+
+        $key_traslados = $this->tabla.'_total_traslados';
+
+        $fc_factura = $this->registro(registro_id: $registro_id, columnas: array($key_traslados),
+            retorno_obj: true);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener partidas', data: $partidas);
-        }
-        $imp_traslado = 0.0;
-
-        foreach ($partidas as $partida) {
-            $imp_traslado += $modelo_partida->calculo_imp_trasladado(
-                modelo_traslado: $modelo_traslado, registro_partida_id: $partida[$modelo_partida->key_id]);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener calculo ', data: $imp_traslado);
-            }
+            return $this->error->error(mensaje: 'Error al obtener factura', data: $fc_factura);
         }
 
-        return $imp_traslado;
+        return round($fc_factura->$key_traslados,2);
+
+
     }
 
     /**

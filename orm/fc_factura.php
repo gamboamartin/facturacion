@@ -15,10 +15,7 @@ class fc_factura extends _transacciones_fc
 
         $fc_factura_uuid = "IFNULL($tabla.folio_fiscal,'SIN UUID')";
 
-
         $columnas_extra['fc_factura_uuid'] = $fc_factura_uuid;
-
-
 
         parent::__construct(link: $link, tabla: $tabla, columnas_extra: $columnas_extra);
 

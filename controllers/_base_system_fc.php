@@ -581,6 +581,30 @@ class _base_system_fc extends _base_system{
 
     }
 
+    final public function es_plantilla(bool $header, bool $ws): array|stdClass
+    {
+        $en_transaccion = false;
+        if($this->link->inTransaction()){
+            $en_transaccion = true;
+        }
+
+        if(!$en_transaccion){
+            $this->link->beginTransaction();
+        }
+
+        $upd = $this->row_upd(key: __FUNCTION__);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al obtener row upd',data:  $upd, header: $header,ws:  $ws);
+        }
+        $this->link->commit();
+
+        $_SESSION[$upd->salida][]['mensaje'] = $upd->mensaje.' del id '.$this->registro_id;
+        $this->header_out(result: $upd, header: $header,ws:  $ws);
+
+        return $upd;
+    }
+
     private function fc_externas(int $com_cliente_id){
         $filtro['com_cliente.id'] = $com_cliente_id;
 
@@ -1844,15 +1868,13 @@ class _base_system_fc extends _base_system{
             return $this->errores->error(mensaje: 'Error al obtener descuento',data:  $descuento);
         }
 
-        $imp_trasladados = $modelo_entidad->get_factura_imp_trasladados(modelo_partida: $modelo_partida,
-            modelo_traslado: $modelo_traslado, name_entidad: $this->tabla, registro_entidad_id: $this->registro_id);
+        $imp_trasladados = $modelo_entidad->get_factura_imp_trasladados( registro_id: $this->registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener imp_trasladados',data:  $imp_trasladados);
         }
 
 
-        $imp_retenidos = $modelo_entidad->get_factura_imp_retenidos(modelo_partida: $modelo_partida,
-            modelo_retencion: $modelo_retencion, name_entidad: $this->tabla, registro_entidad_id: $this->registro_id);
+        $imp_retenidos = $modelo_entidad->get_factura_imp_retenidos( registro_id: $this->registro_id);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener imp_retenidos',data:  $imp_retenidos);
         }
