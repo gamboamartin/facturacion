@@ -277,6 +277,36 @@ class _base_system_fc extends _base_system{
 
         $this->inputs->fc_csd_id = $fc_csd_id;
 
+        $filtro = array();
+        $filtro[$this->tabla.'.es_plantilla'] = 'activo';
+        $r_plantillas = $this->modelo_entidad->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al obtener plantilla',data:  $r_plantillas);
+            print_r($error);
+            die('Error');
+        }
+
+        $plantillas = $r_plantillas->registros;
+        $disabled = true;
+        if($r_plantillas->n_registros > 0){
+            $disabled = true;
+        }
+
+        $columnas_ds[] = "com_cliente_rfc";
+        $columnas_ds[] = "com_cliente_razon_social";
+        $columnas_ds[] = $this->modelo_entidad->tabla."_total";
+        $extra_params_keys[] = $this->modelo_entidad->key_id;
+        $select_plantilla = (new html_controler(html: $this->html_base))->select_catalogo(cols: $cols,
+            con_registros: true, id_selected: -1, modelo: $this->modelo_entidad, columns_ds: $columnas_ds,
+            disabled: $disabled, extra_params_keys: $extra_params_keys, label: 'Plantilla', registros: $plantillas);
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al obtener selector',data:  $select_plantilla);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->inputs->plantillas = $select_plantilla;
+
 
         return $r_alta;
     }
@@ -348,8 +378,6 @@ class _base_system_fc extends _base_system{
         return $r_alta_partida_bd;
 
     }
-
-
 
     private function base_data_partida(int $fc_partida_id): array|stdClass
     {

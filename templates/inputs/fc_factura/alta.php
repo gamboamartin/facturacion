@@ -1,5 +1,6 @@
 <?php /** @var  \gamboamartin\facturacion\controllers\controlador_fc_factura $controlador  controlador en ejecucion */ ?>
 <?php use config\views; ?>
+<?php echo $controlador->inputs->plantillas; ?>
 <?php echo $controlador->inputs->fc_csd_id; ?>
 <?php echo $controlador->inputs->com_sucursal_id; ?>
 <?php echo $controlador->inputs->serie; ?>
