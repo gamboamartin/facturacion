@@ -394,6 +394,59 @@ class _partidaTest extends test
         errores::$error = false;
     }
 
+    public function test_params_calculo(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida_nc(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $del = (new base_test())->del_adm_seccion(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
+            print_r($error);exit;
+        }
+        $del = (new base_test())->del_fc_conf_traslado(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
+            print_r($error);exit;
+        }
+
+        $del = (new base_test())->del_fc_nota_credito(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
+            print_r($error);exit;
+        }
+
+        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link, adm_seccion_descripcion: 'fc_nota_credito');
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
+            print_r($error);exit;
+        }
+
+        $alta = (new base_test())->alta_fc_partida_nc(link: $this->link, cat_sat_metodo_pago_id: 2);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
+            print_r($error);exit;
+        }
+
+        $registro_partida_id = 1;
+        $modelo_imp = new fc_retenido_nc(link: $this->link);
+        $filtro = array();
+        $resultado = $modelo->params_calculo($filtro, $modelo_imp, $registro_partida_id);
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(.01,$resultado->data_imp->registros[0]['fc_retenido_nc_total']);
+        $this->assertEquals(.99,$resultado->data_imp->registros_obj[0]->fc_nota_credito_total);
+        $this->assertEquals(1,$resultado->subtotal);
+
+        errores::$error = false;
+
+    }
+
     public function test_partidas(): void
     {
         errores::$error = false;
@@ -416,6 +469,29 @@ class _partidaTest extends test
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
 
+        errores::$error = false;
+    }
+
+    public function test_resultado_operacion_imp(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida_nc(link: $this->link);
+        $modelo = new liberator($modelo);
+
+
+        $params = new stdClass();
+        $params->data_imp = new stdClass();
+        $params->data_imp->n_registros = 1;
+        $params->data_imp->registros[0]['cat_sat_factor_factor'] = .1;
+        $params->subtotal = '100';
+        $resultado = $modelo->resultado_operacion_imp($params);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(10,$resultado);
         errores::$error = false;
     }
 

@@ -150,6 +150,7 @@ function elimina_partida_bd(boton, entidad_partida){
                     return false;
                 }
             }
+            console.log(json);
             ct.hide();
 
         },

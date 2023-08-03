@@ -128,10 +128,22 @@ btn_alta_partida.click(function () {
             sl_com_producto.val(-1);
             sl_com_producto.selectpicker('refresh');
             txt_descripcion.val('');
-            txt_cantidad.val(0);
+            txt_cantidad.val(1);
             txt_valor_unitario.val(0);
             txt_subtotal.val(0);
             txt_total.val(0);
+
+            let impuestos_traslados_previos = parseFloat($("#impuestos_trasladados").val());
+            let impuestos_trasladados_partida =  parseFloat(json.registro_puro.total_traslados);
+
+
+            let impuestos_trasladados = parseFloat(impuestos_traslados_previos + impuestos_trasladados_partida);
+
+
+
+            $("#impuestos_trasladados").val(impuestos_trasladados);
+
+
 
             if(!isNaN(json.error)){
                 alert(url);
@@ -196,7 +208,7 @@ btn_alta_partida.click(function () {
             sl_com_producto.val(-1);
             sl_com_producto.selectpicker('refresh');
             txt_descripcion.val('');
-            txt_cantidad.val(0);
+            txt_cantidad.val(1);
             txt_valor_unitario.val(0);
             txt_subtotal.val(0);
             txt_total.val(0);
@@ -228,6 +240,12 @@ sl_com_producto.change(function () {
     let aplica_predial = selected.data('com_producto_aplica_predial');
     let precio = selected.data('com_producto_precio');
     let cat_sat_conf_imps_id = selected.data('cat_sat_conf_imps_id');
+    let txt_cantidad = $("#cantidad");
+    let txt_valor_unitario = $("#valor_unitario");
+
+
+
+
 
     txt_cuenta_predial.prop( "disabled", true );
     if(aplica_predial === 'activo'){
@@ -244,6 +262,17 @@ sl_com_producto.change(function () {
     txt_tipo_factor.val(tipo_factor);
     txt_factor.val(factor);
     txt_valor_unitario.val(precio);
+
+
+    let cantidad = txt_cantidad.val();
+    let subtotal = precio * cantidad;
+    let descuento = $("#frm-partida #descuento").val();
+    let total = subtotal-descuento;
+
+
+    $("#frm-partida #subtotal").val(subtotal);
+    $("#frm-partida #total").val(total);
+
 });
 
 txt_cantidad.on('input', function () {

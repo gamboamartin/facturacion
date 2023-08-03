@@ -1232,6 +1232,8 @@ class _transacciones_fc extends modelo
     }
 
     /**
+     * Obtiene los impuestos retenidos de una partida
+     * Cambiar por campo de impuestos retenidos
      * @param _partida $modelo_partida
      * @param _data_impuestos $modelo_retencion
      * @param string $name_entidad

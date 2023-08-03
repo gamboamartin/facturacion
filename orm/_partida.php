@@ -521,8 +521,8 @@ class _partida extends  _base{
 
     /**
      * Calcula el impuesto retenido de una partida
-     * @param _data_impuestos $modelo_retencion
-     * @param int $registro_partida_id
+     * @param _data_impuestos $modelo_retencion Modelo de tipo retencion
+     * @param int $registro_partida_id Registro de partida
      * @return array|float|int
      */
     final public function calculo_imp_retenido(_data_impuestos $modelo_retencion, int $registro_partida_id): float|array|int
@@ -534,11 +534,19 @@ class _partida extends  _base{
         return $resultado;
     }
 
-    private function calcula_impuesto(_data_impuestos $modelo_imp, int $registro_partida_id){
+    /**
+     * Calcula el impuesto de una partida
+     * @param _data_impuestos $modelo_imp Modelo de tip impuesto
+     * @param int $registro_partida_id Registro de partida
+     * @return array|float
+     */
+    private function calcula_impuesto(_data_impuestos $modelo_imp, int $registro_partida_id): float|array
+    {
         $filtro[$this->key_filtro_id] = $registro_partida_id;
 
 
-        $params = $this->params_calculo(filtro: $filtro, modelo_imp: $modelo_imp,registro_partida_id:  $registro_partida_id);
+        $params = $this->params_calculo(filtro: $filtro, modelo_imp: $modelo_imp,
+            registro_partida_id:  $registro_partida_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener parametros', data: $params);
         }
@@ -1229,9 +1237,14 @@ class _partida extends  _base{
      * @param _data_impuestos $modelo_imp Modelo de tipo impuesto
      * @param int $registro_partida_id Partida identificador
      * @return array|stdClass
+     * @version 12.13.2
      */
     private function params_calculo(array $filtro,_data_impuestos $modelo_imp, int $registro_partida_id): array|stdClass
     {
+        if ($registro_partida_id <= 0) {
+            return $this->error->error(mensaje: 'Error el id de la partida es incorrecto', data: $registro_partida_id);
+        }
+
         $data_imp = $modelo_imp->filtro_and(filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener los registros', data: $data_imp);
@@ -1414,12 +1427,58 @@ class _partida extends  _base{
      * Obtiene el resultado de una operacion de calculo de impuestos
      * @param stdClass $params parametros a integrar subtotal y registro de impuestos
      * @return array|float
+     * @version 12.13.2
      */
     private function resultado_operacion_imp(stdClass $params): float|array
     {
+        if(!isset($params->data_imp)){
+            return $this->error->error(mensaje: 'Error $params->data_imp debe existir', data: $params);
+        }
+        if(!is_object($params->data_imp)){
+            return $this->error->error(mensaje: 'Error $params->data_imp debe ser un objeto', data: $params);
+        }
+        if(!isset($params->data_imp->n_registros)){
+            return $this->error->error(mensaje: 'Error $params->data_imp->n_registros debe existir', data: $params);
+        }
+
         $resultado = 0.0;
 
         if ((int)$params->data_imp->n_registros > 0) {
+
+            if(!isset($params->subtotal)){
+                return $this->error->error(mensaje: 'Error $params->subtotal debe existir', data: $params);
+            }
+            if(!isset($params->data_imp->registros)){
+                return $this->error->error(mensaje: 'Error $params->data_imp->registros debe existir', data: $params);
+            }
+            if(!is_array($params->data_imp->registros)){
+                return $this->error->error(mensaje: 'Error $params->data_imp->registros debe ser un array',
+                    data: $params);
+            }
+            if(!isset($params->data_imp->registros[0])){
+                return $this->error->error(mensaje: 'Error $params->data_imp->registros[0] debe existir', data: $params);
+            }
+            if(!is_numeric($params->subtotal)){
+                return $this->error->error(mensaje: 'Error $params->subtotal debe ser un numero', data: $params);
+            }
+            if(!is_array($params->data_imp->registros[0])){
+                return $this->error->error(mensaje: 'Error $params->data_imp->registros[0] debe ser un array',
+                    data: $params);
+            }
+            $keys = array('cat_sat_factor_factor');
+            $valida = $this->validacion->valida_existencia_keys(keys: $keys,
+                registro:  $params->data_imp->registros[0]);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar params',data:  $valida);
+            }
+            $valida = $this->validacion->valida_double_mayores_igual_0(keys: $keys,
+                registro:  $params->data_imp->registros[0]);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar params',data:  $valida);
+            }
+            if($params->subtotal<0.0){
+                return $this->error->error(mensaje: 'Error subtotal debe ser mayor o igual a 0',data:  $params);
+            }
 
             $resultado = $this->operacion_factor(subtotal: $params->subtotal,row:  $params->data_imp->registros[0]);
             if(errores::$error){
