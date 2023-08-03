@@ -58,6 +58,7 @@ use gamboamartin\facturacion\models\fc_uuid_fc;
 use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\system\actions;
 use gamboamartin\system\html_controler;
+use gamboamartin\system\row;
 use gamboamartin\xml_cfdi_4\timbra;
 use gamboamartin\xml_cfdi_4\xml;
 use html\cat_sat_conf_imps_html;
@@ -81,13 +82,13 @@ class _base_system_fc extends _base_system{
 
     public string $button_fc_factura_relaciones = '';
 
-    protected _transacciones_fc $modelo_entidad;
+    public _transacciones_fc $modelo_entidad;
     protected _partida $modelo_partida;
     protected _data_impuestos $modelo_retencion;
     protected _data_impuestos $modelo_traslado;
     protected _cuenta_predial $modelo_predial;
-    protected _relacionada $modelo_relacionada;
-    protected _relacion $modelo_relacion;
+    public _relacionada $modelo_relacionada;
+    public _relacion $modelo_relacion;
 
     protected _uuid_ext $modelo_uuid_ext;
     protected _notificacion $modelo_notificacion;
@@ -161,7 +162,7 @@ class _base_system_fc extends _base_system{
 
     }
 
-    public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
+    protected function ajusta_hora(bool $header, bool $ws = false): array|stdClass
     {
 
         $controladores = $this->init_controladores(ctl_partida: $this->ctl_partida, paths_conf: $this->paths_conf);
@@ -171,9 +172,7 @@ class _base_system_fc extends _base_system{
             die('Error');
         }
 
-        $base = $this->init_modifica(fecha_original: true, modelo_entidad: $this->modelo_entidad,
-            modelo_partida: $this->modelo_partida, modelo_retencion: $this->modelo_retencion,
-            modelo_traslado: $this->modelo_traslado);
+        $base = $this->init_modifica(fecha_original: true, modelo_entidad: $this->modelo_entidad);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
@@ -350,19 +349,7 @@ class _base_system_fc extends _base_system{
 
     }
 
-    private function asigna_por_relacionar(array $class_css_chk, array $class_css_monto, bool $existe_factura_rel, array $factura_cliente,
-                                           array $facturas_cliente_, string $key_entidad_id, string $key_entidad_saldo,
-                                           string $key_entidad_total, array $relacion): array
-    {
-        if(!$existe_factura_rel){
-            $factura_cliente = $this->integra_seleccion(class_css_chk: $class_css_chk,
-                class_css_monto: $class_css_monto, factura_cliente: $factura_cliente, key_entidad_id: $key_entidad_id,
-                key_entidad_saldo: $key_entidad_saldo, key_entidad_total: $key_entidad_total, relacion: $relacion);
 
-            $facturas_cliente_[] = $factura_cliente;
-        }
-        return $facturas_cliente_;
-    }
 
     private function base_data_partida(int $fc_partida_id): array|stdClass
     {
@@ -581,7 +568,7 @@ class _base_system_fc extends _base_system{
 
     }
 
-    final public function es_plantilla(bool $header, bool $ws): array|stdClass
+    public function es_plantilla(bool $header, bool $ws): array|stdClass
     {
         $en_transaccion = false;
         if($this->link->inTransaction()){
@@ -592,7 +579,7 @@ class _base_system_fc extends _base_system{
             $this->link->beginTransaction();
         }
 
-        $upd = $this->row_upd(key: __FUNCTION__);
+        $upd = $this->row_upd(key: __FUNCTION__,verifica_permite_transaccion: false);
         if(errores::$error){
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al obtener row upd',data:  $upd, header: $header,ws:  $ws);
@@ -626,8 +613,6 @@ class _base_system_fc extends _base_system{
 
         return $tipo_comprobante->registros[0]['cat_sat_tipo_de_comprobante_id'];
     }
-
-
 
     public function init_datatable(): stdClass
     {
@@ -904,23 +889,6 @@ class _base_system_fc extends _base_system{
 
 
 
-    private function checkbox_relaciona(array $class_css, array $extra_params, array $factura_cliente, string $key_entidad_id,
-                                        string $key_relacion_id, array $relacion): string|array
-    {
-        $row_entidad_id = $factura_cliente[$key_entidad_id];
-        $entidad_origen_key = $key_entidad_id;
-
-        $chk = $this->input_chk_rel(clases_css: $class_css, entidad_origen_key: $entidad_origen_key,
-            extra_params: $extra_params, relacion_id: $relacion[$key_relacion_id], row_entidad_id: $row_entidad_id);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al generar chk',data:  $chk);
-        }
-
-        return $chk;
-    }
-
-
-
     private function data_partida(int $fc_partida_id): array|stdClass
     {
         $data_partida = (new fc_partida($this->link))->data_partida_obj(registro_partida_id: $fc_partida_id);
@@ -1094,43 +1062,7 @@ class _base_system_fc extends _base_system{
     }
 
 
-    private function existe_factura_rel(string $name_entidad_ejecucion, array $factura_cliente, string $key_entidad_id, array $relacion): bool|array
-    {
-        $existe_factura_rel = false;
 
-        foreach ($relacion['fc_facturas_relacionadas'] as $fc_factura_relacionada){
-
-            if(isset($factura_cliente[$key_entidad_id])) {
-                if(isset($fc_factura_relacionada[$key_entidad_id])){
-                    if ($factura_cliente[$key_entidad_id] === $fc_factura_relacionada[$key_entidad_id]) {
-                        $existe_factura_rel = true;
-                        break;
-                    }
-                }
-                else{
-                    if($name_entidad_ejecucion === 'fc_nota_credito') {
-
-                        $filtro['fc_relacion_nc.id'] = $relacion['fc_relacion_nc_id'];
-                        $filtro['fc_factura.id'] = $factura_cliente['fc_factura_id'];
-                        $existe = (new fc_nc_rel(link: $this->link))->existe(filtro:$filtro);
-                        if(errores::$error){
-                            return $this->errores->error(mensaje: 'Error al validar si existe relacion', data: $existe);
-                        }
-                        if($existe){
-                            $existe_factura_rel = true;
-                            break;
-                        }
-
-                    }
-                }
-            }
-        }
-
-
-
-
-        return $existe_factura_rel;
-    }
 
     private function existe_uuid_externo(array $fc_uuid, string $name_entidad_relacion, _uuid_ext $modelo_uuid_ext,
                                          array $row_relacion_ext): bool|array
@@ -1202,93 +1134,6 @@ class _base_system_fc extends _base_system{
         exit;
     }
 
-    private function facturas_by_client(int $com_cliente_id, int $org_empresa_id){
-        $filtro = array();
-        $filtro['com_cliente.id'] = $com_cliente_id;
-        $filtro['org_empresa.id'] = $org_empresa_id;
-        $r_fc_factura = $this->modelo_entidad->filtro_and(filtro: $filtro);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al obtener facturas', data: $r_fc_factura);
-
-        }
-        return $r_fc_factura->registros;
-    }
-
-    private function facturas_cliente_(int $com_cliente_id, array $facturas_cliente, string $name_entidad, int $org_empresa_id, array $relacion): array
-    {
-        $facturas_cliente_ = array();
-        $key_entidad_id = $name_entidad.'_id';
-        $key_entidad_etapa = $name_entidad.'_etapa';
-        foreach ($facturas_cliente as $factura_cliente){
-            if($factura_cliente[$key_entidad_etapa] !== 'ALTA') {
-                $factura_cliente['key_entidad_id'] = $this->key_entidad_id;
-                $factura_cliente['key_uuid'] = $this->key_uuid;
-                $factura_cliente['key_folio'] = $this->key_folio;
-                $factura_cliente['key_fecha'] = $this->key_fecha;
-                $factura_cliente['key_etapa'] = $this->key_etapa;
-                $factura_cliente['key_total'] = $this->key_total;
-                $factura_cliente['key_saldo'] = $this->key_saldo;
-                $facturas_cliente_ = $this->integra_facturas_cliente(factura_cliente: $factura_cliente,
-                    facturas_cliente_: $facturas_cliente_, key_entidad_id: $key_entidad_id,
-                    name_entidad_ejecucion: $this->tabla, key_entidad_saldo: $this->key_saldo,
-                    key_entidad_total: $this->key_total, relacion: $relacion);
-
-                if (errores::$error) {
-                    return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
-                }
-            }
-        }
-
-        if($name_entidad === 'fc_nota_credito'){
-            $filtro['com_cliente.id'] = $com_cliente_id;
-            $filtro['org_empresa.id'] = $org_empresa_id;
-            $r_fc_factura = (new fc_factura(link: $this->link))->filtro_and(filtro: $filtro);
-            if (errores::$error) {
-                return $this->errores->error(mensaje: 'Error al obtener facturas', data: $r_fc_factura);
-            }
-
-            foreach ($r_fc_factura->registros as $fc_factura){
-                //print_r($fc_factura);exit;
-                $fc_factura['key_uuid'] = 'fc_factura_uuid';
-                $fc_factura['key_folio'] = 'fc_factura_folio';
-                $fc_factura['key_fecha'] = 'fc_factura_fecha';
-                $fc_factura['key_etapa'] = 'fc_factura_etapa';
-                $fc_factura['key_entidad_id'] = 'fc_factura_id';
-                $fc_factura['key_total'] = 'fc_factura_total';
-                $fc_factura['key_saldo'] = 'fc_factura_saldo';
-                $facturas_cliente_ = $this->integra_facturas_cliente(factura_cliente: $fc_factura,
-                    facturas_cliente_: $facturas_cliente_, key_entidad_id: 'fc_factura_id',
-                    name_entidad_ejecucion: $this->tabla, key_entidad_saldo: 'fc_factura_saldo', key_entidad_total: 'fc_factura_total', relacion: $relacion);
-
-                if (errores::$error) {
-                    return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
-                }
-            }
-
-        }
-
-
-
-
-
-        return $facturas_cliente_;
-    }
-
-    private function facturas_relacion(int $com_cliente_id, array $facturas_cliente, string $name_entidad, int $org_empresa_id, array $relaciones): array
-    {
-        foreach ($relaciones as $indice=>$relacion){
-
-            $facturas_cliente_ = $this->facturas_cliente_(com_cliente_id: $com_cliente_id,
-                facturas_cliente: $facturas_cliente, name_entidad: $name_entidad, org_empresa_id: $org_empresa_id, relacion: $relacion);
-
-            if (errores::$error) {
-                return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
-            }
-
-            $relaciones[$indice]['fc_facturas'] = $facturas_cliente_;
-        }
-        return $relaciones;
-    }
 
     private function fc_factura_documento_ins(int $doc_documento_id, int $registro_id): array
     {
@@ -1444,9 +1289,7 @@ class _base_system_fc extends _base_system{
             return $this->errores->error(mensaje: 'Error al obtener params', data: $params);
         }
 
-        $base = $this->init_modifica(fecha_original: false, modelo_entidad: $modelo_entidad,
-            modelo_partida: $modelo_partida, modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado,
-            params: $params);
+        $base = $this->init_modifica(fecha_original: false, modelo_entidad: $modelo_entidad, params: $params);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al maquetar datos',data:  $base);
         }
@@ -1511,58 +1354,6 @@ class _base_system_fc extends _base_system{
 
     }
 
-    /**
-     * Genera input de tipo checkbox array para con variable facturas_id
-     * @param array $clases_css Clases css
-     * @param string $entidad_origen_key key de base ej fc_factura_id
-     * @param array $extra_params Parametros para data extra
-     * @param int $relacion_id Identificador de relacion
-     * @param int $row_entidad_id Registro id de entidad base
-     * @return string
-     */
-    private function input_chk_rel(array $clases_css, string $entidad_origen_key, array $extra_params,
-                                   int $relacion_id, int $row_entidad_id): string
-    {
-        $class_css_html = '';
-        foreach ($clases_css as $class_css){
-            $class_css_html.= " $class_css ";
-        }
-        if($class_css_html!==''){
-            $class_css_html = "class='$class_css_html'";
-        }
-
-        $extra_params_html = '';
-        foreach ($extra_params as $key=>$value){
-            $extra_params_html.=" data-$key='$value' ";
-        }
-
-        return "<input type='checkbox' $class_css_html $extra_params_html name='fc_facturas_id[$row_entidad_id][$entidad_origen_key]' value='$relacion_id'>";
-    }
-
-    private function genera_relaciones(int $com_cliente_id, _uuid_ext $modelo_uuid_ext, string $name_entidad,  int $org_empresa_id): array
-    {
-        $relaciones = $this->modelo_entidad->get_data_relaciones(modelo_relacion: $this->modelo_relacion,
-            modelo_relacionada: $this->modelo_relacionada, modelo_uuid_ext: $modelo_uuid_ext,
-            registro_entidad_id: $this->registro_id);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
-
-        }
-
-        $facturas_cliente = $this->facturas_by_client(com_cliente_id: $com_cliente_id, org_empresa_id: $org_empresa_id);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al obtener facturas', data: $facturas_cliente);
-        }
-
-        $relaciones = $this->facturas_relacion(com_cliente_id: $com_cliente_id, facturas_cliente: $facturas_cliente,
-            name_entidad: $name_entidad, org_empresa_id: $org_empresa_id, relaciones: $relaciones);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al integrar facturas', data: $relaciones);
-        }
-
-
-        return $relaciones;
-    }
 
     public function genera_xml(bool $header, bool $ws = false){
 
@@ -1729,8 +1520,7 @@ class _base_system_fc extends _base_system{
     }
 
 
-    private function init_modifica(bool $fecha_original, _transacciones_fc $modelo_entidad, _partida $modelo_partida,
-                                   _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado,
+    private function init_modifica(bool $fecha_original, _transacciones_fc $modelo_entidad,
                                    array $params = array()): array|stdClass
     {
 
@@ -2023,7 +1813,8 @@ class _base_system_fc extends _base_system{
     public function inserta_notificacion(bool $header, bool $ws = false){
 
         $this->link->beginTransaction();
-        $notificaciones = (new fc_factura(link: $this->link))->inserta_notificacion(registro_id: $this->registro_id);
+        $notificaciones = (new fc_factura(link: $this->link))->inserta_notificacion(modelo_email: $this->modelo_email,
+            modelo_notificacion: $this->modelo_notificacion, registro_id: $this->registro_id);
         if (errores::$error) {
             $this->link->rollBack();
             $error = $this->errores->error(mensaje: 'Error al insertar notificaciones', data: $notificaciones);
@@ -2080,67 +1871,6 @@ class _base_system_fc extends _base_system{
         return $r_fc_factura_relacionada;
     }
 
-    private function integra_facturas_cliente(array $factura_cliente, array $facturas_cliente_, string $key_entidad_id,
-                                              string $name_entidad_ejecucion, string $key_entidad_saldo,
-                                              string $key_entidad_total, array $relacion): array
-    {
-        $existe_factura_rel = $this->existe_factura_rel(name_entidad_ejecucion: $name_entidad_ejecucion,
-            factura_cliente: $factura_cliente, key_entidad_id: $key_entidad_id, relacion: $relacion);
-
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al verificar si existe relacion', data: $existe_factura_rel);
-        }
-        $class_css_chk[] = 'chk_relacion';
-        $class_css_monto[] = 'inp_monto';
-        $class_css_monto[] = 'form-control';
-
-        $facturas_cliente_ = $this->asigna_por_relacionar(class_css_chk: $class_css_chk,
-            class_css_monto: $class_css_monto, existe_factura_rel: $existe_factura_rel,
-            factura_cliente: $factura_cliente, facturas_cliente_: $facturas_cliente_, key_entidad_id: $key_entidad_id,
-            key_entidad_saldo: $key_entidad_saldo, key_entidad_total: $key_entidad_total, relacion: $relacion);
-
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al generar selecciones', data: $facturas_cliente_);
-        }
-
-        return $facturas_cliente_;
-    }
-
-
-    private function integra_seleccion(array $class_css_chk, array $class_css_monto, array $factura_cliente,
-                                       string $key_entidad_id, string $key_entidad_saldo, string $key_entidad_total,
-                                       array $relacion): array
-    {
-        $key_relacion_id = $this->key_relacion_id;
-
-        $extra_params['total'] = $factura_cliente[$key_entidad_total];
-        $extra_params['saldo'] = $factura_cliente[$key_entidad_saldo];
-
-        $checkbox = $this->checkbox_relaciona(class_css: $class_css_chk, extra_params: $extra_params,
-            factura_cliente: $factura_cliente, key_entidad_id: $key_entidad_id, key_relacion_id: $key_relacion_id,
-            relacion: $relacion);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al generar checkbox', data: $checkbox);
-        }
-        $factura_cliente['seleccion'] = $checkbox;
-        $relacion_id = $relacion[$key_relacion_id];
-
-        $row_entidad_id = $factura_cliente[$key_entidad_id];
-        $name = "fc_facturas_id_monto[$row_entidad_id][fc_relacion_id][$relacion_id]";
-
-        $input_monto = (new fc_nota_credito_html(html: $this->html_base))->input_monto_aplicado_factura(
-            class_css: $class_css_monto, cols: 12, row_upd: new stdClass(), value_vacio: false, name: $name);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al generar monto', data: $input_monto);
-        }
-
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al generar input_monto', data: $input_monto);
-        }
-        $factura_cliente['input_monto'] = $input_monto;
-
-        return $factura_cliente;
-    }
 
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
@@ -2168,9 +1898,7 @@ class _base_system_fc extends _base_system{
         $this->partidas = $partidas;
 
 
-        $base = $this->init_modifica(fecha_original: false,modelo_entidad: $this->modelo_entidad,
-            modelo_partida: $this->modelo_partida, modelo_retencion: $this->modelo_retencion,
-            modelo_traslado: $this->modelo_traslado);
+        $base = $this->init_modifica(fecha_original: false,modelo_entidad: $this->modelo_entidad);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
@@ -2593,8 +2321,6 @@ class _base_system_fc extends _base_system{
         return $params;
     }
 
-
-
     /*
      * POR REVISAR
      */
@@ -2669,9 +2395,7 @@ class _base_system_fc extends _base_system{
         $params['fc_csd_id']['filtro']['fc_csd.id'] = $datos->row_upd->fc_csd_id;
         $params['fc_csd_id']['disabled'] = true;
 
-        $base = $this->init_modifica(fecha_original: false, modelo_entidad: $this->modelo_entidad, modelo_partida: $this->modelo_partida,
-            modelo_retencion: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado,
-            params: $params);
+        $base = $this->init_modifica(fecha_original: false, modelo_entidad: $this->modelo_entidad, params: $params);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
@@ -2710,15 +2434,14 @@ class _base_system_fc extends _base_system{
 
         $this->link_fc_factura_relacionada_alta_bd = $link;
 
-        $relaciones = $this->genera_relaciones(com_cliente_id: $datos->row_upd->com_cliente_id,
-            modelo_uuid_ext: $this->modelo_uuid_ext, name_entidad: $this->tabla,
+        $relaciones = (new _relaciones_base())->genera_relaciones(com_cliente_id: $datos->row_upd->com_cliente_id,
+            controller: $this, modelo_uuid_ext: $this->modelo_uuid_ext, name_entidad: $this->tabla,
             org_empresa_id: $datos->row_upd->org_empresa_id);
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al obtener relaciones', data: $relaciones);
             print_r($error);
             die('Error');
         }
-
 
 
         $key_relacionada_id = $this->modelo_relacionada->key_id;
@@ -2766,7 +2489,7 @@ class _base_system_fc extends _base_system{
                     /**
                      * POR REVISAR EXTRA PARAMS CLASESS CSS
                      */
-                    $checkbox = $this->input_chk_rel(clases_css: array(),
+                    $checkbox = (new _relaciones_base())->input_chk_rel(clases_css: array(),
                         entidad_origen_key: 'fc_uuid', extra_params: array(), relacion_id: $relacion[$key_relacion_id],
                         row_entidad_id: $fc_uuid['fc_uuid_id']);
                     if (errores::$error) {
@@ -2903,6 +2626,31 @@ class _base_system_fc extends _base_system{
         $fc_factura_relacionada_ins[$key_modelo_rel_id] = $relacion_id;
         $fc_factura_relacionada_ins[$key_modelo_base_id] = $registro_entidad_id;
         return $fc_factura_relacionada_ins;
+    }
+
+    final public function row_upd(string $key, bool $verifica_permite_transaccion = true): array|stdClass
+    {
+        if($this->registro_id<=0){
+            return $this->errores->error(mensaje: 'Error this->registro_id debe ser mayor a 0',
+                data:  $this->registro_id);
+        }
+        $key = trim($key);
+        if($key === ''){
+            return $this->errores->error(mensaje: 'Error key esta vacio', data:  $key);
+        }
+
+
+        $row_upd = (new row())->integra_row_upd(key: $key, modelo: $this->modelo, registro_id: $this->registro_id);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener row upd',data:  $row_upd);
+        }
+
+        $upd = $this->modelo_entidad->modifica_bd(registro: $row_upd, id: $this->registro_id,
+            verifica_permite_transaccion: $verifica_permite_transaccion);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al modificar adm_accion',data:  $upd);
+        }
+        return $upd;
     }
 
     private function select_fc_factura_id(): array|string
@@ -3145,13 +2893,9 @@ class _base_system_fc extends _base_system{
 
         $this->partidas = $datos->partidas;
 
-
         $params = array();
 
-
-        $base = $this->init_modifica(fecha_original: false, modelo_entidad: $this->modelo_entidad, modelo_partida: $this->modelo_partida,
-            modelo_retencion: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado,
-            params: $params);
+        $base = $this->init_modifica(fecha_original: false, modelo_entidad: $this->modelo_entidad, params: $params);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al maquetar datos',data:  $base,
                 header: $header,ws:$ws);
