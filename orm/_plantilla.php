@@ -249,9 +249,14 @@ class _plantilla{
     /**
      * Obtiene un registro de tipo fc factura nota de credito o complemento de pago
      * @return array|stdClass
+     * @version 12.20.2
      */
     private function row_entidad(): array|stdClass
     {
+        if($this->row_entidad_id <= 0){
+            return $this->error->error(mensaje: 'Error $this->row_entidad_i debe ser mayor a 0',
+                data:  $this->row_entidad_id);
+        }
         $row_entidad = $this->modelo_entidad->registro(registro_id: $this->row_entidad_id, columnas_en_bruto: true,
             retorno_obj: true);
         if(errores::$error){
