@@ -588,8 +588,6 @@ class _partida extends  _base{
         return $data;
     }
 
-
-
     /**
      * Elimina un registro con todas sus dependencias de una entidad de tipo partida
      * @param int $id Identificador a eliminar
@@ -724,8 +722,6 @@ class _partida extends  _base{
         return round($total,2);
 
     }
-
-
     private function fc_entidad_sub_total_base(string $key_filtro_entidad_id, int $registro_entidad_id){
         $fc_partidas = $this->get_partidas(key_filtro_entidad_id: $key_filtro_entidad_id,
             registro_entidad_id:  $registro_entidad_id);
@@ -805,10 +801,13 @@ class _partida extends  _base{
      * Obtiene las partidas de una factura
      * @param string $key_filtro_entidad_id Jey id para filtro de factura complemento
      * @param int $registro_entidad_id Factura a validar
+     * @param array $columnas_by_table
+     * @param bool $columnas_en_bruto
      * @return array
      * @version 10.93.3
      */
-    private function get_partidas(string $key_filtro_entidad_id,int $registro_entidad_id): array
+    final public function get_partidas(string $key_filtro_entidad_id,int $registro_entidad_id,
+                                       array $columnas_by_table = array(), bool $columnas_en_bruto = false,): array
     {
         if ($registro_entidad_id <= 0) {
             return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
@@ -820,7 +819,7 @@ class _partida extends  _base{
         }
 
         $filtro[$key_filtro_entidad_id] = $registro_entidad_id;
-        $r_fc_partida = $this->filtro_and(filtro: $filtro);
+        $r_fc_partida = $this->filtro_and(columnas_by_table: $columnas_by_table, columnas_en_bruto: $columnas_en_bruto, filtro: $filtro,);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_partida);
         }

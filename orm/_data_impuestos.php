@@ -153,10 +153,13 @@ class _data_impuestos extends _base{
      * Obtiene los impuestos trasladados de una partida
      * @param string $name_modelo_partida Nombre del modelo de tipo impuesto puede ser retenido traslado
      * @param int $registro_partida_id partida
+     * @param array $columnas_by_table Obtiene las columnas solo de la tabla en ejecucion
+     * @param bool $columnas_en_bruto Obtiene las columnas de forma tal cual esta en base de datos
      * @return array|stdClass|int
      * @version 10.162.6
      */
-    final public function get_data_rows(string $name_modelo_partida, int $registro_partida_id): array|stdClass|int
+    final public function get_data_rows(string $name_modelo_partida, int $registro_partida_id,
+                                        array $columnas_by_table = array(), bool $columnas_en_bruto = false): array|stdClass|int
     {
 
         $name_modelo_partida = trim($name_modelo_partida);
@@ -169,7 +172,8 @@ class _data_impuestos extends _base{
         }
         $key_id = $name_modelo_partida.'.id';
         $filtro[$key_id]  = $registro_partida_id;
-        $registro = $this->filtro_and(filtro: $filtro);
+        $registro = $this->filtro_and(columnas_by_table: $columnas_by_table,
+            columnas_en_bruto: $columnas_en_bruto, filtro: $filtro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener traslados',data:  $registro);
         }

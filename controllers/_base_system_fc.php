@@ -33,6 +33,7 @@ use gamboamartin\facturacion\models\_etapa;
 use gamboamartin\facturacion\models\_notificacion;
 use gamboamartin\facturacion\models\_partida;
 use gamboamartin\facturacion\models\_pdf;
+use gamboamartin\facturacion\models\_plantilla;
 use gamboamartin\facturacion\models\_relacion;
 use gamboamartin\facturacion\models\_relacionada;
 use gamboamartin\facturacion\models\_sellado;
@@ -289,7 +290,7 @@ class _base_system_fc extends _base_system{
         $plantillas = $r_plantillas->registros;
         $disabled = true;
         if($r_plantillas->n_registros > 0){
-            $disabled = true;
+            $disabled = false;
         }
 
         $columnas_ds[] = "com_cliente_rfc";
@@ -767,6 +768,65 @@ class _base_system_fc extends _base_system{
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         return $this->keys_selects;
+    }
+
+    public function inserta_factura_plantilla_bd(bool $header, bool $ws = false){
+        $this->link->beginTransaction();
+
+
+        $siguiente_view = (new actions())->init_alta_bd();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
+                header:  $header, ws: $ws);
+        }
+
+        $seccion_retorno = $this->tabla;
+        if(isset($_POST['seccion_retorno'])){
+            $seccion_retorno = $_POST['seccion_retorno'];
+            unset($_POST['seccion_retorno']);
+        }
+
+        $id_retorno = -1;
+        if(isset($_POST['id_retorno'])){
+            $id_retorno = $_POST['id_retorno'];
+            unset($_POST['id_retorno']);
+        }
+
+        $plantilla = new _plantilla(modelo_entidad: $this->modelo_entidad, modelo_partida: $this->modelo_partida,
+            modelo_retenido: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado,
+            row_entidad_id: $_GET['fc_factura_id']);
+
+
+        $row_entidad_new = $plantilla->aplica_plantilla();
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al integrar rows_imp_ins',data:  $row_entidad_new,
+                    header: $header,ws:  $ws);
+        }
+
+        $this->link->commit();
+
+        if($header){
+            if($id_retorno === -1) {
+                $id_retorno = $row_entidad_new->registro_id;
+            }
+            $this->retorno_base(registro_id:$id_retorno, result: $row_entidad_new, siguiente_view: $siguiente_view,
+                ws:  $ws,seccion_retorno: $seccion_retorno, valida_permiso: true);
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            try {
+                echo json_encode($row_entidad_new, JSON_THROW_ON_ERROR);
+            }
+            catch (Throwable $e){
+                $error = (new errores())->error(mensaje: 'Error al maquetar JSON' , data: $e);
+                print_r($error);
+            }
+            exit;
+        }
+        $row_entidad_new->siguiente_view = $siguiente_view;
+        return $row_entidad_new;
+
     }
 
     /**
