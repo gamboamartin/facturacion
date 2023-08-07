@@ -222,6 +222,12 @@ class _plantilla{
         return $del;
     }
 
+    /**
+     * Maqueta un registro para insertar un factura
+     * @param array $com_tipo_cambio Tipo de cambio
+     * @param stdClass $row_entidad Registro precargado
+     * @return array
+     */
     private function row_entidad_ins(array $com_tipo_cambio, stdClass $row_entidad): array
     {
         $row_entidad_ins['fc_csd_id'] = $row_entidad->fc_csd_id;

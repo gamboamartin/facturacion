@@ -28,6 +28,7 @@ class fc_ejecucion_aut_plantilla extends _modelo_parent_sin_codigo
         $this->etiqueta = 'Ejecuciones de facturacion automatica';
     }
 
+
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
 
@@ -45,11 +46,13 @@ class fc_ejecucion_aut_plantilla extends _modelo_parent_sin_codigo
         $facturas = $data->facturas;
 
         foreach ($facturas as $fc_factura){
+
             $fc_factura_aut_plantilla_ins = array();
             $fc_factura_aut_plantilla_ins['fc_factura_id'] = $fc_factura->registro_id;
             $fc_factura_aut_plantilla_ins['fc_ejecucion_aut_plantilla_id'] = $fc_ejecucion_aut_plantilla_id;
 
-            $r_alta_fc_aut = (new fc_factura_aut_plantilla(link: $this->link))->alta_registro(registro: $fc_factura_aut_plantilla_ins);
+            $r_alta_fc_aut = (new fc_factura_aut_plantilla(link: $this->link))->alta_registro(
+                registro: $fc_factura_aut_plantilla_ins);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al insertar factura automatica',data:  $r_alta_fc_aut);
             }
