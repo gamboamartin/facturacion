@@ -333,8 +333,9 @@ class _plantilla{
      * @param array $com_tipo_cambio Tipo de cambio
      * @param stdClass $row_entidad Registro de tipo plantilla
      * @return array|true
+     * @version 13.3.0
      */
-    private function valida_row_entidad(array $com_tipo_cambio, stdClass $row_entidad): bool|array
+    PUBLIC function valida_row_entidad(array $com_tipo_cambio, stdClass $row_entidad): bool|array
     {
         $keys = array('fc_csd_id','cat_sat_forma_pago_id','cat_sat_metodo_pago_id','cat_sat_moneda_id',
             'cat_sat_uso_cfdi_id','cat_sat_tipo_de_comprobante_id','dp_calle_pertenece_id','exportacion',
