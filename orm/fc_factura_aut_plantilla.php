@@ -14,7 +14,8 @@ class fc_factura_aut_plantilla extends _modelo_parent_sin_codigo
     {
         $tabla = 'fc_factura_aut_plantilla';
         $columnas = array($tabla => false, 'fc_factura' => $tabla,'fc_ejecucion_aut_plantilla'=>$tabla,
-            'com_tipo_cliente'=>'fc_ejecucion_aut_plantilla');
+            'com_tipo_cliente'=>'fc_ejecucion_aut_plantilla','fc_csd'=>'fc_factura','org_sucursal'=>'fc_csd',
+            'org_empresa'=>'org_sucursal');
 
         $campos_obligatorios = array('fc_factura_id','fc_ejecucion_aut_plantilla_id');
 

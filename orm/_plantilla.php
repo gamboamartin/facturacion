@@ -80,6 +80,7 @@ class _plantilla{
     }
 
     private function genera_row_entidad_ins(){
+
         $row_entidad = $this->row_entidad();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener registro',data:  $row_entidad);
@@ -297,8 +298,10 @@ class _plantilla{
         $fc_row_ins['total'] = $row_partida_origen['total'];
         $fc_row_ins['total_traslados'] = $row_partida_origen['total_traslados'];
         $fc_row_ins['total_retenciones'] = $row_partida_origen['total_retenciones'];
-        $fc_row_ins[$this->modelo_partida->tabla.'_n_traslados'] = $row_partida_origen[$this->modelo_partida->tabla.'_n_traslados'];
-        $fc_row_ins[$this->modelo_partida->tabla.'_n_retenidos'] = $row_partida_origen[$this->modelo_partida->tabla.'_n_retenidos'];
+        $fc_row_ins[$this->modelo_partida->tabla.'_n_traslados']
+            = $row_partida_origen[$this->modelo_partida->tabla.'_n_traslados'];
+        $fc_row_ins[$this->modelo_partida->tabla.'_n_retenidos']
+            = $row_partida_origen[$this->modelo_partida->tabla.'_n_retenidos'];
 
         return $fc_row_ins;
     }

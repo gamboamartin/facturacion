@@ -75,8 +75,18 @@ class fc_ejecucion_aut_plantilla extends _modelo_parent_sin_codigo
     }
 
 
-
-    private function data_auto(int $com_tipo_cliente_id){
+    /**
+     * Obtiene las faturas de un tipo de cliente y que sean plantillas
+     * @param int $com_tipo_cliente_id Tipo de cliente
+     * @return array|stdClass
+     * @version 13.0.0
+     */
+    private function data_auto(int $com_tipo_cliente_id): array|stdClass
+    {
+        if($com_tipo_cliente_id <= 0){
+            return $this->error->error(mensaje: 'Error com_tipo_cliente_id debe ser mayor a 0',
+                data:  $com_tipo_cliente_id);
+        }
 
         $filtro['com_tipo_cliente.id'] = $com_tipo_cliente_id;
         $filtro['fc_factura.es_plantilla'] = 'activo';
@@ -106,7 +116,6 @@ class fc_ejecucion_aut_plantilla extends _modelo_parent_sin_codigo
             $plantilla = new _plantilla(modelo_entidad: $modelo_entidad, modelo_partida: $modelo_partida,
                 modelo_retenido: $modelo_retencion, modelo_traslado: $modelo_traslado,
                 row_entidad_id: $plantilla['fc_factura_id']);
-
 
             $row_entidad_new = $plantilla->aplica_plantilla();
             if (errores::$error) {
