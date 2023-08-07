@@ -11,34 +11,18 @@ namespace gamboamartin\facturacion\controllers;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_conf_automatico_html;
 use gamboamartin\facturacion\html\fc_ejecucion_automatica_html;
-use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_conf_automatico;
-use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\facturacion\models\fc_ejecucion_automatica;
-use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_automatica;
-use gamboamartin\facturacion\models\fc_factura_documento;
-use gamboamartin\facturacion\models\fc_factura_etapa;
-use gamboamartin\facturacion\models\fc_factura_relacionada;
-use gamboamartin\facturacion\models\fc_partida;
-use gamboamartin\facturacion\models\fc_relacion;
-use gamboamartin\facturacion\models\fc_retenido;
-use gamboamartin\facturacion\models\fc_traslado;
-use gamboamartin\facturacion\models\fc_uuid_fc;
-use gamboamartin\system\actions;
 use gamboamartin\system\links_menu;
-use gamboamartin\system\out_permisos;
-use gamboamartin\system\system;
 use gamboamartin\template\html;
 use PDO;
 use stdClass;
 use Throwable;
 
-class controlador_fc_ejecucion_automatica extends system{
+class controlador_fc_ejecucion_automatica extends _automaticos {
 
     public array|stdClass $keys_selects = array();
-    public string $link_timbra = '';
-
 
 
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
@@ -65,6 +49,8 @@ class controlador_fc_ejecucion_automatica extends system{
 
 
         $this->verifica_parents_alta = false;
+
+        $this->modelo_automatico =  (new fc_factura_automatica(link: $this->link));
 
     }
 
@@ -109,57 +95,7 @@ class controlador_fc_ejecucion_automatica extends system{
         $this->inputs->descripcion = $descripcion;
         return $r_alta;
     }
-    public function facturas(bool $header, bool $ws = false): array|stdClass
-    {
-        $fc_ejecucion_automatica = $this->modelo->registro(registro_id: $this->registro_id,retorno_obj: true);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener fc_ejecucion_automatica',
-                data:  $fc_ejecucion_automatica,header:  $header,ws:  $ws);
-        }
-        $filtro['fc_ejecucion_automatica.id'] = $this->registro_id;
-        $r_facturas_automaticas = (new fc_factura_automatica(link: $this->link))->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener facturas',
-                data:  $r_facturas_automaticas,header:  $header,ws:  $ws);
-        }
-        $facturas_automaticas = $r_facturas_automaticas->registros;
 
-        $controlador_fc_factura = new controlador_fc_factura(link: $this->link);
-        $controlador_fc_factura->seccion = 'fc_factura';
-
-        foreach ($facturas_automaticas as $indice=>$fc_factura){
-            $controlador_fc_factura->registro_id = $fc_factura['fc_factura_id'];
-            $buttons = (new out_permisos())->buttons_view(controler:$controlador_fc_factura,
-                not_actions: array(), params: array());
-            if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al obtener botones',
-                    data: $buttons, header: $header, ws: $ws);
-            }
-            $buttons_html = implode('', $buttons);
-            $facturas_automaticas[$indice]['fc_factura_acciones'] = $buttons_html;
-
-            $input_chk = "<input type='checkbox' value='$fc_factura[fc_factura_id]' name='fc_facturas_id[]' class='fc_factura_chk'>";
-            $facturas_automaticas[$indice]['fc_factura_selecciona'] = $input_chk;
-        }
-
-        $this->registros = $facturas_automaticas;
-        $clases_css[] = 'btn_timbra';
-        $button_timbra = $this->html->directivas->btn(ids_css: $ids_css = array(), clases_css: $clases_css, extra_params: array(),
-            label: 'Timbra', name: 'btn_timbra', value: 'Timbra', cols: 2, style: 'success',type: 'submit' );
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener boton', data: $button_timbra, header: $header, ws: $ws);
-        }
-        $this->buttons['button_timbra'] = $button_timbra;
-
-        $link_timbra = $this->obj_link->link_con_id(accion: 'timbra',link:  $this->link,registro_id: $this->registro_id,seccion: $this->seccion);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener boton link_timbra', data: $link_timbra, header: $header, ws: $ws);
-        }
-
-        $this->link_timbra = $link_timbra;
-
-        return $r_facturas_automaticas;
-    }
 
 
     public function modifica(bool $header, bool $ws = false): array|stdClass
@@ -188,91 +124,7 @@ class controlador_fc_ejecucion_automatica extends system{
         return $r_modifica;
     }
 
-    public function timbra(bool $header, bool $ws = false){
 
-        $fc_facturas = $_POST['fc_facturas_id'];
-
-        $modelo_documento = new fc_factura_documento(link: $this->link);
-        $modelo_etapa = new fc_factura_etapa(link: $this->link);
-        $modelo_partida = new fc_partida(link: $this->link);
-        $modelo_predial = new fc_cuenta_predial(link: $this->link);
-        $modelo_relacion = new fc_relacion(link: $this->link);
-        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
-        $modelo_retencion = new fc_retenido(link: $this->link);
-        $modelo_sello = new fc_cfdi_sellado(link: $this->link);
-        $modelo_traslado = new fc_traslado(link: $this->link);
-        $modelo_uuid_ext = new fc_uuid_fc(link: $this->link);
-
-        foreach ($fc_facturas as $fc_factura_id){
-
-            $fc_factura = (new fc_factura(link: $this->link))->registro(registro_id: $fc_factura_id);
-            if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $fc_factura,header:  $header,ws:  $ws);
-            }
-
-            if($fc_factura['fc_factura_etapa'] !=='TIMBRADO'){
-                $this->link->beginTransaction();
-                $timbra = (new fc_factura(link: $this->link))->timbra_xml(modelo_documento: $modelo_documento,modelo_etapa:  $modelo_etapa,
-                    modelo_partida: $modelo_partida,modelo_predial:  $modelo_predial,modelo_relacion:  $modelo_relacion,
-                    modelo_relacionada:  $modelo_relacionada,modelo_retencion:  $modelo_retencion,
-                    modelo_sello: $modelo_sello,modelo_traslado:  $modelo_traslado,modelo_uuid_ext:  $modelo_uuid_ext,registro_id:  $fc_factura_id);
-
-                if(errores::$error){
-                    $this->link->rollBack();
-                    return $this->retorno_error(mensaje: 'Error al timbrar',data:  $timbra,header:  $header,ws:  $ws);
-                }
-                $this->link->commit();
-            }
-
-        }
-
-        if(isset($_GET['accion_retorno'])){
-            $siguiente_view = $_GET['accion_retorno'];
-        }
-        else{
-            $siguiente_view = (new actions())->init_alta_bd(siguiente_view: 'facturas');
-            if(errores::$error){
-
-                return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
-                    header:  $header, ws: $ws);
-            }
-        }
-        $seccion_retorno = $this->tabla;
-        if(isset($_GET['seccion_retorno'])){
-            $seccion_retorno = $_GET['seccion_retorno'];
-        }
-        $id_retorno = $this->registro_id;
-        if(isset($_GET['id_retorno'])){
-            $id_retorno = $_GET['id_retorno'];
-        }
-
-        $header_retorno = $this->header_retorno(accion: $siguiente_view, seccion: $seccion_retorno, id_retorno: $id_retorno);
-        if(errores::$error){
-
-            return $this->retorno_error(mensaje: 'Error al maquetar retorno', data: $header_retorno,
-                header:  $header, ws: $ws);
-        }
-
-        if($header){
-            header('Location:' . $header_retorno);
-            exit;
-        }
-        if($ws){
-            header('Content-Type: application/json');
-            try {
-                echo json_encode($fc_facturas, JSON_THROW_ON_ERROR);
-            }
-            catch (Throwable $e){
-                $error = $this->errores->error(mensaje: 'Error al dar salida json', data: $e);
-                print_r($error);
-                exit;
-            }
-            exit;
-        }
-        $fc_facturas->siguiente_view = $siguiente_view;
-
-        return $fc_facturas;
-    }
 
 
 }

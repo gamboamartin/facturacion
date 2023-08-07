@@ -15,17 +15,16 @@ use gamboamartin\facturacion\html\fc_ejecucion_aut_plantilla_html;
 use gamboamartin\facturacion\models\fc_ejecucion_aut_plantilla;
 use gamboamartin\facturacion\models\fc_factura_aut_plantilla;
 use gamboamartin\system\links_menu;
-use gamboamartin\system\out_permisos;
-use gamboamartin\system\system;
 use gamboamartin\template\html;
 use html\com_tipo_cliente_html;
 use PDO;
 use stdClass;
 
-class controlador_fc_ejecucion_aut_plantilla extends system{
+
+class controlador_fc_ejecucion_aut_plantilla extends _automaticos {
 
     public array|stdClass $keys_selects = array();
-    public string $link_timbra = '';
+
 
 
 
@@ -53,6 +52,8 @@ class controlador_fc_ejecucion_aut_plantilla extends system{
 
 
         $this->verifica_parents_alta = false;
+
+        $this->modelo_automatico = (new fc_factura_aut_plantilla(link: $this->link));
 
     }
 
@@ -97,62 +98,6 @@ class controlador_fc_ejecucion_aut_plantilla extends system{
         $this->hiddens->id_retorno = $id_retorno;
 
         return $r_alta;
-    }
-
-    public function facturas(bool $header, bool $ws = false): array|stdClass
-    {
-        $fc_ejecucion_automatica = $this->modelo->registro(registro_id: $this->registro_id,retorno_obj: true);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener fc_ejecucion_automatica',
-                data:  $fc_ejecucion_automatica,header:  $header,ws:  $ws);
-        }
-        $filtro['fc_factura_aut_plantilla.id'] = $this->registro_id;
-        $r_fc_factura_aut_plantillas = (new fc_factura_aut_plantilla(link: $this->link))->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener facturas',
-                data:  $r_fc_factura_aut_plantillas,header:  $header,ws:  $ws);
-        }
-        $fc_factura_aut_plantillas = $r_fc_factura_aut_plantillas->registros;
-
-        $controlador_fc_factura = new controlador_fc_factura(link: $this->link);
-        $controlador_fc_factura->seccion = 'fc_factura';
-
-        foreach ($fc_factura_aut_plantillas as $indice=>$fc_factura){
-           // print_r($fc_factura);exit;
-            $controlador_fc_factura->registro_id = $fc_factura['fc_factura_id'];
-            $controlador_fc_factura->registro = $fc_factura;
-
-            $buttons = (new out_permisos())->buttons_view(controler:$controlador_fc_factura,
-                not_actions: array(), params: array());
-            if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al obtener botones',
-                    data: $buttons, header: $header, ws: $ws);
-            }
-            $buttons_html = implode('', $buttons);
-            $fc_factura_aut_plantillas[$indice]['fc_factura_acciones'] = $buttons_html;
-
-            $input_chk = "<input type='checkbox' value='$fc_factura[fc_factura_id]' name='fc_facturas_id[]' class='fc_factura_chk'>";
-            $fc_factura_aut_plantillas[$indice]['fc_factura_selecciona'] = $input_chk;
-        }
-
-        $this->registros = $fc_factura_aut_plantillas;
-        $clases_css[] = 'btn_timbra';
-        $button_timbra = $this->html->directivas->btn(ids_css: $ids_css = array(), clases_css: $clases_css, extra_params: array(),
-            label: 'Timbra', name: 'btn_timbra', value: 'Timbra', cols: 2, style: 'success',type: 'submit' );
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener boton', data: $button_timbra, header: $header, ws: $ws);
-        }
-        $this->buttons['button_timbra'] = $button_timbra;
-
-        $link_timbra = $this->obj_link->link_con_id(accion: 'timbra',link:  $this->link,registro_id: $this->registro_id,
-            seccion: $this->seccion);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener boton link_timbra', data: $link_timbra, header: $header, ws: $ws);
-        }
-
-        $this->link_timbra = $link_timbra;
-
-        return $r_fc_factura_aut_plantillas;
     }
 
 
@@ -202,6 +147,8 @@ class controlador_fc_ejecucion_aut_plantilla extends system{
 
         return $r_modifica;
     }
+
+
 
 
 

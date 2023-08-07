@@ -68,9 +68,10 @@ class base_test{
         return $alta;
     }
 
-    public function alta_cat_sat_forma_pago(PDO $link, int $id): array|\stdClass
+    public function alta_cat_sat_forma_pago(PDO $link, string $codigo = '01', int $id = 1): array|\stdClass
     {
-        $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_forma_pago(link: $link, id: $id);
+        $alta = (new \gamboamartin\cat_sat\tests\base_test())->alta_cat_sat_forma_pago(link: $link, codigo: $codigo,
+            id: $id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -583,11 +584,11 @@ class base_test{
         return $alta;
     }
 
-    public function alta_fc_factura(PDO $link, int $cat_sat_forma_pago_id = 1,
-                                    string $cat_sat_metodo_pago_codigo = 'PUE', int $cat_sat_metodo_pago_id = 1,
-                                    int $cat_sat_moneda_id = 999, string $codigo = '1', int $com_sucursal_id = 1,
-                                    int $com_tipo_cambio_id = 1, int $fc_csd_id = 1, string $folio = 'A-000001',
-                                    int $id = 1): array|\stdClass
+    public function alta_fc_factura(
+        PDO $link, int $cat_sat_forma_pago_id = 1, string $cat_sat_metodo_pago_codigo = 'PUE',
+        int $cat_sat_metodo_pago_id = 1, int $cat_sat_moneda_id = 999, string $codigo = '1', int $com_sucursal_id = 1,
+        int $com_tipo_cambio_id = 1, $exportacion = '01', int $fc_csd_id = 1, string $folio = 'A-000001',
+        int $id = 1): array|\stdClass
     {
 
 
@@ -671,7 +672,7 @@ class base_test{
         $registro['com_sucursal_id'] = $com_sucursal_id;
         $registro['serie'] = 1;
         $registro['folio'] = $folio;
-        $registro['exportacion'] = 1;
+        $registro['exportacion'] = $exportacion;
         $registro['cat_sat_forma_pago_id'] = $cat_sat_forma_pago_id;
         $registro['cat_sat_metodo_pago_id'] = $cat_sat_metodo_pago_id;
         $registro['cat_sat_moneda_id'] = $cat_sat_moneda_id;
@@ -920,7 +921,7 @@ class base_test{
         return $alta;
     }
 
-    public function alta_fc_partida(PDO $link, string $codigo = '1', float $cantidad = 1,
+    public function alta_fc_partida(PDO $link, string $codigo = '1', float $cantidad = 1, int $cat_sat_forma_pago_id = 1,
                                     string $cat_sat_metodo_pago_codigo = 'PUE', int $cat_sat_metodo_pago_id = 1,
                                     int $com_producto_id = 1,
                                     string $descripcion = '1', float $descuento = 0,
@@ -933,7 +934,8 @@ class base_test{
             return (new errores())->error('Error al validar si existe', $existe);
         }
         if(!$existe) {
-            $alta = $this->alta_fc_factura(link: $link, cat_sat_metodo_pago_codigo: $cat_sat_metodo_pago_codigo,
+            $alta = $this->alta_fc_factura(link: $link, cat_sat_forma_pago_id: $cat_sat_forma_pago_id,
+                cat_sat_metodo_pago_codigo: $cat_sat_metodo_pago_codigo,
                 cat_sat_metodo_pago_id: $cat_sat_metodo_pago_id, folio: $fc_factura_folio);
             if (errores::$error) {
                 return (new errores())->error('Error al insertar factura', $alta);
@@ -1402,6 +1404,16 @@ class base_test{
         }
 
         $del = (new \gamboamartin\cat_sat\tests\base_test())->del_cat_sat_metodo_pago($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        return $del;
+    }
+    public function del_cat_sat_conf_reg_tp(PDO $link): array|\stdClass
+    {
+
+        $del = (new \gamboamartin\cat_sat\tests\base_test())->del_cat_sat_conf_reg_tp($link);
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
 

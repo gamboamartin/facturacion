@@ -41,6 +41,89 @@ class _plantillaTest extends test
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_genera_row_entidad_ins(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo_entidad = new fc_factura(link: $this->link);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $modelo_retenido = new fc_retenido(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $row_entidad_id = 1;
+
+        $plantilla = new _plantilla($modelo_entidad, $modelo_partida, $modelo_retenido, $modelo_traslado, $row_entidad_id);
+        $plantilla = new liberator($plantilla);
+
+        $del = (new base_test())->del_cat_sat_metodo_pago(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al del',$del);
+            print_r($error);
+            exit;
+        }
+        $del = (new base_test())->del_cat_sat_conf_reg_tp(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al del',$del);
+            print_r($error);
+            exit;
+        }
+        $del = (new base_test())->del_org_empresa(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al del',$del);
+            print_r($error);
+            exit;
+        }
+        $del = (new base_test())->del_cat_sat_forma_pago(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al del',$del);
+            print_r($error);
+            exit;
+        }
+        $del = (new base_test())->del_com_producto(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al del',$del);
+            print_r($error);
+            exit;
+        }
+        $del = (new base_test())->del_adm_seccion(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al del',$del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_cat_sat_conf_reg_tp(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_partida(link: $this->link,cat_sat_metodo_pago_id: 2);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        $resultado = $plantilla->genera_row_entidad_ins();
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(161, $resultado['cat_sat_moneda_id']);
+        errores::$error = false;
+
+    }
+
     public function test_row_entidad(): void
     {
         errores::$error = false;
@@ -88,7 +171,7 @@ class _plantillaTest extends test
 
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals(999, $resultado->cat_sat_moneda_id);
+        $this->assertEquals(161, $resultado->cat_sat_moneda_id);
         errores::$error = false;
 
     }
@@ -150,6 +233,50 @@ class _plantillaTest extends test
         $this->assertEquals(0, $resultado['total_traslados']);
         $this->assertEquals(0, $resultado['total_retenciones']);
         $this->assertEquals(0, $resultado['total']);
+        errores::$error = false;
+    }
+
+    public function test_valida_row_entidad(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo_entidad = new fc_nota_credito(link: $this->link);
+        $modelo_partida = new fc_partida_nc(link: $this->link);
+        $modelo_retenido = new fc_retenido_nc(link: $this->link);
+        $modelo_traslado = new fc_traslado_nc(link: $this->link);
+        $row_entidad_id = 1;
+
+        $plantilla = new _plantilla($modelo_entidad, $modelo_partida, $modelo_retenido, $modelo_traslado, $row_entidad_id);
+        $plantilla = new liberator($plantilla);
+
+        $com_tipo_cambio = array();
+        $row_entidad = new stdClass();
+        $row_entidad->fc_csd_id = '1';
+        $row_entidad->cat_sat_forma_pago_id = '1';
+        $row_entidad->cat_sat_metodo_pago_id = '1';
+        $row_entidad->cat_sat_moneda_id = '1';
+        $row_entidad->cat_sat_uso_cfdi_id = '1';
+        $row_entidad->cat_sat_tipo_de_comprobante_id = '1';
+        $row_entidad->dp_calle_pertenece_id = '1';
+        $row_entidad->exportacion = '02';
+        $row_entidad->cat_sat_regimen_fiscal_id = '1';
+        $row_entidad->com_sucursal_id = '1';
+        $row_entidad->observaciones = '';
+        $row_entidad->total_descuento = '0';
+        $row_entidad->sub_total_base = '0';
+        $row_entidad->sub_total = '0';
+        $row_entidad->total_traslados = '0';
+        $row_entidad->total_retenciones = '0';
+        $row_entidad->total = '0';
+        $com_tipo_cambio['com_tipo_cambio_id'] = 1;
+        $resultado = $plantilla->valida_row_entidad($com_tipo_cambio, $row_entidad);
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
         errores::$error = false;
     }
 

@@ -27,7 +27,11 @@ class _plantilla{
 
     }
 
-    final public function aplica_plantilla(){
+    /**
+     * @return array|stdClass
+     */
+    final public function aplica_plantilla(): array|stdClass
+    {
         $row_entidad_new = $this->inserta_row_entidad();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar factura',data:  $row_entidad_new);
@@ -40,7 +44,14 @@ class _plantilla{
         return $row_entidad_new;
     }
 
-    private function ejecuta_imp_ins(_data_impuestos $modelo_imp, int $partida_id_new, int $registro_partida_id){
+    /**
+     * @param _data_impuestos $modelo_imp
+     * @param int $partida_id_new
+     * @param int $registro_partida_id
+     * @return array|stdClass
+     */
+    private function ejecuta_imp_ins(_data_impuestos $modelo_imp, int $partida_id_new, int $registro_partida_id): array|stdClass
+    {
         $del = $this->limpia_impuestos(modelo_imp: $modelo_imp, partida_id_new: $partida_id_new);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al eliminar traslados',data:  $del);
@@ -65,7 +76,13 @@ class _plantilla{
         return $data;
     }
 
-    private function ejecuta_partida(int $row_entidad_new_id, array $row_partida_origen){
+    /**
+     * @param int $row_entidad_new_id
+     * @param array $row_partida_origen
+     * @return array|stdClass
+     */
+    private function ejecuta_partida(int $row_entidad_new_id, array $row_partida_origen): array|stdClass
+    {
         $r_alta_row_partida = $this->inserta_row_partida(row_entidad_new_id: $row_entidad_new_id,
             row_partida_origen: $row_partida_origen);
         if(errores::$error){
@@ -80,7 +97,13 @@ class _plantilla{
         return $rows_imp_ins;
     }
 
-    private function genera_row_entidad_ins(){
+    /**
+     * Integra un registro listo para insertar como factura basado en una plantilla
+     * @return array
+     * @version 13.4.0
+     */
+    private function genera_row_entidad_ins(): array
+    {
 
         $row_entidad = $this->row_entidad();
         if(errores::$error){
@@ -101,7 +124,15 @@ class _plantilla{
         return $row_entidad_ins;
     }
 
-    private function r_impuestos(_data_impuestos $modelo_imp, string $name_modelo_partida, int $registro_partida_id){
+    /**
+     * @param _data_impuestos $modelo_imp
+     * @param string $name_modelo_partida
+     * @param int $registro_partida_id
+     * @return array|int|stdClass
+     */
+    private function r_impuestos(_data_impuestos $modelo_imp, string $name_modelo_partida,
+                                 int $registro_partida_id): int|array|stdClass
+    {
         $r_impuestos = $modelo_imp->get_data_rows(name_modelo_partida: $name_modelo_partida,
             registro_partida_id:  $registro_partida_id, columnas_en_bruto: true);
         if(errores::$error){
@@ -110,7 +141,14 @@ class _plantilla{
         return $r_impuestos;
     }
 
-    private function inserta_impuesto(_data_impuestos $modelo_imp, array $row_imp, int $row_partida_id){
+    /**
+     * @param _data_impuestos $modelo_imp
+     * @param array $row_imp
+     * @param int $row_partida_id
+     * @return array|stdClass
+     */
+    private function inserta_impuesto(_data_impuestos $modelo_imp, array $row_imp, int $row_partida_id): array|stdClass
+    {
         $row_imp_ins = $this->row_imp_ins(name_modelo_imp: $modelo_imp->tabla,
             row_imp: $row_imp, row_partida_id: $row_partida_id);
         if(errores::$error){
@@ -124,7 +162,14 @@ class _plantilla{
         return $r_alta_imp;
     }
 
-    private function inserta_impuestos(array $impuestos, _data_impuestos $modelo_imp, int $row_partida_id){
+    /**
+     * @param array $impuestos
+     * @param _data_impuestos $modelo_imp
+     * @param int $row_partida_id
+     * @return array
+     */
+    private function inserta_impuestos(array $impuestos, _data_impuestos $modelo_imp, int $row_partida_id): array
+    {
         $data_imp = array();
         foreach ($impuestos as $row_imp){
             $row_imp_ins = $this->inserta_impuesto(modelo_imp: $modelo_imp,row_imp:  $row_imp,
@@ -137,7 +182,13 @@ class _plantilla{
         return $data_imp;
     }
 
-    private function inserta_impuestos_completos(int $partida_id_new, int $registro_partida_id){
+    /**
+     * @param int $partida_id_new
+     * @param int $registro_partida_id
+     * @return array|stdClass
+     */
+    private function inserta_impuestos_completos(int $partida_id_new, int $registro_partida_id): array|stdClass
+    {
 
         $datos = new stdClass();
         $rows_imp_ins = $this->ejecuta_imp_ins(modelo_imp: $this->modelo_traslado,
@@ -158,7 +209,13 @@ class _plantilla{
 
     }
 
-    private function inserta_partidas(int $row_entidad_new_id, array $rows_partidas){
+    /**
+     * @param int $row_entidad_new_id
+     * @param array $rows_partidas
+     * @return array
+     */
+    private function inserta_partidas(int $row_entidad_new_id, array $rows_partidas): array
+    {
         $rows_imps_ins = array();
         foreach ($rows_partidas as $row_partida_origen){
 
@@ -172,7 +229,12 @@ class _plantilla{
         return $rows_imps_ins;
     }
 
-    private function inserta_partidas_full(int $row_entidad_new_id){
+    /**
+     * @param int $row_entidad_new_id
+     * @return array
+     */
+    private function inserta_partidas_full(int $row_entidad_new_id): array
+    {
         $rows_partidas = $this->rows_partidas();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_partidas',data:  $rows_partidas);
@@ -185,7 +247,12 @@ class _plantilla{
         return $rows_imp_ins;
     }
 
-    private function inserta_row_entidad(){
+    /**
+     * Inserta un registro de tipo factura basado en una plantilla
+     * @return array|stdClass
+     */
+    private function inserta_row_entidad(): array|stdClass
+    {
         $row_entidad_ins = $this->genera_row_entidad_ins();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar factura',data:  $row_entidad_ins);
@@ -198,7 +265,13 @@ class _plantilla{
         return $r_alta_fc;
     }
 
-    private function inserta_row_partida(int $row_entidad_new_id, array  $row_partida_origen){
+    /**
+     * @param int $row_entidad_new_id
+     * @param array $row_partida_origen
+     * @return array|stdClass
+     */
+    private function inserta_row_partida(int $row_entidad_new_id, array  $row_partida_origen): array|stdClass
+    {
         $row_partida_ins = $this->row_partida_ins(row_entidad_new_id: $row_entidad_new_id,
             row_partida_origen: $row_partida_origen);
         if(errores::$error){
@@ -212,7 +285,13 @@ class _plantilla{
         return $r_alta_fc_partida;
     }
 
-    private function limpia_impuestos(_data_impuestos $modelo_imp, int $partida_id_new){
+    /**
+     * @param _data_impuestos $modelo_imp
+     * @param int $partida_id_new
+     * @return array|string[]
+     */
+    private function limpia_impuestos(_data_impuestos $modelo_imp, int $partida_id_new): array
+    {
         $filtro = array();
         $filtro[$this->modelo_partida->key_filtro_id] = $partida_id_new;
 
@@ -228,9 +307,14 @@ class _plantilla{
      * @param array $com_tipo_cambio Tipo de cambio
      * @param stdClass $row_entidad Registro precargado
      * @return array
+     * @version 13.3.0
      */
     private function row_entidad_ins(array $com_tipo_cambio, stdClass $row_entidad): array
     {
+
+        if(!isset($row_entidad->observaciones)){
+            $row_entidad->observaciones = '';
+        }
 
         $valida = $this->valida_row_entidad(com_tipo_cambio: $com_tipo_cambio,row_entidad:  $row_entidad);
         if(errores::$error){
@@ -279,6 +363,12 @@ class _plantilla{
         return $row_entidad;
     }
 
+    /**
+     * @param string $name_modelo_imp
+     * @param array $row_imp
+     * @param int $row_partida_id
+     * @return array
+     */
     private function row_imp_ins(string $name_modelo_imp,array $row_imp, int $row_partida_id): array
     {
         $key_partida_importe = $this->modelo_partida->tabla.'_importe';
@@ -298,6 +388,11 @@ class _plantilla{
         return $row_imp_ins;
     }
 
+    /**
+     * @param int $row_entidad_new_id
+     * @param array $row_partida_origen
+     * @return array
+     */
     private function row_partida_ins(int $row_entidad_new_id, array $row_partida_origen): array
     {
         $fc_row_ins['com_producto_id'] = $row_partida_origen['com_producto_id'];
@@ -319,7 +414,12 @@ class _plantilla{
         return $fc_row_ins;
     }
 
-    private function rows_partidas(){
+    /**
+     * Obtiene las partidas de una plantilla
+     * @return array
+     */
+    private function rows_partidas(): array
+    {
         $fc_partidas = $this->modelo_partida->get_partidas(key_filtro_entidad_id: $this->modelo_entidad->key_filtro_id,
             registro_entidad_id:  $this->row_entidad_id,columnas_en_bruto: true);
         if(errores::$error){
@@ -335,7 +435,7 @@ class _plantilla{
      * @return array|true
      * @version 13.3.0
      */
-    PUBLIC function valida_row_entidad(array $com_tipo_cambio, stdClass $row_entidad): bool|array
+    private function valida_row_entidad(array $com_tipo_cambio, stdClass $row_entidad): bool|array
     {
         $keys = array('fc_csd_id','cat_sat_forma_pago_id','cat_sat_metodo_pago_id','cat_sat_moneda_id',
             'cat_sat_uso_cfdi_id','cat_sat_tipo_de_comprobante_id','dp_calle_pertenece_id','exportacion',
