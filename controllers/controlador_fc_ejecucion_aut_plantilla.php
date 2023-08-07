@@ -144,7 +144,8 @@ class controlador_fc_ejecucion_aut_plantilla extends system{
         }
         $this->buttons['button_timbra'] = $button_timbra;
 
-        $link_timbra = $this->obj_link->link_con_id(accion: 'timbra',link:  $this->link,registro_id: $this->registro_id,seccion: $this->seccion);
+        $link_timbra = $this->obj_link->link_con_id(accion: 'timbra',link:  $this->link,registro_id: $this->registro_id,
+            seccion: $this->seccion);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener boton link_timbra', data: $link_timbra, header: $header, ws: $ws);
         }

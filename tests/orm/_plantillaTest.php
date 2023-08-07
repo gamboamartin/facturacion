@@ -7,11 +7,15 @@ use gamboamartin\facturacion\models\_email;
 use gamboamartin\facturacion\models\_facturacion;
 use gamboamartin\facturacion\models\_plantilla;
 use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_nota_credito;
 use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_partida_nc;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_relacion_nc;
 use gamboamartin\facturacion\models\fc_retenido;
+use gamboamartin\facturacion\models\fc_retenido_nc;
 use gamboamartin\facturacion\models\fc_traslado;
+use gamboamartin\facturacion\models\fc_traslado_nc;
 use gamboamartin\facturacion\models\fc_uuid_nc;
 use gamboamartin\facturacion\tests\base_test;
 use gamboamartin\test\liberator;
@@ -87,6 +91,66 @@ class _plantillaTest extends test
         $this->assertEquals(999, $resultado->cat_sat_moneda_id);
         errores::$error = false;
 
+    }
+
+    public function test_row_entidad_ins(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo_entidad = new fc_nota_credito(link: $this->link);
+        $modelo_partida = new fc_partida_nc(link: $this->link);
+        $modelo_retenido = new fc_retenido_nc(link: $this->link);
+        $modelo_traslado = new fc_traslado_nc(link: $this->link);
+        $row_entidad_id = 1;
+
+        $plantilla = new _plantilla($modelo_entidad, $modelo_partida, $modelo_retenido, $modelo_traslado, $row_entidad_id);
+        $plantilla = new liberator($plantilla);
+
+        $com_tipo_cambio = array();
+        $row_entidad = new stdClass();
+        $row_entidad->fc_csd_id = '1';
+        $row_entidad->cat_sat_forma_pago_id = '1';
+        $row_entidad->cat_sat_metodo_pago_id = '1';
+        $row_entidad->cat_sat_moneda_id = '1';
+        $row_entidad->cat_sat_uso_cfdi_id = '1';
+        $row_entidad->cat_sat_tipo_de_comprobante_id = '1';
+        $row_entidad->dp_calle_pertenece_id = '1';
+        $row_entidad->exportacion = '02';
+        $row_entidad->cat_sat_regimen_fiscal_id = '1';
+        $row_entidad->com_sucursal_id = '1';
+        $row_entidad->observaciones = '';
+        $row_entidad->total_descuento = '0';
+        $row_entidad->sub_total_base = '0';
+        $row_entidad->sub_total = '0';
+        $row_entidad->total_traslados = '0';
+        $row_entidad->total_retenciones = '0';
+        $row_entidad->total = '0';
+        $com_tipo_cambio['com_tipo_cambio_id'] = 1;
+        $resultado = $plantilla->row_entidad_ins($com_tipo_cambio, $row_entidad);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(1, $resultado['fc_csd_id']);
+        $this->assertEquals(1, $resultado['cat_sat_forma_pago_id']);
+        $this->assertEquals(1, $resultado['cat_sat_metodo_pago_id']);
+        $this->assertEquals(1, $resultado['cat_sat_moneda_id']);
+        $this->assertEquals(1, $resultado['com_tipo_cambio_id']);
+        $this->assertEquals(1, $resultado['cat_sat_uso_cfdi_id']);
+        $this->assertEquals(1, $resultado['cat_sat_tipo_de_comprobante_id']);
+        $this->assertEquals(1, $resultado['dp_calle_pertenece_id']);
+        $this->assertEquals('02', $resultado['exportacion']);
+        $this->assertEquals(1, $resultado['cat_sat_regimen_fiscal_id']);
+        $this->assertEquals(1, $resultado['com_sucursal_id']);
+        $this->assertEquals(0, $resultado['total_descuento']);
+        $this->assertEquals(0, $resultado['sub_total_base']);
+        $this->assertEquals(0, $resultado['sub_total']);
+        $this->assertEquals(0, $resultado['total_traslados']);
+        $this->assertEquals(0, $resultado['total_retenciones']);
+        $this->assertEquals(0, $resultado['total']);
+        errores::$error = false;
     }
 
 

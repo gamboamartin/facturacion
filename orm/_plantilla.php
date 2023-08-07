@@ -3,6 +3,7 @@
 namespace gamboamartin\facturacion\models;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\errores\errores;
+use gamboamartin\validacion\validacion;
 use PDO;
 use stdClass;
 
@@ -230,6 +231,12 @@ class _plantilla{
      */
     private function row_entidad_ins(array $com_tipo_cambio, stdClass $row_entidad): array
     {
+
+        $valida = $this->valida_row_entidad(com_tipo_cambio: $com_tipo_cambio,row_entidad:  $row_entidad);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar row_entidad',data:  $valida);
+        }
+
         $row_entidad_ins['fc_csd_id'] = $row_entidad->fc_csd_id;
         $row_entidad_ins['cat_sat_forma_pago_id'] = $row_entidad->cat_sat_forma_pago_id;
         $row_entidad_ins['cat_sat_metodo_pago_id'] = $row_entidad->cat_sat_metodo_pago_id;
@@ -319,5 +326,53 @@ class _plantilla{
             return $this->error->error(mensaje: 'Error al obtener fc_partidas',data:  $fc_partidas);
         }
         return $fc_partidas;
+    }
+
+    /**
+     * Valida la entrada de datos de una plantilla
+     * @param array $com_tipo_cambio Tipo de cambio
+     * @param stdClass $row_entidad Registro de tipo plantilla
+     * @return array|true
+     */
+    private function valida_row_entidad(array $com_tipo_cambio, stdClass $row_entidad): bool|array
+    {
+        $keys = array('fc_csd_id','cat_sat_forma_pago_id','cat_sat_metodo_pago_id','cat_sat_moneda_id',
+            'cat_sat_uso_cfdi_id','cat_sat_tipo_de_comprobante_id','dp_calle_pertenece_id','exportacion',
+            'cat_sat_regimen_fiscal_id','com_sucursal_id','observaciones','total_descuento','sub_total_base',
+            'sub_total','total_traslados','total_retenciones','total');
+
+        $valida = (new validacion())->valida_existencia_keys(keys: $keys,registro:  $row_entidad,valida_vacio: false);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar row_entidad',data:  $valida);
+        }
+
+        $keys = array('com_tipo_cambio_id');
+
+        $valida = (new validacion())->valida_ids(keys: $keys,registro:  $com_tipo_cambio);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar com_tipo_cambio',data:  $valida);
+        }
+
+        $keys = array('fc_csd_id','cat_sat_forma_pago_id','cat_sat_metodo_pago_id','cat_sat_moneda_id',
+            'cat_sat_uso_cfdi_id','cat_sat_tipo_de_comprobante_id','dp_calle_pertenece_id',
+            'cat_sat_regimen_fiscal_id','com_sucursal_id');
+
+        $valida = (new validacion())->valida_ids(keys: $keys,registro:  $row_entidad);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar row_entidad',data:  $valida);
+        }
+
+        $valida = (new validacion())->valida_cod_int_0_2_numbers(key: 'exportacion',registro: $row_entidad);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar row_entidad',data:  $valida);
+        }
+
+        $keys = array('total_descuento','sub_total_base', 'sub_total','total_traslados','total_retenciones','total');
+
+        $valida = (new validacion())->valida_double_mayores_igual_0(keys: $keys,registro:  $row_entidad);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar row_entidad',data:  $valida);
+        }
+        return true;
     }
 }
