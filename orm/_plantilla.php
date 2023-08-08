@@ -418,6 +418,7 @@ class _plantilla{
     /**
      * Obtiene las partidas de una plantilla
      * @return array
+     * @version
      */
     private function rows_partidas(): array
     {

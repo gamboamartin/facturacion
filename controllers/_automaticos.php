@@ -95,7 +95,7 @@ class _automaticos extends system{
     }
 
     private function facturas_automaticas(){
-        $filtro[$this->modelo_automatico->key_filtro_id] = $this->registro_id;
+        $filtro[$this->modelo->key_filtro_id] = $this->registro_id;
         $r_fc_facturas = $this->modelo_automatico->filtro_and(filtro: $filtro);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener facturas', data:  $r_fc_facturas);
