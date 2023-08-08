@@ -130,7 +130,7 @@ class _data_impuestosTest extends test
             exit;
         }
 
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link,adm_seccion_descripcion: 'fc_factura');
+        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar', $alta);
             print_r($error);
@@ -138,7 +138,7 @@ class _data_impuestosTest extends test
         }
 
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar', $alta);
             print_r($error);

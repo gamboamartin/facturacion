@@ -232,7 +232,7 @@ class _partidaTest extends test
             print_r($error);exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida_nc(link: $this->link, cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida_nc(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
             print_r($error);exit;
@@ -427,7 +427,7 @@ class _partidaTest extends test
             print_r($error);exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida_nc(link: $this->link, cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida_nc(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
             print_r($error);exit;
@@ -523,7 +523,7 @@ class _partidaTest extends test
             print_r($error);exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida_nc(link: $this->link, cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida_nc(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
             print_r($error);exit;

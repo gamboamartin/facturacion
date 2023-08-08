@@ -133,9 +133,7 @@ class _selladoTest extends test
             exit;
         }
 
-
-
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);

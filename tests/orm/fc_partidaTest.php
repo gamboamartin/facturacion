@@ -71,7 +71,7 @@ class fc_partidaTest extends test
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar', $alta);
             print_r($error);
@@ -79,7 +79,8 @@ class fc_partidaTest extends test
         }
 
         $modelo_traslado = new fc_traslado(link: $this->link);
-        $resultado = $modelo->calculo_imp_trasladado(registro_partida_id: $alta->registro_id, modelo_traslado: $modelo_traslado);
+        $resultado = $modelo->calculo_imp_trasladado(modelo_traslado: $modelo_traslado,
+            registro_partida_id: $alta->registro_id);
         $this->assertIsFloat($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(0.0,$resultado);
@@ -112,8 +113,7 @@ class fc_partidaTest extends test
         }
 
 
-        $fc_partida = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 10, cat_sat_metodo_pago_codigo: 'PPD',
-            cat_sat_metodo_pago_id: 2, id: 999, valor_unitario: 5.57);
+        $fc_partida = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 10, id: 999, valor_unitario: 5.57);
         if (errores::$error) {
             $error = (new errores())->error('Error al obtener id de la partida', $fc_partida);
             print_r($error);
@@ -200,8 +200,7 @@ class fc_partidaTest extends test
         }
 
 
-        $fc_partida = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 10, cat_sat_metodo_pago_codigo: 'PPD',
-            cat_sat_metodo_pago_id: 2, id: 999, valor_unitario: 5.57);
+        $fc_partida = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 10, id: 999, valor_unitario: 5.57);
         if (errores::$error) {
             $error = (new errores())->error('Error al obtener id de la partida', $fc_partida);
             print_r($error);
@@ -240,8 +239,8 @@ class fc_partidaTest extends test
             exit;
         }
 
-        $fc_partida = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 10, cat_sat_metodo_pago_codigo: 'PPD',
-            cat_sat_metodo_pago_id: 2, descuento: 9.35, id: 999, valor_unitario: 5.57);
+        $fc_partida = (new base_test())->alta_fc_partida(link: $this->link, cantidad: 10, descuento: 9.35, id: 999,
+            valor_unitario: 5.57);
         if (errores::$error) {
             $error = (new errores())->error('Error al obtener id de la partida', $fc_partida);
             print_r($error);

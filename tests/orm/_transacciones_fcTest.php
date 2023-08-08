@@ -270,8 +270,7 @@ class _transacciones_fcTest extends test
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_complemento_pago(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD',
-            cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_complemento_pago(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
             print_r($error);
@@ -328,8 +327,7 @@ class _transacciones_fcTest extends test
 
 
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD',
-            cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
             print_r($error);

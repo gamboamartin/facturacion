@@ -141,7 +141,7 @@ class _saldos_fcTest extends test
 
 
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
@@ -164,8 +164,31 @@ class _saldos_fcTest extends test
             print_r($error);
             exit;
         }
+        $del = (new base_test())->del_cat_sat_metodo_pago(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
 
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link,adm_seccion_descripcion: 'fc_nota_credito');
+        $del = (new base_test())->del_cat_sat_forma_pago(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link, adm_accion_descripcion: 'alta_bd',
+            adm_accion_id: 100, adm_seccion_descripcion: 'fc_nota_credito', adm_seccion_id: 100, id: 100,
+            pr_etapa_codigo: '100', pr_etapa_descripcion: '100', pr_etapa_id: 100);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link, adm_accion_descripcion: 'alta_bd',
+            adm_accion_id: 200, adm_seccion_descripcion: 'fc_factura', adm_seccion_id: 200, id: 200,
+            pr_etapa_codigo: 200, pr_etapa_descripcion: '200', pr_etapa_id: 200);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);

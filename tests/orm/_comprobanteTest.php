@@ -109,8 +109,7 @@ class _comprobanteTest extends test
             exit;
         }
 
-        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD',
-            cat_sat_metodo_pago_id: 2);
+        $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al dar de alta factura',$alta_fc_factura);
             print_r($error);

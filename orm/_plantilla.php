@@ -252,7 +252,7 @@ class _plantilla{
      * @return array|stdClass
      * @version 13.5.0
      */
-    PUBLIC function inserta_row_entidad(): array|stdClass
+    private function inserta_row_entidad(): array|stdClass
     {
         $row_entidad_ins = $this->genera_row_entidad_ins();
         if(errores::$error){

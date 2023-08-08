@@ -84,6 +84,18 @@ class fc_complemento_pagoTest extends test {
             print_r($error);
             exit;
         }
+        $del = (new base_test())->del_cat_sat_metodo_pago(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
+            print_r($error);
+            exit;
+        }
+        $del = (new base_test())->del_cat_sat_forma_pago(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
+            print_r($error);
+            exit;
+        }
 
         $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
         if(errores::$error){
@@ -92,7 +104,7 @@ class fc_complemento_pagoTest extends test {
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
             print_r($error);

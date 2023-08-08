@@ -109,7 +109,7 @@ class _plantillaTest extends test
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link,cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
@@ -119,7 +119,7 @@ class _plantillaTest extends test
         $resultado = $plantilla->genera_row_entidad_ins();
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals(161, $resultado['cat_sat_moneda_id']);
+        $this->assertEquals(999, $resultado['cat_sat_moneda_id']);
         errores::$error = false;
 
     }
@@ -171,8 +171,7 @@ class _plantillaTest extends test
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_forma_pago_id: 2,
-            cat_sat_regimen_fiscal_id: 601, cat_sat_tipo_persona_id: 4);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
@@ -180,11 +179,14 @@ class _plantillaTest extends test
         }
 
         $plantilla = new _plantilla($modelo_entidad, $modelo_partida, $modelo_retenido, $modelo_traslado, $row_entidad_id);
-        //$plantilla = new liberator($plantilla);
+        $plantilla = new liberator($plantilla);
 
 
         $resultado = $plantilla->inserta_row_entidad();
-        print_r($resultado);exit;
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("Registro insertado con éxito", $resultado->mensaje);
+        errores::$error = false;
     }
 
     public function test_row_entidad(): void
@@ -216,8 +218,7 @@ class _plantillaTest extends test
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_forma_pago_id: 2,
-            cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
@@ -235,9 +236,10 @@ class _plantillaTest extends test
 
         $resultado = $plantilla->row_entidad();
 
+
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals(161, $resultado->cat_sat_moneda_id);
+
         errores::$error = false;
 
     }

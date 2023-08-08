@@ -55,7 +55,7 @@ class fc_trasladoTest extends test
         }
 
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar', $alta);
             print_r($error);
@@ -63,7 +63,7 @@ class fc_trasladoTest extends test
         }
 
         $fc_partida_id = 1;
-        $resultado = $modelo->get_data_rows(registro_partida_id: $fc_partida_id,name_modelo_partida: 'fc_partida');
+        $resultado = $modelo->get_data_rows(name_modelo_partida: 'fc_partida', registro_partida_id: $fc_partida_id);
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
 
