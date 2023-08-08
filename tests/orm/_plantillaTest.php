@@ -124,12 +124,32 @@ class _plantillaTest extends test
 
     }
 
-    public function test_row_entidad(): void
+    public function test_inserta_row_entidad(): void
     {
         errores::$error = false;
         $_SESSION['grupo_id'] = 1;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
+
+
+        $modelo_entidad = new fc_factura(link: $this->link);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $modelo_retenido = new fc_retenido(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $row_entidad_id = 1;
+
+        $del = (new base_test())->del_org_empresa(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+        $del = (new base_test())->del_com_producto(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
 
         $del = (new base_test())->del_fc_factura(link: $this->link);
         if(errores::$error){
@@ -151,7 +171,53 @@ class _plantillaTest extends test
             exit;
         }
 
-        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_forma_pago_id: 2,
+            cat_sat_regimen_fiscal_id: 601, cat_sat_tipo_persona_id: 4);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        $plantilla = new _plantilla($modelo_entidad, $modelo_partida, $modelo_retenido, $modelo_traslado, $row_entidad_id);
+        //$plantilla = new liberator($plantilla);
+
+
+        $resultado = $plantilla->inserta_row_entidad();
+        print_r($resultado);exit;
+    }
+
+    public function test_row_entidad(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+
+        $del = (new base_test())->del_fc_factura(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+        $del = (new base_test())->del_adm_seccion(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al eliminar',$del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_fc_partida(link: $this->link, cat_sat_forma_pago_id: 2,
+            cat_sat_metodo_pago_codigo: 'PPD', cat_sat_metodo_pago_id: 2);
         if(errores::$error){
             $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);

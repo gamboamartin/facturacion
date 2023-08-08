@@ -152,10 +152,15 @@ class base_test{
         return $alta;
     }
 
-    public function alta_com_sucursal(PDO $link, int $cat_sat_moneda_id = 161, int $id = 1): array|\stdClass
+    public function alta_com_sucursal(PDO $link, int $cat_sat_forma_pago_id = 1, string $cat_sat_metodo_pago_codigo = 'PUE',
+                                      int $cat_sat_metodo_pago_id= 2, int $cat_sat_moneda_id = 161,
+                                      int $cat_sat_regimen_fiscal_id = 1, int $cat_sat_tipo_persona_id = 1,
+                                      int $id = 1): array|\stdClass
     {
 
-        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_sucursal(link: $link, id: $id);
+        $alta = (new \gamboamartin\comercial\test\base_test())->alta_com_sucursal(link: $link, id: $id,
+            cat_sat_forma_pago_id: $cat_sat_forma_pago_id,
+            cat_sat_metodo_pago_id: $cat_sat_metodo_pago_id, cat_sat_metodo_pago_codigo: $cat_sat_metodo_pago_codigo, cat_sat_tipo_persona_id: $cat_sat_tipo_persona_id, cat_sat_regimen_fiscal_id: $cat_sat_regimen_fiscal_id);
         if(errores::$error){
             return (new errores())->error('Error al insertar', $alta);
 
@@ -549,7 +554,8 @@ class base_test{
 
 
 
-    public function alta_fc_csd(PDO $link, int $id = 1, int $org_sucursal_id = 1): array|\stdClass
+    public function alta_fc_csd(PDO $link, int $cat_sat_regimen_fiscal_id = 1, int $cat_sat_tipo_persona_id = 1,
+                                int $id = 1, int $org_sucursal_id = 1): array|\stdClass
     {
 
         $existe = (new org_sucursal($link))->existe_by_id(registro_id: $org_sucursal_id);
@@ -557,7 +563,8 @@ class base_test{
             return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
         }
         if(!$existe) {
-            $alta = $this->alta_org_sucursal(link: $link, id: $org_sucursal_id);
+            $alta = $this->alta_org_sucursal(link: $link, cat_sat_regimen_fiscal_id: $cat_sat_regimen_fiscal_id,
+                cat_sat_tipo_persona_id: $cat_sat_tipo_persona_id, id: $org_sucursal_id);
             if (errores::$error) {
                 return (new errores())->error(mensaje: 'Error al insertar sucursal', data: $alta);
             }
@@ -586,7 +593,8 @@ class base_test{
 
     public function alta_fc_factura(
         PDO $link, int $cat_sat_forma_pago_id = 1, string $cat_sat_metodo_pago_codigo = 'PUE',
-        int $cat_sat_metodo_pago_id = 1, int $cat_sat_moneda_id = 999, string $codigo = '1', int $com_sucursal_id = 1,
+        int $cat_sat_metodo_pago_id = 1, int $cat_sat_moneda_id = 999, int $cat_sat_regimen_fiscal_id = 1,
+        int $cat_sat_tipo_persona_id = 1, string $codigo = '1', int $com_sucursal_id = 1,
         int $com_tipo_cambio_id = 1, $exportacion = '01', int $fc_csd_id = 1, string $folio = 'A-000001',
         int $id = 1): array|\stdClass
     {
@@ -597,7 +605,10 @@ class base_test{
             return (new errores())->error(mensaje: 'Error al verificar si existe factura', data: $existe);
         }
         if(!$existe) {
-            $alta = $this->alta_com_sucursal(link: $link, id: $com_sucursal_id);
+            $alta = $this->alta_com_sucursal(link: $link, id: $com_sucursal_id,
+                cat_sat_metodo_pago_codigo: $cat_sat_metodo_pago_codigo,cat_sat_forma_pago_id: $cat_sat_metodo_pago_id,
+                cat_sat_metodo_pago_id: $cat_sat_metodo_pago_id,cat_sat_moneda_id: $cat_sat_moneda_id,
+                cat_sat_tipo_persona_id:  $cat_sat_tipo_persona_id, cat_sat_regimen_fiscal_id: $cat_sat_regimen_fiscal_id);
             if (errores::$error) {
                 return (new errores())->error(mensaje: 'Error al insertar sucursal', data: $alta);
             }
@@ -619,7 +630,8 @@ class base_test{
             return (new errores())->error(mensaje: 'Error al verificar si existe ', data: $existe);
         }
         if(!$existe) {
-            $alta = $this->alta_fc_csd(link: $link, id: $fc_csd_id);
+            $alta = $this->alta_fc_csd(link: $link, cat_sat_regimen_fiscal_id: $cat_sat_regimen_fiscal_id,
+                cat_sat_tipo_persona_id: $cat_sat_tipo_persona_id, id: $fc_csd_id);
             if (errores::$error) {
                 return (new errores())->error(mensaje: 'Error al insertar csd', data: $alta);
             }
@@ -923,8 +935,8 @@ class base_test{
 
     public function alta_fc_partida(PDO $link, string $codigo = '1', float $cantidad = 1, int $cat_sat_forma_pago_id = 1,
                                     string $cat_sat_metodo_pago_codigo = 'PUE', int $cat_sat_metodo_pago_id = 1,
-                                    int $com_producto_id = 1,
-                                    string $descripcion = '1', float $descuento = 0,
+                                    int $cat_sat_regimen_fiscal_id = 1, int $cat_sat_tipo_persona_id = 1,
+                                    int $com_producto_id = 1, string $descripcion = '1', float $descuento = 0,
                                     string $fc_factura_folio = 'A-000001', int $fc_factura_id = 1,
                                     int $id = 1, float $valor_unitario = 1): array|\stdClass
     {
@@ -936,7 +948,8 @@ class base_test{
         if(!$existe) {
             $alta = $this->alta_fc_factura(link: $link, cat_sat_forma_pago_id: $cat_sat_forma_pago_id,
                 cat_sat_metodo_pago_codigo: $cat_sat_metodo_pago_codigo,
-                cat_sat_metodo_pago_id: $cat_sat_metodo_pago_id, folio: $fc_factura_folio);
+                cat_sat_metodo_pago_id: $cat_sat_metodo_pago_id, folio: $fc_factura_folio,
+                cat_sat_regimen_fiscal_id: $cat_sat_regimen_fiscal_id,cat_sat_tipo_persona_id: $cat_sat_tipo_persona_id);
             if (errores::$error) {
                 return (new errores())->error('Error al insertar factura', $alta);
             }
@@ -1282,10 +1295,13 @@ class base_test{
         return $alta;
     }
 
-    public function alta_org_sucursal(PDO $link, int $id = 1): array|\stdClass
+    public function alta_org_sucursal(PDO $link, int $cat_sat_regimen_fiscal_id = 1, int $cat_sat_tipo_persona_id = 1,
+                                      int $id = 1): array|\stdClass
     {
 
-        $alta = (new \gamboamartin\organigrama\tests\base_test())->alta_org_sucursal(link: $link, id: $id);
+        $alta = (new \gamboamartin\organigrama\tests\base_test())->alta_org_sucursal(link: $link,
+            cat_sat_regimen_fiscal_id: $cat_sat_regimen_fiscal_id,
+            cat_sat_tipo_persona_id: $cat_sat_tipo_persona_id, id: $id);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar sucursal', data: $alta);
 

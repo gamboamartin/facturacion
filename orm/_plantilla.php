@@ -250,8 +250,9 @@ class _plantilla{
     /**
      * Inserta un registro de tipo factura basado en una plantilla
      * @return array|stdClass
+     * @version 13.5.0
      */
-    private function inserta_row_entidad(): array|stdClass
+    PUBLIC function inserta_row_entidad(): array|stdClass
     {
         $row_entidad_ins = $this->genera_row_entidad_ins();
         if(errores::$error){
