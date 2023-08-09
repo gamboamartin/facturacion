@@ -165,7 +165,18 @@ class _automaticos extends system{
 
     public function timbra(bool $header, bool $ws = false){
 
+        if(!isset($_POST['fc_facturas_id'])){
+            $_POST['fc_facturas_id'] = array();
+        }
         $fc_facturas = $_POST['fc_facturas_id'];
+        if(count($fc_facturas) === 0){
+            $facturas = $this->facturas_automaticas();
+
+            foreach ($facturas as $fc_factura){
+                $fc_facturas[] = $fc_factura['fc_factura_id'];
+            }
+
+        }
 
         $modelo_documento = new fc_factura_documento(link: $this->link);
         $modelo_etapa = new fc_factura_etapa(link: $this->link);
@@ -177,6 +188,9 @@ class _automaticos extends system{
         $modelo_sello = new fc_cfdi_sellado(link: $this->link);
         $modelo_traslado = new fc_traslado(link: $this->link);
         $modelo_uuid_ext = new fc_uuid_fc(link: $this->link);
+
+
+
 
         foreach ($fc_facturas as $fc_factura_id){
 

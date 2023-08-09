@@ -117,9 +117,10 @@ class _plantillaTest extends test
         }
 
         $resultado = $plantilla->genera_row_entidad_ins();
+
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals(999, $resultado['cat_sat_moneda_id']);
+        $this->assertEquals(1, $resultado['cat_sat_forma_pago_id']);
         errores::$error = false;
 
     }
@@ -302,6 +303,50 @@ class _plantillaTest extends test
         $this->assertEquals(0, $resultado['total_retenciones']);
         $this->assertEquals(0, $resultado['total']);
         errores::$error = false;
+    }
+
+    public function test_row_partida_ins(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo_entidad = new fc_nota_credito(link: $this->link);
+        $modelo_partida = new fc_partida_nc(link: $this->link);
+        $modelo_retenido = new fc_retenido_nc(link: $this->link);
+        $modelo_traslado = new fc_traslado_nc(link: $this->link);
+        $row_entidad_id = 1;
+
+
+        $plantilla = new _plantilla($modelo_entidad, $modelo_partida, $modelo_retenido, $modelo_traslado, $row_entidad_id);
+        $plantilla = new liberator($plantilla);
+
+        $row_entidad_new_id = 1;
+        $row_partida_origen = array();
+        $row_partida_origen['com_producto_id'] = 1;
+        $row_partida_origen['cantidad'] = 1;
+        $row_partida_origen['descripcion'] = -1;
+        $row_partida_origen['valor_unitario'] = 1;
+        $row_partida_origen['descuento'] = 0;
+        $row_partida_origen['sub_total_base'] = 1;
+        $row_partida_origen['sub_total'] = 1;
+        $row_partida_origen['total'] = 1;
+        $row_partida_origen['total_traslados'] = 0;
+        $row_partida_origen['total_retenciones'] = 0;
+        $row_partida_origen['fc_partida_nc_n_traslados'] = 0;
+        $row_partida_origen['fc_partida_nc_n_retenidos'] = 0;
+        $resultado = $plantilla->row_partida_ins($row_entidad_new_id, $row_partida_origen);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(1,$resultado['cantidad']);
+        $this->assertEquals(1,$resultado['com_producto_id']);
+        $this->assertEquals(1,$resultado['fc_nota_credito_id']);
+        $this->assertEquals(0,$resultado['fc_partida_nc_n_traslados']);
+        $this->assertEquals(0,$resultado['fc_partida_nc_n_retenidos']);
+        errores::$error = false;
+
     }
 
     public function test_rows_partidas(): void
