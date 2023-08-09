@@ -7,7 +7,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="widget widget-box box-container widget-mylistings">
-                    <form method="post" action="<?php echo $controlador->link_timbra; ?>" class="form-additional">
+                    <form method="post" action="<?php echo $controlador->link_timbra; ?>" class="form-additional frm-ejecuta">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -43,6 +43,7 @@
                         </tbody>
                     </table>
                     <?php echo $controlador->buttons['button_timbra']; ?>
+                    <?php echo $controlador->buttons['button_descarga']; ?>
                     </form>
                 </div> <!-- /. widget-table-->
             </div><!-- /.center-content -->

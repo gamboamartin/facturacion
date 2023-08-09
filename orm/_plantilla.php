@@ -463,9 +463,16 @@ class _plantilla{
      * @param stdClass $keys_imps Keys de impuestos
      * @param array $row_partida_origen Partida de plantilla
      * @return array|true
+     * @version 13.10.0
      */
     private function valida_existe_key_partida(stdClass $keys_imps, array $row_partida_origen): bool|array
     {
+        $keys = array('key_n_traslados','key_n_retenidos');
+        $valida = (new validacion())->valida_existencia_keys(keys: $keys,registro:  $keys_imps);
+        if(errores::$error){
+            return  $this->error->error(mensaje: 'Error al validar keys_imps',data:  $valida);
+        }
+
         $keys = array('com_producto_id','cantidad','descripcion','valor_unitario','descuento','sub_total_base',
             'sub_total','total','total_traslados','total_retenciones',$keys_imps->key_n_traslados, $keys_imps->key_n_retenidos);
 
@@ -477,7 +484,8 @@ class _plantilla{
     }
 
     /**
-     * @param array $row_partida_origen
+     * Valida los identificadores necesario externos de una partida de plantilla
+     * @param array $row_partida_origen Registro de plantilla de partida
      * @return array|true
      */
     private function valida_ids_partida(array $row_partida_origen): bool|array

@@ -1,6 +1,8 @@
 <?php
 namespace gamboamartin\facturacion\controllers;
 use base\orm\_modelo_parent_sin_codigo;
+use config\generales;
+use gamboamartin\compresor\compresor;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_email;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
@@ -36,7 +38,7 @@ class _automaticos extends system{
     final protected function data_form(): array|stdClass
     {
         $clases_css[] = 'btn_timbra';
-        $button_timbra = $this->html->directivas->btn(ids_css: $ids_css = array(), clases_css: $clases_css, extra_params: array(),
+        $button_timbra = $this->html->directivas->btn(ids_css: array(), clases_css: $clases_css, extra_params: array(),
             label: 'Timbra', name: 'btn_timbra', value: 'Timbra', cols: 2, style: 'success',type: 'submit' );
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener boton', data: $button_timbra);
@@ -45,9 +47,24 @@ class _automaticos extends system{
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener boton link_timbra', data: $link_timbra);
         }
+
+        $clases_css = array();
+        $clases_css[] = 'btn_descarga';
+        $button_descarga = $this->html->directivas->btn(ids_css: array(), clases_css: $clases_css, extra_params: array(),
+            label: 'Descarga', name: 'btn_descarga', value: 'Descarga', cols: 2, style: 'success',type: 'submit' );
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener boton', data: $button_descarga);
+        }
+        $link_descarga = $this->obj_link->link_con_id(accion: 'descarga',link:  $this->link,registro_id: $this->registro_id,seccion: $this->seccion);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener boton link_descarga', data: $link_timbra);
+        }
+
         $data = new stdClass();
         $data->button_timbra = $button_timbra;
+        $data->button_descarga = $button_descarga;
         $data->link_timbra = $link_timbra;
+        $data->link_descarga = $link_descarga;
         return $data;
     }
 
@@ -84,20 +101,13 @@ class _automaticos extends system{
 
         }
 
-        $modelo_documento = new fc_factura_documento(link: $this->link);
-        $modelo_etapa = new fc_factura_etapa(link: $this->link);
-        $modelo_partida = new fc_partida(link: $this->link);
-        $modelo_predial = new fc_cuenta_predial(link: $this->link);
-        $modelo_relacion = new fc_relacion(link: $this->link);
-        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
-        $modelo_retencion = new fc_retenido(link: $this->link);
-        $modelo_sello = new fc_cfdi_sellado(link: $this->link);
-        $modelo_traslado = new fc_traslado(link: $this->link);
-        $modelo_uuid_ext = new fc_uuid_fc(link: $this->link);
+        $row_aut = $this->modelo->registro(registro_id: $this->registro_id, columnas_en_bruto: true, retorno_obj: true);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener registro',data:  $row_aut,header:  $header,ws:  $ws);
+        }
 
 
-
-        $documentos = array();
+        $documentos_fc = array();
         foreach ($fc_facturas as $fc_factura_id){
 
             $fc_factura = (new fc_factura(link: $this->link))->registro(registro_id: $fc_factura_id);
@@ -109,58 +119,51 @@ class _automaticos extends system{
                 if(errores::$error){
                     return $this->retorno_error(mensaje: 'Error al obtener documento',data:  $documento,header:  $header,ws:  $ws);
                 }
-                $documentos[] = $documento;
+                $documentos_fc[] = $documento;
             }
         }
 
-        //print_r($documentos);exit;
 
-        if(isset($_GET['accion_retorno'])){
-            $siguiente_view = $_GET['accion_retorno'];
-        }
-        else{
-            $siguiente_view = (new actions())->init_alta_bd(siguiente_view: 'facturas');
+        $destinos_zip = array();
+        foreach ($documentos_fc as $documentos){
+
+            $doc_zip = array();
+            foreach ($documentos as $documento){
+                $name_doc = $documento['fc_factura_folio'].'.'.$documento['doc_extension_codigo'];
+                $origen = (new generales())->path_base.$documento['doc_documento_ruta_relativa'];
+
+                $doc_zip[$origen] = $name_doc;
+            }
+
+            $destino_zip = compresor::comprime_archivos(archivos: $doc_zip,name_zip: $documento['fc_factura_folio'].'.zip');
             if(errores::$error){
-
-                return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
-                    header:  $header, ws: $ws);
+                return $this->retorno_error(mensaje: 'Error al comprimir',data:  $destino_zip,header:  $header,ws:  $ws);
             }
-        }
-        $seccion_retorno = $this->tabla;
-        if(isset($_GET['seccion_retorno'])){
-            $seccion_retorno = $_GET['seccion_retorno'];
-        }
-        $id_retorno = $this->registro_id;
-        if(isset($_GET['id_retorno'])){
-            $id_retorno = $_GET['id_retorno'];
+            $origen_zip = (new generales())->path_base.$destino_zip;
+            $destinos_zip[$origen_zip] = $documento['fc_factura_folio'].'.zip';
         }
 
-        $header_retorno = $this->header_retorno(accion: $siguiente_view, seccion: $seccion_retorno, id_retorno: $id_retorno);
-        if(errores::$error){
+        $zip_completo = compresor::comprime_archivos(archivos: $destinos_zip);
 
-            return $this->retorno_error(mensaje: 'Error al maquetar retorno', data: $header_retorno,
-                header:  $header, ws: $ws);
+        foreach ($destinos_zip as $origen_zip=>$destino_zip){
+            unlink($origen_zip);
         }
 
-        if($header){
-            header('Location:' . $header_retorno);
+        if($header) {
+            ob_clean();
+            header("Cache-Control: public");
+            header("Content-Description: File Transfer");
+            header("Content-Disposition: attachment; filename=$row_aut->descripcion.zip");
+            header("Content-Type: application/zip");
+            header("Content-Transfer-Encoding: binary");
+            readfile((new generales())->path_base . $zip_completo);
+            unlink((new generales())->path_base . $zip_completo);
             exit;
         }
-        if($ws){
-            header('Content-Type: application/json');
-            try {
-                echo json_encode($fc_facturas, JSON_THROW_ON_ERROR);
-            }
-            catch (Throwable $e){
-                $error = $this->errores->error(mensaje: 'Error al dar salida json', data: $e);
-                print_r($error);
-                exit;
-            }
-            exit;
-        }
-        $fc_facturas->siguiente_view = $siguiente_view;
+        $content = file_get_contents((new generales())->path_base . $zip_completo);
+        unlink((new generales())->path_base . $zip_completo);
+        return $content;
 
-        return $fc_facturas;
     }
 
     public function facturas(bool $header, bool $ws = false): array|stdClass
@@ -185,6 +188,7 @@ class _automaticos extends system{
         }
         $this->link_timbra = $data_form->link_timbra;
         $this->buttons['button_timbra'] = $data_form->button_timbra;
+        $this->buttons['button_descarga'] = $data_form->button_descarga;
 
         return $fc_factura_automaticas;
     }
