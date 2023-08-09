@@ -286,6 +286,11 @@ class _plantilla{
         return $r_alta_fc_partida;
     }
 
+    /**
+     * Integra los key de los impuestos a integrar
+     * @return stdClass
+     * @version 13.9.0
+     */
     private function keys_impuestos(): stdClass
     {
         $key_n_traslados = $this->modelo_partida->tabla.'_n_traslados';
@@ -453,7 +458,14 @@ class _plantilla{
     }
 
 
-    private function valida_existe_key_partida(stdClass $keys_imps, array $row_partida_origen){
+    /**
+     * Valida que existan los keys necesarios para integrar una factura
+     * @param stdClass $keys_imps Keys de impuestos
+     * @param array $row_partida_origen Partida de plantilla
+     * @return array|true
+     */
+    private function valida_existe_key_partida(stdClass $keys_imps, array $row_partida_origen): bool|array
+    {
         $keys = array('com_producto_id','cantidad','descripcion','valor_unitario','descuento','sub_total_base',
             'sub_total','total','total_traslados','total_retenciones',$keys_imps->key_n_traslados, $keys_imps->key_n_retenidos);
 
@@ -464,7 +476,12 @@ class _plantilla{
         return true;
     }
 
-    private function valida_ids_partida(array $row_partida_origen){
+    /**
+     * @param array $row_partida_origen
+     * @return array|true
+     */
+    private function valida_ids_partida(array $row_partida_origen): bool|array
+    {
         $keys = array('com_producto_id');
 
         $valida = (new validacion())->valida_ids(keys: $keys,registro:  $row_partida_origen);
@@ -475,7 +492,12 @@ class _plantilla{
 
     }
 
-    private function valida_monto_mayor_0(array $row_partida_origen){
+    /**
+     * @param array $row_partida_origen
+     * @return array|true
+     */
+    private function valida_monto_mayor_0(array $row_partida_origen): bool|array
+    {
         $keys = array('cantidad','valor_unitario','sub_total_base', 'sub_total','total');
 
         $valida = (new validacion())->valida_double_mayores_0(keys: $keys,registro:  $row_partida_origen);
@@ -485,17 +507,29 @@ class _plantilla{
         return true;
     }
 
-    private function valida_monto_mayor_igual_0(stdClass $keys_imps, array $row_partida_origen){
+    /**
+     * @param stdClass $keys_imps
+     * @param array $row_partida_origen
+     * @return array|bool
+     */
+    private function valida_monto_mayor_igual_0(stdClass $keys_imps, array $row_partida_origen): bool|array
+    {
         $keys = array('descuento','total_traslados','total_retenciones',$keys_imps->key_n_traslados, $keys_imps->key_n_retenidos);
 
         $valida = (new validacion())->valida_double_mayores_igual_0(keys: $keys,registro:  $row_partida_origen);
         if(errores::$error){
             return  $this->error->error(mensaje: 'Error al validar row_partida_origen',data:  $valida);
         }
-        return $valida;
+        return true;
     }
 
-    private function valida_montos(stdClass $keys_imps,array $row_partida_origen){
+    /**
+     * @param stdClass $keys_imps
+     * @param array $row_partida_origen
+     * @return array|true
+     */
+    private function valida_montos(stdClass $keys_imps,array $row_partida_origen): bool|array
+    {
         $valida = $this->valida_monto_mayor_0(row_partida_origen: $row_partida_origen);
         if(errores::$error){
             return  $this->error->error(mensaje: 'Error al validar row_partida_origen',data:  $valida);
@@ -557,7 +591,13 @@ class _plantilla{
         return true;
     }
 
-    private function valida_row_partida(stdClass $keys_imps, array $row_partida_origen){
+    /**
+     * @param stdClass $keys_imps
+     * @param array $row_partida_origen
+     * @return array|true
+     */
+    private function valida_row_partida(stdClass $keys_imps, array $row_partida_origen): bool|array
+    {
         $valida = $this->valida_existe_key_partida(keys_imps: $keys_imps,row_partida_origen:  $row_partida_origen);
         if(errores::$error){
             return  $this->error->error(mensaje: 'Error al validar row_partida_origen',data:  $valida);
@@ -576,7 +616,14 @@ class _plantilla{
         return true;
     }
 
-    private function valida_row_partida_insert(stdClass $keys_imps, int $row_entidad_new_id, array $row_partida_origen){
+    /**
+     * @param stdClass $keys_imps
+     * @param int $row_entidad_new_id
+     * @param array $row_partida_origen
+     * @return array|true
+     */
+    private function valida_row_partida_insert(stdClass $keys_imps, int $row_entidad_new_id, array $row_partida_origen): bool|array
+    {
         $valida = $this->valida_row_partida(keys_imps: $keys_imps,row_partida_origen:  $row_partida_origen);
         if(errores::$error){
             return  $this->error->error(mensaje: 'Error al validar row_partida_origen',data:  $valida);

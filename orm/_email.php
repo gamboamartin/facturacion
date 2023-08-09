@@ -203,7 +203,7 @@ class _email{
         return $r_fc_email->registros;
     }
 
-    private function genera_documentos(PDO $link, int $registro_id, stdClass $row_entidad){
+    final public function genera_documentos(PDO $link, int $registro_id){
 
         $fc_factura_documentos = $this->documentos(registro_id: $registro_id,link:  $link);
         if (errores::$error) {
@@ -290,7 +290,7 @@ class _email{
 
     private function inserta_adjuntos(stdClass $row_entidad, int $registro_id, PDO $link,  int $not_mensaje_id){
         $adjuntos = array();
-        $docs = $this->genera_documentos(link: $link, registro_id: $registro_id, row_entidad: $row_entidad);
+        $docs = $this->genera_documentos(link: $link, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener documentos', data: $docs);
         }

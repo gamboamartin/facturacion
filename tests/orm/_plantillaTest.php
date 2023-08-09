@@ -190,6 +190,34 @@ class _plantillaTest extends test
         errores::$error = false;
     }
 
+    public function test_keys_impuestos(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo_entidad = new fc_nota_credito(link: $this->link);
+        $modelo_partida = new fc_partida_nc(link: $this->link);
+        $modelo_retenido = new fc_retenido_nc(link: $this->link);
+        $modelo_traslado = new fc_traslado_nc(link: $this->link);
+        $row_entidad_id = 1;
+
+        $plantilla = new _plantilla($modelo_entidad, $modelo_partida, $modelo_retenido, $modelo_traslado, $row_entidad_id);
+        $plantilla = new liberator($plantilla);
+
+
+        $resultado = $plantilla->keys_impuestos();
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("fc_partida_nc_n_traslados",$resultado->key_n_traslados);
+        $this->assertEquals("fc_partida_nc_n_retenidos",$resultado->key_n_retenidos);
+
+        errores::$error = false;
+
+    }
+
     public function test_row_entidad(): void
     {
         errores::$error = false;
