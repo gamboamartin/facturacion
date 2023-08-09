@@ -10,6 +10,7 @@ use stdClass;
 class _etapa extends _modelo_parent_sin_codigo{
 
     protected _transacciones_fc $modelo_entidad;
+    public bool $verifica_permite_transaccion = true;
 
     public function alta_bd(array $keys_integra_ds = array('descripcion','pr_etapa_proceso_id', 'fecha')): array|stdClass
     {
@@ -34,7 +35,9 @@ class _etapa extends _modelo_parent_sin_codigo{
         }
 
         $row_entidad_base['etapa'] = $pr_etapa_proceso->pr_etapa_descripcion;
-        $upd = $this->modelo_entidad->modifica_bd(registro: $row_entidad_base,id:  $this->registro[$this->modelo_entidad->key_id]);
+        $upd = $this->modelo_entidad->modifica_bd(registro: $row_entidad_base,
+            id:  $this->registro[$this->modelo_entidad->key_id],
+            verifica_permite_transaccion: $this->verifica_permite_transaccion);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al actualizar entidad',data:  $upd);
         }

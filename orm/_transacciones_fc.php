@@ -239,6 +239,8 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al cancelar factura',data:  $r_fc_cancelacion);
         }
 
+        $modelo_etapa->verifica_permite_transaccion = false;
+
         $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
             modelo: $this, modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if(errores::$error){
