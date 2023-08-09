@@ -487,6 +487,7 @@ class _plantilla{
      * Valida los identificadores necesario externos de una partida de plantilla
      * @param array $row_partida_origen Registro de plantilla de partida
      * @return array|true
+     * @version 13.11.1
      */
     private function valida_ids_partida(array $row_partida_origen): bool|array
     {
