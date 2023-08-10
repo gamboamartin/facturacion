@@ -28,6 +28,7 @@ class _plantilla{
     }
 
     /**
+     * Inserta una factura basada en una plantilla
      * @return array|stdClass
      */
     final public function aplica_plantilla(): array|stdClass
@@ -45,6 +46,7 @@ class _plantilla{
     }
 
     /**
+     * Ejecuta la insercion de impuestos de una partida
      * @param _data_impuestos $modelo_imp
      * @param int $partida_id_new
      * @param int $registro_partida_id
@@ -77,6 +79,7 @@ class _plantilla{
     }
 
     /**
+     * Inserta el registro de partida basado en una plantilla
      * @param int $row_entidad_new_id
      * @param array $row_partida_origen
      * @return array|stdClass
@@ -125,6 +128,7 @@ class _plantilla{
     }
 
     /**
+     * Obtiene los impuestos de la plantilla de una partida
      * @param _data_impuestos $modelo_imp
      * @param string $name_modelo_partida
      * @param int $registro_partida_id
@@ -142,6 +146,7 @@ class _plantilla{
     }
 
     /**
+     * Inserta un registro de impuestos basado en una plantilla
      * @param _data_impuestos $modelo_imp
      * @param array $row_imp
      * @param int $row_partida_id
@@ -163,6 +168,7 @@ class _plantilla{
     }
 
     /**
+     * Inserta todos los impuestos basados en una plantilla
      * @param array $impuestos
      * @param _data_impuestos $modelo_imp
      * @param int $row_partida_id
@@ -183,6 +189,7 @@ class _plantilla{
     }
 
     /**
+     * Inserta todos los impuestos de una partida basado en una plantilla
      * @param int $partida_id_new
      * @param int $registro_partida_id
      * @return array|stdClass
@@ -210,6 +217,7 @@ class _plantilla{
     }
 
     /**
+     * Inserta las partidas basados en una plantilla
      * @param int $row_entidad_new_id
      * @param array $rows_partidas
      * @return array
@@ -230,6 +238,7 @@ class _plantilla{
     }
 
     /**
+     * Inserta todas las partidas de una plantilla
      * @param int $row_entidad_new_id
      * @return array
      */
@@ -267,6 +276,7 @@ class _plantilla{
     }
 
     /**
+     * Inserta un registro de tipo partida basado en la plantilla de origen
      * @param int $row_entidad_new_id
      * @param array $row_partida_origen
      * @return array|stdClass
@@ -302,6 +312,7 @@ class _plantilla{
     }
 
     /**
+     * Limpia los datos de impuestos precargados en la partida destino para posteriormente integralos con seguridad
      * @param _data_impuestos $modelo_imp
      * @param int $partida_id_new
      * @return array|string[]
@@ -380,6 +391,7 @@ class _plantilla{
     }
 
     /**
+     * Obtiene el registro a insertar de impuestos
      * @param string $name_modelo_imp
      * @param array $row_imp
      * @param int $row_partida_id
@@ -502,7 +514,8 @@ class _plantilla{
     }
 
     /**
-     * @param array $row_partida_origen
+     * Valida que los montos sean validos
+     * @param array $row_partida_origen Registro de partida
      * @return array|true
      */
     private function valida_monto_mayor_0(array $row_partida_origen): bool|array
@@ -517,8 +530,9 @@ class _plantilla{
     }
 
     /**
-     * @param stdClass $keys_imps
-     * @param array $row_partida_origen
+     * Valida que los montos sean validos
+     * @param stdClass $keys_imps Keys de impuestos
+     * @param array $row_partida_origen Registro de partida de plantilla
      * @return array|bool
      */
     private function valida_monto_mayor_igual_0(stdClass $keys_imps, array $row_partida_origen): bool|array
@@ -533,8 +547,9 @@ class _plantilla{
     }
 
     /**
-     * @param stdClass $keys_imps
-     * @param array $row_partida_origen
+     * Valida que los montos de una partida de plantilla sean validos
+     * @param stdClass $keys_imps Keys de impuestos
+     * @param array $row_partida_origen Registro de partida
      * @return array|true
      */
     private function valida_montos(stdClass $keys_imps,array $row_partida_origen): bool|array
@@ -601,8 +616,9 @@ class _plantilla{
     }
 
     /**
-     * @param stdClass $keys_imps
-     * @param array $row_partida_origen
+     * Valida los datos de una partida de plantilla
+     * @param stdClass $keys_imps Keys de impuestos
+     * @param array $row_partida_origen Registro de partida de plantilla
      * @return array|true
      */
     private function valida_row_partida(stdClass $keys_imps, array $row_partida_origen): bool|array
@@ -626,6 +642,7 @@ class _plantilla{
     }
 
     /**
+     * Valida los datos de una partida de plantilla
      * @param stdClass $keys_imps
      * @param int $row_entidad_new_id
      * @param array $row_partida_origen

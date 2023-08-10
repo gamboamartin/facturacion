@@ -5,6 +5,7 @@ use config\generales;
 use gamboamartin\compresor\compresor;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_email;
+use gamboamartin\facturacion\models\_pdf;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\facturacion\models\fc_factura;
@@ -106,8 +107,20 @@ class _automaticos extends system{
             return $this->retorno_error(mensaje: 'Error al obtener registro',data:  $row_aut,header:  $header,ws:  $ws);
         }
 
+        $modelo_documento = new fc_factura_documento(link: $this->link);
+        $modelo_entidad = new fc_factura(link: $this->link);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $modelo_predial = new fc_cuenta_predial(link: $this->link);
+        $modelo_relacion = new fc_relacion(link: $this->link);
+        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_sello = new fc_cfdi_sellado(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $modelo_uuid_ext = new fc_uuid_fc(link: $this->link);
+
 
         $documentos_fc = array();
+
         foreach ($fc_facturas as $fc_factura_id){
 
             $fc_factura = (new fc_factura(link: $this->link))->registro(registro_id: $fc_factura_id);
@@ -115,32 +128,62 @@ class _automaticos extends system{
                 return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $fc_factura,header:  $header,ws:  $ws);
             }
             if($fc_factura['fc_factura_etapa'] ==='TIMBRADO'){
-                $documento = (new _email())->genera_documentos(link: $this->link,registro_id:  $fc_factura_id);
+
+                $ruta_xml = $modelo_documento->get_factura_documento(
+                    key_entidad_filter_id: $modelo_entidad->key_filtro_id, registro_id: $fc_factura_id,
+                    tipo_documento: "xml_sin_timbrar");
                 if(errores::$error){
-                    return $this->retorno_error(mensaje: 'Error al obtener documento',data:  $documento,header:  $header,ws:  $ws);
+                    return $this->retorno_error(mensaje: 'Error al obtener XML',data:  $ruta_xml, header: $header,ws:$ws);
                 }
-                $documentos_fc[] = $documento;
+
+                if(!file_exists($ruta_xml)){
+                    return $this->retorno_error(mensaje: 'Error al no existe xml',data:  $ruta_xml, header: $header,ws:$ws);
+                }
+
+                $docto_xml = array();
+                $docto_xml['ruta'] = $ruta_xml;
+                $docto_xml['doc_extension_codigo'] ='xml';
+                $docto_xml['fc_factura_folio'] =$fc_factura['fc_factura_folio'];
+
+
+                $ruta_pdf = (new _pdf())->pdf(descarga: false, guarda: true, link: $this->link,
+                    modelo_documento: $modelo_documento, modelo_entidad: $modelo_entidad,
+                    modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
+                    modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
+                    modelo_retencion: $modelo_retencion, modelo_sellado: $modelo_sello,
+                    modelo_traslado: $modelo_traslado, modelo_uuid_ext: $modelo_uuid_ext, registro_id: $fc_factura['fc_factura_id']);
+                if(errores::$error){
+                    return $this->retorno_error(mensaje: 'Error al generar PDF',data:  $ruta_pdf, header: $header,ws:$ws);
+                }
+
+                $docto_pdf = array();
+                $docto_pdf['ruta'] = $ruta_pdf;
+                $docto_pdf['doc_extension_codigo'] ='pdf';
+                $docto_pdf['fc_factura_folio'] =$fc_factura['fc_factura_folio'];
+
+
+                $documentos_fc[$fc_factura['fc_factura_folio']][] = $docto_xml;
+                $documentos_fc[$fc_factura['fc_factura_folio']][] = $docto_pdf;
             }
         }
 
 
         $destinos_zip = array();
-        foreach ($documentos_fc as $documentos){
-
+        foreach ($documentos_fc as $fc_factura_folio=>$fc_documento){
             $doc_zip = array();
-            foreach ($documentos as $documento){
-                $name_doc = $documento['fc_factura_folio'].'.'.$documento['doc_extension_codigo'];
-                $origen = (new generales())->path_base.$documento['doc_documento_ruta_relativa'];
-
+            foreach ($fc_documento as $documento) {
+                $name_doc = $documento['fc_factura_folio'] . '.' . $documento['doc_extension_codigo'];
+                $origen = $documento['ruta'];
                 $doc_zip[$origen] = $name_doc;
             }
 
-            $destino_zip = compresor::comprime_archivos(archivos: $doc_zip,name_zip: $documento['fc_factura_folio'].'.zip');
+
+            $destino_zip = compresor::comprime_archivos(archivos: $doc_zip,name_zip: $fc_factura_folio.'.zip');
             if(errores::$error){
                 return $this->retorno_error(mensaje: 'Error al comprimir',data:  $destino_zip,header:  $header,ws:  $ws);
             }
             $origen_zip = (new generales())->path_base.$destino_zip;
-            $destinos_zip[$origen_zip] = $documento['fc_factura_folio'].'.zip';
+            $destinos_zip[$origen_zip] = $fc_factura_folio.'.zip';
         }
 
         $zip_completo = compresor::comprime_archivos(archivos: $destinos_zip);
@@ -148,6 +191,7 @@ class _automaticos extends system{
         foreach ($destinos_zip as $origen_zip=>$destino_zip){
             unlink($origen_zip);
         }
+
 
         if($header) {
             ob_clean();

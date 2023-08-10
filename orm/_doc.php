@@ -89,10 +89,11 @@ class _doc extends _modelo_parent{
      * @param string $key_entidad_filter_id Key filtro de la entidad base
      * @param int $registro_id Registro de entidad base
      * @param string $tipo_documento Tipo de documento a obtener
+     * @param string $key_ruta Key de obtencion de ruta
      * @return array|string
      */
-    final public function get_factura_documento(string $key_entidad_filter_id, int $registro_id,
-                                                string $tipo_documento): array|string{
+    final public function get_factura_documento(string $key_entidad_filter_id, int $registro_id, string $tipo_documento,
+                                                string $key_ruta = 'doc_documento_ruta_absoluta'): array|string{
 
 
         $documento = $this->get_factura_documentos(key_entidad_filter_id: $key_entidad_filter_id,
@@ -104,7 +105,7 @@ class _doc extends _modelo_parent{
         $ruta_archivo = "";
 
         if ($documento->n_registros > 0){
-            $ruta_archivo = $documento->registros[0]['doc_documento_ruta_absoluta'];
+            $ruta_archivo = $documento->registros[0][$key_ruta];
         }
 
         return $ruta_archivo;

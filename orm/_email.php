@@ -433,6 +433,7 @@ class _email{
                 $docs[] = $fc_factura_documento;
             }
             if($fc_factura_documento['doc_tipo_documento_descripcion'] === 'CFDI PDF'){
+
                 $docs[] = $fc_factura_documento;
             }
         }
