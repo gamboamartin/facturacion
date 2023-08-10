@@ -42,11 +42,12 @@ class _automaticos extends system{
     {
         $clases_css[] = 'btn_timbra';
         $button_timbra = $this->html->directivas->btn(ids_css: array(), clases_css: $clases_css, extra_params: array(),
-            label: 'Timbra', name: 'btn_timbra', value: 'Timbra', cols: 2, style: 'success',type: 'submit' );
+            label: 'Timbra', name: 'btn_timbra', value: 'Timbra', cols: 2, style: 'danger',type: 'submit' );
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener boton', data: $button_timbra);
         }
-        $link_timbra = $this->obj_link->link_con_id(accion: 'timbra',link:  $this->link,registro_id: $this->registro_id,seccion: $this->seccion);
+        $link_timbra = $this->obj_link->link_con_id(accion: 'timbra',link:  $this->link,
+            registro_id: $this->registro_id,seccion: $this->seccion);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener boton link_timbra', data: $link_timbra);
         }
@@ -54,20 +55,36 @@ class _automaticos extends system{
         $clases_css = array();
         $clases_css[] = 'btn_descarga';
         $button_descarga = $this->html->directivas->btn(ids_css: array(), clases_css: $clases_css, extra_params: array(),
-            label: 'Descarga', name: 'btn_descarga', value: 'Descarga', cols: 2, style: 'success',type: 'submit' );
+            label: 'Descarga', name: 'btn_descarga', value: 'Descarga', cols: 2, style: 'warning',type: 'submit' );
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener boton', data: $button_descarga);
         }
         $link_descarga = $this->obj_link->link_con_id(accion: 'descarga',link:  $this->link,registro_id: $this->registro_id,seccion: $this->seccion);
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener boton link_descarga', data: $link_timbra);
+            return $this->errores->error(mensaje: 'Error al obtener boton link_descarga', data: $link_descarga);
+        }
+
+        $clases_css = array();
+        $clases_css[] = 'btn_envia_cfdi';
+        $button_envia_cfdi = $this->html->directivas->btn(ids_css: array(), clases_css: $clases_css, extra_params: array(),
+            label: 'Envia CFDI', name: 'btn_envia', value: 'Envia CFDI', cols: 2, style: 'success',type: 'submit' );
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener boton', data: $button_envia_cfdi);
+        }
+        $link_envia_cfdi = $this->obj_link->link_con_id(accion: 'envia_cfdi',link:  $this->link,
+            registro_id: $this->registro_id,seccion: $this->seccion);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener boton link_descarga', data: $link_envia_cfdi);
         }
 
         $data = new stdClass();
         $data->button_timbra = $button_timbra;
         $data->button_descarga = $button_descarga;
+        $data->button_envia_cfdi = $button_envia_cfdi;
         $data->link_timbra = $link_timbra;
         $data->link_descarga = $link_descarga;
+        $data->link_envia_cfdi = $link_envia_cfdi;
+
         return $data;
     }
 
@@ -341,6 +358,7 @@ class _automaticos extends system{
         $this->link_timbra = $data_form->link_timbra;
         $this->buttons['button_timbra'] = $data_form->button_timbra;
         $this->buttons['button_descarga'] = $data_form->button_descarga;
+        $this->buttons['button_envia_cfdi'] = $data_form->button_envia_cfdi;
 
         return $fc_factura_automaticas;
     }

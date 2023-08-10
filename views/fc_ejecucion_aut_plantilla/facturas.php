@@ -44,6 +44,7 @@
                     </table>
                     <?php echo $controlador->buttons['button_timbra']; ?>
                     <?php echo $controlador->buttons['button_descarga']; ?>
+                    <?php echo $controlador->buttons['button_envia_cfdi']; ?>
                     </form>
                 </div> <!-- /. widget-table-->
             </div><!-- /.center-content -->

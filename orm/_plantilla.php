@@ -535,10 +535,18 @@ class _plantilla{
      * @param stdClass $keys_imps Keys de impuestos
      * @param array $row_partida_origen Registro de partida de plantilla
      * @return array|bool
+     * @version 13.14.1
      */
     private function valida_monto_mayor_igual_0(stdClass $keys_imps, array $row_partida_origen): bool|array
     {
-        $keys = array('descuento','total_traslados','total_retenciones',$keys_imps->key_n_traslados, $keys_imps->key_n_retenidos);
+        $keys = array('key_n_traslados','key_n_retenidos');
+        $valida = (new validacion())->valida_existencia_keys(keys: $keys,registro:  $keys_imps);
+        if(errores::$error){
+            return  $this->error->error(mensaje: 'Error al validar keys_imps',data:  $valida);
+        }
+
+        $keys = array('descuento','total_traslados','total_retenciones',
+            $keys_imps->key_n_traslados, $keys_imps->key_n_retenidos);
 
         $valida = (new validacion())->valida_double_mayores_igual_0(keys: $keys,registro:  $row_partida_origen);
         if(errores::$error){
