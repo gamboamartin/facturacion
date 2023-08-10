@@ -539,6 +539,38 @@ class _plantillaTest extends test
         errores::$error = false;
     }
 
+    public function test_valida_monto_mayor_0(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo_entidad = new fc_factura(link: $this->link);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $modelo_retenido = new fc_retenido(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $row_entidad_id = 1;
+
+        $plantilla = new _plantilla($modelo_entidad, $modelo_partida, $modelo_retenido, $modelo_traslado, $row_entidad_id);
+        $plantilla = new liberator($plantilla);
+
+
+        $row_partida_origen= array();
+        $row_partida_origen['cantidad'] = 1;
+        $row_partida_origen['valor_unitario'] = 1;
+        $row_partida_origen['sub_total_base'] = 1;
+        $row_partida_origen['sub_total'] = 1;
+        $row_partida_origen['total'] = 1;
+
+        $resultado = $plantilla->valida_monto_mayor_0($row_partida_origen);
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+        errores::$error = false;
+    }
+
     public function test_valida_row_entidad(): void
     {
         errores::$error = false;

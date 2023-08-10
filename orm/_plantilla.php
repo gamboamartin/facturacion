@@ -517,6 +517,7 @@ class _plantilla{
      * Valida que los montos sean validos
      * @param array $row_partida_origen Registro de partida
      * @return array|true
+     * @version 13.13.1
      */
     private function valida_monto_mayor_0(array $row_partida_origen): bool|array
     {

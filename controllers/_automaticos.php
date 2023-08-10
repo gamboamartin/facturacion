@@ -8,10 +8,12 @@ use gamboamartin\facturacion\models\_email;
 use gamboamartin\facturacion\models\_pdf;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
+use gamboamartin\facturacion\models\fc_email;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
+use gamboamartin\facturacion\models\fc_notificacion;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
 use gamboamartin\facturacion\models\fc_retenido;
@@ -208,6 +210,112 @@ class _automaticos extends system{
         unlink((new generales())->path_base . $zip_completo);
         return $content;
 
+    }
+
+    public function envia_cfdi(bool $header, bool $ws = false){
+
+        if(!isset($_POST['fc_facturas_id'])){
+            $_POST['fc_facturas_id'] = array();
+        }
+        $fc_facturas = $_POST['fc_facturas_id'];
+        if(count($fc_facturas) === 0){
+            $facturas = $this->facturas_automaticas();
+
+            foreach ($facturas as $fc_factura){
+                $fc_facturas[] = $fc_factura['fc_factura_id'];
+            }
+
+        }
+
+        $modelo_documento = new fc_factura_documento(link: $this->link);
+        $modelo_partida = new fc_partida(link: $this->link);
+        $modelo_predial = new fc_cuenta_predial(link: $this->link);
+        $modelo_relacion = new fc_relacion(link: $this->link);
+        $modelo_relacionada = new fc_factura_relacionada(link: $this->link);
+        $modelo_retencion = new fc_retenido(link: $this->link);
+        $modelo_sello = new fc_cfdi_sellado(link: $this->link);
+        $modelo_traslado = new fc_traslado(link: $this->link);
+        $modelo_uuid_ext = new fc_uuid_fc(link: $this->link);
+        $modelo_entidad = new fc_factura(link: $this->link);
+        $modelo_notificacion = new fc_notificacion(link: $this->link);
+        $modelo_email = new fc_email(link: $this->link);
+
+
+
+
+        foreach ($fc_facturas as $fc_factura_id){
+
+            $genera_pdf = (new _doctos())->pdf(modelo_documento: $modelo_documento,modelo_entidad:  $modelo_entidad,
+                modelo_partida: $modelo_partida,modelo_predial:  $modelo_predial,
+                modelo_relacion: $modelo_relacion,modelo_relacionada:  $modelo_relacionada,
+                modelo_retencion:  $modelo_retencion,modelo_sello:  $modelo_sello,
+                modelo_traslado:  $modelo_traslado, modelo_uuid_ext: $modelo_uuid_ext,
+                row_entidad_id: $fc_factura_id);
+
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $genera_pdf, header: $header,ws:$ws);
+            }
+
+            $inserta_notificacion = $modelo_entidad->inserta_notificacion(modelo_email: $modelo_email,
+                modelo_notificacion: $modelo_notificacion,registro_id:  $fc_factura_id);
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al insertar notificacion',data:  $inserta_notificacion, header: $header,ws:$ws);
+            }
+
+
+            $envia_notificacion = $modelo_entidad->envia_factura(modelo_notificacion: $modelo_notificacion, registro_id: $fc_factura_id);
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al enviar notificacion',data:  $envia_notificacion, header: $header,ws:$ws);
+            }
+
+        }
+
+        if(isset($_GET['accion_retorno'])){
+            $siguiente_view = $_GET['accion_retorno'];
+        }
+        else{
+            $siguiente_view = (new actions())->init_alta_bd(siguiente_view: 'facturas');
+            if(errores::$error){
+
+                return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
+                    header:  $header, ws: $ws);
+            }
+        }
+        $seccion_retorno = $this->tabla;
+        if(isset($_GET['seccion_retorno'])){
+            $seccion_retorno = $_GET['seccion_retorno'];
+        }
+        $id_retorno = $this->registro_id;
+        if(isset($_GET['id_retorno'])){
+            $id_retorno = $_GET['id_retorno'];
+        }
+
+        $header_retorno = $this->header_retorno(accion: $siguiente_view, seccion: $seccion_retorno, id_retorno: $id_retorno);
+        if(errores::$error){
+
+            return $this->retorno_error(mensaje: 'Error al maquetar retorno', data: $header_retorno,
+                header:  $header, ws: $ws);
+        }
+
+        if($header){
+            header('Location:' . $header_retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            try {
+                echo json_encode($fc_facturas, JSON_THROW_ON_ERROR);
+            }
+            catch (Throwable $e){
+                $error = $this->errores->error(mensaje: 'Error al dar salida json', data: $e);
+                print_r($error);
+                exit;
+            }
+            exit;
+        }
+        $fc_facturas->siguiente_view = $siguiente_view;
+
+        return $fc_facturas;
     }
 
     public function facturas(bool $header, bool $ws = false): array|stdClass
