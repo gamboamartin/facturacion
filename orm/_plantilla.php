@@ -560,6 +560,7 @@ class _plantilla{
      * @param stdClass $keys_imps Keys de impuestos
      * @param array $row_partida_origen Registro de partida
      * @return array|true
+     * @version 13.14.1
      */
     private function valida_montos(stdClass $keys_imps,array $row_partida_origen): bool|array
     {
