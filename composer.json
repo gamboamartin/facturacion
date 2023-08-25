@@ -60,8 +60,8 @@
         "gamboa.martin/comercial": "^15.0.0",
         "gamboa.martin/services": "^8.0.0",
         "gamboa.martin/xml_cfdi_4": "^2.0.0",
-        "gamboa.martin/proceso": "^9.0.0",
-        "gamboa.martin/notificaciones": "^5.0.0",
+        "gamboa.martin/proceso": "^10.0.0",
+        "gamboa.martin/notificaciones": "^6.0.0",
       "ext-openssl": "*"
     },
     "require-dev": {
