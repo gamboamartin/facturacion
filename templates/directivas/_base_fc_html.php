@@ -1,11 +1,13 @@
 <?php
 namespace gamboamartin\facturacion\html;
 
+use base\orm\modelo;
 use gamboamartin\cat_sat\models\cat_sat_conf_imps;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\_base_system_fc;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
 use gamboamartin\facturacion\models\_transacciones_fc;
+use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\limpieza;
 use gamboamartin\system\html_controler;
 use gamboamartin\validacion\validacion;
@@ -219,7 +221,7 @@ class _base_fc_html extends html_controler{
 
     public function genera_inputs_alta(controlador_fc_factura $controler, array $keys_selects, PDO $link): array|stdClass
     {
-        $inputs = $this->init_alta(keys_selects: $keys_selects, link: $link);
+        $inputs = $this->init_alta(keys_selects: $keys_selects, modelo: $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
 
@@ -234,7 +236,7 @@ class _base_fc_html extends html_controler{
 
     private function genera_inputs_modifica(controlador_fc_factura $controler, PDO $link): array|stdClass
     {
-        $inputs = $this->init_modifica(link: $link, row_upd: $controler->row_upd);
+        $inputs = $this->init_modifica(link: $link, modelo: $controler->modelo, row_upd: $controler->row_upd);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar inputs',data:  $inputs);
         }
@@ -583,10 +585,11 @@ class _base_fc_html extends html_controler{
 
     /** Inicializa los datos para una accion de tipo alta bd
      * @param array $keys_selects
-     * @param PDO $link Conexion a la base de datos
+     * @param PDO $link
+     * @param modelo|false $modelo
      * @return array|stdClass
      */
-    protected function init_alta(array $keys_selects, PDO $link): array|stdClass
+    protected function init_alta(array $keys_selects, PDO $link, modelo|false $modelo = false): array|stdClass
     {
         $selects = $this->selects_alta(keys_selects: $keys_selects, link: $link);
         if(errores::$error){
@@ -595,7 +598,7 @@ class _base_fc_html extends html_controler{
 
         $row_upd = new stdClass();
         $row_upd->exportacion = -1;
-        $in_exportacion = $this->select_exportacion(cols: 6,row_upd: $row_upd);
+        $in_exportacion = $this->select_exportacion(cols: 6, link: $link, modelo: $modelo, row_upd: $row_upd);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_exportacion);
         }
@@ -615,9 +618,11 @@ class _base_fc_html extends html_controler{
 
     /** Inicializa los datos para una accion de tipo modifica bd
      * @param PDO $link Conexion a la base de datos
+     * @param modelo $modelo
+     * @param stdClass $row_upd
      * @return array|stdClass
      */
-    private function init_modifica(PDO $link, stdClass $row_upd): array|stdClass
+    private function init_modifica(PDO $link, modelo $modelo, stdClass $row_upd): array|stdClass
     {
 
         $selects = $this->selects_modifica(link: $link, row_upd: $row_upd);
@@ -625,7 +630,7 @@ class _base_fc_html extends html_controler{
             return $this->error->error(mensaje: 'Error al generar selects',data:  $selects);
         }
 
-        $in_exportacion = $this->select_exportacion(cols: 6,row_upd: $row_upd);
+        $in_exportacion = $this->select_exportacion(cols: 6, link: $link, modelo: $modelo, row_upd: $row_upd);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar input',data:  $in_exportacion);
         }
@@ -851,15 +856,16 @@ class _base_fc_html extends html_controler{
     }
 
 
-
     /**
      * Genera un select de tipo exportacion
      * @param int $cols N columnas css
+     * @param PDO $link
+     * @param modelo|bool $modelo $modelo
      * @param stdClass $row_upd Registro en proceso
      * @return array|string
      * @version 0.113.26
      */
-    public function select_exportacion(int $cols, stdClass $row_upd): array|string
+    public function select_exportacion(int $cols, PDO $link, modelo|bool $modelo, stdClass $row_upd): array|string
     {
         $keys = array('exportacion');
         $valida = (new validacion())->valida_existencia_keys(keys: $keys, registro: $row_upd);
@@ -877,8 +883,12 @@ class _base_fc_html extends html_controler{
         $values['01']['descripcion_select'] = '01';
         $values['02']['descripcion_select'] = '02';
 
-        $select = $this->html_base->select(cols:$cols, id_selected: $exportacion, label: 'Exportacion',
-            name:'exportacion', values: $values, extra_params_key: array(),required: true);
+        if(!$modelo){
+            $modelo = new fc_factura(link: $link);
+        }
+
+        $select = $this->html_base->select(cols: $cols, id_selected: $exportacion, label: 'Exportacion',
+            modelo: $modelo, name: 'exportacion', values: $values, required: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select', data: $select);
         }

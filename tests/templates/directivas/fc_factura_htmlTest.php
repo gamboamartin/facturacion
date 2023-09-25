@@ -4,6 +4,7 @@ namespace tests\controllers;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_factura_html;
+use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\template\html;
 use gamboamartin\test\test;
 
@@ -40,7 +41,9 @@ class fc_factura_htmlTest extends test {
         $cols = 1;
         $row_upd = new stdClass();
         $row_upd->exportacion = '1';
-        $resultado = $html->select_exportacion($cols, $row_upd);
+        $link = $this->link;
+        $modelo = new fc_factura(link: $link);
+        $resultado = $html->select_exportacion($cols, $link, $modelo, $row_upd);
 
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
