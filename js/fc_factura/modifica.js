@@ -136,13 +136,29 @@ btn_alta_partida.click(function () {
             let impuestos_traslados_previos = parseFloat($("#impuestos_trasladados").val());
             let impuestos_trasladados_partida =  parseFloat(json.registro_puro.total_traslados);
 
+            let impuestos_retenciones_previos = parseFloat($("#impuestos_retenidos").val());
+            let impuestos_retenciones_partida =  parseFloat(json.registro_puro.total_retenciones);
 
-            let impuestos_trasladados = parseFloat(impuestos_traslados_previos + impuestos_trasladados_partida);
+            let subtotal_previos = parseFloat($("#subtotal").val());
+            let subtotal_partida =  parseFloat(json.registro_puro.sub_total);
 
+            let descuento_previos = parseFloat($("#descuento").val());
+            let descuento_partida =  parseFloat(json.registro_puro.descuento);
 
+            let total_previos = parseFloat($("#total").val());
+            let total_partida =  parseFloat(json.registro_puro.total);
+
+            let impuestos_trasladados = parseFloat(impuestos_traslados_previos + impuestos_trasladados_partida).toFixed(2);
+            let impuestos_retenciones = parseFloat(impuestos_retenciones_previos + impuestos_retenciones_partida).toFixed(2);
+            let _subtotal = parseFloat(subtotal_previos + subtotal_partida).toFixed(2);
+            let _descuento = parseFloat(descuento_previos + descuento_partida).toFixed(2);
+            let _total = parseFloat(total_previos + total_partida).toFixed(2);
 
             $("#impuestos_trasladados").val(impuestos_trasladados);
-
+            $("#impuestos_retenidos").val(impuestos_retenciones);
+            $("#subtotal").val(_subtotal);
+            $("#descuento").val(_descuento);
+            $("#total").val(_total);
 
 
             if(!isNaN(json.error)){
