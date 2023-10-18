@@ -888,7 +888,7 @@ class _base_fc_html extends html_controler{
         }
 
         $select = $this->html_base->select(cols: $cols, id_selected: $exportacion, label: 'Exportacion',
-            modelo: $modelo, name: 'exportacion', values: $values, required: true);
+            name: 'exportacion', values: $values, required: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar select', data: $select);
         }
