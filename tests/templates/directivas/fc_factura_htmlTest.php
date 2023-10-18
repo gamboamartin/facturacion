@@ -40,6 +40,7 @@ class fc_factura_htmlTest extends test {
 
         $cols = 1;
         $row_upd = new stdClass();
+        
         $row_upd->exportacion = '1';
         $link = $this->link;
         $modelo = new fc_factura(link: $link);
