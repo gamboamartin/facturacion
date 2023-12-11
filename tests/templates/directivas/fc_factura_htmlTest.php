@@ -40,18 +40,21 @@ class fc_factura_htmlTest extends test {
 
         $cols = 1;
         $row_upd = new stdClass();
-        
+
         $row_upd->exportacion = '1';
         $link = $this->link;
         $modelo = new fc_factura(link: $link);
         $resultado = $html->select_exportacion($cols, $link, $modelo, $row_upd);
 
+        //print_r($resultado);exit;
+
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertStringContainsStringIgnoringCase("<div class='control-group col-sm-1'><div class='controls'><select", $resultado);
-        $this->assertStringContainsStringIgnoringCase("<select class='form-control selectpicker color-se", $resultado);
-        $this->assertStringContainsStringIgnoringCase("or-secondary  exportacion' data-live-search='true' id='expo", $resultado);
-        $this->assertStringContainsStringIgnoringCase(" id='exportacion' name='exportacion' required ><option value", $resultado);
+        $this->assertStringContainsStringIgnoringCase("div class='control-group col-sm-1'><div class='controls'><select ", $resultado);
+        $this->assertStringContainsStringIgnoringCase("<select class='form-control selectpicker color-secondary exp", $resultado);
+        $this->assertStringContainsStringIgnoringCase("exportacion ' data-live-search='true' id='exportacion'", $resultado);
+        $this->assertStringContainsStringIgnoringCase("name='exportacion' required ><option value=''  >Sel", $resultado);
+        $this->assertStringContainsStringIgnoringCase("Selecciona una opcion</option>", $resultado);
         errores::$error = false;
 
 
