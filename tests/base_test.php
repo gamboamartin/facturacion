@@ -1616,6 +1616,16 @@ class base_test{
             return (new errores())->error('Error al eliminar', $del);
 
         }
+        $del = (new base_test())->del_fc_partida($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+        $del = (new base_test())->del_fc_partida_nc($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
 
 
         $del = (new \gamboamartin\comercial\test\base_test())->del_com_producto($link);
