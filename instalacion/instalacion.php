@@ -143,6 +143,9 @@ class instalacion
             }
             $etapa_descripcion = $ultima_etapa->pr_etapa_descripcion;
 
+            if(!isset($registro['etapa'])){
+                return (new errores())->error(mensaje: 'Error no se asigno el campo etapa', data:  $registro);
+            }
 
             if($etapa_descripcion !== $registro['etapa']){
                 $upd = $modelo->modifica_etapa(etapa_descripcion: $etapa_descripcion, registro_id: $registro['id']);
