@@ -9,107 +9,107 @@ use stdClass;
 class instalacion
 {
 
-    private function fc_complemento_pago(PDO $link): array|stdClass
+    private function add_foraneas_facturacion(PDO $link,string $table)
     {
         $init = (new _instalacion(link: $link));
-        $foraneas = array();
-        $foraneas[] = 'fc_csd_id';
-        $foraneas[] = 'cat_sat_forma_pago_id';
-        $foraneas[] = 'cat_sat_metodo_pago_id';
-        $foraneas[] = 'cat_sat_moneda_id';
-        $foraneas[] = 'com_tipo_cambio_id';
-        $foraneas[] = 'cat_sat_uso_cfdi_id';
-        $foraneas[] = 'cat_sat_tipo_de_comprobante_id';
-        $foraneas[] = 'dp_calle_pertenece_id';
-        $foraneas[] = 'cat_sat_regimen_fiscal_id';
-        $foraneas[] = 'com_sucursal_id';
+        $foraneas = $this->foraneas_factura();
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener foraneas', data:  $foraneas);
+        }
 
-        $foraneas_r = $init->foraneas(foraneas: $foraneas,table:  'fc_complemento_pago');
+
+        $foraneas_r = $init->foraneas(foraneas: $foraneas,table:  $table);
 
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
         }
 
-        $campos = new stdClass();
+        return $foraneas_r;
 
-        $campos->cantidad = new stdClass();
-        $campos->cantidad->tipo_dato = 'double';
-        $campos->cantidad->default = '0';
-        $campos->cantidad->longitud = '100,2';
+    }
 
-        $campos->valor_unitario = new stdClass();
-        $campos->valor_unitario->tipo_dato = 'double';
-        $campos->valor_unitario->default = '0';
-        $campos->valor_unitario->longitud = '100,2';
+    private function campos_doubles_facturacion(): array
+    {
+        $campos_double = array();
+        $campos_double[] = 'cantidad';
+        $campos_double[] = 'valor_unitario';
+        $campos_double[] = 'descuento';
+        $campos_double[] = 'total_traslados';
+        $campos_double[] = 'total_retenciones';
+        $campos_double[] = 'total';
+        $campos_double[] = 'monto_pago_nc';
+        $campos_double[] = 'monto_pago_cp';
+        $campos_double[] = 'saldo';
+        $campos_double[] = 'monto_saldo_aplicado';
+        $campos_double[] = 'total_descuento';
+        $campos_double[] = 'sub_total_base';
+        $campos_double[] = 'sub_total';
+        return $campos_double;
 
-        $campos->descuento = new stdClass();
-        $campos->descuento->tipo_dato = 'double';
-        $campos->descuento->default = '0';
-        $campos->descuento->longitud = '100,2';
+    }
 
-        $campos->total_traslados = new stdClass();
-        $campos->total_traslados->tipo_dato = 'double';
-        $campos->total_traslados->default = '0';
-        $campos->total_traslados->longitud = '100,2';
+    private function campos_double_facturacion_integra(stdClass $campos, PDO $link): array|stdClass
+    {
+        $init = (new _instalacion(link: $link));
 
-        $campos->total_retenciones = new stdClass();
-        $campos->total_retenciones->tipo_dato = 'double';
-        $campos->total_retenciones->default = '0';
-        $campos->total_retenciones->longitud = '100,2';
+        $campos_double = $this->campos_doubles_facturacion();
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener campos_double', data:  $campos_double);
+        }
 
-        $campos->aplica_saldo = new stdClass();
-        $campos->aplica_saldo->default = 'inactivo';
+        $campos = $init->campos_double_default(campos: $campos,name_campos:  $campos_double);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos double', data:  $campos);
+        }
+        return $campos;
 
-        $campos->total = new stdClass();
-        $campos->total->tipo_dato = 'double';
-        $campos->total->default = '0';
-        $campos->total->longitud = '100,2';
+    }
 
-        $campos->monto_pago_nc = new stdClass();
-        $campos->monto_pago_nc->tipo_dato = 'double';
-        $campos->monto_pago_nc->default = '0';
-        $campos->monto_pago_nc->longitud = '100,2';
+    private function campos_status_factura(stdClass $campos, PDO $link)
+    {
+        $init = (new _instalacion(link: $link));
+        $name_campos = array();
+        $name_campos[] = 'aplica_saldo';
+        $name_campos[] = 'es_plantilla';
 
-        $campos->monto_pago_cp = new stdClass();
-        $campos->monto_pago_cp->tipo_dato = 'double';
-        $campos->monto_pago_cp->default = '0';
-        $campos->monto_pago_cp->longitud = '100,2';
+        $campos = $init->campos_status_inactivo(campos: $campos,name_campos:  $name_campos);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos status', data:  $campos);
+        }
 
-        $campos->saldo = new stdClass();
-        $campos->saldo->tipo_dato = 'double';
-        $campos->saldo->default = '0';
-        $campos->saldo->longitud = '100,2';
+        return $campos;
 
-        $campos->monto_saldo_aplicado = new stdClass();
-        $campos->monto_saldo_aplicado->tipo_dato = 'double';
-        $campos->monto_saldo_aplicado->default = '0';
-        $campos->monto_saldo_aplicado->longitud = '100,2';
+    }
 
-        $campos->folio_fiscal = new stdClass();
-        $campos->folio_fiscal->default = 'SIN ASIGNAR';
+    private function exe_campos_factura(PDO $link, string $table)
+    {
+        $init = (new _instalacion(link: $link));
 
-        $campos->etapa = new stdClass();
-        $campos->etapa->default = 'ALTA';
+        $campos = $this->init_campos_factura(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos status', data:  $campos);
+        }
 
-        $campos->es_plantilla = new stdClass();
-        $campos->es_plantilla->default = 'inactivo';
 
-        $campos->total_descuento = new stdClass();
-        $campos->total_descuento->tipo_dato = 'double';
-        $campos->total_descuento->default = '0';
-        $campos->total_descuento->longitud = '100,2';
+        $campos_r = $init->add_columns(campos: $campos,table:  $table);
 
-        $campos->sub_total_base = new stdClass();
-        $campos->sub_total_base->tipo_dato = 'double';
-        $campos->sub_total_base->default = '0';
-        $campos->sub_total_base->longitud = '100,2';
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $campos_r);
+        }
 
-        $campos->sub_total = new stdClass();
-        $campos->sub_total->tipo_dato = 'double';
-        $campos->sub_total->default = '0';
-        $campos->sub_total->longitud = '100,2';
+        return $campos_r;
 
-        $campos_r = $init->add_columns(campos: $campos,table:  'fc_complemento_pago');
+    }
+
+    private function fc_complemento_pago(PDO $link): array|stdClass
+    {
+
+        $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: __FUNCTION__);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+
+        $campos_r = $this->exe_campos_factura(link: $link, table: __FUNCTION__);
 
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $campos_r);
@@ -123,92 +123,48 @@ class instalacion
 
     }
 
-    private function fc_factura(PDO $link): array|stdClass
+    private function fc_ejecucion_aut_plantilla(PDO $link): array|stdClass
     {
         $init = (new _instalacion(link: $link));
-        $foraneas = array();
-        $foraneas[] = 'fc_csd_id';
-        $foraneas[] = 'cat_sat_forma_pago_id';
-        $foraneas[] = 'cat_sat_metodo_pago_id';
-        $foraneas[] = 'cat_sat_moneda_id';
-        $foraneas[] = 'com_tipo_cambio_id';
-        $foraneas[] = 'cat_sat_uso_cfdi_id';
-        $foraneas[] = 'cat_sat_tipo_de_comprobante_id';
-        $foraneas[] = 'dp_calle_pertenece_id';
-        $foraneas[] = 'cat_sat_regimen_fiscal_id';
-        $foraneas[] = 'com_sucursal_id';
 
-        $foraneas_r = $init->foraneas(foraneas: $foraneas,table:  'fc_factura');
+        $existe_entidad = $init->existe_entidad(table: __FUNCTION__);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar table', data:  $existe_entidad);
+        }
+
+        if(!$existe_entidad) {
+
+            $campos = new stdClass();
+            $create_table = $init->create_table(campos: $campos, table: __FUNCTION__);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al crear table', data: $create_table);
+            }
+        }
+
+
+        $foraneas = array();
+        $foraneas['com_tipo_cliente_id'] = new stdClass();
+
+        $foraneas_r = $init->foraneas(foraneas: $foraneas,table:  __FUNCTION__);
 
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
         }
 
-        $campos = new stdClass();
 
-        $campos->cantidad = new stdClass();
-        $campos->cantidad->tipo_dato = 'double';
-        $campos->cantidad->default = '0';
-        $campos->cantidad->longitud = '100,2';
 
-        $campos->valor_unitario = new stdClass();
-        $campos->valor_unitario->tipo_dato = 'double';
-        $campos->valor_unitario->default = '0';
-        $campos->valor_unitario->longitud = '100,2';
+        return $foraneas_r;
 
-        $campos->descuento = new stdClass();
-        $campos->descuento->tipo_dato = 'double';
-        $campos->descuento->default = '0';
-        $campos->descuento->longitud = '100,2';
+    }
 
-        $campos->total_traslados = new stdClass();
-        $campos->total_traslados->tipo_dato = 'double';
-        $campos->total_traslados->default = '0';
-        $campos->total_traslados->longitud = '100,2';
+    private function fc_factura(PDO $link): array|stdClass
+    {
+        $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: __FUNCTION__);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
 
-        $campos->total_retenciones = new stdClass();
-        $campos->total_retenciones->tipo_dato = 'double';
-        $campos->total_retenciones->default = '0';
-        $campos->total_retenciones->longitud = '100,2';
-
-        $campos->aplica_saldo = new stdClass();
-        $campos->aplica_saldo->default = 'inactivo';
-
-        $campos->total = new stdClass();
-        $campos->total->tipo_dato = 'double';
-        $campos->total->default = '0';
-        $campos->total->longitud = '100,2';
-
-        $campos->monto_pago_nc = new stdClass();
-        $campos->monto_pago_nc->tipo_dato = 'double';
-        $campos->monto_pago_nc->default = '0';
-        $campos->monto_pago_nc->longitud = '100,2';
-
-        $campos->monto_pago_cp = new stdClass();
-        $campos->monto_pago_cp->tipo_dato = 'double';
-        $campos->monto_pago_cp->default = '0';
-        $campos->monto_pago_cp->longitud = '100,2';
-
-        $campos->saldo = new stdClass();
-        $campos->saldo->tipo_dato = 'double';
-        $campos->saldo->default = '0';
-        $campos->saldo->longitud = '100,2';
-
-        $campos->monto_saldo_aplicado = new stdClass();
-        $campos->monto_saldo_aplicado->tipo_dato = 'double';
-        $campos->monto_saldo_aplicado->default = '0';
-        $campos->monto_saldo_aplicado->longitud = '100,2';
-
-        $campos->folio_fiscal = new stdClass();
-        $campos->folio_fiscal->default = 'SIN ASIGNAR';
-
-        $campos->etapa = new stdClass();
-        $campos->etapa->default = 'ALTA';
-
-        $campos->es_plantilla = new stdClass();
-        $campos->es_plantilla->default = 'inactivo';
-
-        $campos_r = $init->add_columns(campos: $campos,table:  'fc_factura');
+        $campos_r = $this->exe_campos_factura(link: $link, table: __FUNCTION__);
 
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $campos_r);
@@ -223,92 +179,68 @@ class instalacion
 
     }
 
-    private function fc_nota_credito(PDO $link): array|stdClass
+    private function fc_factura_aut_plantilla(PDO $link): array|stdClass
     {
+        $out = new stdClass();
         $init = (new _instalacion(link: $link));
-        $foraneas = array();
-        $foraneas[] = 'fc_csd_id';
-        $foraneas[] = 'cat_sat_forma_pago_id';
-        $foraneas[] = 'cat_sat_metodo_pago_id';
-        $foraneas[] = 'cat_sat_moneda_id';
-        $foraneas[] = 'com_tipo_cambio_id';
-        $foraneas[] = 'cat_sat_uso_cfdi_id';
-        $foraneas[] = 'cat_sat_tipo_de_comprobante_id';
-        $foraneas[] = 'dp_calle_pertenece_id';
-        $foraneas[] = 'cat_sat_regimen_fiscal_id';
-        $foraneas[] = 'com_sucursal_id';
 
-        $foraneas_r = $init->foraneas(foraneas: $foraneas,table:  'fc_nota_credito');
+        $existe_entidad = $init->existe_entidad(table: __FUNCTION__);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar table', data:  $existe_entidad);
+        }
+        $out->existe_entidad = $existe_entidad;
+
+
+        if(!$existe_entidad) {
+
+            $campos = new stdClass();
+            $create_table = $init->create_table(campos: $campos, table: __FUNCTION__);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al crear table '.__FUNCTION__, data: $create_table);
+            }
+            $out->create_table = $create_table;
+        }
+
+
+        $foraneas = array();
+        $foraneas['fc_ejecucion_aut_plantilla_id'] = new stdClass();
+        $foraneas['fc_factura_id'] = new stdClass();
+
+        $foraneas_r = $init->foraneas(foraneas: $foraneas,table:  __FUNCTION__);
 
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
         }
+        $out->foraneas_r = $foraneas_r;
 
-        $campos = new stdClass();
+        $name_index = 'unique_fc_factura_id_exe';
+        $existe_indice = $init->existe_indice_by_name(name_index: $name_index, table: __FUNCTION__);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al VERIFICAR SI EXISTE INDICE', data:  $existe_indice);
+        }
+        if(!$existe_indice){
+            $columnas = array();
+            $columnas[] = 'fc_factura_id';
+            $columnas[] = 'fc_ejecucion_aut_plantilla_id';
+            $uniques = $init->index_unique(columnas: $columnas, table: __FUNCTION__,index_name: $name_index);
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al ajustar uniques', data:  $uniques);
+            }
+            $out->uniques = $uniques;
+        }
 
-        $campos->cantidad = new stdClass();
-        $campos->cantidad->tipo_dato = 'double';
-        $campos->cantidad->default = '0';
-        $campos->cantidad->longitud = '100,2';
+        return $out;
 
-        $campos->valor_unitario = new stdClass();
-        $campos->valor_unitario->tipo_dato = 'double';
-        $campos->valor_unitario->default = '0';
-        $campos->valor_unitario->longitud = '100,2';
+    }
 
-        $campos->descuento = new stdClass();
-        $campos->descuento->tipo_dato = 'double';
-        $campos->descuento->default = '0';
-        $campos->descuento->longitud = '100,2';
+    private function fc_nota_credito(PDO $link): array|stdClass
+    {
+        $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: __FUNCTION__);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
 
-        $campos->total_traslados = new stdClass();
-        $campos->total_traslados->tipo_dato = 'double';
-        $campos->total_traslados->default = '0';
-        $campos->total_traslados->longitud = '100,2';
-
-        $campos->total_retenciones = new stdClass();
-        $campos->total_retenciones->tipo_dato = 'double';
-        $campos->total_retenciones->default = '0';
-        $campos->total_retenciones->longitud = '100,2';
-
-        $campos->aplica_saldo = new stdClass();
-        $campos->aplica_saldo->default = 'inactivo';
-
-        $campos->total = new stdClass();
-        $campos->total->tipo_dato = 'double';
-        $campos->total->default = '0';
-        $campos->total->longitud = '100,2';
-
-        $campos->monto_pago_nc = new stdClass();
-        $campos->monto_pago_nc->tipo_dato = 'double';
-        $campos->monto_pago_nc->default = '0';
-        $campos->monto_pago_nc->longitud = '100,2';
-
-        $campos->monto_pago_cp = new stdClass();
-        $campos->monto_pago_cp->tipo_dato = 'double';
-        $campos->monto_pago_cp->default = '0';
-        $campos->monto_pago_cp->longitud = '100,2';
-
-        $campos->saldo = new stdClass();
-        $campos->saldo->tipo_dato = 'double';
-        $campos->saldo->default = '0';
-        $campos->saldo->longitud = '100,2';
-
-        $campos->monto_saldo_aplicado = new stdClass();
-        $campos->monto_saldo_aplicado->tipo_dato = 'double';
-        $campos->monto_saldo_aplicado->default = '0';
-        $campos->monto_saldo_aplicado->longitud = '100,2';
-
-        $campos->folio_fiscal = new stdClass();
-        $campos->folio_fiscal->default = 'SIN ASIGNAR';
-
-        $campos->etapa = new stdClass();
-        $campos->etapa->default = 'ALTA';
-
-        $campos->es_plantilla = new stdClass();
-        $campos->es_plantilla->default = 'inactivo';
-
-        $campos_r = $init->add_columns(campos: $campos,table:  'fc_nota_credito');
+        $campos_r = $this->exe_campos_factura(link: $link, table: __FUNCTION__);
 
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $campos_r);
@@ -327,8 +259,8 @@ class instalacion
     {
         $init = (new _instalacion(link: $link));
         $foraneas = array();
-        $foraneas[] = 'com_producto_id';
-        $foraneas[] = 'fc_factura_id';
+        $foraneas['com_producto_id'] = new stdClass();
+        $foraneas['fc_factura_id'] = new stdClass();
 
 
         $foraneas_r = $init->foraneas(foraneas: $foraneas,table:  'fc_partida');
@@ -400,8 +332,8 @@ class instalacion
     {
         $init = (new _instalacion(link: $link));
         $foraneas = array();
-        $foraneas[] = 'com_producto_id';
-        $foraneas[] = 'fc_complemento_pago_id';
+        $foraneas['com_producto_id'] = new stdClass();
+        $foraneas['fc_complemento_pago_id'] = new stdClass();
 
 
         $foraneas_r = $init->foraneas(foraneas: $foraneas,table:  'fc_partida_cp');
@@ -456,8 +388,8 @@ class instalacion
     {
         $init = (new _instalacion(link: $link));
         $foraneas = array();
-        $foraneas[] = 'com_producto_id';
-        $foraneas[] = 'fc_nota_credito_id';
+        $foraneas['com_producto_id'] = new stdClass();
+        $foraneas['fc_nota_credito_id'] = new stdClass();
 
         $foraneas_r = $init->foraneas(foraneas: $foraneas,table:  'fc_partida_nc');
 
@@ -528,10 +460,10 @@ class instalacion
         $init = (new _instalacion(link: $link));
 
         $foraneas = array();
-        $foraneas[] = 'fc_partida_id';
-        $foraneas[] = 'cat_sat_tipo_factor_id';
-        $foraneas[] = 'cat_sat_factor_id';
-        $foraneas[] = 'cat_sat_tipo_impuesto_id';
+        $foraneas['fc_partida_id'] = new stdClass();
+        $foraneas['cat_sat_tipo_factor_id'] = new stdClass();
+        $foraneas['cat_sat_factor_id'] = new stdClass();
+        $foraneas['cat_sat_tipo_impuesto_id'] = new stdClass();
 
 
         $foraneas_r = $init->foraneas(foraneas: $foraneas,table:  'fc_retenido');
@@ -567,10 +499,10 @@ class instalacion
         $init = (new _instalacion(link: $link));
 
         $foraneas = array();
-        $foraneas[] = 'fc_partida_nc_id';
-        $foraneas[] = 'cat_sat_tipo_factor_id';
-        $foraneas[] = 'cat_sat_factor_id';
-        $foraneas[] = 'cat_sat_tipo_impuesto_id';
+        $foraneas['fc_partida_nc_id'] = new stdClass();
+        $foraneas['cat_sat_tipo_factor_id'] = new stdClass();
+        $foraneas['cat_sat_factor_id'] = new stdClass();
+        $foraneas['cat_sat_tipo_impuesto_id'] = new stdClass();
 
 
         $foraneas_r = $init->foraneas(foraneas: $foraneas,table:  'fc_retenido_nc');
@@ -605,10 +537,10 @@ class instalacion
     {
         $init = (new _instalacion(link: $link));
         $foraneas = array();
-        $foraneas[] = 'fc_partida_id';
-        $foraneas[] = 'cat_sat_tipo_factor_id';
-        $foraneas[] = 'cat_sat_factor_id';
-        $foraneas[] = 'cat_sat_tipo_impuesto_id';
+        $foraneas['fc_partida_id'] = new stdClass();
+        $foraneas['cat_sat_tipo_factor_id'] = new stdClass();
+        $foraneas['cat_sat_factor_id'] = new stdClass();
+        $foraneas['cat_sat_tipo_impuesto_id'] = new stdClass();
 
 
         $foraneas_r = $init->foraneas(foraneas: $foraneas,table:  'fc_traslado');
@@ -639,7 +571,56 @@ class instalacion
         return $result;
 
     }
-    final public function instala(PDO $link)
+
+
+    /**
+     * POR DOCUMENTAR WIKI
+     * Esta función devuelve un array con las claves foráneas utilizadas en la factura.
+     *
+     * @return array Las claves foráneas utilizadas en la factura.
+     * @version 20.3.0
+     */
+    private function foraneas_factura(): array
+    {
+        $foraneas = array();
+        $foraneas['fc_csd_id'] = new stdClass();
+        $foraneas['cat_sat_forma_pago_id'] = new stdClass();
+        $foraneas['cat_sat_metodo_pago_id'] = new stdClass();
+        $foraneas['cat_sat_moneda_id'] = new stdClass();
+        $foraneas['com_tipo_cambio_id'] = new stdClass();
+        $foraneas['cat_sat_uso_cfdi_id'] = new stdClass();
+        $foraneas['cat_sat_tipo_de_comprobante_id'] = new stdClass();
+        $foraneas['dp_calle_pertenece_id'] = new stdClass();
+        $foraneas['cat_sat_regimen_fiscal_id'] = new stdClass();
+        $foraneas['com_sucursal_id'] = new stdClass();
+        return $foraneas;
+
+    }
+
+    private function init_campos_factura(PDO $link)
+    {
+        $campos = new stdClass();
+        $campos = $this->campos_double_facturacion_integra(campos: $campos,link:  $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos double', data:  $campos);
+        }
+
+
+        $campos = $this->campos_status_factura(campos: $campos,link:  $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos status', data:  $campos);
+        }
+
+        $campos->folio_fiscal = new stdClass();
+        $campos->folio_fiscal->default = 'SIN ASIGNAR';
+
+        $campos->etapa = new stdClass();
+        $campos->etapa->default = 'ALTA';
+
+        return $campos;
+
+    }
+    final public function instala(PDO $link): array|stdClass
     {
 
         $result = new stdClass();
@@ -698,6 +679,21 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar fc_retenido_nc', data:  $fc_retenido_nc);
         }
         $result->fc_retenido_nc = $fc_retenido_nc;
+
+        $fc_ejecucion_aut_plantilla = $this->fc_ejecucion_aut_plantilla(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar fc_ejecucion_aut_plantilla',
+                data:  $fc_ejecucion_aut_plantilla);
+        }
+        $result->fc_ejecucion_aut_plantilla = $fc_ejecucion_aut_plantilla;
+
+        $fc_factura_aut_plantilla = $this->fc_factura_aut_plantilla(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar fc_ejecucion_aut_plantilla',
+                data:  $fc_factura_aut_plantilla);
+        }
+        $result->fc_factura_aut_plantilla = $fc_factura_aut_plantilla;
+
 
         return $result;
 
