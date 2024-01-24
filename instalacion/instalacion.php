@@ -28,6 +28,9 @@ class instalacion
 
     }
 
+    /**
+     * @return array
+     */
     private function campos_doubles_facturacion(): array
     {
         $campos_double = array();
