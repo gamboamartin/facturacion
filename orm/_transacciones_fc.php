@@ -1683,6 +1683,16 @@ class _transacciones_fc extends modelo
         return $r_modifica_bd;
     }
 
+    final public function modifica_etapa(string $etapa_descripcion, int $registro_id)
+    {
+        $data_upd['etapa'] = $etapa_descripcion;
+        $upd = parent::modifica_bd(registro: $data_upd, id: $registro_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al actualiza etapa registro', data: $upd);
+        }
+        return $upd;
+    }
+
 
     /**
      * Obtiene el numero de folio de una factura
@@ -2223,7 +2233,19 @@ class _transacciones_fc extends modelo
 
     }
 
+    final public function ultima_etapa(_etapa $modelo_etapa, int $registro_id)
+    {
+        $filtro[$this->key_filtro_id] = $registro_id;
+        $order[$modelo_etapa->tabla.'.fecha'] = 'DESC';
+        $order[$modelo_etapa->tabla.'.id'] = 'DESC';
+        $r_etapas = $modelo_etapa->filtro_and(filtro: $filtro, limit: 1, order: $order);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener r_etapas', data: $r_etapas);
+        }
 
+        return $r_etapas->registros_obj[0];
+
+    }
 
     private function ultimo_folio(int $fc_csd_id){
 

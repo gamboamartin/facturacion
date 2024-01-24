@@ -1,8 +1,17 @@
 <?php
 namespace gamboamartin\facturacion\instalacion;
 
+use base\orm\modelo;
 use gamboamartin\administrador\models\_instalacion;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\_etapa;
+use gamboamartin\facturacion\models\_transacciones_fc;
+use gamboamartin\facturacion\models\fc_complemento_pago;
+use gamboamartin\facturacion\models\fc_complemento_pago_etapa;
+use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_factura_etapa;
+use gamboamartin\facturacion\models\fc_nota_credito;
+use gamboamartin\facturacion\models\fc_nota_credito_etapa;
 use PDO;
 use stdClass;
 
@@ -29,7 +38,24 @@ class instalacion
     }
 
     /**
-     * @return array
+     * POR DOCUMENTAR EN WIKI
+     * Esta función devuelve un array de campos que son tratados como doubles en la facturación.
+     *
+     * @return array Retorna un array que consiste en nombres de campos que son tratados como doubles. Los campos incluidos son:
+     *               'cantidad',
+     *               'valor_unitario',
+     *               'descuento',
+     *               'total_traslados',
+     *               'total_retenciones',
+     *               'total',
+     *               'monto_pago_nc',
+     *               'monto_pago_cp',
+     *               'saldo',
+     *               'monto_saldo_aplicado',
+     *               'total_descuento',
+     *               'sub_total_base',
+     *               'sub_total'
+     * @version 22.2.0
      */
     private function campos_doubles_facturacion(): array
     {
@@ -84,7 +110,7 @@ class instalacion
 
     }
 
-    private function exe_campos_factura(PDO $link, string $table)
+    private function exe_campos_factura(PDO $link, _transacciones_fc $modelo, _etapa $modelo_etapa)
     {
         $init = (new _instalacion(link: $link));
 
@@ -94,11 +120,35 @@ class instalacion
         }
 
 
-        $campos_r = $init->add_columns(campos: $campos,table:  $table);
+        $campos_r = $init->add_columns(campos: $campos,table:  $modelo->tabla);
 
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $campos_r);
         }
+
+        $registros = $modelo->registros(columnas_en_bruto: true);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener registros', data:  $registros);
+        }
+
+        foreach ($registros as $registro){
+
+            $ultima_etapa = $modelo->ultima_etapa(modelo_etapa: $modelo_etapa, registro_id: $registro['id']);
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al obtener ultima_etapa', data:  $ultima_etapa);
+            }
+            $etapa_descripcion = $ultima_etapa->pr_etapa_descripcion;
+
+            if($etapa_descripcion !== $registro['etapa']){
+                $upd = $modelo->modifica_etapa(etapa_descripcion: $etapa_descripcion, registro_id: $registro['id']);
+                if(errores::$error){
+                    return (new errores())->error(mensaje: 'Error al actualizar etapa', data:  $upd);
+                }
+            }
+        }
+
+
+
 
         return $campos_r;
 
@@ -106,13 +156,15 @@ class instalacion
 
     private function fc_complemento_pago(PDO $link): array|stdClass
     {
+        $modelo = new fc_complemento_pago(link: $link);
+        $modelo_etapa = new fc_complemento_pago_etapa(link: $link);
 
-        $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: __FUNCTION__);
+        $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: $modelo->tabla);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
         }
 
-        $campos_r = $this->exe_campos_factura(link: $link, table: __FUNCTION__);
+        $campos_r = $this->exe_campos_factura(link: $link, modelo: $modelo,modelo_etapa: $modelo_etapa);
 
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $campos_r);
@@ -162,12 +214,15 @@ class instalacion
 
     private function fc_factura(PDO $link): array|stdClass
     {
-        $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: __FUNCTION__);
+        $modelo = new fc_factura(link: $link);
+        $modelo_etapa = new fc_factura_etapa(link: $link);
+
+        $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: $modelo->tabla);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
         }
 
-        $campos_r = $this->exe_campos_factura(link: $link, table: __FUNCTION__);
+        $campos_r = $this->exe_campos_factura(link: $link, modelo: $modelo, modelo_etapa: $modelo_etapa);
 
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $campos_r);
@@ -238,12 +293,15 @@ class instalacion
 
     private function fc_nota_credito(PDO $link): array|stdClass
     {
+        $modelo = new fc_nota_credito(link: $link);
+        $modelo_etapa = new fc_nota_credito_etapa(link: $link);
+
         $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: __FUNCTION__);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
         }
 
-        $campos_r = $this->exe_campos_factura(link: $link, table: __FUNCTION__);
+        $campos_r = $this->exe_campos_factura(link: $link, modelo: $modelo, modelo_etapa: $modelo_etapa);
 
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $campos_r);

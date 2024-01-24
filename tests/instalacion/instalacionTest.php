@@ -22,6 +22,38 @@ class instalacionTest extends test {
         $this->paths_conf->views = '/var/www/html/cat_sat/config/views.php';
     }
 
+    public function test_campos_doubles_facturacion(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $instalacion = new instalacion();
+        $instalacion = new liberator($instalacion);
+
+        $resultado = $instalacion->campos_doubles_facturacion();
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals( 'cantidad',$resultado[0]);
+        $this->assertEquals( 'valor_unitario',$resultado[1]);
+        $this->assertEquals( 'descuento',$resultado[2]);
+        $this->assertEquals( 'total_traslados',$resultado[3]);
+        $this->assertEquals( 'total_retenciones',$resultado[4]);
+        $this->assertEquals( 'total',$resultado[5]);
+        $this->assertEquals( 'monto_pago_nc',$resultado[6]);
+        $this->assertEquals( 'monto_pago_cp',$resultado[7]);
+        $this->assertEquals( 'saldo',$resultado[8]);
+        $this->assertEquals( 'monto_saldo_aplicado',$resultado[9]);
+        $this->assertEquals( 'total_descuento',$resultado[10]);
+        $this->assertEquals( 'sub_total_base',$resultado[11]);
+        $this->assertEquals( 'sub_total',$resultado[12]);
+        errores::$error = false;
+    }
+
     public function test_input_serie(): void
     {
         errores::$error = false;
