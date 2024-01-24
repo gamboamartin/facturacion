@@ -126,6 +126,10 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $campos_r);
         }
 
+        print_r($_SESSION['entidades_bd']);
+        print_r($_SESSION['campos_tabla']);
+        print_r($_SESSION['columnas_completas']);
+
         $registros = $modelo->registros(columnas_en_bruto: true);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al obtener registros', data:  $registros);
@@ -139,6 +143,7 @@ class instalacion
             }
             $etapa_descripcion = $ultima_etapa->pr_etapa_descripcion;
 
+
             if($etapa_descripcion !== $registro['etapa']){
                 $upd = $modelo->modifica_etapa(etapa_descripcion: $etapa_descripcion, registro_id: $registro['id']);
                 if(errores::$error){
@@ -148,18 +153,17 @@ class instalacion
         }
 
 
-
-
         return $campos_r;
 
     }
 
     private function fc_complemento_pago(PDO $link): array|stdClass
     {
-        $modelo = new fc_complemento_pago(link: $link);
+
+        $modelo = new fc_complemento_pago(link: $link, valida_atributos_criticos: false);
         $modelo_etapa = new fc_complemento_pago_etapa(link: $link);
 
-        $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: $modelo->tabla);
+        $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: __FUNCTION__);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
         }
@@ -214,13 +218,14 @@ class instalacion
 
     private function fc_factura(PDO $link): array|stdClass
     {
-        $modelo = new fc_factura(link: $link);
+        $modelo = new fc_factura(link: $link, valida_atributos_criticos: false);
         $modelo_etapa = new fc_factura_etapa(link: $link);
 
-        $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: $modelo->tabla);
+        $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: __FUNCTION__);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
         }
+
 
         $campos_r = $this->exe_campos_factura(link: $link, modelo: $modelo, modelo_etapa: $modelo_etapa);
 
@@ -293,13 +298,14 @@ class instalacion
 
     private function fc_nota_credito(PDO $link): array|stdClass
     {
-        $modelo = new fc_nota_credito(link: $link);
+        $modelo = new fc_nota_credito(link: $link, valida_atributos_criticos: false);
         $modelo_etapa = new fc_nota_credito_etapa(link: $link);
-
         $foraneas_r = $this->add_foraneas_facturacion(link: $link,table: __FUNCTION__);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
         }
+
+
 
         $campos_r = $this->exe_campos_factura(link: $link, modelo: $modelo, modelo_etapa: $modelo_etapa);
 
@@ -686,10 +692,12 @@ class instalacion
 
         $result = new stdClass();
 
+
         $fc_factura = $this->fc_factura(link: $link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar fc_factura', data:  $fc_factura);
         }
+
         $result->fc_factura = $fc_factura;
 
         $fc_complemento_pago = $this->fc_complemento_pago(link: $link);

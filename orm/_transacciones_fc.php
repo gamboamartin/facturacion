@@ -50,7 +50,8 @@ class _transacciones_fc extends modelo
 
     protected string $key_fc_id = '';
 
-    public function __construct(PDO $link, string $tabla, array $columnas_extra)
+    public function __construct(PDO $link, string $tabla, array $columnas_extra,
+                                bool $valida_atributos_criticos = true)
     {
         $columnas = array($tabla => false, 'fc_csd' => $tabla, 'cat_sat_forma_pago' => $tabla,
             'cat_sat_metodo_pago' => $tabla, 'cat_sat_moneda' => $tabla, 'com_tipo_cambio' => $tabla,
@@ -127,7 +128,8 @@ class _transacciones_fc extends modelo
 
         parent::__construct(link: $link, tabla: $tabla, campos_obligatorios: $campos_obligatorios, columnas: $columnas,
             campos_view: $campos_view, columnas_extra: $columnas_extra, no_duplicados: $no_duplicados,
-            renombres: $renombres, atributos_criticos: $atributos_criticos);
+            renombres: $renombres, atributos_criticos: $atributos_criticos,
+            valida_atributos_criticos: $valida_atributos_criticos);
 
 
     }

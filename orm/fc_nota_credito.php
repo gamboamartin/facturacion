@@ -10,7 +10,7 @@ use stdClass;
 class fc_nota_credito extends _transacciones_fc
 {
 
-    public function __construct(PDO $link)
+    public function __construct(PDO $link, bool $valida_atributos_criticos = true)
     {
         $tabla = 'fc_nota_credito';
 
@@ -23,7 +23,8 @@ class fc_nota_credito extends _transacciones_fc
 
         $columnas_extra['fc_nota_credito_uuid'] = $fc_nota_credito_uuid;
 
-        parent::__construct(link: $link, tabla: $tabla, columnas_extra: $columnas_extra);
+        parent::__construct(link: $link, tabla: $tabla, columnas_extra: $columnas_extra,
+            valida_atributos_criticos: $valida_atributos_criticos);
 
         $this->NAMESPACE = __NAMESPACE__;
 

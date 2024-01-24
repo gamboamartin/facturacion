@@ -15,7 +15,7 @@ class fc_complemento_pago extends _transacciones_fc
 
     private string $com_producto_codigo_default = '84111506';
     private string $cat_sat_unidad_codigo_default = 'ACT';
-    public function __construct(PDO $link)
+    public function __construct(PDO $link, bool $valida_atributos_criticos = true)
     {
         $tabla = 'fc_complemento_pago';
 
@@ -33,7 +33,8 @@ class fc_complemento_pago extends _transacciones_fc
         $columnas_extra['fc_complemento_pago_total_pagos'] = "$fc_complemento_pago_total_pagos";
 
 
-        parent::__construct(link: $link, tabla: $tabla, columnas_extra: $columnas_extra);
+        parent::__construct(link: $link, tabla: $tabla, columnas_extra: $columnas_extra,
+            valida_atributos_criticos: $valida_atributos_criticos);
 
         $this->NAMESPACE = __NAMESPACE__;
 
