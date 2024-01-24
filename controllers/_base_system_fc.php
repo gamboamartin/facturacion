@@ -138,6 +138,11 @@ class _base_system_fc extends _base_system{
 
     private array $configuraciones_impuestos = array();
 
+    public string $link_fc_factura_nueva_partida = '';
+    public string $link_factura_genera_xml = '';
+    public string $link_factura_cancela = '';
+    public string $link_factura_timbra_xml = '';
+
 
     public function __construct(html_controler $html_, PDO $link, modelo $modelo, stdClass $paths_conf = new stdClass())
     {
