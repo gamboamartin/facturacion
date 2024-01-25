@@ -19,6 +19,7 @@ $instala = $cat_sat->instala(link: $link);
 if(errores::$error){
     $link->rollBack();
     $error = (new errores())->error(mensaje: 'Error al instalar cat_sat', data: $instala);
+    print_r($error);
     exit;
 }
 
@@ -30,6 +31,7 @@ $instala = $organigrama->instala(link: $link);
 if(errores::$error){
     $link->rollBack();
     $error = (new errores())->error(mensaje: 'Error al instalar organigrama', data: $instala);
+    print_r($error);
     exit;
 }
 
@@ -42,6 +44,7 @@ $instala = $comercial->instala(link: $link);
 if(errores::$error){
     $link->rollBack();
     $error = (new errores())->error(mensaje: 'Error al instalar comercial', data: $instala);
+    print_r($error);
     exit;
 }
 
@@ -54,6 +57,7 @@ $instala = $facturacion->instala(link: $link);
 if(errores::$error){
     $link->rollBack();
     $error = (new errores())->error(mensaje: 'Error al instalar facturacion', data: $instala);
+    print_r($error);
     exit;
 }
 
