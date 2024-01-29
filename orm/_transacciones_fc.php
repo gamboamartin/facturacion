@@ -1629,8 +1629,25 @@ class _transacciones_fc extends modelo
         return $registro;
     }
 
+
+    /**
+     * POR DOCUMENTAR EN WIKI
+     * Limpia los campos `tasa_o_cuota` y `importe` del elemento de array `traslados`
+     * con el índice proporcionado en `$indice`.
+     *
+     * @param string $indice Índice del elemento del array `traslados` que será procesado.
+     * @param array $registro Array que contiene los elementos `traslados`.
+     *
+     * @return array Retorna el array `$registro` modificado.
+     *
+     * @throws errores Si `$indice` es menor a 0, se lanza una excepción "Error indice debe ser mayor igual a 0".
+     * @version 23.2.0
+     */
     private function limpia_traslado_exento(string $indice, array $registro): array
     {
+        if($indice<0){
+            return $this->error->error(mensaje: 'Error indice debe ser mayor igual a 0', data: $indice);
+        }
         unset($registro['traslados'][$indice]->tasa_o_cuota);
         unset($registro['traslados'][$indice]->importe);
         return $registro;

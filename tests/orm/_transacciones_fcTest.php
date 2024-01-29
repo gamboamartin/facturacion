@@ -125,8 +125,6 @@ class _transacciones_fcTest extends test
         errores::$error = false;
     }
 
-
-
     public function test_etapas(): void
     {
         errores::$error = false;
@@ -286,6 +284,32 @@ class _transacciones_fcTest extends test
         $this->assertEquals("UPDATE fc_complemento_pago SET observaciones = '1',usuario_update_id=2  WHERE id = 1",$resultado->sql);
 
         errores::$error = false;
+    }
+
+    public function test_limpia_traslado_exento(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new fc_nota_credito($this->link);
+        $trs = new liberator($trs);
+
+
+
+        $indice =  1;
+        $registro =  array();
+        $resultado = $trs->limpia_traslado_exento($indice, $registro);
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEmpty($resultado);
+
+        errores::$error = false;
+
     }
 
     public function test_partidas_base(): void
