@@ -14,7 +14,6 @@ use gamboamartin\cat_sat\models\cat_sat_tipo_de_comprobante;
 use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
-use gamboamartin\comercial\models\com_tmp_cte_dp;
 use gamboamartin\comercial\models\com_tmp_prod_cs;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
 use gamboamartin\documento\models\doc_documento;
@@ -1797,7 +1796,9 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener com_sucursal', data: $com_sucursal);
         }
 
-        $domicilio_fiscal_receptor = $com_sucursal['dp_cp_descripcion'];
+        $domicilio_fiscal_receptor = $com_sucursal['com_sucursal_cp'];
+
+        /*
         $com_cliente_id = $com_sucursal['com_cliente_id'];
         $filtro['com_tmp_cte_dp.com_cliente_id'] = $com_cliente_id;
 
@@ -1812,9 +1813,9 @@ class _transacciones_fc extends modelo
                 return $this->error->error(mensaje: 'Error al validar si existe', data: $r_tmp_dp);
             }
             $domicilio_fiscal_receptor = $r_tmp_dp->registros[0]['com_tmp_cte_dp_dp_cp'];
-        }
 
 
+        }*/
 
         $receptor = array();
         $receptor['rfc'] = $com_sucursal['com_cliente_rfc'];
