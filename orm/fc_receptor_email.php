@@ -15,7 +15,8 @@ class fc_receptor_email extends _modelo_parent_sin_codigo
     public function __construct(PDO $link)
     {
         $tabla = 'fc_receptor_email';
-        $columnas = array($tabla => false, 'not_receptor' => $tabla, 'com_email_cte' => $tabla);
+        $columnas = array($tabla => false, 'not_receptor' => $tabla, 'com_email_cte' => $tabla,
+            'com_cliente'=>'com_email_cte');
         $campos_obligatorios = array('not_receptor_id', 'com_email_cte_id');
 
         $columnas_extra = array();
