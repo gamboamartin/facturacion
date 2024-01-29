@@ -1,7 +1,6 @@
 <?php
 namespace gamboamartin\facturacion\instalacion;
 
-use base\orm\modelo;
 use gamboamartin\administrador\models\_instalacion;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_etapa;
