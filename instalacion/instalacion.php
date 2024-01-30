@@ -76,6 +76,30 @@ class instalacion
 
     }
 
+    /**
+     * POR DOCUMENTAR EN WIKI
+     * Esta es la función `campos_double_facturacion_integra` de la clase `Instalacion`.
+     *
+     * Esta función realiza la integración de los campos que son tratados como números de doble precisión (double) en
+     * el contexto de la facturación.
+     *
+     * @param stdClass $campos Objeto que contiene los metadatos de los campos
+     * @param PDO $link Representa una conexión a una base de datos.
+     * @return array|stdClass Retorna un arreglo de campos dobles configurados correctamente, o en caso de error,
+     * un objeto de la clase `errores`.
+     *
+     * @throws errores En caso de que ocurra algún error durante el proceso, se lanza una excepción de la clase errores.
+     *
+     * Primero, se crea una nueva instancia de `_instalacion` con el enlace PDO proporcionado.
+     * Se obtiene la lista de campos double llamando a la función `campos_doubles_facturacion()`, y en caso de error,
+     * se retorna un nuevo objeto de la clase `errores`.
+     * A continuación, en la instancia `_instalacion` creada se realiza la adecuación predeterminada de los campos
+     * double utilizando el método `campos_double_default()`,
+     * pasando como parámetros el objeto $campos y los campos dobles obtenidos en el paso anterior.
+     * Si ocurre algún error en este punto, se retorna un nuevo objeto de la clase `errores`.
+     * Si todo el proceso se realiza sin errores, se retornan los campos ajustados.
+     * @version 24.0.0
+     */
     private function campos_double_facturacion_integra(stdClass $campos, PDO $link): array|stdClass
     {
         $init = (new _instalacion(link: $link));
@@ -140,13 +164,20 @@ class instalacion
             if(errores::$error){
                 return (new errores())->error(mensaje: 'Error al obtener ultima_etapa', data:  $ultima_etapa);
             }
-            $etapa_descripcion = $ultima_etapa->pr_etapa_descripcion;
+            $etapa_descripcion = 'ALTA';
+            if(!isset($ultima_etapa->pr_etapa_descripcion)){
+                $etapa_descripcion = $ultima_etapa->pr_etapa_descripcion;
+            }
+
 
             if(!isset($registro['etapa'])){
                 return (new errores())->error(mensaje: 'Error no se asigno el campo etapa', data:  $registro);
             }
 
             if($etapa_descripcion !== $registro['etapa']){
+                if(is_null($etapa_descripcion)){
+                    $etapa_descripcion = 'ALTA';
+                }
                 $upd = $modelo->modifica_etapa(etapa_descripcion: $etapa_descripcion, registro_id: $registro['id']);
                 if(errores::$error){
                     return (new errores())->error(mensaje: 'Error al actualizar etapa', data:  $upd);
@@ -249,22 +280,14 @@ class instalacion
         $out = new stdClass();
         $init = (new _instalacion(link: $link));
 
-        $existe_entidad = $init->existe_entidad(table: __FUNCTION__);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al verificar table', data:  $existe_entidad);
+
+
+        $create_table = $init->create_table_new( table: __FUNCTION__);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al crear table '.__FUNCTION__, data: $create_table);
         }
-        $out->existe_entidad = $existe_entidad;
+        $out->create_table = $create_table;
 
-
-        if(!$existe_entidad) {
-
-            $campos = new stdClass();
-            $create_table = $init->create_table(campos: $campos, table: __FUNCTION__);
-            if (errores::$error) {
-                return (new errores())->error(mensaje: 'Error al crear table '.__FUNCTION__, data: $create_table);
-            }
-            $out->create_table = $create_table;
-        }
 
 
         $foraneas = array();

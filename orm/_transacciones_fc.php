@@ -2262,8 +2262,12 @@ class _transacciones_fc extends modelo
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener r_etapas', data: $r_etapas);
         }
+        $ultima_etapa = new stdClass();
+        if($r_etapas->n_registros > 0){
+            $ultima_etapa = $r_etapas->registros_obj[0];
+        }
 
-        return $r_etapas->registros_obj[0];
+        return $ultima_etapa;
 
     }
 

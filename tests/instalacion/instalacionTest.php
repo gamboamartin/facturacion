@@ -54,6 +54,31 @@ class instalacionTest extends test {
         errores::$error = false;
     }
 
+    public function test_campos_doubles_facturacion_integra(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $instalacion = new instalacion();
+        $instalacion = new liberator($instalacion);
+
+        $campos = new stdClass();
+        $link = $this->link;
+        $resultado = $instalacion->campos_double_facturacion_integra($campos, $link);
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals( 'double',$resultado->cantidad->tipo_dato);
+        $this->assertEquals( '0',$resultado->cantidad->default);
+        $this->assertEquals( '100,2',$resultado->cantidad->longitud);
+
+        errores::$error = false;
+    }
+
     public function test_input_serie(): void
     {
         errores::$error = false;
