@@ -318,14 +318,7 @@ final class pdf
         }
 
 
-        $concepto = (new _tmps())->com_tmp_prod_cs(link: $link,partida:  $concepto);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener concepto tmp', data: $concepto);
-        }
-
-
-
-        $body_td_1 = $this->html(etiqueta: "td", data: $concepto['cat_sat_producto_codigo'], class: $class, propiedades: "colspan='2'");
+        $body_td_1 = $this->html(etiqueta: "td", data: $concepto['com_producto_codigo_sat'], class: $class, propiedades: "colspan='2'");
         $body_td_2 = $this->html(etiqueta: "td", data: $concepto['com_producto_codigo'], class: $class);
         $body_td_3 = $this->html(etiqueta: "td", data: $fc_partida_cantidad, class: $class);
         $body_td_4 = $this->html(etiqueta: "td", data: $concepto['cat_sat_unidad_codigo'], class: $class);
@@ -1129,10 +1122,23 @@ final class pdf
     }
 
     /**
-     * Inicializa el descuento
-     * @param array $concepto Concepto en ejecucion
-     * @return array
-     * @version 10.163.6
+     * POR DOCUMENTAR EN WIKI
+     * La función `keys_no_ob` de la clase PDF garantiza que ciertas llaves existan en el array de concepto que se
+     * pasa como parámetro.
+     *
+     * @param array $concepto es el array que representa un concepto de facturación.
+     * @return array Retorna el array de concepto con las llaves aseguradas.
+     *
+     * Esta función toma un array '$concepto' y asegura que ciertas llaves estén presentes en el mismo.
+     * En este caso, la llave que se busca es 'fc_partida_descuento'.
+     *
+     * El proceso inicia creando un array '$keys_no_ob' con las llaves que se desean asegurar. Luego, para cada llave en '$keys_no_ob',
+     * el método verifica si dicha llave existe en la matriz de concepto proporcionada. Si la llave no está presente, se incluye en el array
+     * '$concepto' con un valor de 0.
+     *
+     * Finalmente, la función retorna el array modificado, asegurando así que todas las llaves del array '$keys_no_ob' están presentes.
+     * Esta función es útil para prevenir errores en el manejo del array al intentar acceder a llaves que podrían no existir.
+     * @version 24.1.0
      */
     private function keys_no_ob(array $concepto): array
     {

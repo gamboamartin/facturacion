@@ -145,17 +145,7 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al obtener cfdi_sellado', data:  $cfdi_sellado);
         }
 
-        $cp_receptor = (new dp_calle_pertenece($link))->registro(
-            $factura["com_cliente_dp_calle_pertenece_id"]);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener regimen fiscal emisor', data:  $cp_receptor);
-        }
-
-        $cod_postal_receptor = $this->cod_postal_receptor(cp_receptor: $cp_receptor,factura:  $factura,link:  $link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener cod rec', data:  $cod_postal_receptor);
-        }
-
+        $cod_postal_receptor = $factura['com_sucursal_cp'];
 
         $rf_emisor = (new cat_sat_regimen_fiscal($link))->registro(
             $factura["org_empresa_cat_sat_regimen_fiscal_id"]);
