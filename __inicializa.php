@@ -12,6 +12,18 @@ $con = new conexion();
 $link = conexion::$link;
 
 $link->beginTransaction();
+$administrador = new gamboamartin\administrador\instalacion\instalacion();
+
+$instala = $administrador->instala(link: $link);
+if(errores::$error){
+    $link->rollBack();
+    $error = (new errores())->error(mensaje: 'Error al instalar administrador', data: $administrador);
+    print_r($error);
+    exit;
+}
+
+print_r($instala);
+
 
 $cat_sat = new gamboamartin\cat_sat\instalacion\instalacion();
 

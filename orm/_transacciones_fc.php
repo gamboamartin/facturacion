@@ -2285,7 +2285,6 @@ class _transacciones_fc extends modelo
      * Valida si una entidad relacionada de facturacion puede ser o no eliminada
      * @param array $etapas Etapas a verificar
      * @return bool
-     * @version 9.3.0
      */
     private function valida_permite_transaccion(array $etapas): bool
     {
