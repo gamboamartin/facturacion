@@ -698,7 +698,6 @@ class _transacciones_fc extends modelo
      * @param _etapa $modelo_etapa Modelo de tipo etapa
      * @param int $registro_id Factura o complemento a verificar etapas
      * @return array
-     * @version 8.72.4
      */
     private function etapas(_etapa $modelo_etapa, int $registro_id): array
     {
@@ -1572,19 +1571,14 @@ class _transacciones_fc extends modelo
         return $registro;
     }
 
-    private function integra_producto_tmp(array $partida){
-        $filtro['com_producto.id'] = $partida['com_producto_id'];
-        $existe_tmp = (new com_tmp_prod_cs(link: $this->link))->existe(filtro: $filtro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar si existe existe_tmp', data: $existe_tmp);
-        }
-        if($existe_tmp){
-            $r_com_tmp_prod_cs = (new com_tmp_prod_cs(link: $this->link))->filtro_and(filtro: $filtro);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener producto', data: $r_com_tmp_prod_cs);
-            }
-            $partida['cat_sat_producto_codigo'] = $r_com_tmp_prod_cs->registros[0]['com_tmp_prod_cs_cat_sat_producto'];
-        }
+    /**
+     * POR ELIMINAR FUNCION Y OBTENER DE COM PRODUCTO
+     * @param array $partida
+     * @return array
+     */
+    private function integra_producto_tmp(array $partida): array
+    {
+        $partida['cat_sat_producto_codigo'] = $partida['com_producto_codigo_sat'];
         return $partida;
 
     }
@@ -1765,7 +1759,6 @@ class _transacciones_fc extends modelo
      * @param _etapa $modelo_etapa Modelo de etapa
      * @param int $registro_id Registro en proceso
      * @return array|bool
-     * @version 9.9.0
      */
     private function permite_transaccion(_etapa $modelo_etapa, int $registro_id): bool|array
     {
@@ -2114,9 +2107,6 @@ class _transacciones_fc extends modelo
         $xml_contenido = file_get_contents($xml->doc_documento_ruta_absoluta);
 
 
-
-
-
         $filtro_files['fc_csd.id'] = $fc_factura['fc_csd_id'];
 
         $r_fc_key_pem = (new fc_key_pem(link: $this->link))->filtro_and(filtro: $filtro_files);
@@ -2319,7 +2309,6 @@ class _transacciones_fc extends modelo
      * @param _etapa $modelo_etapa Modelo de etapa
      * @param int $registro_id registro de entidad
      * @return array|bool
-     * @version 9.35.3
      */
     final public function verifica_permite_transaccion(_etapa $modelo_etapa, int $registro_id): bool|array
     {
