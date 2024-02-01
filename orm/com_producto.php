@@ -97,13 +97,15 @@ class com_producto extends \gamboamartin\comercial\models\com_producto {
 
     private function inserta_configuraciones_impuestos(int $com_producto_id, array $retenciones, array $traslados){
         $data = new stdClass();
-        $r_alta_conf = $this->inserta_configuraciones(com_producto_id: $com_producto_id,configuraciones:  $retenciones,entidad:  'fc_conf_retenido');
+        $r_alta_conf = $this->inserta_configuraciones(com_producto_id: $com_producto_id,
+            configuraciones:  $retenciones,entidad:  'fc_conf_retenido');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar configuracion',data:  $r_alta_conf);
         }
         $data->fc_conf_retencion = $r_alta_conf;
 
-        $r_alta_conf = $this->inserta_configuraciones(com_producto_id: $com_producto_id,configuraciones:  $traslados,entidad:  'fc_conf_traslado');
+        $r_alta_conf = $this->inserta_configuraciones(com_producto_id: $com_producto_id,
+            configuraciones:  $traslados,entidad:  'fc_conf_traslado');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar configuracion',data:  $r_alta_conf);
         }
@@ -122,7 +124,8 @@ class com_producto extends \gamboamartin\comercial\models\com_producto {
         $retenciones = $confs->retenciones;
         $traslados = $confs->traslados;
 
-        $r_alta_conf = $this->inserta_configuraciones_impuestos(com_producto_id: $com_producto_id,retenciones:  $retenciones,traslados:   $traslados);
+        $r_alta_conf = $this->inserta_configuraciones_impuestos(com_producto_id: $com_producto_id,
+            retenciones:  $retenciones,traslados:   $traslados);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar configuracion',data:  $r_alta_conf);
         }
@@ -165,7 +168,8 @@ class com_producto extends \gamboamartin\comercial\models\com_producto {
             return $this->error->error(mensaje: 'Error al eliminar configuracion',data:  $del);
         }
 
-        $inserta_data_confs = $this->inserta_data_confs(cat_sat_conf_imps_id: $cat_sat_conf_imps_id,com_producto_id:  $com_producto_id);
+        $inserta_data_confs = $this->inserta_data_confs(
+            cat_sat_conf_imps_id: $cat_sat_conf_imps_id,com_producto_id:  $com_producto_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar configuracion',data:  $inserta_data_confs);
         }

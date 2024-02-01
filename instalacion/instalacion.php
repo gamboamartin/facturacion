@@ -17,6 +17,38 @@ use stdClass;
 class instalacion
 {
 
+    private function _add_fc_factura_etapa(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_factura_etapa');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['pr_etapa_proceso_id'] = new stdClass();
+        $foraneas['fc_factura_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_factura_etapa');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+        $campos = new stdClass();
+        $campos->fecha = new stdClass();
+        $campos->fecha->tipo_dato = 'DATE';
+        $campos->fecha->default = '1900-01-01';
+
+        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_factura_etapa');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
+        }
+        $out->columnas = $result;
+        return $out;
+
+    }
     private function add_foraneas_facturacion(PDO $link,string $table)
     {
         $init = (new _instalacion(link: $link));
@@ -251,6 +283,11 @@ class instalacion
 
     private function fc_factura(PDO $link): array|stdClass
     {
+        $create = $this->_add_fc_factura_etapa(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
+
         $modelo = new fc_factura(link: $link, valida_atributos_criticos: false);
         $modelo_etapa = new fc_factura_etapa(link: $link);
 
@@ -318,6 +355,17 @@ class instalacion
         }
 
         return $out;
+
+    }
+
+    private function fc_factura_etapa(PDO $link): array|stdClass
+    {
+        $create = $this->_add_fc_factura_etapa(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
+
+        return $create;
 
     }
 
@@ -664,7 +712,6 @@ class instalacion
 
     }
 
-
     /**
      * POR DOCUMENTAR WIKI
      * Esta función devuelve un array con las claves foráneas utilizadas en la factura.
@@ -724,6 +771,13 @@ class instalacion
         }
 
         $result->fc_factura = $fc_factura;
+
+        $fc_factura_etapa = $this->fc_factura_etapa(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar fc_factura_etapa', data:  $fc_factura_etapa);
+        }
+
+        $result->fc_factura_etapa = $fc_factura_etapa;
 
         $fc_complemento_pago = $this->fc_complemento_pago(link: $link);
         if(errores::$error){
