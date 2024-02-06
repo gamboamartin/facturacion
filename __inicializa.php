@@ -24,6 +24,18 @@ if(errores::$error){
 
 print_r($instala);
 
+$direccion_postal = new gamboamartin\direccion_postal\instalacion\instalacion();
+
+$instala = $direccion_postal->instala(link: $link);
+if(errores::$error){
+    $link->rollBack();
+    $error = (new errores())->error(mensaje: 'Error al instalar direccion_postal', data: $instala);
+    print_r($error);
+    exit;
+}
+
+print_r($instala);
+
 
 $cat_sat = new gamboamartin\cat_sat\instalacion\instalacion();
 
@@ -56,6 +68,28 @@ $instala = $comercial->instala(link: $link);
 if(errores::$error){
     $link->rollBack();
     $error = (new errores())->error(mensaje: 'Error al instalar comercial', data: $instala);
+    print_r($error);
+    exit;
+}
+
+print_r($instala);
+
+$documento = new gamboamartin\documento\instalacion\instalacion();
+
+$instala = $documento->instala(link: $link);
+if(errores::$error){
+    $link->rollBack();
+    $error = (new errores())->error(mensaje: 'Error al instalar documento', data: $instala);
+    print_r($error);
+    exit;
+}
+
+$notificaciones = new gamboamartin\notificaciones\instalacion\instalacion();
+
+$instala = $notificaciones->instala(link: $link);
+if(errores::$error){
+    $link->rollBack();
+    $error = (new errores())->error(mensaje: 'Error al instalar notificaciones', data: $instala);
     print_r($error);
     exit;
 }

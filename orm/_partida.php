@@ -1130,6 +1130,10 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al obtener partida', data: $partida);
         }
 
+        if(!isset($partida[$this->tabla.'_valor_unitario'])){
+            return $this->error->error(mensaje: 'Error no existe campo valor unitario', data: $partida);
+        }
+
         $sub_total_base = round(round($partida[$this->tabla.'_valor_unitario'],4)
             * round($partida[$this->tabla.'_cantidad'],4),4);
 
