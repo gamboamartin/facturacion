@@ -52,18 +52,6 @@ class fc_facturaTest extends test {
         $modelo = new liberator($modelo);
 
 
-        $del = (new base_test())->del_cat_sat_metodo_pago($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
-        $del = (new base_test())->del_cat_sat_forma_pago($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
 
         $del = (new base_test())->del_org_empresa($this->link);
         if(errores::$error){
@@ -130,16 +118,10 @@ class fc_facturaTest extends test {
         $modelo = new fc_factura($this->link);
         $modelo = new liberator($modelo);
 
-        $del = (new base_test())->del_cat_sat_moneda($this->link,);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
 
-        $del = (new base_test())->del_cat_sat_metodo_pago($this->link,);
+        $del = (new base_test())->del_fc_partida(link: $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
+            $error = (new errores())->error('Error al del',$del);
             print_r($error);
             exit;
         }
@@ -709,16 +691,9 @@ class fc_facturaTest extends test {
         $modelo = new fc_factura($this->link);
         $modelo = new liberator($modelo);
 
-        $del = (new base_test())->del_cat_sat_moneda($this->link,);
+        $del = (new base_test())->del_fc_partida(link: $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new base_test())->del_cat_sat_metodo_pago($this->link,);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
+            $error = (new errores())->error('Error al del',$del);
             print_r($error);
             exit;
         }
@@ -829,17 +804,9 @@ class fc_facturaTest extends test {
 
         $modelo = new fc_factura($this->link);
         //$modelo = new liberator($modelo);
-
-        $del = (new base_test())->del_cat_sat_moneda($this->link,);
+        $del = (new base_test())->del_fc_partida(link: $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new base_test())->del_cat_sat_metodo_pago($this->link,);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
+            $error = (new errores())->error('error al del', $del);
             print_r($error);
             exit;
         }
@@ -850,7 +817,7 @@ class fc_facturaTest extends test {
 
 
         $resultado = $modelo->total($modelo_partida, $name_entidad, $registro_id);
-
+        //print_r($resultado);exit;
         $this->assertIsArray($resultado);
         $this->assertTrue(errores::$error);
         $this->assertStringContainsStringIgnoringCase('Error al obtener sub total',$resultado['mensaje']);
@@ -887,19 +854,7 @@ class fc_facturaTest extends test {
         $modelo = new fc_factura($this->link);
         $modelo = new liberator($modelo);
 
-        $del = (new base_test())->del_cat_sat_moneda($this->link,);
-        if (errores::$error) {
-            $error = (new errores())->error('Error al eliminar', $del);
-            print_r($error);
-            exit;
-        }
 
-        $del = (new base_test())->del_cat_sat_metodo_pago($this->link,);
-        if (errores::$error) {
-            $error = (new errores())->error('Error al eliminar', $del);
-            print_r($error);
-            exit;
-        }
 
         $del = (new base_test())->del_org_empresa($this->link,);
         if (errores::$error) {

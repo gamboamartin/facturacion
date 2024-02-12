@@ -254,12 +254,6 @@ class _transacciones_fcTest extends test
             exit;
         }
 
-        $del = (new base_test())->del_cat_sat_metodo_pago(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al eliminar', data: $del);
-            print_r($error);
-            exit;
-        }
 
         $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link,adm_seccion_descripcion: 'fc_complemento_pago');
         if(errores::$error){

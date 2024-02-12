@@ -863,6 +863,7 @@ class instalacion
         $foraneas = array();
         $foraneas['doc_documento_id'] = new stdClass();
         $foraneas['fc_cer_csd_id'] = new stdClass();
+        $foraneas['fc_cer_csd_id']->name_indice_opt = 'fc_cer_csd_id_ext';
 
         $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_cer_pem');
 
@@ -871,17 +872,7 @@ class instalacion
         }
         $out->foraneas_r = $foraneas_r;
 
-        /*$campos = new stdClass();
-        $campos->fecha = new stdClass();
-        $campos->fecha->tipo_dato = 'DATE';
-        $campos->fecha->default = '1900-01-01';
 
-        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_cer_csd');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
-        }
-        $out->columnas = $result;*/
         return $out;
 
     }
@@ -3593,8 +3584,6 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar fc_traslado', data:  $fc_traslado);
         }
         $result->fc_traslado = $fc_traslado;
-
-
 
         $fc_partida_cp = $this->fc_partida_cp(link: $link);
         if(errores::$error){

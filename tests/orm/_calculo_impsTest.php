@@ -94,12 +94,6 @@ class _calculo_impsTest extends test
             exit;
         }
 
-        $del = (new base_test())->del_cat_sat_metodo_pago(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al eliminar', data: $del);
-            print_r($error);
-            exit;
-        }
 
         $del = (new base_test())->del_org_empresa(link: $this->link);
         if(errores::$error){
@@ -130,12 +124,6 @@ class _calculo_impsTest extends test
             exit;
         }
 
-        $alta = (new base_test())->alta_cat_sat_conf_reg_tp(link: $this->link,id: 1000);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
-            print_r($error);
-            exit;
-        }
 
         $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
@@ -151,6 +139,8 @@ class _calculo_impsTest extends test
 
         $resultado = $modelo->tiene_retenciones(modelo_retencion: $modelo_retencion, key_filtro_id: 'fc_factura_id',
             registro_id: $registro_id);
+
+        //print_r($resultado);exit;
 
         $this->assertIsBool($resultado);
         $this->assertNotTrue(errores::$error);
@@ -281,6 +271,21 @@ class _calculo_impsTest extends test
             print_r($error);
             exit;
         }
+
+        $del = (new base_test())->del_pr_etapa_proceso(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al del', data: $del);
+            print_r($error);
+            exit;
+        }
+
+        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
+            print_r($error);
+            exit;
+        }
+
         $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);

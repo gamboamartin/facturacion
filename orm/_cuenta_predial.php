@@ -22,10 +22,14 @@ class _cuenta_predial extends  _modelo_parent_sin_codigo{
                                 array $childrens = array(), array $defaults = array(), array $parents_data = array(),
                                 array $atributos_criticos = array())
     {
-        parent::__construct($link, $tabla, $aplica_bitacora, $aplica_seguridad, $aplica_transaccion_inactivo,
-            $campos_encriptados, $campos_obligatorios, $columnas, $campos_view, $columnas_extra, $extension_estructura,
-            $no_duplicados, $renombres, $sub_querys, $tipo_campos, $validation, $campos_no_upd, $parents, $temp,
-            $childrens, $defaults, $parents_data, $atributos_criticos);
+        parent::__construct(link: $link,tabla:  $tabla,aplica_bitacora:  $aplica_bitacora,
+            aplica_seguridad:  $aplica_seguridad,aplica_transaccion_inactivo:  $aplica_transaccion_inactivo,
+            campos_encriptados: $campos_encriptados,campos_obligatorios:  $campos_obligatorios,
+            columnas:  $columnas,campos_view:  $campos_view,columnas_extra:  $columnas_extra,
+            extension_estructura:  $extension_estructura,
+            no_duplicados: $no_duplicados,renombres:  $renombres,sub_querys:  $sub_querys,
+            tipo_campos:  $tipo_campos,validation:  $validation,campos_no_upd:  $campos_no_upd,parents:  $parents,temp:  $temp,
+            childrens: $childrens,defaults:  $defaults,parents_data:  $parents_data,atributos_criticos:  $atributos_criticos);
 
         $this->modelo_partida = $modelo_partida;
     }

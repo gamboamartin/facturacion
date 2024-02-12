@@ -62,12 +62,6 @@ class _saldos_fcTest extends test
             exit;
         }
 
-        $del = (new base_test())->del_cat_sat_metodo_pago(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
 
         $resultado = $modelo->get_pagos_nc(1, $this->link);
         $this->assertIsFloat($resultado);
@@ -118,19 +112,7 @@ class _saldos_fcTest extends test
             exit;
         }
 
-        $del = (new base_test())->del_cat_sat_metodo_pago(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
 
-        $del = (new base_test())->del_cat_sat_forma_pago(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
 
         $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
         if(errores::$error){
@@ -164,19 +146,8 @@ class _saldos_fcTest extends test
             print_r($error);
             exit;
         }
-        $del = (new base_test())->del_cat_sat_metodo_pago(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
 
-        $del = (new base_test())->del_cat_sat_forma_pago(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
+
 
         $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link, adm_accion_descripcion: 'alta_bd',
             adm_accion_id: 100, adm_seccion_descripcion: 'fc_nota_credito', adm_seccion_id: 100, id: 100,

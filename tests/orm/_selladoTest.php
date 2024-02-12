@@ -103,20 +103,6 @@ class _selladoTest extends test
             exit;
         }
 
-        $del = (new base_test())->del_cat_sat_metodo_pago(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
-
-        $del = (new base_test())->del_cat_sat_forma_pago(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
-
 
 
         $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
@@ -126,12 +112,7 @@ class _selladoTest extends test
             exit;
         }
 
-        $alta = (new base_test())->alta_cat_sat_conf_reg_tp(link: $this->link,id: 99);
-        if(errores::$error){
-            $error = (new errores())->error('Error al insertar',$alta);
-            print_r($error);
-            exit;
-        }
+
 
         $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
