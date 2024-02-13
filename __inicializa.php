@@ -24,6 +24,17 @@ if(errores::$error){
 
 print_r($instala);
 
+$proceso = new gamboamartin\proceso\instalacion\instalacion();
+$instala = $proceso->instala(link: $link);
+if(errores::$error){
+    $link->rollBack();
+    $error = (new errores())->error(mensaje: 'Error al instalar proceso', data: $instala);
+    print_r($error);
+    exit;
+}
+
+print_r($instala);
+
 $direccion_postal = new gamboamartin\direccion_postal\instalacion\instalacion();
 
 $instala = $direccion_postal->instala(link: $link);

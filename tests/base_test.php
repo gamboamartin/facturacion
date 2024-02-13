@@ -904,7 +904,7 @@ class base_test{
 
     public function alta_fc_pago_pago(PDO $link, int $cat_sat_forma_pago_id = 1,
                                       string $cat_sat_metodo_pago_codigo='PUE', int $cat_sat_metodo_pago_id = 1,
-                                      int $cat_sat_moneda_id = 1, int $com_tipo_cambio_id = 1, int $fc_pago_id = 1,
+                                      int $cat_sat_moneda_id = 161, int $com_tipo_cambio_id = 1, int $fc_pago_id = 1,
                                       string $fecha_pago = '2020-01-01', int $id = 1,
                                       float $monto = 10): array|\stdClass
     {
@@ -1086,7 +1086,7 @@ class base_test{
 
     public function alta_fc_nota_credito(PDO $link, int $cat_sat_forma_pago_id = 1,
                                          string $cat_sat_metodo_pago_codigo = 'PUE', int $cat_sat_metodo_pago_id = 2,
-                                         int $cat_sat_moneda_id = 1, int $cat_sat_regimen_fiscal_id = 1,
+                                         int $cat_sat_moneda_id = 161, int $cat_sat_regimen_fiscal_id = 1,
                                          int $cat_sat_tipo_persona_id = 1, int $cat_sat_uso_cfdi_id = 2,
                                          int $com_sucursal_id = 1, int $com_tipo_cambio_id = 1,
                                          int $cat_sat_tipo_de_comprobante_id = 2, string $exportacion = '01',
