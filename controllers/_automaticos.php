@@ -4,7 +4,6 @@ use base\orm\_modelo_parent_sin_codigo;
 use config\generales;
 use gamboamartin\compresor\compresor;
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\models\_email;
 use gamboamartin\facturacion\models\_pdf;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
