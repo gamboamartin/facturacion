@@ -2177,9 +2177,9 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $campos_r);
         }
 
-        print_r($_SESSION['entidades_bd']);
+        /*print_r($_SESSION['entidades_bd']);
         print_r($_SESSION['campos_tabla']);
-        print_r($_SESSION['columnas_completas']);
+        print_r($_SESSION['columnas_completas']);*/
 
         $registros = $modelo->registros(columnas_en_bruto: true);
         if(errores::$error){
