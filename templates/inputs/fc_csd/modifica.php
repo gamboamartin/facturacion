@@ -6,3 +6,4 @@
 <?php echo $controlador->inputs->org_sucursal_id; ?>
 
 <?php include (new views())->ruta_templates.'botons/submit/modifica_bd.php';?>
+
