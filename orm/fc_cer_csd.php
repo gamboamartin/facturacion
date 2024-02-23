@@ -31,6 +31,12 @@ class fc_cer_csd extends modelo{
     public function alta_bd(): array|stdClass
     {
 
+        $keys = array('fc_csd_id');
+        $valida = $this->validacion->valida_ids($keys, $this->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data: $valida);
+        }
+
         $existe_file = (new fc_csd(link: $this->link))->tiene_file_cer(fc_csd_id: $this->registro['fc_csd_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar si existe file',data: $existe_file);
