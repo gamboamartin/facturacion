@@ -247,6 +247,8 @@ class controlador_fc_csd extends system{
                 header: $header,ws:$ws);
         }
 
+        //$fc_csd_cer =
+
         return $base->template;
     }
 

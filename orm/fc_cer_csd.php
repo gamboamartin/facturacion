@@ -37,7 +37,6 @@ class fc_cer_csd extends modelo{
                 return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $this->registro);
             }
         }
-
         $validacion = $this->validaciones(data: $this->registro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);

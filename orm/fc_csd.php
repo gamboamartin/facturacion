@@ -177,7 +177,27 @@ class fc_csd extends _modelo_parent {
         return $r_modifica_bd;
     }
 
+    final public function tiene_file_cer(int $fc_csd_id)
+    {
+        $filtro['fc_csd.id'] = $fc_csd_id;
+        $existe = (new fc_cer_csd(link: $this->link))->existe(filtro: $filtro );
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar cer',data:  $existe);
+        }
+        return $existe;
 
+    }
+
+    final public function tiene_file_key(int $fc_csd_id)
+    {
+        $filtro['fc_csd.id'] = $fc_csd_id;
+        $existe = (new fc_key_csd(link: $this->link))->existe(filtro: $filtro );
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar key',data:  $existe);
+        }
+        return $existe;
+
+    }
 
     private function validaciones(array $data): bool|array
     {

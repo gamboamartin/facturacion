@@ -9,7 +9,6 @@ class _base extends _modelo_parent{
     /**
      * Integra los elementos base de un modelo para alta
      * @return array
-     * @version 10.42.3
      */
     protected function init_alta_bd(): array
     {
