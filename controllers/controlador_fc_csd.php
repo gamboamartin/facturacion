@@ -66,13 +66,6 @@ class controlador_fc_csd extends system{
         }
 
 
-        /*$init_ctl = (new _fc_base())->init_base_fc(controler: $this, name_modelo_email: 'fc_email');
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al inicializar',data:  $init_ctl);
-            print_r($error);
-            die('Error');
-        }*/
-
         $this->parents_verifica[] = new org_sucursal(link: $this->link);
         $this->verifica_parents_alta = true;
 
@@ -96,6 +89,27 @@ class controlador_fc_csd extends system{
             print_r($error);
             die('Error');
         }
+
+
+        $fc_cer_csd_doc = $this->html->input_file(cols: 12,name:  'fc_cer_csd_doc', row_upd: new stdClass(),
+            value_vacio: false,place_holder: 'Archivo CER');
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al generar fc_cer_csd_doc',data:  $fc_cer_csd_doc);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->inputs->fc_cer_csd = $fc_cer_csd_doc;
+
+        $fc_key_csd_doc = $this->html->input_file(cols: 12,name:  'fc_key_csd_doc', row_upd: new stdClass(),
+            value_vacio: false, place_holder: 'Archivo KEY');
+        if(errores::$error){
+            $error = $this->errores->error(mensaje: 'Error al generar fc_key_csd_doc',data:  $fc_key_csd_doc);
+            print_r($error);
+            die('Error');
+        }
+
+        $this->inputs->fc_key_csd = $fc_key_csd_doc;
 
         return $r_alta;
     }
