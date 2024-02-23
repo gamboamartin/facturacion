@@ -31,6 +31,8 @@ class fc_cer_pem extends modelo{
     public function alta_bd(): array|stdClass
     {
 
+
+
         if(!isset($this->registro['codigo'])){
             $this->registro['codigo'] =  $this->get_codigo_aleatorio();
             if(errores::$error){

@@ -31,6 +31,14 @@ class fc_cer_csd extends modelo{
     public function alta_bd(): array|stdClass
     {
 
+        $existe_file = (new fc_csd(link: $this->link))->tiene_file_cer(fc_csd_id: $this->registro['fc_csd_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar si existe file',data: $existe_file);
+        }
+        if($existe_file){
+            return $this->error->error(mensaje: 'Error el cer ya existe favor eliminalo',data: $existe_file);
+        }
+
         if(!isset($this->registro['codigo'])){
             $this->registro['codigo'] =  $this->get_codigo_aleatorio();
             if(errores::$error){
