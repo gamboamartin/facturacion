@@ -126,6 +126,16 @@ class _cert
 
     }
 
+    private function file_pem(string $file_origen,string $name): array
+    {
+        $_FILES['documento'] = array();
+        $_FILES['documento']['name'] =  $name;
+        $_FILES['documento']['tmp_name'] = $file_origen;
+
+        return $_FILES;
+
+    }
+
     final public function init_alta_bd(fc_key_csd|fc_cer_csd $modelo, array $registro)
     {
         $keys = array('fc_csd_id');
@@ -238,6 +248,21 @@ class _cert
 
     }
 
+    final public function integra_files(string $file_origen)
+    {
+        $name = $this->name_pem();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar name', data: $name);
+        }
+
+        $file = $this->file_pem(file_origen: $file_origen,name:  $name);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar FILE', data: $file);
+        }
+        return $file;
+
+    }
+
     private function pr_etapa_proceso_id(PDO $link, string $pr_etapa_descripcion, string $pr_proceso_descripcion)
     {
         $filtro = array();
@@ -252,6 +277,14 @@ class _cert
         }
         return (int)$pr_etapa_proceso->registros[0]['pr_etapa_proceso_id'];
 
+    }
+
+    private function name_pem(): string
+    {
+        $name = mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
+        $name .= mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
+        $name .= '.pem';
+        return $name;
     }
 
     private function row_fc_csd_etapa(int $fc_csd_id, int $pr_etapa_proceso_id): array

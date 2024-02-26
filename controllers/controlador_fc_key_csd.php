@@ -12,6 +12,7 @@ use base\controller\controler;
 use config\generales;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_key_csd_html;
+use gamboamartin\facturacion\models\_cert;
 use gamboamartin\facturacion\models\fc_key_csd;
 use gamboamartin\facturacion\models\fc_key_pem;
 use gamboamartin\plugins\ssl;
@@ -41,21 +42,9 @@ class controlador_fc_key_csd extends _base_system_csd {
     public function genera_pem(bool $header, bool $ws = false): array|string|stdClass{
 
 
-        $data = (new fc_key_csd(link: $this->link))->genera_pem(fc_key_csd_id: $this->registro_id);
+        $data = (new fc_key_csd(link: $this->link))->genera_pem_full(fc_key_csd_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pem', data: $data,header:  $header,ws:  $ws);
-        }
-
-        $_FILES['documento'] = array();
-        $_FILES['documento']['name'] = mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
-        $_FILES['documento']['name'] .= mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
-        $_FILES['documento']['name'] .= '.key.pem';
-        $_FILES['documento']['tmp_name'] = $data->file;
-
-        $fc_key_pem_ins['fc_key_csd_id'] = $this->registro_id;
-        $inserta_pem = (new fc_key_pem(link: $this->link))->alta_registro(registro: $fc_key_pem_ins);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al insertar pem', data: $inserta_pem,header:  $header,ws:  $ws);
         }
 
         return $data;
