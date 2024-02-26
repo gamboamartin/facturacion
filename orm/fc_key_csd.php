@@ -2,9 +2,7 @@
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 use gamboamartin\documento\models\doc_documento;
-use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
-use gamboamartin\plugins\files;
 use PDO;
 use stdClass;
 
@@ -44,6 +42,12 @@ class fc_key_csd extends modelo{
         $r_alta_bd = parent::alta_bd();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al dar de alta key csd',data: $r_alta_bd);
+        }
+
+        $inserta_etapa = (new _cert())->inserta_etapa(fc_csd_id: $this->registro['fc_csd_id'],link:  $this->link,
+            pr_etapa_descripcion:  'KEY INTEGRADO', pr_proceso_descripcion: 'CSD');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar etapa',data: $inserta_etapa);
         }
 
         return $r_alta_bd;

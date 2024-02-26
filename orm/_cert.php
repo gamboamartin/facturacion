@@ -5,6 +5,7 @@ use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
 use gamboamartin\plugins\files;
+use gamboamartin\proceso\models\pr_etapa_proceso;
 use gamboamartin\validacion\validacion;
 use PDO;
 use stdClass;
@@ -65,7 +66,6 @@ class _cert
         return $doc_documento;
     }
 
-
     private function asigna_documento(array $data, PDO $link): array|stdClass
     {
         $alta_documento = $this->alta_documento(documento: "documento",link: $link);
@@ -87,6 +87,21 @@ class _cert
             }
         }
         return $registro;
+
+    }
+
+    private function fc_csd_etapa_ins(int $fc_csd_id, PDO $link, string $pr_etapa_descripcion, string $pr_proceso_descripcion)
+    {
+        $pr_etapa_proceso_id =$this->pr_etapa_proceso_id(link: $link,pr_etapa_descripcion:  $pr_etapa_descripcion,
+            pr_proceso_descripcion:  $pr_proceso_descripcion);
+
+
+        $fc_csd_etapa = $this->row_fc_csd_etapa(fc_csd_id: $fc_csd_id, pr_etapa_proceso_id: $pr_etapa_proceso_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener etapa ins',data: $fc_csd_etapa);
+        }
+
+        return $fc_csd_etapa;
 
     }
 
@@ -130,8 +145,6 @@ class _cert
 
     }
 
-
-
     final public function init_campos_base(array $data, PDO $link): array
     {
         $csd = (new fc_csd($link))->get_csd(fc_csd_id: $data["fc_csd_id"]);
@@ -166,6 +179,48 @@ class _cert
             $data['alias'] = $data['codigo'];
         }
         return $data;
+    }
+
+    final public function inserta_etapa(int $fc_csd_id, PDO $link, string $pr_etapa_descripcion, string $pr_proceso_descripcion)
+    {
+        $fc_csd_etapa = $this->fc_csd_etapa_ins(fc_csd_id: $fc_csd_id,link:  $link,
+            pr_etapa_descripcion:  $pr_etapa_descripcion, pr_proceso_descripcion:  $pr_proceso_descripcion);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener etapa ins',data: $fc_csd_etapa);
+        }
+
+        $r_alta_et_p = (new fc_csd_etapa(link: $link))->alta_registro(registro: $fc_csd_etapa);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar etapa',data: $r_alta_et_p);
+        }
+        return $r_alta_et_p;
+
+    }
+
+    private function pr_etapa_proceso_id(PDO $link, string $pr_etapa_descripcion, string $pr_proceso_descripcion)
+    {
+        $filtro = array();
+        $filtro['pr_proceso.descripcion'] = $pr_proceso_descripcion;
+        $filtro['pr_etapa.descripcion'] = $pr_etapa_descripcion;
+        $pr_etapa_proceso = (new pr_etapa_proceso(link: $link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener etapa_proceso',data: $pr_etapa_proceso);
+        }
+        if($pr_etapa_proceso->n_registros === 0){
+            return $this->error->error(mensaje: 'Error no existe etapa proceso',data: $pr_etapa_proceso);
+        }
+        return (int)$pr_etapa_proceso->registros[0]['pr_etapa_proceso_id'];
+
+    }
+
+    private function row_fc_csd_etapa(int $fc_csd_id, int $pr_etapa_proceso_id): array
+    {
+        $fc_csd_etapa['fc_csd_id'] = $fc_csd_id;
+        $fc_csd_etapa['pr_etapa_proceso_id'] = $pr_etapa_proceso_id;
+        $fc_csd_etapa['fecha'] = date('Y-m-d');
+
+        return $fc_csd_etapa;
+
     }
     private function valida_existe_file(int $fc_csd_id, PDO $link, string $name_modelo)
     {
