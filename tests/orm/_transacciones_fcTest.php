@@ -247,20 +247,6 @@ class _transacciones_fcTest extends test
             exit;
         }
 
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al eliminar', data: $del);
-            print_r($error);
-            exit;
-        }
-
-
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link,adm_seccion_descripcion: 'fc_complemento_pago');
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
-            print_r($error);
-            exit;
-        }
 
         $alta = (new base_test())->alta_fc_complemento_pago(link: $this->link);
         if(errores::$error){
@@ -328,21 +314,6 @@ class _transacciones_fcTest extends test
             print_r($error);
             exit;
         }
-
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al del', data: $del);
-            print_r($error);
-            exit;
-        }
-
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link,adm_seccion_descripcion: 'fc_factura');
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
-            print_r($error);
-            exit;
-        }
-
 
 
         $alta = (new base_test())->alta_fc_partida(link: $this->link);

@@ -72,20 +72,6 @@ class _plantillaTest extends test
             print_r($error);
             exit;
         }
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al del',$del);
-            print_r($error);
-            exit;
-        }
-
-
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al insertar',$alta);
-            print_r($error);
-            exit;
-        }
 
         $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
@@ -133,19 +119,6 @@ class _plantillaTest extends test
         $del = (new base_test())->del_fc_factura(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
-
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al insertar',$alta);
             print_r($error);
             exit;
         }
@@ -211,19 +184,7 @@ class _plantillaTest extends test
             print_r($error);
             exit;
         }
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
 
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al insertar',$alta);
-            print_r($error);
-            exit;
-        }
 
         $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
@@ -368,12 +329,7 @@ class _plantillaTest extends test
             print_r($error);
             exit;
         }
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
+
 
         $del = (new base_test())->del_com_cliente(link: $this->link);
         if(errores::$error){
@@ -394,12 +350,6 @@ class _plantillaTest extends test
             exit;
         }
 
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al insertar',$alta);
-            print_r($error);
-            exit;
-        }
 
 
         $alta = (new base_test())->alta_fc_partida(link: $this->link);

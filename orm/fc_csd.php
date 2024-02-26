@@ -4,6 +4,8 @@ use base\orm\_modelo_parent;
 use base\orm\modelo;
 use gamboamartin\errores\errores;
 use gamboamartin\organigrama\models\org_sucursal;
+use gamboamartin\proceso\models\pr_etapa;
+use gamboamartin\proceso\models\pr_etapa_proceso;
 use PDO;
 use stdClass;
 
@@ -61,6 +63,25 @@ class fc_csd extends _modelo_parent {
         $r_alta_bd = parent::alta_bd();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al dar de alta csd',data: $r_alta_bd);
+        }
+
+        $filtro['pr_proceso.descripcion'] = 'CSD';
+        $filtro['pr_etapa.descripcion'] = 'ALTA';
+        $pr_etapa_proceso = (new pr_etapa_proceso(link: $this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener etapa_proceso',data: $pr_etapa_proceso);
+        }
+        if($pr_etapa_proceso->n_registros === 0){
+            return $this->error->error(mensaje: 'Error no existe etapa proceso',data: $pr_etapa_proceso);
+        }
+
+
+        $fc_csd_etapa['fc_csd_id'] = $r_alta_bd->registro_id;
+        $fc_csd_etapa['pr_etapa_proceso_id'] = $pr_etapa_proceso->registros[0]['pr_etapa_proceso_id'];
+        $fc_csd_etapa['fecha'] = date('Y-m-d');
+        $r_alta_et_p = (new fc_csd_etapa(link: $this->link))->alta_registro(registro: $fc_csd_etapa);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar etapa',data: $r_alta_et_p);
         }
 
         return $r_alta_bd;

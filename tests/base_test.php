@@ -1903,6 +1903,12 @@ class base_test{
 
         }
 
+        $del = (new base_test())->del_fc_csd_etapa($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
+
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_csd');
         if(errores::$error){
             return (new errores())->error('Error al eliminar', $del);
@@ -2679,6 +2685,16 @@ class base_test{
         }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_conf_automatico');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar retenido', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_csd_etapa(PDO $link): array
+    {
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_csd_etapa');
         if(errores::$error){
             return (new errores())->error('Error al eliminar retenido', $del);
         }

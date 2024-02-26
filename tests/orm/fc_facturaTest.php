@@ -67,19 +67,6 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $del = (new base_test())->del_adm_seccion($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
-
-        $alta = (new base_test())->alta_pr_etapa_proceso($this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al insertar partida',$alta);
-            print_r($error);
-            exit;
-        }
 
         $alta = (new base_test())->alta_fc_partida($this->link);
         if(errores::$error){
@@ -623,19 +610,6 @@ class fc_facturaTest extends test {
             exit;
         }
 
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al del', $del);
-            print_r($error);
-            exit;
-        }
-
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al insertar', $alta);
-            print_r($error);
-            exit;
-        }
 
 
         $alta = (new base_test())->alta_fc_partida(link: $this->link);

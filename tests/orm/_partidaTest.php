@@ -214,11 +214,6 @@ class _partidaTest extends test
         $modelo_retencion = new fc_retenido_nc(link: $this->link);
         $modelo_traslado = new fc_traslado_nc(link: $this->link);
 
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
-            print_r($error);exit;
-        }
 
         $del = (new base_test())->del_fc_nota_credito(link: $this->link);
         if(errores::$error){
@@ -226,11 +221,6 @@ class _partidaTest extends test
             print_r($error);exit;
         }
 
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link, adm_seccion_descripcion: 'fc_nota_credito');
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
-            print_r($error);exit;
-        }
 
         $alta = (new base_test())->alta_fc_partida_nc(link: $this->link);
         if(errores::$error){
@@ -404,11 +394,7 @@ class _partidaTest extends test
         $modelo = new fc_partida_nc(link: $this->link);
         $modelo = new liberator($modelo);
 
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
-            print_r($error);exit;
-        }
+
         $del = (new base_test())->del_fc_conf_traslado(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
@@ -421,11 +407,6 @@ class _partidaTest extends test
             print_r($error);exit;
         }
 
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link, adm_seccion_descripcion: 'fc_nota_credito');
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
-            print_r($error);exit;
-        }
 
         $alta = (new base_test())->alta_fc_partida_nc(link: $this->link);
         if(errores::$error){
@@ -505,11 +486,6 @@ class _partidaTest extends test
         $modelo = new fc_partida_nc(link: $this->link);
         //$modelo = new liberator($modelo);
 
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
-            print_r($error);exit;
-        }
 
         $del = (new base_test())->del_fc_nota_credito(link: $this->link);
         if(errores::$error){
@@ -517,11 +493,6 @@ class _partidaTest extends test
             print_r($error);exit;
         }
 
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link, adm_seccion_descripcion: 'fc_nota_credito');
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
-            print_r($error);exit;
-        }
 
         $alta = (new base_test())->alta_fc_partida_nc(link: $this->link);
         if(errores::$error){
@@ -577,11 +548,7 @@ class _partidaTest extends test
             $error = (new errores())->error(mensaje: 'Error al eliminar',data:  $del);
             print_r($error);exit;
         }
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al del',data:  $del);
-            print_r($error);exit;
-        }
+
 
         $inserta = (new base_test())->alta_com_producto(link: $this->link, codigo: '84111506', id: '84111506');
         if(errores::$error){
@@ -589,11 +556,7 @@ class _partidaTest extends test
             print_r($error);exit;
         }
 
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link, adm_seccion_descripcion: 'fc_complemento_pago');
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
-            print_r($error);exit;
-        }
+
 
         $inserta = (new base_test())->alta_fc_partida_cp(link: $this->link);
         if(errores::$error){

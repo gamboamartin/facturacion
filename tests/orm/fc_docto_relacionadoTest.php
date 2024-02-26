@@ -68,18 +68,7 @@ class fc_docto_relacionadoTest extends test {
             $error = (new errores())->error(mensaje: 'Error al del',data:  $del);
             print_r($error);exit;
         }
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al del',data:  $del);
-            print_r($error);exit;
-        }
 
-
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
-            print_r($error);exit;
-        }
 
         $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
@@ -88,17 +77,7 @@ class fc_docto_relacionadoTest extends test {
         }
 
 
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al del',data:  $del);
-            print_r($error);exit;
-        }
 
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link,adm_seccion_descripcion: 'fc_complemento_pago');
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
-            print_r($error);exit;
-        }
 
         $alta = (new base_test())->alta_fc_pago_pago(link: $this->link);
         if(errores::$error){

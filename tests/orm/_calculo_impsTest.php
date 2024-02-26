@@ -73,12 +73,6 @@ class _calculo_impsTest extends test
             exit;
         }
 
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al eliminar', data: $del);
-            print_r($error);
-            exit;
-        }
 
         $del = (new base_test())->del_cat_sat_tipo_factor(link: $this->link);
         if(errores::$error){
@@ -111,13 +105,6 @@ class _calculo_impsTest extends test
             exit;
         }
         $alta = (new base_test())->alta_fc_conf_retenido(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
-            print_r($error);
-            exit;
-        }
-
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
             print_r($error);
@@ -191,12 +178,7 @@ class _calculo_impsTest extends test
             print_r($error);
             exit;
         }
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al eliminar', data: $del);
-            print_r($error);
-            exit;
-        }
+
 
         $alta = (new base_test())->alta_fc_conf_traslado(link: $this->link);
         if(errores::$error){
@@ -211,12 +193,7 @@ class _calculo_impsTest extends test
             exit;
         }
 
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
-            print_r($error);
-            exit;
-        }
+
 
         $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
@@ -272,19 +249,7 @@ class _calculo_impsTest extends test
             exit;
         }
 
-        $del = (new base_test())->del_pr_etapa_proceso(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al del', data: $del);
-            print_r($error);
-            exit;
-        }
 
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
-            print_r($error);
-            exit;
-        }
 
         $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){

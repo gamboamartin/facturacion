@@ -86,22 +86,7 @@ class _comprobanteTest extends test
             exit;
         }
 
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',$del);
-            print_r($error);
-            exit;
-        }
 
-
-
-        $alta = (new base_test())->alta_pr_etapa_proceso(link: $this->link,
-            adm_seccion_descripcion: 'fc_factura');
-        if(errores::$error){
-            $error = (new errores())->error('Error al dar de alta',$alta);
-            print_r($error);
-            exit;
-        }
 
         $alta_fc_factura = (new base_test())->alta_fc_factura(link: $this->link);
         if(errores::$error){

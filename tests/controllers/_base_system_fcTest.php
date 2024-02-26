@@ -41,17 +41,8 @@ class _base_system_fcTest extends test {
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',data:  $del);
-            print_r($error);exit;
-        }
 
-        $alta = (new base_test())->alta_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al insertar',data:  $alta);
-            print_r($error);exit;
-        }
+
 
 
         $ctl = new controlador_fc_factura(link: $this->link, paths_conf: $this->paths_conf);
@@ -87,17 +78,6 @@ class _base_system_fcTest extends test {
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
-        $del = (new base_test())->del_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al eliminar',data:  $del);
-            print_r($error);exit;
-        }
-
-        $alta = (new base_test())->alta_adm_seccion(link: $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error al insertar',data:  $alta);
-            print_r($error);exit;
-        }
 
 
         $ctl = new controlador_fc_nota_credito(link: $this->link, paths_conf: $this->paths_conf);

@@ -1,6 +1,7 @@
 <?php
 namespace gamboamartin\facturacion\instalacion;
 
+use gamboamartin\administrador\instalacion\_adm;
 use gamboamartin\administrador\models\_instalacion;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_etapa;
@@ -11,6 +12,11 @@ use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_nota_credito;
 use gamboamartin\facturacion\models\fc_nota_credito_etapa;
+use gamboamartin\js_base\eventos\adm_accion;
+use gamboamartin\proceso\models\pr_etapa;
+use gamboamartin\proceso\models\pr_etapa_proceso;
+use gamboamartin\proceso\models\pr_proceso;
+use gamboamartin\proceso\models\pr_tipo_proceso;
 use PDO;
 use stdClass;
 
@@ -2284,8 +2290,32 @@ class instalacion
     private function fc_csd_etapa(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_csd_etapa(link: $link);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al ajustar create', data: $create);
+        }
+
+        $adm_menu_descripcion = 'Etapas';
+        $adm_sistema_descripcion = 'facturacion';
+        $etiqueta_label = 'CSD Etapas';
+        $adm_seccion_pertenece_descripcion = 'facturacion';
+        $adm_namespace_name = 'gamboamartin/facturacion';
+        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
+
+        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
+            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
+            adm_seccion_descripcion: __FUNCTION__,
+            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
+            adm_sistema_descripcion: $adm_sistema_descripcion,
+            etiqueta_label: $etiqueta_label, link: $link);
         if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
+
+
+        $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
+            link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'CSD',pr_tipo_proceso_codigo:  'Control');
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
         }
 
         return $create;
@@ -2376,6 +2406,30 @@ class instalacion
         $result = new stdClass();
         $result->foranenas = $foraneas_r;
         $result->campos = $campos_r;
+
+        $adm_menu_descripcion = 'Pagos';
+        $adm_sistema_descripcion = 'facturacion';
+        $etiqueta_label = 'Pagos';
+        $adm_seccion_pertenece_descripcion = 'facturacion';
+        $adm_namespace_name = 'gamboamartin/facturacion';
+        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
+
+        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
+            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
+            adm_seccion_descripcion: __FUNCTION__,
+            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
+            adm_sistema_descripcion: $adm_sistema_descripcion,
+            etiqueta_label: $etiqueta_label, link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
+
+
+        $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
+            link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'PAGOS',pr_tipo_proceso_codigo:  'Control');
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
 
         return $result;
 
@@ -2529,6 +2583,31 @@ class instalacion
         $result = new stdClass();
         $result->foraneas = $foraneas_r;
         $result->campos_r = $campos_r;
+
+
+        $adm_menu_descripcion = 'Facturacion';
+        $adm_sistema_descripcion = 'facturacion';
+        $etiqueta_label = 'Facturacion';
+        $adm_seccion_pertenece_descripcion = 'facturacion';
+        $adm_namespace_name = 'gamboamartin/facturacion';
+        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
+
+        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
+            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
+            adm_seccion_descripcion: __FUNCTION__,
+            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
+            adm_sistema_descripcion: $adm_sistema_descripcion,
+            etiqueta_label: $etiqueta_label, link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
+
+
+        $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
+            link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'FACTURACION',pr_tipo_proceso_codigo:  'Control');
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
 
         return $result;
 
@@ -2743,6 +2822,30 @@ class instalacion
         $result = new stdClass();
         $result->foraneas = $foraneas_r;
         $result->campos_r = $campos_r;
+
+        $adm_menu_descripcion = 'Egresos';
+        $adm_sistema_descripcion = 'facturacion';
+        $etiqueta_label = 'Egresos';
+        $adm_seccion_pertenece_descripcion = 'facturacion';
+        $adm_namespace_name = 'gamboamartin/facturacion';
+        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
+
+        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
+            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
+            adm_seccion_descripcion: __FUNCTION__,
+            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
+            adm_sistema_descripcion: $adm_sistema_descripcion,
+            etiqueta_label: $etiqueta_label, link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
+
+
+        $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
+            link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'EGRESOS',pr_tipo_proceso_codigo:  'Control');
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
 
         return $result;
 
@@ -3462,7 +3565,6 @@ class instalacion
     }
 
 
-
     /**
      * POR DOCUMENTAR WIKI
      * Esta función devuelve un array con las claves foráneas utilizadas en la factura.
@@ -3484,6 +3586,32 @@ class instalacion
         $foraneas['cat_sat_regimen_fiscal_id'] = new stdClass();
         $foraneas['com_sucursal_id'] = new stdClass();
         return $foraneas;
+
+    }
+
+    private function genera_pr_etapa_proceso(string $adm_accion_descripcion, string $adm_seccion_descripcion,PDO $link, string $pr_etapa_codigo, string $pr_proceso_codigo, string $pr_tipo_proceso_codigo): array
+    {
+        $inserta = $this->inserta_pr_tipo_proceso(codigo: $pr_tipo_proceso_codigo,link:  $link);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
+
+        $inserta = $this->inserta_pr_etapa(codigo: $pr_etapa_codigo,link:  $link);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
+        $inserta = $this->inserta_pr_proceso(codigo: $pr_proceso_codigo, pr_tipo_proceso_codigo: $pr_tipo_proceso_codigo, link: $link);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
+        $inserta = $this->inserta_pr_etapa_proceso(adm_accion_descripcion: $adm_accion_descripcion,
+            adm_seccion_descripcion:  $adm_seccion_descripcion,link:  $link, pr_etapa_codigo: $pr_etapa_codigo, pr_proceso_codigo: $pr_proceso_codigo);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
+
+        return $inserta;
+
 
     }
 
@@ -3517,6 +3645,112 @@ class instalacion
 
 
         return $campos;
+
+    }
+
+    private function inserta_pr_etapa(string $codigo, PDO $link): array
+    {
+        $pr_etapa = $this->pr_etapa(codigo: $codigo);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al obtener row', data: $pr_etapa);
+        }
+        $pr_etapas[0] = $pr_etapa;
+
+        foreach ($pr_etapas as $pr_etapa) {
+            $inserta = (new pr_etapa(link: $link))->inserta_registro_si_no_existe_code(registro: $pr_etapa);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar row', data: $inserta);
+            }
+        }
+        return $pr_etapas;
+
+    }
+
+    private function inserta_pr_etapa_proceso(string $adm_accion_descripcion, string $adm_seccion_descripcion,
+                                              PDO $link, string $pr_etapa_codigo , string $pr_proceso_codigo): array
+    {
+        $pr_proceso_id = (new pr_proceso(link: $link))->get_id_by_codigo(codigo: $pr_proceso_codigo);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al obtener row', data: $pr_proceso_id);
+        }
+        $pr_etapa_id = (new pr_etapa(link: $link))->get_id_by_codigo(codigo: $pr_etapa_codigo);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al obtener row', data: $pr_etapa_id);
+        }
+
+        $adm_accion_id = (new \gamboamartin\administrador\models\adm_accion(link: $link))->adm_accion_id(
+            adm_accion_descripcion: $adm_accion_descripcion,adm_seccion_descripcion:  $adm_seccion_descripcion);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al obtener row', data: $adm_accion_id);
+        }
+
+        $pr_etapa_proceso['pr_proceso_id'] = $pr_proceso_id;
+        $pr_etapa_proceso['pr_etapa_id'] = $pr_etapa_id;
+        $pr_etapa_proceso['adm_accion_id'] = $adm_accion_id;
+
+        $filtro = array();
+        $filtro['pr_proceso.id'] = $pr_proceso_id;
+        $filtro['pr_etapa.id'] = $pr_etapa_id;
+        $filtro['adm_accion.id'] = $adm_accion_id;
+
+        $alta_pr_etapa_proceso = (new pr_etapa_proceso(link: $link))->inserta_registro_si_no_existe_filtro(
+            registro: $pr_etapa_proceso,filtro: $filtro);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar alta_pr_etapa_proceso',
+                data: $alta_pr_etapa_proceso);
+        }
+
+        return $pr_etapa_proceso;
+    }
+
+    private function inserta_pr_proceso(string $codigo, string $pr_tipo_proceso_codigo, PDO $link): array
+    {
+        $pr_tipo_proceso_id = (new pr_tipo_proceso(link: $link))->get_id_by_codigo(codigo: $pr_tipo_proceso_codigo);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al obtener row', data: $pr_tipo_proceso_id);
+        }
+
+        $pr_proceso['descripcion'] = $codigo;
+        $pr_proceso['codigo'] = $codigo;
+        $pr_proceso['pr_tipo_proceso_id'] = $pr_tipo_proceso_id;
+
+        $pr_procesos[0] = $pr_proceso;
+
+        foreach ($pr_procesos as $pr_proceso) {
+            $inserta = (new pr_proceso(link: $link))->inserta_registro_si_no_existe_code(registro: $pr_proceso);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar row', data: $inserta);
+            }
+        }
+        return $pr_procesos;
+
+    }
+    private function inserta_pr_tipo_proceso(string $codigo, PDO $link): array
+    {
+        $pr_tipo_proceso = $this->pr_tipo_proceso(codigo: $codigo);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener pr_tipo_proceso', data:  $pr_tipo_proceso);
+        }
+        $pr_tipo_procesos[0] = $pr_tipo_proceso;
+
+        $inserta = $this->inserta_pr_tipos_procesos(link: $link,pr_tipo_procesos:  $pr_tipo_procesos);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
+        return $inserta;
+    }
+
+    private function inserta_pr_tipos_procesos(PDO $link, array $pr_tipo_procesos): array
+    {
+        $inserciones = array();
+        foreach ($pr_tipo_procesos as $pr_tipo_proceso) {
+            $inserta = (new pr_tipo_proceso(link: $link))->inserta_registro_si_no_existe_code(registro: $pr_tipo_proceso);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar row', data: $inserta);
+            }
+            $inserciones[] = $inserta;
+        }
+        return $inserciones;
 
     }
     final public function instala(PDO $link): array|stdClass
@@ -3958,6 +4192,27 @@ class instalacion
 
         return $result;
 
+    }
+
+    private function pr_etapa(string $codigo, string $descripcion = ''): array
+    {
+        if($descripcion === ''){
+            $descripcion = $codigo;
+        }
+        $pr_etapa['descripcion'] = $descripcion;
+        $pr_etapa['codigo'] = $codigo;
+
+        return $pr_etapa;
+    }
+
+    private function pr_tipo_proceso(string $codigo, string $descripcion = ''): array
+    {
+        if($descripcion === ''){
+            $descripcion = $codigo;
+        }
+        $pr_tipo_proceso['descripcion'] = $descripcion;
+        $pr_tipo_proceso['codigo'] = $codigo;
+        return $pr_tipo_proceso;
     }
 
 }
