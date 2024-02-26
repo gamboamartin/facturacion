@@ -44,7 +44,7 @@ class _cert
             return $this->error->error(mensaje: "Error la extension: $extension no esta permitida", data: $extension);
         }
 
-        $filtro['doc_documento.descripcion'] = $_FILES[$documento]['name'];
+        $filtro['doc_documento.descripcion'] = mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).$_FILES[$documento]['name'];
         $duplicado = (new doc_documento($link))->filtro_and(filtro: $filtro,limit: 1);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar duplicado del documento', data: $duplicado);

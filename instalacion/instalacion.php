@@ -2445,7 +2445,7 @@ class instalacion
 
 
         $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
-            link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'PAGOS',pr_tipo_proceso_codigo:  'Control');
+            link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'PAGO',pr_tipo_proceso_codigo:  'Control');
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
         }
@@ -2799,7 +2799,7 @@ class instalacion
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al obtener accion',data:  $existe);
         }
-        if($existe){
+        if(!$existe){
             $alta = (new \gamboamartin\administrador\models\adm_accion(link: $link))->alta_registro(registro: $adm_accion_ins);
             if(errores::$error){
                 return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta);
@@ -2914,7 +2914,7 @@ class instalacion
 
 
         $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
-            link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'EGRESOS',pr_tipo_proceso_codigo:  'Control');
+            link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'NOTA CREDITO',pr_tipo_proceso_codigo:  'Control');
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
         }
