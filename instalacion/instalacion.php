@@ -2318,6 +2318,24 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
         }
 
+        $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
+            link:  $link,pr_etapa_codigo: 'CER INTEGRADO',pr_proceso_codigo: 'CSD',pr_tipo_proceso_codigo:  'Control');
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
+
+        $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
+            link:  $link,pr_etapa_codigo: 'KEY INTEGRADO',pr_proceso_codigo: 'CSD',pr_tipo_proceso_codigo:  'Control');
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
+
+        $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
+            link:  $link,pr_etapa_codigo: 'DOCS INTEGRADOS',pr_proceso_codigo: 'CSD',pr_tipo_proceso_codigo:  'Control');
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
+
         return $create;
 
     }
@@ -2755,8 +2773,6 @@ class instalacion
         return $create;
 
     }
-
-
     private function fc_factura_relacionada(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_factura_relacionada(link: $link);
@@ -2767,7 +2783,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_nota_credito_relacionada(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_nota_credito_relacionada(link: $link);
