@@ -3,6 +3,7 @@ namespace gamboamartin\facturacion\instalacion;
 
 use gamboamartin\administrador\instalacion\_adm;
 use gamboamartin\administrador\models\_instalacion;
+use gamboamartin\administrador\models\adm_seccion;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_etapa;
 use gamboamartin\facturacion\models\_transacciones_fc;
@@ -2727,6 +2728,9 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
         }
 
+
+
+
         return $create;
 
     }
@@ -2747,6 +2751,59 @@ class instalacion
         $create = $this->_add_fc_key_csd(link: $link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
+
+
+        $adm_menu_descripcion = 'Certificados';
+        $adm_sistema_descripcion = 'facturacion';
+        $etiqueta_label = 'Certificados';
+        $adm_seccion_pertenece_descripcion = 'certificados';
+        $adm_namespace_name = 'gamboamartin/facturacion';
+        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
+
+        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
+            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
+            adm_seccion_descripcion: __FUNCTION__,
+            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
+            adm_sistema_descripcion: $adm_sistema_descripcion,
+            etiqueta_label: $etiqueta_label, link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
+
+
+        $adm_seccion_id = (new adm_seccion(link: $link))->adm_seccion_id(descripcion: __FUNCTION__);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener adm_seccion_id', data:  $adm_seccion_id);
+        }
+
+        $adm_accion_ins['descripcion'] = 'genera_pem';
+        $adm_accion_ins['adm_seccion_id'] = $adm_seccion_id;
+        $adm_accion_ins['icono'] = 'bi bi-file-lock2';
+        $adm_accion_ins['visible'] = 'inactivo';
+        $adm_accion_ins['inicio'] = 'inactivo';
+        $adm_accion_ins['lista'] = 'activo';
+        $adm_accion_ins['seguridad'] = 'activo';
+        $adm_accion_ins['es_modal'] = 'inactivo';
+        $adm_accion_ins['es_view'] = 'inactivo';
+        $adm_accion_ins['titulo'] = 'Genera PEM';
+        $adm_accion_ins['css'] = 'warning';
+        $adm_accion_ins['es_status'] = 'inactivo';
+        $adm_accion_ins['es_lista'] = 'activo';
+        $adm_accion_ins['muestra_icono_btn'] = 'activo';
+        $adm_accion_ins['muestra_titulo_btn'] = 'inactivo';
+
+        $filtro['adm_accion.descripcion'] = 'genera_pem';
+        $filtro['adm_seccion.descripcion'] = __FUNCTION__;
+        $existe  = (new \gamboamartin\administrador\models\adm_accion(link: $link))->existe(filtro: $filtro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener accion',data:  $existe);
+        }
+        if($existe){
+            $alta = (new \gamboamartin\administrador\models\adm_accion(link: $link))->alta_registro(registro: $adm_accion_ins);
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta);
+            }
         }
 
         return $create;

@@ -131,4 +131,5 @@ class fc_cer_csd extends modelo{
         return $fc_csd_cer['doc_documento_ruta_absoluta'];
     }
 
+
 }
