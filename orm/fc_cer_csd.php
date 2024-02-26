@@ -44,13 +44,7 @@ class fc_cer_csd extends modelo{
         }
 
 
-        $inserta_etapa = (new _cert())->inserta_etapa(fc_csd_id: $this->registro['fc_csd_id'],link:  $this->link,
-            pr_etapa_descripcion:  'CER INTEGRADO', pr_proceso_descripcion: 'CSD');
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al insertar etapa',data: $inserta_etapa);
-        }
-
-        $inserta_etapa = (new _cert())->etapa_docs_completos(fc_csd_id: $this->registro['fc_csd_id'],link:  $this->link);
+        $inserta_etapa = (new _cert())->inserta_etapas($this->registro['fc_csd_id'],link: $this->link,pr_etapa_descripcion:  'CER INTEGRADO');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa',data: $inserta_etapa);
         }

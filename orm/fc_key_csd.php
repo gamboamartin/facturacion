@@ -44,13 +44,7 @@ class fc_key_csd extends modelo{
             return $this->error->error(mensaje: 'Error al dar de alta key csd',data: $r_alta_bd);
         }
 
-        $inserta_etapa = (new _cert())->inserta_etapa(fc_csd_id: $this->registro['fc_csd_id'],link:  $this->link,
-            pr_etapa_descripcion:  'KEY INTEGRADO', pr_proceso_descripcion: 'CSD');
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al insertar etapa',data: $inserta_etapa);
-        }
-
-        $inserta_etapa = (new _cert())->etapa_docs_completos(fc_csd_id: $this->registro['fc_csd_id'],link:  $this->link);
+        $inserta_etapa = (new _cert())->inserta_etapas($this->registro['fc_csd_id'],link: $this->link,pr_etapa_descripcion:  'KEY INTEGRADO');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa',data: $inserta_etapa);
         }
