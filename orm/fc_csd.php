@@ -183,6 +183,26 @@ class fc_csd extends _modelo_parent {
         return $r_modifica_bd;
     }
 
+
+    final public function tiene_documentos_completos(int $fc_csd_id)
+    {
+        $existe_key = $this->tiene_file_key(fc_csd_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $existe_key);
+        }
+        $existe_cer = $this->tiene_file_cer(fc_csd_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $existe_cer);
+        }
+
+        $tiene_ambos = false;
+        if($existe_cer && $existe_key){
+            $tiene_ambos = true;
+        }
+        return $tiene_ambos;
+
+
+    }
     final public function tiene_file_cer(int $fc_csd_id)
     {
         $filtro['fc_csd.id'] = $fc_csd_id;
