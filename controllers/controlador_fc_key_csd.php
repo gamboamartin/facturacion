@@ -39,24 +39,12 @@ class controlador_fc_key_csd extends _base_system_csd {
 
     public function genera_pem(bool $header, bool $ws = false): array|string{
 
-        $fc_key_csd = (new fc_key_csd(link: $this->link))->registro(registro_id: $this->registro_id);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener datos', data: $fc_key_csd,header:  $header,ws:  $ws);
-        }
-        $ruta_in = $fc_key_csd['doc_documento_ruta_absoluta'];
-        $pass = $fc_key_csd['fc_csd_password'];
-        $ruta_out_base = mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
-        $ruta_out = (new generales())->path_base.'archivos/temporales/'.$ruta_out_base.'.pem';
 
-        $pem = (new ssl())->genera_key_pem(pass: $pass,ruta_in:  $ruta_in,ruta_out:  $ruta_out);
+        $data = (new fc_key_csd(link: $this->link))->genera_pem(fc_key_csd_id: $this->registro_id);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al generar pem', data: $pem,header:  $header,ws:  $ws);
+            return $this->retorno_error(mensaje: 'Error al generar pem', data: $data,header:  $header,ws:  $ws);
         }
-        $data_pem = file_get_contents($ruta_out);
-        if($data_pem === ''){
-            return $this->retorno_error(mensaje: 'Error al generar pem', data: $data_pem,header:  $header,ws:  $ws);
-        }
-
+        return $data;
 
     }
     private function init_configuraciones(): controler
