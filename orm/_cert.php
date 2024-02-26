@@ -28,6 +28,9 @@ class _cert
         if (!array_key_exists($documento,$_FILES)){
             return $this->error->error(mensaje: "Error no existe: $documento", data: $documento);
         }
+        if(!isset($_FILES[$documento]['name'])){
+            return $this->error->error(mensaje: 'Error no existe: $_FILES[$documento][name]', data: $documento);
+        }
 
         $extension = (new files())->extension(archivo: $_FILES[$documento]['name']);
         if(errores::$error){

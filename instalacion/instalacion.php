@@ -317,7 +317,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_csd_etapa(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -600,7 +599,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_cuenta_predial_nc(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -622,7 +620,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_cuenta_predial_cp(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -644,7 +641,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_email(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -668,7 +664,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_email_cp(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -692,7 +687,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_email_nc(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -739,7 +733,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_complemento_pago_documento(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -763,7 +756,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_nota_credito_documento(PDO $link): array|stdClass
     {
         $out = new stdClass();

@@ -38,13 +38,19 @@ class controlador_fc_key_csd extends _base_system_csd {
         }
     }
 
-    public function genera_pem(bool $header, bool $ws = false): array|string{
+    public function genera_pem(bool $header, bool $ws = false): array|string|stdClass{
 
 
         $data = (new fc_key_csd(link: $this->link))->genera_pem(fc_key_csd_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pem', data: $data,header:  $header,ws:  $ws);
         }
+
+        $_FILES['documento'] = array();
+        $_FILES['documento']['name'] = mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
+        $_FILES['documento']['name'] .= mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
+        $_FILES['documento']['name'] .= '.key.pem';
+        $_FILES['documento']['tmp_name'] = $data->file;
 
         $fc_key_pem_ins['fc_key_csd_id'] = $this->registro_id;
         $inserta_pem = (new fc_key_pem(link: $this->link))->alta_registro(registro: $fc_key_pem_ins);

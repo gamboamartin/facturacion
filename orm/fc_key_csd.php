@@ -91,7 +91,7 @@ class fc_key_csd extends modelo{
             return $this->error->error(mensaje: 'Error al generar pem', data: $data_pem);
         }
         $data = new stdClass();
-        $data->file= $ruta_out_base;
+        $data->file= $ruta_out;
         $data->contenido= $data_pem;
         return $data;
 
