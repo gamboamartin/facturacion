@@ -43,7 +43,7 @@ class fc_key_pem extends modelo{
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
         }
 
-        $this->registro = $this->asigna_documento(data: $this->registro);
+        $this->registro = (new _cert())->asigna_documento(data: $this->registro,link: $this->link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al asignar documento',data: $this->registro);
         }
@@ -61,17 +61,6 @@ class fc_key_pem extends modelo{
         return $r_alta_bd;
     }
 
-    private function asigna_documento(array $data): array|stdClass
-    {
-        $alta_documento = (new fc_key_csd($this->link))->alta_documento(documento: "documento");
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al dar de alta documento',data: $alta_documento);
-        }
-
-        $data['doc_documento_id'] = $alta_documento->registro_id;
-
-        return $data;
-    }
 
     public function get_key_csd(int $fc_key_csd_id): array|stdClass|int
     {

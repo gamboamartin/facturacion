@@ -66,7 +66,7 @@ class _cert
         return $doc_documento;
     }
 
-    private function asigna_documento(array $data, PDO $link): array|stdClass
+    final public function asigna_documento(array $data, PDO $link): array|stdClass
     {
         $alta_documento = $this->alta_documento(documento: "documento",link: $link);
         if(errores::$error){

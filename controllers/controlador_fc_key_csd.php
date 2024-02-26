@@ -13,6 +13,7 @@ use config\generales;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_key_csd_html;
 use gamboamartin\facturacion\models\fc_key_csd;
+use gamboamartin\facturacion\models\fc_key_pem;
 use gamboamartin\plugins\ssl;
 use gamboamartin\template\html;
 
@@ -44,6 +45,13 @@ class controlador_fc_key_csd extends _base_system_csd {
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pem', data: $data,header:  $header,ws:  $ws);
         }
+
+        $fc_key_pem_ins['fc_key_csd_id'] = $this->registro_id;
+        $inserta_pem = (new fc_key_pem(link: $this->link))->alta_registro(registro: $fc_key_pem_ins);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al insertar pem', data: $inserta_pem,header:  $header,ws:  $ws);
+        }
+
         return $data;
 
     }
