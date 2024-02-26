@@ -50,6 +50,19 @@ class fc_key_csd extends modelo{
             return $this->error->error(mensaje: 'Error al insertar etapa',data: $inserta_etapa);
         }
 
+        $tiene_documentos_completos = (new fc_csd(link: $this->link))->tiene_documentos_completos(fc_csd_id: $this->registro['fc_csd_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar docs',data: $tiene_documentos_completos);
+        }
+
+        if($tiene_documentos_completos){
+            $inserta_etapa = (new _cert())->inserta_etapa(fc_csd_id: $this->registro['fc_csd_id'],link:  $this->link,
+                pr_etapa_descripcion:  'DOCS INTEGRADOS', pr_proceso_descripcion: 'CSD');
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al insertar etapa',data: $inserta_etapa);
+            }
+        }
+
         return $r_alta_bd;
     }
 
