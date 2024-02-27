@@ -127,7 +127,7 @@ class fc_csd extends _modelo_parent {
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_cer_csd', data: $fc_cer_csd);
         }
-        $fc_key_csd = (new fc_cer_csd(link: $this->link))->row_by_csd(fc_csd_id: $fc_csd_id);
+        $fc_key_csd = (new fc_key_csd(link: $this->link))->row_by_csd(fc_csd_id: $fc_csd_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener fc_key_csd', data: $fc_key_csd);
         }
@@ -144,18 +144,18 @@ class fc_csd extends _modelo_parent {
     final public function genera_pems(int $fc_csd_id)
     {
         $out = new stdClass();
-        $data = $this->data(fc_csd_id: $fc_csd_id);
+        $data_csd = $this->data(fc_csd_id: $fc_csd_id);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener datos', data: $data);
+            return $this->error->error(mensaje: 'Error al obtener datos', data: $data_csd);
         }
-        $out->fc_csd = $data;
+        $out->fc_csd = $data_csd;
 
-        $data = (new fc_key_csd(link: $this->link))->genera_pem_full(fc_key_csd_id: $data->fc_key_csd['fc_key_csd_id']);
+        $data = (new fc_key_csd(link: $this->link))->genera_pem_full(fc_key_csd_id: $data_csd->fc_key_csd['fc_key_csd_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar pem', data: $data);
         }
         $out->fc_key_csd = $data;
-        $data = (new fc_cer_csd(link: $this->link))->genera_pem_full(fc_cer_csd_id: $data->fc_key_csd['fc_cer_csd_id']);
+        $data = (new fc_cer_csd(link: $this->link))->genera_pem_full(fc_cer_csd_id: $data_csd->fc_cer_csd['fc_cer_csd_id']);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar pem', data: $data);
         }

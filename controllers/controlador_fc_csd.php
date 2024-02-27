@@ -154,6 +154,14 @@ class controlador_fc_csd extends system{
             die('Error');
         }
 
+        $pems = (new fc_csd(link: $this->link))->genera_pems(fc_csd_id: $r_alta_bd->registro_id);
+        if(errores::$error){
+            $this->link->rollBack();
+            $error = $this->errores->error(mensaje: 'Error al generar pems',data:  $pems);
+            print_r($error);
+            die('Error');
+        }
+
         $this->link->commit();
 
 
@@ -200,6 +208,7 @@ class controlador_fc_csd extends system{
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener datos', data: $data,header:  $header,ws:  $ws);
         }
+        $data->registro_id = $this->registro_id;
 
         $out = $this->out_alta(header: $header,id_retorno:  -1,r_alta_bd:  $data,
             seccion_retorno:  $seccion_retorno,siguiente_view:  'lista',ws:  $ws);
