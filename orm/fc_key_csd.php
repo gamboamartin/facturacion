@@ -73,25 +73,18 @@ class fc_key_csd extends modelo{
 
     private function genera_pem(int $fc_key_csd_id)
     {
-        $fc_key_csd = $this->registro(registro_id: $fc_key_csd_id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener datos', data: $fc_key_csd);
-        }
-        $ruta_in = $fc_key_csd['doc_documento_ruta_absoluta'];
-        $pass = $fc_key_csd['fc_csd_password'];
-        $ruta_out_base = mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
-        $ruta_out = (new generales())->path_base.'archivos/temporales/'.$ruta_out_base.'.pem';
 
-        $pem = (new ssl())->genera_key_pem(pass: $pass,ruta_in:  $ruta_in,ruta_out:  $ruta_out);
+        $pem = (new _cert())->pem(modelo: $this,registro_id:  $fc_key_csd_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar pem', data: $pem);
         }
-        $data_pem = file_get_contents($ruta_out);
+
+        $data_pem = file_get_contents($pem->ruta_out);
         if($data_pem === ''){
             return $this->error->error(mensaje: 'Error al generar pem', data: $data_pem);
         }
         $data = new stdClass();
-        $data->file= $ruta_out;
+        $data->file= $pem->ruta_out;
         $data->contenido= $data_pem;
         return $data;
 

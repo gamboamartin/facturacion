@@ -1,10 +1,12 @@
 <?php
 namespace gamboamartin\facturacion\models;
 
+use config\generales;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
 use gamboamartin\plugins\files;
+use gamboamartin\plugins\ssl;
 use gamboamartin\proceso\models\pr_etapa_proceso;
 use gamboamartin\validacion\validacion;
 use PDO;
@@ -263,6 +265,46 @@ class _cert
 
     }
 
+    private function params_pem(fc_key_csd|fc_cer_csd $modelo, int $registro_id)
+    {
+        $row = $modelo->registro(registro_id: $registro_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener datos', data: $row);
+        }
+        $ruta_in = $row['doc_documento_ruta_absoluta'];
+        $pass = $row['fc_csd_password'];
+
+        $ruta_out = $this->ruta_out();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar ruta_out', data: $ruta_out);
+        }
+
+        $data = new stdClass();
+        $data->ruta_in = $ruta_in;
+        $data->pass = $pass;
+        $data->ruta_out = $ruta_out;
+
+        return $data;
+
+    }
+
+    final public function pem(fc_key_csd|fc_cer_csd $modelo, int $registro_id)
+    {
+        $params = $this->params_pem(modelo: $modelo,registro_id: $registro_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar params', data: $params);
+        }
+
+        $pem = (new ssl())->genera_key_pem(pass: $params->pass,ruta_in:  $params->ruta_in,ruta_out:  $params->ruta_out);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar pem', data: $pem);
+        }
+        $params->pem = $pem;
+
+        return $params;
+
+    }
+
     private function pr_etapa_proceso_id(PDO $link, string $pr_etapa_descripcion, string $pr_proceso_descripcion)
     {
         $filtro = array();
@@ -294,6 +336,23 @@ class _cert
         $fc_csd_etapa['fecha'] = date('Y-m-d');
 
         return $fc_csd_etapa;
+
+    }
+
+    private function ruta_out()
+    {
+        $ruta_out_base = $this->ruta_out_base();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar ruta_out_base', data: $ruta_out_base);
+        }
+        return (new generales())->path_base.'archivos/temporales/'.$ruta_out_base.'.pem';
+
+    }
+    private function ruta_out_base(): string
+    {
+        $ruta_out_base = mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
+        $ruta_out_base .= mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
+        return $ruta_out_base;
 
     }
     private function valida_existe_file(int $fc_csd_id, PDO $link, string $name_modelo)
