@@ -72,28 +72,11 @@ class fc_key_csd extends modelo{
 
     }
 
-    private function genera_pem(int $fc_key_csd_id)
-    {
 
-        $pem = (new _cert())->pem(modelo: $this,registro_id:  $fc_key_csd_id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar pem', data: $pem);
-        }
-
-        $data_pem = file_get_contents($pem->ruta_out);
-        if($data_pem === ''){
-            return $this->error->error(mensaje: 'Error al generar pem', data: $data_pem);
-        }
-        $data = new stdClass();
-        $data->file= $pem->ruta_out;
-        $data->contenido= $data_pem;
-        return $data;
-
-    }
 
     final public function genera_pem_full(int $fc_key_csd_id)
     {
-        $data = $this->integra_pem(fc_key_csd_id: $fc_key_csd_id);
+        $data = (new _cert())->integra_pem(registro_id: $fc_key_csd_id,modelo: $this);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar pem', data: $data);
         }
@@ -122,20 +105,7 @@ class fc_key_csd extends modelo{
         return $registro;
     }
 
-    private function integra_pem(int $fc_key_csd_id)
-    {
-        $data = $this->genera_pem(fc_key_csd_id: $fc_key_csd_id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar pem', data: $data);
-        }
 
-        $file = (new _cert())->integra_files(file_origen: $data->file);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al integrar FILE', data: $file);
-        }
-        return $file;
-
-    }
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {

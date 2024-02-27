@@ -39,6 +39,17 @@ class controlador_fc_cer_csd extends _base_system_csd {
 
 
 
+    public function genera_pem(bool $header, bool $ws = false): array|string|stdClass{
+
+
+        $data = (new fc_cer_csd(link: $this->link))->genera_pem_full(fc_key_csd_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar pem', data: $data,header:  $header,ws:  $ws);
+        }
+
+        return $data;
+
+    }
 
     private function init_configuraciones(): controler
     {

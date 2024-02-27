@@ -70,6 +70,29 @@ class fc_cer_csd extends modelo{
 
     }
 
+
+
+    final public function genera_pem_full(int $fc_cer_csd_id)
+    {
+        $data = (new _cert())->integra_pem(registro_id: $fc_cer_csd_id,modelo: $this);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar pem', data: $data);
+        }
+
+        $fc_key_csd = $this->registro(registro_id: $fc_cer_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener row', data: $fc_key_csd);
+        }
+
+        $fc_cer_pem_ins['fc_cer_csd_id'] = $fc_key_csd['fc_cer_csd_id'];
+        $inserta_pem = (new fc_cer_pem(link: $this->link))->alta_registro(registro: $fc_cer_pem_ins);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar pem', data: $inserta_pem);
+        }
+        return $inserta_pem;
+
+    }
+
     public function get_cer_csd(int $fc_cer_csd_id): array|stdClass|int
     {
         $registro = $this->registro(registro_id: $fc_cer_csd_id);
@@ -79,8 +102,6 @@ class fc_cer_csd extends modelo{
 
         return $registro;
     }
-
-
 
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass

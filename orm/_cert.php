@@ -138,6 +138,25 @@ class _cert
 
     }
 
+    private function genera_pem(int $registro_id, fc_key_csd|fc_cer_csd $modelo)
+    {
+
+        $pem = $this->pem(modelo: $modelo,registro_id:  $registro_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar pem', data: $pem);
+        }
+
+        $data_pem = file_get_contents($pem->ruta_out);
+        if($data_pem === ''){
+            return $this->error->error(mensaje: 'Error al generar pem', data: $data_pem);
+        }
+        $data = new stdClass();
+        $data->file= $pem->ruta_out;
+        $data->contenido= $data_pem;
+        return $data;
+
+    }
+
     final public function init_alta_bd(fc_key_csd|fc_cer_csd $modelo, string $key_val_id, array $registro)
     {
         $keys = array('fc_csd_id');
@@ -273,7 +292,7 @@ class _cert
 
     }
 
-    final public function integra_files(string $file_origen)
+    private function integra_files(string $file_origen)
     {
         $name = $this->name_pem();
         if(errores::$error){
@@ -281,6 +300,21 @@ class _cert
         }
 
         $file = $this->file_pem(file_origen: $file_origen,name:  $name);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integrar FILE', data: $file);
+        }
+        return $file;
+
+    }
+
+    final public function integra_pem(int $registro_id, fc_key_csd|fc_cer_csd $modelo)
+    {
+        $data = $this->genera_pem(registro_id: $registro_id,modelo: $modelo);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar pem', data: $data);
+        }
+
+        $file = $this->integra_files(file_origen: $data->file);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al integrar FILE', data: $file);
         }
@@ -311,17 +345,26 @@ class _cert
 
     }
 
-    final public function pem(fc_key_csd|fc_cer_csd $modelo, int $registro_id)
+    private function pem(fc_key_csd|fc_cer_csd $modelo, int $registro_id)
     {
         $params = $this->params_pem(modelo: $modelo,registro_id: $registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar params', data: $params);
         }
 
-        $pem = (new ssl())->genera_key_pem(pass: $params->pass,ruta_in:  $params->ruta_in,ruta_out:  $params->ruta_out);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar pem', data: $pem);
+        if($modelo->tabla === 'fc_key_csd') {
+            $pem = (new ssl())->genera_key_pem(pass: $params->pass, ruta_in: $params->ruta_in, ruta_out: $params->ruta_out);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al generar pem key', data: $pem);
+            }
         }
+        else{
+            $pem = (new ssl())->genera_cer_pem(ruta_in: $params->ruta_in, ruta_out: $params->ruta_out);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al generar pem cer', data: $pem);
+            }
+        }
+
         $params->pem = $pem;
 
         return $params;
