@@ -31,7 +31,7 @@ class fc_cer_pem extends modelo{
     public function alta_bd(): array|stdClass
     {
 
-        $registro = (new _cert())->init_alta_pem(modelo: $this);
+        $registro = (new _cert())->init_alta_pem(key_val_id: 'fc_cer_csd_id', modelo: $this);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar campos ',data: $registro);
         }
@@ -64,7 +64,7 @@ class fc_cer_pem extends modelo{
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
-        $validacion = (new _cert())->validaciones(data: $registro,modelo: $this);
+        $validacion = (new _cert())->validaciones(data: $registro,key_id: 'fc_cer_csd_id');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
         }

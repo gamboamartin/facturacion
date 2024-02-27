@@ -34,7 +34,7 @@ class fc_key_csd extends modelo{
     public function alta_bd(): array|stdClass
     {
 
-        $registro = (new _cert())->init_alta_bd(modelo: $this,registro:  $this->registro);
+        $registro = (new _cert())->init_alta_bd(modelo: $this, key_val_id: 'fc_csd_id', registro: $this->registro);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar',data: $registro);
         }
@@ -46,7 +46,8 @@ class fc_key_csd extends modelo{
             return $this->error->error(mensaje: 'Error al dar de alta key csd',data: $r_alta_bd);
         }
 
-        $inserta_etapa = (new _cert())->inserta_etapas($this->registro['fc_csd_id'],link: $this->link,pr_etapa_descripcion:  'KEY INTEGRADO');
+        $inserta_etapa = (new _cert())->inserta_etapas($r_alta_bd->registro['fc_csd_id'],link: $this->link,
+            pr_etapa_descripcion:  'KEY INTEGRADO');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa',data: $inserta_etapa);
         }
@@ -138,7 +139,7 @@ class fc_key_csd extends modelo{
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
-        $validacion = (new _cert())->validaciones(data: $registro, modelo: $this);
+        $validacion = (new _cert())->validaciones(data: $registro,key_id: 'fc_csd_id');
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
         }

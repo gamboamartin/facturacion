@@ -138,7 +138,7 @@ class _cert
 
     }
 
-    final public function init_alta_bd(fc_key_csd|fc_cer_csd $modelo, array $registro)
+    final public function init_alta_bd(fc_key_csd|fc_cer_csd $modelo, string $key_val_id, array $registro)
     {
         $keys = array('fc_csd_id');
         $valida = $this->validacion->valida_ids(keys: $keys,registro:  $registro);
@@ -158,7 +158,7 @@ class _cert
         }
 
 
-        $validacion = $this->validaciones(data: $registro, modelo: $modelo);
+        $validacion = $this->validaciones(data: $registro, key_id: $key_val_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
         }
@@ -178,7 +178,7 @@ class _cert
 
     }
 
-    final public function init_alta_pem(fc_cer_pem|fc_key_pem $modelo)
+    final public function init_alta_pem(string $key_val_id, fc_cer_pem|fc_key_pem $modelo)
     {
         $registro = $this->code_row_ins(modelo: $modelo,registro:  $modelo->registro);
         if(errores::$error){
@@ -186,7 +186,7 @@ class _cert
         }
         $modelo->registro = $registro;
 
-        $validacion = $this->validaciones(data: $modelo->registro, modelo: $modelo);
+        $validacion = $this->validaciones(data: $modelo->registro, key_id: $key_val_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
         }
@@ -206,10 +206,7 @@ class _cert
 
     final public function init_campos_base(array $data, PDO $link): array
     {
-        $csd = (new fc_csd($link))->get_csd(fc_csd_id: $data["fc_csd_id"]);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener CSD',data:  $csd);
-        }
+
 
         $documento = (new doc_documento($link))->registro(registro_id: $data["doc_documento_id"]);
         if(errores::$error){
@@ -357,6 +354,7 @@ class _cert
 
     private function row_fc_csd_etapa(int $fc_csd_id, int $pr_etapa_proceso_id): array
     {
+        $fc_csd_etapa['codigo'] = $fc_csd_id.$pr_etapa_proceso_id.mt_rand(1000000,9999999);
         $fc_csd_etapa['fc_csd_id'] = $fc_csd_id;
         $fc_csd_etapa['pr_etapa_proceso_id'] = $pr_etapa_proceso_id;
         $fc_csd_etapa['fecha'] = date('Y-m-d');
@@ -403,7 +401,7 @@ class _cert
 
     }
 
-    final public function validaciones(array $data, fc_key_pem|fc_cer_csd|fc_key_csd|fc_cer_pem $modelo): bool|array
+    final public function validaciones(array $data, string $key_id): bool|array
     {
         $keys = array('codigo');
         $valida = (new validacion())->valida_existencia_keys(keys:$keys,registro:  $data);
@@ -411,7 +409,7 @@ class _cert
             return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
         }
 
-        $keys = array($modelo->key_id);
+        $keys = array($key_id);
         $valida = (new validacion())->valida_ids(keys: $keys, registro: $data);
         if(errores::$error){
             return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
