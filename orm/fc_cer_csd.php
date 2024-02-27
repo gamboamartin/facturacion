@@ -87,7 +87,7 @@ class fc_cer_csd extends modelo{
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
-        $validacion = (new _cert())->validaciones(data: $registro);
+        $validacion = (new _cert())->validaciones(data: $registro, modelo: $this);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
         }

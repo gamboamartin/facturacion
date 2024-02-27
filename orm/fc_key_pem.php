@@ -31,26 +31,9 @@ class fc_key_pem extends modelo{
     public function alta_bd(): array|stdClass
     {
 
-        if(!isset($this->registro['codigo'])){
-            $this->registro['codigo'] =  $this->get_codigo_aleatorio();
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al generar codigo aleatorio',data:  $this->registro);
-            }
-        }
-
-        $validacion = $this->validaciones(data: $this->registro);
+        $registro = (new _cert())->init_alta_pem(modelo: $this);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
-        }
-
-        $this->registro = (new _cert())->asigna_documento(data: $this->registro,link: $this->link);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al asignar documento',data: $this->registro);
-        }
-
-        $this->registro = $this->init_campos_base(data: $this->registro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
+            return $this->error->error(mensaje: 'Error al inicializar campos ',data: $registro);
         }
 
         $r_alta_bd = parent::alta_bd();
@@ -72,67 +55,18 @@ class fc_key_pem extends modelo{
         return $registro;
     }
 
-    private function init_campos_base(array $data): array
-    {
-        $key_csd = (new fc_key_csd($this->link))->get_key_csd(fc_key_csd_id: $data["fc_key_csd_id"]);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener cer_csd',data:  $key_csd);
-        }
 
-        $documento = (new doc_documento($this->link))->registro(registro_id: $data["doc_documento_id"]);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener documento',data:  $documento);
-        }
 
-        if(!isset($data['codigo'])){
-            $data['codigo'] =  $data['fc_key_codigo'];
-            $data['codigo'] .=  $documento['doc_documento_codigo'];
-        }
 
-        if(!isset($data['descripcion'])){
-            $data['descripcion'] =  $documento['doc_documento_descripcion'];
-        }
-
-        if(!isset($data['codigo_bis'])){
-            $data['codigo_bis'] =  $data['codigo'];
-        }
-
-        if(!isset($data['descripcion_select'])){
-            $ds = ucwords($data['descripcion']);
-            $data['descripcion_select'] =  "{$data['codigo']} - {$ds}";
-        }
-
-        if(!isset($data['alias'])){
-            $data['alias'] = $data['codigo'];
-        }
-        return $data;
-    }
-
-    private function validaciones(array $data): bool|array
-    {
-        $keys = array('codigo');
-        $valida = $this->validacion->valida_existencia_keys(keys:$keys,registro:  $data);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
-        }
-
-        $keys = array('fc_key_csd_id');
-        $valida = $this->validacion->valida_ids(keys: $keys, registro: $data);
-        if(errores::$error){
-            return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
-        }
-
-        return true;
-    }
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
-        $validacion = $this->validaciones(data: $registro);
+        $validacion = (new _cert())->validaciones(data: $registro,modelo: $this);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
         }
 
-        $registro = $this->init_campos_base(data: $registro);
+        $registro = (new _cert())->init_campos_base(data: $registro,link: $this->link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar campos base',data: $registro);
         }

@@ -71,7 +71,7 @@ class _cert
         return $doc_documento;
     }
 
-    final public function asigna_documento(array $data, PDO $link): array|stdClass
+    private function asigna_documento(array $data, PDO $link): array|stdClass
     {
         $alta_documento = $this->alta_documento(documento: "documento",link: $link);
         if(errores::$error){
@@ -83,7 +83,7 @@ class _cert
         return $data;
     }
 
-    private function code_row_ins(fc_key_csd|fc_cer_csd $modelo, array $registro)
+    private function code_row_ins(fc_key_csd|fc_cer_csd|fc_key_pem|fc_cer_pem $modelo, array $registro)
     {
         if(!isset($registro['codigo'])){
             $registro['codigo'] =  $modelo->get_codigo_aleatorio();
@@ -158,7 +158,7 @@ class _cert
         }
 
 
-        $validacion = $this->validaciones(data: $registro);
+        $validacion = $this->validaciones(data: $registro, modelo: $modelo);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
         }
@@ -175,6 +175,32 @@ class _cert
         }
 
         return $registro;
+
+    }
+
+    final public function init_alta_pem(fc_cer_pem|fc_key_pem $modelo)
+    {
+        $registro = $this->code_row_ins(modelo: $modelo,registro:  $modelo->registro);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al integra code',data: $registro);
+        }
+        $modelo->registro = $registro;
+
+        $validacion = $this->validaciones(data: $modelo->registro, modelo: $modelo);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar datos',data: $validacion);
+        }
+
+        $modelo->registro = $this->asigna_documento(data: $modelo->registro,link: $modelo->link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al asignar documento',data: $modelo->registro);
+        }
+
+        $modelo->registro = $this->init_campos_base(data: $modelo->registro,link: $modelo->link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al inicializar campos base',data: $modelo->registro);
+        }
+        return $modelo->registro;
 
     }
 
@@ -377,7 +403,7 @@ class _cert
 
     }
 
-    final public function validaciones(array $data): bool|array
+    final public function validaciones(array $data, fc_key_pem|fc_cer_csd|fc_key_csd|fc_cer_pem $modelo): bool|array
     {
         $keys = array('codigo');
         $valida = (new validacion())->valida_existencia_keys(keys:$keys,registro:  $data);
@@ -385,7 +411,7 @@ class _cert
             return $this->error->error(mensaje: 'Error al validar campos', data: $valida);
         }
 
-        $keys = array('fc_csd_id');
+        $keys = array($modelo->key_id);
         $valida = (new validacion())->valida_ids(keys: $keys, registro: $data);
         if(errores::$error){
             return $this->error->error(mensaje: "Error al validar foraneas",data:  $valida);
