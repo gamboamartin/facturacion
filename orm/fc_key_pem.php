@@ -41,6 +41,12 @@ class fc_key_pem extends modelo{
             return $this->error->error(mensaje: 'Error al dar de alta key csd',data: $r_alta_bd);
         }
 
+        $inserta_etapa = (new _cert())->inserta_etapas($r_alta_bd->registro['fc_csd_id'],link: $this->link,
+            pr_etapa_descripcion:  'KEY PEM INTEGRADO');
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar etapa',data: $inserta_etapa);
+        }
+
         return $r_alta_bd;
     }
 
