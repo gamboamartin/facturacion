@@ -188,6 +188,39 @@ class controlador_fc_csd extends system{
 
     }
 
+    public function genera_pems(bool $header, bool $ws = false): array|string|stdClass{
+
+        $seccion_retorno = $this->tabla;
+        if(isset($_POST['seccion_retorno'])){
+            $seccion_retorno = $_POST['seccion_retorno'];
+            unset($_POST['seccion_retorno']);
+        }
+
+        $data = (new fc_csd(link: $this->link))->data(fc_csd_id: $this->registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener datos', data: $data,header:  $header,ws:  $ws);
+        }
+
+        $data = (new fc_key_csd(link: $this->link))->genera_pem_full(fc_key_csd_id: $data->fc_key_csd['fc_key_csd_id']);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar pem', data: $data,header:  $header,ws:  $ws);
+        }
+        $data = (new fc_cer_csd(link: $this->link))->genera_pem_full(fc_cer_csd_id: $data->fc_key_csd['fc_cer_csd_id']);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar pem', data: $data,header:  $header,ws:  $ws);
+        }
+
+        $out = $this->out_alta(header: $header,id_retorno:  -1,r_alta_bd:  $data,
+            seccion_retorno:  $seccion_retorno,siguiente_view:  'lista',ws:  $ws);
+        if(errores::$error){
+            print_r($out);
+            die('Error');
+        }
+
+        return $data;
+
+    }
+
     public function get_csd(bool $header, bool $ws = true): array|stdClass
     {
         $keys['org_sucursal'] = array('id','descripcion','codigo','codigo_bis');;

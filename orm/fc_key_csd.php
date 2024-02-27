@@ -54,8 +54,6 @@ class fc_key_csd extends modelo{
 
         return $r_alta_bd;
     }
-
-
     final public function elimina_bd(int $id): array|stdClass
     {
         $filtro['fc_key_csd.id'] = $id;
@@ -71,9 +69,6 @@ class fc_key_csd extends modelo{
         return $r_elimina_bd;
 
     }
-
-
-
     final public function genera_pem_full(int $fc_key_csd_id)
     {
         $data = (new _cert())->integra_pem(registro_id: $fc_key_csd_id,modelo: $this);
@@ -94,7 +89,6 @@ class fc_key_csd extends modelo{
         return $inserta_pem;
 
     }
-
     public function get_key_csd(int $fc_key_csd_id): array|stdClass|int
     {
         $registro = $this->registro(registro_id: $fc_key_csd_id);
@@ -104,9 +98,6 @@ class fc_key_csd extends modelo{
 
         return $registro;
     }
-
-
-
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
         $validacion = (new _cert())->validaciones(data: $registro,key_id: 'fc_csd_id');
@@ -127,7 +118,8 @@ class fc_key_csd extends modelo{
         return $r_modifica_bd;
     }
 
-    final public function ruta_key(int $fc_csd_id){
+    final public function row_by_csd(int $fc_csd_id)
+    {
         $filtro = array();
         $filtro['fc_csd.id'] = $fc_csd_id;
         $r_fc_csd_key = $this->filtro_and(filtro: $filtro);
@@ -141,10 +133,17 @@ class fc_key_csd extends modelo{
         if($r_fc_csd_key->n_registros > 1){
             return $this->error->error(mensaje: 'Error  existe mas de un registro', data: $r_fc_csd_key);
         }
+        return $r_fc_csd_key->registros[0];
 
-        $fc_csd_key = $r_fc_csd_key->registros[0];
+    }
 
-        return $fc_csd_key['doc_documento_ruta_absoluta'];
+    final public function ruta_key(int $fc_csd_id){
+        $row = $this->row_by_csd(fc_csd_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener registro', data: $row);
+        }
+
+        return $row['doc_documento_ruta_absoluta'];
     }
 
 }

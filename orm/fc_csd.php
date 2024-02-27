@@ -123,11 +123,21 @@ class fc_csd extends _modelo_parent {
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener ruta cer', data: $ruta_cer);
         }
+        $fc_cer_csd = (new fc_cer_csd(link: $this->link))->row_by_csd(fc_csd_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_cer_csd', data: $fc_cer_csd);
+        }
+        $fc_key_csd = (new fc_cer_csd(link: $this->link))->row_by_csd(fc_csd_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener fc_key_csd', data: $fc_key_csd);
+        }
 
         $data = new stdClass();
         $data->ruta_cer = $ruta_cer;
         $data->ruta_key = $ruta_key;
         $data->fc_csd_password = $fc_csd->fc_csd_password;
+        $data->fc_cer_csd = $fc_cer_csd;
+        $data->fc_key_csd = $fc_key_csd;
         return $data;
     }
 

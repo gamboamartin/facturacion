@@ -52,8 +52,6 @@ class fc_cer_csd extends modelo{
         return $r_alta_bd;
     }
 
-
-
     final public function elimina_bd(int $id): array|stdClass
     {
         $filtro['fc_cer_csd.id'] = $id;
@@ -69,9 +67,6 @@ class fc_cer_csd extends modelo{
         return $r_elimina_bd;
 
     }
-
-
-
     final public function genera_pem_full(int $fc_cer_csd_id)
     {
         $data = (new _cert())->integra_pem(registro_id: $fc_cer_csd_id,modelo: $this);
@@ -92,7 +87,6 @@ class fc_cer_csd extends modelo{
         return $inserta_pem;
 
     }
-
     public function get_cer_csd(int $fc_cer_csd_id): array|stdClass|int
     {
         $registro = $this->registro(registro_id: $fc_cer_csd_id);
@@ -102,8 +96,6 @@ class fc_cer_csd extends modelo{
 
         return $registro;
     }
-
-
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
         $validacion = (new _cert())->validaciones(data: $registro,key_id: 'fc_csd_id');
@@ -124,12 +116,7 @@ class fc_cer_csd extends modelo{
         return $r_modifica_bd;
     }
 
-    /**
-     * Obtiene la ruta absoluta del cer de un csd
-     * @param int $fc_csd_id identificador de csd
-     * @return array|string
-     */
-    final public function ruta_cer(int $fc_csd_id): array|string
+    final public function row_by_csd(int $fc_csd_id)
     {
         $filtro = array();
         $filtro['fc_csd.id'] = $fc_csd_id;
@@ -144,10 +131,24 @@ class fc_cer_csd extends modelo{
         if($r_fc_csd_cer->n_registros > 1){
             return $this->error->error(mensaje: 'Error  existe mas de un registro', data: $r_fc_csd_cer);
         }
+        return $r_fc_csd_cer->registros[0];
 
-        $fc_csd_cer = $r_fc_csd_cer->registros[0];
+    }
 
-        return $fc_csd_cer['doc_documento_ruta_absoluta'];
+    /**
+     * Obtiene la ruta absoluta del cer de un csd
+     * @param int $fc_csd_id identificador de csd
+     * @return array|string
+     */
+    final public function ruta_cer(int $fc_csd_id): array|string
+    {
+
+        $row = $this->row_by_csd(fc_csd_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener registro', data: $row);
+        }
+
+        return $row['doc_documento_ruta_absoluta'];
     }
 
 
