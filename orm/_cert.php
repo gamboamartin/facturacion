@@ -441,8 +441,13 @@ class _cert
     }
     private function ruta_out_base(): string
     {
-        $ruta_out_base = mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
-        $ruta_out_base .= mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
+        $ruta_out_base = '';
+        $n_iteraciones = 20;
+        $i=0;
+        while ($i<=$n_iteraciones){
+            $ruta_out_base.=mt_rand(10,99);
+            $i++;
+        }
         return $ruta_out_base;
 
     }
