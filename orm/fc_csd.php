@@ -141,6 +141,30 @@ class fc_csd extends _modelo_parent {
         return $data;
     }
 
+    final public function genera_pems(int $fc_csd_id)
+    {
+        $out = new stdClass();
+        $data = $this->data(fc_csd_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener datos', data: $data);
+        }
+        $out->fc_csd = $data;
+
+        $data = (new fc_key_csd(link: $this->link))->genera_pem_full(fc_key_csd_id: $data->fc_key_csd['fc_key_csd_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar pem', data: $data);
+        }
+        $out->fc_key_csd = $data;
+        $data = (new fc_cer_csd(link: $this->link))->genera_pem_full(fc_cer_csd_id: $data->fc_key_csd['fc_cer_csd_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar pem', data: $data);
+        }
+        $out->fc_cer_csd = $data;
+
+        return $out;
+
+    }
+
     public function get_csd(int $fc_csd_id): array|stdClass|int
     {
         $registro = $this->registro(registro_id: $fc_csd_id);
