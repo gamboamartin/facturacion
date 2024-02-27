@@ -68,6 +68,40 @@ class instalacion
         return $out;
 
     }
+
+    private function _add_fc_cer_csd(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_cer_csd');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['doc_documento_id'] = new stdClass();
+        $foraneas['fc_csd_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_cer_csd');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+        /*$campos = new stdClass();
+        $campos->fecha = new stdClass();
+        $campos->fecha->tipo_dato = 'DATE';
+        $campos->fecha->default = '1900-01-01';
+
+        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_cer_csd');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
+        }
+        $out->columnas = $result;*/
+        return $out;
+
+    }
     private function _add_fc_cfdi_sellado(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -676,7 +710,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_impuesto_p(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -910,6 +943,38 @@ class instalacion
         return $out;
 
     }
+    private function _add_fc_retencion_p(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_retencion_p');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_impuesto_p_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_retencion_p');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+        /*$campos = new stdClass();
+
+        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_traslado_p');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
+        }
+        $out->columnas = $result;*/
+
+
+
+        return $out;
+
+    }
     private function _add_fc_uuid_cancela(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -970,39 +1035,6 @@ class instalacion
 
 
 
-        return $out;
-
-    }
-    private function _add_fc_cer_csd(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_cer_csd');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['doc_documento_id'] = new stdClass();
-        $foraneas['fc_csd_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_cer_csd');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-        /*$campos = new stdClass();
-        $campos->fecha = new stdClass();
-        $campos->fecha->tipo_dato = 'DATE';
-        $campos->fecha->default = '1900-01-01';
-
-        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_cer_csd');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
-        }
-        $out->columnas = $result;*/
         return $out;
 
     }
@@ -2013,39 +2045,6 @@ class instalacion
         return $out;
 
     }
-    private function _add_fc_retencion_p(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_retencion_p');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_impuesto_p_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_retencion_p');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-        /*$campos = new stdClass();
-
-        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_traslado_p');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
-        }
-        $out->columnas = $result;*/
-
-
-
-        return $out;
-
-    }
-
 
     /**
      * @param PDO $link
@@ -2335,6 +2334,18 @@ class instalacion
         return $result;
 
     }
+
+    private function fc_complemento_pago_etapa(PDO $link): array|stdClass
+    {
+        $create = $this->_add_fc_complemento_pago_etapa(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
+
+
+        return $create;
+
+    }
     private function fc_conf_aut_producto(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_conf_aut_producto(link: $link);
@@ -2394,6 +2405,12 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
         }
 
+        $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
+            link:  $link,pr_etapa_codigo: 'LISTO USO',pr_proceso_codigo: 'CSD',pr_tipo_proceso_codigo:  'Control');
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
+
         return $create;
 
     }
@@ -2433,19 +2450,6 @@ class instalacion
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
         }
-
-        return $create;
-
-    }
-
-
-    private function fc_complemento_pago_etapa(PDO $link): array|stdClass
-    {
-        $create = $this->_add_fc_complemento_pago_etapa(link: $link);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
-        }
-
 
         return $create;
 
@@ -2491,7 +2495,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_cuenta_predial_cp(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_cuenta_predial_cp(link: $link);
@@ -2502,7 +2505,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_ejecucion_aut_plantilla(PDO $link): array|stdClass
     {
         $init = (new _instalacion(link: $link));
@@ -2536,7 +2538,16 @@ class instalacion
         return $foraneas_r;
 
     }
+    private function fc_ejecucion_automatica(PDO $link): array|stdClass
+    {
+        $create = $this->_add_fc_ejecucion_automatica(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
 
+        return $create;
+
+    }
     private function fc_email(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_email(link: $link);
@@ -3678,18 +3689,6 @@ class instalacion
         return $create;
 
     }
-
-    private function fc_ejecucion_automatica(PDO $link): array|stdClass
-    {
-        $create = $this->_add_fc_ejecucion_automatica(link: $link);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
-        }
-
-        return $create;
-
-    }
-
 
 
     private function fc_uuid(PDO $link): array|stdClass
