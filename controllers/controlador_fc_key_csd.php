@@ -16,6 +16,7 @@ use gamboamartin\facturacion\models\_cert;
 use gamboamartin\facturacion\models\fc_key_csd;
 use gamboamartin\facturacion\models\fc_key_pem;
 use gamboamartin\plugins\ssl;
+use gamboamartin\system\actions;
 use gamboamartin\template\html;
 
 use PDO;
@@ -41,10 +42,23 @@ class controlador_fc_key_csd extends _base_system_csd {
 
     public function genera_pem(bool $header, bool $ws = false): array|string|stdClass{
 
+        $seccion_retorno = $this->tabla;
+        if(isset($_POST['seccion_retorno'])){
+            $seccion_retorno = $_POST['seccion_retorno'];
+            unset($_POST['seccion_retorno']);
+        }
+
 
         $data = (new fc_key_csd(link: $this->link))->genera_pem_full(fc_key_csd_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pem', data: $data,header:  $header,ws:  $ws);
+        }
+
+        $out = $this->out_alta(header: $header,id_retorno:  -1,r_alta_bd:  $data,
+            seccion_retorno:  $seccion_retorno,siguiente_view:  'lista',ws:  $ws);
+        if(errores::$error){
+            print_r($out);
+            die('Error');
         }
 
         return $data;
