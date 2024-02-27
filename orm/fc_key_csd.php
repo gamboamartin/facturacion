@@ -104,8 +104,13 @@ class fc_key_csd extends modelo{
             return $this->error->error(mensaje: 'Error al generar pem', data: $data);
         }
 
-        $fc_key_pem_ins['fc_key_csd_id'] = $this->registro_id;
-        $inserta_pem = $this->alta_registro(registro: $fc_key_pem_ins);
+        $fc_key_csd = $this->registro(registro_id: $fc_key_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener row', data: $fc_key_csd);
+        }
+
+        $fc_key_pem_ins['fc_key_csd_id'] = $fc_key_csd['fc_key_csd_id'];
+        $inserta_pem = (new fc_key_pem(link: $this->link))->alta_registro(registro: $fc_key_pem_ins);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar pem', data: $inserta_pem);
         }
