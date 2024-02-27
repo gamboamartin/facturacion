@@ -10,7 +10,7 @@ use stdClass;
 class fc_csd_etapa extends _modelo_parent {
     public function __construct(PDO $link){
         $tabla = 'fc_csd_etapa';
-        $columnas = array($tabla=>false,'fc_csd'=>$tabla,'pr_etapa_proceso'=>$tabla);
+        $columnas = array($tabla=>false,'fc_csd'=>$tabla,'pr_etapa_proceso'=>$tabla,'pr_etapa'=>'pr_etapa_proceso');
         $campos_obligatorios = array('fc_csd_id','pr_etapa_proceso_id');
 
         $no_duplicados = array();
@@ -42,13 +42,18 @@ class fc_csd_etapa extends _modelo_parent {
             $descripcion .= '-';
             $descripcion .= $pr_etapa_proceso['pr_etapa_proceso_id'];
             $this->registro['descripcion'] = $descripcion;
-
         }
-
         $r_alta_bd = parent::alta_bd(keys_integra_ds: $keys_integra_ds);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa',data:  $r_alta_bd);
         }
+
+        $etapa = $r_alta_bd->registro['pr_etapa_descripcion'];
+        $upd = (new fc_csd(link: $this->link))->modifica_etapa(etapa: $etapa,id: $r_alta_bd->registro['fc_csd_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al actualizar etapa',data:  $upd);
+        }
+
         return $r_alta_bd;
     }
 
