@@ -113,6 +113,24 @@ class _cert
 
     }
 
+    private function etapa_docs_completos_pem(int $fc_csd_id, PDO $link)
+    {
+        $tiene_documentos_completos = (new fc_csd(link: $link))->tiene_documentos_completos_pem(fc_csd_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar docs',data: $tiene_documentos_completos);
+        }
+
+        if($tiene_documentos_completos){
+            $inserta_etapa = $this->inserta_etapa(fc_csd_id: $fc_csd_id,link:  $link,
+                pr_etapa_descripcion:  'LISTO USO', pr_proceso_descripcion: 'CSD');
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al insertar etapa',data: $inserta_etapa);
+            }
+        }
+        return $tiene_documentos_completos;
+
+    }
+
     private function fc_csd_etapa_ins(int $fc_csd_id, PDO $link, string $pr_etapa_descripcion, string $pr_proceso_descripcion)
     {
         $pr_etapa_proceso_id =$this->pr_etapa_proceso_id(link: $link,pr_etapa_descripcion:  $pr_etapa_descripcion,
@@ -283,6 +301,12 @@ class _cert
         $etapas->doc = $inserta_etapa;
 
         $inserta_etapa = $this->etapa_docs_completos(fc_csd_id: $fc_csd_id,link:  $link);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al insertar etapa',data: $inserta_etapa);
+        }
+        $etapas->full = $inserta_etapa;
+
+        $inserta_etapa = $this->etapa_docs_completos_pem(fc_csd_id: $fc_csd_id,link:  $link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa',data: $inserta_etapa);
         }

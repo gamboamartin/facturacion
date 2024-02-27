@@ -203,6 +203,26 @@ class fc_csd extends _modelo_parent {
 
 
     }
+
+    final public function tiene_documentos_completos_pem(int $fc_csd_id)
+    {
+        $existe_key = $this->tiene_file_key_pem(fc_csd_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $existe_key);
+        }
+        $existe_cer = $this->tiene_file_cer_pem(fc_csd_id: $fc_csd_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar registro',data:  $existe_cer);
+        }
+
+        $tiene_ambos = false;
+        if($existe_cer && $existe_key){
+            $tiene_ambos = true;
+        }
+        return $tiene_ambos;
+
+
+    }
     final public function tiene_file_cer(int $fc_csd_id)
     {
         $filtro['fc_csd.id'] = $fc_csd_id;
@@ -214,10 +234,32 @@ class fc_csd extends _modelo_parent {
 
     }
 
+    final public function tiene_file_cer_pem(int $fc_csd_id)
+    {
+        $filtro['fc_csd.id'] = $fc_csd_id;
+        $existe = (new fc_cer_pem(link: $this->link))->existe(filtro: $filtro );
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar cer',data:  $existe);
+        }
+        return $existe;
+
+    }
+
     final public function tiene_file_key(int $fc_csd_id)
     {
         $filtro['fc_csd.id'] = $fc_csd_id;
         $existe = (new fc_key_csd(link: $this->link))->existe(filtro: $filtro );
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar key',data:  $existe);
+        }
+        return $existe;
+
+    }
+
+    final public function tiene_file_key_pem(int $fc_csd_id)
+    {
+        $filtro['fc_csd.id'] = $fc_csd_id;
+        $existe = (new fc_key_pem(link: $this->link))->existe(filtro: $filtro );
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al validar key',data:  $existe);
         }
