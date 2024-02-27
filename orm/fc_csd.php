@@ -174,7 +174,6 @@ class fc_csd extends _modelo_parent {
 
         return $registro;
     }
-
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,
                                 array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
@@ -215,6 +214,17 @@ class fc_csd extends _modelo_parent {
         }
 
         return $r_modifica_bd;
+    }
+
+    final public function modifica_etapa(string $etapa, int $id)
+    {
+        $registro['etapa'] = $etapa;
+        $upd = parent::modifica_bd(registro: $registro,id:  $id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al modificar etapa',data: $upd);
+        }
+        return $upd;
+
     }
 
 
