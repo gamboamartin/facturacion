@@ -256,8 +256,10 @@ class controlador_fc_csd extends system{
         $columns["fc_csd_descripcion"]["titulo"] = "CSD";
         $columns["fc_csd_serie"]["titulo"] = "Serie";
         $columns["org_sucursal_descripcion"]["titulo"] = "Sucursal";
+        $columns["fc_csd_etapa"]["titulo"] = "Etapa";
 
-        $filtro = array("fc_csd.id","fc_csd.codigo","fc_csd.descripcion","fc_csd.serie", "org_sucursal.descripcion");
+        $filtro = array("fc_csd.id","fc_csd.codigo","fc_csd.descripcion","fc_csd.serie", "org_sucursal.descripcion",
+            'fc_csd.etapa');
 
         $datatables = new stdClass();
         $datatables->columns = $columns;
