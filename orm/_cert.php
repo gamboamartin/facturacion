@@ -430,7 +430,8 @@ class _cert
 
     }
 
-    private function ruta_out()
+
+    private function ruta_out(): string
     {
         $ruta_out_base = $this->ruta_out_base();
         if(errores::$error){
@@ -439,6 +440,18 @@ class _cert
         return (new generales())->path_base.'archivos/temporales/'.$ruta_out_base.'.pem';
 
     }
+
+    /**
+     * POR DOCUMENTAR EN WIKI
+     * Genera una cadena aleatoria.
+     *
+     * Esta función genera una cadena aleatoria con un máximo de
+     * 20 iteraciones donde cada iteración agrega un número aleatorio entre 10 y 99.
+     * La cadena resultante se utiliza probablemente como una ruta única base.
+     *
+     * @return string La cadena aleatoria generada.
+     * @version 27.6.0
+     */
     private function ruta_out_base(): string
     {
         $ruta_out_base = '';
