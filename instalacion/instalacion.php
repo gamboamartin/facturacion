@@ -254,6 +254,61 @@ class instalacion
         return $out;
 
     }
+    private function _add_fc_complemento_pago_documento(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_complemento_pago_documento');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_complemento_pago_id'] = new stdClass();
+        $foraneas['doc_documento_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_complemento_pago_documento');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+
+        return $out;
+
+    }
+    private function _add_fc_complemento_pago_etapa(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_complemento_pago_etapa');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['pr_etapa_proceso_id'] = new stdClass();
+        $foraneas['fc_complemento_pago_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_complemento_pago_etapa');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+        $campos = new stdClass();
+        $campos->fecha = new stdClass();
+        $campos->fecha->tipo_dato = 'DATE';
+        $campos->fecha->default = '1900-01-01';
+
+        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_complemento_pago_etapa');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
+        }
+        $out->columnas = $result;
+        return $out;
+
+    }
     private function _add_fc_conf_aut_producto(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -317,6 +372,65 @@ class instalacion
         return $out;
 
     }
+    private function _add_fc_conf_automatico(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_conf_automatico');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['com_tipo_cliente_id'] = new stdClass();
+        $foraneas['fc_csd_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_conf_automatico');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+
+        return $out;
+
+    }
+    private function _add_fc_conf_etapa_rel(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_conf_etapa_rel');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['pr_etapa_proceso_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_conf_etapa_rel');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+        $campos = new stdClass();
+        $campos->fecha_pago = new stdClass();
+        $campos->fecha_pago->tipo_dato = 'DATETIME';
+        $campos->fecha_pago->default = '1900-01-01';
+
+        $campos->monto = new stdClass();
+        $campos->monto->tipo_dato = 'double';
+        $campos->monto->default = '0';
+        $campos->monto->longitud = '100,2';
+
+        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_conf_etapa_rel');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
+        }
+        $out->columnas = $result;
+        return $out;
+
+    }
     private function _add_fc_csd_etapa(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -351,6 +465,185 @@ class instalacion
         return $out;
 
     }
+    private function _add_fc_cuenta_predial(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_cuenta_predial');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_partida_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_cuenta_predial');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+        return $out;
+
+    }
+    private function _add_fc_cuenta_predial_nc(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_cuenta_predial_nc');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_partida_nc_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_cuenta_predial_nc');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+        return $out;
+
+    }
+    private function _add_fc_cuenta_predial_cp(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_cuenta_predial_cp');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_partida_cp_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_cuenta_predial_cp');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+        return $out;
+
+    }
+    private function _add_fc_ejecucion_automatica(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_ejecucion_automatica');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_conf_automatico_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_ejecucion_automatica');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+
+
+
+        return $out;
+
+    }
+    private function _add_fc_email(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_email');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_factura_id'] = new stdClass();
+        $foraneas['com_email_cte_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_email');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+
+        return $out;
+
+    }
+    private function _add_fc_email_cp(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_email_cp');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_complemento_pago_id'] = new stdClass();
+        $foraneas['com_email_cte_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_email_cp');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+
+        return $out;
+
+    }
+    private function _add_fc_email_nc(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_email_nc');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_nota_credito_id'] = new stdClass();
+        $foraneas['com_email_cte_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_email_nc');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+
+        return $out;
+
+    }
+    private function _add_fc_factura_documento(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_factura_documento');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_factura_id'] = new stdClass();
+        $foraneas['doc_documento_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_factura_documento');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+
+        return $out;
+
+    }
     private function _add_fc_nc_rel(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -381,6 +674,112 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
         }
         $out->columnas = $result;
+        return $out;
+
+    }
+    private function _add_fc_nota_credito_documento(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_nota_credito_documento');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_nota_credito_id'] = new stdClass();
+        $foraneas['doc_documento_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_nota_credito_documento');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+
+        return $out;
+
+    }
+
+    private function _add_fc_pago_total(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_pago_total');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_pago_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_pago_total');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+        $campos = new stdClass();
+        $campos->total_traslados_base_iva_16 = new stdClass();
+        $campos->total_traslados_base_iva_16->tipo_dato = 'DOUBLE';
+        $campos->total_traslados_base_iva_16->default = '0';
+        $campos->total_traslados_base_iva_16->longitud = '100,4';
+
+        $campos->total_traslados_base_iva_08 = new stdClass();
+        $campos->total_traslados_base_iva_08->tipo_dato = 'DOUBLE';
+        $campos->total_traslados_base_iva_08->default = '0';
+        $campos->total_traslados_base_iva_08->longitud = '100,4';
+
+        $campos->total_traslados_base_iva_00 = new stdClass();
+        $campos->total_traslados_base_iva_00->tipo_dato = 'DOUBLE';
+        $campos->total_traslados_base_iva_00->default = '0';
+        $campos->total_traslados_base_iva_00->longitud = '100,4';
+
+        $campos->total_traslados_impuesto_iva_16 = new stdClass();
+        $campos->total_traslados_impuesto_iva_16->tipo_dato = 'DOUBLE';
+        $campos->total_traslados_impuesto_iva_16->default = '0';
+        $campos->total_traslados_impuesto_iva_16->longitud = '100,4';
+
+        $campos->total_traslados_impuesto_iva_08 = new stdClass();
+        $campos->total_traslados_impuesto_iva_08->tipo_dato = 'DOUBLE';
+        $campos->total_traslados_impuesto_iva_08->default = '0';
+        $campos->total_traslados_impuesto_iva_08->longitud = '100,4';
+
+        $campos->total_traslados_impuesto_iva_00 = new stdClass();
+        $campos->total_traslados_impuesto_iva_00->tipo_dato = 'DOUBLE';
+        $campos->total_traslados_impuesto_iva_00->default = '0';
+        $campos->total_traslados_impuesto_iva_00->longitud = '100,4';
+
+        $campos->monto_total_pagos = new stdClass();
+        $campos->monto_total_pagos->tipo_dato = 'DOUBLE';
+        $campos->monto_total_pagos->default = '0';
+        $campos->monto_total_pagos->longitud = '100,4';
+
+        $campos->total_retenciones_iva = new stdClass();
+        $campos->total_retenciones_iva->tipo_dato = 'DOUBLE';
+        $campos->total_retenciones_iva->default = '0';
+        $campos->total_retenciones_iva->longitud = '100,4';
+
+        $campos->total_retenciones_ieps = new stdClass();
+        $campos->total_retenciones_ieps->tipo_dato = 'DOUBLE';
+        $campos->total_retenciones_ieps->default = '0';
+        $campos->total_retenciones_ieps->longitud = '100,4';
+
+        $campos->total_retenciones_isr = new stdClass();
+        $campos->total_retenciones_isr->tipo_dato = 'DOUBLE';
+        $campos->total_retenciones_isr->default = '0';
+        $campos->total_retenciones_isr->longitud = '100,4';
+
+
+        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_pago_total');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
+        }
+        $out->columnas = $result;
+
+
+
         return $out;
 
     }
@@ -505,275 +904,6 @@ class instalacion
         }
         $out->columnas = $result;*/
 
-
-
-        return $out;
-
-    }
-    private function _add_fc_complemento_pago_etapa(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_complemento_pago_etapa');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['pr_etapa_proceso_id'] = new stdClass();
-        $foraneas['fc_complemento_pago_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_complemento_pago_etapa');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-        $campos = new stdClass();
-        $campos->fecha = new stdClass();
-        $campos->fecha->tipo_dato = 'DATE';
-        $campos->fecha->default = '1900-01-01';
-
-        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_complemento_pago_etapa');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
-        }
-        $out->columnas = $result;
-        return $out;
-
-    }
-    private function _add_fc_conf_etapa_rel(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_conf_etapa_rel');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['pr_etapa_proceso_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_conf_etapa_rel');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-        $campos = new stdClass();
-        $campos->fecha_pago = new stdClass();
-        $campos->fecha_pago->tipo_dato = 'DATETIME';
-        $campos->fecha_pago->default = '1900-01-01';
-
-        $campos->monto = new stdClass();
-        $campos->monto->tipo_dato = 'double';
-        $campos->monto->default = '0';
-        $campos->monto->longitud = '100,2';
-
-        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_conf_etapa_rel');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
-        }
-        $out->columnas = $result;
-        return $out;
-
-    }
-    private function _add_fc_cuenta_predial(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_cuenta_predial');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_partida_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_cuenta_predial');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-        return $out;
-
-    }
-    private function _add_fc_cuenta_predial_nc(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_cuenta_predial_nc');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_partida_nc_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_cuenta_predial_nc');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-        return $out;
-
-    }
-    private function _add_fc_cuenta_predial_cp(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_cuenta_predial_cp');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_partida_cp_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_cuenta_predial_cp');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-        return $out;
-
-    }
-    private function _add_fc_email(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_email');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_factura_id'] = new stdClass();
-        $foraneas['com_email_cte_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_email');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-
-        return $out;
-
-    }
-    private function _add_fc_email_cp(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_email_cp');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_complemento_pago_id'] = new stdClass();
-        $foraneas['com_email_cte_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_email_cp');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-
-        return $out;
-
-    }
-    private function _add_fc_email_nc(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_email_nc');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_nota_credito_id'] = new stdClass();
-        $foraneas['com_email_cte_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_email_nc');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-
-        return $out;
-
-    }
-    private function _add_fc_factura_documento(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_factura_documento');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_factura_id'] = new stdClass();
-        $foraneas['doc_documento_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_factura_documento');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-
-        return $out;
-
-    }
-    private function _add_fc_complemento_pago_documento(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_complemento_pago_documento');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_complemento_pago_id'] = new stdClass();
-        $foraneas['doc_documento_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_complemento_pago_documento');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-
-        return $out;
-
-    }
-    private function _add_fc_nota_credito_documento(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_nota_credito_documento');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_nota_credito_id'] = new stdClass();
-        $foraneas['doc_documento_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_nota_credito_documento');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
 
 
         return $out;
@@ -1779,89 +1909,6 @@ class instalacion
 
     }
 
-    private function _add_fc_pago_total(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_pago_total');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_pago_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_pago_total');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-        $campos = new stdClass();
-        $campos->total_traslados_base_iva_16 = new stdClass();
-        $campos->total_traslados_base_iva_16->tipo_dato = 'DOUBLE';
-        $campos->total_traslados_base_iva_16->default = '0';
-        $campos->total_traslados_base_iva_16->longitud = '100,4';
-
-        $campos->total_traslados_base_iva_08 = new stdClass();
-        $campos->total_traslados_base_iva_08->tipo_dato = 'DOUBLE';
-        $campos->total_traslados_base_iva_08->default = '0';
-        $campos->total_traslados_base_iva_08->longitud = '100,4';
-
-        $campos->total_traslados_base_iva_00 = new stdClass();
-        $campos->total_traslados_base_iva_00->tipo_dato = 'DOUBLE';
-        $campos->total_traslados_base_iva_00->default = '0';
-        $campos->total_traslados_base_iva_00->longitud = '100,4';
-
-        $campos->total_traslados_impuesto_iva_16 = new stdClass();
-        $campos->total_traslados_impuesto_iva_16->tipo_dato = 'DOUBLE';
-        $campos->total_traslados_impuesto_iva_16->default = '0';
-        $campos->total_traslados_impuesto_iva_16->longitud = '100,4';
-
-        $campos->total_traslados_impuesto_iva_08 = new stdClass();
-        $campos->total_traslados_impuesto_iva_08->tipo_dato = 'DOUBLE';
-        $campos->total_traslados_impuesto_iva_08->default = '0';
-        $campos->total_traslados_impuesto_iva_08->longitud = '100,4';
-
-        $campos->total_traslados_impuesto_iva_00 = new stdClass();
-        $campos->total_traslados_impuesto_iva_00->tipo_dato = 'DOUBLE';
-        $campos->total_traslados_impuesto_iva_00->default = '0';
-        $campos->total_traslados_impuesto_iva_00->longitud = '100,4';
-
-        $campos->monto_total_pagos = new stdClass();
-        $campos->monto_total_pagos->tipo_dato = 'DOUBLE';
-        $campos->monto_total_pagos->default = '0';
-        $campos->monto_total_pagos->longitud = '100,4';
-
-        $campos->total_retenciones_iva = new stdClass();
-        $campos->total_retenciones_iva->tipo_dato = 'DOUBLE';
-        $campos->total_retenciones_iva->default = '0';
-        $campos->total_retenciones_iva->longitud = '100,4';
-
-        $campos->total_retenciones_ieps = new stdClass();
-        $campos->total_retenciones_ieps->tipo_dato = 'DOUBLE';
-        $campos->total_retenciones_ieps->default = '0';
-        $campos->total_retenciones_ieps->longitud = '100,4';
-
-        $campos->total_retenciones_isr = new stdClass();
-        $campos->total_retenciones_isr->tipo_dato = 'DOUBLE';
-        $campos->total_retenciones_isr->default = '0';
-        $campos->total_retenciones_isr->longitud = '100,4';
-
-
-        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_pago_total');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
-        }
-        $out->columnas = $result;
-
-
-
-        return $out;
-
-    }
-
     private function _add_fc_traslado_cp(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -1902,7 +1949,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_traslado_p(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -1935,7 +1981,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_retencion_p(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -1968,7 +2013,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_impuesto_p(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -2002,55 +2046,6 @@ class instalacion
 
     }
 
-    private function _add_fc_ejecucion_automatica(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_ejecucion_automatica');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_conf_automatico_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_ejecucion_automatica');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-
-
-
-        return $out;
-
-    }
-
-    private function _add_fc_conf_automatico(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_conf_automatico');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['com_tipo_cliente_id'] = new stdClass();
-        $foraneas['fc_csd_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_conf_automatico');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-
-        return $out;
-
-    }
-
     /**
      * @param PDO $link
      * @param string $table
@@ -2074,8 +2069,6 @@ class instalacion
         return $foraneas_r;
 
     }
-
-
 
     /**
      * POR DOCUMENTAR EN WIKI
@@ -2280,6 +2273,16 @@ class instalacion
 
     }
 
+    private function fc_conf_aut_producto(PDO $link): array|stdClass
+    {
+        $create = $this->_add_fc_conf_aut_producto(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
+
+        return $create;
+
+    }
     private function fc_csd_etapa(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_csd_etapa(link: $link);
@@ -2342,7 +2345,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_uuid_cancela(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_uuid_cancela(link: $link);
@@ -2353,7 +2355,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_uuid_fc(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_uuid_fc(link: $link);
@@ -2374,16 +2375,7 @@ class instalacion
         return $create;
 
     }
-    private function fc_conf_aut_producto(PDO $link): array|stdClass
-    {
-        $create = $this->_add_fc_conf_aut_producto(link: $link);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
-        }
 
-        return $create;
-
-    }
     private function fc_complemento_pago(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_complemento_pago_etapa(link: $link);
@@ -2720,9 +2712,6 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
         }
 
-
-
-
         return $create;
 
     }
@@ -2808,6 +2797,29 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
         }
 
+        $adm_menu_descripcion = 'Certificados';
+        $adm_sistema_descripcion = 'facturacion';
+        $etiqueta_label = 'Certificados';
+        $adm_seccion_pertenece_descripcion = 'facturacion';
+        $adm_namespace_name = 'gamboamartin/facturacion';
+        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
+
+        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
+            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
+            adm_seccion_descripcion: __FUNCTION__,
+            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
+            adm_sistema_descripcion: $adm_sistema_descripcion,
+            etiqueta_label: $etiqueta_label, link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
+
+        $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
+            link:  $link,pr_etapa_codigo: 'CER PEM INTEGRADO',pr_proceso_codigo: 'CSD',pr_tipo_proceso_codigo:  'Control');
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
+
         return $create;
 
     }
@@ -2817,6 +2829,29 @@ class instalacion
         $create = $this->_add_fc_key_pem(link: $link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
+
+        $adm_menu_descripcion = 'Certificados';
+        $adm_sistema_descripcion = 'facturacion';
+        $etiqueta_label = 'Certificados';
+        $adm_seccion_pertenece_descripcion = 'facturacion';
+        $adm_namespace_name = 'gamboamartin/facturacion';
+        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
+
+        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
+            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
+            adm_seccion_descripcion: __FUNCTION__,
+            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
+            adm_sistema_descripcion: $adm_sistema_descripcion,
+            etiqueta_label: $etiqueta_label, link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
+
+        $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
+            link:  $link,pr_etapa_codigo: 'KEY PEM INTEGRADO',pr_proceso_codigo: 'CSD',pr_tipo_proceso_codigo:  'Control');
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
         }
 
         return $create;
