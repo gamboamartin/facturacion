@@ -24,7 +24,8 @@ class _doc extends _modelo_parent{
         }
 
 
-        $doc_documento_id = (new doc_documento(link: $this->link))->registro(registro_id: $this->registro['doc_documento_id'], retorno_obj: true);
+        $doc_documento_id = (new doc_documento(link: $this->link))->registro(
+            registro_id: $this->registro['doc_documento_id'], retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener doc_documento_id', data: $doc_documento_id);
         }

@@ -2069,28 +2069,7 @@ class instalacion
 
     }
 
-    private function adm_accion_ins(int $adm_seccion_id, string $descripcion, string $es_view,
-                                    string $icono, string $lista, string $titulo): array
-    {
-        $adm_accion_ins['descripcion'] = $descripcion;
-        $adm_accion_ins['adm_seccion_id'] = $adm_seccion_id;
-        $adm_accion_ins['icono'] = $icono;
-        $adm_accion_ins['visible'] = 'inactivo';
-        $adm_accion_ins['inicio'] = 'inactivo';
-        $adm_accion_ins['lista'] = $lista;
-        $adm_accion_ins['seguridad'] = 'activo';
-        $adm_accion_ins['es_modal'] = 'inactivo';
-        $adm_accion_ins['es_view'] = $es_view;
-        $adm_accion_ins['titulo'] = $titulo;
-        $adm_accion_ins['css'] = 'warning';
-        $adm_accion_ins['es_status'] = 'inactivo';
-        $adm_accion_ins['es_lista'] = $lista;
-        $adm_accion_ins['muestra_icono_btn'] = 'activo';
-        $adm_accion_ins['muestra_titulo_btn'] = 'inactivo';
 
-        return $adm_accion_ins;
-
-    }
 
     /**
      * POR DOCUMENTAR EN WIKI
@@ -2358,19 +2337,25 @@ class instalacion
             }
             $upd = array();
             $upd['descripcion'] = 'PAGO';
-            $r_upd = (new pr_proceso(link: $link))->modifica_bd(registro: $upd,id:  $r_pr_proceso->registros[0]['pr_proceso_id']);
+            $r_upd = (new pr_proceso(link: $link))->modifica_bd(registro: $upd,
+                id:  $r_pr_proceso->registros[0]['pr_proceso_id']);
             if (errores::$error) {
                 return (new errores())->error(mensaje: 'Error al actualizar proceso', data: $r_upd);
             }
         }
 
-        $alta_accion = $this->inserta_accion_base(adm_accion_descripcion: 'adjunta',
-            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',link:  $link,
-            lista:  'activo',titulo:  'Adjunta Documento');
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'activo', icono: 'bi bi-file-earmark-arrow-up',
+            link:  $link, lista:  'activo',titulo:  'Adjunta Documento');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
-
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta_bd',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',
+            link:  $link, lista:  'activo',titulo:  'Adjunta Documento');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
 
         $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
             link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'PAGO',pr_tipo_proceso_codigo:  'Control');
@@ -2447,7 +2432,7 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
         }
 
-        $alta_accion = $this->inserta_accion_base(adm_accion_descripcion: 'genera_pems',
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'genera_pems',
             adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-lock2',link:  $link,
             lista:  'activo',titulo:  'Genera PEM');
         if(errores::$error){
@@ -2734,9 +2719,16 @@ class instalacion
         }
 
 
-        $alta_accion = $this->inserta_accion_base(adm_accion_descripcion: 'adjunta',
-            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',link:  $link,
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'activo', icono: 'bi bi-file-earmark-arrow-up',link:  $link,
             lista:  'activo',titulo:  'Adjunta Documento');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta_bd',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',
+            link:  $link, lista:  'activo',titulo:  'Adjunta Documento');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
@@ -2867,7 +2859,7 @@ class instalacion
 
 
 
-        $alta_accion = $this->inserta_accion_base(adm_accion_descripcion: 'genera_pem',
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'genera_pem',
             adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-lock2',link:  $link,
             lista:  'activo',titulo:  'Genera PEM');
         if(errores::$error){
@@ -2907,7 +2899,7 @@ class instalacion
 
 
 
-        $alta_accion = $this->inserta_accion_base(adm_accion_descripcion: 'genera_pem',
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'genera_pem',
             adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-lock2',link:  $link,
             lista:  'activo',titulo:  'Genera PEM');
         if(errores::$error){
@@ -3066,9 +3058,15 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
         }
 
-        $alta_accion = $this->inserta_accion_base(adm_accion_descripcion: 'adjunta',
-            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',link:  $link,
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'activo', icono: 'bi bi-file-earmark-arrow-up',link:  $link,
             lista:  'activo',titulo:  'Adjunta Documento');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta_bd',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',
+            link:  $link, lista:  'activo',titulo:  'Adjunta Documento');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
@@ -3825,51 +3823,9 @@ class instalacion
 
     }
 
-    private function inserta_accion(string $adm_accion_descripcion, array $adm_accion_ins,
-                                    string $adm_seccion_descripcion, PDO $link): array|stdClass
-    {
-        $alta = new stdClass();
-        $filtro['adm_accion.descripcion'] = $adm_accion_descripcion;
-        $filtro['adm_seccion.descripcion'] = $adm_seccion_descripcion;
-
-        $existe  = (new \gamboamartin\administrador\models\adm_accion(link: $link))->existe(filtro: $filtro);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener accion',data:  $existe);
-        }
-        if(!$existe){
-            $alta = (new \gamboamartin\administrador\models\adm_accion(link: $link))->alta_registro(registro: $adm_accion_ins);
-            if(errores::$error){
-                return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta);
-            }
-        }
-
-        return $alta;
 
 
-    }
 
-    private function inserta_accion_base(string $adm_accion_descripcion,string $adm_seccion_descripcion,
-                                         string $es_view, string $icono, PDO $link, string $lista, string $titulo)
-    {
-        $adm_seccion_id = (new adm_seccion(link: $link))->adm_seccion_id(descripcion: $adm_seccion_descripcion);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener adm_seccion_id', data:  $adm_seccion_id);
-        }
-
-        $adm_accion_ins = $this->adm_accion_ins(adm_seccion_id: $adm_seccion_id,descripcion:  $adm_accion_descripcion,
-            es_view:  $es_view,icono:  $icono,lista:  $lista,titulo:  $titulo);
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener accion ins',data:  $adm_accion_ins);
-        }
-
-        $alta_accion = $this->inserta_accion(adm_accion_descripcion: $adm_accion_descripcion,adm_accion_ins:  $adm_accion_ins,
-            adm_seccion_descripcion:  $adm_seccion_descripcion,link:  $link);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
-        }
-
-    }
 
     private function inserta_pr_etapa(string $codigo, PDO $link): array
     {

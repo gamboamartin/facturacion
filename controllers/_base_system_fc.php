@@ -38,6 +38,7 @@ use gamboamartin\facturacion\models\_uuid_ext;
 use gamboamartin\facturacion\models\com_producto;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_nc_rel;
 use gamboamartin\facturacion\models\fc_notificacion;
 use gamboamartin\facturacion\models\fc_partida;
@@ -126,6 +127,7 @@ class _base_system_fc extends _base_system{
     public string $link_factura_genera_xml = '';
     public string $link_factura_cancela = '';
     public string $link_factura_timbra_xml = '';
+    public string $link_adjunta_bd = '';
 
 
     public function __construct(html_controler $html_, PDO $link, modelo $modelo, stdClass $paths_conf = new stdClass())
@@ -152,6 +154,102 @@ class _base_system_fc extends _base_system{
 
     }
 
+    public function adjunta(bool $header, bool $ws = false): array|stdClass
+    {
+
+
+        $row_upd = $this->modelo_entidad->registro(registro_id: $this->registro_id, columnas_en_bruto: true, retorno_obj: true);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener registro', data: $row_upd, header: $header, ws: $ws);
+        }
+
+
+        $this->inputs = new stdClass();
+
+
+        $columns_ds[] = $this->tabla.'_descripcion_select';
+        $filtro[$this->tabla.'.id'] = $this->registro_id;
+        $selector_id = $this->html_fc->select_fc_entidad_id(cols: 12,columns_ds:  $columns_ds, con_registros: true,
+            disabled: true,filtro:  $filtro, id_selected: $this->registro_id,label: $this->modelo->etiqueta,
+            modelo_entidad:  $this->modelo_entidad, registros: array());
+
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al maquetar input', data: $selector_id, header: $header, ws: $ws);
+        }
+
+        $key_entidad_id = $this->modelo_entidad->key_id;
+        $key_entidad_folio = $this->modelo_entidad->tabla.'_folio';
+
+        $this->inputs->$key_entidad_id = $selector_id;
+
+
+        $fc_factura_folio = $this->html_fc->input_folio(cols: 12,row_upd: $row_upd,
+            value_vacio: false, disabled: true);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $fc_factura_folio);
+        }
+
+        $this->inputs->$key_entidad_folio = $fc_factura_folio;
+
+        $hidden_row_id = $this->html->hidden(name: $key_entidad_id,value:  $this->registro_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $hidden_row_id);
+        }
+
+        $hidden_seccion_retorno = $this->html->hidden(name: 'seccion_retorno',value:  $this->tabla);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $hidden_seccion_retorno);
+        }
+        $hidden_id_retorno = $this->html->hidden(name: 'id_retorno',value:  $this->registro_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al maquetar input', data: $hidden_id_retorno);
+        }
+
+        $this->inputs->hidden_row_id = $hidden_row_id;
+        $this->inputs->hidden_seccion_retorno = $hidden_seccion_retorno;
+        $this->inputs->hidden_id_retorno = $hidden_id_retorno;
+
+        $key_filer_id = $this->modelo_entidad->key_filtro_id;
+        $filtro[$key_filer_id] = $this->registro_id;
+
+
+        $button_fc_factura_modifica =  $this->html->button_href(accion: 'modifica', etiqueta: 'Ir a CFDI',
+            registro_id: $this->registro_id, seccion: $this->tabla, style: 'warning', params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_modifica);
+        }
+        $this->button_fc_factura_modifica = $button_fc_factura_modifica;
+
+
+        $adjunto = $this->html->input_file(cols: 12,name:  'adjunto',row_upd:  $row_upd,value_vacio:  false,
+            place_holder: 'Adjunto');
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar adjunto', data: $adjunto);
+        }
+        $this->inputs->adjunto = $adjunto;
+
+        $link_adjunta = $this->obj_link->link_con_id(accion: 'adjunta_bd',
+            link:  $this->link,registro_id: $this->registro_id,seccion: $this->seccion);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link_adjunta', data: $link_adjunta);
+        }
+
+        $this->link_adjunta_bd = $link_adjunta;
+
+
+        return $this->inputs;
+    }
+
+    public function adjunta_bd(bool $header, bool $ws = false): array|stdClass
+    {
+
+
+
+        print_r($_FILES);EXIT;
+
+
+        return $this->inputs;
+    }
     public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
     {
 
@@ -1017,8 +1115,6 @@ class _base_system_fc extends _base_system{
 
     }
 
-
-
     public function elimina_sin_restriccion(bool $header, bool $ws = false){
 
 
@@ -1121,9 +1217,6 @@ class _base_system_fc extends _base_system{
 
     }
 
-
-
-
     private function existe_uuid_externo(array $fc_uuid, string $name_entidad_relacion, _uuid_ext $modelo_uuid_ext,
                                          array $row_relacion_ext): bool|array
     {
@@ -1193,7 +1286,6 @@ class _base_system_fc extends _base_system{
 
         exit;
     }
-
 
     public function fc_factura_relacionada_alta_bd(bool $header, bool $ws = false){
 
@@ -1324,8 +1416,6 @@ class _base_system_fc extends _base_system{
 
     }
 
-
-
     private function genera_base_upd(_transacciones_fc $modelo_entidad, _partida $modelo_partida,
                                      _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado,
                                      stdClass $row_upd, array $params): array|stdClass
@@ -1342,8 +1432,6 @@ class _base_system_fc extends _base_system{
 
         return $base;
     }
-
-
 
     public function genera_pdf(bool $header, bool $ws = false){
 
@@ -1424,8 +1512,6 @@ class _base_system_fc extends _base_system{
         return $data;
     }
 
-
-
     /**
      * Inicializa las configuraciones de views para facturas
      * @return controler
@@ -1453,8 +1539,6 @@ class _base_system_fc extends _base_system{
 
         return $this;
     }
-
-
 
     public function init_links(string $name_modelo_email): array|string
     {
