@@ -101,6 +101,30 @@ class instalacion
         return $out;
 
     }
+    private function _add_fc_cer_pem(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_cer_pem');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['doc_documento_id'] = new stdClass();
+        $foraneas['fc_cer_csd_id'] = new stdClass();
+        $foraneas['fc_cer_csd_id']->name_indice_opt = 'fc_cer_csd_id_ext';
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_cer_pem');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+
+        return $out;
+
+    }
     private function _add_fc_cfdi_sellado(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -461,6 +485,33 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
         }
         $out->columnas = $result;
+        return $out;
+
+    }
+    private function _add_fc_conf_retenido(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_conf_retenido');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['com_producto_id'] = new stdClass();
+        $foraneas['cat_sat_tipo_factor_id'] = new stdClass();
+        $foraneas['cat_sat_factor_id'] = new stdClass();
+        $foraneas['cat_sat_tipo_impuesto_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_conf_retenido');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+
+
+
         return $out;
 
     }
@@ -1188,30 +1239,7 @@ class instalacion
         return $out;
 
     }
-    private function _add_fc_cer_pem(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_cer_pem');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['doc_documento_id'] = new stdClass();
-        $foraneas['fc_cer_csd_id'] = new stdClass();
-        $foraneas['fc_cer_csd_id']->name_indice_opt = 'fc_cer_csd_id_ext';
 
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_cer_pem');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-
-        return $out;
-
-    }
     private function _add_fc_key_pem(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -1899,34 +1927,6 @@ class instalacion
         return $out;
 
     }
-    private function _add_fc_conf_retenido(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_conf_retenido');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['com_producto_id'] = new stdClass();
-        $foraneas['cat_sat_tipo_factor_id'] = new stdClass();
-        $foraneas['cat_sat_factor_id'] = new stdClass();
-        $foraneas['cat_sat_tipo_impuesto_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_conf_retenido');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-
-
-
-        return $out;
-
-    }
-
 
     private function _add_fc_retencion_p_part(PDO $link): array|stdClass
     {
@@ -2066,6 +2066,29 @@ class instalacion
         }
 
         return $foraneas_r;
+
+    }
+
+    private function adm_accion_ins(int $adm_seccion_id, string $descripcion, string $es_view,
+                                    string $icono, string $lista, string $titulo): array
+    {
+        $adm_accion_ins['descripcion'] = $descripcion;
+        $adm_accion_ins['adm_seccion_id'] = $adm_seccion_id;
+        $adm_accion_ins['icono'] = $icono;
+        $adm_accion_ins['visible'] = 'inactivo';
+        $adm_accion_ins['inicio'] = 'inactivo';
+        $adm_accion_ins['lista'] = $lista;
+        $adm_accion_ins['seguridad'] = 'activo';
+        $adm_accion_ins['es_modal'] = 'inactivo';
+        $adm_accion_ins['es_view'] = $es_view;
+        $adm_accion_ins['titulo'] = $titulo;
+        $adm_accion_ins['css'] = 'warning';
+        $adm_accion_ins['es_status'] = 'inactivo';
+        $adm_accion_ins['es_lista'] = $lista;
+        $adm_accion_ins['muestra_icono_btn'] = 'activo';
+        $adm_accion_ins['muestra_titulo_btn'] = 'inactivo';
+
+        return $adm_accion_ins;
 
     }
 
@@ -2341,6 +2364,13 @@ class instalacion
             }
         }
 
+        $alta_accion = $this->inserta_accion_base(adm_accion_descripcion: 'adjunta',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',link:  $link,
+            lista:  'activo',titulo:  'Adjunta Documento');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+
 
         $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
             link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'PAGO',pr_tipo_proceso_codigo:  'Control');
@@ -2392,7 +2422,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_csd(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_csd(link: $link);
@@ -2418,40 +2447,12 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
         }
 
-        $adm_seccion_id = (new adm_seccion(link: $link))->adm_seccion_id(descripcion: __FUNCTION__);
+        $alta_accion = $this->inserta_accion_base(adm_accion_descripcion: 'genera_pems',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-lock2',link:  $link,
+            lista:  'activo',titulo:  'Genera PEM');
         if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener adm_seccion_id', data:  $adm_seccion_id);
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
-
-        $adm_accion_ins['descripcion'] = 'genera_pems';
-        $adm_accion_ins['adm_seccion_id'] = $adm_seccion_id;
-        $adm_accion_ins['icono'] = 'bi bi-file-lock2';
-        $adm_accion_ins['visible'] = 'inactivo';
-        $adm_accion_ins['inicio'] = 'inactivo';
-        $adm_accion_ins['lista'] = 'activo';
-        $adm_accion_ins['seguridad'] = 'activo';
-        $adm_accion_ins['es_modal'] = 'inactivo';
-        $adm_accion_ins['es_view'] = 'inactivo';
-        $adm_accion_ins['titulo'] = 'Genera PEM';
-        $adm_accion_ins['css'] = 'warning';
-        $adm_accion_ins['es_status'] = 'inactivo';
-        $adm_accion_ins['es_lista'] = 'activo';
-        $adm_accion_ins['muestra_icono_btn'] = 'activo';
-        $adm_accion_ins['muestra_titulo_btn'] = 'inactivo';
-
-        $filtro['adm_accion.descripcion'] = 'genera_pems';
-        $filtro['adm_seccion.descripcion'] = __FUNCTION__;
-        $existe  = (new \gamboamartin\administrador\models\adm_accion(link: $link))->existe(filtro: $filtro);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener accion',data:  $existe);
-        }
-        if(!$existe){
-            $alta = (new \gamboamartin\administrador\models\adm_accion(link: $link))->alta_registro(registro: $adm_accion_ins);
-            if(errores::$error){
-                return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta);
-            }
-        }
-
 
         return $create;
 
@@ -2514,6 +2515,16 @@ class instalacion
         return $create;
 
     }
+    private function fc_cuenta_predial(PDO $link): array|stdClass
+    {
+        $create = $this->_add_fc_cuenta_predial(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
+
+        return $create;
+
+    }
     private function fc_impuesto_p(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_impuesto_p(link: $link);
@@ -2537,6 +2548,16 @@ class instalacion
     private function fc_receptor_email(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_receptor_email(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
+
+        return $create;
+
+    }
+    private function fc_retencion_p(PDO $link): array|stdClass
+    {
+        $create = $this->_add_fc_retencion_p(link: $link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
         }
@@ -2574,16 +2595,7 @@ class instalacion
         return $create;
 
     }
-    private function fc_cuenta_predial(PDO $link): array|stdClass
-    {
-        $create = $this->_add_fc_cuenta_predial(link: $link);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
-        }
 
-        return $create;
-
-    }
     private function fc_cuenta_predial_nc(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_cuenta_predial_nc(link: $link);
@@ -2722,6 +2734,14 @@ class instalacion
         }
 
 
+        $alta_accion = $this->inserta_accion_base(adm_accion_descripcion: 'adjunta',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',link:  $link,
+            lista:  'activo',titulo:  'Adjunta Documento');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+
+
         $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
             link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'FACTURACION',pr_tipo_proceso_codigo:  'Control');
         if (errores::$error) {
@@ -2846,38 +2866,12 @@ class instalacion
         }
 
 
-        $adm_seccion_id = (new adm_seccion(link: $link))->adm_seccion_id(descripcion: __FUNCTION__);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener adm_seccion_id', data:  $adm_seccion_id);
-        }
 
-        $adm_accion_ins['descripcion'] = 'genera_pem';
-        $adm_accion_ins['adm_seccion_id'] = $adm_seccion_id;
-        $adm_accion_ins['icono'] = 'bi bi-file-lock2';
-        $adm_accion_ins['visible'] = 'inactivo';
-        $adm_accion_ins['inicio'] = 'inactivo';
-        $adm_accion_ins['lista'] = 'activo';
-        $adm_accion_ins['seguridad'] = 'activo';
-        $adm_accion_ins['es_modal'] = 'inactivo';
-        $adm_accion_ins['es_view'] = 'inactivo';
-        $adm_accion_ins['titulo'] = 'Genera PEM';
-        $adm_accion_ins['css'] = 'warning';
-        $adm_accion_ins['es_status'] = 'inactivo';
-        $adm_accion_ins['es_lista'] = 'activo';
-        $adm_accion_ins['muestra_icono_btn'] = 'activo';
-        $adm_accion_ins['muestra_titulo_btn'] = 'inactivo';
-
-        $filtro['adm_accion.descripcion'] = 'genera_pem';
-        $filtro['adm_seccion.descripcion'] = __FUNCTION__;
-        $existe  = (new \gamboamartin\administrador\models\adm_accion(link: $link))->existe(filtro: $filtro);
+        $alta_accion = $this->inserta_accion_base(adm_accion_descripcion: 'genera_pem',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-lock2',link:  $link,
+            lista:  'activo',titulo:  'Genera PEM');
         if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener accion',data:  $existe);
-        }
-        if(!$existe){
-            $alta = (new \gamboamartin\administrador\models\adm_accion(link: $link))->alta_registro(registro: $adm_accion_ins);
-            if(errores::$error){
-                return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta);
-            }
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
 
         return $create;
@@ -2912,38 +2906,12 @@ class instalacion
         }
 
 
-        $adm_seccion_id = (new adm_seccion(link: $link))->adm_seccion_id(descripcion: __FUNCTION__);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener adm_seccion_id', data:  $adm_seccion_id);
-        }
 
-        $adm_accion_ins['descripcion'] = 'genera_pem';
-        $adm_accion_ins['adm_seccion_id'] = $adm_seccion_id;
-        $adm_accion_ins['icono'] = 'bi bi-file-lock2';
-        $adm_accion_ins['visible'] = 'inactivo';
-        $adm_accion_ins['inicio'] = 'inactivo';
-        $adm_accion_ins['lista'] = 'activo';
-        $adm_accion_ins['seguridad'] = 'activo';
-        $adm_accion_ins['es_modal'] = 'inactivo';
-        $adm_accion_ins['es_view'] = 'inactivo';
-        $adm_accion_ins['titulo'] = 'Genera PEM';
-        $adm_accion_ins['css'] = 'warning';
-        $adm_accion_ins['es_status'] = 'inactivo';
-        $adm_accion_ins['es_lista'] = 'activo';
-        $adm_accion_ins['muestra_icono_btn'] = 'activo';
-        $adm_accion_ins['muestra_titulo_btn'] = 'inactivo';
-
-        $filtro['adm_accion.descripcion'] = 'genera_pem';
-        $filtro['adm_seccion.descripcion'] = __FUNCTION__;
-        $existe  = (new \gamboamartin\administrador\models\adm_accion(link: $link))->existe(filtro: $filtro);
+        $alta_accion = $this->inserta_accion_base(adm_accion_descripcion: 'genera_pem',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-lock2',link:  $link,
+            lista:  'activo',titulo:  'Genera PEM');
         if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener accion',data:  $existe);
-        }
-        if(!$existe){
-            $alta = (new \gamboamartin\administrador\models\adm_accion(link: $link))->alta_registro(registro: $adm_accion_ins);
-            if(errores::$error){
-                return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta);
-            }
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
 
         return $create;
@@ -3096,6 +3064,13 @@ class instalacion
             etiqueta_label: $etiqueta_label, link: $link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
+
+        $alta_accion = $this->inserta_accion_base(adm_accion_descripcion: 'adjunta',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',link:  $link,
+            lista:  'activo',titulo:  'Adjunta Documento');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
 
 
@@ -3744,16 +3719,7 @@ class instalacion
         return $create;
 
     }
-    private function fc_retencion_p(PDO $link): array|stdClass
-    {
-        $create = $this->_add_fc_retencion_p(link: $link);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
-        }
 
-        return $create;
-
-    }
     private function fc_uuid(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_uuid(link: $link);
@@ -3856,6 +3822,52 @@ class instalacion
 
 
         return $campos;
+
+    }
+
+    private function inserta_accion(string $adm_accion_descripcion, array $adm_accion_ins,
+                                    string $adm_seccion_descripcion, PDO $link): array|stdClass
+    {
+        $alta = new stdClass();
+        $filtro['adm_accion.descripcion'] = $adm_accion_descripcion;
+        $filtro['adm_seccion.descripcion'] = $adm_seccion_descripcion;
+
+        $existe  = (new \gamboamartin\administrador\models\adm_accion(link: $link))->existe(filtro: $filtro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener accion',data:  $existe);
+        }
+        if(!$existe){
+            $alta = (new \gamboamartin\administrador\models\adm_accion(link: $link))->alta_registro(registro: $adm_accion_ins);
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta);
+            }
+        }
+
+        return $alta;
+
+
+    }
+
+    private function inserta_accion_base(string $adm_accion_descripcion,string $adm_seccion_descripcion,
+                                         string $es_view, string $icono, PDO $link, string $lista, string $titulo)
+    {
+        $adm_seccion_id = (new adm_seccion(link: $link))->adm_seccion_id(descripcion: $adm_seccion_descripcion);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener adm_seccion_id', data:  $adm_seccion_id);
+        }
+
+        $adm_accion_ins = $this->adm_accion_ins(adm_seccion_id: $adm_seccion_id,descripcion:  $adm_accion_descripcion,
+            es_view:  $es_view,icono:  $icono,lista:  $lista,titulo:  $titulo);
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener accion ins',data:  $adm_accion_ins);
+        }
+
+        $alta_accion = $this->inserta_accion(adm_accion_descripcion: $adm_accion_descripcion,adm_accion_ins:  $adm_accion_ins,
+            adm_seccion_descripcion:  $adm_seccion_descripcion,link:  $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
 
     }
 
