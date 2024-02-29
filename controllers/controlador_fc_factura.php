@@ -103,8 +103,6 @@ class controlador_fc_factura extends _base_system_fc {
             die('Error');
         }
 
-
-
     }
 
     public function adjunta(bool $header, bool $ws = false): array|stdClass

@@ -2832,6 +2832,13 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
         }
 
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'descarga',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-cloud-download-fill',link:  $link,
+            lista:  'activo',titulo:  'Descarga');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+
 
         return $create;
 
