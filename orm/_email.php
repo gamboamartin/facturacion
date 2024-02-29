@@ -281,6 +281,7 @@ class _email{
         $not_adjunto_ins['not_mensaje_id'] = $not_mensaje_id;
         $not_adjunto_ins['doc_documento_id'] = $doc['doc_documento_id'];
         $not_adjunto_ins['descripcion'] = $row_entidad->fc_factura_folio.'.'.date('YmdHis').'.'.$doc['doc_extension_descripcion'];
+        $not_adjunto_ins['descripcion'] .= mt_rand(10000,99999);
         $r_not_adjunto = (new not_adjunto(link: $link))->alta_registro(registro: $not_adjunto_ins);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar adjunto', data: $r_not_adjunto);
