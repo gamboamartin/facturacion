@@ -2352,7 +2352,7 @@ class instalacion
         }
         $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta_bd',
             adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',
-            link:  $link, lista:  'activo',titulo:  'Adjunta Documento');
+            link:  $link, lista:  'inactivo',titulo:  'Adjunta Documento');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
@@ -2728,7 +2728,7 @@ class instalacion
 
         $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta_bd',
             adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',
-            link:  $link, lista:  'activo',titulo:  'Adjunta Documento');
+            link:  $link, lista:  'inactivo',titulo:  'Adjunta Documento');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
@@ -3066,7 +3066,7 @@ class instalacion
         }
         $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta_bd',
             adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',
-            link:  $link, lista:  'activo',titulo:  'Adjunta Documento');
+            link:  $link, lista:  'inactivo',titulo:  'Adjunta Documento');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
