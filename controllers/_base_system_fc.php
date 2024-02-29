@@ -15,6 +15,7 @@ use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\compresor\compresor;
 use gamboamartin\direccion_postal\models\dp_calle_pertenece;
+use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\_base_fc_html;
 use gamboamartin\facturacion\html\fc_csd_html;
@@ -242,13 +243,32 @@ class _base_system_fc extends _base_system{
 
     public function adjunta_bd(bool $header, bool $ws = false): array|stdClass
     {
+        //print_r($_FILES);EXIT;
+
+        $file = $_FILES['adjunto'];
+
+        $doc_documento_modelo = new doc_documento(link: $this->link);
+        $doc_documento_ins['doc_tipo_documento_id'] = 9;
+        $doc_documento_ins['name_out'] = $_FILES['adjunto']['name'];
 
 
+        $doc_documento_alta = $doc_documento_modelo->alta_documento(registro:$doc_documento_ins,file: $file);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al insertar doc', data: $doc_documento_alta);
+        }
 
-        print_r($_FILES);EXIT;
+        $doc_documento_id = $doc_documento_alta->registro_id;
+
+        $fc_factura_documento_ins['fc_factura_id'] = $this->registro_id;
+        $fc_factura_documento_ins['doc_documento_id'] = $doc_documento_id;
+
+        $fc_factura_doc = (new fc_factura_documento(link: $this->link))->alta_registro(registro:$fc_factura_documento_ins);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al insertar doc', data: $fc_factura_doc);
+        }
 
 
-        return $this->inputs;
+        return $fc_factura_doc;
     }
     public function ajusta_hora(bool $header, bool $ws = false): array|stdClass
     {

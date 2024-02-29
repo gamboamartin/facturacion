@@ -29,7 +29,7 @@ class _doc extends _modelo_parent{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener doc_documento_id', data: $doc_documento_id);
         }
-        if($doc_documento_id->doc_tipo_documento_descripcion!=='CFDI PDF') {
+        if($doc_documento_id->doc_tipo_documento_descripcion!=='CFDI PDF' && $doc_documento_id->doc_tipo_documento_descripcion !== 'ADJUNTO') {
 
             $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(
                 modelo_etapa: $this->modelo_etapa, registro_id: $row_entidad->$key_entidad_id);
