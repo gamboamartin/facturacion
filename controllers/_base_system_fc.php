@@ -243,7 +243,13 @@ class _base_system_fc extends _base_system{
 
     public function adjunta_bd(bool $header, bool $ws = false): array|stdClass
     {
-        //print_r($_FILES);EXIT;
+        $this->link->beginTransaction();
+        $siguiente_view = (new actions())->init_alta_bd(siguiente_view:"adjunta");
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
+                header:  $header, ws: $ws);
+        }
 
         $file = $_FILES['adjunto'];
 
@@ -254,6 +260,7 @@ class _base_system_fc extends _base_system{
 
         $doc_documento_alta = $doc_documento_modelo->alta_documento(registro:$doc_documento_ins,file: $file);
         if(errores::$error){
+            $this->link->rollBack();
             return $this->errores->error(mensaje: 'Error al insertar doc', data: $doc_documento_alta);
         }
 
@@ -262,9 +269,28 @@ class _base_system_fc extends _base_system{
         $fc_factura_documento_ins['fc_factura_id'] = $this->registro_id;
         $fc_factura_documento_ins['doc_documento_id'] = $doc_documento_id;
 
-        $fc_factura_doc = (new fc_factura_documento(link: $this->link))->alta_registro(registro:$fc_factura_documento_ins);
+        $fc_factura_doc = $this->modelo_documento->alta_registro(registro:$fc_factura_documento_ins);
         if(errores::$error){
+            $this->link->rollBack();
             return $this->errores->error(mensaje: 'Error al insertar doc', data: $fc_factura_doc);
+        }
+        $this->link->commit();
+
+        if($header){
+
+            $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
+                seccion: $this->tabla, siguiente_view: "adjunta");
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $fc_factura_doc,
+                    header:  true, ws: $ws);
+            }
+            header('Location:'.$retorno);
+            exit;
+        }
+        if($ws){
+            header('Content-Type: application/json');
+            echo json_encode($fc_factura_doc, JSON_THROW_ON_ERROR);
+            exit;
         }
 
 
