@@ -436,6 +436,10 @@ class _email{
 
                 $docs[] = $fc_factura_documento;
             }
+            if($fc_factura_documento['doc_tipo_documento_descripcion'] === 'ADJUNTO'){
+
+                $docs[] = $fc_factura_documento;
+            }
         }
         return $docs;
     }
