@@ -422,7 +422,20 @@ class _email{
         return $rels;
     }
 
-    PUBLIC function maqueta_documentos(array $_fc_documentos): array
+    /**
+     * POR DOCUMENTAR EN WIKI
+     * La función maqueta_documentos se encarga de formar un nuevo array con los documentos que cumplen con los
+     * tipos de documentos especificados.
+     *
+     * @param array $_fc_documentos Array de Documentos a ser filtrado para la maqueta.
+     * Los Documentos deben tener la llave 'doc_tipo_documento_descripcion' para ser evaluados.
+     *
+     * @return array Retorna un array con los documentos cuya 'doc_tipo_documento_descripcion'
+     * coincide con alguno de los tipos de documentos especificados ('xml_sin_timbrar', 'CFDI PDF', 'ADJUNTO').
+     * Si se encuentra alguna inconsistencia con los datos de entrada, retorna un array con la descripción del error.
+     * @version 27.19.0
+     */
+    private function maqueta_documentos(array $_fc_documentos): array
     {
 
         $tipos_doc = array('xml_sin_timbrar','CFDI PDF','ADJUNTO');
