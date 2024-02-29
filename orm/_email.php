@@ -211,7 +211,7 @@ class _email{
         }
 
 
-        $docs = $this->maqueta_documentos(fc_factura_documentos: $fc_factura_documentos);
+        $docs = $this->maqueta_documentos(_fc_documentos: $fc_factura_documentos);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener documentos', data: $fc_factura_documentos);
         }
@@ -422,14 +422,22 @@ class _email{
         return $rels;
     }
 
-    private function maqueta_documentos(array $fc_factura_documentos): array
+    PUBLIC function maqueta_documentos(array $_fc_documentos): array
     {
 
         $tipos_doc = array('xml_sin_timbrar','CFDI PDF','ADJUNTO');
         $docs = array();
-        foreach ($fc_factura_documentos as $fc_factura_documento){
-            if(in_array($fc_factura_documento['doc_tipo_documento_descripcion'], $tipos_doc)){
-                $docs[] = $fc_factura_documento;
+        foreach ($_fc_documentos as $_fc_documento){
+            if(!is_array($_fc_documento)){
+                return $this->error->error(mensaje: 'Error _fc_documento debe ser array', data: $_fc_documento);
+            }
+            $keys = array('doc_tipo_documento_descripcion');
+            $valida = $this->validacion->valida_existencia_keys(keys: $keys,registro:  $_fc_documento);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar _fc_documento', data: $valida);
+            }
+            if(in_array($_fc_documento['doc_tipo_documento_descripcion'], $tipos_doc)){
+                $docs[] = $_fc_documento;
             }
         }
         return $docs;
