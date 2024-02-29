@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\tests;
 use base\orm\modelo_base;
 
+use config\generales;
 use gamboamartin\cat_sat\models\cat_sat_factor;
 use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
@@ -15,6 +16,8 @@ use gamboamartin\cat_sat\models\cat_sat_uso_cfdi;
 use gamboamartin\comercial\models\com_producto;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\comercial\models\com_tipo_cambio;
+use gamboamartin\documento\models\doc_documento;
+use gamboamartin\documento\models\doc_version;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_complemento_pago;
 use gamboamartin\facturacion\models\fc_conf_retenido;
@@ -22,6 +25,7 @@ use gamboamartin\facturacion\models\fc_conf_traslado;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_docto_relacionado;
 use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_impuesto_dr;
 use gamboamartin\facturacion\models\fc_impuesto_p;
@@ -40,6 +44,7 @@ use gamboamartin\facturacion\models\fc_traslado_dr;
 use gamboamartin\facturacion\models\fc_traslado_dr_part;
 use gamboamartin\facturacion\models\fc_traslado_p;
 use gamboamartin\facturacion\models\fc_traslado_p_part;
+use gamboamartin\notificaciones\models\not_adjunto;
 use gamboamartin\organigrama\models\org_sucursal;
 use PDO;
 use stdClass;
@@ -406,6 +411,23 @@ class base_test{
     }
 
 
+    public function alta_doc_documento(PDO $link, int $id = 1): array|\stdClass
+    {
+        $registro['id'] = $id;
+        $registro['doc_tipo_documento_id'] = 9;
+        $file = array();
+        $file['name'] = 'txt.txt';
+        $file['tmp_name'] = (new generales())->path_base.'/tests/txt.txt';
+
+        $alta = (new doc_documento(link: $link))->alta_documento(registro: $registro,file: $file);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+        }
+        return $alta;
+    }
+
+
 
     public function alta_fc_traslado_dr(PDO $link, $fc_impuesto_dr_id = 1,  int $id = 1): array|\stdClass
     {
@@ -496,6 +518,24 @@ class base_test{
 
 
         $alta = (new fc_docto_relacionado($link))->alta_registro($registro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
+
+        }
+        return $alta;
+    }
+
+    public function alta_fc_factura_documento(PDO $link, int $doc_documento_id = 1 , int $fc_factura_id = 1,
+                                              int $id = 1): array|\stdClass
+    {
+
+
+        $registro = array();
+        $registro['id'] = $id;
+        $registro['fc_factura_id'] = $fc_factura_id;
+        $registro['doc_documento_id'] = $doc_documento_id;
+
+        $alta = (new fc_factura_documento($link))->alta_registro($registro);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar', data: $alta);
 
@@ -1600,10 +1640,6 @@ class base_test{
         return $del;
     }
 
-
-
-
-
     public function del_com_producto(PDO $link): array|\stdClass
     {
         $del = (new base_test())->del_fc_conf_retenido($link);
@@ -1642,6 +1678,24 @@ class base_test{
         return $del;
     }
 
+    public function del_doc_documento(PDO $link): array|\stdClass
+    {
+        $del = (new not_adjunto(link: $link))->elimina_todo();
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = (new doc_version(link: $link))->elimina_todo();
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+
+        $del = (new doc_documento(link: $link))->elimina_todo();
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
     public function del_pr_etapa_proceso(PDO $link): array|\stdClass
     {
 

@@ -18,6 +18,12 @@ class _doc extends _modelo_parent{
 
         $key_entidad_id = $this->modelo_entidad->key_id;
 
+        $keys_val = array($key_entidad_id,'doc_documento_id');
+        $valida = $this->validacion->valida_ids(keys: $keys_val,registro:  $this->registro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al valida registro', data: $valida);
+        }
+
         $row_entidad = $this->modelo_entidad->registro(registro_id: $this->registro[$key_entidad_id], retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $row_entidad);

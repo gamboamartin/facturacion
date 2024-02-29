@@ -263,7 +263,17 @@ class _base_system_fc extends _base_system{
             if(errores::$error){
                 return $this->errores->error(mensaje: 'Error al generar boton', data: $btn_del);
             }
+
+            $btn_descarga = $this->html_base->button_href(accion:'descarga',etiqueta: 'Descarga',
+                registro_id:  $documento[$this->modelo_documento->key_id], seccion: $this->modelo_documento->tabla,
+                style: 'success', params: $params);
+
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error al generar boton', data: $btn_del);
+            }
+
             $documentos_out[$key]['del'] = $btn_del;
+            $documentos_out[$key]['descarga'] = $btn_descarga;
 
         }
 

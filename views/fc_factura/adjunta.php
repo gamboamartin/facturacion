@@ -46,7 +46,8 @@
                         <tr>
                             <th>Id</th>
                             <th>Documento</th>
-                            <th>Acciones</th>
+                            <th>Elimina</th>
+                            <th>Descarga</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -57,6 +58,7 @@
                             <td><?php echo $documento['id'] ?></td>
                             <td><?php echo $documento['doc_documento_name_out'] ?></td>
                             <td><?php echo $documento['del'] ?></td>
+                            <td><?php echo $documento['descarga'] ?></td>
                         </tr>
                         <?php } ?>
                         </tbody>
