@@ -45,19 +45,18 @@
                         <thead>
                         <tr>
                             <th>Id</th>
-                            <th>Correo</th>
+                            <th>Documento</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php
-                        foreach ($controlador->registros['emails_facturas'] as $fc_email){
+                        foreach ($controlador->documentos as $documento){
                         ?>
                         <tr>
-                            <td><?php echo $fc_email['fc_email_id'] ?></td>
-                            <td><?php echo $fc_email['com_email_cte_descripcion'] ?></td>
-                            <td><?php echo $fc_email['elimina_bd'] ?></td>
-                            <td><?php echo $fc_email['status'] ?></td>
+                            <td><?php echo $documento['id'] ?></td>
+                            <td><?php echo $documento['doc_documento_name_out'] ?></td>
+                            <td><?php echo $documento['del'] ?></td>
                         </tr>
                         <?php } ?>
                         </tbody>

@@ -29,6 +29,8 @@ class controlador_fc_factura_documento extends system{
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link,
             paths_conf: $paths_conf);
 
+        $this->lista_get_data = true;
+
     }
 
 }

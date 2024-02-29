@@ -68,7 +68,7 @@ class _doc extends _modelo_parent{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener registro', data: $fc_factura_documento);
         }
-        if($fc_factura_documento->doc_tipo_documento_descripcion!=='CFDI PDF') {
+        if($fc_factura_documento->doc_tipo_documento_descripcion!=='CFDI PDF' && $fc_factura_documento->doc_tipo_documento_descripcion!=='ADJUNTO') {
 
             if($this->valida_restriccion) {
                 $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(

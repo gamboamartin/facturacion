@@ -129,6 +129,7 @@ class _base_system_fc extends _base_system{
     public string $link_factura_cancela = '';
     public string $link_factura_timbra_xml = '';
     public string $link_adjunta_bd = '';
+    public array $documentos = array();
 
 
     public function __construct(html_controler $html_, PDO $link, modelo $modelo, stdClass $paths_conf = new stdClass())
@@ -164,9 +165,7 @@ class _base_system_fc extends _base_system{
             return $this->retorno_error(mensaje: 'Error al obtener registro', data: $row_upd, header: $header, ws: $ws);
         }
 
-
         $this->inputs = new stdClass();
-
 
         $columns_ds[] = $this->tabla.'_descripcion_select';
         $filtro[$this->tabla.'.id'] = $this->registro_id;
@@ -236,6 +235,39 @@ class _base_system_fc extends _base_system{
         }
 
         $this->link_adjunta_bd = $link_adjunta;
+
+        $filtro = array();
+        $filtro[$this->tabla.'.id'] = $this->registro_id;
+        $r_documentos = $this->modelo_documento->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener documentos', data: $r_documentos);
+        }
+
+        $documentos = $r_documentos->registros;
+        $documentos_out = array();
+        $params = array();
+        $params['seccion_retorno'] = $this->tabla;
+        $params['accion_retorno'] = 'adjunta';
+        $params['id_retorno'] = $this->registro_id;
+        foreach ($documentos as $key=>$documento){
+            if((int)$documento['doc_tipo_documento_id'] !== 9){
+                continue;
+            }
+            $documentos_out[$key]['doc_documento_name_out'] = $documento['doc_documento_name_out'];
+            $documentos_out[$key]['doc_tipo_documento_descripcion'] = $documento['doc_tipo_documento_descripcion'];
+            $documentos_out[$key]['id'] = $documento[$this->modelo_documento->key_id];
+
+            $btn_del = $this->html_base->button_href(accion:'elimina_bd',etiqueta: 'Elimina',
+                registro_id:  $documento[$this->modelo_documento->key_id], seccion: $this->modelo_documento->tabla, style: 'danger', params: $params);
+
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error al generar boton', data: $btn_del);
+            }
+            $documentos_out[$key]['del'] = $btn_del;
+
+        }
+
+        $this->documentos = $documentos_out;
 
 
         return $this->inputs;
