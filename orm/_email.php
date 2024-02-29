@@ -26,7 +26,6 @@ class _email{
      * @param stdClass $row_entidad Registro de la entidad a integrar asunto
      * @param string $uuid Identificador del SAT
      * @return string|array
-     * @version 7.4.0
      */
     private function asunto(stdClass $row_entidad, string $uuid): string|array
     {
