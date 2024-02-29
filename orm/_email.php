@@ -424,20 +424,11 @@ class _email{
 
     private function maqueta_documentos(array $fc_factura_documentos): array
     {
+
+        $tipos_doc = array('xml_sin_timbrar','CFDI PDF','ADJUNTO');
         $docs = array();
         foreach ($fc_factura_documentos as $fc_factura_documento){
-            /**
-             * Refactorizar con conf
-             */
-            if($fc_factura_documento['doc_tipo_documento_descripcion'] === 'xml_sin_timbrar'){
-                $docs[] = $fc_factura_documento;
-            }
-            if($fc_factura_documento['doc_tipo_documento_descripcion'] === 'CFDI PDF'){
-
-                $docs[] = $fc_factura_documento;
-            }
-            if($fc_factura_documento['doc_tipo_documento_descripcion'] === 'ADJUNTO'){
-
+            if(in_array($fc_factura_documento['doc_tipo_documento_descripcion'], $tipos_doc)){
                 $docs[] = $fc_factura_documento;
             }
         }
