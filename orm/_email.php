@@ -280,9 +280,14 @@ class _email{
     private function inserta_adjunto(array $doc, stdClass $row_entidad, int $not_mensaje_id, PDO $link){
         $not_adjunto_ins['not_mensaje_id'] = $not_mensaje_id;
         $not_adjunto_ins['doc_documento_id'] = $doc['doc_documento_id'];
-        $not_adjunto_ins['descripcion'] = $row_entidad->fc_factura_folio.'.'.date('YmdHis').
+        $not_adjunto_ins['descripcion'] = $row_entidad->fc_factura_folio.'.'.date('YmdHis').mt_rand(10000,99999).
             '.'.$doc['doc_extension_descripcion'];
-        $not_adjunto_ins['descripcion'] .= mt_rand(10000,99999);
+
+        $not_adjunto_ins['name_out'] =  $doc['doc_documento_name_out'];
+        if($doc['doc_tipo_documento_descripcion'] !=='ADJUNTO') {
+            $not_adjunto_ins['name_out'] = $row_entidad->fc_factura_folio . '.' . $doc['doc_extension_descripcion'];
+        }
+
         $r_not_adjunto = (new not_adjunto(link: $link))->alta_registro(registro: $not_adjunto_ins);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar adjunto', data: $r_not_adjunto);
@@ -297,7 +302,8 @@ class _email{
             return $this->error->error(mensaje: 'Error al obtener documentos', data: $docs);
         }
         foreach ($docs as $doc){
-            $r_not_adjunto = $this->inserta_adjunto(doc: $doc,row_entidad:  $row_entidad,not_mensaje_id:  $not_mensaje_id,link:  $link);
+            $r_not_adjunto = $this->inserta_adjunto(doc: $doc,row_entidad:  $row_entidad,
+                not_mensaje_id:  $not_mensaje_id,link:  $link);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al insertar adjunto', data: $r_not_adjunto);
             }
