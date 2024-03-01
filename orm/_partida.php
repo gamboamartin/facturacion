@@ -878,7 +878,6 @@ class _partida extends  _base{
      * @param array $hijo Hijo a maquetar
      * @param _data_impuestos $modelo_traslado Modelo de tipo traslado
      * @return array
-     * @version 8.47.3
      */
     private function hijo_traslado(array $hijo, _data_impuestos $modelo_traslado): array
     {
@@ -899,7 +898,6 @@ class _partida extends  _base{
      * @param _data_impuestos $modelo_retencion Modelo de retenciones
      * @param _data_impuestos $modelo_traslado Modelo de traslados
      * @return array
-     * @version 10.3.0
      */
     private function hijos_partida(_data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado): array
     {
@@ -1026,7 +1024,6 @@ class _partida extends  _base{
      * @param string $name_modelo_entidad Nombre de la entidad base
      * @param int $registro_entidad_id Identificador de la entidad base
      * @return array|stdClass
-     * @version 10.74.3
      */
     private function integra_buttons_partida( array $filtro, array $hijo, html_controler $html,
                                               string $name_modelo_entidad, int $registro_entidad_id): array|stdClass
@@ -1272,7 +1269,6 @@ class _partida extends  _base{
      * @param int $registro_entidad_id Identificador de factura o complemento
      * @param array $hijo  datos relacionados de partidas
      * @return array|stdClass
-     * @version 10.76.3
      */
     final public function partidas( html_controler $html, _transacciones_fc $modelo_entidad,_data_impuestos $modelo_retencion,
                               _data_impuestos $modelo_traslado, int $registro_entidad_id,array $hijo = array()): array|stdClass
@@ -1523,7 +1519,6 @@ class _partida extends  _base{
      * Obtiene el nombre de una tabla de tipo impuesto
      * @param _data_impuestos $modelo_impuesto Modelo de tipo Impuestos
      * @return array|string
-     * @version 9.30.3
      */
     private function tabla_impuesto(_data_impuestos $modelo_impuesto): array|string
     {
