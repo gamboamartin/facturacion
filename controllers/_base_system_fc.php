@@ -37,6 +37,7 @@ use gamboamartin\facturacion\models\_sellado;
 use gamboamartin\facturacion\models\_transacciones_fc;
 use gamboamartin\facturacion\models\_uuid_ext;
 use gamboamartin\facturacion\models\com_producto;
+use gamboamartin\facturacion\models\fc_complemento_pago;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_nc_rel;
@@ -2589,6 +2590,7 @@ class _base_system_fc extends _base_system{
         }
 
 
+
         $key_relacionada_id = $this->modelo_relacionada->key_id;
         $key_relacion_id = $this->modelo_relacion->key_id;
         foreach ($relaciones as $indice=>$relacion){
@@ -2708,8 +2710,43 @@ class _base_system_fc extends _base_system{
 
         }
 
+        if($this->tabla === 'fc_complemento_pago'){
+
+
+            foreach ($relaciones as $indice=>$relacion){
+
+                $filtro['com_cliente.id'] = $datos->row_upd->com_cliente_id;
+                $r_fc_complemento_pago = (new fc_complemento_pago(link: $this->link))->filtro_and(filtro: $filtro);
+                if (errores::$error) {
+                    return $this->errores->error(mensaje: 'Error al obtener complementos', data: $r_fc_complemento_pago);
+                }
+                $fc_complementos_pago = $r_fc_complemento_pago->registros;
+
+                $fc_complementos_pago_env = array();
+                foreach ($fc_complementos_pago as $fc_complemento_pago){
+                    $checkbox = (new _relaciones_base())->input_chk_rel(clases_css: array(),
+                        entidad_origen_key: 'fc_complemento_pago', extra_params: array(), relacion_id: $relacion[$key_relacion_id],
+                        row_entidad_id: $fc_complemento_pago['fc_complemento_pago_id']);
+                    if (errores::$error) {
+                        return $this->errores->error(mensaje: 'Error al generar checkbox', data: $checkbox);
+                    }
+
+                    if((int)$fc_complemento_pago['fc_complemento_pago_id'] === $this->registro_id){
+                        continue;
+                    }
+                    $fc_complemento_pago['seleccion'] = $checkbox;
+                    $fc_complementos_pago_env[] = $fc_complemento_pago;
+                }
+                $relaciones[$indice]['fc_complementos_pago'] = $fc_complementos_pago_env;
+
+            }
+
+        }
+
 
         $this->relaciones = $relaciones;
+
+        //print_r($relaciones);exit;
 
 
         $button_fc_factura_modifica =  $this->html->button_href(accion: 'modifica', etiqueta: 'Ir a CFDI',

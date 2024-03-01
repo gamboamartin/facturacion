@@ -1516,9 +1516,16 @@ class _partida extends  _base{
     }
 
     /**
-     * Obtiene el nombre de una tabla de tipo impuesto
-     * @param _data_impuestos $modelo_impuesto Modelo de tipo Impuestos
-     * @return array|string
+     * POR DOCUMENTAR EN WIKI
+     * La función tabla_impuesto valida y normaliza el nombre de la tabla de impuesto en
+     * el modelo de impuestos brindado.
+     *
+     * @param _data_impuestos $modelo_impuesto Modelo de impuestos que contiene la tabla a validar.
+     *
+     * @return array|string Retorna el nombre de la tabla si la validación es exitosa.
+     * Si se encuentra alguna inconsistencia con los datos de entrada,
+     * retorna un array con la descripción del error.
+     * @version 27.32.0
      */
     private function tabla_impuesto(_data_impuestos $modelo_impuesto): array|string
     {

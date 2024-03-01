@@ -94,6 +94,21 @@
                                             </tr>
                                         <?php } ?>
 
+                                        <?php foreach ($fc_relacion['fc_complementos_pago'] as $fc_complemento_pago){
+                                            //print_r($fc_relacion['fc_complementos_pago']);exit;
+                                            ?>
+                                            <tr>
+                                                <td><?php echo $fc_complemento_pago['fc_complemento_pago_uuid']; ?></td>
+                                                <td><?php echo $fc_complemento_pago['com_cliente_rfc']; ?></td>
+                                                <td><?php echo $fc_complemento_pago['fc_complemento_pago_folio']; ?></td>
+                                                <td><?php echo $fc_complemento_pago['fc_complemento_pago_fecha']; ?></td>
+                                                <td><?php echo $fc_complemento_pago['fc_complemento_pago_etapa']; ?></td>
+                                                <td>
+                                                    <?php echo $fc_complemento_pago['seleccion']; ?>
+                                                </td>
+                                            </tr>
+                                        <?php } ?>
+
                                         <?php foreach ($fc_relacion['fc_facturas_relacionadas'] as $fc_factura){ ?>
                                             <tr>
                                                 <td><?php echo $fc_factura['fc_factura_uuid']; ?></td>
@@ -104,6 +119,8 @@
                                                 <td><?php echo $fc_factura['elimina_bd']; ?></td>
                                             </tr>
                                         <?php } ?>
+
+
 
                                         </tbody>
                                     </table>
