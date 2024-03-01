@@ -38,6 +38,7 @@ use gamboamartin\facturacion\models\_transacciones_fc;
 use gamboamartin\facturacion\models\_uuid_ext;
 use gamboamartin\facturacion\models\com_producto;
 use gamboamartin\facturacion\models\fc_complemento_pago;
+use gamboamartin\facturacion\models\fc_complemento_pago_relacionada;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_nc_rel;
@@ -1430,16 +1431,31 @@ class _base_system_fc extends _base_system{
                 }
                 else{
 
+                    if($this->tabla === 'fc_complemento_pago'){
+                        $fc_facturas_montos = array();
+                        $modelo_relacionada = new fc_complemento_pago_relacionada(link: $this->link);
 
-                    $modelo_relacionada = $this->modelo_uuid_ext;
+                        $r_fc_factura_relacionada = $this->inserta_relacionada(fc_facturas_montos: $fc_facturas_montos,
+                            key_modelo_base_id: 'fc_complemento_pago_id', key_modelo_rel_id: $this->modelo_relacion->key_id,
+                            modelo_relacionada:  $modelo_relacionada, registro_entidad_id: $fc_factura_id,
+                            relacion_id: $fc_relacion_id);
 
-                    $r_fc_factura_relacionada = $this->inserta_relacionada(
-                        fc_facturas_montos: array(),
-                        key_modelo_base_id: 'fc_uuid_id', key_modelo_rel_id: $this->modelo_relacion->key_id,
-                        modelo_relacionada: $modelo_relacionada, registro_entidad_id: $fc_factura_id, relacion_id: $fc_relacion_id);
-                    if (errores::$error) {
-                        return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_factura_relacionada,
-                            header: true, ws: $ws);
+                        if (errores::$error) {
+                            return $this->retorno_error(mensaje: 'Error al dar de alta registro',
+                                data: $r_fc_factura_relacionada, header: true, ws: $ws);
+                        }
+                    }
+                    else {
+                        $modelo_relacionada = $this->modelo_uuid_ext;
+
+                        $r_fc_factura_relacionada = $this->inserta_relacionada(
+                            fc_facturas_montos: array(),
+                            key_modelo_base_id: 'fc_uuid_id', key_modelo_rel_id: $this->modelo_relacion->key_id,
+                            modelo_relacionada: $modelo_relacionada, registro_entidad_id: $fc_factura_id, relacion_id: $fc_relacion_id);
+                        if (errores::$error) {
+                            return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_factura_relacionada,
+                                header: true, ws: $ws);
+                        }
                     }
 
 

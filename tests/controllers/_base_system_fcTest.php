@@ -95,6 +95,32 @@ class _base_system_fcTest extends test {
         errores::$error = false;
     }
 
+    public function test_valida_data_relacion(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+
+        $ctl = new controlador_fc_factura(link: $this->link, paths_conf: $this->paths_conf);
+        $ctl = new liberator($ctl);
+
+        $key_modelo_base_id = 'a';
+        $key_modelo_rel_id = 'v';
+        $registro_entidad_id = 1;
+        $relacion_id = 1;
+        $resultado = $ctl->valida_data_relacion($key_modelo_base_id, $key_modelo_rel_id, $registro_entidad_id, $relacion_id);
+        //print_r($resultado);exit;
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        errores::$error = false;
+    }
+
 
 
 }

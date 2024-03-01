@@ -855,7 +855,6 @@ class _partida extends  _base{
      * @param array $hijo Children
      * @param _data_impuestos $modelo_retencion Modelo de tipo impuesto
      * @return array
-     * @version 10.2.0
      */
     private function hijo_retenido(array $hijo, _data_impuestos $modelo_retencion): array
     {

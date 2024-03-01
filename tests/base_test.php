@@ -1918,9 +1918,24 @@ class base_test{
         return $del;
     }
 
-    public function del_fc_relacion_cp(PDO $link): array
+    public function del_fc_complemento_pago_relacionada(PDO $link): array
     {
 
+
+        $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_complemento_pago_relacionada');
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+        }
+        return $del;
+    }
+
+    public function del_fc_relacion_cp(PDO $link): array
+    {
+        $del = (new base_test())->del_fc_complemento_pago_relacionada($link);
+        if(errores::$error){
+            return (new errores())->error('Error al eliminar', $del);
+
+        }
 
         $del = $this->del($link, 'gamboamartin\\facturacion\\models\\fc_relacion_cp');
         if(errores::$error){
