@@ -2783,6 +2783,30 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
         }
 
+
+        $registros = (new fc_factura(link: $link))->registros();
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al obtener registros', data: $registros);
+        }
+
+        $modelo_etapa = new fc_factura_etapa(link: $link);
+        foreach ($registros as $registro){
+            $r_etapa = (new fc_factura(link: $link))->ultima_etapa(modelo_etapa: $modelo_etapa, registro_id: $registro['fc_factura_id']);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al obtener etapa', data: $r_etapa);
+            }
+            $etapa = $r_etapa->pr_etapa_descripcion;
+
+            if($etapa!==$registro['fc_factura_etapa']) {
+                $row_upd['etapa'] = $etapa;
+                $upd = (new fc_factura(link: $link))->modifica_bd_base(registro: $row_upd, id: $registro['fc_factura_id']);
+                if (errores::$error) {
+                    return (new errores())->error(mensaje: 'Error al upd etapa', data: $upd);
+                }
+            }
+        }
+
+
         return $result;
 
 
