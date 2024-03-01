@@ -3,7 +3,6 @@ namespace gamboamartin\facturacion\instalacion;
 
 use gamboamartin\administrador\instalacion\_adm;
 use gamboamartin\administrador\models\_instalacion;
-use gamboamartin\administrador\models\adm_seccion;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_etapa;
 use gamboamartin\facturacion\models\_transacciones_fc;
@@ -13,7 +12,6 @@ use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_nota_credito;
 use gamboamartin\facturacion\models\fc_nota_credito_etapa;
-use gamboamartin\js_base\eventos\adm_accion;
 use gamboamartin\proceso\models\pr_etapa;
 use gamboamartin\proceso\models\pr_etapa_proceso;
 use gamboamartin\proceso\models\pr_proceso;
@@ -2772,6 +2770,12 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
 
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'es_plantilla',
+            adm_seccion_descripcion: __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-files-alt',
+            link: $link, lista: 'activo', titulo: 'Es Plantilla', css: 'info', es_status: 'activo');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
 
         $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
             link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'FACTURACION',pr_tipo_proceso_codigo:  'Control');
