@@ -39,7 +39,6 @@ use gamboamartin\facturacion\models\_uuid_ext;
 use gamboamartin\facturacion\models\com_producto;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_factura;
-use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_nc_rel;
 use gamboamartin\facturacion\models\fc_notificacion;
 use gamboamartin\facturacion\models\fc_partida;
@@ -603,9 +602,14 @@ class _base_system_fc extends _base_system{
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_exportar_documentos);
         }
+        $button_fc_factura_adjunta =  $this->html->button_href(accion: 'adjunta', etiqueta: 'Adjunta Docs',
+            registro_id: $this->registro_id, seccion: $this->seccion, style: 'info', cols: 2, params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_exportar_documentos);
+        }
 
         $buttons = $button_fc_factura_relaciones.$button_fc_factura_timbra.$button_fc_factura_correo.
-            $button_fc_factura_envia.$button_fc_factura_exportar_documentos;
+            $button_fc_factura_envia.$button_fc_factura_exportar_documentos.$button_fc_factura_adjunta;
 
         return "<div class='col-md-12 buttons-form'>$buttons</div>";
 

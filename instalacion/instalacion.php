@@ -1020,6 +1020,38 @@ class instalacion
         return $out;
 
     }
+    private function _add_fc_nota_credito_etapa(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_nota_credito_etapa');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['pr_etapa_proceso_id'] = new stdClass();
+        $foraneas['fc_nota_credito_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_nota_credito_etapa');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+        $campos = new stdClass();
+        $campos->fecha = new stdClass();
+        $campos->fecha->tipo_dato = 'DATE';
+        $campos->fecha->default = '1900-01-01';
+
+        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_nota_credito_etapa');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
+        }
+        $out->columnas = $result;
+        return $out;
+
+    }
     private function _add_fc_pago_total(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -1237,6 +1269,38 @@ class instalacion
         return $out;
 
     }
+    private function _add_fc_traslado_p(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_traslado_p');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_impuesto_p_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_traslado_p');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+        /*$campos = new stdClass();
+
+        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_traslado_p');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
+        }
+        $out->columnas = $result;*/
+
+
+
+        return $out;
+
+    }
     private function _add_fc_traslado_p_part(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -1347,38 +1411,7 @@ class instalacion
 
 
 
-    private function _add_fc_nota_credito_etapa(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_nota_credito_etapa');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['pr_etapa_proceso_id'] = new stdClass();
-        $foraneas['fc_nota_credito_id'] = new stdClass();
 
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_nota_credito_etapa');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-        $campos = new stdClass();
-        $campos->fecha = new stdClass();
-        $campos->fecha->tipo_dato = 'DATE';
-        $campos->fecha->default = '1900-01-01';
-
-        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_nota_credito_etapa');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
-        }
-        $out->columnas = $result;
-        return $out;
-
-    }
     private function _add_fc_nota_credito_relacionada(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -1925,8 +1958,6 @@ class instalacion
         return $out;
 
     }
-
-
     private function _add_fc_retencion_p_part(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -2011,38 +2042,7 @@ class instalacion
         return $out;
 
     }
-    private function _add_fc_traslado_p(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_traslado_p');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_impuesto_p_id'] = new stdClass();
 
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_traslado_p');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-        /*$campos = new stdClass();
-
-        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_traslado_p');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
-        }
-        $out->columnas = $result;*/
-
-
-
-        return $out;
-
-    }
 
     /**
      * @param PDO $link
@@ -2344,17 +2344,33 @@ class instalacion
         }
 
         $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta',
-            adm_seccion_descripcion:  __FUNCTION__, es_view: 'activo', icono: 'bi bi-file-earmark-arrow-up',
-            link:  $link, lista:  'activo',titulo:  'Adjunta Documento');
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'activo', icono: 'bi bi-file-earmark-arrow-up',link:  $link,
+            lista:  'activo',titulo:  'Adjunta Documento');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
+
         $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta_bd',
             adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',
             link:  $link, lista:  'inactivo',titulo:  'Adjunta Documento');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
+
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'es_plantilla',
+            adm_seccion_descripcion: __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-files-alt',
+            link: $link, lista: 'activo', titulo: 'Es Plantilla', css: 'info', es_status: 'activo');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'relaciones',
+            adm_seccion_descripcion: __FUNCTION__, es_view: 'activo', icono: 'bi bi-arrow-left-right',
+            link: $link, lista: 'activo', titulo: 'Relaciones', css: 'success');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+
 
         $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
             link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'PAGO',pr_tipo_proceso_codigo:  'Control');
@@ -2635,9 +2651,6 @@ class instalacion
         return $create;
 
     }
-
-
-
     private function fc_ejecucion_aut_plantilla(PDO $link): array|stdClass
     {
         $init = (new _instalacion(link: $link));
@@ -2773,6 +2786,13 @@ class instalacion
         $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'es_plantilla',
             adm_seccion_descripcion: __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-files-alt',
             link: $link, lista: 'activo', titulo: 'Es Plantilla', css: 'info', es_status: 'activo');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'relaciones',
+            adm_seccion_descripcion: __FUNCTION__, es_view: 'activo', icono: 'bi bi-arrow-left-right',
+            link: $link, lista: 'activo', titulo: 'Relaciones', css: 'success');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
@@ -3156,9 +3176,24 @@ class instalacion
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
+
         $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta_bd',
             adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',
             link:  $link, lista:  'inactivo',titulo:  'Adjunta Documento');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'es_plantilla',
+            adm_seccion_descripcion: __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-files-alt',
+            link: $link, lista: 'activo', titulo: 'Es Plantilla', css: 'info', es_status: 'activo');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'relaciones',
+            adm_seccion_descripcion: __FUNCTION__, es_view: 'activo', icono: 'bi bi-arrow-left-right',
+            link: $link, lista: 'activo', titulo: 'Relaciones', css: 'success');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
