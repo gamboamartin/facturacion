@@ -82,7 +82,6 @@ class fc_conf_retenido extends _base {
      * Obtiene las configuraciones de retenciones
      * @param int $com_producto_id Producto en ejecucion
      * @return array|stdClass|int
-     * @version 10.85.3
      */
     final public function get_configuraciones(int $com_producto_id): array|stdClass|int
     {
