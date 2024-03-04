@@ -389,6 +389,29 @@ class instalacion
 
     }
 
+    private function _add_fc_notificacion_cp(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_notificacion_cp');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_complemento_pago_id'] = new stdClass();
+        $foraneas['not_mensaje_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_notificacion_cp');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+        return $out;
+
+    }
+
     private function _add_fc_conf_aut_producto(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -2540,6 +2563,34 @@ class instalacion
         return $create;
 
     }
+
+    private function fc_notificacion_cp(PDO $link): array|stdClass
+    {
+        $create = $this->_add_fc_notificacion_cp(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
+
+        $adm_menu_descripcion = 'Notificaciones';
+        $adm_sistema_descripcion = 'facturacion';
+        $etiqueta_label = 'Notificacion CP';
+        $adm_seccion_pertenece_descripcion = 'fc_notificacion_cp';
+        $adm_namespace_name = 'gamboamartin/facturacion';
+        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
+
+        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
+            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
+            adm_seccion_descripcion: __FUNCTION__,
+            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
+            adm_sistema_descripcion: $adm_sistema_descripcion,
+            etiqueta_label: $etiqueta_label, link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
+
+        return $create;
+
+    }
     private function fc_conf_aut_producto(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_conf_aut_producto(link: $link);
@@ -4612,6 +4663,12 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar fc_complemento_pago_relacionada', data:  $fc_complemento_pago_relacionada);
         }
         $result->fc_complemento_pago_relacionada = $fc_complemento_pago_relacionada;
+
+        $fc_notificacion_cp = $this->fc_notificacion_cp(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar fc_notificacion_cp', data:  $fc_notificacion_cp);
+        }
+        $result->fc_notificacion_cp = $fc_notificacion_cp;
 
         return $result;
 
