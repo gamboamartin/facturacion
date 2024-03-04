@@ -355,9 +355,15 @@ class _partida extends  _base{
 
     private function descripcion_mes_letra(string $descripcion): array|string
     {
+        $descripcion = trim($descripcion);
+        if($descripcion === ''){
+            return $this->error->error(mensaje: 'Error descripcion esta vacio', data: $descripcion);
+        }
         $mes = date('m');
         $mes_letra = $this->mes['espaniol'][$mes]['nombre'];
-        return str_replace("{{MES_LETRA}}", $mes_letra, $descripcion);
+
+        $descripcion = str_replace("{{MES_LETRA}}", $mes_letra, $descripcion);
+        return str_replace("{{mes_letra}}", $mes_letra, $descripcion);
     }
 
     private function descripcion_year(string $descripcion): array|string

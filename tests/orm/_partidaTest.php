@@ -49,6 +49,44 @@ class _partidaTest extends test
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_descripcion_mes_letra(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida_cp(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $descripcion = 'a';
+
+        $resultado = $modelo->descripcion_mes_letra($descripcion);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('a',$resultado);
+
+        errores::$error = false;
+
+        $descripcion = 'a {{MES_LETRA}}';
+
+        $resultado = $modelo->descripcion_mes_letra($descripcion);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('a MARZO',$resultado);
+
+        errores::$error = false;
+
+        $descripcion = 'a {{mes_letra}}';
+
+        $resultado = $modelo->descripcion_mes_letra($descripcion);
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('a MARZO',$resultado);
+        errores::$error = false;
+
+
+    }
     public function test_elimina_dependientes(): void
     {
         errores::$error = false;
