@@ -2114,6 +2114,15 @@ class instalacion
         }
         $out->fc_relacion_alta_bd = $alta_accion;
 
+
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'fc_factura_relacionada_alta_bd',
+            adm_seccion_descripcion: $adm_seccion_descripcion, es_view: 'inactivo', icono: 'bi bi-arrow-left-right',
+            link: $link, lista: 'inactivo', titulo: 'fc_factura_relacionada_alta_bd', css: 'success');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+        $out->fc_relacion_alta_bd = $alta_accion;
+
         return $out;
 
     }
