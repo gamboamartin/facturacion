@@ -1,6 +1,7 @@
 <?php
 namespace gamboamartin\facturacion\instalacion;
 
+use base\orm\modelo;
 use gamboamartin\administrador\instalacion\_adm;
 use gamboamartin\administrador\models\_instalacion;
 use gamboamartin\errores\errores;
@@ -2146,6 +2147,44 @@ class instalacion
 
     }
 
+    private function actualiza_etapa(_transacciones_fc $modelo, _etapa $modelo_etapa, array $registro)
+    {
+        $etapa = $this->ultima_etapa_txt(modelo: $modelo,modelo_etapa:  $modelo_etapa,registro:  $registro);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al obtener etapa', data: $etapa);
+        }
+        if($etapa!==$registro[$modelo_etapa->tabla]) {
+            $upd = $this->upd_etapa(etapa: $etapa, modelo: $modelo, registro: $registro);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al upd etapa', data: $upd);
+            }
+        }
+        return $etapa;
+
+
+    }
+
+    private function actualiza_etapas(_transacciones_fc $modelo, _etapa $modelo_etapa): array
+    {
+        $upds = array();
+        $registros = $modelo->registros();
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al obtener registros', data: $registros);
+        }
+
+        foreach ($registros as $registro){
+            $upd = $this->actualiza_etapa(modelo: $modelo,modelo_etapa:  $modelo_etapa,registro:  $registro);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al upd etapa', data: $upd);
+            }
+            $upds[] = $upd;
+        }
+
+        return $upds;
+
+
+    }
+
 
 
     /**
@@ -2435,6 +2474,14 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
         }
 
+        $modelo_etapa = new fc_complemento_pago_etapa(link: $link);
+        $modelo = new fc_complemento_pago(link: $link);
+
+        $upd = $this->actualiza_etapas(modelo: $modelo,modelo_etapa:  $modelo_etapa);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al upd etapa', data: $upd);
+        }
+
         return $result;
 
     }
@@ -2685,6 +2732,76 @@ class instalacion
         return $foraneas_r;
 
     }
+
+    private function fc_factura(PDO $link): array|stdClass
+    {
+        $create = $this->_add_fc_factura_etapa(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
+
+        $foraneas_r = $this->_add_foraneas_facturacion(link: $link,table: __FUNCTION__);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+
+        $modelo = new fc_factura(link: $link, valida_atributos_criticos: false);
+        $modelo_etapa = new fc_factura_etapa(link: $link);
+
+
+        $campos_r = $this->exe_campos_factura(link: $link, modelo: $modelo, modelo_etapa: $modelo_etapa);
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $campos_r);
+        }
+
+        $result = new stdClass();
+        $result->foraneas = $foraneas_r;
+        $result->campos_r = $campos_r;
+
+
+        $adm_menu_descripcion = 'Facturacion';
+        $adm_sistema_descripcion = 'facturacion';
+        $etiqueta_label = 'Facturacion';
+        $adm_seccion_pertenece_descripcion = 'facturacion';
+        $adm_namespace_name = 'gamboamartin/facturacion';
+        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
+
+        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
+            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
+            adm_seccion_descripcion: __FUNCTION__,
+            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
+            adm_sistema_descripcion: $adm_sistema_descripcion,
+            etiqueta_label: $etiqueta_label, link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
+
+        $acciones = $this->acciones_facturacion(adm_seccion_descripcion: __FUNCTION__,link:  $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar acciones',data:  $acciones);
+        }
+
+
+        $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
+            link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'FACTURACION',pr_tipo_proceso_codigo:  'Control');
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
+
+        $modelo_etapa = new fc_factura_etapa(link: $link);
+        $modelo = new fc_factura(link: $link);
+
+        $upd = $this->actualiza_etapas(modelo: $modelo,modelo_etapa:  $modelo_etapa);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al upd etapa', data: $upd);
+        }
+
+
+        return $result;
+
+
+    }
     private function fc_impuesto_p(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_impuesto_p(link: $link);
@@ -2819,91 +2936,7 @@ class instalacion
 
     }
 
-    private function fc_factura(PDO $link): array|stdClass
-    {
-        $create = $this->_add_fc_factura_etapa(link: $link);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
-        }
 
-        $foraneas_r = $this->_add_foraneas_facturacion(link: $link,table: __FUNCTION__);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-
-        $modelo = new fc_factura(link: $link, valida_atributos_criticos: false);
-        $modelo_etapa = new fc_factura_etapa(link: $link);
-
-
-        $campos_r = $this->exe_campos_factura(link: $link, modelo: $modelo, modelo_etapa: $modelo_etapa);
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $campos_r);
-        }
-
-        $result = new stdClass();
-        $result->foraneas = $foraneas_r;
-        $result->campos_r = $campos_r;
-
-
-        $adm_menu_descripcion = 'Facturacion';
-        $adm_sistema_descripcion = 'facturacion';
-        $etiqueta_label = 'Facturacion';
-        $adm_seccion_pertenece_descripcion = 'facturacion';
-        $adm_namespace_name = 'gamboamartin/facturacion';
-        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
-
-        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
-            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
-            adm_seccion_descripcion: __FUNCTION__,
-            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
-            adm_sistema_descripcion: $adm_sistema_descripcion,
-            etiqueta_label: $etiqueta_label, link: $link);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
-        }
-
-        $acciones = $this->acciones_facturacion(adm_seccion_descripcion: __FUNCTION__,link:  $link);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al insertar acciones',data:  $acciones);
-        }
-
-
-
-        $inserta = $this->genera_pr_etapa_proceso(adm_accion_descripcion: 'alta_bd',adm_seccion_descripcion: __FUNCTION__,
-            link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'FACTURACION',pr_tipo_proceso_codigo:  'Control');
-        if (errores::$error) {
-            return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
-        }
-
-
-        $registros = (new fc_factura(link: $link))->registros();
-        if (errores::$error) {
-            return (new errores())->error(mensaje: 'Error al obtener registros', data: $registros);
-        }
-
-        $modelo_etapa = new fc_factura_etapa(link: $link);
-        foreach ($registros as $registro){
-            $r_etapa = (new fc_factura(link: $link))->ultima_etapa(modelo_etapa: $modelo_etapa, registro_id: $registro['fc_factura_id']);
-            if (errores::$error) {
-                return (new errores())->error(mensaje: 'Error al obtener etapa', data: $r_etapa);
-            }
-            $etapa = $r_etapa->pr_etapa_descripcion;
-
-            if($etapa!==$registro['fc_factura_etapa']) {
-                $row_upd['etapa'] = $etapa;
-                $upd = (new fc_factura(link: $link))->modifica_bd_base(registro: $row_upd, id: $registro['fc_factura_id']);
-                if (errores::$error) {
-                    return (new errores())->error(mensaje: 'Error al upd etapa', data: $upd);
-                }
-            }
-        }
-
-
-        return $result;
-
-
-    }
 
     private function fc_factura_aut_plantilla(PDO $link): array|stdClass
     {
@@ -3262,6 +3295,14 @@ class instalacion
             link:  $link,pr_etapa_codigo: 'ALTA',pr_proceso_codigo: 'NOTA CREDITO',pr_tipo_proceso_codigo:  'Control');
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al insertar rows', data: $inserta);
+        }
+
+        $modelo_etapa = new fc_nota_credito_etapa(link: $link);
+        $modelo = new fc_nota_credito(link: $link);
+
+        $upd = $this->actualiza_etapas(modelo: $modelo,modelo_etapa:  $modelo_etapa);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al upd etapa', data: $upd);
         }
 
         return $result;
@@ -4545,6 +4586,28 @@ class instalacion
         $pr_tipo_proceso['descripcion'] = $descripcion;
         $pr_tipo_proceso['codigo'] = $codigo;
         return $pr_tipo_proceso;
+    }
+
+    private function ultima_etapa_txt(_transacciones_fc $modelo, _etapa $modelo_etapa, array $registro)
+    {
+        $r_etapa = $modelo->ultima_etapa(modelo_etapa: $modelo_etapa, registro_id: $registro[$modelo->key_id]);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al obtener etapa', data: $r_etapa);
+        }
+        return $r_etapa->pr_etapa_descripcion;
+
+
+    }
+
+    private function upd_etapa(string $etapa, modelo $modelo, array $registro)
+    {
+        $row_upd['etapa'] = $etapa;
+        $upd = $modelo->modifica_bd_base(registro: $row_upd, id: $registro[$modelo->key_id]);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al upd etapa', data: $upd);
+        }
+        return $upd;
+
     }
 
 }
