@@ -3068,6 +3068,7 @@ class _base_system_fc extends _base_system{
             return $this->retorno_error(mensaje: 'Error al consulta estado',data:  $verifica,header:  $header, ws: $ws);
         }
 
+        $this->modelo_etapa->verifica_permite_transaccion = false;
 
         $integra_etapa = (new _fc_base())->integra_etapa(key_factura_id_filter: $key_factura_id_filter,
             modelo: $this->modelo_entidad, modelo_etapa: $this->modelo_etapa, registro_id: $this->registro_id,

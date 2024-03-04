@@ -49,7 +49,7 @@ class _fc_base{
     }
 
     final public function integra_etapa(string $key_factura_id_filter, modelo $modelo, modelo $modelo_etapa,
-                                   int $registro_id, stdClass $verifica): bool|array
+                                   int $registro_id, stdClass $verifica, bool $valida_existencia_etapa = true): bool|array
     {
         $aplica_etapa = $this->aplica_etapa(key_factura_id_filter: $key_factura_id_filter,
             modelo_etapa: $modelo_etapa, registro_id: $registro_id, verifica: $verifica);
@@ -58,9 +58,9 @@ class _fc_base{
         }
 
         if($aplica_etapa) {
-            $r_alta_factura_etapa = (new pr_proceso(link: $modelo_etapa->link))->inserta_etapa(adm_accion: 'cancelado_sat', fecha: '',
-                modelo: $modelo, modelo_etapa: $modelo_etapa,
-                registro_id: $registro_id, valida_existencia_etapa: true);
+            $r_alta_factura_etapa = (new pr_proceso(link: $modelo_etapa->link))->inserta_etapa(
+                adm_accion: 'cancelado_sat', fecha: '', modelo: $modelo, modelo_etapa: $modelo_etapa,
+                registro_id: $registro_id, valida_existencia_etapa: $valida_existencia_etapa);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
             }
