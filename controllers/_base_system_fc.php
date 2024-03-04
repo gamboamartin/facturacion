@@ -3018,16 +3018,22 @@ class _base_system_fc extends _base_system{
 
 
     /**
-     * Valida los elementos de una relacion a entidad de tipo factura
-     * @param string $key_modelo_base_id Key del modelo entidad base
-     * @param string $key_modelo_rel_id Key de la entidad de relacion
-     * @param int $registro_entidad_id Identificador de la entidad base
-     * @param int $relacion_id Identificador del modelo de relacion
-     * @return bool|array
-
+     * POR DOCUMENTAR EN WIKI
+     * La función valida_data_relacion verifica la corrección de los parámetros ingresados,
+     * que representan la relación entre dos modelos en una entidad.
+     *
+     * @param string $key_modelo_base_id Clave de identificación del modelo base.
+     * @param string $key_modelo_rel_id Clave de identificación del modelo relacionado.
+     * @param int $registro_entidad_id Identificación del registro de la entidad donde se establece la relación.
+     * @param int $relacion_id Identificación de la relación.
+     *
+     * @return true|array Retorna verdadero si los parámetros son válidos.
+     * Si se encuentra alguna inconsistencia con los datos de entrada,
+     * retorna un array con la descripción del error.
+     * @version 27.39.0
      */
     private function valida_data_relacion(string $key_modelo_base_id, string $key_modelo_rel_id,
-                                          int $registro_entidad_id, int $relacion_id): bool|array
+                                          int $registro_entidad_id, int $relacion_id): true|array
     {
         $key_modelo_base_id = trim($key_modelo_base_id);
         if($key_modelo_base_id === ''){

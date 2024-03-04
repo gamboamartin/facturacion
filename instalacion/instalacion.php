@@ -364,6 +364,30 @@ class instalacion
         return $out;
 
     }
+
+    private function _add_fc_complemento_pago_relacionada(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_complemento_pago_relacionada');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_relacion_cp_id'] = new stdClass();
+        $foraneas['fc_complemento_pago_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_complemento_pago_relacionada');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+        return $out;
+
+    }
+
     private function _add_fc_conf_aut_producto(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -667,6 +691,84 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
         }
         $out->foraneas_r = $foraneas_r;
+
+        return $out;
+
+    }
+
+    private function _add_fc_docto_relacionado(PDO $link): array|stdClass
+    {
+        $out = new stdClass();
+        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_docto_relacionado');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
+        }
+        $out->create = $create;
+        $foraneas = array();
+        $foraneas['fc_factura_id'] = new stdClass();
+        $foraneas['cat_sat_obj_imp_id'] = new stdClass();
+        $foraneas['fc_pago_pago_id'] = new stdClass();
+
+        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_docto_relacionado');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
+        }
+        $out->foraneas_r = $foraneas_r;
+
+        $campos = new stdClass();
+        $campos->equivalencia_dr = new stdClass();
+        $campos->equivalencia_dr->tipo_dato = 'DOUBLE';
+        $campos->equivalencia_dr->default = '0';
+        $campos->equivalencia_dr->longitud = '100,4';
+
+        $campos->num_parcialidad = new stdClass();
+        $campos->num_parcialidad->tipo_dato = 'BIGINT';
+
+        $campos->imp_saldo_ant = new stdClass();
+        $campos->imp_saldo_ant->tipo_dato = 'DOUBLE';
+        $campos->imp_saldo_ant->default = '0';
+        $campos->imp_saldo_ant->longitud = '100,4';
+
+        $campos->imp_pagado = new stdClass();
+        $campos->imp_pagado->tipo_dato = 'DOUBLE';
+        $campos->imp_pagado->default = '0';
+        $campos->imp_pagado->longitud = '100,4';
+
+        $campos->imp_saldo_insoluto = new stdClass();
+        $campos->imp_saldo_insoluto->tipo_dato = 'DOUBLE';
+        $campos->imp_saldo_insoluto->default = '0';
+        $campos->imp_saldo_insoluto->longitud = '100,4';
+
+        $campos->total_factura = new stdClass();
+        $campos->total_factura->tipo_dato = 'DOUBLE';
+        $campos->total_factura->default = '0';
+        $campos->total_factura->longitud = '100,4';
+
+        $campos->total_factura_tc = new stdClass();
+        $campos->total_factura_tc->tipo_dato = 'DOUBLE';
+        $campos->total_factura_tc->default = '0';
+        $campos->total_factura_tc->longitud = '100,4';
+
+        $campos->imp_pagado_tc = new stdClass();
+        $campos->imp_pagado_tc->tipo_dato = 'DOUBLE';
+        $campos->imp_pagado_tc->default = '0';
+        $campos->imp_pagado_tc->longitud = '100,4';
+
+        $campos->saldo_factura_tc = new stdClass();
+        $campos->saldo_factura_tc->tipo_dato = 'DOUBLE';
+        $campos->saldo_factura_tc->default = '0';
+        $campos->saldo_factura_tc->longitud = '100,4';
+
+
+        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_docto_relacionado');
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
+        }
+        $out->columnas = $result;
+
+
 
         return $out;
 
@@ -1470,11 +1572,6 @@ class instalacion
         return $out;
 
     }
-
-
-
-
-
     private function _add_fc_notificacion(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -1834,83 +1931,6 @@ class instalacion
 
     }
 
-    private function _add_fc_docto_relacionado(PDO $link): array|stdClass
-    {
-        $out = new stdClass();
-        $create = (new _instalacion(link: $link))->create_table_new(table: 'fc_docto_relacionado');
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al create table', data:  $create);
-        }
-        $out->create = $create;
-        $foraneas = array();
-        $foraneas['fc_factura_id'] = new stdClass();
-        $foraneas['cat_sat_obj_imp_id'] = new stdClass();
-        $foraneas['fc_pago_pago_id'] = new stdClass();
-
-        $foraneas_r = (new _instalacion(link:$link))->foraneas(foraneas: $foraneas,table:  'fc_docto_relacionado');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar foranea', data:  $foraneas_r);
-        }
-        $out->foraneas_r = $foraneas_r;
-
-        $campos = new stdClass();
-        $campos->equivalencia_dr = new stdClass();
-        $campos->equivalencia_dr->tipo_dato = 'DOUBLE';
-        $campos->equivalencia_dr->default = '0';
-        $campos->equivalencia_dr->longitud = '100,4';
-
-        $campos->num_parcialidad = new stdClass();
-        $campos->num_parcialidad->tipo_dato = 'BIGINT';
-
-        $campos->imp_saldo_ant = new stdClass();
-        $campos->imp_saldo_ant->tipo_dato = 'DOUBLE';
-        $campos->imp_saldo_ant->default = '0';
-        $campos->imp_saldo_ant->longitud = '100,4';
-
-        $campos->imp_pagado = new stdClass();
-        $campos->imp_pagado->tipo_dato = 'DOUBLE';
-        $campos->imp_pagado->default = '0';
-        $campos->imp_pagado->longitud = '100,4';
-
-        $campos->imp_saldo_insoluto = new stdClass();
-        $campos->imp_saldo_insoluto->tipo_dato = 'DOUBLE';
-        $campos->imp_saldo_insoluto->default = '0';
-        $campos->imp_saldo_insoluto->longitud = '100,4';
-
-        $campos->total_factura = new stdClass();
-        $campos->total_factura->tipo_dato = 'DOUBLE';
-        $campos->total_factura->default = '0';
-        $campos->total_factura->longitud = '100,4';
-
-        $campos->total_factura_tc = new stdClass();
-        $campos->total_factura_tc->tipo_dato = 'DOUBLE';
-        $campos->total_factura_tc->default = '0';
-        $campos->total_factura_tc->longitud = '100,4';
-
-        $campos->imp_pagado_tc = new stdClass();
-        $campos->imp_pagado_tc->tipo_dato = 'DOUBLE';
-        $campos->imp_pagado_tc->default = '0';
-        $campos->imp_pagado_tc->longitud = '100,4';
-
-        $campos->saldo_factura_tc = new stdClass();
-        $campos->saldo_factura_tc->tipo_dato = 'DOUBLE';
-        $campos->saldo_factura_tc->default = '0';
-        $campos->saldo_factura_tc->longitud = '100,4';
-
-
-        $result = (new _instalacion(link: $link))->add_columns(campos: $campos,table:  'fc_docto_relacionado');
-
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar campos', data:  $result);
-        }
-        $out->columnas = $result;
-
-
-
-        return $out;
-
-    }
 
     private function _add_fc_traslado_dr_part(PDO $link): array|stdClass
     {
@@ -1955,7 +1975,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_retencion_dr_part(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -2075,16 +2094,16 @@ class instalacion
         $out = new stdClass();
 
         $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta',
-            adm_seccion_descripcion:  $adm_seccion_descripcion, es_view: 'activo', icono: 'bi bi-file-earmark-arrow-up',link:  $link,
-            lista:  'activo',titulo:  'Adjunta Documento');
+            adm_seccion_descripcion:  $adm_seccion_descripcion, es_view: 'activo',
+            icono: 'bi bi-file-earmark-arrow-up',link:  $link, lista:  'activo',titulo:  'Adjunta Documento');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
         $out->adjunta = $alta_accion;
 
         $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'adjunta_bd',
-            adm_seccion_descripcion:  $adm_seccion_descripcion, es_view: 'inactivo', icono: 'bi bi-file-earmark-arrow-up',
-            link:  $link, lista:  'inactivo',titulo:  'Adjunta Documento');
+            adm_seccion_descripcion:  $adm_seccion_descripcion, es_view: 'inactivo',
+            icono: 'bi bi-file-earmark-arrow-up', link:  $link, lista:  'inactivo',titulo:  'Adjunta Documento');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
@@ -2426,6 +2445,34 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
         }
 
+
+        return $create;
+
+    }
+
+    private function fc_complemento_pago_relacionada(PDO $link): array|stdClass
+    {
+        $create = $this->_add_fc_complemento_pago_relacionada(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
+
+        $adm_menu_descripcion = 'Pagos';
+        $adm_sistema_descripcion = 'facturacion';
+        $etiqueta_label = 'Relacion Complemento';
+        $adm_seccion_pertenece_descripcion = 'facturacion';
+        $adm_namespace_name = 'gamboamartin/facturacion';
+        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
+
+        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
+            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
+            adm_seccion_descripcion: __FUNCTION__,
+            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
+            adm_sistema_descripcion: $adm_sistema_descripcion,
+            etiqueta_label: $etiqueta_label, link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
 
         return $create;
 
@@ -2951,6 +2998,17 @@ class instalacion
 
     }
 
+    private function fc_conf_traslado(PDO $link): array|stdClass
+    {
+        $create = $this->_add_fc_conf_traslado(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
+        }
+
+        return $create;
+
+    }
+
     private function fc_nota_credito_documento(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_nota_credito_documento(link: $link);
@@ -3007,8 +3065,6 @@ class instalacion
         return $create;
 
     }
-
-
 
     private function fc_key_csd(PDO $link): array|stdClass
     {
@@ -3704,7 +3760,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_retencion_dr(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_retencion_dr(link: $link);
@@ -3715,7 +3770,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_impuesto_dr(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_impuesto_dr(link: $link);
@@ -3726,7 +3780,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_docto_relacionado(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_docto_relacionado(link: $link);
@@ -3754,7 +3807,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_traslado_dr_part(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_traslado_dr_part(link: $link);
@@ -3765,7 +3817,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_retencion_dr_part(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_retencion_dr_part(link: $link);
@@ -3776,21 +3827,9 @@ class instalacion
         return $create;
 
     }
-
     private function fc_factura_automatica(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_factura_automatica(link: $link);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
-        }
-
-        return $create;
-
-    }
-
-    private function fc_conf_traslado(PDO $link): array|stdClass
-    {
-        $create = $this->_add_fc_conf_traslado(link: $link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
         }
@@ -3809,7 +3848,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_traslado_nc(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_traslado_nc(link: $link);
@@ -3820,8 +3858,6 @@ class instalacion
         return $create;
 
     }
-
-
     private function fc_traslado_cp(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_traslado_cp(link: $link);
@@ -3842,7 +3878,6 @@ class instalacion
         return $create;
 
     }
-
     private function fc_uuid(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_uuid(link: $link);
@@ -3938,10 +3973,6 @@ class instalacion
         return $campos;
 
     }
-
-
-
-
 
     private function inserta_pr_etapa(string $codigo, PDO $link): array
     {
@@ -4484,6 +4515,12 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar fc_csd_etapa', data:  $fc_csd_etapa);
         }
         $result->fc_csd_etapa = $fc_csd_etapa;
+
+        $fc_complemento_pago_relacionada = $this->fc_complemento_pago_relacionada(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar fc_complemento_pago_relacionada', data:  $fc_complemento_pago_relacionada);
+        }
+        $result->fc_complemento_pago_relacionada = $fc_complemento_pago_relacionada;
 
         return $result;
 
