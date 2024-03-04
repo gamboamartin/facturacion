@@ -2754,8 +2754,21 @@ class _base_system_fc extends _base_system{
                     $fc_complementos_pago_env[] = $fc_complemento_pago;
                 }
                 $relaciones[$indice]['fc_complementos_pago'] = $fc_complementos_pago_env;
-
             }
+
+            foreach ($relaciones as $indice=>$relacion){
+                foreach ($relacion['fc_complementos_pago'] as $indice_row_sin_rel=>$row_sin_rel){
+                    foreach ($relacion['fc_facturas_relacionadas'] as $row_rel){
+                        if($row_rel['fc_complemento_pago_id'] === $row_sin_rel['fc_complemento_pago_id']){
+                            unset($relaciones[$indice]['fc_complementos_pago'][$indice_row_sin_rel]);
+                            break;
+                        }
+                    }
+                }
+            }
+
+
+
 
         }
 

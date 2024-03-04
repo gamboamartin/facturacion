@@ -839,7 +839,6 @@ class _partida extends  _base{
      * @param array $hijo configuracion de hijo
      * @param string $name_modelo_impuesto Nombre del modelo de tipo impuesto
      * @return array
-     * @version 10.1.0
      */
     private function hijo(array $hijo, string $name_modelo_impuesto): array
     {
