@@ -87,7 +87,12 @@ class fc_pago_pagoTest extends test {
             exit;
         }
 
-
+        $alta = (new base_test())->alta_com_producto(link: $this->link, codigo: '99999999', id: 99999999);
+        if(errores::$error){
+            $error = (new errores())->error('Error al insertar',$alta);
+            print_r($error);
+            exit;
+        }
 
         $alta = (new base_test())->alta_fc_pago_pago(link: $this->link);
         if(errores::$error){

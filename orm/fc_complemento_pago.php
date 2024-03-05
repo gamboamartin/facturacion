@@ -13,7 +13,7 @@ use stdClass;
 class fc_complemento_pago extends _transacciones_fc
 {
 
-    private string $com_producto_codigo_default = '84111506';
+    private string $com_producto_codigo_default = '99999999';
     private string $cat_sat_unidad_codigo_default = 'ACT';
     public function __construct(PDO $link, bool $valida_atributos_criticos = true)
     {

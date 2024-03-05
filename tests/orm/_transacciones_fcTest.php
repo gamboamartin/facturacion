@@ -247,6 +247,13 @@ class _transacciones_fcTest extends test
             exit;
         }
 
+        $alta = (new base_test())->alta_com_producto(link: $this->link, codigo: '99999999', id: 99999999);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al alta', data: $alta);
+            print_r($error);
+            exit;
+        }
+
 
         $alta = (new base_test())->alta_fc_complemento_pago(link: $this->link);
         if(errores::$error){

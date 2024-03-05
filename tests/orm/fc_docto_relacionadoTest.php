@@ -69,6 +69,11 @@ class fc_docto_relacionadoTest extends test {
             print_r($error);exit;
         }
 
+        $alta = (new base_test())->alta_com_producto(link: $this->link,codigo: '99999999',id: 99999999);
+        if(errores::$error){
+            $error = (new errores())->error(mensaje: 'Error al insertar',data:  $alta);
+            print_r($error);exit;
+        }
 
         $alta = (new base_test())->alta_fc_partida(link: $this->link);
         if(errores::$error){
