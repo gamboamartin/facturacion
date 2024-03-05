@@ -888,6 +888,7 @@ class _transacciones_fc extends modelo
 
         $filtro = array();
         $filtro[$this->key_filtro_id] = $this->registro_id;
+        $filtro['doc_extension.codigo'] = 'xml';
 
         $existe = $modelo_documento->existe(filtro: $filtro);
         if (errores::$error) {
@@ -925,7 +926,7 @@ class _transacciones_fc extends modelo
 
             $filtro = array();
             $filtro[$this->key_filtro_id] = $this->registro_id;
-            $filtro['doc_extension.descripcion'] = 'pdf';
+            $filtro['doc_extension.descripcion'] = 'xml';
 
             $r_fc_factura_documento = $modelo_documento->filtro_and(filtro: $filtro);
             if (errores::$error) {
