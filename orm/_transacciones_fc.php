@@ -886,7 +886,10 @@ class _transacciones_fc extends modelo
         $file_xml_st = $ruta_archivos_tmp . '/' . $this->registro_id . '.st.xml';
         file_put_contents($file_xml_st, $ingreso);
 
-        $existe = $modelo_documento->existe(array($this->key_filtro_id => $this->registro_id));
+        $filtro = array();
+        $filtro[$this->key_filtro_id] = $this->registro_id;
+
+        $existe = $modelo_documento->existe(filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar si existe documento', data: $existe);
         }
@@ -919,8 +922,12 @@ class _transacciones_fc extends modelo
             }
         }
         else {
-            $r_fc_factura_documento = $modelo_documento->filtro_and(
-                filtro: array($this->key_filtro_id => $this->registro_id));
+
+            $filtro = array();
+            $filtro[$this->key_filtro_id] = $this->registro_id;
+            $filtro['doc_extension.descripcion'] = 'xml';
+
+            $r_fc_factura_documento = $modelo_documento->filtro_and(filtro: $filtro);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al obtener factura documento', data: $r_fc_factura_documento);
             }
@@ -944,7 +951,6 @@ class _transacciones_fc extends modelo
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error  al modificar documento', data: $documento);
             }
-
 
             $documento->registro = (new doc_documento(link: $this->link))->registro(registro_id: $documento->registro_id);
             if (errores::$error) {
