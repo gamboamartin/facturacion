@@ -2175,8 +2175,8 @@ class instalacion
         $out->fc_relacion_alta_bd = $alta_accion;
 
         $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'envia_cfdi',
-            adm_seccion_descripcion: $adm_seccion_descripcion, es_view: 'inactivo', icono: 'bi bi-mailbox-flag',
-            link: $link, lista: 'activo', titulo: 'envia_cfdi');
+            adm_seccion_descripcion: $adm_seccion_descripcion, es_view: 'inactivo',
+            icono: 'bi bi-envelope-arrow-up-fill', link: $link, lista: 'activo', titulo: 'envia_cfdi',css: 'info');
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
