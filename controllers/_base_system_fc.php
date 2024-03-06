@@ -309,7 +309,7 @@ class _base_system_fc extends _base_system{
 
         $doc_documento_id = $doc_documento_alta->registro_id;
 
-        $fc_factura_documento_ins['fc_factura_id'] = $this->registro_id;
+        $fc_factura_documento_ins[$this->modelo_entidad->key_id] = $this->registro_id;
         $fc_factura_documento_ins['doc_documento_id'] = $doc_documento_id;
 
         $fc_factura_doc = $this->modelo_documento->alta_registro(registro:$fc_factura_documento_ins);
