@@ -3176,6 +3176,30 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
         }
 
+        $adm_menu_descripcion = 'Documentos NC';
+        $adm_sistema_descripcion = 'facturacion';
+        $etiqueta_label = 'Documentos NC';
+        $adm_seccion_pertenece_descripcion = 'documentos';
+        $adm_namespace_name = 'gamboamartin/facturacion';
+        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
+
+        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
+            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
+            adm_seccion_descripcion: __FUNCTION__,
+            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
+            adm_sistema_descripcion: $adm_sistema_descripcion,
+            etiqueta_label: $etiqueta_label, link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
+
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'descarga',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo', icono: 'bi bi-cloud-download-fill',link:  $link,
+            lista:  'activo',titulo:  'Descarga');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+
         return $create;
 
     }
