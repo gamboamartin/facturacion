@@ -57,9 +57,10 @@ class _email{
         return $r_com_email_cte->registros;
     }
 
-    final public function crear_notificaciones(int $registro_entidad_id, _data_mail $modelo_email,
+    final public function crear_notificaciones(_doc $modelo_doc, _data_mail $modelo_email,
                                                _transacciones_fc $modelo_entidad, _notificacion $modelo_notificacion,
-                                               PDO $link){
+                                               PDO $link, int $registro_entidad_id){
+
         $row_entidad = $modelo_entidad->registro(registro_id: $registro_entidad_id, retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener factura', data: $row_entidad);
@@ -81,11 +82,13 @@ class _email{
         }
 
 
-        $r_not_adjunto = $this->inserta_adjuntos(row_entidad: $row_entidad,registro_id:  $registro_entidad_id,
-            link:  $link,not_mensaje_id:  $not_mensaje_id);
+
+        $r_not_adjunto = $this->inserta_adjuntos(modelo_doc: $modelo_doc,modelo_entidad:  $modelo_entidad,
+            registro_id:  $registro_entidad_id,row_entidad:  $row_entidad,not_mensaje_id:  $not_mensaje_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al insertar adjunto', data: $r_not_adjunto);
         }
+
 
         $data = new stdClass();
         $data->row_entidad = $row_entidad;
@@ -114,11 +117,11 @@ class _email{
         return $data;
     }
 
-    private function documentos(int $registro_id, PDO $link){
+    private function documentos(_doc $modelo_doc, _transacciones_fc $modelo_entidad, int $registro_id){
         $filtro = array();
-        $filtro['fc_factura.id'] = $registro_id;
+        $filtro[$modelo_entidad->key_filtro_id] = $registro_id;
 
-        $r_fc_factura_documento = (new fc_factura_documento(link: $link))->filtro_and(filtro: $filtro);
+        $r_fc_factura_documento = $modelo_doc->filtro_and(filtro: $filtro);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener documentos', data: $r_fc_factura_documento);
         }
@@ -202,9 +205,9 @@ class _email{
         return $r_fc_email->registros;
     }
 
-    final public function genera_documentos(PDO $link, int $registro_id){
+    final public function genera_documentos(_doc $modelo_doc, _transacciones_fc $modelo_entidad, int $registro_id){
 
-        $fc_factura_documentos = $this->documentos(registro_id: $registro_id,link:  $link);
+        $fc_factura_documentos = $this->documentos(modelo_doc: $modelo_doc, modelo_entidad: $modelo_entidad, registro_id: $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener documentos', data: $fc_factura_documentos);
         }
@@ -276,15 +279,16 @@ class _email{
         return $r_fc_notificacion->registros;
     }
 
-    private function inserta_adjunto(array $doc, stdClass $row_entidad, int $not_mensaje_id, PDO $link){
+    private function inserta_adjunto(array $doc, string $key_folio, stdClass $row_entidad, int $not_mensaje_id, PDO $link){
+
         $not_adjunto_ins['not_mensaje_id'] = $not_mensaje_id;
         $not_adjunto_ins['doc_documento_id'] = $doc['doc_documento_id'];
-        $not_adjunto_ins['descripcion'] = $row_entidad->fc_factura_folio.'.'.date('YmdHis').mt_rand(10000,99999).
+        $not_adjunto_ins['descripcion'] = $row_entidad->$key_folio.'.'.date('YmdHis').mt_rand(10000,99999).
             '.'.$doc['doc_extension_descripcion'];
 
         $not_adjunto_ins['name_out'] =  $doc['doc_documento_name_out'];
         if($doc['doc_tipo_documento_descripcion'] !=='ADJUNTO') {
-            $not_adjunto_ins['name_out'] = $row_entidad->fc_factura_folio . '.' . $doc['doc_extension_descripcion'];
+            $not_adjunto_ins['name_out'] = $row_entidad->$key_folio . '.' . $doc['doc_extension_descripcion'];
         }
 
         $r_not_adjunto = (new not_adjunto(link: $link))->alta_registro(registro: $not_adjunto_ins);
@@ -294,15 +298,18 @@ class _email{
         return $r_not_adjunto;
     }
 
-    private function inserta_adjuntos(stdClass $row_entidad, int $registro_id, PDO $link,  int $not_mensaje_id){
+    private function inserta_adjuntos(_doc $modelo_doc, _transacciones_fc $modelo_entidad, int $registro_id,stdClass $row_entidad,  int $not_mensaje_id){
         $adjuntos = array();
-        $docs = $this->genera_documentos(link: $link, registro_id: $registro_id);
+        $docs = $this->genera_documentos(modelo_doc: $modelo_doc,modelo_entidad:  $modelo_entidad,registro_id:  $registro_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener documentos', data: $docs);
         }
+
         foreach ($docs as $doc){
-            $r_not_adjunto = $this->inserta_adjunto(doc: $doc,row_entidad:  $row_entidad,
-                not_mensaje_id:  $not_mensaje_id,link:  $link);
+            $key_folio = $modelo_entidad->tabla.'_folio';
+
+            $r_not_adjunto = $this->inserta_adjunto(doc: $doc, key_folio: $key_folio,
+                row_entidad: $row_entidad, not_mensaje_id: $not_mensaje_id, link: $modelo_entidad->link);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al insertar adjunto', data: $r_not_adjunto);
             }

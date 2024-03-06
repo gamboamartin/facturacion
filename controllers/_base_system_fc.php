@@ -1244,8 +1244,8 @@ class _base_system_fc extends _base_system{
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $genera_pdf, header: $header,ws:$ws);
         }
 
-        $inserta_notificacion = $this->modelo_entidad->inserta_notificacion(modelo_email: $this->modelo_email,
-            modelo_notificacion: $this->modelo_notificacion,registro_id:  $this->registro_id);
+        $inserta_notificacion = $this->modelo_entidad->inserta_notificacion(modelo_doc: $this->modelo_documento,
+            modelo_email: $this->modelo_email, modelo_notificacion: $this->modelo_notificacion, registro_id: $this->registro_id);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al insertar notificacion',data:  $inserta_notificacion, header: $header,ws:$ws);
         }
@@ -1555,6 +1555,7 @@ class _base_system_fc extends _base_system{
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $pdf, header: $header,ws:$ws);
         }
+
 
         if($header){
             $fichero = $pdf->registro_obj->doc_documento_ruta_absoluta;
@@ -1975,8 +1976,8 @@ class _base_system_fc extends _base_system{
     public function inserta_notificacion(bool $header, bool $ws = false){
 
         $this->link->beginTransaction();
-        $notificaciones = (new fc_factura(link: $this->link))->inserta_notificacion(modelo_email: $this->modelo_email,
-            modelo_notificacion: $this->modelo_notificacion, registro_id: $this->registro_id);
+        $notificaciones = (new fc_factura(link: $this->link))->inserta_notificacion(modelo_doc: $this->modelo_documento,
+            modelo_email: $this->modelo_email, modelo_notificacion: $this->modelo_notificacion, registro_id: $this->registro_id);
         if (errores::$error) {
             $this->link->rollBack();
             $error = $this->errores->error(mensaje: 'Error al insertar notificaciones', data: $notificaciones);

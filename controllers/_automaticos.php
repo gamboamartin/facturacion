@@ -272,8 +272,8 @@ class _automaticos extends system{
                 return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $genera_pdf, header: $header,ws:$ws);
             }
 
-            $inserta_notificacion = $modelo_entidad->inserta_notificacion(modelo_email: $modelo_email,
-                modelo_notificacion: $modelo_notificacion,registro_id:  $fc_factura_id);
+            $inserta_notificacion = $modelo_entidad->inserta_notificacion(modelo_doc: $modelo_documento,
+                modelo_email: $modelo_email, modelo_notificacion: $modelo_notificacion, registro_id: $fc_factura_id);
             if(errores::$error){
                 return $this->retorno_error(mensaje: 'Error al insertar notificacion',data:  $inserta_notificacion, header: $header,ws:$ws);
             }

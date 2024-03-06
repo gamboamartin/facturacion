@@ -369,7 +369,6 @@ class _relacion extends _modelo_parent_sin_codigo{
      * @param _transacciones_fc $modelo_entidad Modelo de tipo base factura complemento
      * @param int $registro_entidad_id Registro identificador
      * @return array
-     * @version 6.33.0
      */
     final public function relaciones(_transacciones_fc $modelo_entidad, int $registro_entidad_id): array
     {
