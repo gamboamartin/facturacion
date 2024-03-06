@@ -8,16 +8,16 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
+
 use gamboamartin\facturacion\html\fc_complemento_pago_documento_html;
 use gamboamartin\facturacion\models\fc_complemento_pago_documento;
 use gamboamartin\system\links_menu;
-use gamboamartin\system\system;
 
 use gamboamartin\template_1\html;
 use PDO;
 use stdClass;
 
-class controlador_fc_complemento_pago_documento extends system{
+class controlador_fc_complemento_pago_documento extends _entidad_docto {
 
     public array|stdClass $keys_selects = array();
 
@@ -30,6 +30,8 @@ class controlador_fc_complemento_pago_documento extends system{
             paths_conf: $paths_conf);
 
     }
+
+
 
 
 }
