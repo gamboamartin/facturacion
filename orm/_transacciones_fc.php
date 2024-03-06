@@ -1594,7 +1594,6 @@ class _transacciones_fc extends modelo
      * Limpia los parametros de una factura
      * @param array $registro registro en proceso
      * @return array
-     * @version 0.127.26
      */
     private function limpia_alta_factura(array $registro): array
     {
@@ -1616,7 +1615,6 @@ class _transacciones_fc extends modelo
      * @param string $key Key a limpiar
      * @param array $registro Registro para aplicacion de limpieza
      * @return array
-     * @version 0.115.26
      */
     private function limpia_si_existe(string $key, array $registro): array
     {

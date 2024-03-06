@@ -220,6 +220,32 @@ class _transacciones_fcTest extends test
 
     }
 
+    public function test_limpia_si_existe(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new fc_factura($this->link);
+        $trs = new liberator($trs);
+
+
+        $registro = array();
+        $registro['D'] = 'xxx';
+        $key = 'D';
+        $resultado = $trs->limpia_si_existe(key: $key,registro: $registro);
+
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEmpty($resultado);
+
+        errores::$error = false;
+    }
+
     public function test_modifica_bd(): void
     {
         errores::$error = false;
