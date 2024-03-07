@@ -155,6 +155,15 @@ class _base_system_fc extends _base_system{
         $this->configuraciones_impuestos['626']['PF']['permitidos'] = array(1,3);
         $this->configuraciones_impuestos['626']['PF']['default'] = 1;
 
+        if($this->registro_id > 0) {
+            $buttons = $this->buttons_base();
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al obtener buttons', data: $buttons);
+            }
+
+            $this->buttons_base = $buttons;
+        }
+
     }
 
     public function adjunta(bool $header, bool $ws = false): array|stdClass
@@ -2128,12 +2137,7 @@ class _base_system_fc extends _base_system{
         $this->registros['fc_emails'] = $r_fc_email->registros;
 
 
-        $buttons = $this->buttons_base();
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al obtener buttons', data: $buttons);
-        }
 
-        $this->buttons_base = $buttons;
 
 
         $form_data_fc = $this->inputs->fc_csd_id;

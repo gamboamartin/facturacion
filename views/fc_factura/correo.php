@@ -1,6 +1,7 @@
 <?php /** @var gamboamartin\facturacion\controllers\controlador_fc_factura $controlador  controlador en ejecucion */ ?>
 <?php use config\views; ?>
 <main class="main section-color-primary">
+
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
@@ -28,13 +29,22 @@
                 </div>
 
             </div>
+            <div class="container">
+                <?php echo $controlador->buttons_base; ?>
+            </div>
         </div>
+
+
         <div class="col-md-12 buttons-form">
             <?php echo $controlador->button_fc_factura_modifica; ?>
         </div>
+
     </div>
 
+
 </main>
+
+
 
 <main class="main section-color-primary">
     <div class="container">

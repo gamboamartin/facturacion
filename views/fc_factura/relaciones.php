@@ -28,6 +28,10 @@
     </div>
 
     <div class="container">
+        <?php echo $controlador->buttons_base; ?>
+    </div>
+
+    <div class="container">
 
     <div class="col-md-12 buttons-form">
         <?php echo $controlador->button_fc_factura_modifica; ?>

@@ -27,6 +27,10 @@
 
                 </div>
 
+
+            </div>
+            <div class="container">
+                <?php echo $controlador->buttons_base; ?>
             </div>
         </div>
         <div class="col-md-12 buttons-form">

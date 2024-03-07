@@ -182,19 +182,3 @@
 </main>
 
 <script src="<?php echo (new \config\generales())->url_base."js/_facturacion.js" ?>"></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
