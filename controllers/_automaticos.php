@@ -27,6 +27,11 @@ use Throwable;
 class _automaticos extends system{
     public string $link_timbra = '';
     protected _modelo_parent_sin_codigo $modelo_automatico;
+
+    /**
+     * @param controlador_fc_factura $controlador_fc_factura
+     * @return array|string
+     */
     private function buttons_html(controlador_fc_factura $controlador_fc_factura): array|string
     {
         $buttons = (new out_permisos())->buttons_view(controler:$controlador_fc_factura,
