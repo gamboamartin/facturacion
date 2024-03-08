@@ -2857,9 +2857,17 @@ class instalacion
         }
         if($existe){
 
-            $r_pr_proceso = (new pr_proceso(link: $link))->elimina_con_filtro_and(filtro: $filtro);
+            $r_pr_proceso = (new pr_proceso(link: $link))->filtro_and(filtro: $filtro);
             if(errores::$error){
                 return (new errores())->error(mensaje: 'Error al obtener proceso',data:  $r_pr_proceso);
+            }
+
+            $upd = array();
+            $upd['descripcion'] = 'FACTURACION';
+            $upd['codigo'] = 'FACTURACION';
+            $r_upd = (new pr_proceso(link: $link))->modifica_bd(registro: $upd,id:  $r_pr_proceso->registros[0]['pr_proceso_id']);
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al actualizar proceso',data:  $r_upd);
             }
 
         }
@@ -3453,6 +3461,29 @@ class instalacion
         $acciones = $this->acciones_facturacion(adm_seccion_descripcion: __FUNCTION__,link:  $link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar acciones',data:  $acciones);
+        }
+
+        $filtro = array();
+        $filtro['pr_proceso.descripcion'] = 'FC_NOTA_CREDITO';
+        $existe = (new pr_proceso(link: $link))->existe(filtro: $filtro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener proceso',data:  $existe);
+        }
+        if($existe){
+
+            $r_pr_proceso = (new pr_proceso(link: $link))->filtro_and(filtro: $filtro);
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al obtener proceso',data:  $r_pr_proceso);
+            }
+
+            $upd = array();
+            $upd['descripcion'] = 'FC_NOTA_CREDITO';
+            $upd['codigo'] = 'FC_NOTA_CREDITO';
+            $r_upd = (new pr_proceso(link: $link))->modifica_bd(registro: $upd,id:  $r_pr_proceso->registros[0]['pr_proceso_id']);
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al actualizar proceso',data:  $r_upd);
+            }
+
         }
 
 
