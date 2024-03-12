@@ -81,19 +81,10 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         $registros = array();
 
         if($adm_reporte_descripcion === 'Facturas'){
-            $filtro_rango = array();
-            if(isset($_POST['fecha_inicial'])){
-                $filtro_rango['fc_factura.fecha']['valor1'] = $_POST['fecha_inicial'];
-                $filtro_rango['fc_factura.fecha']['valor2'] = $_POST['fecha_final'];
-            }
-
-            $r_fc_factura = (new fc_factura(link: $this->link))->filtro_and(filtro_rango: $filtro_rango);
+            $registros = $this->result_fc_factura();
             if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al obtener fc_facturas',data:  $r_fc_factura, header: $header, ws: $ws);
+                return $this->retorno_error(mensaje: 'Error al obtener fc_facturas',data:  $registros, header: $header, ws: $ws);
             }
-
-            $registros = $r_fc_factura->registros;
-
         }
 
         $ths_html = $this->genera_ths_html(adm_reporte_descripcion: $adm_reporte_descripcion);
@@ -138,19 +129,12 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         $nombre_hojas = array();
         $keys_hojas = array();
         if($adm_reporte_descripcion === 'Facturas'){
-            $filtro_rango = array();
-            if(isset($_POST['fecha_inicial'])){
-                $filtro_rango['fc_factura.fecha']['valor1'] = $_POST['fecha_inicial'];
-                $filtro_rango['fc_factura.fecha']['valor2'] = $_POST['fecha_final'];
-            }
 
-            $r_fc_factura = (new fc_factura(link: $this->link))->filtro_and(filtro_rango: $filtro_rango);
+
+            $registros = $this->result_fc_factura();
             if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al obtener fc_facturas',data:  $r_fc_factura, header: $header, ws: $ws);
+                return $this->retorno_error(mensaje: 'Error al obtener fc_facturas',data:  $registros, header: $header, ws: $ws);
             }
-
-            $registros = $r_fc_factura->registros;
-
 
             $ths = $this->ths_array(adm_reporte_descripcion: $adm_reporte_descripcion);
             if(errores::$error){
@@ -174,6 +158,27 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener xls',data:  $xls, header: $header, ws: $ws);
         }
+
+    }
+
+    private function filtro_rango(): array
+    {
+        $filtro_rango = array();
+        if(isset($_POST['fecha_inicial'])){
+            $filtro_rango = $this->filtro_rango_post();
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error al obtener filtro_rango',data:  $filtro_rango);
+            }
+        }
+        return $filtro_rango;
+
+    }
+
+    private function filtro_rango_post(): array
+    {
+        $filtro_rango['fc_factura.fecha']['valor1'] = $_POST['fecha_inicial'];
+        $filtro_rango['fc_factura.fecha']['valor2'] = $_POST['fecha_final'];
+        return $filtro_rango;
 
     }
 
@@ -217,6 +222,21 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         }
         $tds_html.="$td";
         return $tds_html;
+    }
+
+    private function result_fc_factura()
+    {
+        $filtro_rango = $this->filtro_rango();
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener filtro_rango',data:  $filtro_rango);
+        }
+
+        $r_fc_factura = (new fc_factura(link: $this->link))->filtro_and(filtro_rango: $filtro_rango);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener fc_facturas',data:  $r_fc_factura);
+        }
+        return $r_fc_factura->registros;
+
     }
 
 
