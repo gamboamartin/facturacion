@@ -109,6 +109,13 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         $this->ths = $ths_html;
         $this->trs = $trs_html;
 
+        $btn_exporta = $this->html_base->submit(css: 'success',label: 'Exporta');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar boton',data:  $btn_exporta, header: $header, ws: $ws);
+        }
+
+        $this->buttons['btn_exporta'] = $btn_exporta;
+
     }
 
     final public function exportar_xls(bool $header, bool $ws = false){

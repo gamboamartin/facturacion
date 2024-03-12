@@ -22,7 +22,7 @@
         </div>
         <div class="col-lg-12">
             <form method="post" action="<?php echo $controlador->link_exportar_xls; ?>" class="form-additional" enctype="multipart/form-data">
-                <?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>
+                <?php echo $controlador->buttons['btn_exporta']; ?>
             </form>
         </div>
     </div>
