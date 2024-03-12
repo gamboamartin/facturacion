@@ -4,6 +4,7 @@ namespace gamboamartin\facturacion\instalacion;
 use base\orm\modelo;
 use gamboamartin\administrador\instalacion\_adm;
 use gamboamartin\administrador\models\_instalacion;
+use gamboamartin\administrador\models\adm_reporte;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_etapa;
 use gamboamartin\facturacion\models\_transacciones_fc;
@@ -2644,6 +2645,26 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $exportar_xls);
         }
         $out->exportar_xls = $exportar_xls;
+
+
+        $adm_reportes = array();
+        $adm_reporte['id'] = 1;
+        $adm_reporte['descripcion'] = 'Facturas';
+        $adm_reporte['status'] = 'activo';
+        $adm_reporte['codigo'] = 'Facturas';
+        $adm_reporte['codigo_bis'] = 'Facturas';
+        $adm_reporte['descripcion_select'] = 'Facturas';
+
+        $adm_reportes[] = $adm_reporte;
+
+        foreach ($adm_reportes as $adm_reporte){
+            $inserta = (new adm_reporte(link: $link))->inserta_registro_si_no_existe(registro: $adm_reporte);
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al insertar adm_reporte',data:  $inserta);
+            }
+
+        }
+
 
         return $out;
 
