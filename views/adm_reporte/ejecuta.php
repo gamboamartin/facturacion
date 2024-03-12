@@ -1,4 +1,4 @@
-<?php /** @var  \gamboamartin\facturacion\controllers\controlador_fc_key_csd $controlador  controlador en ejecucion */ ?>
+<?php /** @var  gamboamartin\facturacion\controllers\controlador_adm_reporte $controlador  controlador en ejecucion */ ?>
 <?php use config\views; ?>
 
 <main class="main section-color-primary">
@@ -12,8 +12,9 @@
                         <?php include (new views())->ruta_templates."mensajes.php"; ?>
 
                         <?php echo $controlador->filtros; ?>
+                        <?php echo $controlador->buttons['btn_ejecuta']; ?>
 
-                        <?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>
+
                     </form>
                 </div>
 

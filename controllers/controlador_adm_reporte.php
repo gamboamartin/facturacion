@@ -55,6 +55,15 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
             $this->filtros .= $fecha_final;
         }
 
+        $btn_ejecuta = $this->html_base->submit(css: 'success',label: 'Ejecuta');
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar boton',data:  $btn_ejecuta, header: $header, ws: $ws);
+        }
+
+        $this->buttons['btn_ejecuta'] = $btn_ejecuta;
+
+
+
     }
 
     final public function ejecuta_reporte(bool $header, bool $ws = false){
