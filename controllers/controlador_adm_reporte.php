@@ -116,6 +116,20 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
         $this->buttons['btn_exporta'] = $btn_exporta;
 
+        $fecha_inicial = $this->html->hidden(name: 'fecha_inicial',value:  $_POST['fecha_inicial']);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar fecha_inicial',data:  $fecha_inicial, header: $header, ws: $ws);
+        }
+
+        $fecha_final = $this->html->hidden(name: 'fecha_final',value:  $_POST['fecha_final']);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar fecha_final',data:  $fecha_final, header: $header, ws: $ws);
+        }
+
+        $this->hiddens->fecha_inicial = $fecha_inicial;
+        $this->hiddens->fecha_final = $fecha_final;
+
+
     }
 
     final public function exportar_xls(bool $header, bool $ws = false){
