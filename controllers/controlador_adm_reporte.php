@@ -29,31 +29,17 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
         $this->link_ejecuta_reporte = $link_ejecuta_reporte;
 
+        $descripciones_rpt = array('Facturas','Pagos');
 
-
-        if($descripcion === 'Facturas'){
-            $hoy = date('Y-m-d');
-            $fecha_mes_inicial = date('Y-m-01');
-            $fecha_inicial = (new adm_reporte_html(html: $this->html_base))->input_fecha(cols: 6,
-                row_upd: new stdClass(), value_vacio: false, name: 'fecha_inicial', place_holder: 'Fecha Inicial',
-                value: $fecha_mes_inicial);
-
+        if(in_array($descripcion, $descripciones_rpt)){
+            $filtros_fecha = $this->filtros_fecha();
             if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al generar input',data:  $fecha_inicial, header: $header, ws: $ws);
+                return $this->retorno_error(mensaje: 'Error al generar filtros fecha',
+                    data:  $filtros_fecha, header: $header, ws: $ws);
             }
-
-            $this->filtros = $fecha_inicial;
-
-            $fecha_final = (new adm_reporte_html(html: $this->html_base))->input_fecha(cols: 6,
-                row_upd: new stdClass(), value_vacio: false, name: 'fecha_final', place_holder: 'Fecha Final',
-                value: $hoy);
-
-            if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al generar input',data:  $fecha_final, header: $header, ws: $ws);
-            }
-
-            $this->filtros .= $fecha_final;
+            $this->filtros = $filtros_fecha;
         }
+
 
         $btn_ejecuta = $this->html_base->submit(css: 'success',label: 'Ejecuta');
         if(errores::$error){
@@ -153,8 +139,9 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
         }
 
+        $moneda = array();
         $xls = (new exportador())->genera_xls(header: $header,name:  'Facturas',nombre_hojas:  $nombre_hojas,
-            keys_hojas: $keys_hojas, path_base: $this->path_base);
+            keys_hojas: $keys_hojas, path_base: $this->path_base,moneda: $moneda);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener xls',data:  $xls, header: $header, ws: $ws);
         }
@@ -179,6 +166,36 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         $filtro_rango['fc_factura.fecha']['valor1'] = $_POST['fecha_inicial'];
         $filtro_rango['fc_factura.fecha']['valor2'] = $_POST['fecha_final'];
         return $filtro_rango;
+
+    }
+
+    private function filtros_fecha(): array|string
+    {
+
+        $hoy = date('Y-m-d');
+
+        $fecha_mes_inicial = date('Y-m-01');
+        $fecha_inicial = (new adm_reporte_html(html: $this->html_base))->input_fecha(cols: 6,
+            row_upd: new stdClass(), value_vacio: false, name: 'fecha_inicial', place_holder: 'Fecha Inicial',
+            value: $fecha_mes_inicial);
+
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al generar input',data:  $fecha_inicial);
+        }
+
+        $filtros = $fecha_inicial;
+
+        $fecha_final = (new adm_reporte_html(html: $this->html_base))->input_fecha(cols: 6,
+            row_upd: new stdClass(), value_vacio: false, name: 'fecha_final', place_holder: 'Fecha Final',
+            value: $hoy);
+
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al generar input',data:  $fecha_final);
+        }
+
+        $filtros .= $fecha_final;
+
+        return $filtros;
 
     }
 
