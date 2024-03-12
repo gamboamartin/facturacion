@@ -2598,6 +2598,56 @@ class instalacion
         return $create;
 
     }
+
+    private function adm_reporte(PDO $link): array|stdClass
+    {
+
+        $adm_menu_descripcion = 'Reportes';
+        $adm_sistema_descripcion = 'facturacion';
+        $etiqueta_label = 'Reportes';
+        $adm_seccion_pertenece_descripcion = 'adm_reporte';
+        $adm_namespace_name = 'gamboamartin/facturacion';
+        $adm_namespace_descripcion = 'gamboa.martin/facturacion';
+
+        $acl = (new _adm())->integra_acl(adm_menu_descripcion: $adm_menu_descripcion,
+            adm_namespace_name: $adm_namespace_name, adm_namespace_descripcion: $adm_namespace_descripcion,
+            adm_seccion_descripcion: __FUNCTION__,
+            adm_seccion_pertenece_descripcion: $adm_seccion_pertenece_descripcion,
+            adm_sistema_descripcion: $adm_sistema_descripcion,
+            etiqueta_label: $etiqueta_label, link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener acl', data:  $acl);
+        }
+
+        $out = new stdClass();
+
+        $ejecuta = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'ejecuta',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'activo',
+            icono: 'bi bi-files-alt',link:  $link, lista:  'activo',titulo:  'Ejecuta');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $ejecuta);
+        }
+        $out->ejecuta = $ejecuta;
+
+        $ejecuta_reporte = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'ejecuta_reporte',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'activo',
+            icono: 'bi bi-files-alt',link:  $link, lista:  'inactivo',titulo:  'Ejecuta');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $ejecuta_reporte);
+        }
+        $out->ejecuta_reporte = $ejecuta_reporte;
+
+        $exportar_xls = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'exportar_xls',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo',
+            icono: 'bi bi-files-alt',link:  $link, lista:  'inactivo',titulo:  'exportar_xls');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $exportar_xls);
+        }
+        $out->exportar_xls = $exportar_xls;
+
+        return $out;
+
+    }
     private function fc_conf_aut_producto(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_conf_aut_producto(link: $link);
@@ -4230,14 +4280,6 @@ class instalacion
 
     }
 
-
-
-
-
-
-
-
-
     final public function instala(PDO $link): array|stdClass
     {
 
@@ -4687,13 +4729,16 @@ class instalacion
         }
         $result->fc_notificacion_cp = $fc_notificacion_cp;
 
+
+        $adm_reporte = $this->adm_reporte(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar adm_reporte', data:  $adm_reporte);
+        }
+        $result->adm_reporte = $adm_reporte;
+
         return $result;
 
     }
-
-
-
-
 
     private function ultima_etapa_txt(_transacciones_fc $modelo, _etapa $modelo_etapa, array $registro)
     {
