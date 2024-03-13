@@ -2666,6 +2666,15 @@ class instalacion
 
         $adm_reportes[] = $adm_reporte;
 
+        $adm_reporte['id'] = 3;
+        $adm_reporte['descripcion'] = 'Egresos';
+        $adm_reporte['status'] = 'activo';
+        $adm_reporte['codigo'] = 'Egresos';
+        $adm_reporte['codigo_bis'] = 'Egresos';
+        $adm_reporte['descripcion_select'] = 'Egresos';
+
+        $adm_reportes[] = $adm_reporte;
+
         foreach ($adm_reportes as $adm_reporte){
             $inserta = (new adm_reporte(link: $link))->inserta_registro_si_no_existe(registro: $adm_reporte);
             if(errores::$error){

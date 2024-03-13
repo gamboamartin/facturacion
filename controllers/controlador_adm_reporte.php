@@ -8,7 +8,9 @@
  */
 namespace gamboamartin\facturacion\controllers;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_complemento_pago;
 use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_nota_credito;
 use gamboamartin\plugins\exportador;
 use html\adm_reporte_html;
 use stdClass;
@@ -18,7 +20,7 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
     public string $link_ejecuta_reporte = '';
     public string $link_exportar_xls ='';
     final public function ejecuta(bool $header, bool $ws = false){
-        $descripcion = $this->adm_reporte['adm_reporte_descripcion'];
+        $adm_reporte_descripcion = $this->adm_reporte['adm_reporte_descripcion'];
 
         $link_ejecuta_reporte = $this->obj_link->link_con_id(accion: 'ejecuta_reporte',link: $this->link,
             registro_id:  $this->registro_id,seccion:  $this->tabla);
@@ -29,9 +31,9 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
         $this->link_ejecuta_reporte = $link_ejecuta_reporte;
 
-        $descripciones_rpt = array('Facturas','Pagos');
+        $descripciones_rpt = array('Facturas','Pagos','Egresos');
 
-        if(in_array($descripcion, $descripciones_rpt)){
+        if(in_array($adm_reporte_descripcion, $descripciones_rpt)){
             $filtros_fecha = $this->filtros_fecha();
             if(errores::$error){
                 return $this->retorno_error(mensaje: 'Error al generar filtros fecha',
@@ -66,12 +68,16 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
         $registros = array();
 
-        if($adm_reporte_descripcion === 'Facturas'){
-            $registros = $this->result_fc_factura();
+        $descripciones_rpt = array('Facturas','Pagos','Egresos');
+
+        if(in_array($adm_reporte_descripcion, $descripciones_rpt)){
+            $registros = $this->result_fc_rpt(adm_reporte_descripcion: $adm_reporte_descripcion);
             if(errores::$error){
                 return $this->retorno_error(mensaje: 'Error al obtener fc_facturas',data:  $registros, header: $header, ws: $ws);
             }
         }
+
+
 
         $ths_html = $this->genera_ths_html(adm_reporte_descripcion: $adm_reporte_descripcion);
         if(errores::$error){
@@ -117,7 +123,7 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         if($adm_reporte_descripcion === 'Facturas'){
 
 
-            $registros = $this->result_fc_factura();
+            $registros = $this->result_fc_rpt(adm_reporte_descripcion: $adm_reporte_descripcion);
             if(errores::$error){
                 return $this->retorno_error(mensaje: 'Error al obtener fc_facturas',data:  $registros, header: $header, ws: $ws);
             }
@@ -148,11 +154,11 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     }
 
-    private function filtro_rango(): array
+    private function filtro_rango(string $table): array
     {
         $filtro_rango = array();
         if(isset($_POST['fecha_inicial'])){
-            $filtro_rango = $this->filtro_rango_post();
+            $filtro_rango = $this->filtro_rango_post(table: $table);
             if(errores::$error){
                 return $this->errores->error(mensaje: 'Error al obtener filtro_rango',data:  $filtro_rango);
             }
@@ -161,10 +167,10 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     }
 
-    private function filtro_rango_post(): array
+    private function filtro_rango_post(string $table): array
     {
-        $filtro_rango['fc_factura.fecha']['valor1'] = $_POST['fecha_inicial'];
-        $filtro_rango['fc_factura.fecha']['valor2'] = $_POST['fecha_final'];
+        $filtro_rango[$table.'.fecha']['valor1'] = $_POST['fecha_inicial'];
+        $filtro_rango[$table.'.fecha']['valor2'] = $_POST['fecha_final'];
         return $filtro_rango;
 
     }
@@ -241,18 +247,46 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         return $tds_html;
     }
 
-    private function result_fc_factura()
+    private function result_fc_rpt(string $adm_reporte_descripcion): array
     {
-        $filtro_rango = $this->filtro_rango();
+        $result = new stdClass();
+        $result->registros = array();
+
+        $table = '';
+        if($adm_reporte_descripcion === 'Facturas'){
+            $table = 'fc_factura';
+        }
+        if($adm_reporte_descripcion === 'Pagos'){
+            $table = 'fc_complemento_pago';
+        }
+        if($adm_reporte_descripcion === 'Egresos'){
+            $table = 'fc_nota_credito';
+        }
+
+        $filtro_rango = $this->filtro_rango(table: $table);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener filtro_rango',data:  $filtro_rango);
         }
-
-        $r_fc_factura = (new fc_factura(link: $this->link))->filtro_and(filtro_rango: $filtro_rango);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener fc_facturas',data:  $r_fc_factura);
+        if($adm_reporte_descripcion === 'Facturas'){
+            $result = (new fc_factura(link: $this->link))->filtro_and(filtro_rango: $filtro_rango);
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error al obtener fc_facturas',data:  $result);
+            }
         }
-        return $r_fc_factura->registros;
+        if($adm_reporte_descripcion === 'Pagos'){
+            $result = (new fc_complemento_pago(link: $this->link))->filtro_and(filtro_rango: $filtro_rango);
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error al obtener fc_facturas',data:  $result);
+            }
+        }
+        if($adm_reporte_descripcion === 'Egresos'){
+            $result = (new fc_nota_credito(link: $this->link))->filtro_and(filtro_rango: $filtro_rango);
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error al obtener fc_facturas',data:  $result);
+            }
+        }
+
+        return $result->registros;
 
     }
 
@@ -310,6 +344,40 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
             $ths[] = array('etiqueta'=>'Tipo Cambio', 'campo'=>'com_tipo_cambio_monto');
             $ths[] = array('etiqueta'=>'Uso CFDI', 'campo'=>'cat_sat_uso_cfdi_descripcion');
             $ths[] = array('etiqueta'=>'Exportacion', 'campo'=>'fc_factura_exportacion');
+        }
+        if($adm_reporte_descripcion === 'Pagos'){
+            $ths[] = array('etiqueta'=>'Folio', 'campo'=>'fc_complemento_pago_folio');
+            $ths[] = array('etiqueta'=>'UUID', 'campo'=>'fc_complemento_pago_uuid');
+            $ths[] = array('etiqueta'=>'Cliente', 'campo'=>'com_cliente_razon_social');
+            $ths[] = array('etiqueta'=>'Sub Total', 'campo'=>'fc_complemento_pago_sub_total_base');
+            $ths[] = array('etiqueta'=>'Descuento', 'campo'=>'fc_complemento_pago_total_descuento');
+            $ths[] = array('etiqueta'=>'Traslados', 'campo'=>'fc_complemento_pago_total_traslados');
+            $ths[] = array('etiqueta'=>'Retenciones', 'campo'=>'fc_complemento_pago_total_retenciones');
+            $ths[] = array('etiqueta'=>'Total', 'campo'=>'fc_complemento_pago_total');
+            $ths[] = array('etiqueta'=>'Fecha', 'campo'=>'fc_complemento_pago_fecha');
+            $ths[] = array('etiqueta'=>'Forma de Pago', 'campo'=>'cat_sat_forma_pago_descripcion');
+            $ths[] = array('etiqueta'=>'Metodo de Pago', 'campo'=>'cat_sat_metodo_pago_descripcion');
+            $ths[] = array('etiqueta'=>'Moneda', 'campo'=>'cat_sat_moneda_codigo');
+            $ths[] = array('etiqueta'=>'Tipo Cambio', 'campo'=>'com_tipo_cambio_monto');
+            $ths[] = array('etiqueta'=>'Uso CFDI', 'campo'=>'cat_sat_uso_cfdi_descripcion');
+            $ths[] = array('etiqueta'=>'Exportacion', 'campo'=>'fc_complemento_pago_exportacion');
+        }
+        if($adm_reporte_descripcion === 'Egresos'){
+            $ths[] = array('etiqueta'=>'Folio', 'campo'=>'fc_nota_credito_folio');
+            $ths[] = array('etiqueta'=>'UUID', 'campo'=>'fc_nota_credito_uuid');
+            $ths[] = array('etiqueta'=>'Cliente', 'campo'=>'com_cliente_razon_social');
+            $ths[] = array('etiqueta'=>'Sub Total', 'campo'=>'fc_nota_credito_sub_total_base');
+            $ths[] = array('etiqueta'=>'Descuento', 'campo'=>'fc_nota_credito_total_descuento');
+            $ths[] = array('etiqueta'=>'Traslados', 'campo'=>'fc_nota_credito_total_traslados');
+            $ths[] = array('etiqueta'=>'Retenciones', 'campo'=>'fc_nota_credito_total_retenciones');
+            $ths[] = array('etiqueta'=>'Total', 'campo'=>'fc_nota_credito_total');
+            $ths[] = array('etiqueta'=>'Fecha', 'campo'=>'fc_nota_credito_fecha');
+            $ths[] = array('etiqueta'=>'Forma de Pago', 'campo'=>'cat_sat_forma_pago_descripcion');
+            $ths[] = array('etiqueta'=>'Metodo de Pago', 'campo'=>'cat_sat_metodo_pago_descripcion');
+            $ths[] = array('etiqueta'=>'Moneda', 'campo'=>'cat_sat_moneda_codigo');
+            $ths[] = array('etiqueta'=>'Tipo Cambio', 'campo'=>'com_tipo_cambio_monto');
+            $ths[] = array('etiqueta'=>'Uso CFDI', 'campo'=>'cat_sat_uso_cfdi_descripcion');
+            $ths[] = array('etiqueta'=>'Exportacion', 'campo'=>'fc_nota_credito_exportacion');
         }
         return $ths;
     }
