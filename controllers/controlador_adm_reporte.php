@@ -19,6 +19,39 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
     public string $filtros = '';
     public string $link_ejecuta_reporte = '';
     public string $link_exportar_xls ='';
+
+    private function asigna_data_fechas(): array|stdClass
+    {
+        $data = $this->data_fechas();
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error inicializar filtros',data:  $data);
+        }
+
+        $init = $this->init_data_post_fecha(data: $data);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error inicializar POST',data:  $init);
+        }
+        return $init;
+
+    }
+    private function data_fechas(): array|stdClass
+    {
+        $data = $this->init_filtro_fecha();
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error inicializar filtros',data:  $data);
+        }
+
+        $data = $this->init_fecha_inicial(data: $data);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error inicializar filtros',data:  $data);
+        }
+        $data = $this->init_fecha_final(data: $data);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error inicializar filtros',data:  $data);
+        }
+        return $data;
+
+    }
     final public function ejecuta(bool $header, bool $ws = false){
         $adm_reporte_descripcion = $this->adm_reporte['adm_reporte_descripcion'];
 
@@ -76,8 +109,6 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
                 return $this->retorno_error(mensaje: 'Error al obtener fc_facturas',data:  $registros, header: $header, ws: $ws);
             }
         }
-
-
 
         $ths_html = $this->genera_ths_html(adm_reporte_descripcion: $adm_reporte_descripcion);
         if(errores::$error){
@@ -169,6 +200,16 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     private function filtro_rango_post(string $table): array
     {
+        $table = trim($table);
+        if($table === ''){
+            return $this->errores->error(mensaje: 'Error table esta vacia',data:  $table);
+        }
+
+        $init = $this->asigna_data_fechas();
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error inicializar POST',data:  $init);
+        }
+
         $filtro_rango[$table.'.fecha']['valor1'] = $_POST['fecha_inicial'];
         $filtro_rango[$table.'.fecha']['valor2'] = $_POST['fecha_final'];
         return $filtro_rango;
@@ -236,6 +277,84 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         return $trs_html;
     }
 
+    private function init_data_post_fecha(stdClass $data): array|stdClass
+    {
+        if(!$data->existe_alguna_fecha){
+            $init = $this->init_post_fecha();
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error inicializar POST',data:  $init);
+            }
+        }
+
+        if(!$data->existe_fecha_inicial){
+            $init = $this->init_post_fecha_inicial();
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error inicializar POST',data:  $init);
+            }
+        }
+        if(!$data->existe_fecha_final){
+            $init = $this->init_post_fecha_final();
+            if(errores::$error){
+                return $this->errores->error(mensaje: 'Error inicializar POST',data:  $init);
+            }
+        }
+        return $data;
+
+
+    }
+
+    private function init_fecha_final(stdClass $data): stdClass
+    {
+        if(isset($_POST['fecha_final'])){
+            $data->existe_alguna_fecha = true;
+            $data->existe_fecha_final = true;
+        }
+        return $data;
+
+    }
+
+    private function init_fecha_inicial(stdClass $data): stdClass
+    {
+        if(isset($_POST['fecha_inicial'])) {
+            $data->existe_alguna_fecha = true;
+            $data->existe_fecha_inicial = true;
+        }
+        return $data;
+
+    }
+
+    private function init_filtro_fecha(): stdClass
+    {
+        $data = new stdClass();
+        $data->existe_alguna_fecha = false;
+        $data->existe_fecha_inicial = false;
+        $data->existe_fecha_final = false;
+        return $data;
+
+    }
+
+    private function init_post_fecha(): array
+    {
+        $_POST['fecha_inicial'] = date('Y-m-01');
+        $_POST['fecha_final'] = date('Y-m-d');
+        return $_POST;
+
+    }
+
+    private function init_post_fecha_final(): array
+    {
+        $_POST['fecha_final'] = date('Y-m-d');
+        return $_POST;
+
+    }
+
+    private function init_post_fecha_inicial(): array
+    {
+        $_POST['fecha_inicial'] = date('Y-m-01');
+        return $_POST;
+
+    }
+
     private function integra_td(array $data_ths, array $registro, string $tds_html): array|string
     {
         $key_registro = $data_ths['campo'];
@@ -268,10 +387,17 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
             return $this->errores->error(mensaje: 'Error al obtener filtro_rango',data:  $filtro_rango);
         }
         if($adm_reporte_descripcion === 'Facturas'){
-            $result = (new fc_factura(link: $this->link))->filtro_and(filtro_rango: $filtro_rango);
+            $columnas_totales[] = 'fc_factura_sub_total_base';
+            $columnas_totales[] = 'fc_factura_total_descuento';
+            $columnas_totales[] = 'fc_factura_total_traslados';
+            $columnas_totales[] = 'fc_factura_total_retenciones';
+            $columnas_totales[] = 'fc_factura_total';
+            $result = (new fc_factura(link: $this->link))->filtro_and(
+                columnas_totales: $columnas_totales, filtro_rango: $filtro_rango);
             if(errores::$error){
                 return $this->errores->error(mensaje: 'Error al obtener fc_facturas',data:  $result);
             }
+
         }
         if($adm_reporte_descripcion === 'Pagos'){
             $result = (new fc_complemento_pago(link: $this->link))->filtro_and(filtro_rango: $filtro_rango);

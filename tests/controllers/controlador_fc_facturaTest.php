@@ -21,9 +21,9 @@ use stdClass;
 class controlador_fc_facturaTest extends test {
     public errores $errores;
     private stdClass $paths_conf;
-    public function __construct(?string $name = null, array $data = [], $dataName = '')
+    public function __construct(?string $name = null)
     {
-        parent::__construct($name, $data, $dataName);
+        parent::__construct($name);
         $this->errores = new errores();
         $this->paths_conf = new stdClass();
         $this->paths_conf->generales = '/var/www/html/facturacion/config/generales.php';

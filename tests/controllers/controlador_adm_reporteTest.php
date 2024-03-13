@@ -1,20 +1,14 @@
 <?php
-namespace gamboamartin\facturacion\tests\orm;
+namespace controllers;
 
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\controllers\controlador_adm_reporte;
+use gamboamartin\facturacion\controllers\controlador_fc_factura;
+use gamboamartin\facturacion\controllers\controlador_fc_partida;
+use gamboamartin\facturacion\controllers\pdf;
 use gamboamartin\facturacion\models\fc_csd;
-use gamboamartin\facturacion\models\fc_cuenta_predial;
-use gamboamartin\facturacion\models\fc_ejecucion_aut_plantilla;
-use gamboamartin\facturacion\models\fc_factura_relacionada;
-use gamboamartin\facturacion\models\fc_pago_pago;
-use gamboamartin\facturacion\models\fc_partida;
-use gamboamartin\facturacion\models\fc_relacion;
-use gamboamartin\facturacion\models\fc_retenido;
-use gamboamartin\facturacion\models\fc_traslado;
-use gamboamartin\facturacion\models\fc_uuid_fc;
 use gamboamartin\facturacion\tests\base_test;
-use gamboamartin\facturacion\tests\base_test2;
 use gamboamartin\organigrama\models\org_empresa;
 use gamboamartin\organigrama\models\org_sucursal;
 use gamboamartin\test\liberator;
@@ -25,7 +19,7 @@ use gamboamartin\facturacion\models\fc_factura;
 use stdClass;
 
 
-class fc_ejecucion_aut_plantillaTest extends test {
+class controlador_adm_reporteTest extends test {
     public errores $errores;
     private stdClass $paths_conf;
     public function __construct(?string $name = null)
@@ -38,33 +32,27 @@ class fc_ejecucion_aut_plantillaTest extends test {
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
-    public function test_data_auto(): void
+    public function test_filtro_rango_post(): void
     {
         errores::$error = false;
 
-        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['seccion'] = 'fc_factura';
         $_GET['accion'] = 'lista';
         $_SESSION['grupo_id'] = 1;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
 
-        $modelo = new fc_ejecucion_aut_plantilla($this->link);
-        $modelo = new liberator($modelo);
+        $ctl = new controlador_adm_reporte(link: $this->link, paths_conf: $this->paths_conf);
+        $ctl = new liberator($ctl);
 
-
-
-        $com_tipo_cliente_id = 1;
-        $resultado = $modelo->data_auto($com_tipo_cliente_id);
-
-        $this->assertIsObject($resultado);
+        $table = 'A';
+        $resultado = $ctl->filtro_rango_post($table);
+        $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
-
 
         errores::$error = false;
     }
-
-
 
 }
 
