@@ -163,8 +163,8 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
             if(errores::$error){
                 return $this->errores->error(mensaje: 'Error al obtener ths',data:  $ths);
             }
-            $keys = array();
 
+            $keys = array();
             foreach ($ths as $data_th){
                 $keys[] = $data_th['campo'];
             }
@@ -172,7 +172,7 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
             $nombre_hojas[] = 'Facturas';
             $keys_hojas['Facturas'] = new stdClass();
             $keys_hojas['Facturas']->keys = $keys;
-            $keys_hojas['Facturas']->registros = $registros;
+            $keys_hojas['Facturas']->registros = $registros->registros;
 
         }
 
@@ -269,12 +269,21 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
         $trs_html = '';
         foreach ($result->registros as $registro){
-            $trs_html = $this->integra_trs_html(registro: $registro,ths:  $ths,trs_html:  $trs_html);
+            $trs_html = $this->integra_trs_html(bold: false, registro: $registro, ths: $ths, trs_html: $trs_html);
             if(errores::$error){
                 return $this->errores->error(mensaje: 'Error al obtener trs_html',data:  $trs_html);
             }
         }
-        //print_r($result->totales);exit;
+
+        $registro_totales = $this->registro_totales(result: $result,ths:  $ths);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener registro_totales',data:  $registro_totales);
+        }
+        $trs_html = $this->integra_trs_html(bold: true, registro: $registro_totales, ths: $ths, trs_html: $trs_html);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener trs_html',data:  $trs_html);
+        }
+
         return $trs_html;
     }
 
@@ -324,7 +333,21 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     }
 
-
+    /**
+     * POR DOCUMENTAR EN WIKI
+     * Inicializa el filtro de fecha.
+     *
+     * Este método se encarga de inicializar el filtro de fecha para ser utilizado en
+     * el informe del administrador.
+     *
+     * @return stdClass Los datos del filtro de fecha inicializado si no hay errores.
+     *                        En caso de error, retorna un objeto de error.
+     *
+     * @throws errores En caso de cualquier error durante la inicialización del filtro de fecha,
+     *                 se lanza un objeto de error por esta función.
+     *
+     * @version 29.3.0
+     */
     private function init_filtro_fecha(): stdClass
     {
         $data = new stdClass();
@@ -357,13 +380,14 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     }
 
-    private function integra_td(array $data_ths, array $registro, string $tds_html): array|string
+    private function integra_td(bool $bold, array $data_ths, array $registro, string $tds_html): array|string
     {
         $key_registro = $data_ths['campo'];
-        $td = $this->td(key_registro: $key_registro,registro:  $registro);
+        $td = $this->td(bold: $bold, key_registro: $key_registro,registro:  $registro);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener td',data:  $td);
         }
+
         $tds_html.="$td";
         return $tds_html;
     }
@@ -419,7 +443,7 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     }
 
-    private function td(string $key_registro, array $registro): string|array
+    private function td(bool $bold,string $key_registro, array $registro): string|array
     {
         $key_registro = trim($key_registro);
         if($key_registro === ''){
@@ -428,14 +452,18 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         if(!isset($registro[$key_registro])){
             return $this->errores->error(mensaje: '$registro['.$key_registro.'] no existe',data:  $registro);
         }
-        return "<td>$registro[$key_registro]</td>";
+        $contenido = $registro[$key_registro];
+        if($bold){
+            $contenido = "<b>$contenido</b>";
+        }
+        return "<td>$contenido</td>";
     }
 
-    private function tds_html(array $registro, array $ths): array|string
+    private function tds_html(bool $bold,array $registro, array $ths): array|string
     {
         $tds_html = '';
         foreach ($ths as $data_ths){
-            $tds_html = $this->integra_td(data_ths: $data_ths,registro:  $registro,tds_html:  $tds_html);
+            $tds_html = $this->integra_td(bold: $bold, data_ths: $data_ths, registro: $registro, tds_html: $tds_html);
             if(errores::$error){
                 return $this->errores->error(mensaje: 'Error al obtener td',data:  $tds_html);
             }
@@ -443,14 +471,28 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         return $tds_html;
     }
 
-    private function integra_trs_html(array $registro, array $ths, string $trs_html): array|string
+    private function integra_trs_html(bool $bold, array $registro, array $ths, string $trs_html): array|string
     {
-        $tds_html = $this->tds_html(registro: $registro, ths: $ths);
+        $tds_html = $this->tds_html(bold: $bold, registro: $registro, ths: $ths);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener tds_html',data:  $tds_html);
         }
         $trs_html.="<tr>$tds_html</tr>";
         return $trs_html;
+    }
+
+    private function registro_totales(stdClass $result, array $ths): array
+    {
+        $registro_totales = (array)$result->totales;
+
+        foreach ($ths as $th){
+            $columna = $th['campo'];
+            if(!isset($registro_totales[$columna])){
+                $registro_totales[$columna] = '';
+            }
+        }
+        return $registro_totales;
+
     }
 
     private function th(string $etiqueta): string

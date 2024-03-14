@@ -90,7 +90,7 @@ class controlador_adm_reporteTest extends test {
         $key_registro = 'a';
         $registro = array();
         $registro['a'] = '';
-        $resultado = $ctl->td($key_registro, $registro);
+        $resultado = $ctl->td(false,$key_registro, $registro);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals("<td></td>",$resultado);
         $this->assertIsString($resultado);
