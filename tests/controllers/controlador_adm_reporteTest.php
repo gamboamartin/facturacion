@@ -46,6 +46,32 @@ class controlador_adm_reporteTest extends test {
         errores::$error = false;
     }
 
+    public function test_init_fecha_inicial(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $ctl = new controlador_adm_reporte(link: $this->link, paths_conf: $this->paths_conf);
+        $ctl = new liberator($ctl);
+
+        $_POST['fecha_inicial'] = '';
+        $data = new stdClass();
+        $resultado = $ctl->init_fecha_inicial($data);
+        //print_r($resultado);exit;
+
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado->existe_alguna_fecha);
+        $this->assertTrue($resultado->existe_fecha_inicial);
+
+        errores::$error = false;
+    }
     public function test_init_filtro_fecha(): void
     {
         errores::$error = false;

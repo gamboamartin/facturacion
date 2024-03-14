@@ -177,8 +177,10 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         }
 
         $moneda = array();
+        $totales_hoja = new stdClass();
+        $totales_hoja->Facturas = (array)$registros->totales;
         $xls = (new exportador())->genera_xls(header: $header,name:  'Facturas',nombre_hojas:  $nombre_hojas,
-            keys_hojas: $keys_hojas, path_base: $this->path_base,moneda: $moneda);
+            keys_hojas: $keys_hojas, path_base: $this->path_base,moneda: $moneda,totales_hoja: $totales_hoja);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener xls',data:  $xls, header: $header, ws: $ws);
         }
@@ -322,7 +324,6 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         return $data;
 
     }
-
     private function init_fecha_inicial(stdClass $data): stdClass
     {
         if(isset($_POST['fecha_inicial'])) {
