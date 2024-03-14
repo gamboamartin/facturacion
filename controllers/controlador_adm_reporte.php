@@ -99,14 +99,14 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
         $this->link_exportar_xls = $link_exportar_xls;
 
-        $registros = array();
+        $result = new stdClass();
 
         $descripciones_rpt = array('Facturas','Pagos','Egresos');
 
         if(in_array($adm_reporte_descripcion, $descripciones_rpt)){
-            $registros = $this->result_fc_rpt(adm_reporte_descripcion: $adm_reporte_descripcion);
+            $result = $this->result_fc_rpt(adm_reporte_descripcion: $adm_reporte_descripcion);
             if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al obtener fc_facturas',data:  $registros, header: $header, ws: $ws);
+                return $this->retorno_error(mensaje: 'Error al obtener fc_facturas',data:  $result, header: $header, ws: $ws);
             }
         }
 
@@ -115,7 +115,7 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
             return $this->retorno_error(mensaje: 'Error al obtener ths_html',data:  $ths_html, header: $header, ws: $ws);
         }
 
-        $trs_html = $this->genera_trs_html(adm_reporte_descripcion: $adm_reporte_descripcion,registros:  $registros);
+        $trs_html = $this->genera_trs_html(adm_reporte_descripcion: $adm_reporte_descripcion,result:  $result);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener trs_html',data:  $trs_html, header: $header, ws: $ws);
         }
@@ -260,7 +260,7 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         return $ths_html;
     }
 
-    private function genera_trs_html(string $adm_reporte_descripcion, array $registros): array|string
+    private function genera_trs_html(string $adm_reporte_descripcion,  stdClass $result): array|string
     {
         $ths = $this->ths_array(adm_reporte_descripcion: $adm_reporte_descripcion);
         if(errores::$error){
@@ -268,12 +268,13 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         }
 
         $trs_html = '';
-        foreach ($registros as $registro){
+        foreach ($result->registros as $registro){
             $trs_html = $this->integra_trs_html(registro: $registro,ths:  $ths,trs_html:  $trs_html);
             if(errores::$error){
                 return $this->errores->error(mensaje: 'Error al obtener trs_html',data:  $trs_html);
             }
         }
+        //print_r($result->totales);exit;
         return $trs_html;
     }
 
@@ -323,6 +324,7 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     }
 
+
     private function init_filtro_fecha(): stdClass
     {
         $data = new stdClass();
@@ -366,10 +368,11 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         return $tds_html;
     }
 
-    private function result_fc_rpt(string $adm_reporte_descripcion): array
+    private function result_fc_rpt(string $adm_reporte_descripcion): array|stdClass
     {
         $result = new stdClass();
         $result->registros = array();
+        $result->totales = array();
 
         $table = '';
         if($adm_reporte_descripcion === 'Facturas'){
@@ -412,7 +415,7 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
             }
         }
 
-        return $result->registros;
+        return $result;
 
     }
 
@@ -442,7 +445,7 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     private function integra_trs_html(array $registro, array $ths, string $trs_html): array|string
     {
-        $tds_html = $this->tds_html(registro: $registro,ths:  $ths);
+        $tds_html = $this->tds_html(registro: $registro, ths: $ths);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener tds_html',data:  $tds_html);
         }
