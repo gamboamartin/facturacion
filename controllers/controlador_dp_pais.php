@@ -11,7 +11,7 @@ namespace gamboamartin\facturacion\controllers;
 use PDO;
 use stdClass;
 
-class controlador_dp_pais extends \controllers\controlador_dp_pais {
+class controlador_dp_pais extends \gamboamartin\facturacion\tests\controllers\controlador_dp_pais {
     public function __construct(PDO $link, stdClass $paths_conf = new stdClass())
     {
         parent::__construct(link: $link, paths_conf: $paths_conf);

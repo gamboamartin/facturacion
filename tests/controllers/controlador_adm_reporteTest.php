@@ -1,19 +1,11 @@
 <?php
-namespace controllers;
+namespace gamboamartin\facturacion\tests\controllers;
 
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_adm_reporte;
-use gamboamartin\facturacion\controllers\controlador_fc_factura;
-use gamboamartin\facturacion\controllers\controlador_fc_partida;
-use gamboamartin\facturacion\controllers\pdf;
-use gamboamartin\facturacion\models\fc_csd;
-use gamboamartin\facturacion\tests\base_test;
-use gamboamartin\organigrama\models\org_empresa;
-use gamboamartin\organigrama\models\org_sucursal;
 use gamboamartin\test\liberator;
 use gamboamartin\test\test;
-use gamboamartin\facturacion\models\fc_factura;
 
 
 use stdClass;
@@ -51,6 +43,30 @@ class controlador_adm_reporteTest extends test {
         $this->assertIsArray($resultado);
         $this->assertNotTrue(errores::$error);
 
+        errores::$error = false;
+    }
+
+    public function test_td(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $ctl = new controlador_adm_reporte(link: $this->link, paths_conf: $this->paths_conf);
+        $ctl = new liberator($ctl);
+
+        $key_registro = 'a';
+        $registro = array();
+        $registro['a'] = '';
+        $resultado = $ctl->td($key_registro, $registro);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("<td></td>",$resultado);
+        $this->assertIsString($resultado);
         errores::$error = false;
     }
 

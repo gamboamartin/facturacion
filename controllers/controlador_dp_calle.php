@@ -8,4 +8,4 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
-class controlador_dp_calle extends \controllers\controlador_dp_calle {}
+class controlador_dp_calle extends \gamboamartin\facturacion\tests\controllers\controlador_dp_calle {}

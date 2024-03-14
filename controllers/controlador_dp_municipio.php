@@ -8,4 +8,4 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
-class controlador_dp_municipio extends \controllers\controlador_dp_municipio {}
+class controlador_dp_municipio extends \gamboamartin\facturacion\tests\controllers\controlador_dp_municipio {}

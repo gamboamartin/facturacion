@@ -416,10 +416,15 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     }
 
-
-
-    private function td(string $key_registro, array $registro): string
+    private function td(string $key_registro, array $registro): string|array
     {
+        $key_registro = trim($key_registro);
+        if($key_registro === ''){
+            return $this->errores->error(mensaje: 'Error key_registro esta vacio',data:  $key_registro);
+        }
+        if(!isset($registro[$key_registro])){
+            return $this->errores->error(mensaje: '$registro['.$key_registro.'] no existe',data:  $registro);
+        }
         return "<td>$registro[$key_registro]</td>";
     }
 
