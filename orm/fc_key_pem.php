@@ -61,10 +61,6 @@ class fc_key_pem extends modelo{
         return $registro;
     }
 
-
-
-
-
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
         $validacion = (new _cert())->validaciones(data: $registro,key_id: 'fc_key_csd_id');

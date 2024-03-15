@@ -437,7 +437,13 @@ class _cert
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al generar ruta_out_base', data: $ruta_out_base);
         }
-        return (new generales())->path_base.'archivos/temporales/'.$ruta_out_base.'.pem';
+
+        $ruta_temporales = $this->ruta_temporales();
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al generar ruta_temporales', data: $ruta_temporales);
+        }
+
+        return $ruta_temporales.$ruta_out_base.'.pem';
 
     }
 
@@ -462,6 +468,16 @@ class _cert
             $i++;
         }
         return $ruta_out_base;
+
+    }
+
+    private function ruta_temporales(): string
+    {
+        $ruta_temporales = (new generales())->path_base.'archivos/temporales/';
+        if(!is_dir($ruta_temporales)){
+            mkdir($ruta_temporales);
+        }
+        return $ruta_temporales;
 
     }
     private function valida_existe_file(int $fc_csd_id, PDO $link, string $name_modelo)
