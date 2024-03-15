@@ -2,18 +2,64 @@
 namespace gamboamartin\facturacion\instalacion;
 
 use base\orm\modelo;
+use base\orm\modelo_base;
 use gamboamartin\administrador\instalacion\_adm;
 use gamboamartin\administrador\models\_instalacion;
 use gamboamartin\administrador\models\adm_reporte;
+use gamboamartin\comercial\models\com_sucursal;
+use gamboamartin\documento\models\doc_documento;
+use gamboamartin\documento\models\doc_version;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_etapa;
 use gamboamartin\facturacion\models\_transacciones_fc;
+use gamboamartin\facturacion\models\com_cliente;
+use gamboamartin\facturacion\models\com_email_cte;
+use gamboamartin\facturacion\models\fc_cer_csd;
+use gamboamartin\facturacion\models\fc_cer_pem;
+use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_complemento_pago;
 use gamboamartin\facturacion\models\fc_complemento_pago_etapa;
+use gamboamartin\facturacion\models\fc_conf_automatico;
+use gamboamartin\facturacion\models\fc_csd;
+use gamboamartin\facturacion\models\fc_docto_relacionado;
+use gamboamartin\facturacion\models\fc_ejecucion_automatica;
+use gamboamartin\facturacion\models\fc_email;
+use gamboamartin\facturacion\models\fc_email_cp;
+use gamboamartin\facturacion\models\fc_email_nc;
 use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_factura_aut_plantilla;
+use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_etapa;
+use gamboamartin\facturacion\models\fc_impuesto_dr;
+use gamboamartin\facturacion\models\fc_impuesto_p;
+use gamboamartin\facturacion\models\fc_key_csd;
+use gamboamartin\facturacion\models\fc_key_pem;
+use gamboamartin\facturacion\models\fc_nc_rel;
 use gamboamartin\facturacion\models\fc_nota_credito;
 use gamboamartin\facturacion\models\fc_nota_credito_etapa;
+use gamboamartin\facturacion\models\fc_notificacion;
+use gamboamartin\facturacion\models\fc_pago;
+use gamboamartin\facturacion\models\fc_pago_pago;
+use gamboamartin\facturacion\models\fc_pago_total;
+use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_partida_cp;
+use gamboamartin\facturacion\models\fc_partida_nc;
+use gamboamartin\facturacion\models\fc_receptor_email;
+use gamboamartin\facturacion\models\fc_relacion_nc;
+use gamboamartin\facturacion\models\fc_traslado;
+use gamboamartin\facturacion\models\fc_traslado_dr;
+use gamboamartin\facturacion\models\fc_traslado_dr_part;
+use gamboamartin\facturacion\models\fc_traslado_nc;
+use gamboamartin\facturacion\models\fc_traslado_p;
+use gamboamartin\facturacion\models\fc_traslado_p_part;
+use gamboamartin\notificaciones\models\not_adjunto;
+use gamboamartin\notificaciones\models\not_mensaje;
+use gamboamartin\notificaciones\models\not_mensaje_etapa;
+use gamboamartin\notificaciones\models\not_receptor;
+use gamboamartin\notificaciones\models\not_rel_mensaje;
+use gamboamartin\notificaciones\models\not_rel_mensaje_etapa;
+use gamboamartin\organigrama\models\org_empresa;
+use gamboamartin\organigrama\models\org_sucursal;
 use gamboamartin\proceso\models\pr_etapa;
 use gamboamartin\proceso\models\pr_etapa_proceso;
 use gamboamartin\proceso\models\pr_proceso;
@@ -366,7 +412,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_complemento_pago_relacionada(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -389,7 +434,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_notificacion_cp(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -412,7 +456,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_conf_aut_producto(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -720,7 +763,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_docto_relacionado(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -1907,7 +1949,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_retencion_dr(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -1931,7 +1972,6 @@ class instalacion
         return $out;
 
     }
-
     private function _add_fc_impuesto_dr(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -1955,8 +1995,6 @@ class instalacion
         return $out;
 
     }
-
-
     private function _add_fc_traslado_dr_part(PDO $link): array|stdClass
     {
         $out = new stdClass();
@@ -2087,8 +2125,6 @@ class instalacion
         return $out;
 
     }
-
-
 
     /**
      * @param PDO $link
@@ -2224,8 +2260,6 @@ class instalacion
 
 
     }
-
-
 
     /**
      * POR DOCUMENTAR EN WIKI
@@ -2379,8 +2413,6 @@ class instalacion
         return $campos_r;
 
     }
-
-
     private function fc_cancelacion(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_cancelacion(link: $link);
@@ -4779,6 +4811,150 @@ class instalacion
 
     }
 
+    final public function limpia(PDO $link): array|stdClass
+    {
+
+        $out = new stdClass();
+
+        $modelos = array();
+        $modelos[] = 'fc_cer_pem';
+        $modelos[] = 'fc_cer_csd';
+        $modelos[] = 'fc_complemento_pago_etapa';
+        $modelos[] = 'fc_email_cp';
+        $modelos[] = 'fc_traslado_dr_part';
+        $modelos[] = 'fc_traslado_dr';
+        $modelos[] = 'fc_impuesto_dr';
+        $modelos[] = 'fc_docto_relacionado';
+        $modelos[] = 'fc_traslado_p_part';
+        $modelos[] = 'fc_traslado_p';
+        $modelos[] = 'fc_impuesto_p';
+        $modelos[] = 'fc_pago_pago';
+        $modelos[] = 'fc_pago_total';
+        $modelos[] = 'fc_pago';
+        $modelos[] = 'fc_partida_cp';
+        $modelos[] = 'fc_complemento_pago';
+        $modelos[] = 'fc_ejecucion_automatica';
+        $modelos[] = 'fc_conf_automatico';
+        $modelos[] = 'fc_cfdi_sellado';
+        $modelos[] = 'fc_email';
+        $modelos[] = 'fc_factura_documento';
+        $modelos[] = 'fc_factura_etapa';
+        $modelos[] = 'fc_nc_rel';
+        $modelos[] = 'fc_notificacion';
+        $modelos[] = 'fc_traslado';
+        $modelos[] = 'fc_partida';
+        $modelos[] = 'fc_factura_aut_plantilla';
+        $modelos[] = 'fc_factura';
+        $modelos[] = 'fc_key_pem';
+        $modelos[] = 'fc_key_csd';
+        $modelos[] = 'fc_email_nc';
+        $modelos[] = 'fc_nota_credito_etapa';
+        $modelos[] = 'fc_relacion_nc';
+        $modelos[] = 'fc_traslado_nc';
+        $modelos[] = 'fc_partida_nc';
+        $modelos[] = 'fc_nota_credito';
+        $modelos[] = 'fc_csd_etapa';
+        $modelos[] = 'fc_csd';
+        $modelos[] = 'fc_receptor_email';
+
+        foreach ($modelos as $modelo){
+            $modelo_new = modelo_base::modelo_new(link: $link,modelo:  $modelo,
+                namespace_model: 'gamboamartin\\facturacion\\models');
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al generar modelo', data:  $modelo);
+            }
+            $del = $modelo_new->elimina_todo();
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al eliminar datos del modelo '.$modelo, data:  $del);
+            }
+            $out->$modelo = $del;
+
+        }
+
+        $modelos = array();
+        $modelos[] = 'org_sucursal';
+        $modelos[] = 'org_empresa';
+
+        foreach ($modelos as $modelo){
+            $modelo_new = modelo_base::modelo_new(link: $link,modelo:  $modelo,
+                namespace_model: 'gamboamartin\\organigrama\\models');
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al generar modelo', data:  $modelo);
+            }
+            $del = $modelo_new->elimina_todo();
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al eliminar datos del modelo '.$modelo, data:  $del);
+            }
+            $out->$modelo = $del;
+
+        }
+
+        $modelos = array();
+        $modelos[] = 'com_email_cte';
+        $modelos[] = 'com_sucursal';
+        $modelos[] = 'com_cliente';
+
+        foreach ($modelos as $modelo){
+            $modelo_new = modelo_base::modelo_new(link: $link,modelo:  $modelo,
+                namespace_model: 'gamboamartin\\comercial\\models');
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al generar modelo', data:  $modelo);
+            }
+            $del = $modelo_new->elimina_todo();
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al eliminar datos del modelo '.$modelo, data:  $del);
+            }
+            $out->$modelo = $del;
+
+        }
+
+        $modelos = array();
+        $modelos[] = 'not_rel_mensaje_etapa';
+        $modelos[] = 'not_rel_mensaje';
+        $modelos[] = 'not_receptor';
+        $modelos[] = 'not_adjunto';
+        $modelos[] = 'not_mensaje_etapa';
+        $modelos[] = 'not_mensaje';
+
+        foreach ($modelos as $modelo){
+            $modelo_new = modelo_base::modelo_new(link: $link,modelo:  $modelo,
+                namespace_model: 'gamboamartin\\notificaciones\\models');
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al generar modelo', data:  $modelo);
+            }
+            $del = $modelo_new->elimina_todo();
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al eliminar datos del modelo '.$modelo, data:  $del);
+            }
+            $out->$modelo = $del;
+
+        }
+
+        $modelos = array();
+        $modelos[] = 'doc_version';
+        $modelos[] = 'doc_documento';
+
+
+        foreach ($modelos as $modelo){
+            $modelo_new = modelo_base::modelo_new(link: $link,modelo:  $modelo,
+                namespace_model: 'gamboamartin\\documento\\models');
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al generar modelo', data:  $modelo);
+            }
+            $del = $modelo_new->elimina_todo();
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al eliminar datos del modelo '.$modelo, data:  $del);
+            }
+            $out->$modelo = $del;
+
+        }
+
+        return $out;
+
+
+    }
+
+
     private function ultima_etapa_txt(_transacciones_fc $modelo, _etapa $modelo_etapa, array $registro)
     {
         $r_etapa = $modelo->ultima_etapa(modelo_etapa: $modelo_etapa, registro_id: $registro[$modelo->key_id]);
@@ -4786,7 +4962,6 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al obtener etapa', data: $r_etapa);
         }
         return $r_etapa->pr_etapa_descripcion;
-
 
     }
 

@@ -78,7 +78,6 @@ class instalacionTest extends test {
 
         errores::$error = false;
     }
-
     public function test_input_serie(): void
     {
         errores::$error = false;
@@ -110,6 +109,29 @@ class instalacionTest extends test {
         $this->assertIsObject( $resultado['com_sucursal_id']);
         errores::$error = false;
 
+
+    }
+
+    public function test_limpia(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 1;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $instalacion = new instalacion();
+        //$instalacion = new liberator($instalacion);
+
+        $resultado = $instalacion->limpia(link: $this->link);
+
+
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+
+        errores::$error = false;
 
     }
 

@@ -56,7 +56,6 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         $this->buttons['btn_ejecuta'] = $btn_ejecuta;
 
 
-
     }
 
     final public function ejecuta_reporte(bool $header, bool $ws = false){
