@@ -127,7 +127,7 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
                 return $this->retorno_error(mensaje: 'Error al obtener fc_facturas',data:  $registros, header: $header, ws: $ws);
             }
 
-            $ths = $this->ths_array(adm_reporte_descripcion: $adm_reporte_descripcion);
+            $ths = (new _table())->ths_array(adm_reporte_descripcion: $adm_reporte_descripcion);
             if(errores::$error){
                 return $this->errores->error(mensaje: 'Error al obtener ths',data:  $ths);
             }
