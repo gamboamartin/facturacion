@@ -7,6 +7,8 @@
  *
  */
 namespace gamboamartin\facturacion\controllers;
+use gamboamartin\controllers\_controlador_adm_reporte\_filtros;
+use gamboamartin\controllers\_controlador_adm_reporte\_table;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_complemento_pago;
 use gamboamartin\facturacion\models\fc_factura;
@@ -20,38 +22,8 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
     public string $link_ejecuta_reporte = '';
     public string $link_exportar_xls ='';
 
-    private function asigna_data_fechas(): array|stdClass
-    {
-        $data = $this->data_fechas();
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error inicializar filtros',data:  $data);
-        }
 
-        $init = $this->init_data_post_fecha(data: $data);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error inicializar POST',data:  $init);
-        }
-        return $init;
 
-    }
-    private function data_fechas(): array|stdClass
-    {
-        $data = $this->init_filtro_fecha();
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error inicializar filtros',data:  $data);
-        }
-
-        $data = $this->init_fecha_inicial(data: $data);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error inicializar filtros',data:  $data);
-        }
-        $data = $this->init_fecha_final(data: $data);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error inicializar filtros',data:  $data);
-        }
-        return $data;
-
-    }
     final public function ejecuta(bool $header, bool $ws = false){
         $adm_reporte_descripcion = $this->adm_reporte['adm_reporte_descripcion'];
 
@@ -110,18 +82,14 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
             }
         }
 
-        $ths_html = $this->genera_ths_html(adm_reporte_descripcion: $adm_reporte_descripcion);
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener ths_html',data:  $ths_html, header: $header, ws: $ws);
-        }
 
-        $trs_html = $this->genera_trs_html(adm_reporte_descripcion: $adm_reporte_descripcion,result:  $result);
+        $table = (new _table())->contenido_table(adm_reporte_descripcion: $adm_reporte_descripcion,result:  $result);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener trs_html',data:  $trs_html, header: $header, ws: $ws);
+            return $this->retorno_error(mensaje: 'Error al obtener contenido',data:  $table, header: $header, ws: $ws);
         }
+        $this->ths = $table->ths_html;
+        $this->trs = $table->trs_html;
 
-        $this->ths = $ths_html;
-        $this->trs = $trs_html;
 
         $btn_exporta = $this->html_base->submit(css: 'success',label: 'Exporta');
         if(errores::$error){
@@ -187,36 +155,6 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     }
 
-    private function filtro_rango(string $table): array
-    {
-        $filtro_rango = array();
-        if(isset($_POST['fecha_inicial'])){
-            $filtro_rango = $this->filtro_rango_post(table: $table);
-            if(errores::$error){
-                return $this->errores->error(mensaje: 'Error al obtener filtro_rango',data:  $filtro_rango);
-            }
-        }
-        return $filtro_rango;
-
-    }
-
-    private function filtro_rango_post(string $table): array
-    {
-        $table = trim($table);
-        if($table === ''){
-            return $this->errores->error(mensaje: 'Error table esta vacia',data:  $table);
-        }
-
-        $init = $this->asigna_data_fechas();
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error inicializar POST',data:  $init);
-        }
-
-        $filtro_rango[$table.'.fecha']['valor1'] = $_POST['fecha_inicial'];
-        $filtro_rango[$table.'.fecha']['valor2'] = $_POST['fecha_final'];
-        return $filtro_rango;
-
-    }
 
     private function filtros_fecha(): array|string
     {
@@ -248,150 +186,6 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     }
 
-    private function genera_ths_html(string $adm_reporte_descripcion): array|string
-    {
-        $ths = $this->ths_array(adm_reporte_descripcion: $adm_reporte_descripcion);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener ths',data:  $ths);
-        }
-
-        $ths_html = $this->ths_html(ths: $ths);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener ths_html',data:  $ths_html);
-        }
-        return $ths_html;
-    }
-
-    private function genera_trs_html(string $adm_reporte_descripcion,  stdClass $result): array|string
-    {
-        $ths = $this->ths_array(adm_reporte_descripcion: $adm_reporte_descripcion);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener ths',data:  $ths);
-        }
-
-        $trs_html = '';
-        foreach ($result->registros as $registro){
-            $trs_html = $this->integra_trs_html(bold: false, registro: $registro, ths: $ths, trs_html: $trs_html);
-            if(errores::$error){
-                return $this->errores->error(mensaje: 'Error al obtener trs_html',data:  $trs_html);
-            }
-        }
-
-        $registro_totales = $this->registro_totales(result: $result,ths:  $ths);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener registro_totales',data:  $registro_totales);
-        }
-        $trs_html = $this->integra_trs_html(bold: true, registro: $registro_totales, ths: $ths, trs_html: $trs_html);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener trs_html',data:  $trs_html);
-        }
-
-        return $trs_html;
-    }
-
-    private function init_data_post_fecha(stdClass $data): array|stdClass
-    {
-        if(!$data->existe_alguna_fecha){
-            $init = $this->init_post_fecha();
-            if(errores::$error){
-                return $this->errores->error(mensaje: 'Error inicializar POST',data:  $init);
-            }
-        }
-
-        if(!$data->existe_fecha_inicial){
-            $init = $this->init_post_fecha_inicial();
-            if(errores::$error){
-                return $this->errores->error(mensaje: 'Error inicializar POST',data:  $init);
-            }
-        }
-        if(!$data->existe_fecha_final){
-            $init = $this->init_post_fecha_final();
-            if(errores::$error){
-                return $this->errores->error(mensaje: 'Error inicializar POST',data:  $init);
-            }
-        }
-        return $data;
-
-
-    }
-
-    private function init_fecha_final(stdClass $data): stdClass
-    {
-        if(isset($_POST['fecha_final'])){
-            $data->existe_alguna_fecha = true;
-            $data->existe_fecha_final = true;
-        }
-        return $data;
-
-    }
-    private function init_fecha_inicial(stdClass $data): stdClass
-    {
-        if(isset($_POST['fecha_inicial'])) {
-            $data->existe_alguna_fecha = true;
-            $data->existe_fecha_inicial = true;
-        }
-        return $data;
-
-    }
-
-    /**
-     * POR DOCUMENTAR EN WIKI
-     * Inicializa el filtro de fecha.
-     *
-     * Este método se encarga de inicializar el filtro de fecha para ser utilizado en
-     * el informe del administrador.
-     *
-     * @return stdClass Los datos del filtro de fecha inicializado si no hay errores.
-     *                        En caso de error, retorna un objeto de error.
-     *
-     * @throws errores En caso de cualquier error durante la inicialización del filtro de fecha,
-     *                 se lanza un objeto de error por esta función.
-     *
-     * @version 29.3.0
-     */
-    private function init_filtro_fecha(): stdClass
-    {
-        $data = new stdClass();
-        $data->existe_alguna_fecha = false;
-        $data->existe_fecha_inicial = false;
-        $data->existe_fecha_final = false;
-        return $data;
-
-    }
-
-    private function init_post_fecha(): array
-    {
-        $_POST['fecha_inicial'] = date('Y-m-01');
-        $_POST['fecha_final'] = date('Y-m-d');
-        return $_POST;
-
-    }
-
-    private function init_post_fecha_final(): array
-    {
-        $_POST['fecha_final'] = date('Y-m-d');
-        return $_POST;
-
-    }
-
-    private function init_post_fecha_inicial(): array
-    {
-        $_POST['fecha_inicial'] = date('Y-m-01');
-        return $_POST;
-
-    }
-
-    private function integra_td(bool $bold, array $data_ths, array $registro, string $tds_html): array|string
-    {
-        $key_registro = $data_ths['campo'];
-        $td = $this->td(bold: $bold, key_registro: $key_registro,registro:  $registro);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener td',data:  $td);
-        }
-
-        $tds_html.="$td";
-        return $tds_html;
-    }
 
     private function result_fc_rpt(string $adm_reporte_descripcion): array|stdClass
     {
@@ -410,7 +204,7 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
             $table = 'fc_nota_credito';
         }
 
-        $filtro_rango = $this->filtro_rango(table: $table);
+        $filtro_rango = (new _filtros())->filtro_rango(table: $table);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener filtro_rango',data:  $filtro_rango);
         }
@@ -444,133 +238,4 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     }
 
-    private function td(bool $bold,string $key_registro, array $registro): string|array
-    {
-        $key_registro = trim($key_registro);
-        if($key_registro === ''){
-            return $this->errores->error(mensaje: 'Error key_registro esta vacio',data:  $key_registro);
-        }
-        if(!isset($registro[$key_registro])){
-            return $this->errores->error(mensaje: '$registro['.$key_registro.'] no existe',data:  $registro);
-        }
-        $contenido = $registro[$key_registro];
-        if($bold){
-            $contenido = "<b>$contenido</b>";
-        }
-        return "<td>$contenido</td>";
-    }
-
-    private function tds_html(bool $bold,array $registro, array $ths): array|string
-    {
-        $tds_html = '';
-        foreach ($ths as $data_ths){
-            $tds_html = $this->integra_td(bold: $bold, data_ths: $data_ths, registro: $registro, tds_html: $tds_html);
-            if(errores::$error){
-                return $this->errores->error(mensaje: 'Error al obtener td',data:  $tds_html);
-            }
-        }
-        return $tds_html;
-    }
-
-    private function integra_trs_html(bool $bold, array $registro, array $ths, string $trs_html): array|string
-    {
-        $tds_html = $this->tds_html(bold: $bold, registro: $registro, ths: $ths);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener tds_html',data:  $tds_html);
-        }
-        $trs_html.="<tr>$tds_html</tr>";
-        return $trs_html;
-    }
-
-    private function registro_totales(stdClass $result, array $ths): array
-    {
-        $registro_totales = (array)$result->totales;
-
-        foreach ($ths as $th){
-            $columna = $th['campo'];
-            if(!isset($registro_totales[$columna])){
-                $registro_totales[$columna] = '';
-            }
-        }
-        return $registro_totales;
-
-    }
-
-    private function th(string $etiqueta): string
-    {
-        return "<th>$etiqueta</th>";
-    }
-
-    private function ths_array(string $adm_reporte_descripcion): array
-    {
-        $ths = array();
-
-        if($adm_reporte_descripcion === 'Facturas'){
-            $ths[] = array('etiqueta'=>'Folio', 'campo'=>'fc_factura_folio');
-            $ths[] = array('etiqueta'=>'UUID', 'campo'=>'fc_factura_uuid');
-            $ths[] = array('etiqueta'=>'Cliente', 'campo'=>'com_cliente_razon_social');
-            $ths[] = array('etiqueta'=>'Sub Total', 'campo'=>'fc_factura_sub_total_base');
-            $ths[] = array('etiqueta'=>'Descuento', 'campo'=>'fc_factura_total_descuento');
-            $ths[] = array('etiqueta'=>'Traslados', 'campo'=>'fc_factura_total_traslados');
-            $ths[] = array('etiqueta'=>'Retenciones', 'campo'=>'fc_factura_total_retenciones');
-            $ths[] = array('etiqueta'=>'Total', 'campo'=>'fc_factura_total');
-            $ths[] = array('etiqueta'=>'Fecha', 'campo'=>'fc_factura_fecha');
-            $ths[] = array('etiqueta'=>'Forma de Pago', 'campo'=>'cat_sat_forma_pago_descripcion');
-            $ths[] = array('etiqueta'=>'Metodo de Pago', 'campo'=>'cat_sat_metodo_pago_descripcion');
-            $ths[] = array('etiqueta'=>'Moneda', 'campo'=>'cat_sat_moneda_codigo');
-            $ths[] = array('etiqueta'=>'Tipo Cambio', 'campo'=>'com_tipo_cambio_monto');
-            $ths[] = array('etiqueta'=>'Uso CFDI', 'campo'=>'cat_sat_uso_cfdi_descripcion');
-            $ths[] = array('etiqueta'=>'Exportacion', 'campo'=>'fc_factura_exportacion');
-        }
-        if($adm_reporte_descripcion === 'Pagos'){
-            $ths[] = array('etiqueta'=>'Folio', 'campo'=>'fc_complemento_pago_folio');
-            $ths[] = array('etiqueta'=>'UUID', 'campo'=>'fc_complemento_pago_uuid');
-            $ths[] = array('etiqueta'=>'Cliente', 'campo'=>'com_cliente_razon_social');
-            $ths[] = array('etiqueta'=>'Sub Total', 'campo'=>'fc_complemento_pago_sub_total_base');
-            $ths[] = array('etiqueta'=>'Descuento', 'campo'=>'fc_complemento_pago_total_descuento');
-            $ths[] = array('etiqueta'=>'Traslados', 'campo'=>'fc_complemento_pago_total_traslados');
-            $ths[] = array('etiqueta'=>'Retenciones', 'campo'=>'fc_complemento_pago_total_retenciones');
-            $ths[] = array('etiqueta'=>'Total', 'campo'=>'fc_complemento_pago_total');
-            $ths[] = array('etiqueta'=>'Fecha', 'campo'=>'fc_complemento_pago_fecha');
-            $ths[] = array('etiqueta'=>'Forma de Pago', 'campo'=>'cat_sat_forma_pago_descripcion');
-            $ths[] = array('etiqueta'=>'Metodo de Pago', 'campo'=>'cat_sat_metodo_pago_descripcion');
-            $ths[] = array('etiqueta'=>'Moneda', 'campo'=>'cat_sat_moneda_codigo');
-            $ths[] = array('etiqueta'=>'Tipo Cambio', 'campo'=>'com_tipo_cambio_monto');
-            $ths[] = array('etiqueta'=>'Uso CFDI', 'campo'=>'cat_sat_uso_cfdi_descripcion');
-            $ths[] = array('etiqueta'=>'Exportacion', 'campo'=>'fc_complemento_pago_exportacion');
-        }
-        if($adm_reporte_descripcion === 'Egresos'){
-            $ths[] = array('etiqueta'=>'Folio', 'campo'=>'fc_nota_credito_folio');
-            $ths[] = array('etiqueta'=>'UUID', 'campo'=>'fc_nota_credito_uuid');
-            $ths[] = array('etiqueta'=>'Cliente', 'campo'=>'com_cliente_razon_social');
-            $ths[] = array('etiqueta'=>'Sub Total', 'campo'=>'fc_nota_credito_sub_total_base');
-            $ths[] = array('etiqueta'=>'Descuento', 'campo'=>'fc_nota_credito_total_descuento');
-            $ths[] = array('etiqueta'=>'Traslados', 'campo'=>'fc_nota_credito_total_traslados');
-            $ths[] = array('etiqueta'=>'Retenciones', 'campo'=>'fc_nota_credito_total_retenciones');
-            $ths[] = array('etiqueta'=>'Total', 'campo'=>'fc_nota_credito_total');
-            $ths[] = array('etiqueta'=>'Fecha', 'campo'=>'fc_nota_credito_fecha');
-            $ths[] = array('etiqueta'=>'Forma de Pago', 'campo'=>'cat_sat_forma_pago_descripcion');
-            $ths[] = array('etiqueta'=>'Metodo de Pago', 'campo'=>'cat_sat_metodo_pago_descripcion');
-            $ths[] = array('etiqueta'=>'Moneda', 'campo'=>'cat_sat_moneda_codigo');
-            $ths[] = array('etiqueta'=>'Tipo Cambio', 'campo'=>'com_tipo_cambio_monto');
-            $ths[] = array('etiqueta'=>'Uso CFDI', 'campo'=>'cat_sat_uso_cfdi_descripcion');
-            $ths[] = array('etiqueta'=>'Exportacion', 'campo'=>'fc_nota_credito_exportacion');
-        }
-        return $ths;
-    }
-
-    private function ths_html(array $ths): array|string
-    {
-        $ths_html = '';
-        foreach ($ths as $th_data){
-            $etiqueta = $th_data['etiqueta'];
-
-            $th = $this->th(etiqueta: $etiqueta);
-            if(errores::$error){
-                return $this->errores->error(mensaje: 'Error al obtener th',data:  $th);
-            }
-            $ths_html.=$th;
-        }
-        return $ths_html;
-    }
 }
