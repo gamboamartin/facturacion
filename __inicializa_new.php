@@ -11,11 +11,15 @@ require 'vendor/autoload.php';
 $con = new conexion();
 $link = conexion::$link;
 
-$link->beginTransaction();
 
+if(!$link->inTransaction()){
+    $link->beginTransaction();
+
+}
 
 $limpia = (new \gamboamartin\facturacion\instalacion\instalacion())->limpia(link: $link);
 if(errores::$error){
+
     $link->rollBack();
     $error = (new errores())->error(mensaje: 'Error al instalar limpia fc', data: $limpia);
     print_r($error);
@@ -123,9 +127,9 @@ if(errores::$error){
 }
 
 
+if($link->inTransaction()){
+    $link->commit();
 
-
-
-$link->commit();
+}
 
 

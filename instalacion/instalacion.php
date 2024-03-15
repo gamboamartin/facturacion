@@ -4858,15 +4858,18 @@ class instalacion
         $modelos[] = 'fc_receptor_email';
 
         foreach ($modelos as $modelo){
+
             $modelo_new = modelo_base::modelo_new(link: $link,modelo:  $modelo,
                 namespace_model: 'gamboamartin\\facturacion\\models');
             if(errores::$error){
                 return (new errores())->error(mensaje: 'Error al generar modelo', data:  $modelo);
             }
+
             $del = $modelo_new->elimina_todo();
             if(errores::$error){
                 return (new errores())->error(mensaje: 'Error al eliminar datos del modelo '.$modelo, data:  $del);
             }
+
             $out->$modelo = $del;
 
         }

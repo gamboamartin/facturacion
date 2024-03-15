@@ -42,9 +42,6 @@ class _base_system_fcTest extends test {
         $_GET['session_id'] = '1';
 
 
-
-
-
         $ctl = new controlador_fc_factura(link: $this->link, paths_conf: $this->paths_conf);
         $ctl = new liberator($ctl);
 

@@ -11,7 +11,7 @@ namespace gamboamartin\facturacion\controllers;
 use PDO;
 use stdClass;
 
-class controlador_dp_calle_pertenece extends \gamboamartin\facturacion\tests\controllers\controlador_dp_calle_pertenece {
+class controlador_dp_calle_pertenece extends \gamboamartin\direccion_postal\controllers\controlador_dp_calle_pertenece {
     public function __construct(PDO $link, stdClass $paths_conf = new stdClass())
     {
         parent::__construct(link: $link,paths_conf:  $paths_conf);
