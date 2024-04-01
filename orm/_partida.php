@@ -1239,6 +1239,20 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al modificar entidad base', data: $regenera);
         }
 
+
+        $registro_puro = $this->registro(registro_id: $id, columnas_en_bruto: true, retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener registro_puro', data: $registro_puro);
+        }
+
+        $fc_registro_partida = $this->registro(registro_id: $id, retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error obtener partida', data: $fc_registro_partida);
+        }
+
+        $r_modifica_bd->registro_actualizado = (array)$fc_registro_partida;
+        $r_modifica_bd->registro_puro = (array)$registro_puro;
+
         return $r_modifica_bd;
     }
 

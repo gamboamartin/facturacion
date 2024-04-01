@@ -196,7 +196,7 @@ btn_alta_partida.click(function () {
             let tr_montos = tr_inputs_montos+"<tr>"+td_fc_partida_sub_total+td_fc_partida_traslados+td_fc_partida_retenciones+td_fc_partida_total+"</tr>";
             let tr_buttons = "<tr class='tr_elimina_partida'>"+
                 "<td colspan='5' class='td_elimina_partida'>"+
-                "<button type='button' class='btn btn-danger col-md-12 elimina_partida' data-fc_partida_factura_id='"+json.registro_puro.id+"' value='elimina' name='btn_action_next'>aaaaaaaaaa</button>"+
+                "<button type='button' class='btn btn-danger col-md-12 elimina_partida' data-fc_partida_factura_id='"+json.registro_puro.id+"' value='elimina' name='btn_action_next'>Elimina</button>"+
         "</td> </tr>";
 
             let table_full = "" +

@@ -255,6 +255,22 @@ function modifica_partida_bd(contenedores, data, entidad_factura){
 
             contenedores.td_elimina_partida.children('.elimina_partida').data('fc_partida_factura_id', registro_partida_id);
             contenedores.td_fc_partida_descripcion.data('fc_partida_factura_id', registro_partida_id);
+            contenedores.fc_partida_sub_total_base.children('.fc_partida_sub_total_base').val(json.registro_puro.sub_total_base);
+            contenedores.fc_partida_sub_total.empty();
+            contenedores.fc_partida_traslados.empty();
+            contenedores.fc_partida_retenciones.empty();
+            contenedores.fc_partida_total.empty();
+
+            let subtotal_rs = "<b>Sub Total:</b> "+json.registro_puro.sub_total;
+            let traslados_rs = "<b>Traslados:</b> "+json.registro_puro.total_traslados;
+            let retenciones_rs = "<b>Retenciones:</b> "+json.registro_puro.total_retenciones;
+            let total_rs = "<b>Total:</b> "+json.registro_puro.total;
+
+            contenedores.fc_partida_sub_total.html(subtotal_rs);
+            contenedores.fc_partida_traslados.html(traslados_rs);
+            contenedores.fc_partida_retenciones.html(retenciones_rs);
+            contenedores.fc_partida_total.html(total_rs);
+
 
             return registro_partida_id;
 
@@ -289,11 +305,19 @@ function tds(contenedor){
     let td_fc_partida_descuento = cte_formulario.children(".tr_data_partida").children(".td_fc_partida_descuento");
     let td_fc_partida_descripcion = cte_formulario.children(".tr_fc_partida_descripcion").children(".td_fc_partida_descripcion");
     let td_elimina_partida = cte_formulario.children(".tr_elimina_partida").children(".td_elimina_partida");
+    let fc_partida_sub_total_base = cte_formulario.children(".tr_data_partida").children(".td_fc_partida_sub_total_base");
+    let fc_partida_sub_total = cte_formulario.children(".tr_data_partida_rs").children(".td_fc_partida_sub_total");
+    let fc_partida_traslados = cte_formulario.children(".tr_data_partida_rs").children(".td_fc_partida_traslados");
+    let fc_partida_retenciones = cte_formulario.children(".tr_data_partida_rs").children(".td_fc_partida_retenciones");
+    let fc_partida_total = cte_formulario.children(".tr_data_partida_rs").children(".td_fc_partida_total");
 
     return {
         cte_formulario: cte_formulario, td_fc_partida_cantidad: td_fc_partida_cantidad,
         td_fc_partida_valor_unitario: td_fc_partida_valor_unitario, td_fc_partida_descuento: td_fc_partida_descuento,
-        td_fc_partida_descripcion: td_fc_partida_descripcion,td_elimina_partida: td_elimina_partida
+        td_fc_partida_descripcion: td_fc_partida_descripcion,td_elimina_partida: td_elimina_partida,
+        fc_partida_sub_total_base: fc_partida_sub_total_base,
+        fc_partida_sub_total: fc_partida_sub_total,fc_partida_traslados:fc_partida_traslados,
+        fc_partida_retenciones:fc_partida_retenciones,fc_partida_total:fc_partida_total
     };
 }
 

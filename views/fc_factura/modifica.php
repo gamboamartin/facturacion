@@ -116,11 +116,11 @@
 
                                     </tr>
 
-                                    <tr>
-                                        <td><b>Sub Total: </b><?php echo $partida['fc_partida_sub_total']; ?></td>
-                                        <td><b>Traslados: </b><?php echo $partida['fc_partida_total_traslados']; ?></td>
-                                        <td><b>Retenciones: </b><?php echo $partida['fc_partida_total_retenciones']; ?></td>
-                                        <td><b>Total: </b><?php echo $partida['fc_partida_total']; ?></td>
+                                    <tr class="tr_data_partida_rs">
+                                        <td class="td_fc_partida_sub_total"><b>Sub Total: </b><?php echo $partida['fc_partida_sub_total']; ?></td>
+                                        <td class="td_fc_partida_traslados"><b>Traslados: </b><?php echo $partida['fc_partida_total_traslados']; ?></td>
+                                        <td class="td_fc_partida_retenciones"><b>Retenciones: </b><?php echo $partida['fc_partida_total_retenciones']; ?></td>
+                                        <td class="td_fc_partida_total"><b>Total: </b><?php echo $partida['fc_partida_total']; ?></td>
                                     </tr>
                                 <tr class='tr_elimina_partida'>
                                     <td colspan='5' class='td_elimina_partida'>
