@@ -1183,7 +1183,6 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al actualizar sub total base', data: $upd);
         }
 
-
         $fc_registro_partida = $this->registro(registro_id: $id, retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener partida', data: $fc_registro_partida);

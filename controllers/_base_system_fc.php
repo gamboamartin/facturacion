@@ -2288,7 +2288,7 @@ class _base_system_fc extends _base_system{
             $this->registro_id = $fc_partida[$this->tabla.'_id'];
         }
 
-        $del = $this->modelo_partida->elimina_bd(id: $registro_partida_id);
+        /*$del = $this->modelo_partida->elimina_bd(id: $registro_partida_id);
         if(errores::$error){
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al eliminar partida', data: $del,
@@ -2309,15 +2309,23 @@ class _base_system_fc extends _base_system{
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al insertar partida', data: $alta,
                 header:  true, ws: $ws);
+        }*/
+
+        $upd = $this->modelo_partida->modifica_bd(registro: $_POST,id:  $registro_partida_id);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->retorno_error(mensaje: 'Error al modificar partida', data: $upd,
+                header:  true, ws: $ws);
         }
+
 
         $this->link->commit();
         if($header){
-            $params = array('fc_partida_id'=>$this->fc_partida_id);
+            $params = array('fc_partida_id'=>$registro_partida_id);
             $retorno = (new actions())->retorno_alta_bd(link: $this->link, registro_id: $this->registro_id,
                 seccion: $this->tabla, siguiente_view: $siguiente_view, params: $params);
             if(errores::$error){
-                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $alta,
+                return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $upd,
                     header:  true, ws: $ws);
             }
             header('Location:'.$retorno);
@@ -2325,10 +2333,10 @@ class _base_system_fc extends _base_system{
         }
         if($ws){
             header('Content-Type: application/json');
-            echo json_encode($alta, JSON_THROW_ON_ERROR);
+            echo json_encode($upd, JSON_THROW_ON_ERROR);
             exit;
         }
-        return $alta;
+        return $upd;
 
     }
 
