@@ -2282,7 +2282,7 @@ class _base_system_fc extends _base_system{
                     header:  true, ws: $ws);
             }
             $cuenta_predial = $r_fc_cuenta_predial->registros[0]['descripcion'];
-        }
+        } 
 
         if($this->registro_id === -1){
             $this->registro_id = $fc_partida[$this->tabla.'_id'];
