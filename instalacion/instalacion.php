@@ -2357,7 +2357,7 @@ class instalacion
         return $campos;
 
     }
-    private function exe_campos_factura(PDO $link, _transacciones_fc $modelo, _etapa $modelo_etapa)
+    private function exe_campos_factura(PDO $link, _transacciones_fc $modelo, _etapa $modelo_etapa): object|array
     {
         $init = (new _instalacion(link: $link));
 
@@ -3026,6 +3026,15 @@ class instalacion
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al upd etapa', data: $upd);
         }
+
+
+        $ejecuta = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'inserta_factura_plantilla_bd',
+            adm_seccion_descripcion:  __FUNCTION__, es_view: 'inactivo',
+            icono: 'bi bi-files-alt',link:  $link, lista:  'inactivo',titulo:  'inserta_factura_plantilla_bd');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $ejecuta);
+        }
+
 
 
         return $result;
