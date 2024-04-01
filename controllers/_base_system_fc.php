@@ -2288,28 +2288,6 @@ class _base_system_fc extends _base_system{
             $this->registro_id = $fc_partida[$this->tabla.'_id'];
         }
 
-        /*$del = $this->modelo_partida->elimina_bd(id: $registro_partida_id);
-        if(errores::$error){
-            $this->link->rollBack();
-            return $this->retorno_error(mensaje: 'Error al eliminar partida', data: $del,
-                header:  true, ws: $ws);
-        }
-
-
-        $fc_partida_ins = $_POST;
-        $fc_partida_ins[$this->modelo_entidad->key_id] = $this->registro_id;
-        $fc_partida_ins['com_producto_id'] = $fc_partida['com_producto_id'];
-        $fc_partida_ins['cat_sat_conf_imps_id'] = $fc_partida['com_producto_cat_sat_conf_imps_id'];
-        if($existe_cuenta_predial) {
-            $fc_partida_ins['cuenta_predial'] = $cuenta_predial;
-        }
-
-        $alta = $this->modelo_partida->alta_registro(registro: $fc_partida_ins);
-        if(errores::$error){
-            $this->link->rollBack();
-            return $this->retorno_error(mensaje: 'Error al insertar partida', data: $alta,
-                header:  true, ws: $ws);
-        }*/
 
         $upd = $this->modelo_partida->modifica_bd(registro: $_POST,id:  $registro_partida_id);
         if(errores::$error){
@@ -2332,8 +2310,15 @@ class _base_system_fc extends _base_system{
             exit;
         }
         if($ws){
+            ob_clean();
             header('Content-Type: application/json');
-            echo json_encode($upd, JSON_THROW_ON_ERROR);
+            try {
+                echo json_encode($upd, JSON_THROW_ON_ERROR);
+            }
+            catch (Throwable $e){
+                print_r($e);
+            }
+
             exit;
         }
         return $upd;
