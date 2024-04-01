@@ -2,7 +2,6 @@
 
 namespace gamboamartin\facturacion\models;
 
-use base\orm\modelo;
 use gamboamartin\cat_sat\models\cat_sat_factor;
 use gamboamartin\cat_sat\models\cat_sat_tipo_factor;
 use gamboamartin\errores\errores;
@@ -12,9 +11,9 @@ use stdClass;
 
 class _data_impuestos extends _base{
 
-    protected _partida $modelo_partida;
-    protected _transacciones_fc $modelo_entidad;
-    protected _etapa $modelo_etapa;
+    public _partida $modelo_partida;
+    public _transacciones_fc $modelo_entidad;
+    public _etapa $modelo_etapa;
 
     public bool $valida_restriccion = true;
 
@@ -217,7 +216,7 @@ class _data_impuestos extends _base{
             return $this->error->error(mensaje: 'Error obtener cat_sat_tipo_factor', data: $cat_sat_tipo_factor);
         }
 
-        $total = $this->calcula_total(cat_sat_factor_id: $this->registro['cat_sat_factor_id'],row_partida:  $row_partida);
+        $total = $this->calcula_total(cat_sat_factor_id: $registro['cat_sat_factor_id'],row_partida:  $row_partida);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error calcular total', data: $total);
         }
@@ -245,9 +244,10 @@ class _data_impuestos extends _base{
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener traslado',data: $traslado);
         }
+
         $key_entidad_base_id = $this->modelo_entidad->tabla.'_id';
         $permite_transaccion = $this->modelo_entidad->verifica_permite_transaccion(modelo_etapa: $this->modelo_etapa,
-            registro_id: $traslado->$key_entidad_base_id);
+            registro_id: $traslado[$key_entidad_base_id]);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
@@ -270,9 +270,27 @@ class _data_impuestos extends _base{
             return $this->error->error(mensaje: 'Error al validar foraneas',data: $registro);
         }
 
-        $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
+
+        $partida = $this->modelo_partida->registro(registro_id: $registro[$this->modelo_partida->key_id],
+            columnas_en_bruto: true,retorno_obj: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener partida',data: $partida);
+        }
+
+
+        $registro = $this->integra_total(registro: $registro, row_partida: $partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error integrar total', data: $registro);
+        }
+
+        $r_modifica_bd = parent::modifica_bd(registro: $registro,id:  $id,reactiva:  $reactiva);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al modificar traslados',data:  $r_modifica_bd);
+        }
+
+        $upd_partida = $this->upd_partida(key_filtro_id: $this->modelo_partida->key_filtro_id, row_partida_id: $partida->id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error ejecutar upd_partida', data: $upd_partida);
         }
 
         return $r_modifica_bd;
@@ -329,7 +347,7 @@ class _data_impuestos extends _base{
             return $this->error->error(mensaje: 'Error obtener row_partida_upd', data: $row_partida_upd);
         }
 
-        $upd_partida = $this->modelo_partida->modifica_bd(registro: $row_partida_upd,id:  $row_partida_id);
+        $upd_partida = $this->modelo_partida->modifica_bd_base(registro: $row_partida_upd,id:  $row_partida_id);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error modificar', data: $upd_partida);
         }

@@ -269,7 +269,6 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al insertar predial', data: $r_fc_cuenta_predial);
         }
 
-
         $fc_registro_partida = $this->registro(registro_id: $r_alta_bd->registro_id, columnas_en_bruto: true,
             retorno_obj: true);
         if (errores::$error) {
@@ -1137,7 +1136,7 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al limpiar campos', data: $registro);
         }
 
-        $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
+        $r_modifica_bd = parent::modifica_bd(registro: $registro,id:  $id,reactiva:  $reactiva);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al modificar partida', data: $r_modifica_bd);
         }
@@ -1169,13 +1168,60 @@ class _partida extends  _base{
             return $this->error->error(mensaje: 'Error al actualizar sub total base', data: $upd);
         }
 
+        $this->modelo_traslado->modelo_entidad = $this->modelo_entidad;
+        $this->modelo_traslado->modelo_etapa = $this->modelo_etapa;
+        $this->modelo_traslado->modelo_partida = $this;
+
+        $traslados = $this->get_traslados(partida_id: $id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener traslados', data: $traslados);
+        }
+
+        foreach ($traslados as $traslado){
+           // print_r($traslado);exit;
+            $trs_upd[$this->key_id] = $id;
+            $trs_upd['cat_sat_tipo_factor_id'] = $traslado['cat_sat_tipo_factor_id'];
+            $trs_upd['cat_sat_factor_id'] = $traslado['cat_sat_factor_id'];
+            $trs_upd['cat_sat_tipo_impuesto_id'] = $traslado['cat_sat_tipo_impuesto_id'];
+            $upd_traslado = $this->modelo_traslado->modifica_bd(registro: $trs_upd, id: $traslado[$this->modelo_traslado->key_id]);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al actualizar traslado', data: $upd_traslado);
+            }
+        }
+
+        $this->modelo_retencion->modelo_entidad = $this->modelo_entidad;
+        $this->modelo_retencion->modelo_etapa = $this->modelo_etapa;
+        $this->modelo_retencion->modelo_partida = $this;
+
+        $retenciones = $this->get_retenciones(partida_id: $id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener retenciones', data: $retenciones);
+        }
+
+        foreach ($retenciones as $retencion){
+            $ret_upd[$this->key_id] = $id;
+            $ret_upd['cat_sat_tipo_factor_id'] = $retencion['cat_sat_tipo_factor_id'];
+            $ret_upd['cat_sat_factor_id'] = $retencion['cat_sat_factor_id'];
+            $ret_upd['cat_sat_tipo_impuesto_id'] = $retencion['cat_sat_tipo_impuesto_id'];
+            $upd_retencion = $this->modelo_retencion->modifica_bd(registro: $ret_upd, id: $retencion[$this->modelo_retencion->key_id]);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al actualizar retencion', data: $upd_retencion);
+            }
+        }
+
+        //print_r($traslados);exit;
+
         $fc_registro_partida = $this->registro(registro_id: $id, columnas_en_bruto: true, retorno_obj: true);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener partida', data: $fc_registro_partida);
         }
 
+
+
         $total = $fc_registro_partida->sub_total + $fc_registro_partida->total_traslados
             - $fc_registro_partida->total_retenciones;
+
+        //echo $total;exit;
 
         $row_partida_upd['total'] = $total;
         $upd = parent::modifica_bd(registro: $row_partida_upd,id:  $id);
@@ -1187,8 +1233,6 @@ class _partida extends  _base{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error obtener partida', data: $fc_registro_partida);
         }
-
-
 
         $regenera = $this->regenera_totales(fc_registro_partida: $fc_registro_partida);
         if (errores::$error) {
