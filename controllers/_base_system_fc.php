@@ -757,8 +757,8 @@ class _base_system_fc extends _base_system{
     public function duplica(bool $header, bool $ws = false){
         $this->link->beginTransaction();
 
-
-        $duplica = $this->modelo_entidad->duplica(modelo_partida: $this->modelo_partida, registro_id: $this->registro_id);
+        $duplica = $this->modelo_entidad->duplica(modelo_partida: $this->modelo_partida,
+            modelo_retencion: $this->modelo_retencion, modelo_traslado: $this->modelo_traslado, registro_id: $this->registro_id);
         if (errores::$error) {
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al insertar registro', data: $duplica, header: $header,ws: $ws);

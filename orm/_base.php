@@ -12,6 +12,14 @@ class _base extends _modelo_parent{
      */
     protected function init_alta_bd(): array
     {
+
+        if(!isset($this->registro['descripcion'])){
+            $descripcion = time();
+            $descripcion .= mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
+            $descripcion .= mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99).mt_rand(10,99);
+            $this->registro['descripcion'] = $descripcion;
+        }
+
         if (!isset($this->registro['codigo'])) {
             $this->registro['codigo'] = $this->get_codigo_aleatorio();
             if (errores::$error) {

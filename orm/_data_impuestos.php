@@ -64,6 +64,8 @@ class _data_impuestos extends _base{
             return $this->error->error(mensaje: 'Error integrar total', data: $registro);
         }
 
+
+
         $this->registro = $registro;
 
         $r_alta_bd =  parent::alta_bd();

@@ -11,8 +11,8 @@ use stdClass;
 
 class _partida extends  _base{
 
-    protected _data_impuestos $modelo_retencion;
-    protected _data_impuestos $modelo_traslado;
+    public _data_impuestos $modelo_retencion;
+    public _data_impuestos $modelo_traslado;
 
     protected _transacciones_fc $modelo_entidad;
     protected _cuenta_predial $modelo_predial;
@@ -373,18 +373,21 @@ class _partida extends  _base{
         return str_replace("{{YEAR}}", $year, $descripcion);
     }
 
+    private function integra_calcula_subtotales(array $registro): array
+    {
+        $sub_total_base = round(round($registro['valor_unitario'],4)
+            * round($this->registro['cantidad'],4),4);
 
-    private function inserta_predial(stdClass $fc_registro_partida){
-        $key_id = $this->tabla.'_id';
-        $data_predial[$key_id] = $fc_registro_partida->$key_id;
+        $registro['sub_total_base'] = $sub_total_base;
 
-        $r_fc_cuenta_predial = $this->modelo_predial->alta_registro(registro: $data_predial);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al insertar predial', data: $r_fc_cuenta_predial);
+        $descuento = 0.0;
+        if(isset($registro['descuento'])){
+            $descuento = round($registro['descuento'],2);
         }
-        return $r_fc_cuenta_predial;
-    }
+        $registro['sub_total'] = $sub_total_base - $descuento;
 
+        return $registro;
+    }
     private function integra_descripcion_automatica(int $registro_id){
         $data_desc_aut = $this->data_descripcion_aut(registro_id: $registro_id);
         if (errores::$error) {
@@ -402,7 +405,16 @@ class _partida extends  _base{
         }
         return $upd;
     }
+    private function inserta_predial(stdClass $fc_registro_partida){
+        $key_id = $this->tabla.'_id';
+        $data_predial[$key_id] = $fc_registro_partida->$key_id;
 
+        $r_fc_cuenta_predial = $this->modelo_predial->alta_registro(registro: $data_predial);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al insertar predial', data: $r_fc_cuenta_predial);
+        }
+        return $r_fc_cuenta_predial;
+    }
     private function integra_predial(array $data_predial, stdClass $fc_registro_partida){
 
         if(count($data_predial)>0){
@@ -483,23 +495,6 @@ class _partida extends  _base{
         $data->regenera_saldo = $regenera_saldo;
         return $data;
     }
-
-    private function integra_calcula_subtotales(array $registro): array
-    {
-        $sub_total_base = round(round($registro['valor_unitario'],4)
-            * round($this->registro['cantidad'],4),4);
-
-        $registro['sub_total_base'] = $sub_total_base;
-
-        $descuento = 0.0;
-        if(isset($registro['descuento'])){
-            $descuento = round($registro['descuento'],2);
-        }
-        $registro['sub_total'] = $sub_total_base - $descuento;
-
-        return $registro;
-    }
-
     private function upd_total_partida(int $row_partida_id){
         $fc_registro_partida = $this->registro(registro_id: $row_partida_id, columnas_en_bruto: true, retorno_obj: true);
         if (errores::$error) {
@@ -523,7 +518,6 @@ class _partida extends  _base{
         }
         return $upd;
     }
-
 
     /**
      * Calcula el impuesto retenido de una partida
@@ -813,7 +807,7 @@ class _partida extends  _base{
      * @version 10.93.3
      */
     final public function get_partidas(string $key_filtro_entidad_id,int $registro_entidad_id,
-                                       array $columnas_by_table = array(), bool $columnas_en_bruto = false,): array
+                                       array $columnas_by_table = array(), bool $columnas_en_bruto = false): array
     {
         if ($registro_entidad_id <= 0) {
             return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
@@ -831,6 +825,28 @@ class _partida extends  _base{
         }
 
         return $r_fc_partida->registros;
+    }
+
+    final public function get_retenciones(int $partida_id)
+    {
+        $filtro[$this->key_filtro_id] = $partida_id;
+        $r_retenciones = $this->modelo_retencion->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener retenciones', data: $r_retenciones);
+        }
+        return $r_retenciones->registros;
+
+    }
+
+    final public function get_traslados(int $partida_id)
+    {
+        $filtro[$this->key_filtro_id] = $partida_id;
+        $r_traslados = $this->modelo_traslado->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener traslados', data: $r_traslados);
+        }
+        return $r_traslados->registros;
+
     }
 
 
