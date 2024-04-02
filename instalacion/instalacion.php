@@ -2225,7 +2225,7 @@ class instalacion
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
         }
-        $out->fc_relacion_alta_bd = $alta_accion;
+        $out->ajusta_hora = $alta_accion;
 
         return $out;
 
