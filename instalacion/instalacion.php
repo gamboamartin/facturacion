@@ -2219,6 +2219,14 @@ class instalacion
         }
         $out->fc_relacion_alta_bd = $alta_accion;
 
+        $alta_accion = (new _adm())->inserta_accion_base(adm_accion_descripcion: 'ajusta_hora',
+            adm_seccion_descripcion: $adm_seccion_descripcion, es_view: 'activo',
+            icono: 'bi bi-clock-fill', link: $link, lista: 'activo', titulo: 'Ajusta Hora',css: 'danger');
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al insertar accion',data:  $alta_accion);
+        }
+        $out->fc_relacion_alta_bd = $alta_accion;
+
         return $out;
 
     }
