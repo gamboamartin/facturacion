@@ -2909,7 +2909,8 @@ class _base_system_fc extends _base_system{
             modelo_sello: $this->modelo_sello, modelo_traslado: $this->modelo_traslado,
             modelo_uuid_ext: $this->modelo_uuid_ext, registro_id: $this->registro_id);
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al timbrar XML',data:  $timbre, header: $header,ws:$ws);
+            return $this->retorno_error(mensaje: 'Error al timbrar XML', data: $timbre, header: $header, ws: $ws,
+                class: __CLASS__, file: __FILE__, function: __FUNCTION__, line: __LINE__);
         }
 
         $this->link->beginTransaction();
@@ -2917,7 +2918,7 @@ class _base_system_fc extends _base_system{
         if(errores::$error){
             $this->link->rollBack();
             return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
-                header:  $header, ws: $ws);
+                header:  $header, ws: $ws,class: __CLASS__, file: __FILE__, function: __FUNCTION__, line: __LINE__);
         }
 
         if($header){
@@ -2926,14 +2927,20 @@ class _base_system_fc extends _base_system{
                 seccion: $this->tabla, siguiente_view: "modifica");
             if(errores::$error){
                 return $this->retorno_error(mensaje: 'Error cambiar de view', data: $retorno,
-                    header:  true, ws: $ws);
+                    header:  true, ws: $ws,class: __CLASS__, file: __FILE__, function: __FUNCTION__, line: __LINE__);
             }
             header('Location:'.$retorno);
             exit;
         }
         if($ws){
-            header('Content-Type: application/json');
-            echo json_encode($timbre, JSON_THROW_ON_ERROR);
+            try {
+                ob_clean();
+                header('Content-Type: application/json');
+                echo json_encode($timbre, JSON_THROW_ON_ERROR);
+            }
+            catch (Throwable $e){
+                print_r($e);
+            }
             exit;
         }
 
