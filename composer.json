@@ -39,7 +39,7 @@
       "ext-curl": "*",
       "ext-simplexml": "*",
       "ext-fileinfo": "*",
-        "tomsgu/pdf-merger": "^0.3.0",
+        "tomsgu/pdf-merger": "^0.5.0",
         "spatie/dropbox-api": "^1.19",
         "gamboa.martin/administrador": "^21.0.0",
         "gamboa.martin/base_modelos": "^5.0.0",
