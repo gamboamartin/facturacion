@@ -19,7 +19,7 @@ if(errores::$error){
     if($link->inTransaction()) {
         $link->rollBack();
     }
-    $error = (new errores())->error(mensaje: 'Error al instalar administrador', data: $administrador);
+    $error = (new errores())->error(mensaje: 'Error al instalar administrador', data: $instala);
     print_r($error);
     exit;
 }
@@ -51,7 +51,7 @@ if(errores::$error){
 
 
 
-$cat_sat = new gamboamartin\cat_sat\instalacion\instalacion();
+$cat_sat = new gamboamartin\cat_sat\instalacion\instalacion(link: $link);
 
 $instala = $cat_sat->instala(link: $link);
 if(errores::$error){
