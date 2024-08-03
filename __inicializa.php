@@ -24,6 +24,18 @@ if(errores::$error){
     exit;
 }
 
+$acl = new gamboamartin\acl\instalacion\instalacion();
+
+$instala = $acl->instala(link: $link);
+if(errores::$error){
+    if($link->inTransaction()) {
+        $link->rollBack();
+    }
+    $error = (new errores())->error(mensaje: 'Error al instalar $acl', data: $instala);
+    print_r($error);
+    exit;
+}
+
 
 $proceso = new gamboamartin\proceso\instalacion\instalacion();
 $instala = $proceso->instala(link: $link);
@@ -63,6 +75,17 @@ if(errores::$error){
     exit;
 }
 
+$documento = new gamboamartin\documento\instalacion\instalacion();
+
+$instala = $documento->instala(link: $link);
+if(errores::$error){
+    if($link->inTransaction()) {
+        $link->rollBack();
+    }
+    $error = (new errores())->error(mensaje: 'Error al instalar documento', data: $instala);
+    print_r($error);
+    exit;
+}
 
 $organigrama = new gamboamartin\organigrama\instalacion\instalacion();
 
@@ -91,17 +114,7 @@ if(errores::$error){
 }
 
 
-$documento = new gamboamartin\documento\instalacion\instalacion();
 
-$instala = $documento->instala(link: $link);
-if(errores::$error){
-    if($link->inTransaction()) {
-        $link->rollBack();
-    }
-    $error = (new errores())->error(mensaje: 'Error al instalar documento', data: $instala);
-    print_r($error);
-    exit;
-}
 
 $notificaciones = new gamboamartin\notificaciones\instalacion\instalacion();
 

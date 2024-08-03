@@ -2473,6 +2473,89 @@ class instalacion
     }
     private function fc_complemento_pago(PDO $link): array|stdClass
     {
+
+        $existe = (new _instalacion($link))->existe_entidad(__FUNCTION__);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe '.__FUNCTION__,data: $existe);
+        }
+
+        if(!$existe) {
+            $sql = "CREATE TABLE fc_complemento_pago (
+  id bigint(20) NOT NULL AUTO_INCREMENT,
+  codigo varchar(200) NOT NULL,
+  status varchar(255) NOT NULL DEFAULT 'inactivo',
+  usuario_alta_id int(11) NOT NULL,
+  usuario_update_id int(11) NOT NULL,
+  fecha_alta timestamp NOT NULL DEFAULT current_timestamp(),
+  fecha_update timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  descripcion_select varchar(255) NOT NULL,
+  alias varchar(255) NOT NULL,
+  codigo_bis varchar(255) NOT NULL,
+  fc_csd_id bigint(20) NOT NULL,
+  folio varchar(255) NOT NULL,
+  serie varchar(255) NOT NULL,
+  cat_sat_forma_pago_id bigint(20) NOT NULL,
+  cat_sat_metodo_pago_id bigint(20) NOT NULL,
+  cat_sat_moneda_id bigint(20) NOT NULL,
+  com_tipo_cambio_id bigint(20) NOT NULL,
+  cat_sat_uso_cfdi_id bigint(20) NOT NULL,
+  version varchar(255) NOT NULL,
+  fecha date DEFAULT NULL,
+  cat_sat_tipo_de_comprobante_id bigint(20) NOT NULL,
+  dp_calle_pertenece_id bigint(20) NOT NULL COMMENT 'Domicilio Emisor',
+  exportacion varchar(255) NOT NULL,
+  cat_sat_regimen_fiscal_id bigint(20) NOT NULL,
+  com_sucursal_id bigint(20) NOT NULL,
+  descripcion varchar(255) NOT NULL,
+  observaciones text DEFAULT '',
+  total_descuento double(100,4) NOT NULL DEFAULT 0.0000,
+  sub_total_base double(100,4) NOT NULL DEFAULT 0.0000,
+  sub_total double(100,4) NOT NULL DEFAULT 0.0000,
+  total_traslados double(100,4) NOT NULL DEFAULT 0.0000,
+  total_retenciones double(100,4) NOT NULL DEFAULT 0.0000,
+  aplica_saldo varchar(255) NOT NULL DEFAULT 'inactivo',
+  total double(100,4) NOT NULL DEFAULT 0.0000,
+  monto_pago_nc double(100,4) NOT NULL DEFAULT 0.0000,
+  monto_pago_cp double(100,4) NOT NULL DEFAULT 0.0000,
+  saldo double(100,4) NOT NULL DEFAULT 0.0000,
+  monto_saldo_aplicado double(100,4) NOT NULL DEFAULT 0.0000,
+  folio_fiscal varchar(255) NOT NULL DEFAULT 'SIN UUID',
+  cantidad double(100,2) NOT NULL DEFAULT 0.00,
+  valor_unitario double(100,2) NOT NULL DEFAULT 0.00,
+  descuento double(100,2) NOT NULL DEFAULT 0.00,
+  es_plantilla varchar(255) NOT NULL DEFAULT 'inactivo',
+  etapa varchar(255) NOT NULL DEFAULT 'ALTA',
+  PRIMARY KEY (id) USING BTREE,
+  UNIQUE KEY codigo_bis (codigo_bis) USING BTREE,
+  KEY fc_cfd_id (fc_csd_id) USING BTREE,
+  KEY cat_sat_forma_pago_id (cat_sat_forma_pago_id) USING BTREE,
+  KEY cat_sat_metodo_pago_id (cat_sat_metodo_pago_id) USING BTREE,
+  KEY cat_sat_moneda_id (cat_sat_moneda_id) USING BTREE,
+  KEY com_tipo_cambio_id (com_tipo_cambio_id) USING BTREE,
+  KEY cat_sat_uso_cfdi_id (cat_sat_uso_cfdi_id) USING BTREE,
+  KEY cat_sat_tipo_de_comprobante_id (cat_sat_tipo_de_comprobante_id) USING BTREE,
+  KEY dp_calle_pertenece_id (dp_calle_pertenece_id) USING BTREE,
+  KEY cat_sat_regimen_fiscal_id (cat_sat_regimen_fiscal_id) USING BTREE,
+  KEY com_sucursal_id (com_sucursal_id) USING BTREE,
+  CONSTRAINT fc_complemento_pago_ibfk_1 FOREIGN KEY (dp_calle_pertenece_id) REFERENCES dp_calle_pertenece (id),
+  CONSTRAINT fc_complemento_pago_ibfk_10 FOREIGN KEY (cat_sat_tipo_de_comprobante_id) REFERENCES cat_sat_tipo_de_comprobante (id),
+  CONSTRAINT fc_complemento_pago_ibfk_2 FOREIGN KEY (cat_sat_regimen_fiscal_id) REFERENCES cat_sat_regimen_fiscal (id),
+  CONSTRAINT fc_complemento_pago_ibfk_3 FOREIGN KEY (com_sucursal_id) REFERENCES com_sucursal (id),
+  CONSTRAINT fc_complemento_pago_ibfk_4 FOREIGN KEY (fc_csd_id) REFERENCES fc_csd (id),
+  CONSTRAINT fc_complemento_pago_ibfk_5 FOREIGN KEY (cat_sat_forma_pago_id) REFERENCES cat_sat_forma_pago (id),
+  CONSTRAINT fc_complemento_pago_ibfk_6 FOREIGN KEY (cat_sat_metodo_pago_id) REFERENCES cat_sat_metodo_pago (id),
+  CONSTRAINT fc_complemento_pago_ibfk_7 FOREIGN KEY (cat_sat_moneda_id) REFERENCES cat_sat_moneda (id),
+  CONSTRAINT fc_complemento_pago_ibfk_8 FOREIGN KEY (com_tipo_cambio_id) REFERENCES com_tipo_cambio (id),
+  CONSTRAINT fc_complemento_pago_ibfk_9 FOREIGN KEY (cat_sat_uso_cfdi_id) REFERENCES cat_sat_uso_cfdi (id)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+
+            $exe = (new modelo_base(link: $link))->ejecuta_sql($sql);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al crear table', data: $exe);
+            }
+        }
+
+
         $create = $this->_add_fc_complemento_pago_etapa(link: $link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
@@ -2880,6 +2963,46 @@ class instalacion
         return $create;
 
     }
+
+    private function fc_relacion_cp(PDO $link): array|bool
+    {
+
+        $existe = (new _instalacion(link: $link))->existe_entidad(table: __FUNCTION__);
+        if(errores::$error) {
+            return (new errores())->error(mensaje: 'Error al validar si existe', data: $existe);
+        }
+        if(!$existe) {
+            $sql = "CREATE TABLE fc_relacion_cp (
+  id bigint(20) NOT NULL AUTO_INCREMENT,
+  codigo varchar(200) NOT NULL,
+  status varchar(255) NOT NULL DEFAULT 'inactivo',
+  usuario_alta_id int(11) NOT NULL,
+  usuario_update_id int(11) NOT NULL,
+  fecha_alta timestamp NOT NULL DEFAULT current_timestamp(),
+  fecha_update timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  descripcion_select varchar(255) NOT NULL,
+  alias varchar(255) NOT NULL,
+  codigo_bis varchar(255) NOT NULL,
+  descripcion varchar(255) NOT NULL,
+  cat_sat_tipo_relacion_id bigint(20) NOT NULL,
+  fc_complemento_pago_id bigint(20) NOT NULL,
+  PRIMARY KEY (id) USING BTREE,
+  KEY cat_sat_tipo_relacion_id (cat_sat_tipo_relacion_id) USING BTREE,
+  KEY fc_complemento_pago_id (fc_complemento_pago_id),
+  CONSTRAINT fc_relacion_cp_ibfk_1 FOREIGN KEY (cat_sat_tipo_relacion_id) REFERENCES cat_sat_tipo_relacion (id),
+  CONSTRAINT fc_relacion_cp_ibfk_2 FOREIGN KEY (fc_complemento_pago_id) REFERENCES fc_complemento_pago (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Por generar, Integra los cfdis relacionados, es encabezado';";
+
+            $exe = (new modelo_base(link: $link))->ejecuta_sql(consulta: $sql);
+            if(errores::$error) {
+                return (new errores())->error(mensaje: 'Error al ejecutar sql', data: $exe);
+            }
+        }
+
+
+        return $existe;
+
+    }
     private function fc_cuenta_predial(PDO $link): array|stdClass
     {
         $create = $this->_add_fc_cuenta_predial(link: $link);
@@ -2943,6 +3066,80 @@ class instalacion
 
     private function fc_factura(PDO $link): array|stdClass
     {
+
+        $existe = (new _instalacion($link))->existe_entidad(__FUNCTION__);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe '.__FUNCTION__,data: $existe);
+        }
+
+        if(!$existe) {
+            $sql = "CREATE TABLE fc_factura (
+                    id bigint(20) NOT NULL AUTO_INCREMENT,codigo varchar(200) NOT NULL,
+                    status varchar(255) NOT NULL DEFAULT 'inactivo', usuario_alta_id int(11) NOT NULL, 
+                    usuario_update_id int(11) NOT NULL, fecha_alta timestamp NOT NULL DEFAULT current_timestamp(),
+                    fecha_update timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+                    descripcion_select varchar(255) NOT NULL, alias varchar(255) NOT NULL, 
+                    codigo_bis varchar(255) NOT NULL, fc_csd_id bigint(20) NOT NULL, folio varchar(255) NOT NULL,
+                    serie varchar(255) NOT NULL, cat_sat_forma_pago_id bigint(20) NOT NULL,
+                    cat_sat_metodo_pago_id bigint(20) NOT NULL, cat_sat_moneda_id bigint(20) NOT NULL,
+                      com_tipo_cambio_id bigint(20) NOT NULL,
+                      cat_sat_uso_cfdi_id bigint(20) NOT NULL,
+                      version varchar(255) NOT NULL,
+                      fecha date DEFAULT NULL,
+                      cat_sat_tipo_de_comprobante_id bigint(20) NOT NULL,
+                      dp_calle_pertenece_id bigint(20) NOT NULL COMMENT 'Domicilio Emisor',
+                      exportacion varchar(255) NOT NULL,
+                      cat_sat_regimen_fiscal_id bigint(20) NOT NULL,
+                      com_sucursal_id bigint(20) NOT NULL,
+                      descripcion varchar(255) NOT NULL,
+                      observaciones text DEFAULT '',
+                      total_descuento double(100,4) NOT NULL DEFAULT 0.0000,
+                      sub_total_base double(100,4) NOT NULL DEFAULT 0.0000,
+                      sub_total double(100,4) NOT NULL DEFAULT 0.0000,
+                      total_traslados double(100,4) NOT NULL DEFAULT 0.0000,
+                      total_retenciones double(100,4) NOT NULL DEFAULT 0.0000,
+                      aplica_saldo varchar(255) NOT NULL DEFAULT 'inactivo',
+                      total double(100,4) NOT NULL DEFAULT 0.0000,
+                      monto_pago_nc double(100,4) NOT NULL DEFAULT 0.0000,
+                      monto_pago_cp double(100,4) NOT NULL DEFAULT 0.0000,
+                      saldo double(100,4) NOT NULL DEFAULT 0.0000,
+                      monto_saldo_aplicado double(100,4) NOT NULL DEFAULT 0.0000,
+                      folio_fiscal varchar(255) NOT NULL DEFAULT 'SIN UUID',
+                      cantidad double(100,2) NOT NULL DEFAULT 0.00,
+                      valor_unitario double(100,2) NOT NULL DEFAULT 0.00,
+                      descuento double(100,2) NOT NULL DEFAULT 0.00,
+                      es_plantilla varchar(255) NOT NULL DEFAULT 'inactivo',
+                      etapa varchar(255) NOT NULL DEFAULT 'ALTA',
+                      PRIMARY KEY (id) USING BTREE,
+                      UNIQUE KEY codigo_bis (codigo_bis) USING BTREE,
+                      KEY fc_cfd_id (fc_csd_id) USING BTREE,
+                      KEY cat_sat_forma_pago_id (cat_sat_forma_pago_id) USING BTREE,
+                      KEY cat_sat_metodo_pago_id (cat_sat_metodo_pago_id) USING BTREE,
+                      KEY cat_sat_moneda_id (cat_sat_moneda_id) USING BTREE,
+                      KEY com_tipo_cambio_id (com_tipo_cambio_id) USING BTREE,
+                      KEY cat_sat_uso_cfdi_id (cat_sat_uso_cfdi_id) USING BTREE,
+                      KEY cat_sat_tipo_de_comprobante_id (cat_sat_tipo_de_comprobante_id) USING BTREE,
+                      KEY dp_calle_pertenece_id (dp_calle_pertenece_id) USING BTREE,
+                      KEY cat_sat_regimen_fiscal_id (cat_sat_regimen_fiscal_id) USING BTREE,
+                      KEY com_sucursal_id (com_sucursal_id) USING BTREE,
+                      CONSTRAINT fc_factura_ibfk_10 FOREIGN KEY (dp_calle_pertenece_id) REFERENCES dp_calle_pertenece (id),
+                      CONSTRAINT fc_factura_ibfk_11 FOREIGN KEY (cat_sat_regimen_fiscal_id) REFERENCES cat_sat_regimen_fiscal (id),
+                      CONSTRAINT fc_factura_ibfk_12 FOREIGN KEY (com_sucursal_id) REFERENCES com_sucursal (id),
+                      CONSTRAINT fc_factura_ibfk_2 FOREIGN KEY (fc_csd_id) REFERENCES fc_csd (id),
+                      CONSTRAINT fc_factura_ibfk_3 FOREIGN KEY (cat_sat_forma_pago_id) REFERENCES cat_sat_forma_pago (id),
+                      CONSTRAINT fc_factura_ibfk_4 FOREIGN KEY (cat_sat_metodo_pago_id) REFERENCES cat_sat_metodo_pago (id),
+                      CONSTRAINT fc_factura_ibfk_5 FOREIGN KEY (cat_sat_moneda_id) REFERENCES cat_sat_moneda (id),
+                      CONSTRAINT fc_factura_ibfk_6 FOREIGN KEY (com_tipo_cambio_id) REFERENCES com_tipo_cambio (id),
+                      CONSTRAINT fc_factura_ibfk_7 FOREIGN KEY (cat_sat_uso_cfdi_id) REFERENCES cat_sat_uso_cfdi (id),
+                      CONSTRAINT fc_factura_ibfk_9 FOREIGN KEY (cat_sat_tipo_de_comprobante_id) REFERENCES cat_sat_tipo_de_comprobante (id)
+                    ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+
+            $exe = (new modelo_base(link: $link))->ejecuta_sql($sql);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al crear table', data: $exe);
+            }
+        }
+
         $create = $this->_add_fc_factura_etapa(link: $link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al ajustar create', data:  $create);
@@ -3744,6 +3941,51 @@ class instalacion
 
     private function fc_partida(PDO $link): array|stdClass
     {
+
+        $existe = (new _instalacion($link))->existe_entidad(__FUNCTION__);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al verificar si existe '.__FUNCTION__,data: $existe);
+        }
+        if(!$existe) {
+
+            $sql = "CREATE TABLE fc_partida (
+  id bigint(20) NOT NULL AUTO_INCREMENT,
+  codigo varchar(200) NOT NULL,
+  status varchar(255) NOT NULL DEFAULT 'inactivo',
+  usuario_alta_id int(11) NOT NULL,
+  usuario_update_id int(11) NOT NULL,
+  fecha_alta timestamp NOT NULL DEFAULT current_timestamp(),
+  fecha_update timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  descripcion_select varchar(255) NOT NULL,
+  alias varchar(255) NOT NULL,
+  codigo_bis varchar(255) NOT NULL,
+  com_producto_id bigint(20) NOT NULL,
+  cantidad double(100,4) NOT NULL,
+  descripcion text NOT NULL,
+  valor_unitario double(100,4) NOT NULL,
+  descuento double(100,4) NOT NULL,
+  fc_factura_id bigint(20) DEFAULT NULL,
+  sub_total double(100,4) NOT NULL DEFAULT 0.0000,
+  total_traslados double(100,4) NOT NULL DEFAULT 0.0000,
+  total_retenciones double(100,4) NOT NULL DEFAULT 0.0000,
+  sub_total_base double(100,4) NOT NULL DEFAULT 0.0000,
+  total double(100,4) NOT NULL DEFAULT 0.0000,
+  PRIMARY KEY (id) USING BTREE,
+  UNIQUE KEY codigo_bis (codigo_bis) USING BTREE,
+  KEY fc_factura_id (fc_factura_id) USING BTREE,
+  KEY fc_partida__com_producto_id (com_producto_id),
+  CONSTRAINT fc_partida__com_producto_id FOREIGN KEY (com_producto_id) REFERENCES com_producto (id),
+  CONSTRAINT fc_partida_ibfk_1 FOREIGN KEY (fc_factura_id) REFERENCES fc_factura (id)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+
+            $exe = (new modelo_base(link: $link))->ejecuta_sql($sql);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al crear table', data: $exe);
+            }
+        }
+
+
+
         $init = (new _instalacion(link: $link));
         $foraneas = array();
         $foraneas['com_producto_id'] = new stdClass();
@@ -4804,6 +5046,13 @@ class instalacion
             return (new errores())->error(mensaje: 'Error al ajustar fc_csd_etapa', data:  $fc_csd_etapa);
         }
         $result->fc_csd_etapa = $fc_csd_etapa;
+
+
+        $fc_relacion_cp = $this->fc_relacion_cp(link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al ajustar fc_relacion_cp', data:  fc_relacion_cp);
+        }
+        $result->fc_relacion_cp = $fc_relacion_cp;
 
         $fc_complemento_pago_relacionada = $this->fc_complemento_pago_relacionada(link: $link);
         if(errores::$error){
