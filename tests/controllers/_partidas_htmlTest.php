@@ -201,7 +201,7 @@ class _partidas_htmlTest extends test {
 
         $_GET['seccion'] = 'fc_factura';
         $_GET['accion'] = 'lista';
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 

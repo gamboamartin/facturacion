@@ -52,7 +52,7 @@ class _partidaTest extends test
     public function test_descripcion_mes_letra(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -73,7 +73,7 @@ class _partidaTest extends test
         $resultado = $modelo->descripcion_mes_letra($descripcion);
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals('a MAYO',$resultado);
+        $this->assertEquals('a AGOSTO',$resultado);
 
         errores::$error = false;
 
@@ -82,7 +82,7 @@ class _partidaTest extends test
         $resultado = $modelo->descripcion_mes_letra($descripcion);
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals('a MAYO',$resultado);
+        $this->assertEquals('a AGOSTO',$resultado);
         errores::$error = false;
 
 
@@ -90,7 +90,7 @@ class _partidaTest extends test
     public function test_elimina_dependientes(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -114,7 +114,7 @@ class _partidaTest extends test
     public function test_fc_entidad_total_descuento(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -136,7 +136,7 @@ class _partidaTest extends test
     public function test_get_partida(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -156,7 +156,7 @@ class _partidaTest extends test
     public function test_get_partidas(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -176,7 +176,7 @@ class _partidaTest extends test
     public function test_hijo(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -195,7 +195,7 @@ class _partidaTest extends test
     public function test_hijo_retenido(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -215,7 +215,7 @@ class _partidaTest extends test
     public function test_hijos_partida(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -237,7 +237,7 @@ class _partidaTest extends test
     public function test_init_elimina_bd(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -279,7 +279,7 @@ class _partidaTest extends test
     public function test_integra_button_partida(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -298,9 +298,10 @@ class _partidaTest extends test
         $modelo = new liberator($modelo);
         $resultado = $modelo->integra_button_partida($html, $indice, $name_modelo_entidad, $partida,
             $r_fc_registro_partida, $registro_entidad_id);
+
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals("<a role='button' title='Eliminar' href='index.php?seccion=fc_partida_nc&accion=elimina_bd&registro_id=1&session_id=1&adm_menu_id=-1&seccion_retorno=a&accion_retorno=modifica&id_retorno=1' class='btn btn-danger col-sm-12'><span class='bi bi-trash'></span></a>", $resultado->registros[0]['elimina_bd']);
+        $this->assertEquals("<a role='button' title='Eliminar' href='index.php?seccion=fc_partida_nc&accion=elimina_bd&registro_id=1&session_id=1&adm_menu_id=-1&seccion_retorno=a&accion_retorno=modifica&id_retorno=1' class='btn btn-danger col-sm-12 '><span class='bi bi-trash'></span></a>", $resultado->registros[0]['elimina_bd']);
         errores::$error = false;
 
 
@@ -309,7 +310,7 @@ class _partidaTest extends test
     public function test_integra_buttons_partida(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -334,7 +335,7 @@ class _partidaTest extends test
     public function test_integra_relacionado(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -354,7 +355,7 @@ class _partidaTest extends test
     public function test_operacion_factor(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -404,7 +405,7 @@ class _partidaTest extends test
     public function test_params_button_partida(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -425,7 +426,7 @@ class _partidaTest extends test
     public function test_params_calculo(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -469,7 +470,7 @@ class _partidaTest extends test
     public function test_partidas(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -494,7 +495,7 @@ class _partidaTest extends test
     public function test_resultado_operacion_imp(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -517,7 +518,7 @@ class _partidaTest extends test
     public function test_subtotal_partida(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -550,7 +551,7 @@ class _partidaTest extends test
     public function test_valida_restriccion(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -573,7 +574,7 @@ class _partidaTest extends test
     public function test_valida_restriccion_partida(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 

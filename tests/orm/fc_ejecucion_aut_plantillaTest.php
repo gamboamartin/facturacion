@@ -44,7 +44,7 @@ class fc_ejecucion_aut_plantillaTest extends test {
 
         $_GET['seccion'] = 'cat_sat_tipo_persona';
         $_GET['accion'] = 'lista';
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 

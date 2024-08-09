@@ -34,7 +34,7 @@ class _relacionTest extends test
     public function test_ajusta_relacionados(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -57,7 +57,7 @@ class _relacionTest extends test
     public function test_integra_relacion_nc(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -76,7 +76,7 @@ class _relacionTest extends test
     public function test_integra_relacionado(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -98,7 +98,7 @@ class _relacionTest extends test
     public function test_integra_relacionados(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -120,7 +120,7 @@ class _relacionTest extends test
     public function test_relaciones_externas(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 

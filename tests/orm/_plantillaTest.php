@@ -44,7 +44,7 @@ class _plantillaTest extends test
     public function test_genera_row_entidad_ins(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -92,7 +92,7 @@ class _plantillaTest extends test
     public function test_inserta_row_entidad(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -144,7 +144,7 @@ class _plantillaTest extends test
     public function test_keys_impuestos(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -172,7 +172,7 @@ class _plantillaTest extends test
     public function test_row_entidad(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -215,7 +215,7 @@ class _plantillaTest extends test
     public function test_row_entidad_ins(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -275,7 +275,7 @@ class _plantillaTest extends test
     public function test_row_partida_ins(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -319,7 +319,7 @@ class _plantillaTest extends test
     public function test_rows_partidas(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -380,7 +380,7 @@ class _plantillaTest extends test
     public function test_valida_existe_key_partida(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -421,7 +421,7 @@ class _plantillaTest extends test
     public function test_valida_ids_partida(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -459,7 +459,7 @@ class _plantillaTest extends test
     public function test_valida_monto_mayor_0(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -491,7 +491,7 @@ class _plantillaTest extends test
     public function test_valida_monto_mayor_igual_0(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -527,7 +527,7 @@ class _plantillaTest extends test
     public function test_valida_montos(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -568,7 +568,7 @@ class _plantillaTest extends test
     public function test_valida_row_entidad(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 

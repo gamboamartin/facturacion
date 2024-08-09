@@ -45,7 +45,7 @@ class _docTest extends test
     public function test_get_factura_documentos(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 

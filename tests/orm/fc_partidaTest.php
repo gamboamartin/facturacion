@@ -35,7 +35,7 @@ class fc_partidaTest extends test
     {
         errores::$error = false;
 
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -77,7 +77,7 @@ class fc_partidaTest extends test
     public function test_get_partida(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -116,7 +116,7 @@ class fc_partidaTest extends test
     public function test_get_partidas(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -141,7 +141,7 @@ class fc_partidaTest extends test
     public function test_hijo_traslado(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -162,7 +162,7 @@ class fc_partidaTest extends test
     public function test_subtotal_partida(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -204,7 +204,7 @@ class fc_partidaTest extends test
     public function test_total_partida(): void
     {
         errores::$error = false;
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 

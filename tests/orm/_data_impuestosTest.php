@@ -67,7 +67,7 @@ class _data_impuestosTest extends test
     {
         errores::$error = false;
 
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -160,7 +160,7 @@ class _data_impuestosTest extends test
     {
         errores::$error = false;
 
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
@@ -182,7 +182,7 @@ class _data_impuestosTest extends test
     {
         errores::$error = false;
 
-        $_SESSION['grupo_id'] = 1;
+        $_SESSION['grupo_id'] = 2;
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
