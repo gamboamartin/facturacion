@@ -139,7 +139,7 @@ final class pdf
         $logo = '';
         if($ruta_logo!=='') {
             if(file_exists($ruta_logo)){
-                $logo = $this->html(etiqueta: "img", data: "", propiedades: 'src = "' . $ruta_logo . '" width = "350px"');
+                $logo = $this->html(etiqueta: "img", data: "", propiedades: 'src = "' . $ruta_logo . '" width = "110px"');
                 if (errores::$error) {
                     return $this->error->error(mensaje: 'Error al generar data', data: $ruta_logo);
                 }
