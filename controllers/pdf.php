@@ -1239,13 +1239,18 @@ final class pdf
         return $td;
     }
 
-    public function totales(string $moneda, string $subtotal, string $forma_pago, string $imp_trasladados,
+    public function totales(string $descuento, string $moneda, string $subtotal, string $forma_pago, string $imp_trasladados,
                             string $imp_retenidos, string $metodo_pago, string $total)
     {
 
         $subtotal = $this->monto_moneda(monto: $subtotal);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al limpiar monto',data:  $subtotal);
+        }
+
+        $descuento = $this->monto_moneda(monto: $descuento);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al limpiar monto',data:  $descuento);
         }
 
         $imp_trasladados = $this->monto_moneda(monto: $imp_trasladados);
@@ -1269,24 +1274,28 @@ final class pdf
         $body_td_3 = $this->html(etiqueta: "td", data: "Subtotal:", class: "negrita");
         $body_td_4 = $this->html(etiqueta: "td", data: $subtotal);
 
-        $body_td_5 = $this->html(etiqueta: "td", data: "Forma de pago:", class: "negrita", propiedades: "rowspan='2'");
-        $body_td_6 = $this->html(etiqueta: "td", data: $forma_pago, propiedades: "rowspan='2'");
-        $body_td_7 = $this->html(etiqueta: "td", data: "Impuestos trasladados:", class: "negrita");
-        $body_td_8 = $this->html(etiqueta: "td", data: $imp_trasladados);
-        $body_td_9 = $this->html(etiqueta: "td", data: "Impuestos retenidos", class: "negrita");
-        $body_td_10 = $this->html(etiqueta: "td", data: $imp_retenidos);
+        $body_td_5 = $this->html(etiqueta: "td", data: "Forma de pago:", class: "negrita", propiedades: "rowspan='3'");
+        $body_td_6 = $this->html(etiqueta: "td", data: $forma_pago, propiedades: "rowspan='3'");
+        $body_td_7 = $this->html(etiqueta: "td", data: "Descuento:", class: "negrita");
+        $body_td_8 = $this->html(etiqueta: "td", data: $descuento);
 
-        $body_td_11 = $this->html(etiqueta: "td", data: "Método de pago:", class: "negrita");
-        $body_td_12 = $this->html(etiqueta: "td", data: $metodo_pago);
-        $body_td_13 = $this->html(etiqueta: "td", data: "Total", class: "negrita");
-        $body_td_14 = $this->html(etiqueta: "td", data: $total);
+        $body_td_9 = $this->html(etiqueta: "td", data: "Impuestos trasladados:", class: "negrita");
+        $body_td_10 = $this->html(etiqueta: "td", data: $imp_trasladados);
+        $body_td_11 = $this->html(etiqueta: "td", data: "Impuestos retenidos", class: "negrita");
+        $body_td_12 = $this->html(etiqueta: "td", data: $imp_retenidos);
+
+        $body_td_13 = $this->html(etiqueta: "td", data: "Método de pago:", class: "negrita");
+        $body_td_14 = $this->html(etiqueta: "td", data: $metodo_pago);
+        $body_td_15 = $this->html(etiqueta: "td", data: "Total", class: "negrita");
+        $body_td_16 = $this->html(etiqueta: "td", data: $total);
 
         $body_tr_1 = $this->html(etiqueta: "tr", data: $body_td_1 . $body_td_2 . $body_td_3 . $body_td_4);
         $body_tr_2 = $this->html(etiqueta: "tr", data: $body_td_5 . $body_td_6 . $body_td_7 . $body_td_8);
         $body_tr_3 = $this->html(etiqueta: "tr", data: $body_td_9 . $body_td_10);
-        $body_tr_4 = $this->html(etiqueta: "tr", data: $body_td_11 . $body_td_12 . $body_td_13 . $body_td_14);
+        $body_tr_4 = $this->html(etiqueta: "tr", data: $body_td_11 . $body_td_12);
+        $body_tr_5 = $this->html(etiqueta: "tr", data: $body_td_13 . $body_td_14 . $body_td_15 . $body_td_16);
 
-        $body = $this->html(etiqueta: "tbody", data: $body_tr_1 . $body_tr_2 . $body_tr_3 . $body_tr_4);
+        $body = $this->html(etiqueta: "tbody", data: $body_tr_1 . $body_tr_2 . $body_tr_3 . $body_tr_4 . $body_tr_5);
 
         $table = $this->html(etiqueta: "table", data: $body, class: "mt-2");
 

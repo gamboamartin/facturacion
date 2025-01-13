@@ -238,18 +238,18 @@ class _pdf{
         }
 
 
-        $key_sub_total = $modelo_entidad->tabla.'_sub_total';
+        //$key_sub_total = $modelo_entidad->tabla.'_sub_total';
+        $key_sub_total_base = $modelo_entidad->tabla.'_sub_total_base';
         $key_total = $modelo_entidad->tabla.'_total';
 
-        $pdf->totales(moneda: $factura['cat_sat_moneda_descripcion'],subtotal: $factura[$key_sub_total],
-            forma_pago: $factura['cat_sat_forma_pago_descripcion'],imp_trasladados: $factura['total_impuestos_trasladados'],
-            imp_retenidos: $factura['total_impuestos_retenidos'],metodo_pago: $factura['cat_sat_metodo_pago_descripcion'],
-            total: $factura[$key_total]);
+        $pdf->totales(descuento: $factura['total_descuento'],moneda: $factura['cat_sat_moneda_descripcion'],
+            subtotal: $factura[$key_sub_total_base], forma_pago: $factura['cat_sat_forma_pago_descripcion'],
+            imp_trasladados: $factura['total_impuestos_trasladados'],
+            imp_retenidos: $factura['total_impuestos_retenidos'],
+            metodo_pago: $factura['cat_sat_metodo_pago_descripcion'], total: $factura[$key_total]);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al maquetar totales',data:  $pdf);
         }
-
-
 
         $pdf->complementos(ruta_documento: $ruta_qr, complento: $data->complento,rfc_proveedor: $data->rfc_proveedor,
             fecha: $data->fecha_timbrado, no_certificado: $data->no_certificado);

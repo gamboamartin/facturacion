@@ -1160,6 +1160,11 @@ class _transacciones_fc extends modelo
 
         $key_total = $this->tabla.'_total';
         $key_sub_total = $this->tabla.'_sub_total';
+        $key_sub_total_base = $this->tabla.'_sub_total_base';
+        $key_descuento = $this->tabla.'_total_descuento';
+
+        $registro['total_descuento'] = number_format($registro[$key_descuento], 2);
+        $registro[$key_sub_total_base] = number_format($registro[$key_sub_total_base], 2);
 
         $registro[$key_total] = round($registro[$key_sub_total]
             + $total_impuestos_trasladados - $total_impuestos_retenidos,2);
