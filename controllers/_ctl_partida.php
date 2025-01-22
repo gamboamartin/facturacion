@@ -155,7 +155,7 @@ class _ctl_partida extends _base{
             return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
         }
         $keys_selects['com_producto_id']->extra_params_keys = array("com_producto_codigo", "com_producto_descripcion",
-            "cat_sat_unidad_descripcion","cat_sat_obj_imp_descripcion",'com_producto_aplica_predial',
+            "cat_sat_unidad_descripcion","cat_sat_obj_imp_descripcion",'cat_sat_obj_imp_id','com_producto_aplica_predial',
             'cat_sat_conf_imps_id','com_producto_precio');
 
         $keys_selects = $this->init_selects(keys_selects: $keys_selects, key: "fc_factura_id", label: "Factura");
@@ -164,6 +164,11 @@ class _ctl_partida extends _base{
         }
 
         $keys_selects = $this->init_selects(keys_selects: $keys_selects, key: "cat_sat_conf_imps_id", label: "Conf Imps");
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
+        }
+
+        $keys_selects = $this->init_selects(keys_selects: $keys_selects, key: "cat_sat_obj_imp_id", label: "Objeto Imps");
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
         }
@@ -217,7 +222,7 @@ class _ctl_partida extends _base{
         }
         $keys_selects['total']->disabled = true;
 
-        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 4, key: 'unidad',
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6, key: 'unidad',
             keys_selects: $keys_selects, place_holder: 'Unidad');
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
@@ -231,7 +236,7 @@ class _ctl_partida extends _base{
         }
         $keys_selects['impuesto']->disabled = true;
 
-        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 4, key: 'cuenta_predial',
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 6, key: 'cuenta_predial',
             keys_selects: $keys_selects, place_holder: 'Predial', required: true);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);

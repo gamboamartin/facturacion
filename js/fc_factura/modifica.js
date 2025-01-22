@@ -12,6 +12,7 @@ let sl_com_sucursal = $("#com_sucursal_id");
 let sl_com_producto = $("#com_producto_id");
 let sl_com_tipo_cambio = $("#com_tipo_cambio_id");
 let sl_cat_sat_conf_imps_id = $("#cat_sat_conf_imps_id");
+let sl_cat_sat_obj_imp_id = $("#cat_sat_obj_imp_id");
 let txt_descripcion = $("#descripcion");
 let txt_unidad = $("#unidad");
 let txt_impuesto = $("#impuesto");
@@ -251,6 +252,7 @@ sl_com_producto.change(function () {
     let descripcion = selected.data(`com_producto_descripcion`);
     let unidad = selected.data(`cat_sat_unidad_descripcion`);
     let impuesto = selected.data(`cat_sat_obj_imp_descripcion`);
+    let obj_imp = selected.data(`cat_sat_obj_imp_id`);
     let tipo_factor = selected.data(`cat_sat_tipo_factor_descripcion`);
     let factor = selected.data(`cat_sat_factor_factor`);
     let aplica_predial = selected.data('com_producto_aplica_predial');
@@ -270,6 +272,9 @@ sl_com_producto.change(function () {
     //if(parseInt(cat_sat_conf_imps_id) !== 1) {
         sl_cat_sat_conf_imps_id.val(cat_sat_conf_imps_id);
         sl_cat_sat_conf_imps_id.selectpicker('refresh');
+
+        sl_cat_sat_obj_imp_id.val(obj_imp);
+        sl_cat_sat_obj_imp_id.selectpicker('refresh');
     //}
 
     txt_descripcion.val(descripcion);

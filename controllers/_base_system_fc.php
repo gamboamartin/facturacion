@@ -52,6 +52,7 @@ use gamboamartin\system\html_controler;
 use gamboamartin\system\row;
 use gamboamartin\xml_cfdi_4\timbra;
 use html\cat_sat_motivo_cancelacion_html;
+use html\cat_sat_obj_imp_html;
 use html\cat_sat_tipo_relacion_html;
 use html\com_cliente_html;
 use html\com_email_cte_html;
@@ -2085,6 +2086,10 @@ class _base_system_fc extends _base_system{
         $propiedades = array("cols" => 12);
         $this->ctl_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
+        $identificador = "cat_sat_obj_imp_id";
+        $propiedades = array("cols" => 12);
+        $this->ctl_partida->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
 
         $com_cliente_id = $this->registro['com_cliente_id'];
 
@@ -2109,6 +2114,13 @@ class _base_system_fc extends _base_system{
 
         $this->inputs->partidas->cat_sat_conf_imps_id = $cat_sat_conf_imps_id;
 
+        $cat_sat_obj_imp_id = (new cat_sat_obj_imp_html(html: $this->html_base))->select_cat_sat_obj_imp_id(cols:12,
+            con_registros: true, id_selected: -1,label: 'Objeto Impuesto', link: $this->link);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al inicializar input', data: $cat_sat_obj_imp_id);
+        }
+
+        $this->inputs->partidas->cat_sat_obj_imp_id = $cat_sat_obj_imp_id;
 
         $t_head_producto = (new _html_factura())->thead_producto();
         if (errores::$error) {
@@ -2364,7 +2376,7 @@ class _base_system_fc extends _base_system{
         $keys_selects['fc_factura_id']->cols = 12;
         $keys_selects['com_producto_id']->cols = 12;
         $keys_selects['cat_sat_conf_imps_id']->cols = 12;
-
+        $keys_selects['cat_sat_obj_imp_id']->cols = 12;
 
         $com_productos = (new com_producto(link: $this->link))->registros_activos();
         if (errores::$error) {
