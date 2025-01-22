@@ -138,22 +138,22 @@ class _base_system_fc extends _base_system{
     {
         parent::__construct(html_: $html_,link:  $link,modelo:  $modelo,paths_conf:  $paths_conf);
 
-        $this->configuraciones_impuestos['601']['PM']['permitidos'] = array(1,3);
+        $this->configuraciones_impuestos['601']['PM']['permitidos'] = array(1,3,999);
         $this->configuraciones_impuestos['601']['PM']['default'] = 1;
 
-        $this->configuraciones_impuestos['601']['PF']['permitidos'] = array(1,3);
+        $this->configuraciones_impuestos['601']['PF']['permitidos'] = array(1,3,999);
         $this->configuraciones_impuestos['601']['PF']['default'] = 1;
 
-        $this->configuraciones_impuestos['612']['PM']['permitidos'] = array(1,3,5);
+        $this->configuraciones_impuestos['612']['PM']['permitidos'] = array(1,3,5,999);
         $this->configuraciones_impuestos['612']['PM']['default'] = 1;
 
-        $this->configuraciones_impuestos['612']['PF']['permitidos'] = array(1,3);
+        $this->configuraciones_impuestos['612']['PF']['permitidos'] = array(1,3,999);
         $this->configuraciones_impuestos['612']['PF']['default'] = 1;
 
-        $this->configuraciones_impuestos['626']['PM']['permitidos'] = array(2,4,998);
+        $this->configuraciones_impuestos['626']['PM']['permitidos'] = array(2,4,998,999);
         $this->configuraciones_impuestos['626']['PM']['default'] = 2;
 
-        $this->configuraciones_impuestos['626']['PF']['permitidos'] = array(1,3);
+        $this->configuraciones_impuestos['626']['PF']['permitidos'] = array(1,3,999);
         $this->configuraciones_impuestos['626']['PF']['default'] = 1;
 
         if($this->registro_id > 0) {
