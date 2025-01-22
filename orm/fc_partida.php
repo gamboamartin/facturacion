@@ -12,9 +12,9 @@ class fc_partida extends _partida
     public function __construct(PDO $link)
     {
         $tabla = 'fc_partida';
-        $columnas = array($tabla => false, 'fc_factura' => $tabla, 'com_producto' => $tabla,
+        $columnas = array($tabla => false, 'fc_factura' => $tabla, 'com_producto' => $tabla,'cat_sat_obj_imp'=>$tabla,
             'cat_sat_producto' => 'com_producto', 'cat_sat_unidad' => 'com_producto',
-            'cat_sat_obj_imp' => 'com_producto','com_sucursal'=>'fc_factura','com_cliente'=>'com_sucursal');
+            'com_sucursal'=>'fc_factura','com_cliente'=>'com_sucursal');
         $campos_obligatorios = array('codigo', 'com_producto_id');
 
         $columnas_extra = array();

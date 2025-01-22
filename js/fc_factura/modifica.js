@@ -59,6 +59,7 @@ btn_alta_partida.click(function () {
     let descripcion = txt_descripcion.val();
     let descuento = txt_descuento.val();
     let cuenta_predial = txt_cuenta_predial.val();
+    let cat_sat_obj_imp_id = sl_cat_sat_obj_imp_id.val();
     let cat_sat_conf_imps_id = sl_cat_sat_conf_imps_id.val();
     let registro_id = hidden_registro_id.val();
 
@@ -75,6 +76,11 @@ btn_alta_partida.click(function () {
     if(com_producto_id === ''){
         alert('La seleccione un producto');
         sl_com_producto.focus();
+        return false;
+    }
+    if(cat_sat_obj_imp_id === ''){
+        alert('La seleccione una Configuracion');
+        sl_cat_sat_obj_imp_id.focus();
         return false;
     }
     if(cat_sat_conf_imps_id === ''){
@@ -112,7 +118,7 @@ btn_alta_partida.click(function () {
         // (también es posible utilizar una cadena de datos)
         data : {com_producto_id: com_producto_id, descripcion: descripcion,cantidad: cantidad,
             valor_unitario: valor_unitario, descuento: descuento,cat_sat_conf_imps_id:cat_sat_conf_imps_id,
-            key_entidad_factura_id:registro_id,cuenta_predial: cuenta_predial } ,
+            key_entidad_factura_id:registro_id,cuenta_predial: cuenta_predial,cat_sat_obj_imp_id: cat_sat_obj_imp_id } ,
 
         // especifica si será una petición POST o GET
         type : 'POST',

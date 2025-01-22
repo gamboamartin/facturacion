@@ -152,7 +152,6 @@ class _partida extends  _base{
      */
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-
         $modelo_entidad_tabla = trim($this->modelo_entidad->tabla);
 
         if($modelo_entidad_tabla === ''){
@@ -234,6 +233,14 @@ class _partida extends  _base{
             unset($registro['cuenta_predial']);
         }
 
+        if(!isset($this->registro['cat_sat_obj_imp_id']) || (int)$this->registro['cat_sat_obj_imp_id'] <= 0) {
+            $com_producto = (new com_producto($this->link))->registro(registro_id: $this->registro['com_producto_id']);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error obtener producto', data: $com_producto);
+            }
+
+            $this->registro['cat_sat_obj_imp_id'] = $com_producto['cat_sat_obj_imp_id'];
+        }
 
         $this->registro = $registro;
 

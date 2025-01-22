@@ -3960,6 +3960,7 @@ class instalacion
   alias varchar(255) NOT NULL,
   codigo_bis varchar(255) NOT NULL,
   com_producto_id bigint(20) NOT NULL,
+  cat_sat_obj_imp_id bigint(20) NOT NULL,
   cantidad double(100,4) NOT NULL,
   descripcion text NOT NULL,
   valor_unitario double(100,4) NOT NULL,
@@ -3974,7 +3975,9 @@ class instalacion
   UNIQUE KEY codigo_bis (codigo_bis) USING BTREE,
   KEY fc_factura_id (fc_factura_id) USING BTREE,
   KEY fc_partida__com_producto_id (com_producto_id),
+  KEY fc_partida_cat_sat_obj_imp_id(cat_sat_obj_imp_id),
   CONSTRAINT fc_partida__com_producto_id FOREIGN KEY (com_producto_id) REFERENCES com_producto (id),
+  CONSTRAINT fc_partida_cat_sat_obj_imp_id FOREIGN KEY (cat_sat_obj_imp_id) REFERENCES cat_sat_obj_imp (id),
   CONSTRAINT fc_partida_ibfk_1 FOREIGN KEY (fc_factura_id) REFERENCES fc_factura (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
 
@@ -3989,6 +3992,7 @@ class instalacion
         $init = (new _instalacion(link: $link));
         $foraneas = array();
         $foraneas['com_producto_id'] = new stdClass();
+        $foraneas['cat_sat_obj_imp_id'] = new stdClass();
         $foraneas['fc_factura_id'] = new stdClass();
 
 
