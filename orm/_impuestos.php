@@ -16,7 +16,7 @@ class _impuestos{
 
     private function acumulado_global_imp(array $global_imp, array $impuesto, string $key_gl, string $key_importe): stdClass
     {
-        $base = round($impuesto['fc_partida_importe'],2);
+        $base = round($impuesto['fc_partida_importe_con_descuento'],2);
         $base_ac = round($global_imp[$key_gl]->base+ $base,2);
 
         $importe = round($impuesto[$key_importe],2);
