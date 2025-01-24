@@ -20,6 +20,7 @@ class _duplica
         $fc_partida_ins['descripcion'] = $row[$name_entidad_partida . '_descripcion'];
         $fc_partida_ins['valor_unitario'] = $row[$name_entidad_partida . '_valor_unitario'];
         $fc_partida_ins['descuento'] = $row[$name_entidad_partida . '_descuento'];
+        $fc_partida_ins['cat_sat_obj_imp_id'] = $row[$name_entidad_partida . '_cat_sat_obj_imp_id'];
         $fc_partida_ins[$key_id] = $row_entidad_id;
 
         return $fc_partida_ins;
