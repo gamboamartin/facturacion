@@ -28,12 +28,13 @@ class _automaticos extends system{
     public string $link_timbra = '';
     protected _modelo_parent_sin_codigo $modelo_automatico;
 
-    /**
-     * @param controlador_fc_factura $controlador_fc_factura
-     * @return array|string
-     */
+
     private function buttons_html(controlador_fc_factura $controlador_fc_factura): array|string
     {
+        if(count($controlador_fc_factura->registro) === 0){
+            return $this->errores->error(mensaje: 'Error controler->registro esta vacio',
+                data:  $controlador_fc_factura->registro);
+        }
         $buttons = (new out_permisos())->buttons_view(controler:$controlador_fc_factura,
             not_actions: array(), params: array());
         if(errores::$error){
@@ -41,6 +42,7 @@ class _automaticos extends system{
         }
         return implode('', $buttons);
     }
+
 
     final protected function data_form(): array|stdClass
     {

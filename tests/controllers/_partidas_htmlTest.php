@@ -191,7 +191,7 @@ class _partidas_htmlTest extends test {
             $name_entidad_impuesto, $name_modelo_entidad);
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertStringContainsStringIgnoringCase("seccion=a&accion=elimina_bd&re",$resultado);
+        $this->assertStringContainsStringIgnoringCase("seccion=a&accion=elimina_bd&session_id=1",$resultado);
         errores::$error = false;
     }
 
