@@ -258,7 +258,7 @@ class _pdf{
 
     }
 
-    private function base_pdf(stdClass $data, array $factura, Fpdi $pdf): void
+    private function base_pdf(stdClass $data, array $factura, Fpdi $pdf, string $ruta_qr): void
     {
         $this->init($pdf);
         $this->header(data: $data, factura: $factura,pdf: $pdf);
@@ -267,6 +267,10 @@ class _pdf{
         $this->pago(factura: $factura, pdf: $pdf);
         $this->montos(factura: $factura, pdf: $pdf);
         $this->sellos(data: $data, pdf: $pdf);
+        if($ruta_qr !== '') {
+            $pdf->SetXY(10, 196);
+            $pdf->Image($ruta_qr,null,null,45,45,'png');
+        }
 
     }
 
@@ -373,7 +377,7 @@ class _pdf{
             $pdf = new Fpdi();
 
 
-            $this->base_pdf(data: $data,factura: $factura,pdf: $pdf);
+            $this->base_pdf(data: $data,factura: $factura,pdf: $pdf, ruta_qr: $ruta_qr);
 
 
 
@@ -424,10 +428,10 @@ class _pdf{
                 $mod = $partidas%6;
                 if($mod === 0){
                     $y = 96.5;
-                    $this->base_pdf(data: $data,factura: $factura,pdf: $pdf);
+                    $this->base_pdf(data: $data,factura: $factura,pdf: $pdf, ruta_qr: $ruta_qr);
                 }
             }
-            
+
             $pdf->Output();
             exit;
 
