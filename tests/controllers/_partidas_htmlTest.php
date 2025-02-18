@@ -222,6 +222,8 @@ class _partidas_htmlTest extends test {
         $resultado = $html->genera_partidas_html($html_controler, $link, $modelo_entidad, $modelo_partida, $modelo_retencion,
             $modelo_traslado, $registro_entidad_id);
 
+        //print_r($resultado);exit;
+
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
         errores::$error = false;
@@ -282,9 +284,12 @@ class _partidas_htmlTest extends test {
 
         $resultado = $html->impuesto_html_completo($html_controler, $impuesto_html_completo, $modelo_partida,
             $name_entidad_impuesto, $name_modelo_entidad, $partida);
+
+        //print_r($resultado);exit;
+
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertStringContainsStringIgnoringCase("seccion=a&accion=elimina_bd&re",$resultado);
+        $this->assertStringContainsStringIgnoringCase("index.php?seccion=a&accion=elimina_bd&session_id",$resultado);
         errores::$error = false;
     }
 

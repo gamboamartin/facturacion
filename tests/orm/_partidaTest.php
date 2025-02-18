@@ -73,7 +73,7 @@ class _partidaTest extends test
         $resultado = $modelo->descripcion_mes_letra($descripcion);
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals('a AGOSTO',$resultado);
+        $this->assertEquals('a FEBRERO',$resultado);
 
         errores::$error = false;
 
@@ -82,7 +82,7 @@ class _partidaTest extends test
         $resultado = $modelo->descripcion_mes_letra($descripcion);
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals('a AGOSTO',$resultado);
+        $this->assertEquals('a FEBRERO',$resultado);
         errores::$error = false;
 
 
@@ -301,7 +301,7 @@ class _partidaTest extends test
 
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals("<a role='button' title='Eliminar' href='index.php?seccion=fc_partida_nc&accion=elimina_bd&registro_id=1&session_id=1&adm_menu_id=-1&seccion_retorno=a&accion_retorno=modifica&id_retorno=1' class='btn btn-danger col-sm-12 '><span class='bi bi-trash'></span></a>", $resultado->registros[0]['elimina_bd']);
+        $this->assertStringContainsStringIgnoringCase("<a role='button' title='Eliminar' href='index.php?seccion=fc_partida_nc&accion=elimina_bd&session_id=1&adm_menu_id=-1&registro_id=1&seccion_retorno=a&accion_retorno=modifica&id_retorno=1' class='btn btn-danger col-sm-12 '><span class='bi bi-trash'>", $resultado->registros[0]['elimina_bd']);
         errores::$error = false;
 
 

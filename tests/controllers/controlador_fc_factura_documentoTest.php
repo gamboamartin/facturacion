@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\tests\controllers;
 
 
+use base\orm\modelo;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
 use gamboamartin\facturacion\controllers\controlador_fc_factura_documento;
@@ -47,7 +48,6 @@ class controlador_fc_factura_documentoTest extends test {
         $ctl = new controlador_fc_factura_documento(link: $this->link, paths_conf: $this->paths_conf);
         $ctl->registro_id = 1;
         //$ctl = new liberator($ctl);
-
         $del = (new base_test())->del_com_cliente(link: $this->link);
         if(errores::$error){
             $error = (new errores())->error(mensaje: 'Error al dar de del',data:  $del);
@@ -87,6 +87,7 @@ class controlador_fc_factura_documentoTest extends test {
             print_r($error);
             exit;
         }
+
 
         $header = false;
         $resultado = $ctl->descarga($header);

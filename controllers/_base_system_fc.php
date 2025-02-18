@@ -2887,29 +2887,31 @@ class _base_system_fc extends _base_system{
         return $select;
     }
 
-    final protected function thead_relacion(): string
+    final protected function thead_relacion(): array|string
+    {
+        $ths = $this->ths();
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al generar html',data:  $ths);
+        }
+
+        $html = "<thead><tr>$ths</tr></thead>";
+
+        $this->thead_relacion = $html;
+        return $html;
+    }
+
+    private function ths(): string
     {
         $th_aplica_monto = '';
         if($this->aplica_monto_relacion){
             $th_aplica_monto = '<th>Monto</th>';
         }
-        $html = '<thead>
-                                        <tr>
-                                            <th>UUID</th>
-                                            <th>Cliente</th>
-                                            <th>Folio</th>
-                                            <th>Fecha</th>
-                                            <th>Total</th>
-                                            <th>Saldo</th>
-                                            <th>Estatus</th>
-                                            <th>Tipo de CFDI</th>
-                                            '.$th_aplica_monto.'
-                                            <th>Selecciona</th>
-                                        </tr>
-                                        </thead>';
 
-        $this->thead_relacion = $html;
-        return $html;
+        $ths = "<th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th>";
+        $ths.= "<th>Tipo de CFDI</th>'.$th_aplica_monto.'<th>Selecciona</th>";
+
+        return $ths;
+
     }
 
     public function timbra_xml(bool $header, bool $ws = false): array|stdClass{

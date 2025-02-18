@@ -47,7 +47,8 @@ class _automaticosTest extends test {
         $ctl = new controlador_fc_ejecucion_automatica(link: $this->link,paths_conf: $this->paths_conf);
         $controlador_factura = new controlador_fc_factura(link: $this->link, paths_conf: $this->paths_conf);
         $controlador_factura->registro = array();
-        $controlador_factura->registro['fc_factura_id'] = 1;
+        $controlador_factura->registro['fc_factura_id'] = 328;
+        $controlador_factura->registro['fc_factura_es_plantilla'] = 'inactivo';
         $ctl = new liberator($ctl);
 
         $resultado = $ctl->buttons_html($controlador_factura);

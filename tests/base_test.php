@@ -1026,6 +1026,7 @@ class base_test{
         $registro['com_producto_id'] = $com_producto_id;
         $registro['codigo_bis'] = $codigo;
         $registro['descuento'] = $descuento;
+        $registro['cat_sat_obj_imp_id'] = 2;
 
 
         $alta = (new fc_partida($link))->alta_registro($registro);

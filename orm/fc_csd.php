@@ -35,8 +35,13 @@ class fc_csd extends _modelo_parent {
 
     }
 
-    public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
+    final public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
+
+        if(!isset($this->registro["org_sucursal_id"])){
+            return $this->error->error(mensaje: 'Error no existe org_sucursal_id en registro',data:  $this->registro);
+        }
+
         $this->registro = $this->campos_base_temp(data: $this->registro,modelo: $this);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar campos base',data: $this->registro);
@@ -77,6 +82,10 @@ class fc_csd extends _modelo_parent {
     {
         if(isset($data['status'])){
             return $data;
+        }
+
+        if(!isset($data["org_sucursal_id"])){
+            return $this->error->error(mensaje: 'Error no existe org_sucursal_id en data',data:  $data);
         }
 
         $sucursal = (new org_sucursal($this->link))->get_sucursal(org_sucursal_id: $data["org_sucursal_id"]);

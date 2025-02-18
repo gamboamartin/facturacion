@@ -5114,6 +5114,7 @@ class instalacion
         $modelos[] = 'fc_traslado';
         $modelos[] = 'fc_partida';
         $modelos[] = 'fc_factura_aut_plantilla';
+        $modelos[] = 'fc_cancelacion';
         $modelos[] = 'fc_factura';
         $modelos[] = 'fc_key_pem';
         $modelos[] = 'fc_key_csd';
@@ -5146,6 +5147,7 @@ class instalacion
 
         $modelos = array();
         $modelos[] = 'org_sucursal';
+        $modelos[] = 'org_logo';
         $modelos[] = 'org_empresa';
 
         foreach ($modelos as $modelo){
@@ -5165,6 +5167,7 @@ class instalacion
         $modelos = array();
         $modelos[] = 'com_email_cte';
         $modelos[] = 'com_sucursal';
+        $modelos[] = 'com_cliente_documento';
         $modelos[] = 'com_cliente';
 
         foreach ($modelos as $modelo){
