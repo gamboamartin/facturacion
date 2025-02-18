@@ -1,6 +1,5 @@
 <?php
 namespace gamboamartin\facturacion\models;
-use base\orm\monedas;
 use config\generales;
 use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\errores\errores;
@@ -134,12 +133,21 @@ class _pdf{
 
     private function receptor(array $factura, Fpdi $pdf): void
     {
+
+        if(!isset($factura['com_sucursal_numero_interior'])){
+            $factura['com_sucursal_numero_interior'] = '';
+        }
+
+        $uso_cfdi = trim($factura['cat_sat_uso_cfdi_codigo']).' '.trim($factura['cat_sat_uso_cfdi_descripcion']);
+        $uso_cfdi = trim($uso_cfdi);
+        $uso_cfdi = mb_convert_encoding($uso_cfdi, 'ISO-8859-1', 'UTF-8');
+
         $x = 33;
         $pdf->SetXY($x, 53);
         $pdf->Write(10, $factura['com_cliente_rfc']);
 
         $pdf->SetXY($x, 57);
-        $pdf->Write(10, $factura['cat_sat_uso_cfdi_codigo'].' '.$factura['cat_sat_uso_cfdi_descripcion']);
+        $pdf->Write(10, $uso_cfdi);
 
         $pdf->SetXY($x, 63.7);
         $domicilio_receptor = trim($factura['com_sucursal_calle']);
@@ -258,7 +266,7 @@ class _pdf{
 
     }
 
-    private function base_pdf(stdClass $data, array $factura, Fpdi $pdf, string $ruta_qr): void
+    private function base_pdf(stdClass $data, array $factura, Fpdi $pdf, string $ruta_logo, string $ruta_qr): void
     {
         $this->init($pdf);
         $this->header(data: $data, factura: $factura,pdf: $pdf);
@@ -271,6 +279,14 @@ class _pdf{
             $pdf->SetXY(10, 196);
             $pdf->Image($ruta_qr,null,null,45,45,'png');
         }
+        if($ruta_logo !== '') {
+            if(file_exists($ruta_logo)){
+                $pdf->SetXY(10, 10);
+                $pdf->Image($ruta_logo,null,null,35,0,'png');
+            }
+        }
+
+
 
     }
 
@@ -377,12 +393,12 @@ class _pdf{
             $pdf = new Fpdi();
 
 
-            $this->base_pdf(data: $data,factura: $factura,pdf: $pdf, ruta_qr: $ruta_qr);
+            $this->base_pdf(data: $data,factura: $factura,pdf: $pdf, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
 
 
 
             $border = 0;
-            $h = 7;
+            $h = 2.5;
             $y = 96.5;
             $partidas = 1;
             foreach ($factura['partidas'] as $partida){
@@ -401,7 +417,7 @@ class _pdf{
 
                 $x = 52;
                 $pdf->SetXY($x, $y);
-                $pdf->MultiCell(75,$h, mb_convert_encoding($partida['fc_partida_descripcion'], 'ISO-8859-1', 'UTF-8'),$border,'C');
+                $pdf->MultiCell(75,$h, mb_convert_encoding($partida['fc_partida_descripcion'], 'ISO-8859-1', 'UTF-8'),$border,'L');
 
                 $x = 127;
                 $pdf->SetXY($x, $y);
@@ -428,12 +444,32 @@ class _pdf{
                 $mod = $partidas%6;
                 if($mod === 0){
                     $y = 96.5;
-                    $this->base_pdf(data: $data,factura: $factura,pdf: $pdf, ruta_qr: $ruta_qr);
+                    $this->base_pdf(data: $data,factura: $factura,pdf: $pdf, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
                 }
             }
 
-            $pdf->Output();
-            exit;
+            $key_serie = $modelo_entidad->tabla.'_serie';
+            $key_folio = $modelo_entidad->tabla.'_folio';
+            $nombre_documento = $factura[$key_serie].$factura[$key_folio];
+
+            if($descarga) {
+                $pdf->Output($nombre_documento . '.pdf', 'D');
+                return $nombre_documento;
+            }
+            if($guarda){
+                $path_base = (new generales())->path_base;
+                $path_base_archivos = $path_base.'archivos';
+                if(!file_exists($path_base_archivos)){
+                    mkdir($path_base_archivos);
+                }
+                $nombre_documento = $path_base_archivos.'/'.$nombre_documento.'.pdf';
+
+
+                $pdf->Output($nombre_documento, 'F');
+                return $nombre_documento;
+            }
+
+            $pdf->Output( );
 
         }
 
@@ -485,7 +521,6 @@ class _pdf{
         }
 
 
-        //$key_sub_total = $modelo_entidad->tabla.'_sub_total';
         $key_sub_total_base = $modelo_entidad->tabla.'_sub_total_base';
         $key_total = $modelo_entidad->tabla.'_total';
 
