@@ -194,7 +194,6 @@ class _impuestos{
 
             $imp[] = $impuesto_obj;
         }
-
         return $imp;
     }
 
