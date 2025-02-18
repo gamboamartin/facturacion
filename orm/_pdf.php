@@ -8,7 +8,6 @@ use gamboamartin\facturacion\controllers\pdf;
 use gamboamartin\organigrama\models\org_logo;
 use NumberFormatter;
 use PDO;
-use setasign\Fpdi\FpdfTpl;
 use setasign\Fpdi\Fpdi;
 use stdClass;
 
@@ -86,6 +85,191 @@ class _pdf{
         return $data;
 
     }
+
+    private function init(Fpdi $pdf): void
+    {
+        $generales = new generales();
+        $pdf->addPage();
+        $pdf->setSourceFile($generales->ruta_factura_pdf);
+        $tplIdx = $pdf->importPage(1);
+        $pdf->useTemplate($tplIdx, 0, 0, null, null, true);
+    }
+
+
+    private function header(stdClass $data, array $factura, Fpdi $pdf): void
+    {
+        $pdf->SetFont('Arial', '', '9');
+        $pdf->SetTextColor(0, 0, 0);
+
+        $x = 68;
+        $pdf->SetXY($x, 10.3);
+        $pdf->Write(10, $factura['org_empresa_razon_social']);
+
+        $pdf->SetXY($x, 15);
+        $pdf->Write(10, $factura['org_empresa_nombre_comercial']);
+
+        $pdf->SetXY($x, 19);
+        $pdf->Write(10, $factura['org_empresa_rfc']);
+
+        $pdf->SetXY($x, 23);
+        $pdf->Write(10, $factura['cat_sat_regimen_fiscal_codigo'].' '.$factura['cat_sat_regimen_fiscal_descripcion']);
+
+        $x = 140;
+
+        $pdf->SetXY($x, 14);
+        $pdf->Write(10, $factura['fc_factura_fecha']);
+
+        $fecha_hora_emision = '';
+        if(isset($data->fecha_timbrado)){
+            $fecha_hora_emision = $data->fecha_timbrado;
+        }
+
+        $pdf->SetXY($x, 22);
+        $pdf->Write(10, $fecha_hora_emision);
+
+        $pdf->SetXY($x, 30);
+        $pdf->Write(10, $factura['dp_cp_descripcion']);
+
+    }
+
+    private function receptor(array $factura, Fpdi $pdf): void
+    {
+        $x = 33;
+        $pdf->SetXY($x, 53);
+        $pdf->Write(10, $factura['com_cliente_rfc']);
+
+        $pdf->SetXY($x, 57);
+        $pdf->Write(10, $factura['cat_sat_uso_cfdi_codigo'].' '.$factura['cat_sat_uso_cfdi_descripcion']);
+
+        $pdf->SetXY($x, 63.7);
+        $domicilio_receptor = trim($factura['com_sucursal_calle']);
+        $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_numero_exterior']);
+        $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_numero_interior']);
+        $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_municipio']);
+        $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_estado']);
+        $domicilio_receptor = trim($domicilio_receptor).' '.$factura['com_sucursal_cp'];
+        $domicilio_receptor = mb_convert_encoding($domicilio_receptor, 'ISO-8859-1', 'UTF-8');
+        $pdf->MultiCell(72,5, $domicilio_receptor,0,'L');
+
+
+        $pdf->SetXY($x, 78.5);
+        $pdf->Write(10, $factura['cat_sat_regimen_fiscal_cliente_codigo'].' '.$factura['cat_sat_regimen_fiscal_cliente_descripcion']);
+
+    }
+
+    private function fiscales(stdClass $data, Fpdi $pdf): void
+    {
+        $x = 109;
+        $pdf->SetXY($x, 53);
+
+        $folio_fiscal = '';
+        if(isset($data->folio_fiscal)){
+            $folio_fiscal = $data->folio_fiscal;
+        }
+
+        $no_certificado = '';
+        if(isset($data->no_certificado)){
+            $no_certificado = $data->no_certificado;
+        }
+
+        $no_certificado_sat = '';
+        if(isset($data->no_certificado_sat)){
+            $no_certificado_sat = $data->no_certificado_sat;
+        }
+
+        $pdf->Write(10, $folio_fiscal);
+        $pdf->SetXY($x, 61);
+        $pdf->Write(10, $no_certificado);
+        $pdf->SetXY($x, 69);
+        $pdf->Write(10, $no_certificado_sat);
+
+    }
+
+    private function pago(array$factura, Fpdi $pdf): void
+    {
+        $x = 38;
+        $pdf->SetXY($x, 138.8);
+        $pdf->Write(10, mb_convert_encoding($factura['cat_sat_forma_pago_codigo'] . ' ' . $factura['cat_sat_forma_pago_descripcion'], 'ISO-8859-1', 'UTF-8'));
+
+        $pdf->SetXY($x, 142);
+        $pdf->Write(10, mb_convert_encoding($factura['cat_sat_metodo_pago_codigo'].' '.$factura['cat_sat_metodo_pago_descripcion'], 'ISO-8859-1', 'UTF-8'));
+
+        $pdf->SetXY($x, 146);
+        $pdf->Write(10, mb_convert_encoding($factura['cat_sat_tipo_de_comprobante_codigo'].' '.$factura['cat_sat_tipo_de_comprobante_descripcion'], 'ISO-8859-1', 'UTF-8'));
+
+        $pdf->SetXY($x, 149);
+        $pdf->Write(10, mb_convert_encoding($factura['cat_sat_metodo_pago_descripcion'], 'ISO-8859-1', 'UTF-8'));
+
+        $pdf->SetXY($x, 153);
+        $pdf->Write(10, mb_convert_encoding($factura['cat_sat_moneda_codigo'].' '.$factura['cat_sat_moneda_descripcion'], 'ISO-8859-1', 'UTF-8'));
+
+    }
+
+    private function montos(array$factura, Fpdi $pdf): void
+    {
+        $pdf->SetFont('Arial', 'B', '9');
+        $pdf->SetTextColor(255,255,255);
+        $fmt = new NumberFormatter( 'es_MX', NumberFormatter::CURRENCY );
+        $x = 172;
+
+        $fc_factura_sub_total = round($factura['fc_factura_sub_total'],2);
+        $fc_factura_sub_total = $fmt->formatCurrency($fc_factura_sub_total, "MXN");
+        $pdf->SetXY($x, 134.5);
+        $pdf->Write(10, $fc_factura_sub_total);
+
+
+        $fc_factura_total_traslados = round($factura['fc_factura_total_traslados'],2);
+        $fc_factura_total_traslados = $fmt->formatCurrency($fc_factura_total_traslados, "MXN");
+        $pdf->SetXY($x, 140);
+        $pdf->Write(10, $fc_factura_total_traslados);
+
+
+
+        $fc_factura_total_retenciones = round($factura['fc_factura_total_retenciones'],2);
+        $fc_factura_total_retenciones = $fmt->formatCurrency($fc_factura_total_retenciones, "MXN");
+        $pdf->SetXY($x, 146);
+        $pdf->Write(10, $fc_factura_total_retenciones);
+
+
+        $fc_factura_total_retenciones = round($factura['fc_factura_total_retenciones'],2);
+        $fc_factura_total_retenciones = $fmt->formatCurrency($fc_factura_total_retenciones, "MXN");
+        $pdf->SetXY($x, 151.5);
+        $pdf->Write(10, $fc_factura_total_retenciones);
+
+        $fc_factura_total = round($factura['fc_factura_total'],2);
+        $fc_factura_total = $fmt->formatCurrency($fc_factura_total, "MXN");
+        $pdf->SetXY($x, 156.5);
+        $pdf->Write(10, $fc_factura_total);
+    }
+
+    private function sellos(stdClass $data, Fpdi $pdf): void
+    {
+        $x = 59;
+        $pdf->SetFont('Arial', '', '7');
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetXY($x, 204);
+        $pdf->MultiCell(149,2.6,$data->complento,0);
+
+        $pdf->SetXY($x, 226);
+        $pdf->MultiCell(149,2.6,$data->sello_cfdi,0);
+
+        $pdf->SetXY($x, 248.5);
+        $pdf->MultiCell(149,2.6,$data->sello_sat,0);
+
+    }
+
+    private function base_pdf(stdClass $data, array $factura, Fpdi $pdf): void
+    {
+        $this->init($pdf);
+        $this->header(data: $data, factura: $factura,pdf: $pdf);
+        $this->receptor(factura: $factura, pdf: $pdf);
+        $this->fiscales(data: $data, pdf: $pdf);
+        $this->pago(factura: $factura, pdf: $pdf);
+        $this->montos(factura: $factura, pdf: $pdf);
+        $this->sellos(data: $data, pdf: $pdf);
+
+    }
+
     final public function pdf( bool $descarga, bool $guarda, PDO $link, _doc $modelo_documento,
                                _transacciones_fc $modelo_entidad, _partida $modelo_partida,
                                _cuenta_predial $modelo_predial, _relacion $modelo_relacion,
@@ -185,156 +369,20 @@ class _pdf{
         else{
             ob_clean();
 
-            $pdf = new Fpdi();
-            $pdf->addPage();
-            $pdf->setSourceFile($generales->ruta_factura_pdf);
-            $tplIdx = $pdf->importPage(1);
-            $pdf->useTemplate($tplIdx, 0, 0, null, null, true);
-
-            $x = 68;
-            $pdf->SetFont('Arial', '', '9');
-            $pdf->SetXY($x, 10.3);
-            $pdf->SetTextColor(0, 0, 0);
-            $pdf->Write(10, $factura['org_empresa_razon_social']);
-
-            $pdf->SetXY($x, 15);
-            $pdf->Write(10, $factura['org_empresa_nombre_comercial']);
-
-            $pdf->SetXY($x, 19);
-            $pdf->Write(10, $factura['org_empresa_rfc']);
-
-            $pdf->SetXY($x, 23);
-            $pdf->Write(10, $factura['cat_sat_regimen_fiscal_codigo'].' '.$factura['cat_sat_regimen_fiscal_descripcion']);
-
-            $x = 140;
-
-            $pdf->SetXY($x, 14);
-            $pdf->Write(10, $factura['fc_factura_fecha']);
-
-            $fecha_hora_emision = '';
-            if(isset($data->fecha_timbrado)){
-                $fecha_hora_emision = $data->fecha_timbrado;
-            }
-
-            $pdf->SetXY($x, 22);
-            $pdf->Write(10, $fecha_hora_emision);
-
-            $pdf->SetXY($x, 30);
-            $pdf->Write(10, $factura['dp_cp_descripcion']);
-
-            $x = 33;
-            $pdf->SetXY($x, 53);
-            $pdf->Write(10, $factura['com_cliente_rfc']);
-
-            $pdf->SetXY($x, 57);
-            $pdf->Write(10, $factura['cat_sat_uso_cfdi_codigo'].' '.$factura['cat_sat_uso_cfdi_descripcion']);
-
-            $pdf->SetXY($x, 61);
-            $domicilio_receptor = trim($factura['com_sucursal_calle']);
-            $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_numero_exterior']);
-            $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_numero_interior']);
-            $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_municipio']);
-            $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_estado']);
-            $domicilio_receptor = trim($domicilio_receptor).' '.$factura['com_sucursal_cp'];
-            $pdf->Write(10, $domicilio_receptor);
-
-
-            $pdf->SetXY($x, 65);
-            $pdf->Write(10, $factura['cat_sat_regimen_fiscal_cliente_codigo'].' '.$factura['cat_sat_regimen_fiscal_cliente_descripcion']);
-
-
-            $x = 109;
-            $pdf->SetXY($x, 53);
-
-            $folio_fiscal = '';
-            if(isset($data->folio_fiscal)){
-                $folio_fiscal = $data->folio_fiscal;
-            }
-
-            $no_certificado = '';
-            if(isset($data->no_certificado)){
-                $no_certificado = $data->no_certificado;
-            }
-
-            $no_certificado_sat = '';
-            if(isset($data->no_certificado_sat)){
-                $no_certificado_sat = $data->no_certificado_sat;
-            }
-
-            $pdf->Write(10, $folio_fiscal);
-            $pdf->SetXY($x, 61);
-            $pdf->Write(10, $no_certificado);
-            $pdf->SetXY($x, 69);
-            $pdf->Write(10, $no_certificado_sat);
-
-            $x = 38;
-            $pdf->SetXY($x, 138.8);
-            $pdf->Write(10, $factura['cat_sat_forma_pago_codigo'].' '.$factura['cat_sat_forma_pago_descripcion']);
-
-            $pdf->SetXY($x, 142);
-            $pdf->Write(10, $factura['cat_sat_metodo_pago_codigo'].' '.$factura['cat_sat_metodo_pago_descripcion']);
-
-            $pdf->SetXY($x, 146);
-            $pdf->Write(10, $factura['cat_sat_tipo_de_comprobante_codigo'].' '.$factura['cat_sat_tipo_de_comprobante_descripcion']);
-
-            $pdf->SetXY($x, 149);
-            $pdf->Write(10, $factura['cat_sat_metodo_pago_descripcion']);
-
-            $pdf->SetXY($x, 153);
-            $pdf->Write(10, $factura['cat_sat_moneda_codigo'].' '.$factura['cat_sat_moneda_descripcion']);
-
-            $pdf->SetFont('Arial', 'B', '9');
-            $pdf->SetTextColor(255,255,255);
             $fmt = new NumberFormatter( 'es_MX', NumberFormatter::CURRENCY );
-            $x = 172;
-
-            $fc_factura_sub_total = round($factura['fc_factura_sub_total'],2);
-            $fc_factura_sub_total = $fmt->formatCurrency($fc_factura_sub_total, "MXN");
-            $pdf->SetXY($x, 134.5);
-            $pdf->Write(10, $fc_factura_sub_total);
+            $pdf = new Fpdi();
 
 
-            $fc_factura_total_traslados = round($factura['fc_factura_total_traslados'],2);
-            $fc_factura_total_traslados = $fmt->formatCurrency($fc_factura_total_traslados, "MXN");
-            $pdf->SetXY($x, 140);
-            $pdf->Write(10, $fc_factura_total_traslados);
+            $this->base_pdf(data: $data,factura: $factura,pdf: $pdf);
 
 
 
-            $fc_factura_total_retenciones = round($factura['fc_factura_total_retenciones'],2);
-            $fc_factura_total_retenciones = $fmt->formatCurrency($fc_factura_total_retenciones, "MXN");
-            $pdf->SetXY($x, 146);
-            $pdf->Write(10, $fc_factura_total_retenciones);
-
-
-            $fc_factura_total_retenciones = round($factura['fc_factura_total_retenciones'],2);
-            $fc_factura_total_retenciones = $fmt->formatCurrency($fc_factura_total_retenciones, "MXN");
-            $pdf->SetXY($x, 151.5);
-            $pdf->Write(10, $fc_factura_total_retenciones);
-
-            $fc_factura_total = round($factura['fc_factura_total'],2);
-            $fc_factura_total = $fmt->formatCurrency($fc_factura_total, "MXN");
-            $pdf->SetXY($x, 156.5);
-            $pdf->Write(10, $fc_factura_total);
-
-            $x = 59;
-            $pdf->SetFont('Arial', '', '7');
-            $pdf->SetTextColor(0,0,0);
-            $pdf->SetXY($x, 204);
-            $pdf->MultiCell(149,2.6,$data->complento,0);
-
-            $pdf->SetXY($x, 226);
-            $pdf->MultiCell(149,2.6,$data->sello_cfdi,0);
-
-            $pdf->SetXY($x, 248.5);
-            $pdf->MultiCell(149,2.6,$data->sello_sat,0);
-
-            $pdf->SetFont('Arial', '', '7');
             $border = 0;
             $h = 7;
             $y = 96.5;
             $partidas = 1;
             foreach ($factura['partidas'] as $partida){
+                $pdf->SetFont('Arial', '', '7');
                 $x = 7;
                 $pdf->SetXY($x, $y);
                 $pdf->MultiCell(10,$h,$partida['fc_partida_cantidad'],$border,'C');
@@ -371,157 +419,15 @@ class _pdf{
                 $pdf->MultiCell(24,$h,$fc_partida_sub_total,$border,'C');
 
                 $y = $y + $h;
+
                 $partidas++;
-                if($partidas === 6){
+                $mod = $partidas%6;
+                if($mod === 0){
                     $y = 96.5;
-                    $pdf->addPage();
-                    $pdf->setSourceFile($generales->ruta_factura_pdf);
-                    $tplIdx = $pdf->importPage(1);
-                    $pdf->useTemplate($tplIdx, 0, 0, null, null, true);
-
-                    $x = 68;
-                    $pdf->SetFont('Arial', '', '9');
-                    $pdf->SetXY($x, 10.3);
-                    $pdf->SetTextColor(0, 0, 0);
-                    $pdf->Write(10, $factura['org_empresa_razon_social']);
-
-                    $pdf->SetXY($x, 15);
-                    $pdf->Write(10, $factura['org_empresa_nombre_comercial']);
-
-                    $pdf->SetXY($x, 19);
-                    $pdf->Write(10, $factura['org_empresa_rfc']);
-
-                    $pdf->SetXY($x, 23);
-                    $pdf->Write(10, $factura['cat_sat_regimen_fiscal_codigo'].' '.$factura['cat_sat_regimen_fiscal_descripcion']);
-
-                    $x = 140;
-
-                    $pdf->SetXY($x, 14);
-                    $pdf->Write(10, $factura['fc_factura_fecha']);
-
-                    $fecha_hora_emision = '';
-                    if(isset($data->fecha_timbrado)){
-                        $fecha_hora_emision = $data->fecha_timbrado;
-                    }
-
-                    $pdf->SetXY($x, 22);
-                    $pdf->Write(10, $fecha_hora_emision);
-
-                    $pdf->SetXY($x, 30);
-                    $pdf->Write(10, $factura['dp_cp_descripcion']);
-
-                    $x = 33;
-                    $pdf->SetXY($x, 53);
-                    $pdf->Write(10, $factura['com_cliente_rfc']);
-
-                    $pdf->SetXY($x, 57);
-                    $pdf->Write(10, $factura['cat_sat_uso_cfdi_codigo'].' '.$factura['cat_sat_uso_cfdi_descripcion']);
-
-                    $pdf->SetXY($x, 61);
-                    $domicilio_receptor = trim($factura['com_sucursal_calle']);
-                    $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_numero_exterior']);
-                    $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_numero_interior']);
-                    $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_municipio']);
-                    $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_estado']);
-                    $domicilio_receptor = trim($domicilio_receptor).' '.$factura['com_sucursal_cp'];
-                    $pdf->Write(10, $domicilio_receptor);
-
-
-                    $pdf->SetXY($x, 65);
-                    $pdf->Write(10, $factura['cat_sat_regimen_fiscal_cliente_codigo'].' '.$factura['cat_sat_regimen_fiscal_cliente_descripcion']);
-
-
-                    $x = 109;
-                    $pdf->SetXY($x, 53);
-
-                    $folio_fiscal = '';
-                    if(isset($data->folio_fiscal)){
-                        $folio_fiscal = $data->folio_fiscal;
-                    }
-
-                    $no_certificado = '';
-                    if(isset($data->no_certificado)){
-                        $no_certificado = $data->no_certificado;
-                    }
-
-                    $no_certificado_sat = '';
-                    if(isset($data->no_certificado_sat)){
-                        $no_certificado_sat = $data->no_certificado_sat;
-                    }
-
-                    $pdf->Write(10, $folio_fiscal);
-                    $pdf->SetXY($x, 61);
-                    $pdf->Write(10, $no_certificado);
-                    $pdf->SetXY($x, 69);
-                    $pdf->Write(10, $no_certificado_sat);
-
-                    $x = 38;
-                    $pdf->SetXY($x, 138.8);
-                    $pdf->Write(10, $factura['cat_sat_forma_pago_codigo'].' '.$factura['cat_sat_forma_pago_descripcion']);
-
-                    $pdf->SetXY($x, 142);
-                    $pdf->Write(10, $factura['cat_sat_metodo_pago_codigo'].' '.$factura['cat_sat_metodo_pago_descripcion']);
-
-                    $pdf->SetXY($x, 146);
-                    $pdf->Write(10, $factura['cat_sat_tipo_de_comprobante_codigo'].' '.$factura['cat_sat_tipo_de_comprobante_descripcion']);
-
-                    $pdf->SetXY($x, 149);
-                    $pdf->Write(10, $factura['cat_sat_metodo_pago_descripcion']);
-
-                    $pdf->SetXY($x, 153);
-                    $pdf->Write(10, $factura['cat_sat_moneda_codigo'].' '.$factura['cat_sat_moneda_descripcion']);
-
-                    $pdf->SetFont('Arial', 'B', '9');
-                    $pdf->SetTextColor(255,255,255);
-                    $fmt = new NumberFormatter( 'es_MX', NumberFormatter::CURRENCY );
-                    $x = 172;
-
-                    $fc_factura_sub_total = round($factura['fc_factura_sub_total'],2);
-                    $fc_factura_sub_total = $fmt->formatCurrency($fc_factura_sub_total, "MXN");
-                    $pdf->SetXY($x, 134.5);
-                    $pdf->Write(10, $fc_factura_sub_total);
-
-
-                    $fc_factura_total_traslados = round($factura['fc_factura_total_traslados'],2);
-                    $fc_factura_total_traslados = $fmt->formatCurrency($fc_factura_total_traslados, "MXN");
-                    $pdf->SetXY($x, 140);
-                    $pdf->Write(10, $fc_factura_total_traslados);
-
-
-
-                    $fc_factura_total_retenciones = round($factura['fc_factura_total_retenciones'],2);
-                    $fc_factura_total_retenciones = $fmt->formatCurrency($fc_factura_total_retenciones, "MXN");
-                    $pdf->SetXY($x, 146);
-                    $pdf->Write(10, $fc_factura_total_retenciones);
-
-
-                    $fc_factura_total_retenciones = round($factura['fc_factura_total_retenciones'],2);
-                    $fc_factura_total_retenciones = $fmt->formatCurrency($fc_factura_total_retenciones, "MXN");
-                    $pdf->SetXY($x, 151.5);
-                    $pdf->Write(10, $fc_factura_total_retenciones);
-
-                    $fc_factura_total = round($factura['fc_factura_total'],2);
-                    $fc_factura_total = $fmt->formatCurrency($fc_factura_total, "MXN");
-                    $pdf->SetXY($x, 156.5);
-                    $pdf->Write(10, $fc_factura_total);
-
-                    $x = 59;
-                    $pdf->SetFont('Arial', '', '7');
-                    $pdf->SetTextColor(0,0,0);
-                    $pdf->SetXY($x, 204);
-                    $pdf->MultiCell(149,2.6,$data->complento,0);
-
-                    $pdf->SetXY($x, 226);
-                    $pdf->MultiCell(149,2.6,$data->sello_cfdi,0);
-
-                    $pdf->SetXY($x, 248.5);
-                    $pdf->MultiCell(149,2.6,$data->sello_sat,0);
-
+                    $this->base_pdf(data: $data,factura: $factura,pdf: $pdf);
                 }
-                //print_r($partida);exit;
             }
-
-            //print_r($data);exit;
+            
             $pdf->Output();
             exit;
 
