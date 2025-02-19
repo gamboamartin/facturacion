@@ -609,11 +609,18 @@ class _base_system_fc extends _base_system{
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_envia);
         }
 
-        $button_fc_factura_exportar_documentos =  $this->html->button_href(accion: 'exportar_documentos', etiqueta: 'Descargar',
+        $button_fc_factura_exportar_documentos =  $this->html->button_href(accion: 'exportar_documentos', etiqueta: 'Descargar ZIP',
             registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 2, params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_exportar_documentos);
         }
+
+        $button_fc_factura_descarga_separado =  $this->html->button_href(accion: 'descargar_por_separado', etiqueta: 'Descargar',
+            registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 2, params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_descarga_separado);
+        }
+
         $button_fc_factura_adjunta =  $this->html->button_href(accion: 'adjunta', etiqueta: 'Adjunta Docs',
             registro_id: $this->registro_id, seccion: $this->seccion, style: 'info', cols: 2, params: array());
         if (errores::$error) {
@@ -621,7 +628,7 @@ class _base_system_fc extends _base_system{
         }
 
         $buttons = $button_fc_factura_relaciones.$button_fc_factura_timbra.$button_fc_factura_correo.
-            $button_fc_factura_envia.$button_fc_factura_exportar_documentos.$button_fc_factura_adjunta;
+            $button_fc_factura_envia.$button_fc_factura_exportar_documentos.$button_fc_factura_adjunta.$button_fc_factura_descarga_separado;
 
         return "<div class='col-md-12 buttons-form'>$buttons</div>";
 
@@ -1555,12 +1562,12 @@ class _base_system_fc extends _base_system{
     public function genera_pdf(bool $header, bool $ws = false){
 
 
-        $pdf = (new _doctos())->pdf(modelo_documento: $this->modelo_documento,modelo_entidad:  $this->modelo_entidad,
-            modelo_partida: $this->modelo_partida,modelo_predial:  $this->modelo_predial,
-            modelo_relacion: $this->modelo_relacion,modelo_relacionada:  $this->modelo_relacionada,
-            modelo_retencion:  $this->modelo_retencion,modelo_sello:  $this->modelo_sello,
-            modelo_traslado:  $this->modelo_traslado, modelo_uuid_ext: $this->modelo_uuid_ext,
-            row_entidad_id: $this->registro_id);
+        $pdf = (new _doctos())->pdf(descarga: true, guarda: false, modelo_documento: $this->modelo_documento,
+            modelo_entidad:  $this->modelo_entidad, modelo_partida: $this->modelo_partida,
+            modelo_predial:  $this->modelo_predial, modelo_relacion: $this->modelo_relacion,
+            modelo_relacionada:  $this->modelo_relacionada, modelo_retencion:  $this->modelo_retencion,
+            modelo_sello:  $this->modelo_sello, modelo_traslado:  $this->modelo_traslado,
+            modelo_uuid_ext: $this->modelo_uuid_ext, row_entidad_id: $this->registro_id);
 
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $pdf, header: $header,ws:$ws);

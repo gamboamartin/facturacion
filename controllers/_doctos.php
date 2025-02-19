@@ -140,13 +140,13 @@ class _doctos{
         return $r_fc_factura_documento;
     }
 
-    final public function pdf(_doc $modelo_documento, _transacciones_fc $modelo_entidad, _partida $modelo_partida,
-                              _cuenta_predial $modelo_predial, _relacion $modelo_relacion,
+    final public function pdf(bool $descarga, bool $guarda, _doc $modelo_documento, _transacciones_fc $modelo_entidad,
+                              _partida $modelo_partida, _cuenta_predial $modelo_predial, _relacion $modelo_relacion,
                               _relacionada $modelo_relacionada, _data_impuestos $modelo_retencion,
                               _sellado $modelo_sello, _data_impuestos $modelo_traslado, _uuid_ext $modelo_uuid_ext,
                               int $row_entidad_id){
 
-        $pdf = (new _pdf())->pdf(descarga: false, guarda: true, link: $modelo_entidad->link,
+        $pdf = (new _pdf())->pdf(descarga: $descarga, guarda: $guarda, link: $modelo_entidad->link,
             modelo_documento: $modelo_documento, modelo_entidad: $modelo_entidad, modelo_partida: $modelo_partida,
             modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
             modelo_retencion: $modelo_retencion, modelo_sellado: $modelo_sello, modelo_traslado: $modelo_traslado,

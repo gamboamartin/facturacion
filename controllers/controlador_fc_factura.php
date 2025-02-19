@@ -220,6 +220,7 @@ class controlador_fc_factura extends _base_system_fc {
         return $r_template;
     }
 
+
     public function descarga_xml(bool $header, bool $ws = false)
     {
         $this->modelo_documento = new fc_factura_documento(link: $this->link);
@@ -231,6 +232,27 @@ class controlador_fc_factura extends _base_system_fc {
 
         return $r_template;
     }
+
+    public function descargar_por_separado(bool $header, bool $ws = false): array|stdClass
+    {
+        $genera_pdf = $this->obj_link->link_con_id('genera_pdf',$this->link,$this->registro_id,$this->seccion);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error $genera_pdf',data:  $genera_pdf,header:  $header, ws: $ws);
+        }
+
+        $descarga_xml = $this->obj_link->link_con_id('descarga_xml',$this->link,$this->registro_id,$this->seccion);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error $descarga_xml',data:  $descarga_xml,header:  $header, ws: $ws);
+        }
+
+        $this->registro = new stdClass();
+        $this->registro->genera_pdf = $genera_pdf;
+        $this->registro->descarga_xml = $descarga_xml;
+
+        return $this->registro;
+
+    }
+
 
     public function duplica(bool $header, bool $ws = false)
     {

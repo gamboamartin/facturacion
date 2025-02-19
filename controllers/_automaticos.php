@@ -268,12 +268,11 @@ class _automaticos extends system{
 
         foreach ($fc_facturas as $fc_factura_id){
 
-            $genera_pdf = (new _doctos())->pdf(modelo_documento: $modelo_documento,modelo_entidad:  $modelo_entidad,
-                modelo_partida: $modelo_partida,modelo_predial:  $modelo_predial,
+            $genera_pdf = (new _doctos())->pdf(descarga: false,guarda: true, modelo_documento: $modelo_documento,
+                modelo_entidad:  $modelo_entidad, modelo_partida: $modelo_partida,modelo_predial:  $modelo_predial,
                 modelo_relacion: $modelo_relacion,modelo_relacionada:  $modelo_relacionada,
-                modelo_retencion:  $modelo_retencion,modelo_sello:  $modelo_sello,
-                modelo_traslado:  $modelo_traslado, modelo_uuid_ext: $modelo_uuid_ext,
-                row_entidad_id: $fc_factura_id);
+                modelo_retencion:  $modelo_retencion,modelo_sello:  $modelo_sello, modelo_traslado:  $modelo_traslado,
+                modelo_uuid_ext: $modelo_uuid_ext, row_entidad_id: $fc_factura_id);
 
             if(errores::$error){
                 return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $genera_pdf, header: $header,ws:$ws);
