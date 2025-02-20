@@ -618,7 +618,7 @@ class _base_system_fc extends _base_system{
 
         $button_fc_factura_descarga_separado =  $this->html->button_href(accion: 'descargar_por_separado',
             etiqueta: 'Descargar',
-            registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 2, params: array());
+            registro_id: $this->registro_id, seccion: $this->seccion, style: 'success', cols: 2, target: '_blank');
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_fc_factura_descarga_separado);
         }
@@ -875,12 +875,20 @@ class _base_system_fc extends _base_system{
     {
         $identificador = "fc_csd_id";
         $propiedades = array("label" => "Empresa", "cols" => 12,"extra_params_keys"=>array("fc_csd_serie"));
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        $input = $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
 
         $identificador = "com_sucursal_id";
-        $propiedades = array("label" => "Cliente", "cols" => 12,"extra_params_keys" => array("com_cliente_cat_sat_forma_pago_id",
+        $propiedades = array("label" => "Cliente", "cols" => 12,"extra_params_keys" =>
+            array("com_cliente_cat_sat_forma_pago_id",
             "com_cliente_cat_sat_metodo_pago_id","com_cliente_cat_sat_moneda_id","com_cliente_cat_sat_uso_cfdi_id"));
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
 
         $identificador = "cat_sat_forma_pago_id";
         $propiedades = array("label" => "Forma Pago",
@@ -888,20 +896,30 @@ class _base_system_fc extends _base_system{
             'filtro'=>$this->data_selected_alta['cat_sat_forma_pago_id']['filtro'],
             'extra_params_keys'=>array('cat_sat_forma_pago_codigo')
             );
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
+
 
         $identificador = "cat_sat_metodo_pago_id";
         $propiedades = array("label" => "Metodo Pago",
             'id_selected'=>$this->data_selected_alta['cat_sat_metodo_pago_id']['id'],
             'filtro'=>$this->data_selected_alta['cat_sat_metodo_pago_id']['filtro'],
             'extra_params_keys'=>array('cat_sat_metodo_pago_codigo'));
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
 
         $identificador = "cat_sat_moneda_id";
         $propiedades = array("label" => "Moneda",
             'id_selected'=>$this->data_selected_alta['cat_sat_moneda_id']['id'],
             'filtro'=>$this->data_selected_alta['cat_sat_moneda_id']['filtro']);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
 
         $identificador = "com_tipo_cambio_id";
         $propiedades = array("label" => "Tipo Cambio",
@@ -909,66 +927,93 @@ class _base_system_fc extends _base_system{
             'filtro'=>$this->data_selected_alta['com_tipo_cambio_id']['filtro']);
 
 
-        $prop = $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input = $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
         if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al asignar propiedad',data:  $prop);
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
         }
+
 
         $identificador = "cat_sat_uso_cfdi_id";
         $propiedades = array("label" => "Uso CFDI",
             'id_selected'=>$this->data_selected_alta['cat_sat_uso_cfdi_id']['id'],
             'filtro'=>$this->data_selected_alta['cat_sat_uso_cfdi_id']['filtro']);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         $identificador = "cat_sat_tipo_de_comprobante_id";
         $propiedades = array("label" => "Tipo Comprobante");
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         $identificador = "dp_calle_pertenece_id";
         $propiedades = array("label" => "Calle");
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         $identificador = "cat_sat_regimen_fiscal_id";
         $propiedades = array("label" => "Regimen Fiscal");
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         $identificador = "folio";
         $propiedades = array("place_holder" => "Folio", 'required'=>false, 'disabled'=>true);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         $identificador = "exportacion";
         $propiedades = array("place_holder" => "Exportación");
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         $identificador = "serie";
         $propiedades = array("place_holder" => "Serie", 'required'=>false,'disabled'=>true);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         $identificador = "subtotal";
         $propiedades = array("place_holder" => "Subtotal", "cols" => 4,"disabled" => true);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         $identificador = "descuento";
         $propiedades = array("place_holder" => "Descuento", "cols" => 4,"disabled" => true);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         $identificador = "impuestos_trasladados";
         $propiedades = array("place_holder" => "Imp. Trasladados", "disabled" => true);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         $identificador = "impuestos_retenidos";
         $propiedades = array("place_holder" => "Imp. Retenidos", "disabled" => true);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         $identificador = "total";
         $propiedades = array("place_holder" => "Total", "cols" => 4, "disabled" => true);
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         $identificador = "fecha";
         $propiedades = array("place_holder" => "Fecha");
-        $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
-
+        $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
+        }
         return $this->keys_selects;
     }
 
@@ -1671,49 +1716,117 @@ class _base_system_fc extends _base_system{
         return $this;
     }
 
-    final public function init_links(string $name_modelo_email): array|string
+    /**
+     * REG
+     * Inicializa y genera enlaces para diversas acciones dentro del controlador.
+     *
+     * Este método genera y asigna enlaces para operaciones específicas dentro de la sección actual,
+     * tales como la creación de partidas, la generación y timbrado de XML, y la alta de emails.
+     *
+     * @param string $name_modelo_email Nombre del modelo relacionado con los correos electrónicos.
+     * @return bool|array Retorna `true` si los enlaces se generaron correctamente o un array de error si ocurre un fallo.
+     *
+     * @throws array Retorna un array de error si ocurre un problema en la generación de enlaces.
+     *
+     * ### Ejemplo de uso 1 (Ejecución exitosa):
+     * ```php
+     * $controlador = new ControladorFcFactura();
+     * $resultado = $controlador->init_links('fc_email');
+     * var_dump($resultado); // bool(true)
+     * ```
+     *
+     * ### Ejemplo de uso 2 (Error por nombre de modelo vacío):
+     * ```php
+     * $controlador = new ControladorFcFactura();
+     * $resultado = $controlador->init_links('');
+     * var_dump($resultado);
+     * // Salida esperada:
+     * // array(
+     * //     'error' => true,
+     * //     'mensaje' => 'Error $name_modelo_email esta vacio',
+     * //     'data' => ''
+     * // )
+     * ```
+     *
+     * ### Ejemplo de uso 3 (Error al generar enlaces):
+     * ```php
+     * $controlador = new ControladorFcFactura();
+     * $controlador->obj_link = null; // Simula un fallo en el objeto de enlaces
+     * $resultado = $controlador->init_links('fc_email');
+     * var_dump($resultado);
+     * // Salida esperada:
+     * // array(
+     * //     'error' => true,
+     * //     'mensaje' => 'Error al generar links para partida',
+     * //     'data' => null
+     * // )
+     * ```
+     */
+    final public function init_links(string $name_modelo_email): bool|array
     {
+        $name_modelo_email = trim($name_modelo_email);
+        if ($name_modelo_email === '') {
+            return $this->errores->error(
+                mensaje: 'Error $name_modelo_email esta vacio',
+                data: $name_modelo_email,
+                es_final: true
+            );
+        }
 
+        // Genera los enlaces utilizando el objeto de enlaces.
         $this->obj_link->genera_links(controler: $this);
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al generar links para partida',data:  $this->obj_link);
+        if (errores::$error) {
+            return $this->errores->error(
+                mensaje: 'Error al generar links para partida',
+                data: $this->obj_link
+            );
         }
 
-        $link = $this->obj_link->get_link($this->seccion,"nueva_partida");
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener link nueva_partida',data:  $link);
-        }
-        $this->link_fc_factura_nueva_partida = $link;
-
-        $link = $this->obj_link->get_link($this->seccion,"alta_partida_bd");
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener link alta_partida_bd',data:  $link);
+        // Obtención de enlaces de diferentes acciones y asignación a variables de la clase
+        $this->link_fc_factura_nueva_partida = $this->obj_link->get_link($this->seccion, "nueva_partida");
+        if (errores::$error) {
+            return $this->errores->error(
+                mensaje: 'Error al obtener link nueva_partida',
+                data: $this->link_fc_factura_nueva_partida
+            );
         }
 
-        $this->link_fc_partida_alta_bd = $link;
-
-        $link = $this->obj_link->get_link($this->seccion,"genera_xml");
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener link genera_xml',data:  $link);
+        $this->link_fc_partida_alta_bd = $this->obj_link->get_link($this->seccion, "alta_partida_bd");
+        if (errores::$error) {
+            return $this->errores->error(
+                mensaje: 'Error al obtener link alta_partida_bd',
+                data: $this->link_fc_partida_alta_bd
+            );
         }
-        $this->link_factura_genera_xml = $link;
 
-        $link = $this->obj_link->get_link($this->seccion,"timbra_xml");
-        if(errores::$error){
-            return $this->errores->error(mensaje: 'Error al obtener link genera_xml',data:  $link);
+        $this->link_factura_genera_xml = $this->obj_link->get_link($this->seccion, "genera_xml");
+        if (errores::$error) {
+            return $this->errores->error(
+                mensaje: 'Error al obtener link genera_xml',
+                data: $this->link_factura_genera_xml
+            );
         }
-        $this->link_factura_timbra_xml = $link;
 
-        $link_fc_email_alta_bd = $this->obj_link->link_alta_bd(link: $this->link, seccion: $name_modelo_email);
-        if(errores::$error){
-            $error = $this->errores->error(mensaje: 'Error al obtener link',data:  $this->link_fc_email_alta_bd);
-            print_r($error);
-            exit;
+        $this->link_factura_timbra_xml = $this->obj_link->get_link($this->seccion, "timbra_xml");
+        if (errores::$error) {
+            return $this->errores->error(
+                mensaje: 'Error al obtener link timbra_xml',
+                data: $this->link_factura_timbra_xml
+            );
         }
-        $this->link_fc_email_alta_bd  = $link_fc_email_alta_bd;
 
-        return $link;
+        // Obtención del enlace para alta de email
+        $this->link_fc_email_alta_bd = $this->obj_link->link_alta_bd(link: $this->link, seccion: $name_modelo_email);
+        if (errores::$error) {
+            return $this->errores->error(
+                mensaje: 'Error al obtener link',
+                data: $this->link_fc_email_alta_bd
+            );
+        }
+
+        return true;
     }
+
 
 
     private function init_modifica(bool $fecha_original, _transacciones_fc $modelo_entidad,

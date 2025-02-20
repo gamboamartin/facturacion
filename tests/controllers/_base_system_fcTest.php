@@ -31,6 +31,31 @@ class _base_system_fcTest extends test {
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_init_links(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+
+        $ctl = new controlador_fc_factura(link: $this->link, paths_conf: $this->paths_conf);
+        //$ctl = new liberator($ctl);
+
+        $name_modelo_email = 'fc_email';
+        $resultado = $ctl->init_links($name_modelo_email);
+
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+
+        errores::$error = false;
+    }
+
     public function test_parents(): void
     {
         errores::$error = false;

@@ -3,8 +3,8 @@ let adm_menu_id = getParameterByName('adm_menu_id');
 let registro_id = getParameterByName('registro_id');
 
 setTimeout(function(){
-    window.history.back();
-}, 500);
+    window.close();
+}, 3000);
 
 
 
