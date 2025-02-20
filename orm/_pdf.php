@@ -97,6 +97,13 @@ class _pdf{
 
     private function header(stdClass $data, array $factura, Fpdi $pdf): void
     {
+
+        $x = 154;
+        $pdf->SetFont('Arial', 'B', '10');
+        $pdf->SetXY($x, 5);
+        $pdf->Write(10, $factura['fc_factura_folio']);
+
+
         $pdf->SetFont('Arial', '', '9');
         $pdf->SetTextColor(0, 0, 0);
 
