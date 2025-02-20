@@ -143,13 +143,19 @@ class _pdf{
         $uso_cfdi = mb_convert_encoding($uso_cfdi, 'ISO-8859-1', 'UTF-8');
 
         $x = 33;
-        $pdf->SetXY($x, 53);
+
+
+        $pdf->SetXY($x, 52.3);
+        $pdf->Write(10, mb_convert_encoding($factura['com_cliente_razon_social'],'ISO-8859-1', 'UTF-8'));
+
+
+        $pdf->SetXY($x, 57.8);
         $pdf->Write(10, $factura['com_cliente_rfc']);
 
-        $pdf->SetXY($x, 57);
+        $pdf->SetXY($x, 62);
         $pdf->Write(10, $uso_cfdi);
 
-        $pdf->SetXY($x, 63.7);
+        $pdf->SetXY($x, 68.5);
         $domicilio_receptor = trim($factura['com_sucursal_calle']);
         $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_numero_exterior']);
         $domicilio_receptor = trim($domicilio_receptor).' '.trim($factura['com_sucursal_numero_interior']);
@@ -276,8 +282,10 @@ class _pdf{
         $this->montos(factura: $factura, pdf: $pdf);
         $this->sellos(data: $data, pdf: $pdf);
         if($ruta_qr !== '') {
-            $pdf->SetXY(10, 196);
-            $pdf->Image($ruta_qr,null,null,45,45,'png');
+            if(file_exists($ruta_logo)){
+                $pdf->SetXY(10, 196);
+                $pdf->Image($ruta_qr,null,null,45,45,'png');
+            }
         }
         if($ruta_logo !== '') {
             if(file_exists($ruta_logo)){
