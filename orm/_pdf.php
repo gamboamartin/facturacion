@@ -98,9 +98,10 @@ class _pdf{
     private function header(stdClass $data, array $factura, Fpdi $pdf): void
     {
 
-        $x = 154;
+        $x = 179;
         $pdf->SetFont('Arial', 'B', '10');
-        $pdf->SetXY($x, 5);
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetXY($x, 0);
         $pdf->Write(10, $factura['fc_factura_folio']);
 
 
@@ -119,6 +120,20 @@ class _pdf{
 
         $pdf->SetXY($x, 23);
         $pdf->Write(10, $factura['cat_sat_regimen_fiscal_codigo'].' '.$factura['cat_sat_regimen_fiscal_descripcion']);
+
+
+        if($factura['org_empresa_rfc'] === "FIN171207CKA") {
+            $pdf->SetXY($x, 31.5);
+            $dom = "Av. Vallarta 6503 - Int. C2, Col. Ciudad Granja,";
+            $dom .= "45010, Zapopan, Jalisco";
+            $pdf->MultiCell(60,3, $dom,0);
+
+            $pdf->SetXY($x, 40.5);
+            $tel = "+52 3338523986";
+            $pdf->MultiCell(60,3, $tel,0);
+
+        }
+
 
         $x = 140;
 
