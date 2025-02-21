@@ -328,34 +328,45 @@ class _pdf{
         $pdf->SetTextColor(255,255,255);
         $fmt = new NumberFormatter( 'es_MX', NumberFormatter::CURRENCY );
         $x = 172;
+        $y = 136;
 
         $fc_factura_sub_total = round($factura['fc_factura_sub_total'],2);
         $fc_factura_sub_total = $fmt->formatCurrency($fc_factura_sub_total, "MXN");
-        $pdf->SetXY($x, 134.5);
+        $pdf->SetXY($x, $y);
         $pdf->Write(10, $fc_factura_sub_total);
 
+        $y = $y+5.5;
+
+        $fc_factura_descuento = round($factura['fc_factura_descuento'],2);
+        $fc_factura_descuento = $fmt->formatCurrency($fc_factura_descuento, "MXN");
+        $pdf->SetXY($x, $y);
+        $pdf->Write(10, $fc_factura_descuento);
+
+        $y = $y+4.7;
 
         $fc_factura_total_traslados = round($factura['fc_factura_total_traslados'],2);
         $fc_factura_total_traslados = $fmt->formatCurrency($fc_factura_total_traslados, "MXN");
-        $pdf->SetXY($x, 140);
+        $pdf->SetXY($x, $y);
         $pdf->Write(10, $fc_factura_total_traslados);
-
-
-
-        $fc_factura_total_retenciones = round($factura['fc_factura_total_retenciones'],2);
-        $fc_factura_total_retenciones = $fmt->formatCurrency($fc_factura_total_retenciones, "MXN");
-        $pdf->SetXY($x, 146);
-        $pdf->Write(10, $fc_factura_total_retenciones);
+        $y = $y+5;
 
 
         $fc_factura_total_retenciones = round($factura['fc_factura_total_retenciones'],2);
         $fc_factura_total_retenciones = $fmt->formatCurrency($fc_factura_total_retenciones, "MXN");
-        $pdf->SetXY($x, 151.5);
+        $pdf->SetXY($x, $y);
         $pdf->Write(10, $fc_factura_total_retenciones);
 
+        $y = $y+5;
+
+        $fc_factura_total_retenciones = round($factura['fc_factura_total_retenciones'],2);
+        $fc_factura_total_retenciones = $fmt->formatCurrency($fc_factura_total_retenciones, "MXN");
+        $pdf->SetXY($x, $y);
+        $pdf->Write(10, $fc_factura_total_retenciones);
+
+        $y = $y+4.4;
         $fc_factura_total = round($factura['fc_factura_total'],2);
         $fc_factura_total = $fmt->formatCurrency($fc_factura_total, "MXN");
-        $pdf->SetXY($x, 156.5);
+        $pdf->SetXY($x, $y);
         $pdf->Write(10, $fc_factura_total);
 
         $pdf->SetTextColor(0,0,0);
@@ -373,7 +384,8 @@ class _pdf{
 
         $letra = strtoupper($letra);
         $x = 65;
-        $pdf->SetXY($x, 167);
+        $y = $y+12;
+        $pdf->SetXY($x, $y);
         $pdf->MultiCell(144,2, $letra,0,'R');
 
     }
