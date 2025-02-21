@@ -198,7 +198,8 @@ class _pdf{
         $pdf->Write(10, $factura['org_empresa_rfc']);
 
         $pdf->SetXY($x, 23);
-        $pdf->Write(10, $factura['cat_sat_regimen_fiscal_codigo'].' '.$factura['cat_sat_regimen_fiscal_descripcion']);
+        $regimen = mb_convert_encoding(trim($factura['cat_sat_regimen_fiscal_codigo'] . ' ' . $factura['cat_sat_regimen_fiscal_descripcion']), 'ISO-8859-1', 'UTF-8');
+        $pdf->Write(10, $regimen);
 
 
         if($factura['org_empresa_rfc'] === "FIN171207CKA") {
@@ -266,9 +267,10 @@ class _pdf{
         $domicilio_receptor = mb_convert_encoding($domicilio_receptor, 'ISO-8859-1', 'UTF-8');
         $pdf->MultiCell(72,5, $domicilio_receptor,0,'L');
 
-
-        $pdf->SetXY($x, 78.5);
-        $pdf->Write(10, $factura['cat_sat_regimen_fiscal_cliente_codigo'].' '.$factura['cat_sat_regimen_fiscal_cliente_descripcion']);
+        $reg = mb_convert_encoding($factura['cat_sat_regimen_fiscal_cliente_codigo'] . ' ' . $factura['cat_sat_regimen_fiscal_cliente_descripcion'], 'ISO-8859-1', 'UTF-8');
+        $reg = trim($reg);
+        $pdf->SetXY($x, 82);
+        $pdf->MultiCell(70,2.7, $reg);
 
     }
 
