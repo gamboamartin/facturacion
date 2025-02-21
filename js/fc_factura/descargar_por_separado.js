@@ -4,7 +4,7 @@ let registro_id = getParameterByName('registro_id');
 
 setTimeout(function(){
     window.close();
-}, 5000);
+}, 6000);
 
 
 
