@@ -18,6 +18,85 @@ class _pdf{
     }
 
 
+    private function numero_a_letras(float $numero, string $moneda = 'pesos', string $centavos = 'centavos'): string {
+        $unidades = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
+        $decenas = ['', 'diez', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+        $especiales = [11 => 'once', 12 => 'doce', 13 => 'trece', 14 => 'catorce', 15 => 'quince',
+            16 => 'dieciséis', 17 => 'diecisiete', 18 => 'dieciocho', 19 => 'diecinueve'];
+        $centenas = ['', 'cien', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos',
+            'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+
+        if ($numero < 0) {
+            return 'menos ' . $this->numero_a_letras(abs($numero), $moneda, $centavos);
+        }
+
+        $parte_entera = (int) $numero;
+        $parte_decimal = round(($numero - $parte_entera) * 100);
+
+        $texto = $this->convertir_mayores($parte_entera, $unidades, $decenas, $especiales, $centenas);
+
+        if ($texto == '') {
+            $texto = 'cero';
+        }
+
+        $resultado = ucfirst($texto) . " $moneda";
+
+        if ($parte_decimal > 0) {
+            $resultado .= " con " . $this->convertir_mayores($parte_decimal, $unidades, $decenas, $especiales, $centenas) . " $centavos";
+        }
+
+        return $resultado;
+    }
+
+    private function convertir_mayores($numero, $unidades, $decenas, $especiales, $centenas) {
+        if ($numero == 0) return '';
+
+        if ($numero < 1000) {
+            return $this->convertir_cientos($numero, $unidades, $decenas, $especiales, $centenas);
+        }
+
+        if ($numero < 1000000) {
+            $miles = (int) ($numero / 1000);
+            $resto = $numero % 1000;
+            $texto_miles = ($miles == 1) ? 'mil' : $this->convertir_cientos($miles, $unidades, $decenas, $especiales, $centenas) . ' mil';
+            return trim($texto_miles . ' ' . $this->convertir_cientos($resto, $unidades, $decenas, $especiales, $centenas));
+        }
+
+        if ($numero < 1000000000) {
+            $millones = (int) ($numero / 1000000);
+            $resto = $numero % 1000000;
+            $texto_millones = ($millones == 1) ? 'un millón' : $this->convertir_cientos($millones, $unidades, $decenas, $especiales, $centenas) . ' millones';
+            return trim($texto_millones . ' ' . $this->convertir_mayores($resto, $unidades, $decenas, $especiales, $centenas));
+        }
+
+        return 'Número demasiado grande';
+    }
+
+    function convertir_cientos($numero, $unidades, $decenas, $especiales, $centenas) {
+        if ($numero == 0) return '';
+
+        if ($numero < 10) {
+            return $unidades[$numero];
+        }
+
+        if ($numero < 20) {
+            return $especiales[$numero] ?? '';
+        }
+
+        if ($numero < 100) {
+            $unidad = $numero % 10;
+            return $decenas[(int) ($numero / 10)] . ($unidad ? ' y ' . $unidades[$unidad] : '');
+        }
+
+        if ($numero < 1000) {
+            $centena = (int) ($numero / 100);
+            $resto = $numero % 100;
+            return ($numero == 100) ? 'cien' : $centenas[$centena] . ($resto ? ' ' . $this->convertir_cientos($resto, $unidades, $decenas, $especiales, $centenas) : '');
+        }
+
+        return '';
+    }
+
 
     private function data_factura(stdClass $cfdi_sellado, string $name_entidad_sellado){
         $data = $this->data_init_limpio();
@@ -276,6 +355,25 @@ class _pdf{
         $fc_factura_total = $fmt->formatCurrency($fc_factura_total, "MXN");
         $pdf->SetXY($x, 156.5);
         $pdf->Write(10, $fc_factura_total);
+
+        $pdf->SetTextColor(0,0,0);
+        $fc_factura_total = round($factura['fc_factura_total'],2);
+
+
+        $formatterES = new NumberFormatter("es-ES", NumberFormatter::SPELLOUT);
+        $izquierda = intval(floor($fc_factura_total));
+        $derecha = intval(($fc_factura_total - floor($fc_factura_total)) * 100);
+        $letra = $formatterES->format($izquierda) . " pesos ";
+        if((float)$derecha === 0.0){
+            $derecha = '00';
+        }
+        $letra .= $derecha."/100 M.N.";
+
+        $letra = strtoupper($letra);
+        $x = 65;
+        $pdf->SetXY($x, 167);
+        $pdf->MultiCell(144,2, $letra,0,'R');
+
     }
 
     private function sellos(stdClass $data, Fpdi $pdf): void
