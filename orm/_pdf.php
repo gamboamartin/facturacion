@@ -383,6 +383,7 @@ class _pdf{
         $letra .= $derecha."/100 M.N.";
 
         $letra = strtoupper($letra);
+        $letra = mb_convert_encoding($letra, 'ISO-8859-1', 'UTF-8');
         $x = 65;
         $y = $y+12;
         $pdf->SetXY($x, $y);
