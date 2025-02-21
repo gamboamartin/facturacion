@@ -50,7 +50,6 @@ sl_com_sucursal.change(function () {
 
 ejecuciones_partida(entidad_factura,entidad_partida);
 
-
 btn_alta_partida.click(function () {
 
     let cantidad = txt_cantidad.val();
