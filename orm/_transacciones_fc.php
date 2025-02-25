@@ -282,6 +282,23 @@ class _transacciones_fc extends modelo
         return round($descuento + $descuento_nuevo, 2);
     }
 
+    private function concepto(stdClass $data_partida, stdClass $keys_part): stdClass
+    {
+        $concepto = new stdClass();
+        $concepto->clave_prod_serv = $data_partida->partida['cat_sat_producto_codigo'];
+        $concepto->cantidad = $data_partida->partida[$keys_part->cantidad];
+        $concepto->clave_unidad = $data_partida->partida['cat_sat_unidad_codigo'];
+        $concepto->descripcion = $data_partida->partida[$keys_part->descripcion];
+        $concepto->valor_unitario = number_format($data_partida->partida[$keys_part->valor_unitario], 2);
+        $concepto->importe = number_format($data_partida->partida[$keys_part->importe], 2);
+        $concepto->objeto_imp = $data_partida->partida['cat_sat_obj_imp_codigo'];
+        $concepto->no_identificacion = $data_partida->partida['com_producto_codigo'];
+        $concepto->unidad = $data_partida->partida['cat_sat_unidad_descripcion'];
+
+        return $concepto;
+
+    }
+
     /**
      * REG
      * Asigna la cuenta predial a un concepto si el producto lo requiere.
@@ -1422,26 +1439,19 @@ class _transacciones_fc extends modelo
             $registro['partidas'][$key]['traslados'] = $data_partida->traslados->registros;
             $registro['partidas'][$key]['retenidos'] = $data_partida->retenidos->registros;
 
-            $key_cantidad = $modelo_partida->tabla.'_cantidad';
-            $key_descripcion = $modelo_partida->tabla.'_descripcion';
-            $key_valor_unitario = $modelo_partida->tabla.'_valor_unitario';
-            $key_importe = $modelo_partida->tabla.'_sub_total_base';
-            $key_descuento = $modelo_partida->tabla.'_descuento';
 
-            $concepto = new stdClass();
-            $concepto->clave_prod_serv = $data_partida->partida['cat_sat_producto_codigo'];
-            $concepto->cantidad = $data_partida->partida[$key_cantidad];
-            $concepto->clave_unidad = $data_partida->partida['cat_sat_unidad_codigo'];
-            $concepto->descripcion = $data_partida->partida[$key_descripcion];
-            $concepto->valor_unitario = number_format($data_partida->partida[$key_valor_unitario], 2);
-            $concepto->importe = number_format($data_partida->partida[$key_importe], 2);
-            $concepto->objeto_imp = $data_partida->partida['cat_sat_obj_imp_codigo'];
-            $concepto->no_identificacion = $data_partida->partida['com_producto_codigo'];
-            $concepto->unidad = $data_partida->partida['cat_sat_unidad_descripcion'];
+            $keys_part = $this->keys_partida(modelo_partida: $modelo_partida);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener $keys_part', data: $keys_part);
+            }
 
 
+            $concepto = $this->concepto(data_partida: $data_partida,keys_part: $keys_part);
+            if (errores::$error) {
+                return $this->error->error(mensaje: 'Error al maquetar $concepto', data: $concepto);
+            }
 
-            $descuento = $this->descuento(data_partida: $data_partida,key_descuento:  $key_descuento);
+            $descuento = $this->descuento(data_partida: $data_partida,key_descuento:  $keys_part->descuento);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar descuento', data: $descuento);
             }
@@ -2010,6 +2020,25 @@ class _transacciones_fc extends modelo
     {
         $partida['cat_sat_producto_codigo'] = $partida['com_producto_codigo_sat'];
         return $partida;
+
+    }
+
+    private function keys_partida(_partida $modelo_partida): stdClass
+    {
+        $key_cantidad = $modelo_partida->tabla.'_cantidad';
+        $key_descripcion = $modelo_partida->tabla.'_descripcion';
+        $key_valor_unitario = $modelo_partida->tabla.'_valor_unitario';
+        $key_importe = $modelo_partida->tabla.'_sub_total_base';
+        $key_descuento = $modelo_partida->tabla.'_descuento';
+
+        $keys = new stdClass();
+        $keys->cantidad = $key_cantidad;
+        $keys->descripcion = $key_descripcion;
+        $keys->valor_unitario = $key_valor_unitario;
+        $keys->importe = $key_importe;
+        $keys->descuento = $key_descuento;
+
+        return $keys;
 
     }
 
