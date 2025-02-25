@@ -151,36 +151,107 @@ class _data_impuestos extends _base{
     }
 
     /**
-     * Obtiene los impuestos trasladados de una partida
-     * @param string $name_modelo_partida Nombre del modelo de tipo impuesto puede ser retenido traslado
-     * @param int $registro_partida_id partida
-     * @param array $columnas_by_table Obtiene las columnas solo de la tabla en ejecucion
-     * @param bool $columnas_en_bruto Obtiene las columnas de forma tal cual esta en base de datos
-     * @return array|stdClass|int
-     * @version 10.162.6
+     * REG
+     * Obtiene los datos de impuestos trasladados de una partida específica.
+     *
+     * Esta función busca en la base de datos los impuestos asociados a una partida,
+     * permitiendo especificar columnas específicas para la consulta y decidir
+     * si se deben obtener las columnas con su formato original en base de datos.
+     *
+     * @param string $name_modelo_partida Nombre del modelo de la partida (ejemplo: `fc_traslado`, `fc_retenido`).
+     * @param int $registro_partida_id Identificador de la partida. Debe ser mayor a 0.
+     * @param array $columnas_by_table (Opcional) Array con las columnas a seleccionar específicamente.
+     * @param bool $columnas_en_bruto (Opcional) Si `true`, devuelve los datos con las columnas tal como están en la base de datos.
+     *
+     * @return array|stdClass|int Retorna un `array` o `stdClass` con los datos de la partida encontrada.
+     *                            Si ocurre un error, devuelve un `array` con el formato de error.
+     *
+     * @throws array Si `$name_modelo_partida` está vacío, devuelve un array de error con el mensaje correspondiente.
+     * @throws array Si `$registro_partida_id` es menor o igual a 0, devuelve un array de error con los detalles.
+     * @throws array Si ocurre un error al ejecutar la consulta, devuelve un array de error con los detalles.
+     *
+     * @example
+     * // Ejemplo 1: Obtener datos de impuestos trasladados de una partida específica
+     * $name_modelo_partida = 'fc_traslado';
+     * $registro_partida_id = 120;
+     * $columnas_by_table = ['fc_traslado.id', 'fc_traslado.total'];
+     * $columnas_en_bruto = false;
+     *
+     * $resultado = $obj->_data_impuestos->get_data_rows(
+     *     name_modelo_partida: $name_modelo_partida,
+     *     registro_partida_id: $registro_partida_id,
+     *     columnas_by_table: $columnas_by_table,
+     *     columnas_en_bruto: $columnas_en_bruto
+     * );
+     * print_r($resultado);
+     *
+     * // Salida esperada:
+     * // array(
+     * //     'fc_traslado.id' => 120,
+     * //     'fc_traslado.total' => 500.00
+     * // )
+     *
+     * @example
+     * // Ejemplo 2: Manejo de error si el ID de la partida es inválido
+     * $name_modelo_partida = 'fc_traslado';
+     * $registro_partida_id = 0; // Error
+     *
+     * $resultado = $obj->_data_impuestos->get_data_rows(
+     *     name_modelo_partida: $name_modelo_partida,
+     *     registro_partida_id: $registro_partida_id
+     * );
+     *
+     * if (isset($resultado['error'])) {
+     *     echo "Error: " . $resultado['mensaje'];
+     * }
+     * // Salida esperada:
+     * // array(
+     * //     'error' => true,
+     * //     'mensaje' => 'Error registro_partida_id es menor a 0',
+     * //     'data' => 0
+     * // )
      */
-    final public function get_data_rows(string $name_modelo_partida, int $registro_partida_id,
-                                        array $columnas_by_table = array(), bool $columnas_en_bruto = false): array|stdClass|int
-    {
+    final public function get_data_rows(
+        string $name_modelo_partida,
+        int $registro_partida_id,
+        array $columnas_by_table = array(),
+        bool $columnas_en_bruto = false
+    ): array|stdClass|int {
 
         $name_modelo_partida = trim($name_modelo_partida);
-        if($name_modelo_partida === ''){
-            return $this->error->error(mensaje: 'Error name_modelo_partida esta inicializado',
-                data:  $name_modelo_partida);
+        if ($name_modelo_partida === '') {
+            return $this->error->error(
+                mensaje: 'Error name_modelo_partida esta inicializado',
+                data: $name_modelo_partida
+            );
         }
-        if($registro_partida_id <= 0){
-            return $this->error->error(mensaje: 'Error registro_partida_id es menor a 0', data:  $registro_partida_id);
+
+        if ($registro_partida_id <= 0) {
+            return $this->error->error(
+                mensaje: 'Error registro_partida_id es menor a 0',
+                data: $registro_partida_id
+            );
         }
-        $key_id = $name_modelo_partida.'.id';
-        $filtro[$key_id]  = $registro_partida_id;
-        $registro = $this->filtro_and(columnas_by_table: $columnas_by_table,
-            columnas_en_bruto: $columnas_en_bruto, filtro: $filtro);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener traslados',data:  $registro);
+
+        $key_id = $name_modelo_partida . '.id';
+        $filtro[$key_id] = $registro_partida_id;
+
+        $registro = $this->filtro_and(
+            columnas_by_table: $columnas_by_table,
+            columnas_en_bruto: $columnas_en_bruto,
+            filtro: $filtro
+        );
+
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obtener traslados',
+                data: $registro
+            );
         }
 
         return $registro;
     }
+
 
     private function init_del(int $id, _transacciones_fc $modelo_entidad, _etapa $modelo_etapa, _partida $modelo_partida){
         $traslado = $this->get_data_row(registro_id: $id);

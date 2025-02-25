@@ -85,38 +85,96 @@ class _comprobante{
     }
 
     /**
-     * Limpia un monto para dejarlo double
-     * @param string|int|float $monto Monto a limpiar
-     * @return array|string
+     * REG
+     * Limpia un monto dado eliminando espacios, comas y signos de dólar.
+     *
+     * Esta función recibe un valor numérico en formato `string`, `int` o `float`
+     * y lo limpia de caracteres innecesarios como espacios, comas y el signo `$`,
+     * dejándolo listo para ser procesado como un número en operaciones matemáticas.
+     *
+     * @param string|int|float $monto Monto a limpiar. Puede ser un número en formato string con caracteres especiales o un valor numérico sin formato.
+     * @return array|string Devuelve el monto en formato string sin espacios, comas ni símbolos de dólar.
+     *
+     * @example
+     * ```php
+     * $comprobante = new _comprobante();
+     * $monto_limpio = $comprobante->limpia_monto(" $1,234.56 ");
+     * // Resultado esperado: "1234.56"
+     *
+     * $monto_limpio = $comprobante->limpia_monto(9876.54);
+     * // Resultado esperado: "9876.54" (Sin cambios porque ya es un número válido)
+     *
+     * $monto_limpio = $comprobante->limpia_monto("5 000,75");
+     * // Resultado esperado: "5000.75"
+     * ```
+     *
      * @version 4.7.0
      */
     private function limpia_monto(string|int|float $monto): array|string
     {
+        // Elimina espacios en blanco al inicio y al final
         $monto = trim($monto);
+
+        // Elimina espacios intermedios
         $monto = str_replace(' ', '', $monto);
+
+        // Elimina comas de miles
         $monto = str_replace(',', '', $monto);
+
+        // Elimina el signo de dólar
         return str_replace('$', '', $monto);
     }
 
+
     /**
-     * Aplica formato a un monto ingresado
-     * @param string|int|float $monto Monto a dar formato
-     * @return string|array
+     * REG
+     * Aplica formato de dos decimales a un monto numérico.
+     *
+     * Esta función limpia un monto eliminando caracteres no numéricos y lo convierte
+     * en un número con dos decimales redondeados. Si el monto no es válido, devuelve un error.
+     *
+     * @param string|int|float $monto Monto a formatear. Puede ser un número en diferentes formatos (string, int o float).
+     * @return string|array Devuelve el monto en formato string con dos decimales o un array con error en caso de fallo.
+     *
+     * @example
+     * ```php
+     * $comprobante = new _comprobante();
+     * $monto_formateado = $comprobante->monto_dos_dec(" 1,234.567 ");
+     * // Resultado esperado: "1234.57"
+     *
+     * $monto_formateado = $comprobante->monto_dos_dec(100);
+     * // Resultado esperado: "100.00"
+     *
+     * $monto_formateado = $comprobante->monto_dos_dec("$9,876.5");
+     * // Resultado esperado: "9876.50"
+     *
+     * $monto_formateado = $comprobante->monto_dos_dec("texto");
+     * // Resultado esperado: ['error' => true, 'mensaje' => 'Error el monto no es un número', 'data' => 'texto']
+     * ```
+     *
      * @version 4.9.0
      */
     final public function monto_dos_dec(string|int|float $monto): string|array
     {
+        // Limpia el monto eliminando espacios, comas y el signo de dólar
         $monto = $this->limpia_monto(monto: $monto);
+
+        // Verifica si hubo un error en la limpieza
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al limpiar monto', data: $monto);
         }
 
+        // Verifica si el monto es numérico
         if(!is_numeric($monto)){
-            return $this->error->error(mensaje: 'Error al monto no es un numero', data: $monto);
+            return $this->error->error(mensaje: 'Error el monto no es un número', data: $monto);
         }
 
-        $monto = round($monto,2);
-        return number_format($monto,2,'.','');
+        // Redondea el monto a dos decimales
+        $monto = round($monto, 2);
+
+        // Formatea el número con dos decimales y punto decimal
+        return number_format($monto, 2, '.', '');
     }
+
 
 }

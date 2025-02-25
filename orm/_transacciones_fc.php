@@ -282,16 +282,111 @@ class _transacciones_fc extends modelo
         return round($descuento + $descuento_nuevo, 2);
     }
 
-    private function cuenta_predial(stdClass $concepto, _cuenta_predial $modelo_predial, array $partida, int $registro_id){
+    /**
+     * REG
+     * Asigna la cuenta predial a un concepto si el producto lo requiere.
+     *
+     * Esta función verifica si un producto dentro de una partida requiere cuenta predial y,
+     * en caso afirmativo, obtiene y asigna el número de cuenta predial correspondiente.
+     *
+     * @param stdClass $concepto Objeto del concepto en el cual se asignará la cuenta predial si aplica.
+     *        Ejemplo de objeto `$concepto` antes de la asignación:
+     *        ```php
+     *        $concepto = new stdClass();
+     *        $concepto->descripcion = "Terreno en venta";
+     *        ```
+     *
+     * @param _cuenta_predial $modelo_predial Modelo de cuenta predial utilizado para la consulta.
+     *        Ejemplo de instancia:
+     *        ```php
+     *        $modelo_predial = new _cuenta_predial($db);
+     *        ```
+     *
+     * @param array $partida Datos de la partida, que deben incluir el campo `com_producto_aplica_predial`.
+     *        Ejemplo válido:
+     *        ```php
+     *        $partida = [
+     *            'com_producto_aplica_predial' => 'activo',
+     *            'producto' => 'Terreno'
+     *        ];
+     *        ```
+     *        Ejemplo inválido (No aplica predial):
+     *        ```php
+     *        $partida = [
+     *            'com_producto_aplica_predial' => 'inactivo'
+     *        ];
+     *        ```
+     *
+     * @param int $registro_id Identificador del registro en la base de datos. Debe ser mayor a 0.
+     *        Ejemplo válido:
+     *        ```php
+     *        $registro_id = 123;
+     *        ```
+     *        Ejemplo inválido:
+     *        ```php
+     *        $registro_id = 0; // Retornará un error
+     *        ```
+     *
+     * @return stdClass|array Devuelve el objeto `$concepto` con la cuenta predial asignada si aplica.
+     *         Si ocurre un error, se devuelve un array con la estructura del error.
+     *
+     *         Ejemplo de retorno exitoso:
+     *         ```php
+     *         stdClass Object (
+     *             [descripcion] => "Terreno en venta"
+     *             [cuenta_predial] => "1234567890"
+     *         )
+     *         ```
+     *
+     *         Ejemplo de error:
+     *         ```php
+     *         Array (
+     *             [error] => true
+     *             [mensaje] => "Error al obtener cuenta predial"
+     *             [data] => Array(...)
+     *         )
+     *         ```
+     *
+     * @throws errores Si `$registro_id` es menor o igual a 0.
+     * @throws errores Si hay errores al obtener la cuenta predial.
+     */
+    private function cuenta_predial(
+        stdClass $concepto, _cuenta_predial $modelo_predial, array $partida, int $registro_id): array|stdClass
+    {
+
+        // Validar que el ID del registro sea mayor a 0
+        if ($registro_id <= 0) {
+            return $this->error->error(
+                mensaje: "Error: el registro_id debe ser mayor a 0",
+                data: $registro_id,
+                es_final: true
+            );
+        }
+
+        // Verificar si el producto en la partida requiere cuenta predial
         if(isset($partida['com_producto_aplica_predial']) && $partida['com_producto_aplica_predial'] === 'activo'){
-            $fc_cuenta_predial_numero = $this->fc_cuenta_predial_numero(modelo_predial: $modelo_predial,registro_id:  $registro_id);
+
+            // Obtener el número de cuenta predial del registro
+            $fc_cuenta_predial_numero = $this->fc_cuenta_predial_numero(
+                modelo_predial: $modelo_predial,
+                registro_id:  $registro_id
+            );
+
+            // Manejo de errores si la cuenta predial no pudo obtenerse
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al obtener cuenta predial', data: $fc_cuenta_predial_numero);
+                return $this->error->error(
+                    mensaje: 'Error al obtener cuenta predial',
+                    data: $fc_cuenta_predial_numero
+                );
             }
+
+            // Asignar la cuenta predial al concepto
             $concepto->cuenta_predial = $fc_cuenta_predial_numero;
         }
+
         return $concepto;
     }
+
 
     protected function data_factura(array $row_entidad): array|stdClass
     {
@@ -373,20 +468,118 @@ class _transacciones_fc extends modelo
         return $data;
     }
 
-    private function data_partida(_partida $modelo_partida, _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado, array $partida){
-        $imp_partida = $this->get_impuestos_partida(modelo_partida: $modelo_partida,
-            modelo_retencion:  $modelo_retencion,modelo_traslado:  $modelo_traslado,partida:  $partida);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener el impuestos de la partida', data: $imp_partida);
+    /**
+     * REG
+     * Procesa la información de una partida y obtiene sus impuestos.
+     *
+     * Esta función valida la existencia de una partida en los datos proporcionados,
+     * obtiene los impuestos trasladados y retenidos asociados a la misma y, finalmente,
+     * integra los datos temporales del producto en la partida.
+     *
+     * @param _partida $modelo_partida Instancia del modelo que representa una partida.
+     *                                 Contiene información clave como el identificador único de la partida (`key_id`).
+     *
+     * @param _data_impuestos $modelo_retencion Modelo encargado de gestionar los impuestos retenidos aplicables a la partida.
+     *
+     * @param _data_impuestos $modelo_traslado Modelo encargado de gestionar los impuestos trasladados aplicables a la partida.
+     *
+     * @param array $partida Datos de la partida, que deben contener al menos la clave identificadora (`$modelo_partida->key_id`).
+     *                       Ejemplo de estructura esperada:
+     *                       ```php
+     *                       [
+     *                           'partida_id' => 101,
+     *                           'descripcion' => 'Producto ABC',
+     *                           'precio' => 500.00
+     *                       ]
+     *                       ```
+     *
+     * @return stdClass|array Retorna un objeto `stdClass` con la información de los impuestos
+     *                        (`traslados` y `retenidos`) y los datos de la partida (`partida`).
+     *
+     *                        En caso de error, retorna un array con un mensaje descriptivo y los datos asociados al error.
+     *
+     * @throws errores En caso de que no exista el identificador de la partida o haya un fallo en la obtención de impuestos.
+     *
+     * @example
+     * ```php
+     * $modelo_partida = new _partida();
+     * $modelo_partida->key_id = 'partida_id';
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $modelo_retencion = new _data_impuestos();
+     * $modelo_traslado = new _data_impuestos();
+     *
+     * $partida = [
+     *     'partida_id' => 101,
+     *     'descripcion' => 'Producto ABC',
+     *     'precio' => 500.00
+     * ];
+     *
+     * $resultado = $this->data_partida(
+     *     modelo_partida: $modelo_partida,
+     *     modelo_retencion: $modelo_retencion,
+     *     modelo_traslado: $modelo_traslado,
+     *     partida: $partida
+     * );
+     *
+     * // Salida esperada:
+     * // stdClass Object
+     * // (
+     * //     [traslados] => Array ( ... impuestos trasladados ... )
+     * //     [retenidos] => Array ( ... impuestos retenidos ... )
+     * //     [partida] => Array ( 'partida_id' => 101, 'descripcion' => 'Producto ABC', 'precio' => 500.00, ... )
+     * // )
+     * ```
+     */
+    private function data_partida(
+        _partida $modelo_partida,
+        _data_impuestos $modelo_retencion,
+        _data_impuestos $modelo_traslado,
+        array $partida
+    ): array|stdClass
+    {
+        // Verifica que la clave identificadora de la partida exista en el array $partida
+        if (!isset($partida[$modelo_partida->key_id])) {
+            return $this->error->error(
+                mensaje: 'Error $partida[$modelo_partida->key_id] no existe '.$modelo_partida->key_id,
+                data: $partida,
+                es_final: true
+            );
         }
 
-        $partida = $this->integra_producto_tmp(partida: $partida);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al integrar producto temporal', data: $partida);
+        // Obtiene los impuestos trasladados y retenidos de la partida
+        $imp_partida = $this->get_impuestos_partida(
+            modelo_partida: $modelo_partida,
+            modelo_retencion:  $modelo_retencion,
+            modelo_traslado:  $modelo_traslado,
+            partida:  $partida
+        );
+
+        // Manejo de error en la obtención de impuestos
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obtener los impuestos de la partida',
+                data: $imp_partida
+            );
         }
+
+        // Integra los datos temporales del producto a la partida
+        $partida = $this->integra_producto_tmp(partida: $partida);
+
+        // Manejo de error en la integración del producto temporal
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al integrar producto temporal',
+                data: $partida
+            );
+        }
+
+        // Agrega la información de la partida al objeto de impuestos
         $imp_partida->partida = $partida;
+
         return $imp_partida;
     }
+
 
     /**
      * Inicializa los datos del emisor para alta
@@ -485,18 +678,103 @@ class _transacciones_fc extends modelo
         return $descripcion_select;
     }
 
-    private function descuento(stdClass $data_partida, string $key_descuento){
+    /**
+     * REG
+     * Calcula y formatea el descuento de una partida específica.
+     *
+     * Esta función toma un objeto `stdClass` que contiene los datos de una partida y
+     * una clave (`$key_descuento`) que representa el campo del descuento dentro de la
+     * estructura de datos. Si la clave existe en `$data_partida->partida`, obtiene su
+     * valor y lo formatea con dos decimales mediante `_comprobante::monto_dos_dec()`.
+     *
+     * Si la clave no existe, se asume un descuento de `0.0`. Si ocurre algún error en
+     * el proceso, se maneja a través del sistema de errores de la clase.
+     *
+     * ### Ejemplo de estructura esperada en `$data_partida`
+     * ```php
+     * $data_partida = new stdClass();
+     * $data_partida->partida = [
+     *     'descuento' => 15.756
+     * ];
+     * ```
+     *
+     * ### Ejemplo de uso:
+     * ```php
+     * $data_partida = new stdClass();
+     * $data_partida->partida = [
+     *     'descuento' => 15.756
+     * ];
+     *
+     * $descuento = $this->descuento($data_partida, 'descuento');
+     * echo $descuento; // Salida esperada: 15.76
+     * ```
+     *
+     * @param stdClass $data_partida Objeto que contiene los datos de la partida.
+     *                                Ejemplo:
+     * ```php
+     * $data_partida = new stdClass();
+     * $data_partida->partida = [
+     *     'descuento' => 20.256
+     * ];
+     * ```
+     *
+     * @param string $key_descuento Clave del array `partida` donde se encuentra el valor del descuento.
+     *                              Debe ser un string no vacío.
+     *                              Ejemplo de un valor válido: `'descuento'`
+     *
+     * @return float|array Devuelve el valor del descuento formateado con dos decimales.
+     *                     Si ocurre un error, devuelve un array con el mensaje de error.
+     *
+     * ### Ejemplo de retorno esperado:
+     * ```php
+     * 12.75 // Si el valor original era 12.748
+     * ```
+     *
+     * ### Ejemplo de retorno en caso de error:
+     * ```php
+     * [
+     *     'error' => true,
+     *     'mensaje' => 'Error al maquetar descuento',
+     *     'data' => 0.0
+     * ]
+     * ```
+     */
+    private function descuento(stdClass $data_partida, string $key_descuento): float|array
+    {
+        // Elimina espacios en blanco en la clave del descuento
+        $key_descuento = trim($key_descuento);
+
+        // Validación: La clave del descuento no debe estar vacía
+        if ($key_descuento === '') {
+            return $this->error->error(
+                mensaje: 'Error $key_descuento está vacío',
+                data: $key_descuento,
+                es_final: true
+            );
+        }
+
+        // Valor por defecto del descuento
         $descuento = 0.0;
-        if(isset($data_partida->partida[$key_descuento])){
+
+        // Verifica si la clave del descuento está definida en la partida
+        if (isset($data_partida->partida[$key_descuento])) {
             $descuento = $data_partida->partida[$key_descuento];
         }
 
+        // Formatear el monto del descuento con dos decimales
         $descuento = (new _comprobante())->monto_dos_dec(monto: $descuento);
+
+        // Validación de errores después del formateo
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al maquetar descuento', data: $descuento);
+            return $this->error->error(
+                mensaje: 'Error al maquetar descuento',
+                data: $descuento
+            );
         }
+
         return $descuento;
     }
+
 
     /**
      * Obtiene y redondea un descuento de una partida
@@ -742,15 +1020,80 @@ class _transacciones_fc extends modelo
         return trim($fc_csd['fc_csd_serie']);
     }
 
-    private function fc_cuenta_predial_numero(_cuenta_predial $modelo_predial, int $registro_id){
-        $r_fc_cuenta_predial = $this->r_fc_cuenta_predial(modelo_predial: $modelo_predial,
-            registro_id:  $registro_id);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener cuenta predial', data: $r_fc_cuenta_predial);
+    /**
+     * REG
+     * Obtiene el número de cuenta predial asociado a un registro específico.
+     *
+     * Esta función consulta la cuenta predial asociada a un registro en la base de datos
+     * y retorna su número. Valida que el `$registro_id` sea mayor a 0 y se asegura de que
+     * la cuenta predial esté correctamente registrada.
+     *
+     * @param _cuenta_predial $modelo_predial Modelo de cuenta predial utilizado para la consulta.
+     *        Ejemplo de instancia:
+     *        ```php
+     *        $modelo_predial = new _cuenta_predial($db);
+     *        ```
+     * @param int $registro_id Identificador del registro en la base de datos.
+     *        Debe ser un número entero mayor a 0.
+     *        Ejemplo válido:
+     *        ```php
+     *        $registro_id = 123;
+     *        ```
+     *        Ejemplo inválido:
+     *        ```php
+     *        $registro_id = 0; // Retornará un error
+     *        ```
+     *
+     * @return string|array Retorna el número de cuenta predial en caso de éxito, o un array con los detalles del error en caso de falla.
+     *         Ejemplo de respuesta exitosa:
+     *         ```php
+     *         "1234567890"
+     *         ```
+     *         Ejemplo de error:
+     *         ```php
+     *         Array (
+     *             [error] => true
+     *             [mensaje] => "Error al obtener cuenta predial"
+     *             [data] => stdClass Object ( [n_registros] => 0 )
+     *         )
+     *         ```
+     *
+     * @throws errores Si el `$registro_id` es menor o igual a 0.
+     * @throws errores Si hay errores al obtener la cuenta predial.
+     */
+    private function fc_cuenta_predial_numero(_cuenta_predial $modelo_predial, int $registro_id): array|string
+    {
+
+        // Validar que el ID del registro sea mayor a 0
+        if ($registro_id <= 0) {
+            return $this->error->error(
+                mensaje: "Error: el registro_id debe ser mayor a 0",
+                data: $registro_id,
+                es_final: true
+            );
         }
-        $key_cuenta_predial_descripcion = $modelo_predial->tabla.'_descripcion';
+
+        // Obtener la cuenta predial asociada al registro
+        $r_fc_cuenta_predial = $this->r_fc_cuenta_predial(
+            modelo_predial: $modelo_predial,
+            registro_id: $registro_id
+        );
+
+        // Verificar si hubo un error en la consulta
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obtener cuenta predial',
+                data: $r_fc_cuenta_predial
+            );
+        }
+
+        // Obtener la clave de la cuenta predial en el resultado
+        $key_cuenta_predial_descripcion = $modelo_predial->tabla . '_descripcion';
+
+        // Retornar el número de cuenta predial
         return $r_fc_cuenta_predial->registros[0][$key_cuenta_predial_descripcion];
     }
+
 
 
 
@@ -1118,15 +1461,17 @@ class _transacciones_fc extends modelo
                 return $this->error->error(mensaje: 'Error al maquetar traslados', data: $impuestos);
             }
 
-            $trs_global = (new _impuestos())->impuestos_globales(impuestos: $data_partida->traslados, global_imp: $trs_global,
-                key_importe: $key_traslado_importe, name_tabla_partida: $modelo_partida->tabla);
+            $trs_global = (new _impuestos())->impuestos_globales(
+                impuestos: $data_partida->traslados, global_imp: $trs_global, key_importe: $key_traslado_importe,
+                name_tabla_partida: $modelo_partida->tabla);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $trs_global);
             }
 
             $key_retenido_importe = $modelo_retencion->tabla.'_importe';
-            $ret_global = (new _impuestos())->impuestos_globales(impuestos: $data_partida->retenidos, global_imp: $ret_global,
-                key_importe: $key_retenido_importe, name_tabla_partida: $modelo_partida->tabla);
+            $ret_global = (new _impuestos())->impuestos_globales(
+                impuestos: $data_partida->retenidos, global_imp: $ret_global, key_importe: $key_retenido_importe,
+                name_tabla_partida: $modelo_partida->tabla);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $ret_global);
             }
@@ -1304,25 +1649,120 @@ class _transacciones_fc extends modelo
         return round($fc_factura->$key_total,2);
     }
 
-    private function get_impuestos_partida(_partida $modelo_partida,_data_impuestos $modelo_retencion,
-                                           _data_impuestos $modelo_traslado, array $partida){
-
-        $traslados = $modelo_traslado->get_data_rows(name_modelo_partida: $modelo_partida->tabla,
-            registro_partida_id: $partida[$modelo_partida->key_id]);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener el traslados de la partida', data: $traslados);
+    /**
+     * REG
+     * Obtiene los impuestos asociados a una partida específica.
+     *
+     * Esta función recupera los impuestos trasladados y retenidos de una partida determinada
+     * dentro de una factura o transacción, utilizando modelos especializados de impuestos.
+     *
+     * @param _partida $modelo_partida Instancia del modelo que representa una partida.
+     *                                 Contiene información clave como el identificador único de la partida (`key_id`).
+     *
+     * @param _data_impuestos $modelo_retencion Modelo encargado de gestionar los impuestos retenidos aplicables a la partida.
+     *
+     * @param _data_impuestos $modelo_traslado Modelo encargado de gestionar los impuestos trasladados aplicables a la partida.
+     *
+     * @param array $partida Datos de la partida, que deben contener al menos la clave identificadora (`$modelo_partida->key_id`).
+     *                       Ejemplo de estructura esperada:
+     *                       ```php
+     *                       [
+     *                           'partida_id' => 101,
+     *                           'descripcion' => 'Producto XYZ',
+     *                           'precio' => 500.00
+     *                       ]
+     *                       ```
+     *
+     * @return stdClass|array Retorna un objeto `stdClass` con las propiedades:
+     *                        - `traslados` (array): Contiene los impuestos trasladados de la partida.
+     *                        - `retenidos` (array): Contiene los impuestos retenidos de la partida.
+     *
+     *                        En caso de error, retorna un array con un mensaje descriptivo y los datos asociados al error.
+     *
+     * @throws errores En caso de que no exista el identificador de la partida o haya un fallo en la obtención de impuestos.
+     *
+     * @example
+     * ```php
+     * $modelo_partida = new _partida();
+     * $modelo_partida->key_id = 'partida_id';
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $modelo_retencion = new _data_impuestos();
+     * $modelo_traslado = new _data_impuestos();
+     *
+     * $partida = [
+     *     'partida_id' => 101,
+     *     'descripcion' => 'Producto XYZ',
+     *     'precio' => 500.00
+     * ];
+     *
+     * $resultado = $this->get_impuestos_partida(
+     *     modelo_partida: $modelo_partida,
+     *     modelo_retencion: $modelo_retencion,
+     *     modelo_traslado: $modelo_traslado,
+     *     partida: $partida
+     * );
+     *
+     * // Salida esperada:
+     * // stdClass Object
+     * // (
+     * //     [traslados] => Array ( ... impuestos trasladados ... )
+     * //     [retenidos] => Array ( ... impuestos retenidos ... )
+     * // )
+     * ```
+     */
+    private function get_impuestos_partida(
+        _partida $modelo_partida,
+        _data_impuestos $modelo_retencion,
+        _data_impuestos $modelo_traslado,
+        array $partida
+    ): array|stdClass
+    {
+        // Verifica que la clave identificadora de la partida exista en el array $partida
+        if (!isset($partida[$modelo_partida->key_id])) {
+            return $this->error->error(
+                mensaje: 'Error $partida[$modelo_partida->key_id] no existe '.$modelo_partida->key_id,
+                data: $partida,
+                es_final: true
+            );
         }
 
-        $retenidos = $modelo_retencion->get_data_rows(name_modelo_partida: $modelo_partida->tabla,
-            registro_partida_id: $partida[$modelo_partida->key_id]);
+        // Obtiene los impuestos trasladados asociados a la partida
+        $traslados = $modelo_traslado->get_data_rows(
+            name_modelo_partida: $modelo_partida->tabla,
+            registro_partida_id: $partida[$modelo_partida->key_id]
+        );
+
+        // Manejo de error en la obtención de impuestos trasladados
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener el retenidos de la partida', data: $retenidos);
+            return $this->error->error(
+                mensaje: 'Error al obtener el traslados de la partida',
+                data: $traslados
+            );
         }
+
+        // Obtiene los impuestos retenidos asociados a la partida
+        $retenidos = $modelo_retencion->get_data_rows(
+            name_modelo_partida: $modelo_partida->tabla,
+            registro_partida_id: $partida[$modelo_partida->key_id]
+        );
+
+        // Manejo de error en la obtención de impuestos retenidos
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obtener el retenidos de la partida',
+                data: $retenidos
+            );
+        }
+
+        // Retorna los impuestos de la partida en un objeto estándar
         $data = new stdClass();
         $data->traslados = $traslados;
         $data->retenidos = $retenidos;
+
         return $data;
     }
+
 
     /**
      * Obtiene las partidas de una factura
@@ -1390,15 +1830,75 @@ class _transacciones_fc extends modelo
         return $documento;
     }
 
+    /**
+     * REG
+     * Inicializa la estructura de impuestos dentro de un concepto.
+     *
+     * Esta función establece la estructura básica de impuestos en un objeto `stdClass`
+     * que representa un concepto. Agrega un array `impuestos` en el objeto de concepto,
+     * y dentro de él, define una estructura con índices para `traslados` y `retenciones`,
+     * ambos inicializados como arrays vacíos.
+     *
+     * Esta estructura se utiliza para manejar los impuestos trasladados y retenidos en
+     * un concepto dentro de una factura o documento contable.
+     *
+     * ### Ejemplo de estructura de entrada:
+     * ```php
+     * $concepto = new stdClass();
+     * ```
+     *
+     * ### Ejemplo de uso:
+     * ```php
+     * $concepto = new stdClass();
+     * $concepto = $this->inicializa_impuestos_de_concepto($concepto);
+     * print_r($concepto);
+     * ```
+     *
+     * ### Salida esperada:
+     * ```php
+     * stdClass Object
+     * (
+     *     [impuestos] => Array
+     *         (
+     *             [0] => stdClass Object
+     *                 (
+     *                     [traslados] => Array()
+     *                     [retenciones] => Array()
+     *                 )
+     *         )
+     * )
+     * ```
+     *
+     * @param stdClass $concepto Objeto del concepto al que se le agregará la estructura de impuestos.
+     *                           Ejemplo antes de la inicialización:
+     * ```php
+     * $concepto = new stdClass();
+     * ```
+     *
+     * @return stdClass Devuelve el mismo objeto `$concepto` con la estructura de impuestos inicializada.
+     *
+     * ### Ejemplo de retorno:
+     * ```php
+     * $concepto->impuestos[0]->traslados = [];
+     * $concepto->impuestos[0]->retenciones = [];
+     * ```
+     */
     private function inicializa_impuestos_de_concepto(stdClass $concepto): stdClass
     {
+        // Inicializa la propiedad impuestos como un array vacío en el concepto
         $concepto->impuestos = array();
+
+        // Agrega una estructura de impuestos en el primer índice del array
         $concepto->impuestos[0] = new stdClass();
+
+        // Inicializa las propiedades traslados y retenciones como arrays vacíos
         $concepto->impuestos[0]->traslados = array();
         $concepto->impuestos[0]->retenciones = array();
-        return $concepto;
 
+        // Retorna el objeto concepto con la estructura de impuestos inicializada
+        return $concepto;
     }
+
 
     /**
      * Inicializa los datos de un registro
@@ -1553,27 +2053,71 @@ class _transacciones_fc extends modelo
 
 
     /**
-     * POR DOCUMENTAR EN WIKI
-     * Limpia los campos `tasa_o_cuota` y `importe` del elemento de array `traslados`
-     * con el índice proporcionado en `$indice`.
+     * REG
+     * Elimina los valores de "tasa_o_cuota" e "importe" de un traslado específico en el registro.
      *
-     * @param string $indice Índice del elemento del array `traslados` que será procesado.
-     * @param array $registro Array que contiene los elementos `traslados`.
+     * Esta función toma un índice y un array de registro, y elimina los valores de "tasa_o_cuota"
+     * e "importe" del traslado correspondiente al índice indicado dentro del array `traslados`.
+     * Se utiliza para limpiar información en caso de exención de impuestos.
      *
-     * @return array Retorna el array `$registro` modificado.
+     * @param string $indice Índice del traslado dentro del array `traslados`. Debe ser mayor o igual a 0.
+     *        Ejemplo válido:
+     *        ```php
+     *        $indice = "0";
+     *        ```
+     *        Ejemplo inválido:
+     *        ```php
+     *        $indice = "-1"; // Retornará un error
+     *        ```
      *
-     * @throws errores Si `$indice` es menor a 0, se lanza una excepción "Error indice debe ser mayor igual a 0".
-     * @version 23.2.0
+     * @param array $registro Array que contiene la información de traslados.
+     *        Ejemplo válido:
+     *        ```php
+     *        $registro = [
+     *            'traslados' => [
+     *                0 => (object) [
+     *                    'tasa_o_cuota' => 0.16,
+     *                    'importe' => 160.00,
+     *                    'impuesto' => 'IVA'
+     *                ]
+     *            ]
+     *        ];
+     *        ```
+     *
+     * @return array Devuelve el array `$registro` con los valores `tasa_o_cuota` e `importe`
+     *         eliminados en el traslado indicado por `$indice`.
+     *
+     *         Ejemplo de retorno:
+     *         ```php
+     *         [
+     *             'traslados' => [
+     *                 0 => (object) [
+     *                     'impuesto' => 'IVA'
+     *                 ]
+     *             ]
+     *         ]
+     *         ```
+     *
+     * @throws errores Si `$indice` es menor a 0.
+     * @throws errores Si `$registro['traslados'][$indice]` no existe.
      */
     private function limpia_traslado_exento(string $indice, array $registro): array
     {
-        if($indice<0){
-            return $this->error->error(mensaje: 'Error indice debe ser mayor igual a 0', data: $indice);
+        // Validar que el índice sea mayor o igual a 0
+        if ($indice < 0) {
+            return $this->error->error(
+                mensaje: 'Error: el índice debe ser mayor o igual a 0',
+                data: $indice,es_final: true
+            );
         }
+
+        // Eliminar los valores específicos del traslado indicado
         unset($registro['traslados'][$indice]->tasa_o_cuota);
         unset($registro['traslados'][$indice]->importe);
+
         return $registro;
     }
+
 
     /**
      * Modifica un registro de tipo factura nota de credito o complemento de pago
@@ -1704,19 +2248,100 @@ class _transacciones_fc extends modelo
         return $permite_transaccion;
     }
 
-    private function r_fc_cuenta_predial(_cuenta_predial $modelo_predial, int $registro_id){
-        $r_fc_cuenta_predial = $modelo_predial->filtro_and(filtro: array($this->key_filtro_id=>$registro_id));
+    /**
+     * REG
+     * Obtiene la cuenta predial asociada a un registro específico.
+     *
+     * Esta función consulta la cuenta predial asociada a un registro en la base de datos.
+     * Valida que el registro ID sea mayor a 0 y que exista exactamente una cuenta predial asociada.
+     * En caso de error o inconsistencia, retorna un mensaje de error detallado.
+     *
+     * @param _cuenta_predial $modelo_predial Modelo de cuenta predial utilizado para la consulta.
+     *        Ejemplo:
+     *        ```php
+     *        $modelo_predial = new _cuenta_predial($db);
+     *        ```
+     * @param int $registro_id Identificador del registro en la base de datos.
+     *        Debe ser un número entero mayor a 0.
+     *        Ejemplo válido:
+     *        ```php
+     *        $registro_id = 123;
+     *        ```
+     *        Ejemplo inválido:
+     *        ```php
+     *        $registro_id = -5; // Retornará un error
+     *        ```
+     *
+     * @return array|stdClass Retorna un objeto con la información de la cuenta predial si es exitosa,
+     *         o un array con los detalles del error en caso de falla.
+     *         Ejemplo de respuesta exitosa:
+     *         ```php
+     *         stdClass Object (
+     *             [n_registros] => 1
+     *             [registros] => Array (
+     *                 [0] => Array (
+     *                     [id] => 123
+     *                     [cuenta_predial] => "1234567890"
+     *                 )
+     *             )
+     *         )
+     *         ```
+     *         Ejemplo de error:
+     *         ```php
+     *         Array (
+     *             [error] => true
+     *             [mensaje] => "Error no existe predial asignado"
+     *             [data] => stdClass Object ( [n_registros] => 0 )
+     *         )
+     *         ```
+     *
+     * @throws errores Si el `$registro_id` es menor o igual a 0.
+     * @throws errores Si existen múltiples registros asociados al mismo `$registro_id`.
+     * @throws errores Si ocurre un error en la consulta de la cuenta predial.
+     */
+    private function r_fc_cuenta_predial(_cuenta_predial $modelo_predial, int $registro_id): array|stdClass
+    {
+        // Validar que el ID del registro sea mayor a 0
+        if ($registro_id <= 0) {
+            return $this->error->error(
+                mensaje: "Error: el registro_id debe ser mayor a 0",
+                data: $registro_id,
+                es_final: true
+            );
+        }
+
+        // Consultar la cuenta predial asociada al registro
+        $r_fc_cuenta_predial = $modelo_predial->filtro_and(filtro: array($this->key_filtro_id => $registro_id));
+
+        // Verificar si hubo un error en la consulta
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener cuenta predial', data: $r_fc_cuenta_predial);
+            return $this->error->error(
+                mensaje: "Error al obtener cuenta predial",
+                data: $r_fc_cuenta_predial
+            );
         }
-        if($r_fc_cuenta_predial->n_registros === 0){
-            return $this->error->error(mensaje: 'Error no existe predial asignado', data: $r_fc_cuenta_predial);
+
+        // Validar que haya exactamente un registro de cuenta predial
+        if ($r_fc_cuenta_predial->n_registros === 0) {
+            return $this->error->error(
+                mensaje: "Error: no existe cuenta predial asignada",
+                data: $r_fc_cuenta_predial,
+                es_final: true
+            );
         }
-        if($r_fc_cuenta_predial->n_registros > 1){
-            return $this->error->error(mensaje: 'Error de integridad en predial', data: $r_fc_cuenta_predial);
+
+        if ($r_fc_cuenta_predial->n_registros > 1) {
+            return $this->error->error(
+                mensaje: "Error de integridad: más de una cuenta predial asignada",
+                data: $r_fc_cuenta_predial,
+                es_final: true
+            );
         }
+
+        // Retornar la cuenta predial encontrada
         return $r_fc_cuenta_predial;
     }
+
 
 
     private function receptor(array $row_entidad): array
