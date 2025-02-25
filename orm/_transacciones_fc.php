@@ -23,6 +23,7 @@ use gamboamartin\plugins\files;
 use gamboamartin\proceso\models\pr_proceso;
 use gamboamartin\xml_cfdi_4\cfdis;
 use gamboamartin\xml_cfdi_4\timbra;
+use orm\modelo_impuestos;
 use PDO;
 use stdClass;
 
@@ -1137,6 +1138,41 @@ class _transacciones_fc extends modelo
         return "$entidad_partida AS $base LEFT JOIN $tipo_impuesto ON $tipo_impuesto.$key_id = $base.id";
     }
 
+    private function genera_concepto(stdClass $data_partida, _partida $modelo_partida, _cuenta_predial $modelo_predial,
+                                     _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado, int $registro_id)
+    {
+        $concepto = $this->integra_descuento(data_partida: $data_partida,modelo_partida: $modelo_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al maquetar impuestos', data: $concepto);
+        }
+
+        $concepto = $this->inicializa_impuestos_de_concepto(concepto: $concepto);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al maquetar impuestos', data: $concepto);
+        }
+
+        $concepto = $this->integra_traslados(concepto: $concepto, data_partida: $data_partida,
+            modelo_partida: $modelo_partida, modelo_traslado: $modelo_traslado);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al maquetar traslados', data: $concepto);
+        }
+
+        $concepto = $this->integra_retenciones(concepto: $concepto, data_partida: $data_partida,
+            modelo_partida:  $modelo_partida,modelo_retencion:  $modelo_retencion);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al maquetar traslados', data: $concepto);
+        }
+
+        $concepto = $this->cuenta_predial(concepto: $concepto,modelo_predial:  $modelo_predial,
+            partida:  $data_partida->partida,registro_id:  $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al integrar cuenta predial', data: $concepto);
+        }
+
+        return $concepto;
+
+    }
+
 
     final public function genera_ruta_archivo_tmp(): array|string
     {
@@ -1440,66 +1476,11 @@ class _transacciones_fc extends modelo
             $registro['partidas'][$key]['retenidos'] = $data_partida->retenidos->registros;
 
 
-            $keys_part = $this->keys_partida(modelo_partida: $modelo_partida);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al obtener $keys_part', data: $keys_part);
-            }
-
-
-            $concepto = $this->concepto(data_partida: $data_partida,keys_part: $keys_part);
+            $concepto = $this->genera_concepto(data_partida: $data_partida,modelo_partida:  $modelo_partida,
+                modelo_predial: $modelo_predial, modelo_retencion: $modelo_retencion,
+                modelo_traslado: $modelo_traslado, registro_id: $registro_id);
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al maquetar $concepto', data: $concepto);
-            }
-
-            $descuento = $this->descuento(data_partida: $data_partida,key_descuento:  $keys_part->descuento);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al maquetar descuento', data: $descuento);
-            }
-
-            $concepto->descuento = $descuento;
-
-            $concepto = $this->inicializa_impuestos_de_concepto(concepto: $concepto);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al maquetar impuestos', data: $concepto);
-            }
-
-            $key_traslado_importe = $modelo_traslado->tabla.'_importe';
-
-            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $data_partida->traslados,
-                key_importe_impuesto: $key_traslado_importe,name_tabla_partida: $modelo_partida->tabla);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al maquetar traslados', data: $impuestos);
-            }
-
-            $trs_global = (new _impuestos())->impuestos_globales(
-                impuestos: $data_partida->traslados, global_imp: $trs_global, key_importe: $key_traslado_importe,
-                name_tabla_partida: $modelo_partida->tabla);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $trs_global);
-            }
-
-            $key_retenido_importe = $modelo_retencion->tabla.'_importe';
-            $ret_global = (new _impuestos())->impuestos_globales(
-                impuestos: $data_partida->retenidos, global_imp: $ret_global, key_importe: $key_retenido_importe,
-                name_tabla_partida: $modelo_partida->tabla);
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $ret_global);
-            }
-
-            $concepto->impuestos[0]->traslados = $impuestos;
-
-            $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $data_partida->retenidos,
-                key_importe_impuesto: $key_retenido_importe, name_tabla_partida: $modelo_partida->tabla);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al maquetar retenciones', data: $impuestos);
-            }
-
-            $concepto->impuestos[0]->retenciones = $impuestos;
-
-            $concepto = $this->cuenta_predial(concepto: $concepto,modelo_predial:  $modelo_predial,
-                partida:  $data_partida->partida,registro_id:  $registro_id);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al integrar cuenta predial', data: $concepto);
+                return $this->error->error(mensaje: 'Error al integrar concepto', data: $concepto);
             }
 
 
@@ -1510,6 +1491,17 @@ class _transacciones_fc extends modelo
 
             $total_impuestos_trasladados += ($data_partida->partida[$key_importe_total_traslado]);
             $total_impuestos_retenidos += ($data_partida->partida[$key_importe_total_retenido]);
+
+
+            $globales_imps = $this->impuestos_globales(data_partida: $data_partida,modelo_partida:  $modelo_partida,
+                modelo_retencion:  $modelo_retencion,
+                modelo_traslado: $modelo_traslado, ret_global: $ret_global,trs_global:  $trs_global);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al cargar globales_imps', data: $globales_imps);
+            }
+
+            $ret_global = $globales_imps->ret_global;
+            $trs_global = $globales_imps->trs_global;
 
         }
 
@@ -1976,6 +1968,34 @@ class _transacciones_fc extends modelo
         return $registro;
     }
 
+    private function impuestos_globales(
+        stdClass $data_partida, _partida $modelo_partida, _data_impuestos $modelo_retencion,
+        _data_impuestos $modelo_traslado, array $ret_global, array $trs_global)
+    {
+        $key_traslado_importe = $modelo_traslado->tabla.'_importe';
+        $trs_global = (new _impuestos())->impuestos_globales(
+            impuestos: $data_partida->traslados, global_imp: $trs_global, key_importe: $key_traslado_importe,
+            name_tabla_partida: $modelo_partida->tabla);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $trs_global);
+        }
+
+        $key_retenido_importe = $modelo_retencion->tabla.'_importe';
+        $ret_global = (new _impuestos())->impuestos_globales(
+            impuestos: $data_partida->retenidos, global_imp: $ret_global, key_importe: $key_retenido_importe,
+            name_tabla_partida: $modelo_partida->tabla);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $ret_global);
+        }
+
+        $impuestos_glb = new stdClass();
+        $impuestos_glb->ret_global = $ret_global;
+        $impuestos_glb->trs_global = $trs_global;
+
+        return $impuestos_glb;
+
+    }
+
     final public function inserta_notificacion(_doc $modelo_doc, _data_mail $modelo_email,
                                                _notificacion $modelo_notificacion, int $registro_id){
 
@@ -1986,6 +2006,31 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al insertar notificaciones', data: $notificaciones);
         }
         return $notificaciones;
+    }
+
+
+    private function integra_descuento(stdClass $data_partida, _partida $modelo_partida)
+    {
+
+        $keys_part = $this->keys_partida(modelo_partida: $modelo_partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener $keys_part', data: $keys_part);
+        }
+
+        $concepto = $this->concepto(data_partida: $data_partida,keys_part: $keys_part);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al maquetar $concepto', data: $concepto);
+        }
+
+        $descuento = $this->descuento(data_partida: $data_partida,key_descuento:  $keys_part->descuento);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al maquetar descuento', data: $descuento);
+        }
+
+        $concepto->descuento = $descuento;
+
+        return $concepto;
+
     }
 
 
@@ -2021,6 +2066,36 @@ class _transacciones_fc extends modelo
         $partida['cat_sat_producto_codigo'] = $partida['com_producto_codigo_sat'];
         return $partida;
 
+    }
+
+    private function integra_retenciones(stdClass $concepto, stdClass $data_partida, _partida $modelo_partida,
+                                        _data_impuestos $modelo_retencion)
+    {
+        $key_retenido_importe = $modelo_retencion->tabla.'_importe';
+        $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $data_partida->retenidos,
+            key_importe_impuesto: $key_retenido_importe, name_tabla_partida: $modelo_partida->tabla);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al maquetar retenciones', data: $impuestos);
+        }
+
+        $concepto->impuestos[0]->retenciones = $impuestos;
+
+        return $concepto;
+
+    }
+
+    private function integra_traslados(stdClass $concepto, stdClass $data_partida, _partida $modelo_partida,
+                                       _data_impuestos $modelo_traslado){
+        $key_traslado_importe = $modelo_traslado->tabla.'_importe';
+        $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $data_partida->traslados,
+            key_importe_impuesto: $key_traslado_importe,name_tabla_partida: $modelo_partida->tabla);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al maquetar traslados', data: $impuestos);
+        }
+
+        $concepto->impuestos[0]->traslados = $impuestos;
+
+        return $concepto;
     }
 
     private function keys_partida(_partida $modelo_partida): stdClass
