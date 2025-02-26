@@ -125,17 +125,119 @@ class _conceptos{
         return $concepto;
     }
 
+    /**
+     * REG
+     * Obtiene los datos completos de una partida, incluyendo impuestos y detalles del producto.
+     *
+     * La función primero verifica si la clave identificadora de la partida existe en el array `$partida`.
+     * Luego, obtiene los impuestos asociados a la partida y, si no hay errores, integra los datos
+     * temporales del producto en la partida. Finalmente, agrega la información completa de la partida
+     * al objeto de impuestos y la devuelve.
+     *
+     * @param _partida $modelo_partida Instancia del modelo de partida que contiene la estructura y claves de identificación.
+     * @param _data_impuestos $modelo_retencion Modelo encargado de manejar los impuestos retenidos.
+     * @param _data_impuestos $modelo_traslado Modelo encargado de manejar los impuestos trasladados.
+     * @param array $partida Array que contiene los datos de la partida, incluyendo la clave de identificación.
+     *
+     * @return array|stdClass Retorna un objeto con los datos completos de la partida, incluyendo impuestos.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si no se encuentra la clave identificadora de la partida o si falla la consulta de impuestos.
+     * El array de error generado tiene la siguiente estructura:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada:
+     * ```php
+     * $modelo_partida = new _partida();
+     * $modelo_partida->key_id = 'partida_id';
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $modelo_retencion = new _data_impuestos();
+     * $modelo_traslado = new _data_impuestos();
+     *
+     * $partida = [
+     *     'partida_id' => 123,
+     *     'fc_partida_cantidad' => 5,
+     *     'fc_partida_valor_unitario' => 100.00,
+     *     'com_producto_codigo_sat' => '01010101'
+     * ];
+     *
+     * $resultado = $this->data_partida($modelo_partida, $modelo_retencion, $modelo_traslado, $partida);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida exitosa:
+     * ```php
+     * stdClass Object
+     * (
+     *     [traslados] => Array
+     *         (
+     *             [0] => Array
+     *                 (
+     *                     [tipo_impuesto] => IVA
+     *                     [tasa] => 16
+     *                     [importe] => 80.00
+     *                 )
+     *         )
+     *
+     *     [retenidos] => Array
+     *         (
+     *             [0] => Array
+     *                 (
+     *                     [tipo_impuesto] => ISR
+     *                     [tasa] => 10
+     *                     [importe] => 50.00
+     *                 )
+     *         )
+     *
+     *     [partida] => Array
+     *         (
+     *             [partida_id] => 123
+     *             [fc_partida_cantidad] => 5
+     *             [fc_partida_valor_unitario] => 100.00
+     *             [cat_sat_producto_codigo] => '01010101'
+     *         )
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si la clave de identificación no existe:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error partida[partida_id] no existe partida_id"
+     *     [data] => Array()
+     *     [es_final] => true
+     * )
+     * ```
+     */
     private function data_partida(
         _partida $modelo_partida,
         _data_impuestos $modelo_retencion,
         _data_impuestos $modelo_traslado,
         array $partida
-    ): array|stdClass
-    {
+    ): array|stdClass {
         // Verifica que la clave identificadora de la partida exista en el array $partida
         if (!isset($partida[$modelo_partida->key_id])) {
             return $this->error->error(
-                mensaje: 'Error $partida[$modelo_partida->key_id] no existe '.$modelo_partida->key_id,
+                mensaje: 'Error $partida[' . $modelo_partida->key_id . '] no existe ' . $modelo_partida->key_id,
                 data: $partida,
                 es_final: true
             );
@@ -161,7 +263,7 @@ class _conceptos{
         $partida = $this->integra_producto_tmp(partida: $partida);
 
         // Manejo de error en la integración del producto temporal
-        if(errores::$error){
+        if (errores::$error) {
             return $this->error->error(
                 mensaje: 'Error al integrar producto temporal',
                 data: $partida
@@ -173,6 +275,7 @@ class _conceptos{
 
         return $imp_partida;
     }
+
 
     private function descuento(stdClass $data_partida, string $key_descuento): float|array
     {
@@ -291,17 +394,92 @@ class _conceptos{
         return $concepto;
 
     }
+    /**
+     * Obtiene los impuestos asociados a una partida, incluyendo impuestos trasladados y retenidos.
+     *
+     * Esta función verifica la existencia de la clave de identificación de la partida en el array `$partida`,
+     * luego obtiene los impuestos trasladados y retenidos mediante los modelos `_data_impuestos`.
+     * Si hay errores en la obtención de los impuestos, retorna un array con el error.
+     *
+     * @param _partida $modelo_partida Instancia del modelo de partida que contiene la estructura y claves de identificación.
+     * @param _data_impuestos $modelo_retencion Modelo encargado de manejar los impuestos retenidos.
+     * @param _data_impuestos $modelo_traslado Modelo encargado de manejar los impuestos trasladados.
+     * @param array $partida Array que contiene los datos de la partida, incluyendo la clave de identificación.
+     *
+     * @return array|stdClass Retorna un objeto con los impuestos trasladados y retenidos si la operación es exitosa.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si no se encuentra la clave identificadora de la partida o si falla la consulta de impuestos.
+     *
+     * @example
+     * Ejemplo de entrada:
+     * ```php
+     * $modelo_partida = new _partida();
+     * $modelo_partida->key_id = 'partida_id';
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $modelo_retencion = new _data_impuestos();
+     * $modelo_traslado = new _data_impuestos();
+     *
+     * $partida = [
+     *     'partida_id' => 123,
+     *     'fc_partida_cantidad' => 5,
+     *     'fc_partida_valor_unitario' => 100.00
+     * ];
+     *
+     * $resultado = $this->get_impuestos_partida($modelo_partida, $modelo_retencion, $modelo_traslado, $partida);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida exitosa:
+     * ```php
+     * stdClass Object
+     * (
+     *     [traslados] => Array
+     *         (
+     *             [0] => Array
+     *                 (
+     *                     [tipo_impuesto] => IVA
+     *                     [tasa] => 16
+     *                     [importe] => 80.00
+     *                 )
+     *         )
+     *
+     *     [retenidos] => Array
+     *         (
+     *             [0] => Array
+     *                 (
+     *                     [tipo_impuesto] => ISR
+     *                     [tasa] => 10
+     *                     [importe] => 50.00
+     *                 )
+     *         )
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si la clave de identificación no existe:
+     * ```php
+     * Array
+     * (
+     *     [error] => true
+     *     [mensaje] => "Error partida[partida_id] no existe partida_id"
+     *     [data] => Array()
+     *     [es_final] => true
+     * )
+     * ```
+     */
     private function get_impuestos_partida(
         _partida $modelo_partida,
         _data_impuestos $modelo_retencion,
         _data_impuestos $modelo_traslado,
         array $partida
-    ): array|stdClass
-    {
+    ): array|stdClass {
         // Verifica que la clave identificadora de la partida exista en el array $partida
         if (!isset($partida[$modelo_partida->key_id])) {
             return $this->error->error(
-                mensaje: 'Error $partida[$modelo_partida->key_id] no existe '.$modelo_partida->key_id,
+                mensaje: 'Error $partida[' . $modelo_partida->key_id . '] no existe ' . $modelo_partida->key_id,
                 data: $partida,
                 es_final: true
             );
@@ -510,14 +688,91 @@ class _conceptos{
         return $concepto;
     }
 
-    private function keys_partida(_partida $modelo_partida): stdClass
+    /**
+     * REG
+     * Genera un conjunto de claves (keys) dinámicas para identificar los atributos de una partida en la base de datos.
+     *
+     * Esta función toma el nombre de la tabla de la partida y genera las claves necesarias para acceder a los atributos
+     * principales de la partida, como cantidad, descripción, valor unitario, importe y descuento.
+     *
+     * @param _partida $modelo_partida Instancia del modelo de partida que contiene la estructura y el nombre de la tabla.
+     *
+     * @return stdClass|array Retorna un objeto con las claves generadas si la operación es exitosa.
+     * En caso de error (si `$modelo_partida->tabla` está vacío), retorna un array con la información del error.
+     *
+     * @throws errores Si el nombre de la tabla (`$modelo_partida->tabla`) está vacío, genera un error con la estructura:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>$modelo_partida->tabla esta vacio</span></b>"
+     *     [mensaje_limpio] => "$modelo_partida->tabla esta vacio"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada:
+     * ```php
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $resultado = $this->keys_partida($modelo_partida);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida exitosa:
+     * ```php
+     * stdClass Object
+     * (
+     *     [cantidad] => "fc_partida_cantidad"
+     *     [descripcion] => "fc_partida_descripcion"
+     *     [valor_unitario] => "fc_partida_valor_unitario"
+     *     [importe] => "fc_partida_sub_total_base"
+     *     [descuento] => "fc_partida_descuento"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$modelo_partida->tabla` está vacío:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error: $modelo_partida->tabla esta vacio"
+     *     [data] => ""
+     *     [es_final] => true
+     * )
+     * ```
+     */
+    private function keys_partida(_partida $modelo_partida): stdClass|array
     {
-        $key_cantidad = $modelo_partida->tabla.'_cantidad';
-        $key_descripcion = $modelo_partida->tabla.'_descripcion';
-        $key_valor_unitario = $modelo_partida->tabla.'_valor_unitario';
-        $key_importe = $modelo_partida->tabla.'_sub_total_base';
-        $key_descuento = $modelo_partida->tabla.'_descuento';
+        // Limpia espacios en blanco del nombre de la tabla
+        $modelo_partida->tabla = trim($modelo_partida->tabla);
 
+        // Verifica si el nombre de la tabla está vacío
+        if ($modelo_partida->tabla === '') {
+            return $this->error->error(
+                mensaje: '$modelo_partida->tabla esta vacio',
+                data: $modelo_partida->tabla
+            );
+        }
+
+        // Construcción de claves basadas en el nombre de la tabla
+        $key_cantidad = $modelo_partida->tabla . '_cantidad';
+        $key_descripcion = $modelo_partida->tabla . '_descripcion';
+        $key_valor_unitario = $modelo_partida->tabla . '_valor_unitario';
+        $key_importe = $modelo_partida->tabla . '_sub_total_base';
+        $key_descuento = $modelo_partida->tabla . '_descuento';
+
+        // Creación del objeto que contiene las claves generadas
         $keys = new stdClass();
         $keys->cantidad = $key_cantidad;
         $keys->descripcion = $key_descripcion;
@@ -526,8 +781,8 @@ class _conceptos{
         $keys->descuento = $key_descuento;
 
         return $keys;
-
     }
+
 
     private function r_fc_cuenta_predial(string $key_filtro_id, _cuenta_predial $modelo_predial, int $registro_id): array|stdClass
     {

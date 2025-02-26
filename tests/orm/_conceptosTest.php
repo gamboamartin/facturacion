@@ -263,6 +263,38 @@ class _conceptosTest extends test
 
     }
 
+    public function test_keys_partida(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new _conceptos();
+        $trs = new liberator($trs);
+
+        $modelo_partida = new fc_partida($this->link);
+
+        $resultado = $trs->keys_partida($modelo_partida);
+        //print_r($resultado);exit;
+
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("fc_partida_cantidad", $resultado->cantidad);
+        $this->assertEquals("fc_partida_descripcion", $resultado->descripcion);
+        $this->assertEquals("fc_partida_valor_unitario", $resultado->valor_unitario);
+        $this->assertEquals("fc_partida_sub_total_base", $resultado->importe);
+        $this->assertEquals("fc_partida_descuento", $resultado->descuento);
+
+
+
+        errores::$error = false;
+
+    }
+
     public function test_inicializa_impuestos_de_concepto(): void
     {
         errores::$error = false;
