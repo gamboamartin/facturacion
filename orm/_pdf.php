@@ -189,26 +189,61 @@ class _pdf{
 
         $x = 68;
         $pdf->SetXY($x, 10.3);
+        if($factura['org_empresa_rfc'] === "TELJ470913GY5"){
+            $x = 35;
+            $pdf->SetXY($x, 8.5);
+        }
+
         $pdf->Write(10, $factura['org_empresa_razon_social']);
 
         $pdf->SetXY($x, 15);
+        if($factura['org_empresa_rfc'] === "TELJ470913GY5"){
+            $pdf->SetXY($x, 14.5);
+        }
         $pdf->Write(10, $factura['org_empresa_nombre_comercial']);
 
         $pdf->SetXY($x, 19);
+        if($factura['org_empresa_rfc'] === "TELJ470913GY5"){
+            $pdf->SetXY($x, 18);
+        }
         $pdf->Write(10, $factura['org_empresa_rfc']);
 
-        $pdf->SetXY($x, 23);
+        $pdf->SetXY($x, 27);
+        if($factura['org_empresa_rfc'] === "TELJ470913GY5"){
+            $pdf->SetXY($x, 25.5);
+        }
         $regimen = mb_convert_encoding(trim($factura['cat_sat_regimen_fiscal_codigo'] . ' ' . $factura['cat_sat_regimen_fiscal_descripcion']), 'ISO-8859-1', 'UTF-8');
-        $pdf->Write(10, $regimen);
+        if($factura['org_empresa_rfc'] === "FIN171207CKA") {
+            $pdf->MultiCell(65, 2.5, $regimen, 0, 'L');
+        }
+
+        if($factura['org_empresa_rfc'] === "TELJ470913GY5") {
+            $pdf->MultiCell(90, 2.5, $regimen, 0, 'L');
+        }
 
 
         if($factura['org_empresa_rfc'] === "FIN171207CKA") {
             $pdf->SetXY($x, 31.5);
             $dom = "Av. Vallarta 6503 - Int. C2, Col. Ciudad Granja,";
             $dom .= "45010, Zapopan, Jalisco";
+
+            $dom = mb_convert_encoding($dom, 'ISO-8859-1', 'UTF-8');
+
             $pdf->MultiCell(60,3, $dom,0);
 
             $pdf->SetXY($x, 40.5);
+            $tel = "+52 3338523986";
+            $pdf->MultiCell(60,3, $tel,0);
+
+        }
+        if($factura['org_empresa_rfc'] === "TELJ470913GY5") {
+            $pdf->SetXY($x, 31.5);
+            $dom = "Calle: Carlos Villaseñor 885 Jardines Alcalde";
+            $dom .= "44290, Guadalajara, Jalisco";
+            $dom = mb_convert_encoding($dom, 'ISO-8859-1', 'UTF-8');
+            $pdf->MultiCell(80,3, $dom,0,'L');
+
+            $pdf->SetXY($x, 39.5);
             $tel = "+52 3338523986";
             $pdf->MultiCell(60,3, $tel,0);
 
@@ -608,7 +643,7 @@ class _pdf{
                 $nombre_documento = $path_base_archivos.'/'.$nombre_documento.'.pdf';
 
 
-                $pdf->Output($nombre_documento, 'F');
+                $pdf->Output('F',$nombre_documento);
                 return $nombre_documento;
             }
 
