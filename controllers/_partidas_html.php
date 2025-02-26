@@ -231,6 +231,11 @@ class _partidas_html{
         }
 
         foreach ($partidas->registros as $indice=>$partida){
+            $valida = $this->valida_partida_html(partida: $partida);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
+            }
+
             $partidas = $this->partida_html(html_controler: $html, indice: $indice, link: $link,
                 modelo_partida: $modelo_partida, name_entidad_retenido: $modelo_retencion->tabla,
                 name_entidad_traslado: $modelo_traslado->tabla, name_modelo_entidad: $modelo_entidad->tabla,
