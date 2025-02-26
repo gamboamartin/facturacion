@@ -13,22 +13,157 @@ class _conceptos{
 
     }
 
-    private function acumula_totales(stdClass $data_partida, _partida $modelo_partida, float $total_impuestos_retenidos,
-                                     float $total_impuestos_trasladados): stdClass
+    /**
+     * REG
+     * Acumula los totales de impuestos retenidos y trasladados en una partida.
+     *
+     * Esta función toma los valores actuales de `total_impuestos_retenidos` y `total_impuestos_trasladados`,
+     * y los actualiza con los valores presentes en la partida dentro de `$data_partida`.
+     *
+     * Si los valores de impuestos no existen en la partida, se inicializan en 0.
+     *
+     * @param stdClass $data_partida Objeto que contiene la información de la partida.
+     *        - `partida` (array): Datos de la partida que incluyen los impuestos trasladados y retenidos.
+     * @param _partida $modelo_partida Instancia del modelo de partida que contiene la estructura y claves de identificación.
+     *        - `tabla` (string): Nombre de la tabla en la base de datos donde se almacenan los datos de la partida.
+     * @param float $total_impuestos_retenidos Monto acumulado de impuestos retenidos antes de esta operación.
+     * @param float $total_impuestos_trasladados Monto acumulado de impuestos trasladados antes de esta operación.
+     *
+     * @return stdClass|array Retorna un objeto `totales` con los impuestos retenidos y trasladados acumulados.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si `$modelo_partida->tabla` está vacío o si `$data_partida->partida` no está definido.
+     *
+     * Estructura del error generado:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada válida:
+     * ```php
+     * $data_partida = new stdClass();
+     * $data_partida->partida = [
+     *     'fc_partida_total_traslados' => 50.00,
+     *     'fc_partida_total_retenciones' => 30.00
+     * ];
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $total_impuestos_retenidos = 100.00;
+     * $total_impuestos_trasladados = 200.00;
+     *
+     * $resultado = $this->acumula_totales($data_partida, $modelo_partida, $total_impuestos_retenidos, $total_impuestos_trasladados);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida esperada:
+     * ```php
+     * stdClass Object
+     * (
+     *     [total_impuestos_retenidos] => 130.00
+     *     [total_impuestos_trasladados] => 250.00
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida si los impuestos no existen en `$data_partida->partida` (se inicializan en 0):
+     * ```php
+     * stdClass Object
+     * (
+     *     [total_impuestos_retenidos] => 100.00
+     *     [total_impuestos_trasladados] => 200.00
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$modelo_partida->tabla` está vacío:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $modelo_partida->tabla está vacío"
+     *     [data] => ""
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$data_partida->partida` no existe:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $data_partida->partida no existe"
+     *     [data] => stdClass Object()
+     *     [es_final] => true
+     * )
+     * ```
+     */
+    private function acumula_totales(
+        stdClass $data_partida,
+        _partida $modelo_partida,
+        float $total_impuestos_retenidos,
+        float $total_impuestos_trasladados
+    ): array|stdClass
     {
-        $key_importe_total_traslado = $modelo_partida->tabla.'_total_traslados';
-        $key_importe_total_retenido = $modelo_partida->tabla.'_total_retenciones';
+        // Validar que el nombre de la tabla en el modelo de partida no esté vacío
+        $modelo_partida->tabla = trim($modelo_partida->tabla);
+        if ($modelo_partida->tabla === '') {
+            return $this->error->error(
+                mensaje: 'Error $modelo_partida->tabla está vacío',
+                data: $modelo_partida->tabla,
+                es_final: true
+            );
+        }
 
-        $total_impuestos_trasladados += ($data_partida->partida[$key_importe_total_traslado]);
-        $total_impuestos_retenidos += ($data_partida->partida[$key_importe_total_retenido]);
+        // Validar que la partida exista dentro de los datos de la partida
+        if (!isset($data_partida->partida)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->partida no existe',
+                data: $data_partida,
+                es_final: true
+            );
+        }
 
+        // Claves para obtener los montos de impuestos trasladados y retenidos
+        $key_importe_total_traslado = $modelo_partida->tabla . '_total_traslados';
+        $key_importe_total_retenido = $modelo_partida->tabla . '_total_retenciones';
+
+        // Inicializar los valores de impuestos si no están definidos en la partida
+        if (!isset($data_partida->partida[$key_importe_total_traslado])) {
+            $data_partida->partida[$key_importe_total_traslado] = 0;
+        }
+        if (!isset($data_partida->partida[$key_importe_total_retenido])) {
+            $data_partida->partida[$key_importe_total_retenido] = 0;
+        }
+
+        // Acumular los impuestos trasladados y retenidos
+        $total_impuestos_trasladados += $data_partida->partida[$key_importe_total_traslado];
+        $total_impuestos_retenidos += $data_partida->partida[$key_importe_total_retenido];
+
+        // Crear objeto con los totales actualizados
         $totales = new stdClass();
         $totales->total_impuestos_retenidos = $total_impuestos_retenidos;
         $totales->total_impuestos_trasladados = $total_impuestos_trasladados;
 
         return $totales;
-
     }
+
 
     private function carga_totales(stdClass $data_partida, _partida $modelo_partida,
                                    _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado, array $ret_global,
@@ -200,10 +335,124 @@ class _conceptos{
     }
 
 
+    /**
+     * REG
+     * Asigna la cuenta predial a un concepto si el producto de la partida lo requiere.
+     *
+     * Esta función verifica si el producto en la partida está marcado para aplicar cuenta predial
+     * (`com_producto_aplica_predial` == 'activo'). Si es así, obtiene la cuenta predial mediante
+     * `fc_cuenta_predial_numero()` y la asigna al concepto. Si ocurre algún error en la validación o
+     * en la consulta de la cuenta predial, se devuelve un array con la información del error.
+     *
+     * @param stdClass $concepto Objeto que representa un concepto de facturación.
+     *        - Este objeto debe estar previamente estructurado con los datos del producto.
+     * @param string $key_filtro_id Clave del campo que se utilizará como filtro en la consulta.
+     * @param _cuenta_predial $modelo_predial Modelo que maneja los datos de cuentas prediales.
+     * @param array $partida Datos de la partida que contienen información sobre el producto y si aplica cuenta predial.
+     *        - `com_producto_aplica_predial` (string): Indica si el producto requiere cuenta predial ('activo' o no).
+     * @param int $registro_id Identificador del registro del cual se quiere obtener la cuenta predial.
+     *
+     * @return stdClass|array Retorna el objeto `concepto` con la cuenta predial asignada si aplica.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si `$registro_id` es menor o igual a 0, si `$key_filtro_id` está vacío o si la consulta falla.
+     *
+     * Estructura del error generado:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada válida:
+     * ```php
+     * $concepto = new stdClass();
+     * $concepto->clave_prod_serv = "01010101";
+     *
+     * $modelo_predial = new _cuenta_predial();
+     * $key_filtro_id = 'fc_cuenta_predial_id';
+     * $partida = [
+     *     'com_producto_aplica_predial' => 'activo'
+     * ];
+     * $registro_id = 123;
+     *
+     * $resultado = $this->cuenta_predial($concepto, $key_filtro_id, $modelo_predial, $partida, $registro_id);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida esperada si el producto aplica cuenta predial:
+     * ```php
+     * stdClass Object
+     * (
+     *     [clave_prod_serv] => "01010101"
+     *     [cuenta_predial] => "123456789"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida esperada si el producto no aplica cuenta predial:
+     * ```php
+     * stdClass Object
+     * (
+     *     [clave_prod_serv] => "01010101"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$registro_id` es 0:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error: el registro_id debe ser mayor a 0"
+     *     [data] => 0
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$key_filtro_id` está vacío:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error: el key_filtro_id está vacío"
+     *     [data] => ""
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si no se encuentra cuenta predial:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error al obtener cuenta predial"
+     *     [data] => stdClass Object()
+     * )
+     * ```
+     */
     private function cuenta_predial(
-        stdClass $concepto, string $key_filtro_id, _cuenta_predial $modelo_predial, array $partida, int $registro_id): array|stdClass
+        stdClass $concepto,
+        string $key_filtro_id,
+        _cuenta_predial $modelo_predial,
+        array $partida,
+        int $registro_id
+    ): array|stdClass
     {
-
         // Validar que el ID del registro sea mayor a 0
         if ($registro_id <= 0) {
             return $this->error->error(
@@ -213,20 +462,23 @@ class _conceptos{
             );
         }
 
+        // Validar que la clave del filtro no esté vacía
         $key_filtro_id = trim($key_filtro_id);
-        if($key_filtro_id === ''){
+        if ($key_filtro_id === '') {
             return $this->error->error(
-                mensaje: "Error: el $key_filtro_id esta vacio", data: $registro_id, es_final: true
+                mensaje: "Error: el $key_filtro_id está vacío",
+                data: $registro_id,
+                es_final: true
             );
         }
 
         // Verificar si el producto en la partida requiere cuenta predial
-        if(isset($partida['com_producto_aplica_predial']) && $partida['com_producto_aplica_predial'] === 'activo'){
-
+        if (isset($partida['com_producto_aplica_predial']) && $partida['com_producto_aplica_predial'] === 'activo') {
             // Obtener el número de cuenta predial del registro
-            $fc_cuenta_predial_numero = $this->fc_cuenta_predial_numero(key_filtro_id: $key_filtro_id,
+            $fc_cuenta_predial_numero = $this->fc_cuenta_predial_numero(
+                key_filtro_id: $key_filtro_id,
                 modelo_predial: $modelo_predial,
-                registro_id:  $registro_id
+                registro_id: $registro_id
             );
 
             // Manejo de errores si la cuenta predial no pudo obtenerse
@@ -243,6 +495,7 @@ class _conceptos{
 
         return $concepto;
     }
+
 
     /**
      * REG
@@ -506,9 +759,98 @@ class _conceptos{
 
 
 
-    private function fc_cuenta_predial_numero(string $key_filtro_id, _cuenta_predial $modelo_predial, int $registro_id): array|string
+    /**
+     * REG
+     * Obtiene el número de cuenta predial asociado a un registro en la base de datos.
+     *
+     * Esta función valida la existencia del `registro_id`, asegura que `key_filtro_id` no esté vacío,
+     * y realiza una consulta mediante `r_fc_cuenta_predial()` para obtener los datos de la cuenta predial.
+     * Luego, extrae y retorna la descripción (número de cuenta predial).
+     *
+     * @param string $key_filtro_id Clave del campo que se utilizará como filtro en la consulta.
+     * @param _cuenta_predial $modelo_predial Modelo que maneja los datos de cuentas prediales.
+     * @param int $registro_id Identificador del registro del cual se quiere obtener la cuenta predial.
+     *
+     * @return array|string Retorna el número de cuenta predial si la operación es exitosa.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si `$registro_id` es menor o igual a 0, si `$key_filtro_id` está vacío o si la consulta falla.
+     *
+     * Estructura del error generado:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada válida:
+     * ```php
+     * $modelo_predial = new _cuenta_predial();
+     * $key_filtro_id = 'fc_cuenta_predial_id';
+     * $registro_id = 123;
+     *
+     * $resultado = $this->fc_cuenta_predial_numero($key_filtro_id, $modelo_predial, $registro_id);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida esperada si existe una cuenta predial:
+     * ```php
+     * "123456789"
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$registro_id` es 0:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error: el registro_id debe ser mayor a 0"
+     *     [data] => 0
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$key_filtro_id` está vacío:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error: el key_filtro_id está vacío"
+     *     [data] => ""
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si no se encuentra cuenta predial:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error al obtener cuenta predial"
+     *     [data] => stdClass Object()
+     * )
+     * ```
+     */
+    private function fc_cuenta_predial_numero(
+        string $key_filtro_id,
+        _cuenta_predial $modelo_predial,
+        int $registro_id
+    ): array|string
     {
-
         // Validar que el ID del registro sea mayor a 0
         if ($registro_id <= 0) {
             return $this->error->error(
@@ -517,15 +859,20 @@ class _conceptos{
                 es_final: true
             );
         }
+
+        // Validar que la clave del filtro no esté vacía
         $key_filtro_id = trim($key_filtro_id);
-        if($key_filtro_id === ''){
+        if ($key_filtro_id === '') {
             return $this->error->error(
-                mensaje: 'Error: el $key_filtro_id esta vacio', data: $registro_id, es_final: true
+                mensaje: 'Error: el $key_filtro_id está vacío',
+                data: $registro_id,
+                es_final: true
             );
         }
 
         // Obtener la cuenta predial asociada al registro
-        $r_fc_cuenta_predial = $this->r_fc_cuenta_predial(key_filtro_id: $key_filtro_id,
+        $r_fc_cuenta_predial = $this->r_fc_cuenta_predial(
+            key_filtro_id: $key_filtro_id,
             modelo_predial: $modelo_predial,
             registro_id: $registro_id
         );
@@ -545,14 +892,202 @@ class _conceptos{
         return $r_fc_cuenta_predial->registros[0][$key_cuenta_predial_descripcion];
     }
 
-    private function genera_concepto(stdClass $data_partida, string $key_filtro_id, _partida $modelo_partida, _cuenta_predial $modelo_predial,
-                                     _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado, int $registro_id)
+
+    /**
+     * REG
+     * Genera un concepto de facturación a partir de la información de una partida.
+     *
+     * Esta función realiza validaciones en la estructura de la partida, asegura la existencia y el
+     * formato correcto de los impuestos trasladados y retenidos, e integra diversos datos como
+     * descuentos, impuestos y cuenta predial en el concepto generado.
+     *
+     * @param stdClass $data_partida Objeto que contiene la información de la partida.
+     *        - `partida` (array): Datos de la partida a validar.
+     *        - `traslados` (stdClass): Objeto que contiene los impuestos trasladados asociados a la partida.
+     *        - `retenidos` (stdClass): Objeto que contiene los impuestos retenidos asociados a la partida.
+     * @param string $key_filtro_id Clave del campo que se utilizará como filtro en la consulta.
+     * @param _partida $modelo_partida Instancia del modelo de partida que contiene la estructura y claves de identificación.
+     * @param _cuenta_predial $modelo_predial Modelo que maneja los datos de cuentas prediales.
+     * @param _data_impuestos $modelo_retencion Modelo que maneja los datos de impuestos retenidos.
+     * @param _data_impuestos $modelo_traslado Modelo que maneja los datos de impuestos trasladados.
+     * @param int $registro_id Identificador del registro del cual se quiere generar el concepto.
+     *
+     * @return stdClass|array Retorna un objeto `concepto` con los datos estructurados si la operación es exitosa.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si `$registro_id` es menor o igual a 0, si `$key_filtro_id` está vacío,
+     * si `data_partida` no contiene los datos esperados o si la integración de impuestos falla.
+     *
+     * Estructura del error generado:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada válida:
+     * ```php
+     * $data_partida = new stdClass();
+     * $data_partida->partida = [
+     *     'fc_partida_cantidad' => 5,
+     *     'fc_partida_descripcion' => 'Producto de prueba',
+     *     'fc_partida_valor_unitario' => 100.00,
+     *     'fc_partida_sub_total_base' => 500.00
+     * ];
+     * $data_partida->traslados = (object) [
+     *     (object) ['tipo_impuesto' => 'IVA', 'tasa' => 16, 'importe' => 80.00]
+     * ];
+     * $data_partida->retenidos = (object) [
+     *     (object) ['tipo_impuesto' => 'ISR', 'tasa' => 10, 'importe' => 50.00]
+     * ];
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $modelo_predial = new _cuenta_predial();
+     * $modelo_retencion = new _data_impuestos();
+     * $modelo_traslado = new _data_impuestos();
+     *
+     * $key_filtro_id = 'fc_cuenta_predial_id';
+     * $registro_id = 123;
+     *
+     * $resultado = $this->genera_concepto($data_partida, $key_filtro_id, $modelo_partida,
+     *     $modelo_predial, $modelo_retencion, $modelo_traslado, $registro_id);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida esperada:
+     * ```php
+     * stdClass Object
+     * (
+     *     [clave_prod_serv] => "01010101"
+     *     [cantidad] => 5
+     *     [clave_unidad] => "H87"
+     *     [descripcion] => "Producto de prueba"
+     *     [valor_unitario] => 100.00
+     *     [importe] => 500.00
+     *     [objeto_imp] => "02"
+     *     [no_identificacion] => "12345"
+     *     [unidad] => "Pieza"
+     *     [descuento] => 50.00
+     *     [impuestos] => Array
+     *         (
+     *             [0] => stdClass Object
+     *                 (
+     *                     [traslados] => Array
+     *                         (
+     *                             [0] => stdClass Object
+     *                                 (
+     *                                     [tipo_impuesto] => "IVA"
+     *                                     [tasa] => 16
+     *                                     [importe] => 80.00
+     *                                 )
+     *                         )
+     *                     [retenciones] => Array
+     *                         (
+     *                             [0] => stdClass Object
+     *                                 (
+     *                                     [tipo_impuesto] => "ISR"
+     *                                     [tasa] => 10
+     *                                     [importe] => 50.00
+     *                                 )
+     *                         )
+     *                 )
+     *         )
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$registro_id` es 0:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error: el registro_id debe ser mayor a 0"
+     *     [data] => 0
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$key_filtro_id` está vacío:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error: el key_filtro_id está vacío"
+     *     [data] => ""
+     *     [es_final] => true
+     * )
+     * ```
+     */
+    private function genera_concepto(stdClass $data_partida, string $key_filtro_id, _partida $modelo_partida,
+                                     _cuenta_predial $modelo_predial, _data_impuestos $modelo_retencion,
+                                     _data_impuestos $modelo_traslado, int $registro_id): array|stdClass
     {
 
         $key_filtro_id = trim($key_filtro_id);
         if($key_filtro_id === ''){
             return $this->error->error(
-                mensaje: "Error: el $key_filtro_id esta vacio", data: $registro_id, es_final: true
+                mensaje: 'Error: el $key_filtro_id esta vacio', data: $key_filtro_id, es_final: true
+            );
+        }
+
+
+        $valida = $this->verifica_partida(data_partida: $data_partida,modelo_partida:  $modelo_partida);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al validar data_partida',
+                data: $valida
+            );
+        }
+
+        if (!isset($data_partida->traslados)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->traslados no existe',
+                data: $data_partida
+            );
+        }
+
+        if (!is_object($data_partida->traslados)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->traslados debe ser un objeto',
+                data: $data_partida
+            );
+        }
+
+        if (!isset($data_partida->retenidos)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->retenidos no existe',
+                data: $data_partida
+            );
+        }
+
+        // Validación: Verifica que los impuestos retenidos sean un objeto
+        if (!is_object($data_partida->retenidos)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->retenidos debe ser un objeto',
+                data: $data_partida
+            );
+        }
+
+        if ($registro_id <= 0) {
+            return $this->error->error(
+                mensaje: "Error: el registro_id debe ser mayor a 0",
+                data: $registro_id,
+                es_final: true
             );
         }
 
@@ -587,7 +1122,9 @@ class _conceptos{
         return $concepto;
 
     }
+
     /**
+     * REG
      * Obtiene los impuestos asociados a una partida, incluyendo impuestos trasladados y retenidos.
      *
      * Esta función verifica la existencia de la clave de identificación de la partida en el array `$partida`,
@@ -714,10 +1251,19 @@ class _conceptos{
         return $data;
     }
 
-    private function impuestos_globales(
+    PUBLIC function impuestos_globales(
         stdClass $data_partida, _partida $modelo_partida, _data_impuestos $modelo_retencion,
         _data_impuestos $modelo_traslado, array $ret_global, array $trs_global)
     {
+        if(!isset($data_partida->traslados)){
+            return $this->error->error(mensaje: 'Error $data_partida->traslados no existe', data: $data_partida);
+        }
+
+        if(!isset($data_partida->retenidos)){
+            return $this->error->error(mensaje: 'Error $data_partida->retenidos no existe', data: $data_partida);
+        }
+
+
         $key_traslado_importe = $modelo_traslado->tabla.'_importe';
         $trs_global = (new _impuestos())->impuestos_globales(
             impuestos: $data_partida->traslados, global_imp: $trs_global, key_importe: $key_traslado_importe,
@@ -910,26 +1456,7 @@ class _conceptos{
      */
     private function integra_descuento(stdClass $data_partida, _partida $modelo_partida): stdClass|array
     {
-        // Verifica si la partida existe en el objeto data_partida
-        if (!isset($data_partida->partida)) {
-            return $this->error->error(
-                mensaje: 'Error $data_partida->partida no existe',
-                data: $data_partida,
-                es_final: true
-            );
-        }
-
-        // Obtiene las claves de la partida
-        $keys_part = $this->keys_partida(modelo_partida: $modelo_partida);
-        if (errores::$error) {
-            return $this->error->error(
-                mensaje: 'Error al obtener $keys_part',
-                data: $keys_part
-            );
-        }
-
-        // Valida la estructura de la partida
-        $valida = $this->valida_partida(data_partida: $data_partida, keys_part: $keys_part);
+        $valida = $this->verifica_partida(data_partida: $data_partida,modelo_partida:  $modelo_partida);
         if (errores::$error) {
             return $this->error->error(
                 mensaje: 'Error al validar data_partida',
@@ -1031,35 +1558,355 @@ class _conceptos{
 
     }
 
-    private function integra_retenciones(stdClass $concepto, stdClass $data_partida, _partida $modelo_partida,
-                                         _data_impuestos $modelo_retencion)
+    /**
+     * REG
+     * Integra los impuestos retenidos en la estructura de un concepto.
+     *
+     * Esta función verifica que los impuestos retenidos existan en `$data_partida`,
+     * sean un objeto válido y que `concepto` tenga una estructura de impuestos adecuada.
+     * Posteriormente, maqueta los impuestos retenidos con `_impuestos()->maqueta_impuesto()`
+     * y los asigna a la propiedad `retenciones` dentro del concepto.
+     *
+     * @param stdClass $concepto Objeto que representa un concepto de facturación.
+     *        - Este objeto debe estar previamente estructurado con datos del producto y debe contener
+     *          la estructura de `impuestos[0]` antes de ser completada con las retenciones.
+     * @param stdClass $data_partida Objeto que contiene la información de la partida, incluyendo impuestos retenidos.
+     *        - `retenidos` (stdClass): Objeto que contiene los impuestos retenidos asociados a la partida.
+     * @param _partida $modelo_partida Instancia del modelo de partida que contiene la estructura y claves de identificación.
+     * @param _data_impuestos $modelo_retencion Modelo que maneja los datos de impuestos retenidos.
+     *        - `tabla` (string): Nombre de la tabla en la base de datos donde se almacenan las retenciones.
+     *
+     * @return stdClass|array Retorna el objeto `concepto` con los impuestos retenidos integrados si la operación es exitosa.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si la propiedad `retenidos` no existe en `$data_partida`, si no es un objeto,
+     * o si la maquetación de los impuestos retenidos falla.
+     *
+     * Estructura del error:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada válida:
+     * ```php
+     * $concepto = new stdClass();
+     * $concepto->impuestos = array();
+     * $concepto->impuestos[0] = new stdClass();
+     *
+     * $data_partida = new stdClass();
+     * $data_partida->retenidos = (object) [
+     *     (object) ['tipo_impuesto' => 'ISR', 'tasa' => 10, 'importe' => 50.00]
+     * ];
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $modelo_retencion = new _data_impuestos();
+     * $modelo_retencion->tabla = 'fc_retencion';
+     *
+     * $resultado = $this->integra_retenciones($concepto, $data_partida, $modelo_partida, $modelo_retencion);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida esperada:
+     * ```php
+     * stdClass Object
+     * (
+     *     [impuestos] => Array
+     *         (
+     *             [0] => stdClass Object
+     *                 (
+     *                     [retenciones] => Array
+     *                         (
+     *                             [0] => stdClass Object
+     *                                 (
+     *                                     [tipo_impuesto] => "ISR"
+     *                                     [tasa] => 10
+     *                                     [importe] => 50.00
+     *                                 )
+     *                         )
+     *                 )
+     *         )
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `retenidos` no existe en `$data_partida`:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $data_partida->retenidos no existe"
+     *     [data] => stdClass Object()
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `retenidos` no es un objeto:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $data_partida->retenidos debe ser un objeto"
+     *     [data] => stdClass Object()
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error en la maquetación de impuestos retenidos:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error al maquetar retenciones"
+     *     [data] => stdClass Object()
+     * )
+     * ```
+     */
+    private function integra_retenciones(
+        stdClass $concepto,
+        stdClass $data_partida,
+        _partida $modelo_partida,
+        _data_impuestos $modelo_retencion
+    ): stdClass|array
     {
-        $key_retenido_importe = $modelo_retencion->tabla.'_importe';
-        $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $data_partida->retenidos,
-            key_importe_impuesto: $key_retenido_importe, name_tabla_partida: $modelo_partida->tabla);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al maquetar retenciones', data: $impuestos);
+        // Validación: Verifica que los impuestos retenidos existan en la partida
+        if (!isset($data_partida->retenidos)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->retenidos no existe',
+                data: $data_partida
+            );
         }
 
+        // Validación: Verifica que los impuestos retenidos sean un objeto
+        if (!is_object($data_partida->retenidos)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->retenidos debe ser un objeto',
+                data: $data_partida
+            );
+        }
+
+        // Asegura que el objeto concepto tenga la estructura de impuestos inicializada
+        if (!isset($concepto->impuestos)) {
+            $concepto->impuestos = array();
+        }
+        if (!isset($concepto->impuestos[0])) {
+            $concepto->impuestos[0] = new stdClass();
+        }
+
+        // Define la clave para obtener el importe del impuesto retenido desde la tabla de impuestos retenidos
+        $key_retenido_importe = $modelo_retencion->tabla . '_importe';
+
+        // Maqueta los impuestos retenidos con base en la información de la partida
+        $impuestos = (new _impuestos())->maqueta_impuesto(
+            impuestos: $data_partida->retenidos,
+            key_importe_impuesto: $key_retenido_importe,
+            name_tabla_partida: $modelo_partida->tabla
+        );
+
+        // Manejo de error en la maquetación de los impuestos retenidos
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al maquetar retenciones',
+                data: $impuestos
+            );
+        }
+
+        // Asigna los impuestos retenidos al concepto
         $concepto->impuestos[0]->retenciones = $impuestos;
 
         return $concepto;
-
     }
 
-    private function integra_traslados(stdClass $concepto, stdClass $data_partida, _partida $modelo_partida,
-                                       _data_impuestos $modelo_traslado){
-        $key_traslado_importe = $modelo_traslado->tabla.'_importe';
-        $impuestos = (new _impuestos())->maqueta_impuesto(impuestos: $data_partida->traslados,
-            key_importe_impuesto: $key_traslado_importe,name_tabla_partida: $modelo_partida->tabla);
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al maquetar traslados', data: $impuestos);
+
+    /**
+     * REG
+     * Integra los impuestos trasladados en la estructura de un concepto.
+     *
+     * Esta función verifica que los impuestos trasladados existan en `$data_partida`,
+     * sean un objeto válido y que `concepto` tenga una estructura de impuestos adecuada.
+     * Posteriormente, maqueta los impuestos trasladados con `_impuestos()->maqueta_impuesto()`
+     * y los asigna a la propiedad `traslados` dentro del concepto.
+     *
+     * @param stdClass $concepto Objeto que representa un concepto de facturación.
+     *        - Este objeto debe estar previamente estructurado con datos del producto y debe contener
+     *          la estructura de `impuestos[0]` antes de ser completada con los traslados.
+     * @param stdClass $data_partida Objeto que contiene la información de la partida, incluyendo impuestos trasladados.
+     *        - `traslados` (stdClass): Objeto que contiene los impuestos trasladados asociados a la partida.
+     * @param _partida $modelo_partida Instancia del modelo de partida que contiene la estructura y claves de identificación.
+     * @param _data_impuestos $modelo_traslado Modelo que maneja los datos de impuestos trasladados.
+     *        - `tabla` (string): Nombre de la tabla en la base de datos donde se almacenan los traslados.
+     *
+     * @return stdClass|array Retorna el objeto `concepto` con los impuestos trasladados integrados si la operación es exitosa.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si la propiedad `traslados` no existe en `$data_partida`, si no es un objeto,
+     * o si la maquetación de los impuestos trasladados falla.
+     *
+     * Estructura del error:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada válida:
+     * ```php
+     * $concepto = new stdClass();
+     * $concepto->impuestos = array();
+     * $concepto->impuestos[0] = new stdClass();
+     *
+     * $data_partida = new stdClass();
+     * $data_partida->traslados = (object) [
+     *     (object) ['tipo_impuesto' => 'IVA', 'tasa' => 16, 'importe' => 80.00]
+     * ];
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $modelo_traslado = new _data_impuestos();
+     * $modelo_traslado->tabla = 'fc_traslado';
+     *
+     * $resultado = $this->integra_traslados($concepto, $data_partida, $modelo_partida, $modelo_traslado);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida esperada:
+     * ```php
+     * stdClass Object
+     * (
+     *     [impuestos] => Array
+     *         (
+     *             [0] => stdClass Object
+     *                 (
+     *                     [traslados] => Array
+     *                         (
+     *                             [0] => stdClass Object
+     *                                 (
+     *                                     [tipo_impuesto] => "IVA"
+     *                                     [tasa] => 16
+     *                                     [importe] => 80.00
+     *                                 )
+     *                         )
+     *                 )
+     *         )
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `traslados` no existe en `$data_partida`:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $data_partida->traslados no existe"
+     *     [data] => stdClass Object()
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `traslados` no es un objeto:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $data_partida->traslados debe ser un objeto"
+     *     [data] => stdClass Object()
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error en la maquetación de impuestos trasladados:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error al maquetar traslados"
+     *     [data] => stdClass Object()
+     * )
+     * ```
+     */
+    private function integra_traslados(
+        stdClass $concepto,
+        stdClass $data_partida,
+        _partida $modelo_partida,
+        _data_impuestos $modelo_traslado
+    ): stdClass|array
+    {
+        // Validación: Verifica que los traslados existan en la partida
+        if (!isset($data_partida->traslados)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->traslados no existe',
+                data: $data_partida
+            );
         }
 
+        // Validación: Verifica que los traslados sean un objeto
+        if (!is_object($data_partida->traslados)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->traslados debe ser un objeto',
+                data: $data_partida
+            );
+        }
+
+        // Asegura que el objeto concepto tenga la estructura de impuestos inicializada
+        if (!isset($concepto->impuestos)) {
+            $concepto->impuestos = array();
+        }
+        if (!isset($concepto->impuestos[0])) {
+            $concepto->impuestos[0] = new stdClass();
+        }
+
+        // Define la clave para obtener el importe del traslado desde la tabla de impuestos trasladados
+        $key_traslado_importe = $modelo_traslado->tabla . '_importe';
+
+        // Maqueta los impuestos trasladados con base en la información de la partida
+        $impuestos = (new _impuestos())->maqueta_impuesto(
+            impuestos: $data_partida->traslados,
+            key_importe_impuesto: $key_traslado_importe,
+            name_tabla_partida: $modelo_partida->tabla
+        );
+
+        // Manejo de error en la maquetación de los impuestos trasladados
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al maquetar traslados',
+                data: $impuestos
+            );
+        }
+
+        // Asigna los impuestos trasladados al concepto
         $concepto->impuestos[0]->traslados = $impuestos;
 
         return $concepto;
     }
+
 
     /**
      * REG
@@ -1157,7 +2004,122 @@ class _conceptos{
     }
 
 
-    private function r_fc_cuenta_predial(string $key_filtro_id, _cuenta_predial $modelo_predial, int $registro_id): array|stdClass
+    /**
+     * REG
+     * Obtiene la cuenta predial asociada a un registro en la base de datos.
+     *
+     * Esta función valida la existencia del `registro_id`, asegura que `key_filtro_id` no esté vacío
+     * y realiza una consulta en el modelo `_cuenta_predial` para obtener la cuenta predial asociada.
+     * Si la consulta falla o si no hay exactamente un registro asociado, se devuelve un error.
+     *
+     * @param string $key_filtro_id Clave del campo que se utilizará como filtro en la consulta.
+     * @param _cuenta_predial $modelo_predial Modelo que maneja los datos de cuentas prediales.
+     * @param int $registro_id Identificador del registro que se está consultando.
+     *
+     * @return array|stdClass Retorna un objeto con los datos de la cuenta predial si la operación es exitosa.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si `$registro_id` es menor o igual a 0, si `$key_filtro_id` está vacío,
+     * si la consulta falla o si hay más de una cuenta predial asignada.
+     *
+     * Estructura del error generado:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada válida:
+     * ```php
+     * $modelo_predial = new _cuenta_predial();
+     * $key_filtro_id = 'fc_cuenta_predial_id';
+     * $registro_id = 123;
+     *
+     * $resultado = $this->r_fc_cuenta_predial($key_filtro_id, $modelo_predial, $registro_id);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida esperada si hay una cuenta predial asociada:
+     * ```php
+     * stdClass Object
+     * (
+     *     [n_registros] => 1
+     *     [registros] => Array
+     *         (
+     *             [0] => Array
+     *                 (
+     *                     [fc_cuenta_predial_id] => 123
+     *                     [descripcion] => "Cuenta predial asignada"
+     *                 )
+     *         )
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$registro_id` es 0:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error: el registro_id debe ser mayor a 0"
+     *     [data] => 0
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$key_filtro_id` está vacío:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error: el key_filtro_id está vacío"
+     *     [data] => ""
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si no hay cuenta predial asociada:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error: no existe cuenta predial asignada"
+     *     [data] => stdClass Object()
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si hay más de una cuenta predial asignada:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error de integridad: más de una cuenta predial asignada"
+     *     [data] => stdClass Object()
+     *     [es_final] => true
+     * )
+     * ```
+     */
+    private function r_fc_cuenta_predial(
+        string $key_filtro_id,
+        _cuenta_predial $modelo_predial,
+        int $registro_id
+    ): array|stdClass
     {
         // Validar que el ID del registro sea mayor a 0
         if ($registro_id <= 0) {
@@ -1168,10 +2130,13 @@ class _conceptos{
             );
         }
 
+        // Validar que la clave del filtro no esté vacía
         $key_filtro_id = trim($key_filtro_id);
-        if($key_filtro_id === ''){
+        if ($key_filtro_id === '') {
             return $this->error->error(
-                mensaje: "Error: el $key_filtro_id esta vacio", data: $registro_id, es_final: true
+                mensaje: "Error: el $key_filtro_id está vacío",
+                data: $registro_id,
+                es_final: true
             );
         }
 
@@ -1206,6 +2171,7 @@ class _conceptos{
         // Retornar la cuenta predial encontrada
         return $r_fc_cuenta_predial;
     }
+
 
     /**
      * REG
@@ -1360,6 +2326,136 @@ class _conceptos{
                     es_final: true
                 );
             }
+        }
+
+        return true;
+    }
+
+    /**
+     * REG
+     * Verifica la validez de una partida antes de procesarla.
+     *
+     * Esta función realiza validaciones en el objeto `$data_partida`, asegurándose de que contenga
+     * la clave `partida`, obtiene las claves requeridas usando `keys_partida()`, y luego valida
+     * la estructura de la partida mediante `valida_partida()`.
+     *
+     * Si alguna validación falla, se devuelve un error detallado.
+     *
+     * @param stdClass $data_partida Objeto que contiene la información de la partida.
+     *        - `partida` (array): Datos de la partida a validar.
+     * @param _partida $modelo_partida Instancia del modelo de partida que contiene la estructura y claves de identificación.
+     *
+     * @return true|array Retorna `true` si la partida es válida.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si `$data_partida->partida` no existe, si no se pueden obtener las claves de la partida
+     * o si la validación de la partida falla.
+     *
+     * Estructura del error generado:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada válida:
+     * ```php
+     * $data_partida = new stdClass();
+     * $data_partida->partida = [
+     *     'fc_partida_cantidad' => 5,
+     *     'fc_partida_descripcion' => 'Producto de prueba',
+     *     'fc_partida_valor_unitario' => 100.00,
+     *     'fc_partida_sub_total_base' => 500.00
+     * ];
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $resultado = $this->verifica_partida($data_partida, $modelo_partida);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida esperada si la partida es válida:
+     * ```php
+     * true
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$data_partida->partida` no existe:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $data_partida->partida no existe"
+     *     [data] => stdClass Object()
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si no se pueden obtener las claves de la partida:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error al obtener $keys_part"
+     *     [data] => stdClass Object()
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si la validación de la partida falla:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error al validar data_partida"
+     *     [data] => stdClass Object()
+     * )
+     * ```
+     */
+    private function verifica_partida(
+        stdClass $data_partida,
+        _partida $modelo_partida
+    ): true|array
+    {
+        // Validar que la partida exista dentro de los datos de la partida
+        if (!isset($data_partida->partida)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->partida no existe',
+                data: $data_partida,
+                es_final: true
+            );
+        }
+
+        // Obtener las claves necesarias de la partida
+        $keys_part = $this->keys_partida(modelo_partida: $modelo_partida);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obtener $keys_part',
+                data: $keys_part
+            );
+        }
+
+        // Validar la estructura de la partida
+        $valida = $this->valida_partida(data_partida: $data_partida, keys_part: $keys_part);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al validar data_partida',
+                data: $valida
+            );
         }
 
         return true;

@@ -319,91 +319,6 @@ class _impuestos{
         return $impuestos;
     }
 
-    /**
-     * REG
-     * Procesa y acumula impuestos globales a partir de una lista de registros de impuestos.
-     *
-     * Esta función recorre los registros de impuestos y genera claves únicas (`key_gl`) para cada uno de ellos.
-     * Luego, valida la base de datos y acumula los impuestos en la estructura global.
-     *
-     * ### Ejemplo de entrada válida:
-     * ```php
-     * $impuestos = new stdClass();
-     * $impuestos->registros = [
-     *     [
-     *         'cat_sat_tipo_factor_id' => '1',
-     *         'cat_sat_factor_id' => '5',
-     *         'cat_sat_tipo_impuesto_id' => '2',
-     *         'importe' => 150.50
-     *     ],
-     *     [
-     *         'cat_sat_tipo_factor_id' => '1',
-     *         'cat_sat_factor_id' => '3',
-     *         'cat_sat_tipo_impuesto_id' => '2',
-     *         'importe' => 75.25
-     *     ]
-     * ];
-     *
-     * $global_imp = [];
-     * $key_importe = 'importe';
-     * $name_tabla_partida = 'fc_partida';
-     *
-     * $resultado = $this->impuestos_globales($impuestos, $global_imp, $key_importe, $name_tabla_partida);
-     * print_r($resultado);
-     * ```
-     *
-     * ### Salida esperada:
-     * ```php
-     * Array
-     * (
-     *     [1.5.2] => stdClass Object
-     *         (
-     *             [base] => 150.50
-     *             [importe] => 150.50
-     *         )
-     *
-     *     [1.3.2] => stdClass Object
-     *         (
-     *             [base] => 75.25
-     *             [importe] => 75.25
-     *         )
-     * )
-     * ```
-     *
-     * ### Ejemplo de entrada inválida:
-     * ```php
-     * $impuestos = new stdClass();
-     * $impuestos->registros = [
-     *     'cat_sat_tipo_factor_id' => '',
-     *     'cat_sat_factor_id' => '5',
-     *     'cat_sat_tipo_impuesto_id' => '2'
-     * ];
-     * ```
-     *
-     * ### Salida esperada en caso de error:
-     * ```php
-     * Array
-     * (
-     *     [mensaje] => "Error cat_sat_tipo_factor_id esta vacio"
-     *     [data] => Array(...)
-     *     [es_final] => true
-     * )
-     * ```
-     *
-     * @param stdClass $impuestos Lista de registros de impuestos a procesar.
-     *                            Cada registro debe ser un array con claves:
-     *                            - `'cat_sat_tipo_factor_id'` (int/string) - Tipo de factor.
-     *                            - `'cat_sat_factor_id'` (int/string) - Factor del impuesto.
-     *                            - `'cat_sat_tipo_impuesto_id'` (int/string) - Tipo de impuesto.
-     *                            - `'importe'` (float) - Monto del impuesto.
-     * @param array $global_imp Array asociativo donde se almacenarán los impuestos acumulados.
-     * @param string $key_importe Clave del campo que contiene el importe del impuesto en cada registro.
-     * @param string $name_tabla_partida Nombre de la tabla de partidas, utilizada en validaciones.
-     *
-     * @return array Retorna un array con los impuestos acumulados por clave única (`key_gl`).
-     *
-     * @throws array En caso de error, retorna un array con mensaje y detalles del problema.
-     */
     final public function impuestos_globales(stdClass $impuestos, array $global_imp, string $key_importe,
                                              string $name_tabla_partida): array
     {
@@ -412,6 +327,58 @@ class _impuestos{
             // Validar que el impuesto sea un array
             if (!is_array($impuesto)) {
                 return $this->error->error(mensaje: 'Error $impuesto debe ser un array', data: $impuesto);
+            }
+
+
+            $valida = $this->valida_keys_existentes(impuesto: $impuesto);
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id no existe',
+                    data: $valida, es_final: true);
+            }
+
+
+            $impuesto['cat_sat_tipo_factor_id'] = trim($impuesto['cat_sat_tipo_factor_id']);
+            $impuesto['cat_sat_factor_id'] = trim($impuesto['cat_sat_factor_id']);
+            $impuesto['cat_sat_tipo_impuesto_id'] = trim($impuesto['cat_sat_tipo_impuesto_id']);
+
+            // Validar que los valores no estén vacíos
+            if ($impuesto['cat_sat_tipo_factor_id'] === '') {
+                return (new errores())->error(mensaje: 'Error cat_sat_tipo_factor_id esta vacio',
+                    data: $impuesto, es_final: true);
+            }
+            if ($impuesto['cat_sat_factor_id'] === '') {
+                return (new errores())->error(mensaje: 'Error cat_sat_factor_id esta vacio',
+                    data: $impuesto, es_final: true);
+            }
+            if ($impuesto['cat_sat_tipo_impuesto_id'] === '') {
+                return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id esta vacio',
+                    data: $impuesto, es_final: true);
+            }
+
+            if (!is_numeric($impuesto['cat_sat_tipo_factor_id'])) {
+                return (new errores())->error(mensaje: 'Error cat_sat_tipo_factor_id debe ser un numero',
+                    data: $impuesto, es_final: true);
+            }
+            if (!is_numeric($impuesto['cat_sat_factor_id'])) {
+                return (new errores())->error(mensaje: 'Error cat_sat_factor_id debe ser un numero',
+                    data: $impuesto, es_final: true);
+            }
+            if (!is_numeric($impuesto['cat_sat_tipo_impuesto_id'])) {
+                return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id debe ser un numero',
+                    data: $impuesto, es_final: true);
+            }
+
+            if ((int)$impuesto['cat_sat_tipo_factor_id'] <= 0) {
+                return (new errores())->error(mensaje: 'Error cat_sat_tipo_factor_id debe ser mayor a 0',
+                    data: $impuesto, es_final: true);
+            }
+            if ((int)$impuesto['cat_sat_factor_id'] <= 0) {
+                return (new errores())->error(mensaje: 'Error cat_sat_factor_id debe ser mayor a 0',
+                    data: $impuesto, es_final: true);
+            }
+            if ((int)$impuesto['cat_sat_tipo_impuesto_id'] <= 0) {
+                return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id debe ser mayor a 0',
+                    data: $impuesto, es_final: true);
             }
 
             // Generar clave única del impuesto
@@ -915,18 +882,10 @@ class _impuestos{
      */
     private function key_gl(array $impuesto): array|string
     {
-        // Validar existencia de claves requeridas en el array
-        if (!isset($impuesto['cat_sat_tipo_factor_id'])) {
-            return (new errores())->error(mensaje: 'Error cat_sat_tipo_factor_id no existe',
-                data: $impuesto, es_final: true);
-        }
-        if (!isset($impuesto['cat_sat_factor_id'])) {
-            return (new errores())->error(mensaje: 'Error cat_sat_factor_id no existe',
-                data: $impuesto, es_final: true);
-        }
-        if (!isset($impuesto['cat_sat_tipo_impuesto_id'])) {
+        $valida = $this->valida_keys_existentes(impuesto: $impuesto);
+        if(errores::$error){
             return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id no existe',
-                data: $impuesto, es_final: true);
+                data: $valida, es_final: true);
         }
 
         // Limpiar espacios en blanco en los valores
@@ -1249,5 +1208,24 @@ class _impuestos{
                 data: $valida);
         }
         return true;
+    }
+
+    private function valida_keys_existentes(array $impuesto): true|array
+    {
+        if (!isset($impuesto['cat_sat_tipo_factor_id'])) {
+            return (new errores())->error(mensaje: 'Error cat_sat_tipo_factor_id no existe',
+                data: $impuesto, es_final: true);
+        }
+        if (!isset($impuesto['cat_sat_factor_id'])) {
+            return (new errores())->error(mensaje: 'Error cat_sat_factor_id no existe',
+                data: $impuesto, es_final: true);
+        }
+        if (!isset($impuesto['cat_sat_tipo_impuesto_id'])) {
+            return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id no existe',
+                data: $impuesto, es_final: true);
+        }
+
+        return true;
+
     }
 }
