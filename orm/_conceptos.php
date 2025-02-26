@@ -64,8 +64,127 @@ class _conceptos{
 
     }
 
-    private function concepto(stdClass $data_partida, stdClass $keys_part): stdClass
+    /**
+     * REG
+     * Genera un objeto `concepto` a partir de los datos de la partida y las claves proporcionadas.
+     *
+     * Esta función verifica que los datos de la partida contengan la información necesaria antes de crear
+     * el objeto `concepto`. Si faltan claves requeridas o si los valores no son válidos, genera un error.
+     *
+     * @param stdClass $data_partida Objeto que contiene la información de la partida.
+     *        - `partida` (array): Datos de la partida, incluyendo valores numéricos y claves fiscales.
+     * @param stdClass $keys_part Objeto que contiene las claves necesarias para extraer datos de la partida.
+     *        - `cantidad` (string): Clave del campo cantidad.
+     *        - `descripcion` (string): Clave del campo descripción.
+     *        - `valor_unitario` (string): Clave del campo valor unitario.
+     *        - `importe` (string): Clave del campo importe.
+     *
+     * @return stdClass|array Retorna un objeto con la estructura del concepto generado si la operación es exitosa.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si no se encuentra la clave identificadora de la partida o si los valores no son válidos.
+     * El array de error generado tiene la siguiente estructura:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada:
+     * ```php
+     * $data_partida = new stdClass();
+     * $data_partida->partida = [
+     *     'cat_sat_producto_codigo' => '01010101',
+     *     'fc_partida_cantidad' => 5,
+     *     'cat_sat_unidad_codigo' => 'H87',
+     *     'fc_partida_descripcion' => 'Producto genérico',
+     *     'fc_partida_valor_unitario' => 100.00,
+     *     'fc_partida_importe' => 500.00,
+     *     'cat_sat_obj_imp_codigo' => '02',
+     *     'com_producto_codigo' => 'PROD123',
+     *     'cat_sat_unidad_descripcion' => 'Pieza'
+     * ];
+     *
+     * $keys_part = new stdClass();
+     * $keys_part->cantidad = 'fc_partida_cantidad';
+     * $keys_part->descripcion = 'fc_partida_descripcion';
+     * $keys_part->valor_unitario = 'fc_partida_valor_unitario';
+     * $keys_part->importe = 'fc_partida_importe';
+     *
+     * $resultado = $this->concepto($data_partida, $keys_part);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida exitosa:
+     * ```php
+     * stdClass Object
+     * (
+     *     [clave_prod_serv] => "01010101"
+     *     [cantidad] => 5
+     *     [clave_unidad] => "H87"
+     *     [descripcion] => "Producto genérico"
+     *     [valor_unitario] => "100.00"
+     *     [importe] => "500.00"
+     *     [objeto_imp] => "02"
+     *     [no_identificacion] => "PROD123"
+     *     [unidad] => "Pieza"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si falta una clave en `$keys_part`:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $keys_part->valor_unitario no existe"
+     *     [data] => stdClass Object()
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si un valor no es numérico:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $data_partida->partida[fc_partida_valor_unitario] debe ser un número"
+     *     [data] => stdClass Object()
+     *     [es_final] => true
+     * )
+     * ```
+     */
+    private function concepto(stdClass $data_partida, stdClass $keys_part): stdClass|array
     {
+        // Verifica que la partida exista en el objeto data_partida
+        if (!isset($data_partida->partida)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->partida no existe',
+                data: $data_partida,
+                es_final: true
+            );
+        }
+
+
+        $valida  = $this->valida_partida(data_partida: $data_partida,keys_part: $keys_part);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al $validar data_partida', data: $valida);
+        }
+
+        // Creación del objeto concepto con los valores validados
         $concepto = new stdClass();
         $concepto->clave_prod_serv = $data_partida->partida['cat_sat_producto_codigo'];
         $concepto->cantidad = $data_partida->partida[$keys_part->cantidad];
@@ -78,8 +197,8 @@ class _conceptos{
         $concepto->unidad = $data_partida->partida['cat_sat_unidad_descripcion'];
 
         return $concepto;
-
     }
+
 
     private function cuenta_predial(
         stdClass $concepto, string $key_filtro_id, _cuenta_predial $modelo_predial, array $partida, int $registro_id): array|stdClass
@@ -277,6 +396,78 @@ class _conceptos{
     }
 
 
+    /**
+     * REG
+     * Obtiene y formatea el valor del descuento aplicado a una partida.
+     *
+     * Esta función verifica que la clave del descuento proporcionada no esté vacía, luego busca el descuento
+     * en los datos de la partida y lo formatea a dos decimales. Si la clave del descuento no existe en la partida,
+     * se asigna un valor predeterminado de `0.0`. En caso de error en cualquier etapa, se retorna un array con la
+     * información del error.
+     *
+     * @param stdClass $data_partida Objeto que contiene la información de la partida.
+     *        - `partida` (array): Datos de la partida, incluyendo claves fiscales y valores numéricos.
+     * @param string $key_descuento Clave dentro de la partida que representa el descuento.
+     *
+     * @return float|array Retorna el valor del descuento formateado a dos decimales si la operación es exitosa.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si `$key_descuento` está vacío o si hay un error al formatear el descuento.
+     * El array de error generado tiene la siguiente estructura:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada:
+     * ```php
+     * $data_partida = new stdClass();
+     * $data_partida->partida = [
+     *     'fc_partida_descuento' => 50.25
+     * ];
+     *
+     * $key_descuento = 'fc_partida_descuento';
+     *
+     * $resultado = $this->descuento($data_partida, $key_descuento);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida exitosa:
+     * ```php
+     * 50.25
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$key_descuento` está vacío:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $key_descuento está vacío"
+     *     [data] => ""
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida cuando no existe la clave en `$data_partida->partida`:
+     * ```php
+     * 0.0
+     * ```
+     */
     private function descuento(stdClass $data_partida, string $key_descuento): float|array
     {
         // Elimina espacios en blanco en la clave del descuento
@@ -312,6 +503,8 @@ class _conceptos{
 
         return $descuento;
     }
+
+
 
     private function fc_cuenta_predial_numero(string $key_filtro_id, _cuenta_predial $modelo_predial, int $registro_id): array|string
     {
@@ -549,6 +742,56 @@ class _conceptos{
 
     }
 
+    /**
+     * REG
+     * Inicializa la estructura de impuestos dentro del objeto `concepto`.
+     *
+     * Esta función agrega una propiedad `impuestos` al objeto `concepto`, que contendrá arrays vacíos
+     * para `traslados` y `retenciones`. Esto permite estructurar correctamente los impuestos de un concepto
+     * antes de ser llenados con datos específicos.
+     *
+     * @param stdClass $concepto Objeto que representa un concepto de facturación.
+     *        - Este objeto debe estar previamente estructurado con datos del producto.
+     *
+     * @return stdClass Retorna el objeto `concepto` con la estructura de impuestos inicializada.
+     *
+     * @example
+     * Ejemplo de entrada:
+     * ```php
+     * $concepto = new stdClass();
+     * $concepto->clave_prod_serv = "01010101";
+     * $concepto->cantidad = 5;
+     * $concepto->clave_unidad = "H87";
+     * $concepto->descripcion = "Producto genérico";
+     * $concepto->valor_unitario = "100.00";
+     * $concepto->importe = "500.00";
+     *
+     * $resultado = $this->inicializa_impuestos_de_concepto($concepto);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida esperada:
+     * ```php
+     * stdClass Object
+     * (
+     *     [clave_prod_serv] => "01010101"
+     *     [cantidad] => 5
+     *     [clave_unidad] => "H87"
+     *     [descripcion] => "Producto genérico"
+     *     [valor_unitario] => "100.00"
+     *     [importe] => "500.00"
+     *     [impuestos] => Array
+     *         (
+     *             [0] => stdClass Object
+     *                 (
+     *                     [traslados] => Array()
+     *                     [retenciones] => Array()
+     *                 )
+     *         )
+     * )
+     * ```
+     */
     private function inicializa_impuestos_de_concepto(stdClass $concepto): stdClass
     {
         // Inicializa la propiedad impuestos como un array vacío en el concepto
@@ -565,29 +808,159 @@ class _conceptos{
         return $concepto;
     }
 
-    private function integra_descuento(stdClass $data_partida, _partida $modelo_partida)
+
+    /**
+     * REG
+     * Integra el descuento en la estructura de un concepto generado a partir de los datos de una partida.
+     *
+     * La función valida la existencia de los datos de la partida, obtiene las claves necesarias,
+     * valida la partida, genera el concepto y calcula el descuento, integrándolo en la estructura final del concepto.
+     * Si alguna validación falla, devuelve un array con la información del error.
+     *
+     * @param stdClass $data_partida Objeto que contiene la información de la partida.
+     *        - `partida` (array): Datos de la partida, incluyendo claves fiscales y valores numéricos.
+     * @param _partida $modelo_partida Instancia del modelo de partida que contiene la estructura y claves de identificación.
+     *
+     * @return stdClass|array Retorna un objeto `concepto` con el descuento integrado si la operación es exitosa.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si `$data_partida->partida` no existe, si no se pueden obtener las claves necesarias,
+     * si los datos de la partida no son válidos o si hay un error en el cálculo del descuento.
+     * El array de error generado tiene la siguiente estructura:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada válida:
+     * ```php
+     * $data_partida = new stdClass();
+     * $data_partida->partida = [
+     *     'cat_sat_producto_codigo' => '01010101',
+     *     'fc_partida_cantidad' => 5,
+     *     'cat_sat_unidad_codigo' => 'H87',
+     *     'fc_partida_descripcion' => 'Producto genérico',
+     *     'fc_partida_valor_unitario' => 100.00,
+     *     'fc_partida_importe' => 500.00,
+     *     'cat_sat_obj_imp_codigo' => '02',
+     *     'com_producto_codigo' => 'PROD123',
+     *     'cat_sat_unidad_descripcion' => 'Pieza',
+     *     'fc_partida_descuento' => 50.00
+     * ];
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $resultado = $this->integra_descuento($data_partida, $modelo_partida);
+     * print_r($resultado);
+     * ```
+     *
+     * @example
+     * Ejemplo de salida exitosa:
+     * ```php
+     * stdClass Object
+     * (
+     *     [clave_prod_serv] => "01010101"
+     *     [cantidad] => 5
+     *     [clave_unidad] => "H87"
+     *     [descripcion] => "Producto genérico"
+     *     [valor_unitario] => "100.00"
+     *     [importe] => "500.00"
+     *     [objeto_imp] => "02"
+     *     [no_identificacion] => "PROD123"
+     *     [unidad] => "Pieza"
+     *     [descuento] => 50.00
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si `$data_partida->partida` no existe:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $data_partida->partida no existe"
+     *     [data] => stdClass Object()
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si hay problemas al obtener las claves de la partida:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error al obtener $keys_part"
+     *     [data] => stdClass Object()
+     * )
+     * ```
+     */
+    private function integra_descuento(stdClass $data_partida, _partida $modelo_partida): stdClass|array
     {
+        // Verifica si la partida existe en el objeto data_partida
+        if (!isset($data_partida->partida)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->partida no existe',
+                data: $data_partida,
+                es_final: true
+            );
+        }
 
+        // Obtiene las claves de la partida
         $keys_part = $this->keys_partida(modelo_partida: $modelo_partida);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener $keys_part', data: $keys_part);
-        }
-
-        $concepto = $this->concepto(data_partida: $data_partida,keys_part: $keys_part);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al maquetar $concepto', data: $concepto);
+            return $this->error->error(
+                mensaje: 'Error al obtener $keys_part',
+                data: $keys_part
+            );
         }
 
-        $descuento = $this->descuento(data_partida: $data_partida,key_descuento:  $keys_part->descuento);
+        // Valida la estructura de la partida
+        $valida = $this->valida_partida(data_partida: $data_partida, keys_part: $keys_part);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al maquetar descuento', data: $descuento);
+            return $this->error->error(
+                mensaje: 'Error al validar data_partida',
+                data: $valida
+            );
         }
 
+        // Genera el objeto concepto a partir de la partida
+        $concepto = $this->concepto(data_partida: $data_partida, keys_part: $keys_part);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al maquetar $concepto',
+                data: $concepto
+            );
+        }
+
+        // Obtiene el valor del descuento
+        $descuento = $this->descuento(data_partida: $data_partida, key_descuento: $keys_part->descuento);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al maquetar descuento',
+                data: $descuento
+            );
+        }
+
+        // Agrega el descuento al concepto
         $concepto->descuento = $descuento;
 
         return $concepto;
-
     }
+
 
     final public function integra_partidas(array $conceptos, string $key, string $key_filtro_id, _partida $modelo_partida, _cuenta_predial $modelo_predial,
                                       _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado,
@@ -833,6 +1206,165 @@ class _conceptos{
         // Retornar la cuenta predial encontrada
         return $r_fc_cuenta_predial;
     }
+
+    /**
+     * REG
+     * Valida la estructura y los valores de una partida asegurando que contenga los datos esenciales.
+     *
+     * La función verifica que las claves necesarias existan en `$keys_part` y en `$data_partida->partida`,
+     * y que sus valores no estén vacíos. También valida que los valores numéricos sean realmente números.
+     * Si alguna validación falla, devuelve un array con la información del error.
+     *
+     * @param stdClass $data_partida Objeto que contiene la información de la partida.
+     *        - `partida` (array): Datos de la partida, incluyendo claves fiscales y valores numéricos.
+     * @param stdClass $keys_part Objeto que contiene las claves necesarias para extraer datos de la partida.
+     *        - `cantidad` (string): Clave del campo cantidad.
+     *        - `descripcion` (string): Clave del campo descripción.
+     *        - `valor_unitario` (string): Clave del campo valor unitario.
+     *        - `importe` (string): Clave del campo importe.
+     *
+     * @return true|array Retorna `true` si la validación es exitosa.
+     * En caso de error, retorna un array con la información del error.
+     *
+     * @throws errores Si alguna clave requerida no existe en `$keys_part` o en `$data_partida->partida`,
+     * o si los valores no son válidos.
+     * El array de error generado tiene la siguiente estructura:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
+     *     [mensaje_limpio] => "Mensaje de error"
+     *     [file] => "<b>ruta/del/archivo.php</b>"
+     *     [line] => "<b>123</b>"
+     *     [class] => "<b>NombreDeLaClase</b>"
+     *     [function] => "<b>NombreDeLaFuncion</b>"
+     *     [data] => "Datos asociados al error"
+     *     [params] => "Parámetros utilizados en la función"
+     *     [fix] => "Sugerencia de corrección"
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de entrada válida:
+     * ```php
+     * $data_partida = new stdClass();
+     * $data_partida->partida = [
+     *     'cat_sat_producto_codigo' => '01010101',
+     *     'fc_partida_cantidad' => 5,
+     *     'cat_sat_unidad_codigo' => 'H87',
+     *     'fc_partida_descripcion' => 'Producto genérico',
+     *     'fc_partida_valor_unitario' => 100.00,
+     *     'fc_partida_importe' => 500.00,
+     *     'cat_sat_obj_imp_codigo' => '02',
+     *     'com_producto_codigo' => 'PROD123',
+     *     'cat_sat_unidad_descripcion' => 'Pieza'
+     * ];
+     *
+     * $keys_part = new stdClass();
+     * $keys_part->cantidad = 'fc_partida_cantidad';
+     * $keys_part->descripcion = 'fc_partida_descripcion';
+     * $keys_part->valor_unitario = 'fc_partida_valor_unitario';
+     * $keys_part->importe = 'fc_partida_importe';
+     *
+     * $resultado = $this->valida_partida($data_partida, $keys_part);
+     * var_dump($resultado); // true
+     * ```
+     *
+     * @example
+     * Ejemplo de salida exitosa:
+     * ```php
+     * true
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si falta una clave en `$keys_part`:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $keys_part->valor_unitario no existe"
+     *     [data] => stdClass Object()
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @example
+     * Ejemplo de salida con error si un valor en la partida no es numérico:
+     * ```php
+     * Array
+     * (
+     *     [error] => 1
+     *     [mensaje] => "Error $data_partida->partida[fc_partida_valor_unitario] debe ser un número"
+     *     [data] => stdClass Object()
+     *     [es_final] => true
+     * )
+     * ```
+     */
+    private function valida_partida(stdClass $data_partida, stdClass $keys_part): true|array
+    {
+        // Lista de claves obligatorias en keys_part
+        $keys_val = array('cantidad', 'descripcion', 'valor_unitario', 'importe');
+
+        // Validación de existencia y contenido de keys_part
+        foreach ($keys_val as $key) {
+            if (!isset($keys_part->$key)) {
+                return $this->error->error(
+                    mensaje: 'Error $keys_part->' . $key . ' no existe',
+                    data: $keys_part,
+                    es_final: true
+                );
+            }
+            if (trim($keys_part->$key) === '') {
+                return $this->error->error(
+                    mensaje: 'Error $keys_part->' . $key . ' está vacío',
+                    data: $keys_part,
+                    es_final: true
+                );
+            }
+        }
+
+        // Lista de claves requeridas en la partida
+        $keys_val = array(
+            'cat_sat_producto_codigo', $keys_part->cantidad, 'cat_sat_unidad_codigo',
+            $keys_part->descripcion, $keys_part->valor_unitario, $keys_part->importe,
+            'cat_sat_obj_imp_codigo', 'com_producto_codigo', 'cat_sat_unidad_descripcion'
+        );
+
+        // Validación de existencia y contenido de los valores en la partida
+        foreach ($keys_val as $key) {
+            if (!isset($data_partida->partida[$key])) {
+                return $this->error->error(
+                    mensaje: 'Error $data_partida->partida[' . $key . '] no existe',
+                    data: $data_partida,
+                    es_final: true
+                );
+            }
+            if (trim($data_partida->partida[$key]) === '') {
+                return $this->error->error(
+                    mensaje: 'Error $data_partida->partida[' . $key . '] está vacío',
+                    data: $data_partida,
+                    es_final: true
+                );
+            }
+        }
+
+        // Validación de valores numéricos en los campos clave
+        $keys_val = array($keys_part->cantidad, $keys_part->valor_unitario, $keys_part->importe);
+
+        foreach ($keys_val as $key) {
+            if (!is_numeric($data_partida->partida[$key])) {
+                return $this->error->error(
+                    mensaje: 'Error $data_partida->partida[' . $key . '] debe ser un número',
+                    data: $data_partida,
+                    es_final: true
+                );
+            }
+        }
+
+        return true;
+    }
+
 
 
 }

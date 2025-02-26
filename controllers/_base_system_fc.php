@@ -1610,9 +1610,7 @@ class _base_system_fc extends _base_system{
 
     public function genera_pdf(bool $header, bool $ws = false){
 
-        /**
-         * ajusta aqui
-         */
+
         $pdf = (new _doctos())->pdf(descarga: true, guarda: false, modelo_documento: $this->modelo_documento,
             modelo_entidad:  $this->modelo_entidad, modelo_partida: $this->modelo_partida,
             modelo_predial:  $this->modelo_predial, modelo_relacion: $this->modelo_relacion,

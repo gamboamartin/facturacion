@@ -33,6 +33,57 @@ class _conceptosTest extends test
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_concepto(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new _conceptos();
+        $trs = new liberator($trs);
+
+
+        $data_partida = new stdClass();
+        $keys_part = new stdClass();
+        $keys_part->cantidad = 'cantidad';
+        $keys_part->descripcion = 'descripcion';
+        $keys_part->valor_unitario = 'valor_unitario';
+        $keys_part->importe = 'importe';
+
+        $data_partida->partida = array();
+        $data_partida->partida['cat_sat_producto_codigo'] = 'cat_sat_producto_codigo';
+        $data_partida->partida['cantidad'] = '1';
+        $data_partida->partida['cat_sat_unidad_codigo'] = 'cat_sat_unidad_codigo';
+        $data_partida->partida['descripcion'] = 'descripcion';
+        $data_partida->partida['valor_unitario'] = '2';
+        $data_partida->partida['importe'] = '3';
+        $data_partida->partida['cat_sat_obj_imp_codigo'] = 'cat_sat_obj_imp_codigo';
+        $data_partida->partida['com_producto_codigo'] = 'com_producto_codigo';
+        $data_partida->partida['cat_sat_unidad_descripcion'] = 'cat_sat_unidad_descripcion';
+
+        $resultado = $trs->concepto($data_partida, $keys_part);
+
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('cat_sat_producto_codigo',$resultado->clave_prod_serv);
+        $this->assertEquals(1,$resultado->cantidad);
+        $this->assertEquals('cat_sat_unidad_codigo',$resultado->clave_unidad);
+        $this->assertEquals('descripcion',$resultado->descripcion);
+        $this->assertEquals('2.00',$resultado->valor_unitario);
+        $this->assertEquals('3.00',$resultado->importe);
+        $this->assertEquals('cat_sat_obj_imp_codigo',$resultado->objeto_imp);
+        $this->assertEquals('com_producto_codigo',$resultado->no_identificacion);
+        $this->assertEquals('cat_sat_unidad_descripcion',$resultado->unidad);
+
+        errores::$error = false;
+
+    }
+
+
     public function test_cuenta_predial(): void
     {
         errores::$error = false;
@@ -263,6 +314,53 @@ class _conceptosTest extends test
 
     }
 
+    public function test_integra_descuento(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new _conceptos();
+        $trs = new liberator($trs);
+
+        $modelo_partida = new fc_partida($this->link);
+        $data_partida = new stdClass();
+        $data_partida->partida = array();
+        $data_partida->partida['cat_sat_producto_codigo'] = 'cat_sat_producto_codigo';
+        $data_partida->partida['fc_partida_cantidad'] = '1';
+        $data_partida->partida['cat_sat_unidad_codigo'] = 'cat_sat_unidad_codigo';
+        $data_partida->partida['fc_partida_descripcion'] = 'fc_partida_descripcion';
+        $data_partida->partida['fc_partida_valor_unitario'] = '2';
+        $data_partida->partida['fc_partida_sub_total_base'] = '3';
+        $data_partida->partida['cat_sat_obj_imp_codigo'] = 'cat_sat_obj_imp_codigo';
+        $data_partida->partida['com_producto_codigo'] = 'com_producto_codigo';
+        $data_partida->partida['cat_sat_unidad_descripcion'] = 'cat_sat_unidad_descripcion';
+        $data_partida->partida['fc_partida_descuento'] = '2';
+        $resultado = $trs->integra_descuento($data_partida,$modelo_partida);
+
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("cat_sat_producto_codigo", $resultado->clave_prod_serv);
+        $this->assertEquals("1", $resultado->cantidad);
+        $this->assertEquals("cat_sat_unidad_codigo", $resultado->clave_unidad);
+        $this->assertEquals("fc_partida_descripcion", $resultado->descripcion);
+        $this->assertEquals("2.00", $resultado->valor_unitario);
+        $this->assertEquals("3.00", $resultado->importe);
+        $this->assertEquals("cat_sat_obj_imp_codigo", $resultado->objeto_imp);
+        $this->assertEquals("com_producto_codigo", $resultado->no_identificacion);
+        $this->assertEquals("cat_sat_unidad_descripcion", $resultado->unidad);
+        $this->assertEquals("2", $resultado->descuento);
+
+
+
+        errores::$error = false;
+
+    }
+
     public function test_keys_partida(): void
     {
         errores::$error = false;
@@ -374,6 +472,47 @@ class _conceptosTest extends test
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals('xxx',$resultado->registros[0]['fc_cuenta_predial_descripcion']);
+
+        errores::$error = false;
+
+    }
+
+    public function test_valida_partida(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo = new _conceptos();
+        $modelo = new liberator($modelo);
+
+        $data_partida = new stdClass();
+        $data_partida->partida['cat_sat_producto_codigo'] = 'cat_sat_producto_codigo';
+        $data_partida->partida['cantidad'] = '1';
+        $data_partida->partida['cat_sat_unidad_codigo'] = 'cat_sat_unidad_codigo';
+        $data_partida->partida['descripcion'] = 'descripcion';
+        $data_partida->partida['valor_unitario'] = '2';
+        $data_partida->partida['importe'] = '4';
+        $data_partida->partida['cat_sat_obj_imp_codigo'] = 'cat_sat_obj_imp_codigo';
+        $data_partida->partida['com_producto_codigo'] = 'com_producto_codigo';
+        $data_partida->partida['cat_sat_unidad_descripcion'] = 'cat_sat_unidad_descripcion';
+        $keys_part = new stdClass();
+        $keys_part->cantidad = 'cantidad';
+        $keys_part->descripcion = 'descripcion';
+        $keys_part->valor_unitario = 'valor_unitario';
+        $keys_part->importe = 'importe';
+
+
+        $resultado = $modelo->valida_partida($data_partida,$keys_part);
+
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
 
         errores::$error = false;
 
