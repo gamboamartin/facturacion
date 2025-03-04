@@ -13,106 +13,76 @@ class _conceptos{
 
     }
 
+
     /**
      * REG
-     * Acumula los totales de impuestos retenidos y trasladados en una partida.
+     * Acumula los totales de impuestos trasladados y retenidos en una partida.
      *
-     * Esta función toma los valores actuales de `total_impuestos_retenidos` y `total_impuestos_trasladados`,
-     * y los actualiza con los valores presentes en la partida dentro de `$data_partida`.
+     * Esta función valida la estructura de la partida, verifica la existencia de los
+     * campos que almacenan los impuestos trasladados y retenidos dentro de la partida,
+     * y luego suma los valores correspondientes para devolver un objeto con los totales actualizados.
      *
-     * Si los valores de impuestos no existen en la partida, se inicializan en 0.
+     * @param stdClass $data_partida Objeto que contiene la información de la partida,
+     *                               incluyendo los impuestos trasladados y retenidos.
+     * @param _partida $modelo_partida Instancia del modelo de partida que contiene
+     *                                  la referencia a la tabla donde se almacenan los impuestos.
+     * @param float $total_impuestos_retenidos Monto acumulado de impuestos retenidos antes de la función.
+     * @param float $total_impuestos_trasladados Monto acumulado de impuestos trasladados antes de la función.
      *
-     * @param stdClass $data_partida Objeto que contiene la información de la partida.
-     *        - `partida` (array): Datos de la partida que incluyen los impuestos trasladados y retenidos.
-     * @param _partida $modelo_partida Instancia del modelo de partida que contiene la estructura y claves de identificación.
-     *        - `tabla` (string): Nombre de la tabla en la base de datos donde se almacenan los datos de la partida.
-     * @param float $total_impuestos_retenidos Monto acumulado de impuestos retenidos antes de esta operación.
-     * @param float $total_impuestos_trasladados Monto acumulado de impuestos trasladados antes de esta operación.
-     *
-     * @return stdClass|array Retorna un objeto `totales` con los impuestos retenidos y trasladados acumulados.
-     * En caso de error, retorna un array con la información del error.
-     *
-     * @throws errores Si `$modelo_partida->tabla` está vacío o si `$data_partida->partida` no está definido.
-     *
-     * Estructura del error generado:
-     * ```php
-     * Array
-     * (
-     *     [error] => 1
-     *     [mensaje] => "<b><span style='color:red'>Mensaje de error</span></b>"
-     *     [mensaje_limpio] => "Mensaje de error"
-     *     [file] => "<b>ruta/del/archivo.php</b>"
-     *     [line] => "<b>123</b>"
-     *     [class] => "<b>NombreDeLaClase</b>"
-     *     [function] => "<b>NombreDeLaFuncion</b>"
-     *     [data] => "Datos asociados al error"
-     *     [params] => "Parámetros utilizados en la función"
-     *     [fix] => "Sugerencia de corrección"
-     * )
-     * ```
+     * @return array|stdClass Retorna un objeto con los valores acumulados de los impuestos:
+     *  - `total_impuestos_retenidos`: Suma de los impuestos retenidos.
+     *  - `total_impuestos_trasladados`: Suma de los impuestos trasladados.
+     *  En caso de error, retorna un array con el mensaje de error y los datos asociados.
      *
      * @example
-     * Ejemplo de entrada válida:
-     * ```php
+     * // Ejemplo de uso exitoso
      * $data_partida = new stdClass();
      * $data_partida->partida = [
-     *     'fc_partida_total_traslados' => 50.00,
-     *     'fc_partida_total_retenciones' => 30.00
+     *     'factura_total_traslados' => 50.75,
+     *     'factura_total_retenciones' => 30.25
      * ];
      *
      * $modelo_partida = new _partida();
-     * $modelo_partida->tabla = 'fc_partida';
+     * $modelo_partida->tabla = 'factura';
      *
-     * $total_impuestos_retenidos = 100.00;
-     * $total_impuestos_trasladados = 200.00;
-     *
-     * $resultado = $this->acumula_totales($data_partida, $modelo_partida, $total_impuestos_retenidos, $total_impuestos_trasladados);
+     * $resultado = $this->acumula_totales($data_partida, $modelo_partida, 100.00, 80.00);
      * print_r($resultado);
-     * ```
+     * // Salida esperada:
+     * // stdClass Object (
+     * //     [total_impuestos_retenidos] => 110.25
+     * //     [total_impuestos_trasladados] => 150.75
+     * // )
      *
      * @example
-     * Ejemplo de salida esperada:
-     * ```php
-     * stdClass Object
-     * (
-     *     [total_impuestos_retenidos] => 130.00
-     *     [total_impuestos_trasladados] => 250.00
-     * )
-     * ```
+     * // Ejemplo de error: partida no válida
+     * $data_partida = new stdClass(); // Sin datos de partida
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'factura';
+     *
+     * $resultado = $this->acumula_totales($data_partida, $modelo_partida, 0, 0);
+     * print_r($resultado);
+     * // Salida esperada:
+     * // [
+     * //     'error' => true,
+     * //     'mensaje' => 'Error al validar partida',
+     * //     'data' => [...detalle del error...]
+     * // ]
      *
      * @example
-     * Ejemplo de salida si los impuestos no existen en `$data_partida->partida` (se inicializan en 0):
-     * ```php
-     * stdClass Object
-     * (
-     *     [total_impuestos_retenidos] => 100.00
-     *     [total_impuestos_trasladados] => 200.00
-     * )
-     * ```
+     * // Ejemplo de valores por defecto cuando no existen en la partida
+     * $data_partida = new stdClass();
+     * $data_partida->partida = []; // Sin claves específicas
      *
-     * @example
-     * Ejemplo de salida con error si `$modelo_partida->tabla` está vacío:
-     * ```php
-     * Array
-     * (
-     *     [error] => 1
-     *     [mensaje] => "Error $modelo_partida->tabla está vacío"
-     *     [data] => ""
-     *     [es_final] => true
-     * )
-     * ```
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'factura';
      *
-     * @example
-     * Ejemplo de salida con error si `$data_partida->partida` no existe:
-     * ```php
-     * Array
-     * (
-     *     [error] => 1
-     *     [mensaje] => "Error $data_partida->partida no existe"
-     *     [data] => stdClass Object()
-     *     [es_final] => true
-     * )
-     * ```
+     * $resultado = $this->acumula_totales($data_partida, $modelo_partida, 0, 0);
+     * print_r($resultado);
+     * // Salida esperada:
+     * // stdClass Object (
+     * //     [total_impuestos_retenidos] => 0
+     * //     [total_impuestos_trasladados] => 0
+     * // )
      */
     private function acumula_totales(
         stdClass $data_partida,
@@ -121,30 +91,17 @@ class _conceptos{
         float $total_impuestos_trasladados
     ): array|stdClass
     {
-        // Validar que el nombre de la tabla en el modelo de partida no esté vacío
-        $modelo_partida->tabla = trim($modelo_partida->tabla);
-        if ($modelo_partida->tabla === '') {
-            return $this->error->error(
-                mensaje: 'Error $modelo_partida->tabla está vacío',
-                data: $modelo_partida->tabla,
-                es_final: true
-            );
+        // Validar que la partida contiene los datos necesarios
+        $valida = $this->valida_data_partida(data_partida: $data_partida, modelo_partida: $modelo_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
         }
 
-        // Validar que la partida exista dentro de los datos de la partida
-        if (!isset($data_partida->partida)) {
-            return $this->error->error(
-                mensaje: 'Error $data_partida->partida no existe',
-                data: $data_partida,
-                es_final: true
-            );
-        }
-
-        // Claves para obtener los montos de impuestos trasladados y retenidos
+        // Generar claves para obtener los valores de impuestos
         $key_importe_total_traslado = $modelo_partida->tabla . '_total_traslados';
         $key_importe_total_retenido = $modelo_partida->tabla . '_total_retenciones';
 
-        // Inicializar los valores de impuestos si no están definidos en la partida
+        // Verificar si existen los valores, si no, inicializarlos en 0
         if (!isset($data_partida->partida[$key_importe_total_traslado])) {
             $data_partida->partida[$key_importe_total_traslado] = 0;
         }
@@ -152,11 +109,11 @@ class _conceptos{
             $data_partida->partida[$key_importe_total_retenido] = 0;
         }
 
-        // Acumular los impuestos trasladados y retenidos
+        // Acumular impuestos trasladados y retenidos
         $total_impuestos_trasladados += $data_partida->partida[$key_importe_total_traslado];
         $total_impuestos_retenidos += $data_partida->partida[$key_importe_total_retenido];
 
-        // Crear objeto con los totales actualizados
+        // Crear objeto con los valores totales acumulados
         $totales = new stdClass();
         $totales->total_impuestos_retenidos = $total_impuestos_retenidos;
         $totales->total_impuestos_trasladados = $total_impuestos_trasladados;
@@ -165,30 +122,131 @@ class _conceptos{
     }
 
 
-    private function carga_totales(stdClass $data_partida, _partida $modelo_partida,
-                                   _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado, array $ret_global,
-                                   float $total_impuestos_retenidos, float $total_impuestos_trasladados, array $trs_global)
-    {
-        $totales = $this->acumula_totales(data_partida: $data_partida,modelo_partida: $modelo_partida,
-            total_impuestos_retenidos: $total_impuestos_retenidos,total_impuestos_trasladados: $total_impuestos_trasladados);
 
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al cargar $totales', data: $totales);
+    /**
+     * REG
+     * Carga y acumula los totales de impuestos retenidos y trasladados en una partida.
+     *
+     * Esta función realiza validaciones sobre los datos de la partida, acumula los impuestos
+     * correspondientes y obtiene los impuestos globales aplicables. Retorna un objeto con los
+     * totales finales de impuestos retenidos y trasladados, además de los impuestos globales.
+     *
+     * @param stdClass $data_partida Objeto con la información de la partida, incluyendo impuestos.
+     * @param _partida $modelo_partida Modelo de la partida con la tabla de referencia.
+     * @param _data_impuestos $modelo_retencion Modelo para la gestión de impuestos retenidos.
+     * @param _data_impuestos $modelo_traslado Modelo para la gestión de impuestos trasladados.
+     * @param array $ret_global Array con los impuestos retenidos a nivel global.
+     * @param float $total_impuestos_retenidos Total acumulado de impuestos retenidos.
+     * @param float $total_impuestos_trasladados Total acumulado de impuestos trasladados.
+     * @param array $trs_global Array con los impuestos trasladados a nivel global.
+     *
+     * @return stdClass|array Retorna un objeto con los siguientes valores si es exitoso:
+     *  - `total_impuestos_retenidos`: Suma de los impuestos retenidos.
+     *  - `total_impuestos_trasladados`: Suma de los impuestos trasladados.
+     *  - `ret_global`: Array de impuestos retenidos globales actualizados.
+     *  - `trs_global`: Array de impuestos trasladados globales actualizados.
+     *
+     * En caso de error, retorna un array con un mensaje de error y los datos relacionados.
+     *
+     * @example
+     * // Ejemplo de uso exitoso
+     * $data_partida = new stdClass();
+     * $data_partida->partida = [
+     *     'factura_total_traslados' => 120.50,
+     *     'factura_total_retenciones' => 80.25
+     * ];
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'factura';
+     *
+     * $modelo_retencion = new _data_impuestos();
+     * $modelo_traslado = new _data_impuestos();
+     *
+     * $ret_global = [];
+     * $trs_global = [];
+     *
+     * $resultado = $this->carga_totales($data_partida, $modelo_partida, $modelo_retencion,
+     *     $modelo_traslado, $ret_global, 50.00, 100.00, $trs_global);
+     * print_r($resultado);
+     * // Salida esperada:
+     * // stdClass Object (
+     * //     [total_impuestos_trasladados] => 220.50
+     * //     [total_impuestos_retenidos] => 130.25
+     * //     [ret_global] => [... impuestos retenidos globales actualizados ...]
+     * //     [trs_global] => [... impuestos trasladados globales actualizados ...]
+     * // )
+     *
+     * @example
+     * // Ejemplo de error: datos de partida inválidos
+     * $data_partida = new stdClass(); // Sin datos de partida
+     * $resultado = $this->carga_totales($data_partida, $modelo_partida, $modelo_retencion,
+     *     $modelo_traslado, $ret_global, 0, 0, $trs_global);
+     * print_r($resultado);
+     * // Salida esperada:
+     * // [
+     * //     'error' => true,
+     * //     'mensaje' => 'Error al validar partida',
+     * //     'data' => [... detalle del error ...]
+     * // ]
+     */
+    private function carga_totales(
+        stdClass $data_partida,
+        _partida $modelo_partida,
+        _data_impuestos $modelo_retencion,
+        _data_impuestos $modelo_traslado,
+        array $ret_global,
+        float $total_impuestos_retenidos,
+        float $total_impuestos_trasladados,
+        array $trs_global
+    ): stdClass|array
+    {
+        // Validar los datos de la partida
+        $valida = $this->valida_data_partida(data_partida: $data_partida, modelo_partida: $modelo_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
         }
 
+        // Validar impuestos en la partida
+        $valida = $this->valida_impuestos_partida(data_partida: $data_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al validar impuestos de la partida', data: $valida);
+        }
+
+        // Acumular los totales de impuestos
+        $totales = $this->acumula_totales(
+            data_partida: $data_partida,
+            modelo_partida: $modelo_partida,
+            total_impuestos_retenidos: $total_impuestos_retenidos,
+            total_impuestos_trasladados: $total_impuestos_trasladados
+        );
+
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al cargar totales', data: $totales);
+        }
+
+        // Asignar los totales acumulados
         $total_impuestos_trasladados = $totales->total_impuestos_trasladados;
         $total_impuestos_retenidos = $totales->total_impuestos_retenidos;
 
-        $globales_imps = $this->impuestos_globales(data_partida: $data_partida,modelo_partida:  $modelo_partida,
-            modelo_retencion:  $modelo_retencion,
-            modelo_traslado: $modelo_traslado, ret_global: $ret_global,trs_global:  $trs_global);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al cargar globales_imps', data: $globales_imps);
+        // Calcular impuestos globales
+        $globales_imps = $this->impuestos_globales(
+            data_partida: $data_partida,
+            modelo_partida: $modelo_partida,
+            modelo_retencion: $modelo_retencion,
+            modelo_traslado: $modelo_traslado,
+            ret_global: $ret_global,
+            trs_global: $trs_global
+        );
+
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al cargar impuestos globales', data: $globales_imps);
         }
 
+        // Asignar impuestos globales
         $ret_global = $globales_imps->ret_global;
         $trs_global = $globales_imps->trs_global;
 
+        // Crear objeto con los totales finales
         $totales_fin = new stdClass();
         $totales_fin->total_impuestos_trasladados = $total_impuestos_trasladados;
         $totales_fin->total_impuestos_retenidos = $total_impuestos_retenidos;
@@ -196,8 +254,8 @@ class _conceptos{
         $totales_fin->trs_global = $trs_global;
 
         return $totales_fin;
-
     }
+
 
     /**
      * REG
@@ -633,7 +691,6 @@ class _conceptos{
 
         // Integra los datos temporales del producto a la partida
         $partida = $this->integra_producto_tmp(partida: $partida);
-
         // Manejo de error en la integración del producto temporal
         if (errores::$error) {
             return $this->error->error(
@@ -1251,42 +1308,113 @@ class _conceptos{
         return $data;
     }
 
-    PUBLIC function impuestos_globales(
+    /**
+     * REG
+     * Calcula los impuestos globales trasladados y retenidos a partir de los datos de una partida.
+     *
+     * Este método procesa los impuestos trasladados y retenidos de una partida específica, acumulándolos en estructuras
+     * de datos globales. Utiliza la clase `_impuestos` para realizar la acumulación de importes.
+     *
+     * @param stdClass $data_partida Objeto que contiene los impuestos de la partida. Debe tener las propiedades:
+     *                               - `traslados`: array con impuestos trasladados.
+     *                               - `retenidos`: array con impuestos retenidos.
+     * @param _partida $modelo_partida Modelo que representa la partida sobre la que se calculan los impuestos.
+     * @param _data_impuestos $modelo_retencion Modelo de los impuestos retenidos, usado para extraer el nombre de la tabla.
+     * @param _data_impuestos $modelo_traslado Modelo de los impuestos trasladados, usado para extraer el nombre de la tabla.
+     * @param array $ret_global Arreglo de acumulación de impuestos retenidos a nivel global.
+     * @param array $trs_global Arreglo de acumulación de impuestos trasladados a nivel global.
+     *
+     * @return stdClass|array Retorna un objeto con los impuestos globales:
+     *                        - `ret_global`: impuestos retenidos acumulados.
+     *                        - `trs_global`: impuestos trasladados acumulados.
+     *                        En caso de error, retorna un array con detalles del error.
+     *
+     * @throws errores Si hay errores en la validación de datos o en la ejecución de la acumulación de impuestos.
+     *
+     * @example
+     * ```php
+     * $data_partida = new stdClass();
+     * $data_partida->traslados = [
+     *     (object)["impuesto" => "IVA", "tasa" => 0.16, "importe" => 100],
+     *     (object)["impuesto" => "ISR", "tasa" => 0.10, "importe" => 50]
+     * ];
+     * $data_partida->retenidos = [
+     *     (object)["impuesto" => "IVA", "tasa" => 0.04, "importe" => 20],
+     * ];
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = "fc_partida";
+     *
+     * $modelo_retencion = new _data_impuestos();
+     * $modelo_retencion->tabla = "fc_retenido";
+     *
+     * $modelo_traslado = new _data_impuestos();
+     * $modelo_traslado->tabla = "fc_traslado";
+     *
+     * $ret_global = [];
+     * $trs_global = [];
+     *
+     * $resultado = impuestos_globales($data_partida, $modelo_partida, $modelo_retencion, $modelo_traslado, $ret_global, $trs_global);
+     *
+     * print_r($resultado);
+     * ```
+     *
+     * @example Salida esperada:
+     * ```php
+     * stdClass Object
+     * (
+     *     [ret_global] => Array
+     *         (
+     *             [fc_retenido_IVA] => 20
+     *         )
+     *
+     *     [trs_global] => Array
+     *         (
+     *             [fc_traslado_IVA] => 100
+     *             [fc_traslado_ISR] => 50
+     *         )
+     * )
+     * ```
+     */
+    private function impuestos_globales(
         stdClass $data_partida, _partida $modelo_partida, _data_impuestos $modelo_retencion,
-        _data_impuestos $modelo_traslado, array $ret_global, array $trs_global)
+        _data_impuestos $modelo_traslado, array $ret_global, array $trs_global): array|stdClass
     {
-        if(!isset($data_partida->traslados)){
-            return $this->error->error(mensaje: 'Error $data_partida->traslados no existe', data: $data_partida);
+        $valida = $this->valida_impuestos_partida(data_partida: $data_partida);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar partida', data: $valida);
         }
 
-        if(!isset($data_partida->retenidos)){
-            return $this->error->error(mensaje: 'Error $data_partida->retenidos no existe', data: $data_partida);
-        }
-
-
-        $key_traslado_importe = $modelo_traslado->tabla.'_importe';
+        // Obtener el nombre de la clave del importe en los impuestos trasladados
+        $key_traslado_importe = $modelo_traslado->tabla . '_importe';
         $trs_global = (new _impuestos())->impuestos_globales(
             impuestos: $data_partida->traslados, global_imp: $trs_global, key_importe: $key_traslado_importe,
-            name_tabla_partida: $modelo_partida->tabla);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $trs_global);
+            name_tabla_partida: $modelo_partida->tabla
+        );
+
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al inicializar acumulado de trasladados', data: $trs_global);
         }
 
-        $key_retenido_importe = $modelo_retencion->tabla.'_importe';
+        // Obtener el nombre de la clave del importe en los impuestos retenidos
+        $key_retenido_importe = $modelo_retencion->tabla . '_importe';
         $ret_global = (new _impuestos())->impuestos_globales(
             impuestos: $data_partida->retenidos, global_imp: $ret_global, key_importe: $key_retenido_importe,
-            name_tabla_partida: $modelo_partida->tabla);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $ret_global);
+            name_tabla_partida: $modelo_partida->tabla
+        );
+
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al inicializar acumulado de retenidos', data: $ret_global);
         }
 
+        // Crear objeto de salida con los impuestos globales acumulados
         $impuestos_glb = new stdClass();
         $impuestos_glb->ret_global = $ret_global;
         $impuestos_glb->trs_global = $trs_global;
 
         return $impuestos_glb;
-
     }
+
 
     /**
      * REG
@@ -1464,6 +1592,10 @@ class _conceptos{
             );
         }
 
+        $keys_part  = $this->keys_partida(modelo_partida: $modelo_partida);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener $keys_part', data: $valida);
+        }
         // Genera el objeto concepto a partir de la partida
         $concepto = $this->concepto(data_partida: $data_partida, keys_part: $keys_part);
         if (errores::$error) {
@@ -1489,52 +1621,181 @@ class _conceptos{
     }
 
 
-    final public function integra_partidas(array $conceptos, string $key, string $key_filtro_id, _partida $modelo_partida, _cuenta_predial $modelo_predial,
-                                      _data_impuestos $modelo_retencion, _data_impuestos $modelo_traslado,
-                                      array $partida, array $registro, int $registro_id, array $ret_global,
-                                      float $total_impuestos_retenidos, float $total_impuestos_trasladados, array $trs_global)
+    /**
+     * REG
+     * Integra partidas en una factura o comprobante fiscal, validando y acumulando los impuestos de cada partida.
+     *
+     * Esta función procesa los datos de una partida para generar conceptos fiscales,
+     * asigna impuestos trasladados y retenidos, y acumula los totales de impuestos.
+     * Retorna un objeto con los conceptos generados, el registro actualizado y los totales de impuestos.
+     *
+     * @param array $conceptos Arreglo de conceptos fiscales acumulados.
+     * @param string $key Clave identificadora de la partida dentro del registro.
+     * @param string $key_filtro_id Clave para filtrar los registros de la partida.
+     * @param _partida $modelo_partida Modelo de la partida.
+     * @param _cuenta_predial $modelo_predial Modelo para la gestión de cuentas prediales.
+     * @param _data_impuestos $modelo_retencion Modelo para la gestión de impuestos retenidos.
+     * @param _data_impuestos $modelo_traslado Modelo para la gestión de impuestos trasladados.
+     * @param array $partida Datos específicos de la partida a procesar.
+     * @param array $registro Registro en el que se integra la partida.
+     * @param int $registro_id Identificador del registro donde se integra la partida.
+     * @param array $ret_global Array con los impuestos retenidos globales.
+     * @param float $total_impuestos_retenidos Total acumulado de impuestos retenidos.
+     * @param float $total_impuestos_trasladados Total acumulado de impuestos trasladados.
+     * @param array $trs_global Array con los impuestos trasladados globales.
+     *
+     * @return stdClass|array Retorna un objeto con los siguientes valores si es exitoso:
+     *  - `ret_global`: Impuestos retenidos globales actualizados.
+     *  - `trs_global`: Impuestos trasladados globales actualizados.
+     *  - `total_impuestos_retenidos`: Total acumulado de impuestos retenidos.
+     *  - `total_impuestos_trasladados`: Total acumulado de impuestos trasladados.
+     *  - `conceptos`: Arreglo con los conceptos generados.
+     *  - `registro`: Registro actualizado con la partida integrada.
+     *
+     * En caso de error, retorna un array con un mensaje de error y los datos relacionados.
+     *
+     * @example
+     * // Ejemplo de uso exitoso
+     * $conceptos = [];
+     * $partida = ['factura_id' => 123, 'factura_total_traslados' => 50.00, 'factura_total_retenciones' => 20.00];
+     * $registro = [];
+     * $registro_id = 456;
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'factura';
+     *
+     * $modelo_predial = new _cuenta_predial();
+     * $modelo_retencion = new _data_impuestos();
+     * $modelo_traslado = new _data_impuestos();
+     *
+     * $ret_global = [];
+     * $trs_global = [];
+     *
+     * $resultado = $this->integra_partidas(
+     *     $conceptos, 'clave_partida', 'factura_id', $modelo_partida,
+     *     $modelo_predial, $modelo_retencion, $modelo_traslado,
+     *     $partida, $registro, $registro_id, $ret_global, 0, 0, $trs_global
+     * );
+     * print_r($resultado);
+     * // Salida esperada:
+     * // stdClass Object (
+     * //     [ret_global] => [... impuestos retenidos globales actualizados ...]
+     * //     [trs_global] => [... impuestos trasladados globales actualizados ...]
+     * //     [total_impuestos_retenidos] => 20.00
+     * //     [total_impuestos_trasladados] => 50.00
+     * //     [conceptos] => [... lista de conceptos generados ...]
+     * //     [registro] => [... registro actualizado ...]
+     * // )
+     *
+     * @example
+     * // Ejemplo de error: key_filtro_id vacío
+     * $resultado = $this->integra_partidas(
+     *     $conceptos, 'clave_partida', '', $modelo_partida,
+     *     $modelo_predial, $modelo_retencion, $modelo_traslado,
+     *     $partida, $registro, $registro_id, $ret_global, 0, 0, $trs_global
+     * );
+     * print_r($resultado);
+     * // Salida esperada:
+     * // [
+     * //     'error' => true,
+     * //     'mensaje' => 'Error: el $key_filtro_id esta vacio',
+     * //     'data' => ''
+     * // ]
+     */
+    final public function integra_partidas(
+        array $conceptos,
+        string $key,
+        string $key_filtro_id,
+        _partida $modelo_partida,
+        _cuenta_predial $modelo_predial,
+        _data_impuestos $modelo_retencion,
+        _data_impuestos $modelo_traslado,
+        array $partida,
+        array $registro,
+        int $registro_id,
+        array $ret_global,
+        float $total_impuestos_retenidos,
+        float $total_impuestos_trasladados,
+        array $trs_global
+    ): stdClass|array
     {
-
+        // Validar que key_filtro_id no esté vacío
         $key_filtro_id = trim($key_filtro_id);
-        if($key_filtro_id === ''){
+        if ($key_filtro_id === '') {
             return $this->error->error(
-                mensaje: "Error: el $key_filtro_id esta vacio", data: $registro_id, es_final: true
+                mensaje: 'Error: el $key_filtro_id está vacío',
+                data: $key_filtro_id,
+                es_final: true
             );
         }
 
-        $data_partida = $this->data_partida(modelo_partida: $modelo_partida,modelo_retencion:  $modelo_retencion,
-            modelo_traslado:  $modelo_traslado,partida:  $partida);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al integrar producto temporal', data: $partida);
+        // Validar que la partida contenga la clave de identificación de la tabla
+        if (!isset($partida[$modelo_partida->key_id])) {
+            return $this->error->error(
+                mensaje: 'Error $partida[' . $modelo_partida->key_id . '] no existe ' . $modelo_partida->key_id,
+                data: $partida,
+                es_final: true
+            );
         }
 
+        // Validar que el registro_id sea mayor a 0
+        if ($registro_id <= 0) {
+            return $this->error->error(
+                mensaje: "Error: el registro_id debe ser mayor a 0",
+                data: $registro_id,
+                es_final: true
+            );
+        }
+
+        // Obtener datos de la partida
+        $data_partida = $this->data_partida(
+            modelo_partida: $modelo_partida,
+            modelo_retencion: $modelo_retencion,
+            modelo_traslado: $modelo_traslado,
+            partida: $partida
+        );
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al integrar producto temporal', data: $data_partida);
+        }
+
+        // Asignar impuestos trasladados y retenidos a la partida en el registro
         $registro['partidas'][$key]['traslados'] = $data_partida->traslados->registros;
         $registro['partidas'][$key]['retenidos'] = $data_partida->retenidos->registros;
 
-
-        $concepto = $this->genera_concepto(data_partida: $data_partida, key_filtro_id: $key_filtro_id,
-            modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
-            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, registro_id: $registro_id);
+        // Generar el concepto fiscal para la partida
+        $concepto = $this->genera_concepto(
+            data_partida: $data_partida,
+            key_filtro_id: $key_filtro_id,
+            modelo_partida: $modelo_partida,
+            modelo_predial: $modelo_predial,
+            modelo_retencion: $modelo_retencion,
+            modelo_traslado: $modelo_traslado,
+            registro_id: $registro_id
+        );
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al integrar concepto', data: $concepto);
         }
 
-
+        // Agregar el concepto generado a la lista de conceptos
         $conceptos[] = $concepto;
 
-
-
-        $totales = $this->carga_totales(data_partida: $data_partida, modelo_partida: $modelo_partida,
-            modelo_retencion: $modelo_retencion, modelo_traslado: $modelo_traslado, ret_global: $ret_global,
+        // Acumular los totales de impuestos
+        $totales = $this->carga_totales(
+            data_partida: $data_partida,
+            modelo_partida: $modelo_partida,
+            modelo_retencion: $modelo_retencion,
+            modelo_traslado: $modelo_traslado,
+            ret_global: $ret_global,
             total_impuestos_retenidos: $total_impuestos_retenidos,
-            total_impuestos_trasladados: $total_impuestos_trasladados, trs_global: $trs_global);
-        if(errores::$error){
+            total_impuestos_trasladados: $total_impuestos_trasladados,
+            trs_global: $trs_global
+        );
+        if (errores::$error) {
             return $this->error->error(mensaje: 'Error al cargar $totales', data: $totales);
         }
 
+        // Construcción del objeto de retorno
         $datos = new stdClass();
-
-
         $datos->ret_global = $totales->ret_global;
         $datos->trs_global = $totales->trs_global;
         $datos->total_impuestos_trasladados = $totales->total_impuestos_trasladados;
@@ -1543,8 +1804,8 @@ class _conceptos{
         $datos->registro = $registro;
 
         return $datos;
-
     }
+
 
     /**
      * POR ELIMINAR FUNCION Y OBTENER DE COM PRODUCTO
@@ -2170,6 +2431,233 @@ class _conceptos{
 
         // Retornar la cuenta predial encontrada
         return $r_fc_cuenta_predial;
+    }
+
+
+    /**
+     * REG
+     * Valida los datos de una partida asegurando que contenga la información requerida y que su estructura sea correcta.
+     *
+     * Esta función se encarga de validar que la tabla del modelo de partida no esté vacía y que la clave `partida`
+     * dentro del objeto `$data_partida` exista y tenga el formato adecuado.
+     *
+     * @param stdClass $data_partida Objeto que contiene los datos de la partida. Debe incluir la clave `partida`,
+     *                               la cual debe ser un array.
+     * @param _partida $modelo_partida Instancia del modelo de partida, utilizada para obtener el nombre de la tabla
+     *                                 y validar que no esté vacío.
+     *
+     * @return true|array Retorna `true` si los datos son válidos. En caso de error, retorna un array con el mensaje
+     *                    de error y la información asociada.
+     *
+     * @example
+     * // Ejemplo de uso exitoso:
+     * $data_partida = new stdClass();
+     * $data_partida->partida = ['clave' => '001', 'descripcion' => 'Servicio de Consultoría'];
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $resultado = $this->valida_data_partida($data_partida, $modelo_partida);
+     * var_dump($resultado); // true
+     *
+     * @example
+     * // Ejemplo de error: modelo_partida->tabla está vacío
+     * $data_partida = new stdClass();
+     * $data_partida->partida = ['clave' => '001', 'descripcion' => 'Servicio de Consultoría'];
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = '  '; // Cadena vacía después de trim()
+     *
+     * $resultado = $this->valida_data_partida($data_partida, $modelo_partida);
+     * print_r($resultado);
+     * // Salida esperada:
+     * // [
+     * //     'error' => true,
+     * //     'mensaje' => 'Error $modelo_partida->tabla está vacío',
+     * //     'data' => ''
+     * // ]
+     *
+     * @example
+     * // Ejemplo de error: data_partida->partida no existe
+     * $data_partida = new stdClass();
+     * // Falta la clave 'partida'
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $resultado = $this->valida_data_partida($data_partida, $modelo_partida);
+     * print_r($resultado);
+     * // Salida esperada:
+     * // [
+     * //     'error' => true,
+     * //     'mensaje' => 'Error $data_partida->partida no existe',
+     * //     'data' => (object) []
+     * // ]
+     *
+     * @example
+     * // Ejemplo de error: data_partida->partida no es un array
+     * $data_partida = new stdClass();
+     * $data_partida->partida = 'Texto inválido'; // Debe ser un array
+     *
+     * $modelo_partida = new _partida();
+     * $modelo_partida->tabla = 'fc_partida';
+     *
+     * $resultado = $this->valida_data_partida($data_partida, $modelo_partida);
+     * print_r($resultado);
+     * // Salida esperada:
+     * // [
+     * //     'error' => true,
+     * //     'mensaje' => 'Error $data_partida->partida debe ser un array',
+     * //     'data' => (object) ['partida' => 'Texto inválido']
+     * // ]
+     */
+    private function valida_data_partida(stdClass $data_partida, _partida $modelo_partida): true|array
+    {
+        $modelo_partida->tabla = trim($modelo_partida->tabla);
+        if ($modelo_partida->tabla === '') {
+            return $this->error->error(
+                mensaje: 'Error $modelo_partida->tabla está vacío',
+                data: $modelo_partida->tabla,
+                es_final: true
+            );
+        }
+
+        // Validar que la partida exista dentro de los datos de la partida
+        if (!isset($data_partida->partida)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->partida no existe',
+                data: $data_partida,
+                es_final: true
+            );
+        }
+
+        if (!is_array($data_partida->partida)) {
+            return $this->error->error(
+                mensaje: 'Error $data_partida->partida debe ser un array',
+                data: $data_partida,
+                es_final: true
+            );
+        }
+
+        return true;
+    }
+
+
+    /**
+     * REG
+     * Valida la estructura de los impuestos en una partida asegurando que contenga traslados y retenidos.
+     *
+     * Esta función verifica que los impuestos traslados y retenidos estén presentes dentro del objeto `$data_partida`,
+     * y que sean objetos válidos. Si alguna validación falla, se devuelve un mensaje de error estructurado.
+     *
+     * @param stdClass $data_partida Objeto que contiene los impuestos de la partida. Debe incluir las claves `traslados` y `retenidos`,
+     *                               ambas deben ser objetos.
+     *
+     * @return true|array Retorna `true` si los datos son válidos. En caso de error, retorna un array con el mensaje
+     *                    de error y la información asociada.
+     *
+     * @example
+     * // Ejemplo de uso exitoso:
+     * $data_partida = new stdClass();
+     * $data_partida->traslados = new stdClass();
+     * $data_partida->retenidos = new stdClass();
+     *
+     * $resultado = $this->valida_impuestos_partida($data_partida);
+     * var_dump($resultado); // true
+     *
+     * @example
+     * // Ejemplo de error: traslados no existe
+     * $data_partida = new stdClass();
+     * $data_partida->retenidos = new stdClass();
+     *
+     * $resultado = $this->valida_impuestos_partida($data_partida);
+     * print_r($resultado);
+     * // Salida esperada:
+     * // [
+     * //     'error' => true,
+     * //     'mensaje' => 'Error: $data_partida->traslados no existe',
+     * //     'data' => (object) ['retenidos' => (object) []]
+     * // ]
+     *
+     * @example
+     * // Ejemplo de error: traslados no es un objeto
+     * $data_partida = new stdClass();
+     * $data_partida->traslados = 'valor incorrecto'; // Debe ser un objeto
+     * $data_partida->retenidos = new stdClass();
+     *
+     * $resultado = $this->valida_impuestos_partida($data_partida);
+     * print_r($resultado);
+     * // Salida esperada:
+     * // [
+     * //     'error' => true,
+     * //     'mensaje' => 'Error: $data_partida->traslados debe ser un obj',
+     * //     'data' => (object) ['traslados' => 'valor incorrecto', 'retenidos' => (object) []]
+     * // ]
+     *
+     * @example
+     * // Ejemplo de error: retenidos no existe
+     * $data_partida = new stdClass();
+     * $data_partida->traslados = new stdClass();
+     *
+     * $resultado = $this->valida_impuestos_partida($data_partida);
+     * print_r($resultado);
+     * // Salida esperada:
+     * // [
+     * //     'error' => true,
+     * //     'mensaje' => 'Error: $data_partida->retenidos no existe',
+     * //     'data' => (object) ['traslados' => (object) []]
+     * // ]
+     *
+     * @example
+     * // Ejemplo de error: retenidos no es un objeto
+     * $data_partida = new stdClass();
+     * $data_partida->traslados = new stdClass();
+     * $data_partida->retenidos = 'dato incorrecto'; // Debe ser un objeto
+     *
+     * $resultado = $this->valida_impuestos_partida($data_partida);
+     * print_r($resultado);
+     * // Salida esperada:
+     * // [
+     * //     'error' => true,
+     * //     'mensaje' => 'Error: $data_partida->retenidos debe ser un obj',
+     * //     'data' => (object) ['traslados' => (object) [], 'retenidos' => 'dato incorrecto']
+     * // ]
+     */
+    private function valida_impuestos_partida(stdClass $data_partida): true|array
+    {
+        // Validar la existencia de la clave 'traslados' en la partida
+        if (!isset($data_partida->traslados)) {
+            return $this->error->error(
+                mensaje: 'Error: $data_partida->traslados no existe',
+                data: $data_partida
+            );
+        }
+
+        // Validar que 'traslados' sea un objeto
+        if (!is_object($data_partida->traslados)) {
+            return $this->error->error(
+                mensaje: 'Error: $data_partida->traslados debe ser un obj',
+                data: $data_partida
+            );
+        }
+
+        // Validar la existencia de la clave 'retenidos' en la partida
+        if (!isset($data_partida->retenidos)) {
+            return $this->error->error(
+                mensaje: 'Error: $data_partida->retenidos no existe',
+                data: $data_partida
+            );
+        }
+
+        // Validar que 'retenidos' sea un objeto
+        if (!is_object($data_partida->retenidos)) {
+            return $this->error->error(
+                mensaje: 'Error: $data_partida->retenidos debe ser un obj',
+                data: $data_partida
+            );
+        }
+
+        return true;
     }
 
 

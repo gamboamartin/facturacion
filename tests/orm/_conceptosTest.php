@@ -65,6 +65,44 @@ class _conceptosTest extends test
         errores::$error = false;
 
     }
+
+    public function test_carga_totales(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $imp = new _conceptos();
+        $imp = new liberator($imp);
+
+        $data_partida = new stdClass();
+        $modelo_partida = new fc_partida($this->link);
+        $modelo_retencion = new fc_retenido($this->link);
+        $modelo_traslado = new fc_traslado($this->link);
+        $ret_global = array();
+        $total_impuestos_retenidos = 10;
+        $total_impuestos_trasladados = 12;
+        $trs_global = array();
+
+        $data_partida->partida = array();
+        $data_partida->traslados = new stdClass();
+        $data_partida->retenidos = new stdClass();
+
+        $resultado = $imp->carga_totales($data_partida,$modelo_partida,$modelo_retencion,$modelo_traslado,
+            $ret_global,$total_impuestos_retenidos,$total_impuestos_trasladados,$trs_global);
+
+
+
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(12,$resultado->total_impuestos_trasladados);
+
+        errores::$error = false;
+
+
+    }
     public function test_concepto(): void
     {
         errores::$error = false;
@@ -402,7 +440,7 @@ class _conceptosTest extends test
         $_GET['session_id'] = '1';
 
         $trs = new _conceptos();
-        //$trs = new liberator($trs);
+        $trs = new liberator($trs);
 
         $modelo_partida = new fc_partida($this->link);
         $modelo_retencion = new fc_retenido($this->link);
@@ -472,6 +510,60 @@ class _conceptosTest extends test
         $this->assertEquals("cat_sat_unidad_descripcion", $resultado->unidad);
         $this->assertEquals("2", $resultado->descuento);
 
+
+
+        errores::$error = false;
+
+    }
+
+    public function test_integra_partidas(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $trs = new _conceptos();
+        //$trs = new liberator($trs);
+
+        $conceptos = array();
+        $key = '';
+        $key_filtro_id = 'x';
+        $modelo_partida = new fc_partida($this->link);
+        $modelo_predial = new fc_cuenta_predial($this->link);
+        $modelo_retencion = new fc_retenido($this->link);
+        $modelo_traslado = new fc_traslado($this->link);
+        $partida = array();
+        $registro = array();
+        $registro_id = 1;
+        $ret_global = array();
+        $total_impuestos_retenidos = -1;
+        $total_impuestos_trasladados = -1;
+        $trs_global = array();
+
+        $partida['fc_partida_id'] = 1;
+        $partida['com_producto_codigo_sat'] = '001';
+        $partida['fc_partida_cantidad'] = '1';
+        $partida['cat_sat_unidad_codigo'] = '1';
+        $partida['fc_partida_descripcion'] = '1';
+        $partida['fc_partida_valor_unitario'] = '1';
+        $partida['fc_partida_sub_total_base'] = '1';
+        $partida['cat_sat_obj_imp_codigo'] = '1';
+        $partida['com_producto_codigo'] = '1';
+        $partida['cat_sat_unidad_descripcion'] = '1';
+
+        $resultado = $trs->integra_partidas($conceptos,$key,$key_filtro_id,$modelo_partida,$modelo_predial,
+            $modelo_retencion,$modelo_traslado,$partida,$registro,$registro_id,$ret_global,$total_impuestos_retenidos,
+            $total_impuestos_trasladados,$trs_global);
+
+
+
+        $this->assertIsObject($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("001", $resultado->conceptos[0]->clave_prod_serv);
 
 
         errores::$error = false;
@@ -675,6 +767,62 @@ class _conceptosTest extends test
 
     }
 
+    public function test_valida_data_partida(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo = new _conceptos();
+        $modelo = new liberator($modelo);
+
+        $data_partida = new stdClass();
+        $modelo_partida = new fc_partida(link: $this->link);
+
+        $data_partida->partida = array();
+
+        $resultado = $modelo->valida_data_partida($data_partida,$modelo_partida);
+
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+
+        errores::$error = false;
+
+    }
+
+    public function test_valida_impuestos_partida(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'cat_sat_tipo_persona';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+        $modelo = new _conceptos();
+        $modelo = new liberator($modelo);
+
+        $data_partida = new stdClass();
+        $data_partida->traslados = new stdClass();
+        $data_partida->retenidos = new stdClass();
+
+        $resultado = $modelo->valida_impuestos_partida($data_partida);
+
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+
+        errores::$error = false;
+
+    }
     public function test_valida_partida(): void
     {
         errores::$error = false;

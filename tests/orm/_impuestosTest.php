@@ -118,6 +118,64 @@ class _impuestosTest extends test
 
     }
 
+
+
+    public function test_impuesto_limpia(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $imp = new _impuestos();
+        $imp = new liberator($imp);
+
+        $impuesto = array();
+        $impuesto['cat_sat_tipo_impuesto_id'] = 'x ';
+        $impuesto['cat_sat_tipo_factor_id'] = 'r ';
+        $impuesto['cat_sat_factor_id'] = 'z ';
+        $resultado = $imp->impuesto_limpia($impuesto);
+
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('x',$resultado['cat_sat_tipo_impuesto_id']);
+        $this->assertEquals('r',$resultado['cat_sat_tipo_factor_id']);
+        $this->assertEquals('z',$resultado['cat_sat_factor_id']);
+
+        errores::$error = false;
+
+
+    }
+
+    public function test_impuesto_validado(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $imp = new _impuestos();
+        $imp = new liberator($imp);
+
+        $impuesto = array();
+        $impuesto['cat_sat_tipo_factor_id'] = ' 1';
+        $impuesto['cat_sat_factor_id'] = ' 2';
+        $impuesto['cat_sat_tipo_impuesto_id'] = ' 1';
+        $resultado = $imp->impuesto_validado($impuesto);
+
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(1,$resultado['cat_sat_tipo_factor_id']);
+        $this->assertEquals(2,$resultado['cat_sat_factor_id']);
+        $this->assertEquals(1,$resultado['cat_sat_tipo_impuesto_id']);
+
+        errores::$error = false;
+
+
+    }
+
     public function test_impuestos_globales(): void
     {
         errores::$error = false;
@@ -409,6 +467,33 @@ class _impuestosTest extends test
 
     }
 
+    public function test_valida_vacio(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $imp = new _impuestos();
+        $imp = new liberator($imp);
+
+        $impuesto = array();
+        $impuesto['cat_sat_tipo_factor_id'] = 'a';
+        $impuesto['cat_sat_factor_id'] = 'v';
+        $impuesto['cat_sat_tipo_impuesto_id'] = 'c';
+
+        $resultado = $imp->valida_vacio($impuesto);
+
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+
+        errores::$error = false;
+
+
+    }
+
     public function test_valida_base(): void
     {
         errores::$error = false;
@@ -424,6 +509,112 @@ class _impuestosTest extends test
         $key_importe = '$key_importe';
         $name_tabla_partida = '$name_tabla_partida';
         $resultado = $imp->valida_base($key_gl, $key_importe, $name_tabla_partida);
+
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+
+        errores::$error = false;
+
+
+    }
+
+    public function test_valida_foraneas(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $imp = new _impuestos();
+        $imp = new liberator($imp);
+
+        $impuesto = array();
+        $impuesto['cat_sat_tipo_factor_id'] = ' 1 ';
+        $impuesto['cat_sat_factor_id'] = ' 3 ';
+        $impuesto['cat_sat_tipo_impuesto_id'] = ' 4 ';
+
+        $resultado = $imp->valida_foraneas($impuesto);
+
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+
+        errores::$error = false;
+
+
+    }
+
+    public function test_valida_keys_existentes(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $imp = new _impuestos();
+        $imp = new liberator($imp);
+
+        $impuesto = array();
+        $impuesto['cat_sat_tipo_factor_id'] = '-1';
+        $impuesto['cat_sat_factor_id'] = '-1';
+        $impuesto['cat_sat_tipo_impuesto_id'] = '-1';
+        $resultado = $imp->valida_keys_existentes($impuesto);
+
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+
+        errores::$error = false;
+
+
+    }
+
+    public function test_valida_negativo(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $imp = new _impuestos();
+        $imp = new liberator($imp);
+
+        $impuesto = array();
+        $impuesto['cat_sat_tipo_factor_id'] = 1;
+        $impuesto['cat_sat_factor_id'] = 1;
+        $impuesto['cat_sat_tipo_impuesto_id'] = 1;
+
+        $resultado = $imp->valida_negativo($impuesto);
+
+        $this->assertIsBool($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertTrue($resultado);
+
+        errores::$error = false;
+
+
+    }
+    public function test_valida_numeric(): void
+    {
+        errores::$error = false;
+
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $imp = new _impuestos();
+        $imp = new liberator($imp);
+
+        $impuesto = array();
+        $impuesto['cat_sat_tipo_factor_id'] = '1';
+        $impuesto['cat_sat_factor_id'] = '2';
+        $impuesto['cat_sat_tipo_impuesto_id'] = '3';
+
+        $resultado = $imp->valida_numeric($impuesto);
 
         $this->assertIsBool($resultado);
         $this->assertNotTrue(errores::$error);

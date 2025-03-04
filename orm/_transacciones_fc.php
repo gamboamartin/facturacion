@@ -135,6 +135,13 @@ class _transacciones_fc extends modelo
 
 
     private function ajusta_traslado_exento(string $indice, array $registro, stdClass $value){
+        if ($indice < 0) {
+            return $this->error->error(
+                mensaje: 'Error: el índice debe ser mayor o igual a 0',
+                data: $indice,es_final: true
+            );
+        }
+
         if($value->tipo_factor === 'Exento'){
             $registro = $this->limpia_traslado_exento(indice: $indice,registro:  $registro);
             if (errores::$error) {
@@ -930,6 +937,7 @@ class _transacciones_fc extends modelo
         }
 
         if($modelo_relacion->tabla === 'fc_relacion_nc') {
+
             foreach ($relaciones as $indice => $fc_relacion) {
 
                 $cat_sat_tipo_relacion_codigo = trim($fc_relacion['cat_sat_tipo_relacion_codigo']);
@@ -943,8 +951,9 @@ class _transacciones_fc extends modelo
                 if (errores::$error) {
                     return $this->error->error(mensaje: 'Error al obtener relacion', data: $r_fc_nc);
                 }
-
                 $relaciones[$indice]['fc_facturas_relacionadas_nc'] = $r_fc_nc->registros;
+
+
             }
         }
 

@@ -9,6 +9,7 @@ use NumberFormatter;
 use PDO;
 use setasign\Fpdi\Fpdi;
 use stdClass;
+use Throwable;
 
 class _pdf{
     private errores $error;
@@ -164,25 +165,57 @@ class _pdf{
 
     }
 
-    private function init(Fpdi $pdf): void
+    private function fecha_hora_emision( stdClass $data,Fpdi $pdf, int $x): true
     {
-        $generales = new generales();
-        $pdf->addPage();
-        $pdf->setSourceFile($generales->ruta_factura_pdf);
-        $tplIdx = $pdf->importPage(1);
-        $pdf->useTemplate($tplIdx, 0, 0, null, null, true);
+        $fecha_hora_emision = '';
+        if(isset($data->fecha_timbrado)){
+            $fecha_hora_emision = $data->fecha_timbrado;
+        }
+
+        $pdf->SetXY($x, 22);
+        $pdf->Write(10, $fecha_hora_emision);
+
+        return true;
+
     }
 
-
-    private function header(stdClass $data, array $factura, Fpdi $pdf): void
+    private function folio(array $factura, Fpdi $pdf, float $x): true
     {
-
-        $x = 179;
         $pdf->SetFont('Arial', 'B', '10');
         $pdf->SetTextColor(255, 255, 255);
         $pdf->SetXY($x, 0);
         $pdf->Write(10, $factura['fc_factura_folio']);
 
+        return true;
+
+    }
+
+    private function init(Fpdi $pdf): true|array
+    {
+        $generales = new generales();
+        try {
+            $pdf->addPage();
+            $pdf->setSourceFile($generales->ruta_factura_pdf);
+            $tplIdx = $pdf->importPage(1);
+            $pdf->useTemplate($tplIdx, 0, 0, null, null, true);
+        }
+        catch (Throwable $e){
+            return (new errores())->error(mensaje: 'Error al cargar template',data: $e);
+        }
+        return true;
+    }
+
+
+    private function header(stdClass $data, array $factura, Fpdi $pdf)
+    {
+
+        $x = 179;
+
+
+        $folio = $this->folio(factura: $factura, pdf: $pdf,x: $x);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al escribir folio', data: $folio);
+        }
 
         $pdf->SetFont('Arial', '', '9');
         $pdf->SetTextColor(0, 0, 0);
@@ -212,7 +245,14 @@ class _pdf{
         if($factura['org_empresa_rfc'] === "TELJ470913GY5"){
             $pdf->SetXY($x, 25.5);
         }
-        $regimen = mb_convert_encoding(trim($factura['cat_sat_regimen_fiscal_codigo'] . ' ' . $factura['cat_sat_regimen_fiscal_descripcion']), 'ISO-8859-1', 'UTF-8');
+
+
+
+        $regimen = $this->regimen(factura: $factura);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener $regimen', data: $regimen);
+        }
+
         if($factura['org_empresa_rfc'] === "FIN171207CKA") {
             $pdf->MultiCell(65, 2.5, $regimen, 0, 'L');
         }
@@ -255,16 +295,12 @@ class _pdf{
         $pdf->SetXY($x, 14);
         $pdf->Write(10, $factura['fc_factura_fecha']);
 
-        $fecha_hora_emision = '';
-        if(isset($data->fecha_timbrado)){
-            $fecha_hora_emision = $data->fecha_timbrado;
+
+        $fecha_hora_emision = $this->fecha_hora_emision(data: $data, pdf: $pdf, x: $x);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al escribir $fecha_hora_emision', data: $fecha_hora_emision);
         }
 
-        $pdf->SetXY($x, 22);
-        $pdf->Write(10, $fecha_hora_emision);
-
-        $pdf->SetXY($x, 30);
-        $pdf->Write(10, $factura['dp_cp_descripcion']);
 
     }
 
@@ -307,6 +343,11 @@ class _pdf{
         $pdf->SetXY($x, 82);
         $pdf->MultiCell(70,2.7, $reg);
 
+    }
+
+    private function regimen(array $factura): array|false|string|null
+    {
+        return mb_convert_encoding(trim($factura['cat_sat_regimen_fiscal_codigo'] . ' ' . $factura['cat_sat_regimen_fiscal_descripcion']), 'ISO-8859-1', 'UTF-8');
     }
 
     private function fiscales(stdClass $data, Fpdi $pdf): void
@@ -359,6 +400,7 @@ class _pdf{
 
     private function montos(array$factura, Fpdi $pdf): void
     {
+
         $pdf->SetFont('Arial', 'B', '9');
         $pdf->SetTextColor(255,255,255);
         $fmt = new NumberFormatter( 'es_MX', NumberFormatter::CURRENCY );
@@ -442,13 +484,53 @@ class _pdf{
 
     }
 
-    private function base_pdf(stdClass $data, array $factura, Fpdi $pdf, string $ruta_logo, string $ruta_qr): void
+    private function base_pdf(stdClass $data, array $factura, Fpdi $pdf, array $relacionadas, string $ruta_logo, string $ruta_qr)
     {
-        $this->init($pdf);
+        $init = $this->init($pdf);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al cargar template', data: $init);
+        }
+
         $this->header(data: $data, factura: $factura,pdf: $pdf);
         $this->receptor(factura: $factura, pdf: $pdf);
         $this->fiscales(data: $data, pdf: $pdf);
         $this->pago(factura: $factura, pdf: $pdf);
+
+
+
+        if(count($relacionadas) > 0 ) {
+            $y = 165;
+            $pdf->SetXY(7, $y);
+            $pdf->SetFont('Arial', 'B', '9');
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->MultiCell(90, 3, 'Relaciones:', 0);
+            foreach ($relacionadas as $relacionada) {
+                $pdf->SetFont('Arial', 'B', '8');
+                $cat_sat_tipo_relacion_codigo = trim($relacionada['cat_sat_tipo_relacion_codigo']);
+                $cat_sat_tipo_relacion_descripcion = trim($relacionada['cat_sat_tipo_relacion_descripcion']);
+
+                $tipo_relacion = "$cat_sat_tipo_relacion_codigo $cat_sat_tipo_relacion_descripcion";
+                $tipo_relacion = mb_convert_encoding($tipo_relacion, 'ISO-8859-1', 'UTF-8');
+                $y = $y+4;
+                $pdf->SetFont('Arial', 'B', '8');
+                $pdf->SetXY(8.5, $y);
+                $pdf->MultiCell(90, 3.5, $tipo_relacion, 0);
+
+                $folios_rel = $relacionada['fc_facturas_relacionadas'];
+
+                foreach ($folios_rel as $folio_rel){
+                    $y = $y+4;
+                    $pdf->SetXY(9.5, $y);
+                    $pdf->SetFont('Arial', '', '7');
+                    $pdf->MultiCell(90, 3.5, $folio_rel['fc_factura_uuid'], 0);
+
+                }
+
+
+            }
+        }
+
+
         $this->montos(factura: $factura, pdf: $pdf);
         $this->sellos(data: $data, pdf: $pdf);
         if($ruta_qr !== '') {
@@ -528,6 +610,12 @@ class _pdf{
             return $this->error->error(mensaje: 'Error al asignar datos', data:  $data);
         }
 
+        $relacionadas = $modelo_entidad->get_data_relaciones(modelo_relacion: $modelo_relacion,
+            modelo_relacionada: $modelo_relacionada, modelo_uuid_ext: $modelo_uuid_ext, registro_entidad_id: $registro_id);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener relacionadas',data:  $relacionadas);
+        }
+
 
         $key_observaciones = $modelo_entidad->tabla.'_observaciones';
         if(!isset($factura[$key_observaciones])){
@@ -571,9 +659,7 @@ class _pdf{
             $pdf = new Fpdi();
 
 
-            $this->base_pdf(data: $data,factura: $factura,pdf: $pdf, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
-
-
+            $this->base_pdf(data: $data, factura: $factura, pdf: $pdf, relacionadas: $relacionadas, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
 
             $border = 0;
             $h = 2.5;
@@ -622,7 +708,7 @@ class _pdf{
                 $mod = $partidas%6;
                 if($mod === 0){
                     $y = 96.5;
-                    $this->base_pdf(data: $data,factura: $factura,pdf: $pdf, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
+                    $this->base_pdf(data: $data, factura: $factura, pdf: $pdf, relacionadas: $relacionadas, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
                 }
             }
 
@@ -651,11 +737,7 @@ class _pdf{
 
         }
 
-        $relacionadas = $modelo_entidad->get_data_relaciones(modelo_relacion: $modelo_relacion,
-            modelo_relacionada: $modelo_relacionada, modelo_uuid_ext: $modelo_uuid_ext, registro_entidad_id: $registro_id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener relacionadas',data:  $relacionadas);
-        }
+
 
         $rs = $pdf->data_relacionados(name_entidad: $modelo_entidad->tabla, relacionadas: $relacionadas);
         if(errores::$error){

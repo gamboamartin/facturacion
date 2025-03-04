@@ -281,6 +281,245 @@ class _impuestos{
         return $imp_global;
     }
 
+    /**
+     * REG
+     * Limpia y valida las claves obligatorias del array de impuestos.
+     *
+     * Esta función realiza dos acciones principales:
+     * 1. **Validación previa**: Verifica que las claves esenciales (`cat_sat_tipo_factor_id`,
+     *    `cat_sat_factor_id`, `cat_sat_tipo_impuesto_id`) existan en `$impuesto`. Si alguna falta,
+     *    devuelve un error.
+     * 2. **Limpieza de datos**: Aplica `trim()` a los valores de las claves para eliminar
+     *    espacios en blanco al inicio y al final.
+     *
+     * ### Ejemplo de entrada válida:
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => ' 1 ',
+     *     'cat_sat_factor_id' => '2 ',
+     *     'cat_sat_tipo_impuesto_id' => ' 3'
+     * ];
+     * $resultado = $this->impuesto_limpia($impuesto);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada:
+     * ```php
+     * Array
+     * (
+     *     [cat_sat_tipo_factor_id] => "1"
+     *     [cat_sat_factor_id] => "2"
+     *     [cat_sat_tipo_impuesto_id] => "3"
+     * )
+     * ```
+     *
+     * ### Ejemplo de entrada inválida (falta `cat_sat_tipo_factor_id`):
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_factor_id' => '2 ',
+     *     'cat_sat_tipo_impuesto_id' => ' 3'
+     * ];
+     * $resultado = $this->impuesto_limpia($impuesto);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada (error):
+     * ```php
+     * Array
+     * (
+     *     [mensaje] => "Error al validar impuesto"
+     *     [data] => Array
+     *         (
+     *             [mensaje] => "Error cat_sat_tipo_factor_id no existe"
+     *             [data] => Array
+     *                 (
+     *                     [cat_sat_factor_id] => "2"
+     *                     [cat_sat_tipo_impuesto_id] => "3"
+     *                 )
+     *             [es_final] => true
+     *         )
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @param array $impuesto Arreglo con los datos del impuesto.
+     *                        Debe contener las claves:
+     *                        - `cat_sat_tipo_factor_id`
+     *                        - `cat_sat_factor_id`
+     *                        - `cat_sat_tipo_impuesto_id`
+     *
+     * @return array Retorna el array `$impuesto` con los valores de las claves limpiados con `trim()`.
+     *               Si falta alguna clave, devuelve un array con un mensaje de error.
+     *
+     * @throws array Retorna un array de error si alguna clave obligatoria no existe en `$impuesto`.
+     */
+    private function impuesto_limpia(array $impuesto): array
+    {
+        // Validar que las claves requeridas existan en el array
+        $valida = $this->valida_keys_existentes(impuesto: $impuesto);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al validar impuesto',
+                data: $valida,
+                es_final: true
+            );
+        }
+
+        // Aplicar trim() para limpiar espacios en blanco en los valores
+        $impuesto['cat_sat_tipo_factor_id'] = trim($impuesto['cat_sat_tipo_factor_id']);
+        $impuesto['cat_sat_factor_id'] = trim($impuesto['cat_sat_factor_id']);
+        $impuesto['cat_sat_tipo_impuesto_id'] = trim($impuesto['cat_sat_tipo_impuesto_id']);
+
+        return $impuesto;
+    }
+
+    /**
+     * REG
+     * Valida y limpia los valores del array de impuestos.
+     *
+     * Esta función ejecuta un proceso completo de validación y limpieza en el array `$impuesto`,
+     * asegurando que los datos sean correctos y listos para ser utilizados. Realiza las siguientes validaciones:
+     *
+     * 1. **Verificación de existencia de claves** (`valida_keys_existentes`)
+     *    - Asegura que las claves requeridas están presentes en `$impuesto`.
+     *
+     * 2. **Limpieza de datos** (`impuesto_limpia`)
+     *    - Aplica `trim()` para eliminar espacios en blanco en las claves relevantes.
+     *
+     * 3. **Validación de valores foráneos** (`valida_foraneas`)
+     *    - Comprueba que las claves no estén vacías.
+     *    - Verifica que los valores sean numéricos.
+     *    - Asegura que los valores sean mayores a 0.
+     *
+     * Si alguna validación falla, la función devuelve un array con un mensaje de error.
+     *
+     * ### Ejemplo de entrada válida:
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => ' 1 ',
+     *     'cat_sat_factor_id' => ' 2 ',
+     *     'cat_sat_tipo_impuesto_id' => '3'
+     * ];
+     * $resultado = $this->impuesto_validado($impuesto);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada:
+     * ```php
+     * Array
+     * (
+     *     [cat_sat_tipo_factor_id] => "1"
+     *     [cat_sat_factor_id] => "2"
+     *     [cat_sat_tipo_impuesto_id] => "3"
+     * )
+     * ```
+     *
+     * ### Ejemplo de entrada inválida (clave faltante):
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_factor_id' => '2',
+     *     'cat_sat_tipo_impuesto_id' => '3'
+     * ];
+     * $resultado = $this->impuesto_validado($impuesto);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada (error):
+     * ```php
+     * Array
+     * (
+     *     [mensaje] => "Error al validar impuesto"
+     *     [data] => Array
+     *         (
+     *             [mensaje] => "Error cat_sat_tipo_factor_id no existe"
+     *             [data] => Array
+     *                 (
+     *                     [cat_sat_factor_id] => "2"
+     *                     [cat_sat_tipo_impuesto_id] => "3"
+     *                 )
+     *             [es_final] => true
+     *         )
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * ### Ejemplo de entrada inválida (valor no numérico):
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => 'ABC',
+     *     'cat_sat_factor_id' => '2',
+     *     'cat_sat_tipo_impuesto_id' => '3'
+     * ];
+     * $resultado = $this->impuesto_validado($impuesto);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada (error):
+     * ```php
+     * Array
+     * (
+     *     [mensaje] => "Error al validar impuesto"
+     *     [data] => Array
+     *         (
+     *             [mensaje] => "Error cat_sat_tipo_factor_id debe ser un número"
+     *             [data] => Array
+     *                 (
+     *                     [cat_sat_tipo_factor_id] => "ABC"
+     *                     [cat_sat_factor_id] => "2"
+     *                     [cat_sat_tipo_impuesto_id] => "3"
+     *                 )
+     *             [es_final] => true
+     *         )
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @param array $impuesto Arreglo con los datos del impuesto.
+     *                        Debe contener las claves:
+     *                        - `cat_sat_tipo_factor_id`
+     *                        - `cat_sat_factor_id`
+     *                        - `cat_sat_tipo_impuesto_id`
+     *
+     * @return array Retorna el array `$impuesto` con los valores validados y limpiados.
+     *               En caso de error, devuelve un array con un mensaje de error.
+     *
+     * @throws array Retorna un array de error si alguna validación falla.
+     */
+    private function impuesto_validado(array $impuesto): array
+    {
+        // Validar que las claves requeridas existan en el array
+        $valida = $this->valida_keys_existentes(impuesto: $impuesto);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al validar impuesto',
+                data: $valida,
+                es_final: true
+            );
+        }
+
+        // Limpiar los valores del array
+        $impuesto = $this->impuesto_limpia(impuesto: $impuesto);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al limpiar impuesto',
+                data: $impuesto
+            );
+        }
+
+        // Validar que los valores cumplan con las reglas establecidas
+        $valida = $this->valida_foraneas(impuesto: $impuesto);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al validar impuesto',
+                data: $valida,
+                es_final: true
+            );
+        }
+
+        return $impuesto;
+    }
+
+
 
     /**
      * @param array $row_entidad
@@ -319,6 +558,106 @@ class _impuestos{
         return $impuestos;
     }
 
+    /**
+     * REG
+     * Procesa y acumula impuestos en una estructura global.
+     *
+     * Esta función toma una colección de impuestos y los valida, formatea y acumula dentro de un array `$global_imp`.
+     * Cada impuesto es procesado en los siguientes pasos:
+     *
+     * 1. **Validación del tipo de datos**:
+     *    - Se verifica que cada impuesto dentro de `$impuestos->registros` sea un array.
+     *
+     * 2. **Validación y limpieza de impuestos** (`impuesto_validado`)
+     *    - Se validan claves requeridas, se eliminan espacios en blanco y se verifica que los valores sean correctos.
+     *
+     * 3. **Generación de clave única** (`key_gl`)
+     *    - Se construye una clave en el formato `"X.Y.Z"` donde `X`, `Y` y `Z` corresponden a los identificadores de impuesto.
+     *
+     * 4. **Validación de la estructura base** (`valida_base`)
+     *    - Se verifica que la clave global generada, el importe y la tabla de partida sean correctos.
+     *
+     * 5. **Acumulación de impuestos** (`integra_ac_impuesto`)
+     *    - Se agregan los impuestos al array `$global_imp` manteniendo un registro de los valores acumulados.
+     *
+     * Si alguna validación falla, la función devuelve un array con un mensaje de error.
+     *
+     * ### Ejemplo de entrada válida:
+     * ```php
+     * $impuestos = new stdClass();
+     * $impuestos->registros = [
+     *     [
+     *         'cat_sat_tipo_factor_id' => '1',
+     *         'cat_sat_factor_id' => '2',
+     *         'cat_sat_tipo_impuesto_id' => '3',
+     *         'fc_partida_importe_impuesto' => '10.00'
+     *     ]
+     * ];
+     *
+     * $global_imp = [];
+     * $key_importe = 'fc_partida_importe_impuesto';
+     * $name_tabla_partida = 'fc_partida';
+     *
+     * $resultado = $this->impuestos_globales($impuestos, $global_imp, $key_importe, $name_tabla_partida);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada:
+     * ```php
+     * Array
+     * (
+     *     [1.2.3] => stdClass Object
+     *         (
+     *             [base] => "100.00"
+     *             [importe] => "10.00"
+     *         )
+     * )
+     * ```
+     *
+     * ### Ejemplo de entrada inválida (`impuesto` no es un array):
+     * ```php
+     * $impuestos = new stdClass();
+     * $impuestos->registros = [
+     *     "Este no es un array"
+     * ];
+     *
+     * $global_imp = [];
+     * $key_importe = 'fc_partida_importe_impuesto';
+     * $name_tabla_partida = 'fc_partida';
+     *
+     * $resultado = $this->impuestos_globales($impuestos, $global_imp, $key_importe, $name_tabla_partida);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada (error):
+     * ```php
+     * Array
+     * (
+     *     [mensaje] => "Error $impuesto debe ser un array"
+     *     [data] => "Este no es un array"
+     * )
+     * ```
+     *
+     * @param stdClass $impuestos Objeto que contiene un array de impuestos dentro de la propiedad `registros`.
+     *                            Cada registro debe contener:
+     *                            - `cat_sat_tipo_factor_id`
+     *                            - `cat_sat_factor_id`
+     *                            - `cat_sat_tipo_impuesto_id`
+     *                            - `key_importe` (Ejemplo: `fc_partida_importe_impuesto`)
+     *
+     * @param array $global_imp Arreglo que almacena los impuestos acumulados. Cada clave representa un tipo de impuesto.
+     *
+     * @param string $key_importe Clave dentro de `$impuesto` que contiene el importe del impuesto.
+     *                             Ejemplo: `'fc_partida_importe_impuesto'`.
+     *
+     * @param string $name_tabla_partida Nombre de la tabla de partidas en la base de datos.
+     *                                   Ejemplo: `'fc_partida'`.
+     *
+     * @return array Devuelve `$global_imp` con los impuestos acumulados por clave única generada.
+     *               En caso de error, devuelve un array con un mensaje de error.
+     *
+     * @throws array Retorna un array de error si alguna validación falla.
+     */
     final public function impuestos_globales(stdClass $impuestos, array $global_imp, string $key_importe,
                                              string $name_tabla_partida): array
     {
@@ -326,84 +665,54 @@ class _impuestos{
 
             // Validar que el impuesto sea un array
             if (!is_array($impuesto)) {
-                return $this->error->error(mensaje: 'Error $impuesto debe ser un array', data: $impuesto);
+                return $this->error->error(
+                    mensaje: 'Error $impuesto debe ser un array',
+                    data: $impuesto
+                );
             }
 
-
-            $valida = $this->valida_keys_existentes(impuesto: $impuesto);
-            if(errores::$error){
-                return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id no existe',
-                    data: $valida, es_final: true);
-            }
-
-
-            $impuesto['cat_sat_tipo_factor_id'] = trim($impuesto['cat_sat_tipo_factor_id']);
-            $impuesto['cat_sat_factor_id'] = trim($impuesto['cat_sat_factor_id']);
-            $impuesto['cat_sat_tipo_impuesto_id'] = trim($impuesto['cat_sat_tipo_impuesto_id']);
-
-            // Validar que los valores no estén vacíos
-            if ($impuesto['cat_sat_tipo_factor_id'] === '') {
-                return (new errores())->error(mensaje: 'Error cat_sat_tipo_factor_id esta vacio',
-                    data: $impuesto, es_final: true);
-            }
-            if ($impuesto['cat_sat_factor_id'] === '') {
-                return (new errores())->error(mensaje: 'Error cat_sat_factor_id esta vacio',
-                    data: $impuesto, es_final: true);
-            }
-            if ($impuesto['cat_sat_tipo_impuesto_id'] === '') {
-                return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id esta vacio',
-                    data: $impuesto, es_final: true);
-            }
-
-            if (!is_numeric($impuesto['cat_sat_tipo_factor_id'])) {
-                return (new errores())->error(mensaje: 'Error cat_sat_tipo_factor_id debe ser un numero',
-                    data: $impuesto, es_final: true);
-            }
-            if (!is_numeric($impuesto['cat_sat_factor_id'])) {
-                return (new errores())->error(mensaje: 'Error cat_sat_factor_id debe ser un numero',
-                    data: $impuesto, es_final: true);
-            }
-            if (!is_numeric($impuesto['cat_sat_tipo_impuesto_id'])) {
-                return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id debe ser un numero',
-                    data: $impuesto, es_final: true);
-            }
-
-            if ((int)$impuesto['cat_sat_tipo_factor_id'] <= 0) {
-                return (new errores())->error(mensaje: 'Error cat_sat_tipo_factor_id debe ser mayor a 0',
-                    data: $impuesto, es_final: true);
-            }
-            if ((int)$impuesto['cat_sat_factor_id'] <= 0) {
-                return (new errores())->error(mensaje: 'Error cat_sat_factor_id debe ser mayor a 0',
-                    data: $impuesto, es_final: true);
-            }
-            if ((int)$impuesto['cat_sat_tipo_impuesto_id'] <= 0) {
-                return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id debe ser mayor a 0',
-                    data: $impuesto, es_final: true);
+            // Validar y limpiar el impuesto
+            $impuesto = $this->impuesto_validado(impuesto: $impuesto);
+            if (errores::$error) {
+                return (new errores())->error(
+                    mensaje: 'Error al limpiar impuesto',
+                    data: $impuesto
+                );
             }
 
             // Generar clave única del impuesto
             $key_gl = $this->key_gl(impuesto: $impuesto);
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al inicializar $key_gl', data: $key_gl);
+                return $this->error->error(
+                    mensaje: 'Error al inicializar $key_gl',
+                    data: $key_gl
+                );
             }
 
             // Validar estructura base antes de procesar
             $valida = $this->valida_base(key_gl: $key_gl, key_importe: $key_importe,
                 name_tabla_partida: $name_tabla_partida);
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al validar datos', data: $valida);
+                return $this->error->error(
+                    mensaje: 'Error al validar datos',
+                    data: $valida
+                );
             }
 
             // Acumular impuestos en la estructura global
             $global_imp = $this->integra_ac_impuesto(global_imp: $global_imp, impuesto: $impuesto, key_gl: $key_gl,
                 key_importe: $key_importe, name_tabla_partida: $name_tabla_partida);
             if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al inicializar acumulado', data: $global_imp);
+                return $this->error->error(
+                    mensaje: 'Error al inicializar acumulado',
+                    data: $global_imp
+                );
             }
         }
 
         return $global_imp;
     }
+
 
 
     /**
@@ -824,123 +1133,93 @@ class _impuestos{
         return $global_imp;
     }
 
+
     /**
      * REG
-     * Genera una clave única para un impuesto en base a sus identificadores.
+     * Genera una clave global única concatenando los valores de impuestos validados.
      *
-     * Esta función valida la existencia y formato de los identificadores de tipo de factor, factor y tipo de impuesto.
-     * Luego, genera una clave concatenada con el formato: `"tipo_factor_id.factor_id.tipo_impuesto_id"`.
+     * Esta función realiza los siguientes pasos:
+     * 1. **Validación y limpieza del array `$impuesto`**:
+     *    - Llama a `impuesto_validado()` para verificar la existencia de claves, eliminar espacios en blanco y validar los valores.
+     *    - Si alguna validación falla, devuelve un error con los detalles correspondientes.
+     *
+     * 2. **Construcción de la clave global (`key_gl`)**:
+     *    - Concatena los valores de las claves `cat_sat_tipo_factor_id`, `cat_sat_factor_id` y `cat_sat_tipo_impuesto_id` con un separador `.`.
+     *    - Aplica `trim()` al resultado final para asegurar que no haya espacios en blanco al inicio o al final.
      *
      * ### Ejemplo de entrada válida:
      * ```php
      * $impuesto = [
      *     'cat_sat_tipo_factor_id' => '1',
-     *     'cat_sat_factor_id' => '5',
-     *     'cat_sat_tipo_impuesto_id' => '2'
+     *     'cat_sat_factor_id' => '2',
+     *     'cat_sat_tipo_impuesto_id' => '3'
      * ];
-     * ```
-     *
-     * ### Ejemplo de uso:
-     * ```php
-     * $key = $this->key_gl($impuesto);
-     * echo $key;
+     * $resultado = $this->key_gl($impuesto);
+     * print_r($resultado);
      * ```
      *
      * ### Salida esperada:
      * ```php
-     * "1.5.2"
+     * "1.2.3"
      * ```
      *
-     * ### Ejemplo de entrada inválida:
+     * ### Ejemplo de entrada inválida (clave faltante):
      * ```php
      * $impuesto = [
-     *     'cat_sat_tipo_factor_id' => '',
-     *     'cat_sat_factor_id' => '5',
-     *     'cat_sat_tipo_impuesto_id' => '2'
+     *     'cat_sat_factor_id' => '2',
+     *     'cat_sat_tipo_impuesto_id' => '3'
      * ];
+     * $resultado = $this->key_gl($impuesto);
+     * print_r($resultado);
      * ```
      *
-     * ### Salida esperada en caso de error:
+     * ### Salida esperada (error):
      * ```php
      * Array
      * (
-     *     [mensaje] => "Error cat_sat_tipo_factor_id esta vacio"
-     *     [data] => Array(...)
-     *     [es_final] => true
+     *     [mensaje] => "Error al limpiar impuesto"
+     *     [data] => Array
+     *         (
+     *             [mensaje] => "Error cat_sat_tipo_factor_id no existe"
+     *             [data] => Array
+     *                 (
+     *                     [cat_sat_factor_id] => "2"
+     *                     [cat_sat_tipo_impuesto_id] => "3"
+     *                 )
+     *             [es_final] => true
+     *         )
      * )
      * ```
      *
-     * @param array $impuesto Datos del impuesto, debe contener las claves:
-     *                        - `'cat_sat_tipo_factor_id'` (int/string) - Identificador del tipo de factor.
-     *                        - `'cat_sat_factor_id'` (int/string) - Identificador del factor.
-     *                        - `'cat_sat_tipo_impuesto_id'` (int/string) - Identificador del tipo de impuesto.
+     * @param array $impuesto Arreglo con los datos del impuesto.
+     *                        Debe contener las claves:
+     *                        - `cat_sat_tipo_factor_id`
+     *                        - `cat_sat_factor_id`
+     *                        - `cat_sat_tipo_impuesto_id`
      *
-     * @return array|string Retorna la clave única generada en formato `"tipo_factor_id.factor_id.tipo_impuesto_id"`.
-     *                      En caso de error, devuelve un array con detalles del problema.
+     * @return string|array Retorna un string con la clave global generada en formato "X.Y.Z".
+     *                      En caso de error, devuelve un array con un mensaje de error.
      *
-     * @throws array Retorna un array con mensaje de error si alguna validación falla.
+     * @throws array Retorna un array de error si la validación del impuesto falla.
      */
     private function key_gl(array $impuesto): array|string
     {
-        $valida = $this->valida_keys_existentes(impuesto: $impuesto);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id no existe',
-                data: $valida, es_final: true);
-        }
-
-        // Limpiar espacios en blanco en los valores
-        $impuesto['cat_sat_tipo_factor_id'] = trim($impuesto['cat_sat_tipo_factor_id']);
-        $impuesto['cat_sat_factor_id'] = trim($impuesto['cat_sat_factor_id']);
-        $impuesto['cat_sat_tipo_impuesto_id'] = trim($impuesto['cat_sat_tipo_impuesto_id']);
-
-        // Validar que los valores no estén vacíos
-        if ($impuesto['cat_sat_tipo_factor_id'] === '') {
-            return (new errores())->error(mensaje: 'Error cat_sat_tipo_factor_id esta vacio',
-                data: $impuesto, es_final: true);
-        }
-        if ($impuesto['cat_sat_factor_id'] === '') {
-            return (new errores())->error(mensaje: 'Error cat_sat_factor_id esta vacio',
-                data: $impuesto, es_final: true);
-        }
-        if ($impuesto['cat_sat_tipo_impuesto_id'] === '') {
-            return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id esta vacio',
-                data: $impuesto, es_final: true);
-        }
-
-        // Validar que los valores sean numéricos
-        if (!is_numeric($impuesto['cat_sat_tipo_factor_id'])) {
-            return (new errores())->error(mensaje: 'Error cat_sat_tipo_factor_id debe ser un numero',
-                data: $impuesto, es_final: true);
-        }
-        if (!is_numeric($impuesto['cat_sat_factor_id'])) {
-            return (new errores())->error(mensaje: 'Error cat_sat_factor_id debe ser un numero',
-                data: $impuesto, es_final: true);
-        }
-        if (!is_numeric($impuesto['cat_sat_tipo_impuesto_id'])) {
-            return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id debe ser un numero',
-                data: $impuesto, es_final: true);
-        }
-
-        // Validar que los valores sean mayores a 0
-        if ((int)$impuesto['cat_sat_tipo_factor_id'] <= 0) {
-            return (new errores())->error(mensaje: 'Error cat_sat_tipo_factor_id debe ser mayor a 0',
-                data: $impuesto, es_final: true);
-        }
-        if ((int)$impuesto['cat_sat_factor_id'] <= 0) {
-            return (new errores())->error(mensaje: 'Error cat_sat_factor_id debe ser mayor a 0',
-                data: $impuesto, es_final: true);
-        }
-        if ((int)$impuesto['cat_sat_tipo_impuesto_id'] <= 0) {
-            return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id debe ser mayor a 0',
-                data: $impuesto, es_final: true);
+        // Validar y limpiar los valores del impuesto
+        $impuesto = $this->impuesto_validado(impuesto: $impuesto);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al limpiar impuesto',
+                data: $impuesto
+            );
         }
 
         // Construir clave global concatenada
-        $key_gl = $impuesto['cat_sat_tipo_factor_id'] . '.' .
-            $impuesto['cat_sat_factor_id'] . '.' . $impuesto['cat_sat_tipo_impuesto_id'];
+        $key_gl = $impuesto['cat_sat_tipo_factor_id'];
+        $key_gl .= '.' . $impuesto['cat_sat_factor_id'] . '.' . $impuesto['cat_sat_tipo_impuesto_id'];
 
         return trim($key_gl);
     }
+
 
 
 
@@ -1195,6 +1474,384 @@ class _impuestos{
         return true;
     }
 
+    /**
+     * REG
+     * Valida que los valores del array de impuestos cumplan con las siguientes reglas:
+     * - Existan las claves obligatorias (`cat_sat_tipo_factor_id`, `cat_sat_factor_id`, `cat_sat_tipo_impuesto_id`).
+     * - No estén vacías.
+     * - Sean valores numéricos.
+     * - Sean valores mayores a 0.
+     *
+     * ### Proceso de validación:
+     * 1. **`valida_keys_existentes()`**: Verifica que las claves necesarias estén presentes en `$impuesto`.
+     * 2. **`valida_vacio()`**: Asegura que las claves no tengan valores vacíos.
+     * 3. **`valida_numeric()`**: Confirma que las claves contienen valores numéricos.
+     * 4. **`valida_negativo()`**: Asegura que los valores sean mayores a 0.
+     *
+     * Si alguna validación falla, devuelve un array con un mensaje de error.
+     *
+     * ### Ejemplo de entrada válida:
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => 1,
+     *     'cat_sat_factor_id' => 2,
+     *     'cat_sat_tipo_impuesto_id' => 3
+     * ];
+     * $resultado = $this->valida_foraneas($impuesto);
+     * var_dump($resultado);
+     * ```
+     *
+     * ### Salida esperada:
+     * ```php
+     * bool(true)
+     * ```
+     *
+     * ### Ejemplo de entrada inválida (`cat_sat_tipo_factor_id` está vacío):
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => '',
+     *     'cat_sat_factor_id' => 2,
+     *     'cat_sat_tipo_impuesto_id' => 3
+     * ];
+     * $resultado = $this->valida_foraneas($impuesto);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada (error):
+     * ```php
+     * Array
+     * (
+     *     [mensaje] => "Error al validar impuesto"
+     *     [data] => Array
+     *         (
+     *             [mensaje] => "Error cat_sat_tipo_factor_id esta vacio"
+     *             [data] => Array
+     *                 (
+     *                     [cat_sat_tipo_factor_id] => ""
+     *                     [cat_sat_factor_id] => 2
+     *                     [cat_sat_tipo_impuesto_id] => 3
+     *                 )
+     *             [es_final] => true
+     *         )
+     * )
+     * ```
+     *
+     * ### Ejemplo de entrada inválida (`cat_sat_factor_id` no es numérico):
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => 1,
+     *     'cat_sat_factor_id' => 'ABC',
+     *     'cat_sat_tipo_impuesto_id' => 3
+     * ];
+     * $resultado = $this->valida_foraneas($impuesto);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada (error):
+     * ```php
+     * Array
+     * (
+     *     [mensaje] => "Error al validar impuesto"
+     *     [data] => Array
+     *         (
+     *             [mensaje] => "Error cat_sat_factor_id debe ser un número"
+     *             [data] => Array
+     *                 (
+     *                     [cat_sat_tipo_factor_id] => 1
+     *                     [cat_sat_factor_id] => "ABC"
+     *                     [cat_sat_tipo_impuesto_id] => 3
+     *                 )
+     *             [es_final] => true
+     *         )
+     * )
+     * ```
+     *
+     * @param array $impuesto Arreglo con los datos del impuesto.
+     *                        Debe contener las claves:
+     *                        - `cat_sat_tipo_factor_id`
+     *                        - `cat_sat_factor_id`
+     *                        - `cat_sat_tipo_impuesto_id`
+     *
+     * @return true|array Retorna `true` si todas las validaciones se cumplen correctamente.
+     *                    En caso contrario, devuelve un array con un mensaje de error.
+     *
+     * @throws array Retorna un array de error si alguna validación falla.
+     */
+    private function valida_foraneas(array $impuesto): true|array
+    {
+        // Validar existencia de claves
+        $valida = $this->valida_keys_existentes(impuesto: $impuesto);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al validar impuesto',
+                data: $valida,
+                es_final: true
+            );
+        }
+
+        // Validar valores no vacíos
+        $valida = $this->valida_vacio(impuesto: $impuesto);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al validar impuesto',
+                data: $valida
+            );
+        }
+
+        // Validar que los valores sean numéricos
+        $valida = $this->valida_numeric(impuesto: $impuesto);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al validar impuesto',
+                data: $valida
+            );
+        }
+
+        // Validar que los valores sean mayores a 0
+        $valida = $this->valida_negativo(impuesto: $impuesto);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al validar impuesto',
+                data: $valida
+            );
+        }
+
+        return true;
+    }
+
+
+    /**
+     * REG
+     * Valida que los valores de las claves obligatorias en `$impuesto` sean mayores a 0.
+     *
+     * Esta función realiza dos validaciones:
+     * 1. **Verificación de existencia de claves**: Llama a `valida_keys_existentes()` para asegurarse
+     *    de que las claves obligatorias (`cat_sat_tipo_factor_id`, `cat_sat_factor_id`, `cat_sat_tipo_impuesto_id`)
+     *    existen en `$impuesto`. Si falta alguna, devuelve un error.
+     * 2. **Verificación de valores positivos**: Si alguna de las claves contiene un valor menor o igual a 0,
+     *    devuelve un error con un mensaje descriptivo.
+     *
+     * ### Ejemplo de entrada válida:
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => 1,
+     *     'cat_sat_factor_id' => 2,
+     *     'cat_sat_tipo_impuesto_id' => 3
+     * ];
+     * $resultado = $this->valida_negativo($impuesto);
+     * var_dump($resultado);
+     * ```
+     *
+     * ### Salida esperada:
+     * ```php
+     * bool(true)
+     * ```
+     *
+     * ### Ejemplo de entrada inválida (`cat_sat_tipo_factor_id` es 0):
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => 0,
+     *     'cat_sat_factor_id' => 2,
+     *     'cat_sat_tipo_impuesto_id' => 3
+     * ];
+     * $resultado = $this->valida_negativo($impuesto);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada (error):
+     * ```php
+     * Array
+     * (
+     *     [mensaje] => "Error cat_sat_tipo_factor_id debe ser mayor a 0"
+     *     [data] => Array
+     *         (
+     *             [cat_sat_tipo_factor_id] => 0
+     *             [cat_sat_factor_id] => 2
+     *             [cat_sat_tipo_impuesto_id] => 3
+     *         )
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * ### Ejemplo de entrada inválida (`cat_sat_factor_id` es negativo):
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => 1,
+     *     'cat_sat_factor_id' => -5,
+     *     'cat_sat_tipo_impuesto_id' => 3
+     * ];
+     * $resultado = $this->valida_negativo($impuesto);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada (error):
+     * ```php
+     * Array
+     * (
+     *     [mensaje] => "Error cat_sat_factor_id debe ser mayor a 0"
+     *     [data] => Array
+     *         (
+     *             [cat_sat_tipo_factor_id] => 1
+     *             [cat_sat_factor_id] => -5
+     *             [cat_sat_tipo_impuesto_id] => 3
+     *         )
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @param array $impuesto Arreglo con los datos del impuesto.
+     *                        Debe contener las claves:
+     *                        - `cat_sat_tipo_factor_id`
+     *                        - `cat_sat_factor_id`
+     *                        - `cat_sat_tipo_impuesto_id`
+     *
+     * @return true|array Retorna `true` si todas las claves contienen valores mayores a 0.
+     *                    En caso contrario, devuelve un array con un mensaje de error.
+     *
+     * @throws array Retorna un array de error si alguna clave es menor o igual a 0.
+     */
+    private function valida_negativo(array $impuesto): true|array
+    {
+        // Validar que las claves requeridas existan en el array
+        $valida = $this->valida_keys_existentes(impuesto: $impuesto);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al validar impuesto',
+                data: $valida,
+                es_final: true
+            );
+        }
+
+        // Verificar si los valores son mayores a 0
+        if ((int)$impuesto['cat_sat_tipo_factor_id'] <= 0) {
+            return (new errores())->error(
+                mensaje: 'Error cat_sat_tipo_factor_id debe ser mayor a 0',
+                data: $impuesto,
+                es_final: true
+            );
+        }
+        if ((int)$impuesto['cat_sat_factor_id'] <= 0) {
+            return (new errores())->error(
+                mensaje: 'Error cat_sat_factor_id debe ser mayor a 0',
+                data: $impuesto,
+                es_final: true
+            );
+        }
+        if ((int)$impuesto['cat_sat_tipo_impuesto_id'] <= 0) {
+            return (new errores())->error(
+                mensaje: 'Error cat_sat_tipo_impuesto_id debe ser mayor a 0',
+                data: $impuesto,
+                es_final: true
+            );
+        }
+
+        return true;
+    }
+
+
+    /**
+     * REG
+     * Verifica que los valores de las claves obligatorias en `$impuesto` sean numéricos.
+     *
+     * Esta función realiza dos validaciones:
+     * 1. **Verificación de existencia de claves**: Llama a `valida_keys_existentes()` para asegurarse
+     *    de que las claves obligatorias (`cat_sat_tipo_factor_id`, `cat_sat_factor_id`, `cat_sat_tipo_impuesto_id`)
+     *    existen en `$impuesto`. Si falta alguna, devuelve un error.
+     * 2. **Verificación de tipo numérico**: Si alguna de las claves contiene un valor que no es numérico,
+     *    devuelve un error con un mensaje descriptivo.
+     *
+     * ### Ejemplo de entrada válida:
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => 1,
+     *     'cat_sat_factor_id' => '2',
+     *     'cat_sat_tipo_impuesto_id' => 3.5
+     * ];
+     * $resultado = $this->valida_numeric($impuesto);
+     * var_dump($resultado);
+     * ```
+     *
+     * ### Salida esperada:
+     * ```php
+     * bool(true)
+     * ```
+     *
+     * ### Ejemplo de entrada inválida (`cat_sat_tipo_factor_id` no es numérico):
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => 'ABC',
+     *     'cat_sat_factor_id' => 2,
+     *     'cat_sat_tipo_impuesto_id' => 3
+     * ];
+     * $resultado = $this->valida_numeric($impuesto);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada (error):
+     * ```php
+     * Array
+     * (
+     *     [mensaje] => "Error cat_sat_tipo_factor_id debe ser un numero"
+     *     [data] => Array
+     *         (
+     *             [cat_sat_tipo_factor_id] => "ABC"
+     *             [cat_sat_factor_id] => 2
+     *             [cat_sat_tipo_impuesto_id] => 3
+     *         )
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @param array $impuesto Arreglo con los datos del impuesto.
+     *                        Debe contener las claves:
+     *                        - `cat_sat_tipo_factor_id`
+     *                        - `cat_sat_factor_id`
+     *                        - `cat_sat_tipo_impuesto_id`
+     *
+     * @return true|array Retorna `true` si todas las claves contienen valores numéricos.
+     *                    En caso contrario, devuelve un array con un mensaje de error.
+     *
+     * @throws array Retorna un array de error si alguna clave obligatoria no es numérica.
+     */
+    private function valida_numeric(array $impuesto): true|array
+    {
+        // Validar que las claves requeridas existan en el array
+        $valida = $this->valida_keys_existentes(impuesto: $impuesto);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al validar impuesto',
+                data: $valida,
+                es_final: true
+            );
+        }
+
+        // Verificar si los valores son numéricos
+        if (!is_numeric($impuesto['cat_sat_tipo_factor_id'])) {
+            return (new errores())->error(
+                mensaje: 'Error cat_sat_tipo_factor_id debe ser un número',
+                data: $impuesto,
+                es_final: true
+            );
+        }
+        if (!is_numeric($impuesto['cat_sat_factor_id'])) {
+            return (new errores())->error(
+                mensaje: 'Error cat_sat_factor_id debe ser un número',
+                data: $impuesto,
+                es_final: true
+            );
+        }
+        if (!is_numeric($impuesto['cat_sat_tipo_impuesto_id'])) {
+            return (new errores())->error(
+                mensaje: 'Error cat_sat_tipo_impuesto_id debe ser un número',
+                data: $impuesto,
+                es_final: true
+            );
+        }
+
+        return true;
+    }
+
+
     private function valida_tasa_cuota(mixed $imp_traslado){
         if(!is_object($imp_traslado)){
             return $this->error->error(mensaje: 'Error $row_entidad[traslados][] debe ser un objeto' ,
@@ -1210,22 +1867,197 @@ class _impuestos{
         return true;
     }
 
-    private function valida_keys_existentes(array $impuesto): true|array
+    /**
+     * REG
+     * Valida que las claves esenciales del array de impuestos no estén vacías.
+     *
+     * Esta función realiza dos validaciones:
+     * 1. **Verificación de existencia de claves**: Llama a `valida_keys_existentes()` para asegurarse
+     *    de que las claves obligatorias (`cat_sat_tipo_factor_id`, `cat_sat_factor_id`, `cat_sat_tipo_impuesto_id`)
+     *    existen en `$impuesto`. Si falta alguna, devuelve un error.
+     * 2. **Verificación de valores vacíos**: Si alguna de las claves contiene un valor vacío (`''`),
+     *    devuelve un error con un mensaje descriptivo.
+     *
+     * ### Ejemplo de entrada válida:
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => '1',
+     *     'cat_sat_factor_id' => '2',
+     *     'cat_sat_tipo_impuesto_id' => '3'
+     * ];
+     * $resultado = $this->valida_vacio($impuesto);
+     * var_dump($resultado);
+     * ```
+     *
+     * ### Salida esperada:
+     * ```php
+     * bool(true)
+     * ```
+     *
+     * ### Ejemplo de entrada inválida (valor vacío en `cat_sat_tipo_factor_id`):
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => '',
+     *     'cat_sat_factor_id' => '2',
+     *     'cat_sat_tipo_impuesto_id' => '3'
+     * ];
+     * $resultado = $this->valida_vacio($impuesto);
+     * print_r($resultado);
+     * ```
+     *
+     * ### Salida esperada (error):
+     * ```php
+     * Array
+     * (
+     *     [mensaje] => "Error cat_sat_tipo_factor_id esta vacio"
+     *     [data] => Array
+     *         (
+     *             [cat_sat_tipo_factor_id] => ""
+     *             [cat_sat_factor_id] => "2"
+     *             [cat_sat_tipo_impuesto_id] => "3"
+     *         )
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * @param array $impuesto Arreglo con los datos del impuesto.
+     *                        Debe contener las claves:
+     *                        - `cat_sat_tipo_factor_id`
+     *                        - `cat_sat_factor_id`
+     *                        - `cat_sat_tipo_impuesto_id`
+     *
+     * @return true|array Retorna `true` si todas las claves tienen valores no vacíos.
+     *                    En caso contrario, devuelve un array con un mensaje de error.
+     *
+     * @throws array Retorna un array de error si alguna clave obligatoria está vacía.
+     */
+    private function valida_vacio(array $impuesto): true|array
     {
-        if (!isset($impuesto['cat_sat_tipo_factor_id'])) {
-            return (new errores())->error(mensaje: 'Error cat_sat_tipo_factor_id no existe',
-                data: $impuesto, es_final: true);
+        // Validar que las claves requeridas existan en el array
+        $valida = $this->valida_keys_existentes(impuesto: $impuesto);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al validar impuesto',
+                data: $valida,
+                es_final: true
+            );
         }
-        if (!isset($impuesto['cat_sat_factor_id'])) {
-            return (new errores())->error(mensaje: 'Error cat_sat_factor_id no existe',
-                data: $impuesto, es_final: true);
+
+        // Verificar si alguna de las claves tiene un valor vacío
+        if ($impuesto['cat_sat_tipo_factor_id'] === '') {
+            return (new errores())->error(
+                mensaje: 'Error cat_sat_tipo_factor_id esta vacio',
+                data: $impuesto,
+                es_final: true
+            );
         }
-        if (!isset($impuesto['cat_sat_tipo_impuesto_id'])) {
-            return (new errores())->error(mensaje: 'Error cat_sat_tipo_impuesto_id no existe',
-                data: $impuesto, es_final: true);
+        if ($impuesto['cat_sat_factor_id'] === '') {
+            return (new errores())->error(
+                mensaje: 'Error cat_sat_factor_id esta vacio',
+                data: $impuesto,
+                es_final: true
+            );
+        }
+        if ($impuesto['cat_sat_tipo_impuesto_id'] === '') {
+            return (new errores())->error(
+                mensaje: 'Error cat_sat_tipo_impuesto_id esta vacio',
+                data: $impuesto,
+                es_final: true
+            );
         }
 
         return true;
-
     }
+
+
+    /**
+     * REG
+     * Verifica que el array de impuestos contenga las claves obligatorias.
+     *
+     * Esta función valida la existencia de las claves:
+     * - `cat_sat_tipo_factor_id`
+     * - `cat_sat_factor_id`
+     * - `cat_sat_tipo_impuesto_id`
+     *
+     * Si alguna clave no existe, devuelve un array con un mensaje de error.
+     * Si todas las claves existen, devuelve `true`.
+     *
+     * ### Ejemplo de entrada válida:
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_tipo_factor_id' => 1,
+     *     'cat_sat_factor_id' => 2,
+     *     'cat_sat_tipo_impuesto_id' => 3
+     * ];
+     * $resultado = $this->valida_keys_existentes($impuesto);
+     * var_dump($resultado);
+     * ```
+     *
+     * ### Salida esperada:
+     * ```php
+     * bool(true)
+     * ```
+     *
+     * ### Ejemplo de entrada inválida (falta `cat_sat_tipo_factor_id`):
+     * ```php
+     * $impuesto = [
+     *     'cat_sat_factor_id' => 2,
+     *     'cat_sat_tipo_impuesto_id' => 3
+     * ];
+     * $resultado = $this->valida_keys_existentes($impuesto);
+     * var_dump($resultado);
+     * ```
+     *
+     * ### Salida esperada:
+     * ```php
+     * array(3) {
+     *   ["mensaje"] => string(37) "Error cat_sat_tipo_factor_id no existe"
+     *   ["data"] => array(2) {
+     *     ["cat_sat_factor_id"] => int(2)
+     *     ["cat_sat_tipo_impuesto_id"] => int(3)
+     *   }
+     *   ["es_final"] => bool(true)
+     * }
+     * ```
+     *
+     * @param array $impuesto Arreglo con los datos del impuesto.
+     *                        Debe contener las claves:
+     *                        - `cat_sat_tipo_factor_id`
+     *                        - `cat_sat_factor_id`
+     *                        - `cat_sat_tipo_impuesto_id`
+     *
+     * @return true|array Retorna `true` si todas las claves existen.
+     *                    En caso contrario, retorna un array con un mensaje de error y los datos del array recibido.
+     *
+     * @throws array Devuelve un array de error si falta alguna clave obligatoria.
+     */
+    private function valida_keys_existentes(array $impuesto): true|array
+    {
+        if (!isset($impuesto['cat_sat_tipo_factor_id'])) {
+            return (new errores())->error(
+                mensaje: 'Error cat_sat_tipo_factor_id no existe',
+                data: $impuesto,
+                es_final: true
+            );
+        }
+
+        if (!isset($impuesto['cat_sat_factor_id'])) {
+            return (new errores())->error(
+                mensaje: 'Error cat_sat_factor_id no existe',
+                data: $impuesto,
+                es_final: true
+            );
+        }
+
+        if (!isset($impuesto['cat_sat_tipo_impuesto_id'])) {
+            return (new errores())->error(
+                mensaje: 'Error cat_sat_tipo_impuesto_id no existe',
+                data: $impuesto,
+                es_final: true
+            );
+        }
+
+        return true;
+    }
+
 }

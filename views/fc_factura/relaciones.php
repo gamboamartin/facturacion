@@ -27,9 +27,6 @@
         </div>
     </div>
 
-    <div class="container">
-        <?php echo $controlador->buttons_base; ?>
-    </div>
 
     <div class="container">
 
