@@ -867,6 +867,7 @@ class _base_system_fc extends _base_system{
         $datatables = new stdClass();
         $datatables->columns = $columns;
         $datatables->filtro = $filtro;
+        $datatables->menu_active = true;
 
         return $datatables;
     }
