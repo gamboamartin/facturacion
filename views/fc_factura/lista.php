@@ -46,6 +46,27 @@ echo "<style>
 #filtrar:hover {
     background: #0056b3;
 }
+#limpiar {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+#limpiar:hover {
+    background: #a71d2a;
+}
+
+#limpiar:disabled {
+    background: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+    border: none;
+}
 
 </style>";
 ?>
@@ -83,6 +104,7 @@ echo "<style>
                         </div>
 
                         <button id="filtrar">Filtrar</button>
+                        <button id="limpiar">Limpiar</button>
                     </div>
 
                     <table class="datatable table table-striped"></table>
