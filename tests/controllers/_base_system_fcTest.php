@@ -31,6 +31,31 @@ class _base_system_fcTest extends test {
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_init_inputs(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+
+        $ctl = new controlador_fc_factura(link: $this->link, paths_conf: $this->paths_conf);
+        //$ctl = new liberator($ctl);
+
+
+        $resultado = $ctl->init_inputs();
+        //print_r($resultado);exit;
+        $this->assertIsArray($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals('fc_csd_serie',$resultado['fc_csd_id']->extra_params_keys[0]);
+        $this->assertEquals('com_cliente_cat_sat_metodo_pago_id',$resultado['com_sucursal_id']->extra_params_keys[1]);
+
+        errores::$error = false;
+    }
     public function test_init_links(): void
     {
         errores::$error = false;
@@ -114,6 +139,55 @@ class _base_system_fcTest extends test {
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(1,$resultado['b']);
         $this->assertEquals(1,$resultado['a']);
+        errores::$error = false;
+    }
+
+    public function test_thead_relacion(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+
+        $ctl = new controlador_fc_factura(link: $this->link, paths_conf: $this->paths_conf);
+        $ctl = new liberator($ctl);
+
+
+        $resultado = $ctl->thead_relacion();
+
+
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("<thead><tr><th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th><th>Tipo de CFDI</th>'..'<th>Selecciona</th></tr></thead>",$resultado);
+        errores::$error = false;
+    }
+
+    public function test_ths(): void
+    {
+        errores::$error = false;
+
+        $_GET['seccion'] = 'fc_factura';
+        $_GET['accion'] = 'lista';
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+
+        $ctl = new controlador_fc_factura(link: $this->link, paths_conf: $this->paths_conf);
+        $ctl = new liberator($ctl);
+
+
+        $resultado = $ctl->ths();
+
+        $this->assertIsString($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals("<th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th><th>Tipo de CFDI</th>'..'<th>Selecciona</th>",$resultado);
         errores::$error = false;
     }
 

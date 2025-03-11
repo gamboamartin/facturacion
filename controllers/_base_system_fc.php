@@ -171,7 +171,8 @@ class _base_system_fc extends _base_system{
     {
 
 
-        $row_upd = $this->modelo_entidad->registro(registro_id: $this->registro_id, columnas_en_bruto: true, retorno_obj: true);
+        $row_upd = $this->modelo_entidad->registro(registro_id: $this->registro_id, columnas_en_bruto: true,
+            retorno_obj: true);
         if (errores::$error) {
             return $this->retorno_error(mensaje: 'Error al obtener registro', data: $row_upd, header: $header, ws: $ws);
         }

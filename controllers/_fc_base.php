@@ -32,6 +32,16 @@ class _fc_base{
     }
 
     final public function init_base_fc(_base_system_fc $controler, string $name_modelo_email){
+
+        $name_modelo_email = trim($name_modelo_email);
+        if ($name_modelo_email === '') {
+            return $this->error->error(
+                mensaje: 'Error $name_modelo_email esta vacio',
+                data: $name_modelo_email,
+                es_final: true
+            );
+        }
+
         $links = $controler->init_links(name_modelo_email: $name_modelo_email);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al inicializar links',data:  $links);
