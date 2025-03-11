@@ -159,11 +159,12 @@ class _base_system_fcTest extends test {
 
 
         $resultado = $ctl->thead_relacion();
-
+        //print_r($resultado);exit;
 
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals("<thead><tr><th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th><th>Tipo de CFDI</th>'..'<th>Selecciona</th></tr></thead>",$resultado);
+
+        $this->assertEquals("<thead><tr><th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th><th>Tipo de CFDI</th><th>Selecciona</th></tr></thead>",$resultado);
         errores::$error = false;
     }
 
@@ -184,10 +185,11 @@ class _base_system_fcTest extends test {
 
 
         $resultado = $ctl->ths();
-
+        //print_r($resultado);exit;
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
         $this->assertEquals("<th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th><th>Tipo de CFDI</th>'..'<th>Selecciona</th>",$resultado);
+        $this->assertEquals("<th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th><th>Tipo de CFDI</th><th>Selecciona</th>",$resultado);
         errores::$error = false;
     }
 

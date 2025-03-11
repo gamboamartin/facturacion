@@ -873,6 +873,68 @@ class _base_system_fc extends _base_system{
         return $datatables;
     }
 
+    /**
+     * REG
+     * Inicializa los inputs del formulario con sus respectivas propiedades.
+     *
+     * Este método configura una serie de inputs que serán utilizados en la interfaz de usuario,
+     * asignando sus identificadores, etiquetas, propiedades de visualización y parámetros adicionales.
+     *
+     * Se encarga de asignar propiedades como el número de columnas (`cols`),
+     * filtros predefinidos (`filtro`), valores seleccionados (`id_selected`), y otros atributos
+     * como `disabled`, `required` y `place_holder`.
+     *
+     * Si ocurre un error en la asignación de alguna propiedad, la función retornará un array con
+     * la descripción del error.
+     *
+     * @return array Retorna un array con los inputs inicializados y sus propiedades.
+     *
+     * @throws errores Si ocurre un error durante la asignación de las propiedades.
+     *
+     * @example
+     * ```php
+     * $inputs = $this->init_inputs();
+     * print_r($inputs);
+     * ```
+     *
+     * Ejemplo de salida:
+     * ```php
+     * Array (
+     *    [fc_csd_id] => Array (
+     *        [label] => Empresa
+     *        [cols] => 12
+     *        [extra_params_keys] => Array ( [0] => fc_csd_serie )
+     *    ),
+     *    [com_sucursal_id] => Array (
+     *        [label] => Cliente
+     *        [cols] => 12
+     *        [extra_params_keys] => Array (
+     *            [0] => com_cliente_cat_sat_forma_pago_id
+     *            [1] => com_cliente_cat_sat_metodo_pago_id
+     *            [2] => com_cliente_cat_sat_moneda_id
+     *            [3] => com_cliente_cat_sat_uso_cfdi_id
+     *        )
+     *    ),
+     *    [cat_sat_forma_pago_id] => Array (
+     *        [label] => Forma Pago
+     *        [id_selected] => 3
+     *        [filtro] => Array ( [activo] => 1 )
+     *        [extra_params_keys] => Array ( [0] => cat_sat_forma_pago_codigo )
+     *    ),
+     *    ...
+     * )
+     * ```
+     *
+     * Posibles errores:
+     * - Si ocurre un error en `asignar_propiedad`, se retorna un array con la estructura:
+     * ```php
+     * Array (
+     *    [error] => true
+     *    [mensaje] => "Error al inicializar inputs"
+     *    [data] => <detalle del error>
+     * )
+     * ```
+     */
     public function init_inputs(): array
     {
         $identificador = "fc_csd_id";
@@ -3013,11 +3075,98 @@ class _base_system_fc extends _base_system{
         return $select;
     }
 
+    /**
+     * REG
+     * Genera el encabezado (`<thead>`) de una tabla en formato HTML para mostrar información de facturas relacionadas.
+     *
+     * Este método invoca `ths()` para obtener los encabezados (`<th>`) de la tabla y los encapsula dentro de una
+     * estructura de `<thead>` y `<tr>`, formando un bloque HTML válido para una tabla.
+     *
+     * Si ocurre un error al generar los encabezados, se captura y se devuelve un mensaje de error utilizando
+     * la clase `errores`.
+     *
+     * ---
+     *
+     * ### 📌 **Ejemplo de uso:**
+     * ```php
+     * class FacturaRelacionada {
+     *     protected bool $aplica_monto_relacion;
+     *     protected string $thead_relacion;
+     *
+     *     public function __construct(bool $aplica_monto_relacion = false) {
+     *         $this->aplica_monto_relacion = $aplica_monto_relacion;
+     *     }
+     *
+     *     private function ths(): string {
+     *         $th_aplica_monto = '';
+     *         if ($this->aplica_monto_relacion) {
+     *             $th_aplica_monto = '<th>Monto</th>';
+     *         }
+     *
+     *         $ths = "<th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th>";
+     *         $ths .= "<th>Tipo de CFDI</th>" . $th_aplica_monto . "<th>Selecciona</th>";
+     *
+     *         return $ths;
+     *     }
+     *
+     *     final protected function thead_relacion(): array|string {
+     *         $ths = $this->ths();
+     *         if (errores::$error) {
+     *             return (new errores())->error(mensaje: 'Error al generar html', data: $ths);
+     *         }
+     *
+     *         $html = "<thead><tr>$ths</tr></thead>";
+     *         $this->thead_relacion = $html;
+     *
+     *         return $html;
+     *     }
+     *
+     *     public function obtenerEncabezadoTabla(): string {
+     *         return $this->thead_relacion();
+     *     }
+     * }
+     *
+     * // Ejemplo 1: Sin monto en la tabla
+     * $factura1 = new FacturaRelacionada(false);
+     * echo $factura1->obtenerEncabezadoTabla();
+     * ```
+     *
+     * ---
+     *
+     * ### 📌 **Salida esperada para `$aplica_monto_relacion = false`:**
+     * ```html
+     * <thead><tr>
+     * <th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th>
+     * <th>Tipo de CFDI</th><th>Selecciona</th>
+     * </tr></thead>
+     * ```
+     *
+     * ---
+     *
+     * ```php
+     * // Ejemplo 2: Con monto en la tabla
+     * $factura2 = new FacturaRelacionada(true);
+     * echo $factura2->obtenerEncabezadoTabla();
+     * ```
+     *
+     * ### 📌 **Salida esperada para `$aplica_monto_relacion = true`:**
+     * ```html
+     * <thead><tr>
+     * <th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th>
+     * <th>Tipo de CFDI</th><th>Monto</th><th>Selecciona</th>
+     * </tr></thead>
+     * ```
+     *
+     * ---
+     *
+     * @return array|string Devuelve la cadena de texto HTML con el `<thead>` de la tabla.
+     *                      En caso de error, devuelve un array con la información del error.
+     */
     final protected function thead_relacion(): array|string
     {
         $ths = $this->ths();
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al generar html',data:  $ths);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al generar html', data: $ths);
         }
 
         $html = "<thead><tr>$ths</tr></thead>";
@@ -3026,19 +3175,51 @@ class _base_system_fc extends _base_system{
         return $html;
     }
 
+
+    /**
+     * REG
+     * Genera los encabezados (`<th>`) de una tabla en formato HTML para mostrar información de facturas.
+     *
+     * Este método construye una cadena de texto con los encabezados (`<th>`) que representan las columnas
+     * de una tabla que lista facturas. Si la propiedad `$this->aplica_monto_relacion` es verdadera,
+     * se incluye un encabezado adicional para el "Monto".
+     *
+     * ### Ejemplo de uso:
+     * ```php
+     * $objeto = new ClaseEjemplo();
+     * $encabezados = $objeto->ths();
+     * echo $encabezados;
+     * ```
+     *
+     * ### Ejemplo de salida esperada:
+     * ```html
+     * <th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th>
+     * <th>Tipo de CFDI</th><th>Monto</th><th>Selecciona</th>
+     * ```
+     * Si `$this->aplica_monto_relacion` es `false`, la salida sería:
+     * ```html
+     * <th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th>
+     * <th>Tipo de CFDI</th><th>Selecciona</th>
+     * ```
+     *
+     * @return string Devuelve una cadena de texto con los encabezados HTML de la tabla.
+     */
     private function ths(): string
     {
         $th_aplica_monto = '';
-        if($this->aplica_monto_relacion){
+
+        // Si aplica monto de relación, agregar columna de "Monto"
+        if ($this->aplica_monto_relacion) {
             $th_aplica_monto = '<th>Monto</th>';
         }
 
+        // Definir los encabezados base
         $ths = "<th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th>";
-        $ths.= "<th>Tipo de CFDI</th>'.$th_aplica_monto.'<th>Selecciona</th>";
+        $ths .= "<th>Tipo de CFDI</th>" . $th_aplica_monto . "<th>Selecciona</th>";
 
         return $ths;
-
     }
+
 
     public function timbra_xml(bool $header, bool $ws = false): array|stdClass{
 
