@@ -96,7 +96,7 @@ echo "<style>
                             <label for="folio">Folio</label>
                             <input type="text" id="folio" data-ajax="filtro" data-filtro_campo="fc_factura.folio" placeholder="Ej: A-000107">
 
-                            <label for="cantidad-monto">Cantidad/Monto</label>
+                            <label for="cantidad-monto">Total</label>
                             <input type="text" id="cantidad-monto" data-ajax="filtro" data-filtro_campo="fc_factura.total" placeholder="Ej: 5000">
 
                             <label for="rfc">RFC</label>
