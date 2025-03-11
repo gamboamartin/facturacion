@@ -188,7 +188,7 @@ class _base_system_fcTest extends test {
         //print_r($resultado);exit;
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals("<th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th><th>Tipo de CFDI</th>'..'<th>Selecciona</th>",$resultado);
+
         $this->assertEquals("<th>UUID</th><th>Cliente</th><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estatus</th><th>Tipo de CFDI</th><th>Selecciona</th>",$resultado);
         errores::$error = false;
     }
