@@ -672,10 +672,13 @@ class _partida extends  _base{
 
         $sub_total = 0.0;
         foreach ($fc_partidas as $fc_partida){
-            $sub_total += round($fc_partida[$this->tabla.'_sub_total_base'],2)- round($fc_partida[$this->tabla.'_descuento']);
-        }
-        return round($sub_total,2);
+            $base = $fc_partida[$this->tabla.'_sub_total_base'];
+            $descuento = $fc_partida[$this->tabla.'_descuento'];
 
+            $sub_total += round($base - $descuento,2);
+        }
+
+        return round($sub_total,2);
     }
 
     private function fc_entidad_total_traslados(string $key_filtro_entidad_id, int $registro_entidad_id){
