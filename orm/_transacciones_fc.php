@@ -673,20 +673,72 @@ class _transacciones_fc extends modelo
 
 
     /**
-     * Obtiene las etapas de una factura
-     * @param _etapa $modelo_etapa Modelo de tipo etapa
-     * @param int $registro_id Factura o complemento a verificar etapas
-     * @return array
+     * REG
+     * Obtiene las etapas de un registro de entidad.
+     *
+     * Este método busca y devuelve todas las etapas asociadas a un registro de entidad en el sistema.
+     * Se filtra la información con base en la clave de filtro de la entidad.
+     *
+     * @param _etapa $modelo_etapa Modelo que gestiona las etapas.
+     *        Ejemplo de uso:
+     *        ```php
+     *        $modelo_etapa = new _etapa($link);
+     *        ```
+     *
+     * @param int $registro_id Identificador del registro de la entidad del cual se obtendrán las etapas.
+     *        - Debe ser mayor a 0.
+     *        - Si es menor o igual a 0, se devuelve un error.
+     *        Ejemplo de entrada válida:
+     *        ```php
+     *        $registro_id = 123;
+     *        ```
+     *        Ejemplo de entrada inválida:
+     *        ```php
+     *        $registro_id = 0; // Generará un error
+     *        ```
+     *
+     * @return array Retorna un array con las etapas asociadas al registro de la entidad.
+     *         Si ocurre un error, devuelve un array con la información del error.
+     *
+     *         Ejemplo de salida en caso de éxito:
+     *         ```php
+     *         [
+     *             [
+     *                 'id' => 1,
+     *                 'descripcion' => 'Creada',
+     *                 'fecha' => '2024-03-15 10:00:00'
+     *             ],
+     *             [
+     *                 'id' => 2,
+     *                 'descripcion' => 'En proceso',
+     *                 'fecha' => '2024-03-16 12:30:00'
+     *             ]
+     *         ]
+     *         ```
+     *
+     *         Ejemplo de salida en caso de error:
+     *         ```php
+     *         [
+     *             'error' => true,
+     *             'mensaje' => 'Error al obtener r_etapa',
+     *             'data' => []
+     *         ]
+     *         ```
+     *
+     * @throws errores Si el `$registro_id` es menor o igual a 0.
+     * @throws errores Si `$key_filtro_id` no está inicializado en el modelo.
+     * @throws errores Si ocurre un problema al obtener las etapas desde el modelo de etapas.
      */
     private function etapas(_etapa $modelo_etapa, int $registro_id): array
     {
         if($registro_id <= 0){
-            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id,
+                es_final: true);
         }
         $key_filtro_id = trim($this->key_filtro_id);
         if($key_filtro_id === ''){
             return $this->error->error(mensaje: 'Error key_filtro_id debe estar inicializado en el modelo',
-                data: $key_filtro_id);
+                data: $key_filtro_id, es_final: true);
         }
         $filtro[$this->key_filtro_id] =  $registro_id;
 
@@ -1588,15 +1640,52 @@ class _transacciones_fc extends modelo
     }
 
     /**
-     * Verifica si se permite o no una transaccion dependiendo la etapa en la que se encuentre la entidad
-     * @param _etapa $modelo_etapa Modelo de etapa
-     * @param int $registro_id Registro en proceso
-     * @return array|bool
+     * REG
+     * Determina si una transacción es permitida en función de las etapas asociadas a un registro.
+     *
+     * Este método verifica si una entidad puede ser modificada o eliminada, revisando su historial de etapas.
+     * Si la entidad tiene etapas como "TIMBRADO" o "CANCELADO", la transacción no será permitida.
+     *
+     * @param _etapa $modelo_etapa Modelo de etapas utilizado para recuperar las etapas del registro.
+     * @param int $registro_id Identificador único de la entidad a verificar.
+     *        Ejemplo válido:
+     *        ```php
+     *        $registro_id = 123;
+     *        ```
+     *        Ejemplo inválido:
+     *        ```php
+     *        $registro_id = -1; // Generará un error porque debe ser mayor a 0
+     *        ```
+     *
+     * @return bool|array Retorna `true` si la transacción es permitida, `false` si no lo es.
+     *         Si ocurre un error durante la validación, devuelve un array con el mensaje de error.
+     *
+     *         Ejemplo de salida cuando la transacción es permitida:
+     *         ```php
+     *         true
+     *         ```
+     *
+     *         Ejemplo de salida cuando la transacción no es permitida:
+     *         ```php
+     *         false
+     *         ```
+     *
+     *         Ejemplo de salida cuando hay un error en la validación:
+     *         ```php
+     *         [
+     *             'mensaje' => 'Error al obtener fc_factura_etapas',
+     *             'data' => [...]
+     *         ]
+     *         ```
+     *
+     * @throws errores Si `$registro_id` es menor o igual a 0.
+     * @throws errores Si ocurre un error al obtener las etapas del registro.
      */
     private function permite_transaccion(_etapa $modelo_etapa, int $registro_id): bool|array
     {
         if($registro_id <= 0){
-            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id,
+                es_final: true);
         }
         $etapas = $this->etapas(modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if (errores::$error) {
@@ -2043,17 +2132,44 @@ class _transacciones_fc extends modelo
     }
 
     /**
-     * Valida si una entidad relacionada de facturacion puede ser o no eliminada
-     * @param array $etapas Etapas a verificar
-     * @return bool
+     * REG
+     * Valida si una transacción puede ser realizada en función de las etapas previas.
+     *
+     * Este método revisa las etapas asociadas a un registro y determina si la transacción es permitida.
+     * Si la entidad ya ha sido "TIMBRADO" o "CANCELADO", la transacción no puede continuar.
+     *
+     * @param array $etapas Lista de etapas asociadas a una entidad.
+     *        Cada etapa es un array con una clave `'pr_etapa_descripcion'` que define su estado.
+     *        Ejemplo de entrada válida:
+     *        ```php
+     *        $etapas = [
+     *            ['pr_etapa_descripcion' => 'CREADO'],
+     *            ['pr_etapa_descripcion' => 'TIMBRADO']
+     *        ];
+     *        ```
+     *        Ejemplo de entrada inválida:
+     *        ```php
+     *        $etapas = "TIMBRADO"; // Generará un error por no ser un array
+     *        ```
+     *
+     * @return bool Retorna `true` si la transacción está permitida, `false` si está bloqueada.
+     *
+     *         Ejemplo de salida cuando la transacción está permitida:
+     *         ```php
+     *         true
+     *         ```
+     *
+     *         Ejemplo de salida cuando la transacción está bloqueada:
+     *         ```php
+     *         false
+     *         ```
+     *
+     * @throws errores Si `$etapas` no es un array válido.
      */
     private function valida_permite_transaccion(array $etapas): bool
     {
         $permite_transaccion = true;
         foreach ($etapas as $etapa){
-            /**
-             * AJUSTAR MEDIANTE CONF
-             */
             if($etapa['pr_etapa_descripcion'] === 'TIMBRADO'){
                 $permite_transaccion = false;
             }
@@ -2065,15 +2181,55 @@ class _transacciones_fc extends modelo
     }
 
     /**
-     * Verifica si se puede generar de una transaccion de afectacion de registro
-     * @param _etapa $modelo_etapa Modelo de etapa
-     * @param int $registro_id registro de entidad
-     * @return array|bool
+     * REG
+     * Verifica si una transacción es permitida para un registro en función de sus etapas.
+     *
+     * Este método consulta las etapas asociadas a un registro y determina si puede ser modificado o eliminado.
+     * Si el registro está en una etapa como "TIMBRADO" o "CANCELADO", la transacción será denegada.
+     *
+     * @param _etapa $modelo_etapa Modelo de etapas utilizado para validar la transacción.
+     * @param int $registro_id Identificador único del registro a evaluar.
+     *        Ejemplo válido:
+     *        ```php
+     *        $registro_id = 123;
+     *        ```
+     *        Ejemplo inválido:
+     *        ```php
+     *        $registro_id = -5; // Generará un error porque debe ser mayor a 0
+     *        ```
+     *
+     * @return bool|array Retorna `true` si la transacción es permitida, `false` si no lo es.
+     *         En caso de error, devuelve un array con el mensaje y los detalles del error.
+     *
+     *         Ejemplo de salida cuando la transacción es permitida:
+     *         ```php
+     *         true
+     *         ```
+     *
+     *         Ejemplo de salida cuando la transacción no es permitida:
+     *         ```php
+     *         [
+     *             'mensaje' => 'Error no se permite la eliminación',
+     *             'data' => false
+     *         ]
+     *         ```
+     *
+     *         Ejemplo de salida cuando hay un error en la validación:
+     *         ```php
+     *         [
+     *             'mensaje' => 'Error al obtener permite_transaccion',
+     *             'data' => [...]
+     *         ]
+     *         ```
+     *
+     * @throws errores Si `$registro_id` es menor o igual a 0.
+     * @throws errores Si ocurre un error al obtener las etapas del registro.
      */
     final public function verifica_permite_transaccion(_etapa $modelo_etapa, int $registro_id): bool|array
     {
         if($registro_id <= 0){
-            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id);
+            return $this->error->error(mensaje: 'Error registro_id debe ser mayor a 0', data: $registro_id,
+                es_final: true);
         }
 
         $permite_transaccion = $this->permite_transaccion(modelo_etapa: $modelo_etapa, registro_id: $registro_id);

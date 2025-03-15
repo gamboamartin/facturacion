@@ -126,6 +126,92 @@ class _partida extends  _base{
         return $upd;
     }
 
+    /**
+     * REG
+     * Acumula el subtotal de una partida sumando el subtotal base y restando el descuento correspondiente.
+     *
+     * Esta función se utiliza para calcular el subtotal de una entidad base sumando el subtotal base de una
+     * partida específica y restando cualquier descuento aplicable. Si no hay descuento definido, se asume un valor de 0.
+     *
+     * @param array $fc_partida Arreglo asociativo que representa una partida y sus valores financieros.
+     *        Debe contener los campos `{tabla}_sub_total_base` y opcionalmente `{tabla}_descuento`.
+     *        Ejemplo:
+     *        [
+     *            "fc_partida_sub_total_base" => 1000.00,
+     *            "fc_partida_descuento" => 100.00
+     *        ]
+     * @param float $sub_total Monto acumulado de subtotales antes de procesar la partida actual.
+     *        Se actualizará sumando el subtotal base y restando el descuento.
+     *        Ejemplo: `500.00` (subtotal acumulado hasta el momento).
+     *
+     * @return float|array Devuelve el subtotal actualizado tras sumar la partida actual.
+     *         - Si todo es correcto, devuelve un `float` con el nuevo subtotal.
+     *         - Si hay errores, devuelve un `array` con detalles del error.
+     *
+     * @throws array Si la entidad base no está definida o si los datos de la partida son inválidos.
+     *         - 'Error $entidad_base esta vacia' si `$this->tabla` está vacío.
+     *         - 'Error sub_total_base en partida no existe' si la clave `{tabla}_sub_total_base` no está presente en `$fc_partida`.
+     *
+     * @example
+     * // Llamada con una partida válida y un subtotal inicial
+     * $partida = [
+     *     "fc_partida_sub_total_base" => 1000.00,
+     *     "fc_partida_descuento" => 100.00
+     * ];
+     * $subtotal_actualizado = $this->acumula_sub_total($partida, 500.00);
+     * echo $subtotal_actualizado;
+     *
+     * // Salida esperada:
+     * // 1400.00 (500.00 + (1000.00 - 100.00))
+     *
+     * @example
+     * // Llamada con una partida sin descuento definido
+     * $partida = [
+     *     "fc_partida_sub_total_base" => 500.00
+     * ];
+     * $subtotal_actualizado = $this->acumula_sub_total($partida, 200.00);
+     * echo $subtotal_actualizado;
+     *
+     * // Salida esperada:
+     * // 700.00 (200.00 + (500.00 - 0.00))
+     *
+     * @example
+     * // Llamada con una partida sin el campo sub_total_base
+     * $partida = [
+     *     "fc_partida_descuento" => 50.00
+     * ];
+     * $subtotal_actualizado = $this->acumula_sub_total($partida, 300.00);
+     *
+     * // Salida esperada:
+     * // [
+     * //     "error" => true,
+     * //     "mensaje" => "Error sub_total_base en partida no existe",
+     * //     "data" => "fc_partida"
+     * // ]
+     */
+    private function acumula_sub_total(array $fc_partida, float $sub_total): float|array
+    {
+        $entidad_base = trim($this->tabla);
+        if($entidad_base === ''){
+            return $this->error->error(mensaje: 'Error $entidad_base esta vacia', data: $this->tabla, es_final: true);
+        }
+
+        if(!isset($fc_partida[$this->tabla.'_sub_total_base'])){
+            return $this->error->error(mensaje: "Error sub_total_base en partida no existe", data: $fc_partida,
+                es_final: true);
+        }
+        if(!isset($fc_partida[$this->tabla.'_descuento'])){
+            $fc_partida[$this->tabla.'_descuento'] = 0.0;
+        }
+
+        $base = round($fc_partida[$this->tabla.'_sub_total_base'],2);
+        $descuento = round($fc_partida[$this->tabla.'_descuento'],2);
+        $sub_total += round($base - $descuento,2);
+
+        return round($sub_total,2);
+
+    }
+
     private function ajusta_descripcion(string $campo, string $descripcion, mixed $value): array|string
     {
         if(is_null($value)){
@@ -663,21 +749,84 @@ class _partida extends  _base{
         return $data;
     }
 
-    private function fc_entidad_sub_total(string $key_filtro_entidad_id, int $registro_entidad_id){
+    /**
+     * REG
+     * Calcula el subtotal de una entidad de tipo factura a partir de sus partidas.
+     *
+     * Esta función obtiene las partidas asociadas a una entidad (factura, complemento de pago, etc.)
+     * utilizando el identificador de filtro proporcionado. Luego, calcula el subtotal de todas
+     * las partidas sumando sus valores base y restando los descuentos aplicados.
+     *
+     * @param string $key_filtro_entidad_id Clave utilizada para filtrar las partidas de la entidad.
+     *        Ejemplo: 'fc_factura_id' si se trata de una factura.
+     * @param int $registro_entidad_id Identificador de la entidad de la cual se quieren obtener las partidas.
+     *        Debe ser un número entero mayor a 0.
+     *
+     * @return float|array Devuelve el subtotal de todas las partidas asociadas a la entidad, redondeado a dos decimales.
+     *         - Si todo es correcto, devuelve un `float` con el subtotal calculado.
+     *         - Si hay errores, devuelve un `array` con detalles del error.
+     *
+     * @throws array Si:
+     *         - `$registro_entidad_id` es menor o igual a 0 (`Error registro_entidad_id debe ser mayor a 0`).
+     *         - `$key_filtro_entidad_id` está vacío (`Error key_filtro_entidad_id esta vacio`).
+     *         - No se pueden obtener las partidas (`Error al obtener r_fc_partida`).
+     *         - No se puede calcular el subtotal (`Error al obtener $sub_total`).
+     *
+     * @example
+     * // Llamada con una factura válida que tiene varias partidas
+     * $subtotal = $this->fc_entidad_sub_total('fc_factura_id', 25);
+     * echo $subtotal;
+     *
+     * // Salida esperada:
+     * // 3500.00 (sumatoria de los subtotales de las partidas después de aplicar descuentos)
+     *
+     * @example
+     * // Llamada con un registro de entidad no válido
+     * $subtotal = $this->fc_entidad_sub_total('fc_factura_id', 0);
+     *
+     * // Salida esperada:
+     * // [
+     * //     "error" => true,
+     * //     "mensaje" => "Error registro_entidad_id debe ser mayor a 0",
+     * //     "data" => 0,
+     * //     "es_final" => true
+     * // ]
+     *
+     * @example
+     * // Llamada con un key_filtro_entidad_id vacío
+     * $subtotal = $this->fc_entidad_sub_total('', 25);
+     *
+     * // Salida esperada:
+     * // [
+     * //     "error" => true,
+     * //     "mensaje" => "Error key_filtro_entidad_id esta vacio",
+     * //     "data" => "",
+     * //     "es_final" => true
+     * // ]
+     */
+    private function fc_entidad_sub_total(string $key_filtro_entidad_id, int $registro_entidad_id): float|array
+    {
+
+        if ($registro_entidad_id <= 0) {
+            return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
+                data: $registro_entidad_id, es_final: true);
+        }
+        $key_filtro_entidad_id = trim($key_filtro_entidad_id);
+        if($key_filtro_entidad_id === ''){
+            return $this->error->error(mensaje: 'Error key_filtro_entidad_id esta vacio',
+                data: $key_filtro_entidad_id, es_final: true);
+        }
+
         $fc_partidas = $this->get_partidas(key_filtro_entidad_id: $key_filtro_entidad_id,
             registro_entidad_id:  $registro_entidad_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener r_fc_partida', data: $fc_partidas);
         }
 
-        $sub_total = 0.0;
-        foreach ($fc_partidas as $fc_partida){
-            $base = $fc_partida[$this->tabla.'_sub_total_base'];
-            $descuento = $fc_partida[$this->tabla.'_descuento'];
-
-            $sub_total += round($base - $descuento,2);
+        $sub_total = $this->sub_total(fc_partidas: $fc_partidas);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener $sub_total', data: $sub_total);
         }
-
         return round($sub_total,2);
     }
 
@@ -807,13 +956,65 @@ class _partida extends  _base{
     }
 
     /**
-     * Obtiene las partidas de una factura
-     * @param string $key_filtro_entidad_id Jey id para filtro de factura complemento
-     * @param int $registro_entidad_id Factura a validar
-     * @param array $columnas_by_table
-     * @param bool $columnas_en_bruto
-     * @return array
-     * @version 10.93.3
+     * REG
+     * Obtiene las partidas de una entidad de facturación basada en un identificador de entidad y filtro.
+     *
+     * Esta función busca y devuelve un conjunto de registros de partidas asociadas a una entidad específica
+     * dentro del sistema de facturación. Se puede especificar qué columnas incluir en la consulta y si se
+     * deben obtener los valores en bruto.
+     *
+     * @param string $key_filtro_entidad_id Identificador clave del filtro que se utilizará para buscar partidas.
+     *        Ejemplo: 'fc_factura_id' para filtrar por ID de factura.
+     * @param int $registro_entidad_id Identificador de la entidad a la que pertenecen las partidas.
+     *        Debe ser un número entero positivo.
+     *        Ejemplo: 123 (correspondiente al ID de una factura).
+     * @param array $columnas_by_table (Opcional) Arreglo que especifica qué columnas incluir en la consulta.
+     *        Si está vacío, se recuperan todas las columnas disponibles.
+     *        Ejemplo: ['fc_partida.id', 'fc_partida.total'].
+     * @param bool $columnas_en_bruto (Opcional) Indica si las columnas deben obtenerse sin alias ni formato.
+     *        Por defecto es `false`.
+     *        Ejemplo: `true` devuelve los nombres de columna originales de la base de datos.
+     *
+     * @return array Devuelve un arreglo con las partidas encontradas. Cada partida es un array asociativo con sus respectivos datos.
+     *
+     * @throws array Retorna un error si alguno de los parámetros es inválido.
+     *         - 'Error registro_entidad_id debe ser mayor a 0' si `$registro_entidad_id` es menor o igual a 0.
+     *         - 'Error key_filtro_entidad_id esta vacio' si `$key_filtro_entidad_id` está vacío.
+     *         - 'Error al obtener partidas' si hay un fallo en la consulta.
+     *
+     * @example
+     * // Llamada con una factura específica, obteniendo todas sus partidas
+     * $partidas = $this->get_partidas('fc_factura_id', 123);
+     * print_r($partidas);
+     *
+     * // Salida esperada:
+     * [
+     *    [
+     *        "id" => 1,
+     *        "fc_factura_id" => 123,
+     *        "descripcion" => "Producto A",
+     *        "cantidad" => 2,
+     *        "total" => 500.00
+     *    ],
+     *    [
+     *        "id" => 2,
+     *        "fc_factura_id" => 123,
+     *        "descripcion" => "Producto B",
+     *        "cantidad" => 1,
+     *        "total" => 250.00
+     *    ]
+     * ]
+     *
+     * @example
+     * // Llamada con columnas específicas y valores en bruto
+     * $partidas = $this->get_partidas('fc_factura_id', 123, ['fc_partida.id', 'fc_partida.total'], true);
+     * print_r($partidas);
+     *
+     * // Salida esperada:
+     * [
+     *    ["id" => 1, "total" => 500.00],
+     *    ["id" => 2, "total" => 250.00]
+     * ]
      */
     final public function get_partidas(string $key_filtro_entidad_id,int $registro_entidad_id,
                                        array $columnas_by_table = array(), bool $columnas_en_bruto = false): array
@@ -828,7 +1029,8 @@ class _partida extends  _base{
         }
 
         $filtro[$key_filtro_entidad_id] = $registro_entidad_id;
-        $r_fc_partida = $this->filtro_and(columnas_by_table: $columnas_by_table, columnas_en_bruto: $columnas_en_bruto, filtro: $filtro,);
+        $r_fc_partida = $this->filtro_and(columnas_by_table: $columnas_by_table, columnas_en_bruto: $columnas_en_bruto,
+            filtro: $filtro,);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener partidas', data: $r_fc_partida);
         }
@@ -1575,6 +1777,114 @@ class _partida extends  _base{
         return $resultado;
     }
 
+    /**
+     * REG
+     * Calcula el subtotal acumulado de un conjunto de partidas.
+     *
+     * Esta función recorre un conjunto de partidas y acumula sus subtotales base, restando cualquier
+     * descuento aplicable, mediante la función `acumula_sub_total`.
+     * Si alguna partida no es un array válido o si no contiene el campo necesario para el cálculo,
+     * se genera un error y se detiene la ejecución.
+     *
+     * @param array $fc_partidas Arreglo de partidas donde cada partida es un array asociativo.
+     *        Cada partida debe incluir al menos la clave `{tabla}_sub_total_base`, y opcionalmente `{tabla}_descuento`.
+     *        Ejemplo:
+     *        [
+     *            [
+     *                "fc_partida_sub_total_base" => 1000.00,
+     *                "fc_partida_descuento" => 100.00
+     *            ],
+     *            [
+     *                "fc_partida_sub_total_base" => 500.00
+     *            ]
+     *        ]
+     *
+     * @return float|array Devuelve el subtotal acumulado de todas las partidas, redondeado a dos decimales.
+     *         - Si todo es correcto, devuelve un `float` con el subtotal acumulado.
+     *         - Si hay errores, devuelve un `array` con detalles del error.
+     *
+     * @throws array Si:
+     *         - Alguna partida no es un array válido (`Error $fc_partida debe ser un array`).
+     *         - `$this->tabla` está vacío (`Error $entidad_base esta vacia`).
+     *         - Una partida no tiene el campo `{tabla}_sub_total_base` (`Error sub_total_base en partida no existe`).
+     *
+     * @example
+     * // Llamada con un conjunto de partidas válidas
+     * $partidas = [
+     *     [
+     *         "fc_partida_sub_total_base" => 1000.00,
+     *         "fc_partida_descuento" => 100.00
+     *     ],
+     *     [
+     *         "fc_partida_sub_total_base" => 500.00
+     *     ]
+     * ];
+     * $subtotal = $this->sub_total($partidas);
+     * echo $subtotal;
+     *
+     * // Salida esperada:
+     * // 1400.00 ( (1000.00 - 100.00) + (500.00 - 0.00) )
+     *
+     * @example
+     * // Llamada con una partida sin el campo sub_total_base
+     * $partidas = [
+     *     [
+     *         "fc_partida_descuento" => 50.00
+     *     ]
+     * ];
+     * $subtotal = $this->sub_total($partidas);
+     *
+     * // Salida esperada:
+     * // [
+     * //     "error" => true,
+     * //     "mensaje" => "Error sub_total_base en partida no existe",
+     * //     "data" => ["fc_partida_descuento" => 50.00],
+     * //     "es_final" => true
+     * // ]
+     *
+     * @example
+     * // Llamada con una partida que no es un array
+     * $partidas = [
+     *     "fc_partida_sub_total_base" => 500.00
+     * ];
+     * $subtotal = $this->sub_total($partidas);
+     *
+     * // Salida esperada:
+     * // [
+     * //     "error" => true,
+     * //     "mensaje" => "Error $fc_partida debe ser un array",
+     * //     "data" => "fc_partida",
+     * //     "es_final" => true
+     * // ]
+     */
+    private function sub_total(array $fc_partidas): float|array
+    {
+        $sub_total = 0.0;
+        foreach ($fc_partidas as $fc_partida){
+            if(!is_array($fc_partida)){
+                return $this->error->error(mensaje: 'Error $fc_partida debe ser un array',
+                    data: $fc_partida, es_final: true);
+            }
+
+            $entidad_base = trim($this->tabla);
+            if($entidad_base === ''){
+                return $this->error->error(mensaje: 'Error $entidad_base esta vacia', data: $this->tabla,
+                    es_final: true);
+            }
+
+            if(!isset($fc_partida[$this->tabla.'_sub_total_base'])){
+                return $this->error->error(mensaje: "Error sub_total_base en partida no existe", data: $fc_partida,
+                    es_final: true);
+            }
+
+            $sub_total = $this->acumula_sub_total(fc_partida: $fc_partida,sub_total: $sub_total);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener sub_total', data: $sub_total);
+            }
+        }
+        return round($sub_total,2);
+    }
+
 
     /**
      * Calcula el subtotal de una partida
@@ -1664,12 +1974,67 @@ class _partida extends  _base{
     }
 
     /**
-     * Valida si una transaccion es valida y proceder
-     * @param _transacciones_fc $modelo_entidad Modelo de tipo factura complemento etc
-     * @param _etapa $modelo_etapa Modelo de tipo etapa factura_etapa, complemento_etapa etc
-     * @param stdClass $row_partida Registro de tipo partida
-     * @return array|bool
-     * @version 10.4.0
+     * REG
+     * Valida si una transacción está permitida para una partida en función de su estado en la entidad principal.
+     *
+     * Esta función verifica si una partida puede ser modificada o eliminada, dependiendo del estado de la entidad
+     * a la que pertenece. Utiliza la validación de existencia de identificadores y la verificación de permisos
+     * de transacción en el modelo de entidad.
+     *
+     * @param _transacciones_fc $modelo_entidad Modelo de la entidad principal (factura, complemento de pago, etc.).
+     *        Este modelo contiene la información de la entidad a la que pertenece la partida.
+     * @param _etapa $modelo_etapa Modelo de la etapa asociada a la entidad, utilizado para verificar restricciones.
+     * @param stdClass $row_partida Objeto que representa la partida a validar. Debe contener el ID de la entidad principal.
+     *
+     * @return bool|array Devuelve `true` si la transacción está permitida, o un array con detalles del error en caso de fallo.
+     *         - `true` si la transacción puede proceder.
+     *         - `array` con un mensaje de error y detalles si hay algún problema en la validación.
+     *
+     * @throws array Si:
+     *         - El identificador de la entidad principal no está presente en `$row_partida`.
+     *         - No se puede validar la existencia del identificador.
+     *         - Hay un error al verificar la transacción en la entidad principal.
+     *
+     * @example
+     * // Ejemplo de entrada con una partida válida
+     * $modelo_entidad = new fc_factura($db);
+     * $modelo_etapa = new fc_factura_etapa($db);
+     * $row_partida = (object) ['fc_factura_id' => 15];
+     *
+     * $permite = $this->valida_restriccion($modelo_entidad, $modelo_etapa, $row_partida);
+     * echo $permite;
+     *
+     * // Salida esperada:
+     * // true (si la transacción está permitida)
+     *
+     * @example
+     * // Ejemplo de entrada con una partida sin el ID de entidad principal
+     * $row_partida = (object) ['cantidad' => 2, 'descripcion' => 'Producto A'];
+     *
+     * $permite = $this->valida_restriccion($modelo_entidad, $modelo_etapa, $row_partida);
+     *
+     * // Salida esperada:
+     * // [
+     * //     "error" => true,
+     * //     "mensaje" => "Error validar row_partida",
+     * //     "data" => ["fc_factura_id no encontrado en row_partida"]
+     * // ]
+     *
+     * @example
+     * // Ejemplo de error en la verificación de transacción
+     * $row_partida = (object) ['fc_factura_id' => 20];
+     * $modelo_entidad->verifica_permite_transaccion = function() {
+     *     return ['error' => true, 'mensaje' => 'Transacción no permitida'];
+     * };
+     *
+     * $permite = $this->valida_restriccion($modelo_entidad, $modelo_etapa, $row_partida);
+     *
+     * // Salida esperada:
+     * // [
+     * //     "error" => true,
+     * //     "mensaje" => "Error verificar transaccion",
+     * //     "data" => ["Transacción no permitida"]
+     * // ]
      */
     private function valida_restriccion(_transacciones_fc $modelo_entidad, _etapa $modelo_etapa,
                                         stdClass $row_partida): bool|array
@@ -1695,18 +2060,88 @@ class _partida extends  _base{
     }
 
     /**
-     * Verifica si una partida puede o no eliminarse
-     * @param int $id Identificador de la partida
-     * @param _transacciones_fc $modelo_entidad Modelo base
-     * @param _etapa $modelo_etapa Modelo para identificar etapa
-     * @return array|bool
-     * @version 10.5.0
+     * REG
+     * Valida si una partida puede ser eliminada o modificada en función de las restricciones de transacción.
+     *
+     * Esta función verifica si una partida específica tiene restricciones para ser modificada o eliminada.
+     * Primero valida que el ID de la partida sea mayor a 0, luego obtiene los datos de la partida y,
+     * por último, llama a la función `valida_restriccion` para determinar si la transacción está permitida.
+     *
+     * @param int $id Identificador único de la partida que se desea validar.
+     *        Debe ser un número entero positivo mayor a 0.
+     * @param _transacciones_fc $modelo_entidad Modelo de la entidad principal (factura, complemento de pago, etc.).
+     *        Se usa para verificar si la transacción está permitida en base a las restricciones de la entidad.
+     * @param _etapa $modelo_etapa Modelo de la etapa de la entidad. Se usa para verificar si la partida puede modificarse.
+     *
+     * @return bool|array Devuelve `true` si la partida puede ser modificada o eliminada, o un `array` con detalles del error.
+     *         - `true` si la partida puede ser modificada o eliminada.
+     *         - `array` con un mensaje de error y detalles si hay algún problema en la validación.
+     *
+     * @throws array Si:
+     *         - El ID de la partida es menor o igual a 0.
+     *         - No se pueden obtener los datos de la partida.
+     *         - La validación de restricciones de transacción falla.
+     *
+     * @example
+     * // Ejemplo de entrada con una partida válida que se puede modificar
+     * $id = 10;
+     * $modelo_entidad = new fc_factura($db);
+     * $modelo_etapa = new fc_factura_etapa($db);
+     *
+     * $permite = $this->valida_restriccion_partida($id, $modelo_entidad, $modelo_etapa);
+     * echo $permite;
+     *
+     * // Salida esperada:
+     * // true (si la transacción está permitida)
+     *
+     * @example
+     * // Ejemplo de entrada con un ID de partida inválido
+     * $id = 0;
+     *
+     * $permite = $this->valida_restriccion_partida($id, $modelo_entidad, $modelo_etapa);
+     *
+     * // Salida esperada:
+     * // [
+     * //     "error" => true,
+     * //     "mensaje" => "Error id debe ser mayor a 0",
+     * //     "data" => 0
+     * // ]
+     *
+     * @example
+     * // Ejemplo de error al obtener la partida
+     * $id = 15;
+     * $this->registro = function($args) { return ["error" => true, "mensaje" => "Partida no encontrada"]; };
+     *
+     * $permite = $this->valida_restriccion_partida($id, $modelo_entidad, $modelo_etapa);
+     *
+     * // Salida esperada:
+     * // [
+     * //     "error" => true,
+     * //     "mensaje" => "Error obtener row_partida",
+     * //     "data" => ["error" => true, "mensaje" => "Partida no encontrada"]
+     * // ]
+     *
+     * @example
+     * // Ejemplo de error en la validación de restricciones de transacción
+     * $id = 20;
+     * $modelo_entidad->verifica_permite_transaccion = function() {
+     *     return ['error' => true, 'mensaje' => 'Transacción no permitida'];
+     * };
+     *
+     * $permite = $this->valida_restriccion_partida($id, $modelo_entidad, $modelo_etapa);
+     *
+     * // Salida esperada:
+     * // [
+     * //     "error" => true,
+     * //     "mensaje" => "Error verificar transaccion",
+     * //     "data" => ["error" => true, "mensaje" => "Transacción no permitida"]
+     * // ]
      */
     private function valida_restriccion_partida(int $id, _transacciones_fc $modelo_entidad,
                                                 _etapa $modelo_etapa): bool|array
     {
         if($id <= 0){
-            return $this->error->error(mensaje: 'Error id debe ser mayor a 0', data: $id);
+            return $this->error->error(mensaje: 'Error id debe ser mayor a 0', data: $id, es_final: true);
         }
         $row_partida = $this->registro(registro_id: $id, retorno_obj: true);
         if (errores::$error) {

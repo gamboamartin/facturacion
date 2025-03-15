@@ -49,6 +49,46 @@ class _partidaTest extends test
         $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
+    public function test_acumula_sub_total(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida(link: $this->link);
+        $modelo = new liberator($modelo);
+
+
+        $fc_partida = array();
+        $sub_total = 0;
+
+        $fc_partida['fc_partida_sub_total_base'] = 15;
+        $fc_partida['fc_partida_descuento'] = 15;
+
+        $resultado = $modelo->acumula_sub_total($fc_partida,$sub_total);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(0,$resultado);
+        errores::$error = false;
+
+
+        $fc_partida = array();
+        $sub_total = 0;
+
+        $fc_partida['fc_partida_sub_total_base'] = 15.9845;
+        $fc_partida['fc_partida_descuento'] = 12.86412;
+
+        $resultado = $modelo->acumula_sub_total($fc_partida,$sub_total);
+
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(3.12,$resultado);
+        errores::$error = false;
+
+
+    }
+
     public function test_descripcion_mes_letra(): void
     {
         errores::$error = false;
@@ -107,6 +147,28 @@ class _partidaTest extends test
         $this->assertIsObject($resultado);
         $this->assertNotTrue(errores::$error);
 
+        errores::$error = false;
+
+    }
+
+    public function test_fc_entidad_sub_total(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+
+
+        $modelo = new fc_partida(link: $this->link);
+        $modelo = new liberator($modelo);
+
+        $key_filtro_entidad_id = 'fc_factura.id';
+        $registro_entidad_id = 1;
+        $resultado = $modelo->fc_entidad_sub_total($key_filtro_entidad_id, $registro_entidad_id);
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(1.0, $resultado);
         errores::$error = false;
 
     }
@@ -513,6 +575,32 @@ class _partidaTest extends test
         $this->assertNotTrue(errores::$error);
         $this->assertEquals(10,$resultado);
         errores::$error = false;
+    }
+
+    public function test_sub_total(): void
+    {
+        errores::$error = false;
+        $_SESSION['grupo_id'] = 2;
+        $_SESSION['usuario_id'] = 2;
+        $_GET['session_id'] = '1';
+
+        $modelo = new fc_partida(link: $this->link);
+        $modelo = new liberator($modelo);
+
+
+        $fc_partidas = array();
+        $fc_partidas[0]['fc_partida_sub_total_base'] = 12.6978;
+        $fc_partidas[0]['fc_partida_descuento'] = 12.69;
+
+        $resultado = $modelo->sub_total($fc_partidas);
+
+        $this->assertIsFloat($resultado);
+        $this->assertNotTrue(errores::$error);
+        $this->assertEquals(0.01,$resultado);
+        errores::$error = false;
+
+
+
     }
 
     public function test_subtotal_partida(): void
