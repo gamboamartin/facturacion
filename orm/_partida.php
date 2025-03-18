@@ -716,13 +716,80 @@ class _partida extends  _base{
     }
 
     /**
-     * Elimina los elementos dependientes de una partida
-     * @param int $id Identificador de base partida
-     * @param _cuenta_predial $modelo_predial Modelo de tipo predial
-     * @param _data_impuestos $modelo_retencion Modelo de tipo retencion
-     * @param _data_impuestos $modelo_traslado Modelo de tipo traslado
-     * @return array|stdClass
-     * @version 10.45.3
+     * REG
+     * Elimina los registros dependientes de una entidad específica en las tablas de retenciones, traslados y cuentas prediales.
+     *
+     * Esta función se encarga de eliminar los registros asociados en las tablas:
+     * - `_data_impuestos` (Retenciones)
+     * - `_data_impuestos` (Traslados)
+     * - `_cuenta_predial` (Cuentas prediales)
+     *
+     * Si ocurre un error en alguna eliminación, la función retorna un mensaje de error.
+     *
+     * @param int $id ID del registro padre cuyos dependientes serán eliminados.
+     * @param _cuenta_predial $modelo_predial Modelo para gestionar la eliminación de cuentas prediales.
+     * @param _data_impuestos $modelo_retencion Modelo para gestionar la eliminación de retenciones.
+     * @param _data_impuestos $modelo_traslado Modelo para gestionar la eliminación de traslados.
+     *
+     * @return array|stdClass Retorna un objeto `stdClass` con los resultados de las eliminaciones si se ejecutan con éxito,
+     *                        o un array con un mensaje de error si ocurre alguna falla.
+     *
+     * @example
+     * ```php
+     * $modelo_predial = new _cuenta_predial();
+     * $modelo_retencion = new _data_impuestos();
+     * $modelo_traslado = new _data_impuestos();
+     *
+     * $id = 123; // ID del registro principal a eliminar sus dependientes
+     *
+     * $resultado = $this->elimina_dependientes($id, $modelo_predial, $modelo_retencion, $modelo_traslado);
+     *
+     * if (is_array($resultado)) {
+     *     echo "Error: " . $resultado['mensaje'];
+     * } else {
+     *     echo "Eliminación exitosa";
+     *     print_r($resultado);
+     * }
+     * ```
+     *
+     * ### **Ejemplo de entrada**
+     * ```php
+     * $id = 1001;
+     * ```
+     *
+     * ### **Ejemplo de salida exitosa**
+     * ```php
+     * stdClass Object
+     * (
+     *     [r_fc_retenido] => Array
+     *         (
+     *             [success] => true
+     *             [rows_deleted] => 2
+     *         )
+     *
+     *     [r_fc_traslado] => Array
+     *         (
+     *             [success] => true
+     *             [rows_deleted] => 3
+     *         )
+     *
+     *     [r_fc_cuenta_predial] => Array
+     *         (
+     *             [success] => true
+     *             [rows_deleted] => 1
+     *         )
+     * )
+     * ```
+     *
+     * ### **Ejemplo de salida con error**
+     * ```php
+     * Array
+     * (
+     *     [error] => true
+     *     [mensaje] => "Error al eliminar r_fc_traslado"
+     *     [detalles] => "No se pudo eliminar el registro con ID 1001"
+     * )
+     * ```
      */
     private function elimina_dependientes(int $id, _cuenta_predial $modelo_predial, _data_impuestos $modelo_retencion,
                                           _data_impuestos $modelo_traslado): array|stdClass
@@ -902,22 +969,79 @@ class _partida extends  _base{
     }
 
     /**
-     * Obtiene los descuentos de una factura con datos de las partidas
-     * @param string $key_filtro_entidad_id Jey de la entidad para uso de filtros
-     * @param int $registro_entidad_id Registro en proceso
-     * @return array|float
-     * @version 10.145.5
+     * REG
+     * Calcula el total de descuentos aplicados a las partidas de una entidad específica.
+     *
+     * Esta función recibe una clave de filtro para la entidad y un identificador de registro.
+     * Luego, obtiene todas las partidas asociadas a la entidad y suma los valores de descuento,
+     * redondeando el resultado a dos decimales.
+     *
+     * @param string $key_filtro_entidad_id Clave de filtro para identificar la entidad en las partidas.
+     *                                      Ejemplo: 'fc_factura_id' o 'fc_nota_credito_id'.
+     * @param int $registro_entidad_id ID del registro de la entidad para la cual se calcularán los descuentos.
+     *                                  Debe ser un número mayor a 0.
+     *
+     * @return float|array Retorna el total de descuento como un `float` si la operación es exitosa.
+     *                     Si hay un error, retorna un `array` con detalles del problema.
+     *
+     * @example
+     * ```php
+     * $key_filtro = 'fc_factura_id';
+     * $registro_id = 123;
+     *
+     * $total_descuento = $this->fc_entidad_total_descuento($key_filtro, $registro_id);
+     *
+     * if (is_array($total_descuento)) {
+     *     echo "Error: " . $total_descuento['mensaje'];
+     * } else {
+     *     echo "Total de descuentos: $" . number_format($total_descuento, 2);
+     * }
+     * ```
+     *
+     * ### **Ejemplo de entrada válida**
+     * ```php
+     * $key_filtro_entidad_id = 'fc_factura_id';
+     * $registro_entidad_id = 10;
+     * ```
+     *
+     * ### **Ejemplo de salida exitosa**
+     * ```php
+     * 250.75
+     * ```
+     *
+     * ### **Ejemplo de salida con error (ID no válido)**
+     * ```php
+     * Array
+     * (
+     *     [error] => true
+     *     [mensaje] => "Error registro_entidad_id debe ser mayor a 0"
+     *     [data] => 0
+     *     [es_final] => true
+     * )
+     * ```
+     *
+     * ### **Ejemplo de salida con error (Clave vacía)**
+     * ```php
+     * Array
+     * (
+     *     [error] => true
+     *     [mensaje] => "Error key_filtro_entidad_id esta vacio"
+     *     [data] => ""
+     *     [es_final] => true
+     * )
+     * ```
      */
     private function fc_entidad_total_descuento(string $key_filtro_entidad_id, int $registro_entidad_id): float|array
     {
 
         if ($registro_entidad_id <= 0) {
             return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
-                data: $registro_entidad_id);
+                data: $registro_entidad_id, es_final: true);
         }
         $key_filtro_entidad_id = trim($key_filtro_entidad_id);
         if($key_filtro_entidad_id === ''){
-            return $this->error->error(mensaje: 'Error key_filtro_entidad_id esta vacio', data: $key_filtro_entidad_id);
+            return $this->error->error(mensaje: 'Error key_filtro_entidad_id esta vacio',
+                data: $key_filtro_entidad_id, es_final: true);
         }
 
         $fc_partidas = $this->get_partidas(key_filtro_entidad_id: $key_filtro_entidad_id,
@@ -1146,15 +1270,84 @@ class _partida extends  _base{
     }
 
     /**
-     * Inicializa lo elementos para eliminaciones
-     * @param int $id Identificador de partida
-     * @param _transacciones_fc $modelo_entidad Entidad base
-     * @param _etapa $modelo_etapa Modelo de la etapa
-     * @param _cuenta_predial $modelo_predial Modelo del predial
-     * @param _data_impuestos $modelo_retencion Modelo de la retencion
-     * @param _data_impuestos $modelo_traslado Modelo del traslado
-     * @return array|stdClass
-     * @version 10.136.4
+     * REG
+     * Inicia el proceso de eliminación de una entidad en la base de datos junto con sus dependencias.
+     *
+     * Esta función valida si se permite la eliminación de la transacción y, en caso afirmativo,
+     * procede a eliminar sus dependientes en las tablas relacionadas:
+     * - `_cuenta_predial` (Cuentas prediales)
+     * - `_data_impuestos` (Retenciones y Traslados)
+     *
+     * Si alguna de las eliminaciones falla, se devuelve un mensaje de error.
+     *
+     * @param int $id ID del registro principal a eliminar.
+     * @param _transacciones_fc $modelo_entidad Modelo de la entidad principal a la que pertenece la transacción.
+     * @param _etapa $modelo_etapa Modelo de etapas para validar restricciones antes de la eliminación.
+     * @param _cuenta_predial $modelo_predial Modelo para gestionar la eliminación de cuentas prediales.
+     * @param _data_impuestos $modelo_retencion Modelo para gestionar la eliminación de retenciones.
+     * @param _data_impuestos $modelo_traslado Modelo para gestionar la eliminación de traslados.
+     *
+     * @return array|stdClass Retorna un objeto `stdClass` con los resultados de las eliminaciones si se ejecutan con éxito,
+     *                        o un array con un mensaje de error si ocurre alguna falla.
+     *
+     * @example
+     * ```php
+     * $modelo_entidad = new _transacciones_fc();
+     * $modelo_etapa = new _etapa();
+     * $modelo_predial = new _cuenta_predial();
+     * $modelo_retencion = new _data_impuestos();
+     * $modelo_traslado = new _data_impuestos();
+     *
+     * $id = 200; // ID de la transacción a eliminar
+     *
+     * $resultado = $this->init_elimina_bd($id, $modelo_entidad, $modelo_etapa, $modelo_predial, $modelo_retencion, $modelo_traslado);
+     *
+     * if (is_array($resultado)) {
+     *     echo "Error: " . $resultado['mensaje'];
+     * } else {
+     *     echo "Eliminación exitosa";
+     *     print_r($resultado);
+     * }
+     * ```
+     *
+     * ### **Ejemplo de entrada**
+     * ```php
+     * $id = 150;
+     * ```
+     *
+     * ### **Ejemplo de salida exitosa**
+     * ```php
+     * stdClass Object
+     * (
+     *     [r_fc_retenido] => Array
+     *         (
+     *             [success] => true
+     *             [rows_deleted] => 3
+     *         )
+     *
+     *     [r_fc_traslado] => Array
+     *         (
+     *             [success] => true
+     *             [rows_deleted] => 2
+     *         )
+     *
+     *     [r_fc_cuenta_predial] => Array
+     *         (
+     *             [success] => true
+     *             [rows_deleted] => 1
+     *         )
+     * )
+     * ```
+     *
+     * ### **Ejemplo de salida con error**
+     * ```php
+     * Array
+     * (
+     *     [error] => true
+     *     [mensaje] => "Error al eliminar dependientes de partidas"
+     *     [detalles] => "No se pudo eliminar el registro con ID 150"
+     * )
+     * ```
      */
     private function init_elimina_bd(int $id,_transacciones_fc $modelo_entidad, _etapa $modelo_etapa,
                                      _cuenta_predial $modelo_predial, _data_impuestos $modelo_retencion,
@@ -1690,11 +1883,12 @@ class _partida extends  _base{
 
         if ($registro_entidad_id <= 0) {
             return $this->error->error(mensaje: 'Error registro_entidad_id debe ser mayor a 0',
-                data: $registro_entidad_id);
+                data: $registro_entidad_id, es_final: true);
         }
         $key_filtro_entidad_id = trim($key_filtro_entidad_id);
         if($key_filtro_entidad_id === ''){
-            return $this->error->error(mensaje: 'Error key_filtro_entidad_id esta vacio', data: $key_filtro_entidad_id);
+            return $this->error->error(mensaje: 'Error key_filtro_entidad_id esta vacio',
+                data: $key_filtro_entidad_id, es_final: true);
         }
 
         $total_descuento = $this->fc_entidad_total_descuento(key_filtro_entidad_id: $key_filtro_entidad_id,

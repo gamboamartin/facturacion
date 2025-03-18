@@ -1404,11 +1404,39 @@ class _transacciones_fc extends modelo
 
 
     /**
-     * Ajusta la fecha dependiendo la entrada de fecha
-     * @param array $registro Registro en proceso de modificacion
-     * @return array
-     * @version 10.31.0
+     * REG
+     * Valida y ajusta la fecha en un registro, agregando la hora actual si la fecha es válida.
      *
+     * Esta función verifica si la clave 'fecha' está presente en el array `$registro`.
+     * Si existe, valida su formato mediante `valida_pattern`. Si la validación es exitosa,
+     * concatena la hora actual (`H:i:s`) a la fecha y la actualiza en el array `$registro`.
+     *
+     * ### Ejemplo de entrada:
+     * ```php
+     * $registro = ['fecha' => '2025-03-17'];
+     * ```
+     *
+     * ### Ejemplo de salida (si la fecha es válida):
+     * ```php
+     * ['fecha' => '2025-03-17 14:30:45'] // Suponiendo que la hora actual es 14:30:45
+     * ```
+     *
+     * ### Ejemplo de salida con error:
+     * ```php
+     * [
+     *    'error' => true,
+     *    'mensaje' => 'Error al validar fecha',
+     *    'data' => false // Retorno de la validación fallida
+     * ]
+     * ```
+     *
+     * @param array $registro El registro que contiene la clave 'fecha' a validar y modificar.
+     *
+     * #### Estructura esperada de `$registro`:
+     * - `'fecha'` (opcional) => `string` Fecha en formato `YYYY-MM-DD`.
+     *
+     * @return array Retorna el mismo array `$registro`, pero con la fecha modificada si la validación es exitosa.
+     * En caso de error, retorna un array con información del error.
      */
     private function integra_fecha(array $registro): array
     {
@@ -1545,7 +1573,7 @@ class _transacciones_fc extends modelo
     {
 
         if($id <= 0){
-            return $this->error->error(mensaje: 'Error id debe ser mayor a 0', data: $id);
+            return $this->error->error(mensaje: 'Error id debe ser mayor a 0', data: $id, es_final: true);
         }
 
         if($verifica_permite_transaccion) {
