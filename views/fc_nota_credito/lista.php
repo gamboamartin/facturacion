@@ -82,21 +82,21 @@ echo "<style>
         <div class="filtros-avanzados">
             <div class="filtro-grupo">
                 <label for="fecha_inicio">Fecha Inicio</label>
-                <input type="date" id="fecha_inicio" data-ajax="rango-fechas" data-filtro_campo="fc_factura.fecha"
+                <input type="date" id="fecha_inicio" data-ajax="rango-fechas" data-filtro_campo="fc_nota_credito.fecha"
                        data-filtro_key="campo1">
 
                 <label for="fecha_fin">Fecha Fin</label>
-                <input type="date" id="fecha_fin" data-ajax="rango-fechas" data-filtro_campo="fc_factura.fecha"
+                <input type="date" id="fecha_fin" data-ajax="rango-fechas" data-filtro_campo="fc_nota_credito.fecha"
                        data-filtro_key="campo2">
             </div>
 
             <div class="filtro-grupo">
                 <label for="folio">Folio</label>
-                <input type="text" id="folio" data-ajax="filtro" data-filtro_campo="fc_factura.folio"
+                <input type="text" id="folio" data-ajax="filtro" data-filtro_campo="fc_nota_credito.folio"
                        placeholder="Ej: A-000107">
 
                 <label for="cantidad-monto">Total</label>
-                <input type="text" id="cantidad-monto" data-ajax="filtro" data-filtro_campo="fc_factura.total"
+                <input type="text" id="cantidad-monto" data-ajax="filtro" data-filtro_campo="fc_nota_credito.total"
                        placeholder="Ej: 5000">
 
                 <label for="rfc">RFC</label>

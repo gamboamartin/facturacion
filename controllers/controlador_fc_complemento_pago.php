@@ -548,6 +548,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $datatables = new stdClass();
         $datatables->columns = $columns;
         $datatables->filtro = $filtro;
+        $datatables->menu_active = true;
 
         return $datatables;
     }
