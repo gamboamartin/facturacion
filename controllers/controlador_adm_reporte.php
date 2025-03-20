@@ -86,8 +86,8 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener contenido',data:  $table, header: $header, ws: $ws);
         }
-        $this->ths = $table->ths_html;
-        $this->trs = $table->trs_html;
+        $this->html_ths = $table->ths;
+        $this->html_trs = $table->trs;
 
 
         $btn_exporta = $this->html_base->submit(css: 'success',label: 'Exporta');

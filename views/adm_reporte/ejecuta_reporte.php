@@ -11,11 +11,11 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <?php echo $controlador->ths; ?>
+                            <?php echo $controlador->html_ths; ?>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php echo $controlador->trs; ?>
+                        <?php echo $controlador->html_trs; ?>
                     </tbody>
                 </table>
             </div>
