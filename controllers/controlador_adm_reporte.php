@@ -44,7 +44,16 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
                 return $this->retorno_error(mensaje: 'Error al generar filtros fecha',
                     data:  $filtros_fecha, header: $header, ws: $ws);
             }
+
             $this->filtros = $filtros_fecha;
+
+            $filtros_texto = $this->filtros_texto();
+            if(errores::$error){
+                return $this->retorno_error(mensaje: 'Error al generar filtros texto',
+                    data:  $filtros_texto, header: $header, ws: $ws);
+            }
+
+            $this->filtros .= $filtros_texto;
         }
 
 
@@ -54,8 +63,6 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         }
 
         $this->buttons['btn_ejecuta'] = $btn_ejecuta;
-
-
     }
 
     final public function ejecuta_reporte(bool $header, bool $ws = false){
@@ -63,7 +70,6 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
         $link_exportar_xls = $this->obj_link->link_con_id(accion: 'exportar_xls',link: $this->link,
             registro_id:  $this->registro_id,seccion:  $this->tabla);
-
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar link',data:  $link_exportar_xls, header: $header, ws: $ws);
         }
@@ -80,7 +86,6 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
                 return $this->retorno_error(mensaje: 'Error al obtener fc_facturas',data:  $result, header: $header, ws: $ws);
             }
         }
-
 
         $table = (new _table())->contenido_table(adm_reporte_descripcion: $adm_reporte_descripcion,result:  $result);
         if(errores::$error){
@@ -109,8 +114,6 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
         $this->hiddens->fecha_inicial = $fecha_inicial;
         $this->hiddens->fecha_final = $fecha_final;
-
-
     }
 
     final public function exportar_xls(bool $header, bool $ws = false){
@@ -157,7 +160,6 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
 
     private function filtros_fecha(): array|string
     {
-
         $hoy = date('Y-m-d');
 
         $fecha_mes_inicial = date('Y-m-01');
@@ -182,9 +184,36 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         $filtros .= $fecha_final;
 
         return $filtros;
-
     }
 
+    private function filtros_texto(): array|string
+    {
+        $folio = (new adm_reporte_html(html: $this->html_base))->input_text(cols: 6, disabled: false, name: 'folio',
+            place_holder: 'Folio', row_upd: new stdClass(), value_vacio: false, required: false);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al generar input',data:  $folio);
+        }
+
+        $filtros = $folio;
+
+        $total = (new adm_reporte_html(html: $this->html_base))->input_text(cols: 6, disabled: false, name: 'total',
+            place_holder: 'Total', row_upd: new stdClass(), value_vacio: false, required: false);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al generar input',data:  $total);
+        }
+
+        $filtros .= $total;
+
+        $rfc = (new adm_reporte_html(html: $this->html_base))->input_text(cols: 6, disabled: false, name: 'rfc',
+            place_holder: 'RFC', row_upd: new stdClass(), value_vacio: false, required: false);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al generar input',data:  $rfc);
+        }
+
+        $filtros .= $rfc;
+
+        return $filtros;
+    }
 
     private function result_fc_rpt(string $adm_reporte_descripcion): array|stdClass
     {
@@ -207,6 +236,12 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener filtro_rango',data:  $filtro_rango);
         }
+
+        $filtro_text = (new _filtros())->filtro_texto(table: $table);
+        if(errores::$error){
+            return $this->errores->error(mensaje: 'Error al obtener filtro_texto',data:  $filtro_text);
+        }
+
         if($adm_reporte_descripcion === 'Facturas'){
             $columnas_totales[] = 'fc_factura_sub_total_base';
             $columnas_totales[] = 'fc_factura_total_descuento';
@@ -214,12 +249,12 @@ class controlador_adm_reporte extends \gamboamartin\acl\controllers\controlador_
             $columnas_totales[] = 'fc_factura_total_retenciones';
             $columnas_totales[] = 'fc_factura_total';
             $result = (new fc_factura(link: $this->link))->filtro_and(
-                columnas_totales: $columnas_totales, filtro_rango: $filtro_rango);
+                columnas_totales: $columnas_totales, filtro: $filtro_text, filtro_rango: $filtro_rango);
             if(errores::$error){
                 return $this->errores->error(mensaje: 'Error al obtener fc_facturas',data:  $result);
             }
-
         }
+
         if($adm_reporte_descripcion === 'Pagos'){
             $result = (new fc_complemento_pago(link: $this->link))->filtro_and(filtro_rango: $filtro_rango);
             if(errores::$error){
