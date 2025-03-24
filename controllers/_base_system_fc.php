@@ -452,7 +452,7 @@ class _base_system_fc extends _base_system{
         if(count($fc_csds) === 1){
             $id_selected = $fc_csds[0]['fc_csd_id'];
         }
-        $cols = 12;
+        $cols = 6;
         $link = $this->link;
         $fc_csd_id = (new fc_csd_html(html: $this->html_base))->select_fc_csd_id(cols: $cols,
             con_registros:  true,id_selected:  $id_selected, link: $link,label: 'Empresa');
@@ -484,7 +484,7 @@ class _base_system_fc extends _base_system{
         $columnas_ds[] = "com_cliente_razon_social";
         $columnas_ds[] = $this->modelo_entidad->tabla."_total";
         $extra_params_keys[] = $this->modelo_entidad->key_id;
-        $select_plantilla = (new html_controler(html: $this->html_base))->select_catalogo(cols: $cols,
+        $select_plantilla = (new html_controler(html: $this->html_base))->select_catalogo(cols: 12,
             con_registros: true, id_selected: -1, modelo: $this->modelo_entidad, columns_ds: $columnas_ds,
             disabled: $disabled, extra_params_keys: $extra_params_keys, label: 'Plantilla', name: 'plantilla',
             registros: $plantillas);
@@ -938,14 +938,14 @@ class _base_system_fc extends _base_system{
     public function init_inputs(): array
     {
         $identificador = "fc_csd_id";
-        $propiedades = array("label" => "Empresa", "cols" => 12,"extra_params_keys"=>array("fc_csd_serie"));
+        $propiedades = array("label" => "Empresa", "cols" => 6,"extra_params_keys"=>array("fc_csd_serie"));
         $input = $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al inicializar inputs',data:  $input);
         }
 
         $identificador = "com_sucursal_id";
-        $propiedades = array("label" => "Cliente", "cols" => 12,"extra_params_keys" =>
+        $propiedades = array("label" => "Cliente", "cols" => 6,"extra_params_keys" =>
             array("com_cliente_cat_sat_forma_pago_id",
             "com_cliente_cat_sat_metodo_pago_id","com_cliente_cat_sat_moneda_id","com_cliente_cat_sat_uso_cfdi_id"));
         $input =$this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
