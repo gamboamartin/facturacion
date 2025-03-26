@@ -85,6 +85,8 @@ class controlador_fc_csd extends system{
         $this->row_upd->valor_unitario = 0;
         $this->row_upd->descuento = 0;
 
+        $this->keys_selects = $this->init_inputs();
+
         $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar inputs',data:  $inputs);
@@ -93,7 +95,7 @@ class controlador_fc_csd extends system{
         }
 
 
-        $fc_cer_csd_doc = $this->html->input_file(cols: 12,name:  'fc_cer_csd_doc', row_upd: new stdClass(),
+        $fc_cer_csd_doc = $this->html->input_file(cols: 6,name:  'fc_cer_csd_doc', row_upd: new stdClass(),
             value_vacio: false,place_holder: 'Archivo CER');
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar fc_cer_csd_doc',data:  $fc_cer_csd_doc);
@@ -103,7 +105,7 @@ class controlador_fc_csd extends system{
 
         $this->inputs->fc_cer_csd = $fc_cer_csd_doc;
 
-        $fc_key_csd_doc = $this->html->input_file(cols: 12,name:  'fc_key_csd_doc', row_upd: new stdClass(),
+        $fc_key_csd_doc = $this->html->input_file(cols: 6,name:  'fc_key_csd_doc', row_upd: new stdClass(),
             value_vacio: false, place_holder: 'Archivo KEY');
         if(errores::$error){
             $error = $this->errores->error(mensaje: 'Error al generar fc_key_csd_doc',data:  $fc_key_csd_doc);
@@ -330,8 +332,10 @@ class controlador_fc_csd extends system{
             return $this->errores->error(mensaje: 'Error al generar template',data:  $r_modifica);
         }
 
+        $this->keys_selects = $this->init_inputs();
+
         $identificador = "org_sucursal_id";
-        $propiedades = array("id_selected" => $this->row_upd->org_sucursal_id);
+        $propiedades = array("id_selected" => $this->row_upd->org_sucursal_id, "label" => "Sucursal", "cols" => 12);
         $this->asignar_propiedad(identificador:$identificador, propiedades: $propiedades);
 
         $inputs = $this->genera_inputs(keys_selects:  $this->keys_selects);
