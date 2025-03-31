@@ -68,6 +68,22 @@ echo "<style>
     border: none;
 }
 
+#descargar_excel {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+    margin-left: 10px;
+}
+
+#descargar_excel:hover {
+    background: #218838;
+}
+
 </style>";
 ?>
 
@@ -106,6 +122,10 @@ echo "<style>
 
             <button id="filtrar">Filtrar</button>
             <button id="limpiar">Limpiar</button>
+            <form method="post" action="<?php echo $controlador->link_exportar_xls; ?>" enctype="multipart/form-data">
+                <button id="descargar_excel">Descargar Excel</button>
+            </form>
+
         </div>
 
         <table class="datatable table table-striped"></table>
