@@ -1721,13 +1721,15 @@ class _base_system_fc extends _base_system{
 
         unlink($factura->file_xml_st);
         ob_clean();
-        echo trim(file_get_contents($factura->doc_documento_ruta_absoluta));
+
         if($tipo === 'json'){
             header('Content-Type: application/json');
         }
         else{
             header('Content-Type: text/xml');
         }
+
+        echo trim(file_get_contents($factura->doc_documento_ruta_absoluta));
 
         exit;
     }
