@@ -30,6 +30,32 @@ let entidad_partida = 'fc_partida';
 let hidden_registro_id = $("input[name='registro_id']");
 let entidad_factura = 'fc_factura';
 
+
+var valor_unitario = document.getElementById('valor_unitario');
+var maskOptions_valor_unitario = {
+    mask: Number,
+    scale: 2,
+    signed: false,
+    thousandsSeparator: '',
+    padFractionalZeros: false,
+    normalizeZeros: true,
+    radix: '.'
+};
+IMask(valor_unitario, maskOptions_valor_unitario);
+
+var maskOptions_descuento = {
+    mask: Number,
+    scale: 2,
+    signed: false,
+    thousandsSeparator: '',
+    padFractionalZeros: false,
+    normalizeZeros: true,
+    radix: '.'
+};
+document.querySelectorAll('#descuento').forEach(function(el) {
+    IMask(el, maskOptions_descuento);
+});
+
 sl_com_sucursal.change(function () {
     let selected = $(this).find('option:selected');
     let cat_sat_forma_pago = selected.data(`com_cliente_cat_sat_forma_pago_id`);
@@ -72,6 +98,11 @@ btn_alta_partida.click(function () {
         txt_valor_unitario.focus();
         return false;
     }
+    if (!/^\d+(\.\d{1,2})?$/.test(valor_unitario)) {
+        alert('El valor unitario no tiene el formato correcto');
+        txt_valor_unitario.focus();
+        return false;
+    }
     if(com_producto_id === ''){
         alert('La seleccione un producto');
         sl_com_producto.focus();
@@ -94,6 +125,12 @@ btn_alta_partida.click(function () {
     }
     if(descuento === ''){
         descuento = 0;
+    }
+
+    if (!/^\d+(\.\d{1,2})?$/.test(descuento)) {
+        alert('El descuento no tiene el formato correcto');
+        txt_valor_unitario.focus();
+        return false;
     }
 
     let selected_producto = sl_com_producto.find('option:selected');
