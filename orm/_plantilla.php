@@ -450,6 +450,7 @@ class _plantilla{
         $fc_row_ins['total_retenciones'] = $row_partida_origen['total_retenciones'];
         $fc_row_ins[$keys_imps->key_n_traslados] = $row_partida_origen[$keys_imps->key_n_traslados];
         $fc_row_ins[$keys_imps->key_n_retenidos] = $row_partida_origen[$keys_imps->key_n_retenidos];
+        $fc_row_ins['cat_sat_obj_imp_id'] = $row_partida_origen['cat_sat_obj_imp_id'];
 
         return $fc_row_ins;
     }
