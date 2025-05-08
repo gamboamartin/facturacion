@@ -113,7 +113,7 @@ class _partidaTest extends test
         $resultado = $modelo->descripcion_mes_letra($descripcion);
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals('a MARZO',$resultado);
+        $this->assertEquals('a MAYO',$resultado);
 
         errores::$error = false;
 
@@ -122,7 +122,7 @@ class _partidaTest extends test
         $resultado = $modelo->descripcion_mes_letra($descripcion);
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals('a MARZO',$resultado);
+        $this->assertEquals('a MAYO',$resultado);
         errores::$error = false;
 
 

@@ -1369,7 +1369,7 @@ class _base_system_fc extends _base_system{
 
     public function envia_cfdi(bool $header, bool $ws = false){
 
-        $genera_pdf = $this->genera_pdf(header: false);
+        $genera_pdf = $this->genera_pdf(header: false,ws: $ws, descarga: false, guarda: true);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $genera_pdf, header: $header,ws:$ws);
         }
@@ -1672,10 +1672,10 @@ class _base_system_fc extends _base_system{
         return $base;
     }
 
-    public function genera_pdf(bool $header, bool $ws = false){
+    public function genera_pdf(bool $header, bool $ws = false, bool $descarga = true, bool $guarda = false){
 
 
-        $pdf = (new _doctos())->pdf(descarga: true, guarda: false, modelo_documento: $this->modelo_documento,
+        $pdf = (new _doctos())->pdf(descarga: $descarga, guarda: $guarda, modelo_documento: $this->modelo_documento,
             modelo_entidad:  $this->modelo_entidad, modelo_partida: $this->modelo_partida,
             modelo_predial:  $this->modelo_predial, modelo_relacion: $this->modelo_relacion,
             modelo_relacionada:  $this->modelo_relacionada, modelo_retencion:  $this->modelo_retencion,
