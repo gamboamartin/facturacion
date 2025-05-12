@@ -106,7 +106,7 @@ class _pdf
     }
 
 
-    private function data_factura(stdClass $cfdi_sellado, string $name_entidad_sellado)
+    public function data_factura(stdClass $cfdi_sellado, string $name_entidad_sellado)
     {
         $data = $this->data_init_limpio();
         if (errores::$error) {
@@ -631,6 +631,9 @@ class _pdf
         $aplica_plantilla = false;
         $generales = new generales();
 
+        if (!isset($generales->ruta_factura_pdf)) {
+            return $this->error->error(mensaje: 'Error no existe la propiedad ruta_factura_pdf', data: $generales);
+        }
 
         if ($generales->ruta_factura_pdf) {
             if (file_exists($generales->ruta_factura_pdf)) {
