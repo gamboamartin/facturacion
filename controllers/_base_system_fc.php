@@ -1505,7 +1505,10 @@ class _base_system_fc extends _base_system{
         $archivos[$ruta_pdf] = $fc_factura->$key_serie.$fc_factura->$key_folio.".pdf";
 
 
-        Compresor::descarga_zip_multiple(archivos: $archivos,name_zip: $name_zip);
+        $archivos = Compresor::descarga_zip_multiple(archivos: $archivos,name_zip: $name_zip);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al comprimir',data:  $archivos, header: $header,ws:$ws);
+        }
 
 
         exit;
