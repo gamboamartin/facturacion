@@ -8,10 +8,14 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
+use config\generales;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_complemento_pago_html;
 use gamboamartin\facturacion\models\_doctos_rel;
+use gamboamartin\facturacion\models\_pdf;
 use gamboamartin\facturacion\models\fc_cancelacion_cp;
 use gamboamartin\facturacion\models\fc_cfdi_sellado_cp;
 use gamboamartin\facturacion\models\fc_complemento_pago;
@@ -31,10 +35,12 @@ use gamboamartin\facturacion\models\fc_relacion_cp;
 use gamboamartin\facturacion\models\fc_retenido_cp;
 use gamboamartin\facturacion\models\fc_traslado_cp;
 use gamboamartin\facturacion\models\fc_uuid_cp;
+use gamboamartin\organigrama\models\org_logo;
 use gamboamartin\system\actions;
 use gamboamartin\template\html;
 
 use html\cat_sat_forma_pago_html;
+use NumberFormatter;
 use PDO;
 use stdClass;
 
@@ -487,8 +493,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         }
         return $r_alta;
     }
-
-    public function genera_pdf(bool $header, bool $ws = false)
+    public function genera_pdf(bool $header, bool $ws = false, bool $descarga = true, bool $guarda = false)
     {
         $this->modelo_documento = (new fc_complemento_pago_documento(link: $this->link));
         $this->modelo_entidad = $this->modelo;
@@ -507,6 +512,204 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         }
         return $r_genera;
     }
+
+    public function datos_reporte()
+    {
+        $reporte = $this->modelo->get_factura(modelo_partida: new fc_partida_cp(link: $this->link),
+            modelo_predial: new fc_cuenta_predial_cp(link: $this->link), modelo_relacion: new fc_relacion_cp(link: $this->link),
+            modelo_relacionada: new fc_complemento_pago_relacionada(link: $this->link), modelo_retencion: new fc_retenido_cp(link: $this->link),
+            modelo_traslado: new fc_traslado_cp(link: $this->link), modelo_uuid_ext: new fc_uuid_cp(link: $this->link), registro_id: $this->registro_id);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener datos para el reporte', data: $reporte);
+        }
+
+        print_r($reporte);exit();
+
+        $filtro_cfdi[$this->modelo->key_id] = $reporte[$this->modelo->key_id];
+        $cfdi_sellado = (new fc_cfdi_sellado_cp(link: $this->link))->filtro_and(filtro: $filtro_cfdi);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener cfdi_sellado', data: $cfdi_sellado);
+        }
+
+        $data = (new _pdf())->data_factura(cfdi_sellado: $cfdi_sellado, name_entidad_sellado: (new fc_cfdi_sellado_cp(link: $this->link))->tabla);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al asignar datos', data: $data);
+        }
+
+        $filtro_ruta['org_empresa.id'] = $reporte['org_empresa_id'];
+        $ruta_logo = (new org_logo(link: $this->link))->filtro_and(filtro: $filtro_ruta);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener Logo', data: $ruta_logo);
+        }
+
+        $ruta_logo = $ruta_logo->n_registros > 0 ? $ruta_logo->registros[0]['doc_documento_ruta_relativa'] : '';
+
+        $ruta_qr = (new fc_complemento_pago_documento(link: $this->link))->get_factura_documento(key_entidad_filter_id: $this->modelo->key_filtro_id,
+            registro_id: $this->registro_id, tipo_documento: "qr_cfdi");
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener QR', data: $ruta_qr);
+        }
+
+        $uso_cfdi = trim($reporte['cat_sat_uso_cfdi_codigo']) . ' ' . trim($reporte['cat_sat_uso_cfdi_descripcion']);
+        $uso_cfdi = trim($uso_cfdi);
+        $uso_cfdi = mb_convert_encoding($uso_cfdi, 'ISO-8859-1', 'UTF-8');
+
+        $domicilio_receptor = trim($reporte['com_sucursal_calle']);
+        $domicilio_receptor = trim($domicilio_receptor) . ' ' . trim($reporte['com_sucursal_numero_exterior']);
+        $domicilio_receptor = trim($domicilio_receptor) . ' ' . trim($reporte['com_sucursal_numero_interior']);
+        $domicilio_receptor = trim($domicilio_receptor) . ' ' . trim($reporte['com_sucursal_municipio']);
+        $domicilio_receptor = trim($domicilio_receptor) . ' ' . trim($reporte['com_sucursal_estado']);
+        $domicilio_receptor = trim($domicilio_receptor) . ' ' . $reporte['com_sucursal_cp'];
+        $domicilio_receptor = mb_convert_encoding($domicilio_receptor, 'ISO-8859-1', 'UTF-8');
+
+        $regimen = mb_convert_encoding($reporte['cat_sat_regimen_fiscal_cliente_codigo'] . ' ' . $reporte['cat_sat_regimen_fiscal_cliente_descripcion'], 'ISO-8859-1', 'UTF-8');
+        $regimen = trim($regimen);
+
+        $fecha_certificacion = '';
+        if (isset($data->fecha_timbrado)) {
+            $fecha_certificacion = $data->fecha_timbrado;
+        }
+
+        $folio_fiscal = '';
+        if (isset($data->folio_fiscal)) {
+            $folio_fiscal = $data->folio_fiscal;
+        }
+
+        $no_certificado = '';
+        if (isset($data->no_certificado)) {
+            $no_certificado = $data->no_certificado;
+        }
+
+        $no_certificado_sat = '';
+        if (isset($data->no_certificado_sat)) {
+            $no_certificado_sat = $data->no_certificado_sat;
+        }
+
+        $forma_pago = mb_convert_encoding($reporte['cat_sat_forma_pago_codigo'] . ' ' . $reporte['cat_sat_forma_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
+        $metodo_pago = mb_convert_encoding($reporte['cat_sat_metodo_pago_codigo'] . ' ' . $reporte['cat_sat_metodo_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
+        $tipo_comprobante = mb_convert_encoding($reporte['cat_sat_tipo_de_comprobante_codigo'] . ' ' . $reporte['cat_sat_tipo_de_comprobante_descripcion'], 'ISO-8859-1', 'UTF-8');
+        $condiciones_pago = mb_convert_encoding($reporte['cat_sat_metodo_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
+        $moneda = mb_convert_encoding($reporte['cat_sat_moneda_codigo'] . ' ' . $reporte['cat_sat_moneda_descripcion'], 'ISO-8859-1', 'UTF-8');
+
+        $fmt = new NumberFormatter('es_MX', NumberFormatter::CURRENCY);
+        $totales_sub_total = round($reporte['fc_complemento_pago_sub_total'], 2);
+        $totales_sub_total = $fmt->formatCurrency($totales_sub_total, "MXN");
+
+        $totales_descuento = round($reporte['fc_complemento_pago_descuento'], 2);
+        $totales_descuento = $fmt->formatCurrency($totales_descuento, "MXN");
+
+        $totales_iva = round($reporte['fc_complemento_pago_total_traslados'], 2);
+        $totales_iva = $fmt->formatCurrency($totales_iva, "MXN");
+
+        $totales_isr_retenidos = round($reporte['fc_complemento_pago_total_retenciones'], 2);
+        $totales_isr_retenidos = $fmt->formatCurrency($totales_isr_retenidos, "MXN");
+
+        $totales_iva_retenidos = round($reporte['fc_complemento_pago_total_retenciones'], 2);
+        $totales_iva_retenidos = $fmt->formatCurrency($totales_iva_retenidos, "MXN");
+
+        $totales_total = round($reporte['fc_complemento_pago_total'], 2);
+        $totales_total = $fmt->formatCurrency($totales_total, "MXN");
+
+        $fc_factura_total = round($reporte['fc_complemento_pago_total'], 2);
+
+        $formatterES = new NumberFormatter("es-ES", NumberFormatter::SPELLOUT);
+        $izquierda = intval(floor($fc_factura_total));
+        $derecha = intval(($fc_factura_total - floor($fc_factura_total)) * 100);
+        $letra = $formatterES->format($izquierda) . " pesos ";
+        if ((float)$derecha === 0.0) {
+            $derecha = '00';
+        }
+        $letra .= $derecha . "/100 M.N.";
+
+        $letra = strtoupper($letra);
+        $letra = mb_convert_encoding($letra, 'ISO-8859-1', 'UTF-8');
+
+        $productos = array();
+
+        foreach ($reporte['partidas'] as $partida) {
+            $cantidad = $partida['fc_partida_cp_cantidad'];
+            $unidad = $partida['cat_sat_unidad_codigo'];
+            $clave = $partida['com_producto_codigo_sat'];
+            $descripcion = mb_convert_encoding($partida['fc_partida_cp_descripcion'], 'ISO-8859-1', 'UTF-8');
+            $obj_impuesto = mb_convert_encoding($partida['cat_sat_obj_imp_descripcion'], 'ISO-8859-1', 'UTF-8');
+            $valor_unitario = round($partida['fc_partida_cp_valor_unitario'], 2);
+            $valor_unitario = $fmt->formatCurrency($valor_unitario, "MXN");
+            $importe = round($partida['fc_partida_cp_sub_total'], 2);
+            $importe = $fmt->formatCurrency($importe, "MXN");
+
+            $productos[] = [
+                'cantidad' => $cantidad,
+                'unidad' => $unidad,
+                'clave' => $clave,
+                'descripcion' => $descripcion,
+                'obj_impuesto' => $obj_impuesto,
+                'valor_unitario' => $valor_unitario,
+                'importe' => $importe
+            ];
+        }
+
+        $datos = [
+            'folio' => $reporte['fc_complemento_pago_folio'],
+            'logo' => $ruta_logo,
+            'qr' => $ruta_qr,
+            'emisor' => [
+                'emisor' => $reporte['org_empresa_razon_social'],
+                'nombre' => $reporte['org_empresa_nombre_comercial'],
+                'rfc' => $reporte['org_empresa_rfc'],
+                'regimen' => $reporte['cat_sat_regimen_fiscal_descripcion'],
+                'direccion' => "Av. Vallarta 6503 - Int. C2, Col. Ciudad Granja,45010, Zapopan, Jalisco",
+                'telefono' => $reporte['org_empresa_telefono_1']
+            ],
+            'fechas' => [
+                'fecha_emision' => $reporte['fc_complemento_pago_fecha'],
+                'fecha_certificacion' => $fecha_certificacion,
+                'cp_expedicion' => ''
+            ],
+            'receptor' => [
+                'nombre' => $reporte['com_cliente_razon_social'],
+                'rfc' => $reporte['com_cliente_rfc'],
+                'uso_cfdi' => $uso_cfdi,
+                'direccion' => $domicilio_receptor,
+                'regimen' => $regimen
+            ],
+            'fiscales' => [
+                'folio_sat' => $folio_fiscal,
+                'certificado_emisor' => $no_certificado,
+                'certificado_sat' => $no_certificado_sat,
+                'leyenda' => '',
+                'exportacion' => 'No aplica',
+            ],
+            'productos' => $productos,
+            'pagos' => [
+                'forma_pago' => $forma_pago,
+                'metodo_pago' => $metodo_pago,
+                'tipo_comprobante' => $tipo_comprobante,
+                'condiciones_pago' => $condiciones_pago,
+                'moneda' => $moneda,
+            ],
+            'totales' => [
+                'subtotal' => $totales_sub_total,
+                'descuento' => $totales_descuento,
+                'iva' => $totales_iva,
+                'isr_retenido' => $totales_isr_retenidos,
+                'iva_retenido' => $totales_iva_retenidos,
+                'total' => $totales_total,
+                'letra' => $letra,
+            ],
+            'sellos' => [
+                'cadena_original' => $data->complento,
+                'sello_cfdi' => $data->sello_cfdi,
+                'sello_sat' => $data->sello_sat
+            ]
+
+        ];
+
+
+
+
+        return $datos;
+    }
+
 
     public function genera_xml(bool $header, bool $ws = false)
     {

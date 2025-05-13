@@ -23,7 +23,8 @@
     },
     "require": {
       "php": "^8.3",
-        "ext-imagick": "*",
+      "dompdf/dompdf": "v3.1.0",
+      "ext-imagick": "*",
         "ext-pdo": "*",
         "ext-dom": "*",
         "ext-soap": "*",
