@@ -604,5 +604,21 @@ class controlador_fc_factura extends _base_system_fc
         return $result;
     }
 
+    public function valida_cep(bool $header, bool $ws = false)
+    {
+        $respuesta = $this->modelo->valida_cep(fecha: '07-01-2025',
+            clave_rastreo: 'BNET01002501070038420534',
+            insitucion_emisora: '40012',
+            insitucion_receptora: '40072',
+            cuenta: '072534012102254615',
+            monto: '43389.21',
+            receptor_participante: '1');
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al ejecutar la validación CEP', data: $respuesta, header: $header, ws: $ws);
+        }
+
+        return $respuesta;
+    }
+
 
 }

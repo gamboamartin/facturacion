@@ -86,5 +86,24 @@ class fc_factura extends _transacciones_fc
         return $r_modifica_bd;
     }
 
+    public function valida_cep(string $fecha, string $clave_rastreo, string $insitucion_emisora, string $insitucion_receptora,
+                               string $cuenta, float $monto, string $receptor_participante): array
+    {
+        $respuesta = (new _transferencia())->validar(
+            fecha: $fecha,
+            clave_rastreo: $clave_rastreo,
+            insitucion_emisora: $insitucion_emisora,
+            insitucion_receptora: $insitucion_receptora,
+            cuenta: $cuenta,
+            monto: $monto,
+            receptor_participante: $receptor_participante
+        );
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al validar CEP',data:  $respuesta);
+        }
+
+        return $respuesta;
+    }
+
 
 }

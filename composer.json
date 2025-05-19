@@ -66,7 +66,8 @@
         "gamboa.martin/notificaciones": "^21.0.0",
       "phpunit/phpunit": "^10.0.0",
       "ext-openssl": "*",
-      "ext-mysqli": "*"
+      "ext-mysqli": "*",
+      "ext-libxml": "*"
     },
     "require-dev": {
 
