@@ -82,41 +82,38 @@ class _transferencia
         exit;
     }
 
+    private static function valida_salida(string $html): ?array
+    {
+        libxml_use_internal_errors(true);
 
-private
-static function valida_salida(string $html): ?array
-{
-    libxml_use_internal_errors(true);
-
-    if (stripos($html, '<meta charset=') === false) {
-        $html = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">' . $html;
-    }
-
-    $dom = new DOMDocument();
-    $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-
-    $xpath = new DOMXPath($dom);
-
-    $mensaje = self::extraer_texto($xpath, [
-        '//div[@id="#error_div"]//p',
-        '//div[contains(@class, "cuerpo-msg")]//div[contains(@class, "info")]//strong[contains(text(), "El SPEI no ha recibido una orden de pago")]'
-    ]);
-    if ($mensaje !== null) {
-        return (new errores())->error(mensaje: $mensaje, data: $html);
-    }
-
-    return null;
-}
-
-private
-static function extraer_texto(DOMXPath $xpath, array $expresiones): ?string
-{
-    foreach ($expresiones as $expr) {
-        $nodos = $xpath->query($expr);
-        if ($nodos !== false && $nodos->length > 0) {
-            return trim($nodos->item(0)->textContent);
+        if (stripos($html, '<meta charset=') === false) {
+            $html = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">' . $html;
         }
+
+        $dom = new DOMDocument();
+        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        $xpath = new DOMXPath($dom);
+
+        $mensaje = self::extraer_texto($xpath, [
+            '//div[@id="#error_div"]//p',
+            '//div[contains(@class, "cuerpo-msg")]//div[contains(@class, "info")]//strong[contains(text(), "El SPEI no ha recibido una orden de pago")]'
+        ]);
+        if ($mensaje !== null) {
+            return (new errores())->error(mensaje: $mensaje, data: $html);
+        }
+
+        return null;
     }
-    return null;
-}
+
+    private static function extraer_texto(DOMXPath $xpath, array $expresiones): ?string
+    {
+        foreach ($expresiones as $expr) {
+            $nodos = $xpath->query($expr);
+            if ($nodos !== false && $nodos->length > 0) {
+                return trim($nodos->item(0)->textContent);
+            }
+        }
+        return null;
+    }
 }

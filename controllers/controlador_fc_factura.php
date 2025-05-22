@@ -608,8 +608,8 @@ class controlador_fc_factura extends _base_system_fc
     {
         $respuesta = $this->modelo->valida_cep(fecha: '07-01-2025',
             clave_rastreo: 'BNET01002501070038420534',
-            insitucion_emisora: '40012',
-            insitucion_receptora: '40072',
+            insitucion_emisora: '40012', // CLIENTE
+            insitucion_receptora: '40072', // EMPRESA
             cuenta: '072534012102254615',
             monto: '43389.21',
             receptor_participante: '1');
