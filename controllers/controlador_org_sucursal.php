@@ -143,7 +143,7 @@ class controlador_org_sucursal extends \gamboamartin\organigrama\controllers\con
 
         $button_bn_sucursal_cuenta = $this->html->button_href(accion: 'modifica', etiqueta: 'Ir a Sucursal',
             registro_id: $this->registro_id,
-            seccion: 'com_cliente', style: 'warning', params: array());
+            seccion: 'org_sucursal', style: 'warning', params: array());
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al generar link', data: $button_bn_sucursal_cuenta);
         }
@@ -156,7 +156,7 @@ class controlador_org_sucursal extends \gamboamartin\organigrama\controllers\con
     private function params_button_partida(int $org_sucursal_id): array
     {
         $params = array();
-        $params['seccion_retorno'] = 'com_cliente';
+        $params['seccion_retorno'] = 'org_sucursal';
         $params['accion_retorno'] = 'asigna_cuenta';
         $params['id_retorno'] = $org_sucursal_id;
         return $params;
