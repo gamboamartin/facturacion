@@ -40,6 +40,8 @@ class controlador_org_sucursal extends \gamboamartin\organigrama\controllers\con
 
     public function asigna_cuenta(bool $header, bool $ws = false): array|stdClass
     {
+        $this->accion_titulo = 'Asigna Cuenta';
+
         $row_upd = $this->modelo->registro(registro_id: $this->registro_id, columnas_en_bruto: true, retorno_obj: true);
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al obtener registro', data: $row_upd);
