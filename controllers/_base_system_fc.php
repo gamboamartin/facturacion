@@ -1478,6 +1478,8 @@ class _base_system_fc extends _base_system{
             return $this->retorno_error(mensaje: 'Error al no existe xml',data:  $ruta_xml, header: $header,ws:$ws);
         }
 
+
+
         $ruta_pdf = (new _pdf())->pdf(descarga: false, guarda: true, link: $this->link,
             modelo_documento: $this->modelo_documento, modelo_entidad: $this->modelo_entidad,
             modelo_partida: $this->modelo_partida, modelo_predial: $this->modelo_predial,

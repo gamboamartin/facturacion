@@ -642,6 +642,8 @@ class _pdf
         }
 
 
+
+
         if (!$aplica_plantilla) {
             $pdf = new pdf();
             $pdf->header(cfdi: $factura['cat_sat_uso_cfdi_descripcion'], cod_postal: $factura['dp_cp_descripcion'],
@@ -660,7 +662,7 @@ class _pdf
 
 
         } else {
-            ob_clean();
+
 
             $tabla = $modelo_entidad->tabla;
             $tabla_partida = $modelo_partida->tabla;
@@ -719,7 +721,7 @@ class _pdf
                 $mod = $partidas % 6;
                 if ($mod === 0) {
                     $y = 96.5;
-                    $this->base_pdf(data: $data, factura: $factura, pdf: $pdf, relacionadas: $relacionadas, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
+                    $this->base_pdf(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf, relacionadas: $relacionadas, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
                 }
             }
 

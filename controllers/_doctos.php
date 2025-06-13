@@ -155,6 +155,8 @@ class _doctos{
             return $this->error->error(mensaje: 'Error al generar pdf',data:  $pdf);
         }
 
+
+
         $row_entidad = $modelo_entidad->registro(registro_id: $row_entidad_id, retorno_obj: true);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener factura',data:  $row_entidad);
