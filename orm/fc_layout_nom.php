@@ -43,6 +43,7 @@ class fc_layout_nom extends modelo{
         $doc_documento_id = $doc_documento_alta->registro_id;
 
         $this->registro['codigo'] = 'LDN.'.date('YmdHis').'.'.mt_rand(10,99);
+        $this->registro['codigo_bis'] = 'LDN.'.date('YmdHis').'.'.mt_rand(10,99);
         $this->registro['status'] = 'activo';
         $this->registro['descripcion'] = $this->registro['descripcion'].' '.$doc_documento_ins['name_out'];
         $this->registro['doc_documento_id'] = $doc_documento_id;

@@ -89,6 +89,7 @@ class controlador_fc_layout_nom extends system{
 
         $fila_encabezado = 1;
         $n_fila = 1;
+        $es_valido = false;
         foreach ($hoja->getRowIterator() as $fila) {
             $celda = $hoja->getCell('A' . $fila->getRowIndex());
             $value = $celda->getValue();
@@ -99,6 +100,7 @@ class controlador_fc_layout_nom extends system{
             $value = strtoupper($value);
             if($value === 'CLAVE EMPLEADO'){
                 $fila_encabezado = $n_fila;
+                $es_valido = true;
                 break;
             }
             $n_fila++;
@@ -106,6 +108,11 @@ class controlador_fc_layout_nom extends system{
                 return $this->retorno_error(
                     mensaje: 'Error revise layout', data: $n_fila, header: $header, ws: $ws);
             }
+        }
+
+        if(!$es_valido){
+            return $this->retorno_error(
+                mensaje: 'Error revise layout', data: $n_fila, header: $header, ws: $ws);
         }
 
         $fila_inicial = $fila_encabezado + 1;
@@ -136,8 +143,10 @@ class controlador_fc_layout_nom extends system{
             $nombre = strtoupper(trim($valores_fila[0]['5']));
             $clabe = strtoupper(trim($valores_fila[0]['9']));
             $monto = strtoupper(trim($valores_fila[0]['6']));
+            if(is_numeric($monto)){
+                $monto = round($monto,2);
+            }
 
-            $monto = round($monto,2);
 
             if($clabe === ''){
                 if(is_null($valores_fila[0]['10'])){
