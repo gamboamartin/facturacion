@@ -488,6 +488,11 @@ class _email{
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener emisor', data: $not_emisores);
         }
+
+        if (empty($not_emisores)) {
+            return $this->error->error(mensaje: 'Error no existen emisores configurados', data: $not_emisores);
+        }
+
         $n_emisores = count($not_emisores);
         $indice = mt_rand(0,$n_emisores-1);
         return $not_emisores[$indice];
