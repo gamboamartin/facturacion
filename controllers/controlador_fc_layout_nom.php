@@ -9,7 +9,9 @@ use gamboamartin\system\system;
 
 use gamboamartin\template_1\html;
 use PDO;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\Xml\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -155,7 +157,6 @@ class controlador_fc_layout_nom extends system{
 
         }
 
-
         $cliente = $hoja->rangeToArray("D2:D6", null, true, false);
 
         if(is_null($cliente[0][0])){
@@ -174,12 +175,25 @@ class controlador_fc_layout_nom extends system{
 
         $xls = new Spreadsheet();
         $hoja = $xls->getActiveSheet();
+
+        $hoja->getStyle('B:B')
+            ->getNumberFormat()
+            ->setFormatCode('@');
+
+        $hoja->getStyle('C:C')
+            ->getNumberFormat()
+            ->setFormatCode('0.00');
+
         $hoja->fromArray($keys);
 
         $row_ini = 2;
         foreach ($layout_dispersion as $row){
-            $row = (array)$row;
-            $hoja->fromArray($row,startCell: "A$row_ini");
+
+            $hoja->setCellValueExplicit("A$row_ini", $row->nombre, DataType::TYPE_STRING);
+            $hoja->setCellValueExplicit("B$row_ini", $row->clabe, DataType::TYPE_STRING);
+            $hoja->setCellValueExplicit("C$row_ini", $row->monto, DataType::TYPE_NUMERIC);
+            $hoja->setCellValueExplicit("D$row_ini", $row->concepto, DataType::TYPE_STRING);
+
             $row_ini++;
         }
 
@@ -201,7 +215,7 @@ class controlador_fc_layout_nom extends system{
         $writer = new Xlsx($xls);
         $writer->save('php://output');
         exit;
-        
+
 
     }
 
