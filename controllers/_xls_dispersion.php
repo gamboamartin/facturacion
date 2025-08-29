@@ -14,6 +14,26 @@ use Throwable;
 
 class _xls_dispersion{
 
+    private array $letras = array();
+
+    public function __construct()
+    {
+        $letras = array('A','B','D','E','F','G','H','I','J','K','L','M','N','O','P','Q',
+            'R','S','T','U','V','W','X','X','Z');
+
+        $letras_b = $letras;
+
+        $letras_bin = $letras;
+        foreach ($letras as $letra) {
+            foreach ($letras_b as $letra_b) {
+                $letras_bin[] = $letra.$letra_b;
+            }
+        }
+
+        $this->letras = $letras_bin;
+
+    }
+
     private function autosize(Worksheet $hoja): Worksheet
     {
         $hoja->getColumnDimension('A')->setAutoSize(true);
@@ -31,6 +51,7 @@ class _xls_dispersion{
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al obtener $valores_fila', data: $valores_fila);
         }
+
         $row = $this->genera_row_fila($valores_fila);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al obtener $row', data: $row);
@@ -40,6 +61,60 @@ class _xls_dispersion{
         return $layout_dispersion;
 
     }
+
+
+
+    private function columnas(Worksheet $hoja): array
+    {
+        $fila_encabezado = $this->file_encabezado($hoja);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener $fila_encabezado', data: $fila_encabezado);
+        }
+        $valores_fila = $hoja->rangeToArray("A$fila_encabezado:Z$fila_encabezado", null,
+            true, false);
+        if(!isset($valores_fila[0])){
+            return (new errores())->error(mensaje: 'Error al obtener datos de encabezados', data: $valores_fila);
+        }
+
+
+        $row_xls = $valores_fila[0];
+        $columnas = array();
+        foreach ($row_xls as $key => $value) {
+            if(is_null($value)){
+                $value = '';
+            }
+            $value = trim($value);
+            $value = strtoupper($value);
+            $value = str_replace('á','A',$value);
+            $value = str_replace('é','E',$value);
+            $value = str_replace('í','I',$value);
+            $value = str_replace('ó','O',$value);
+            $value = str_replace('ú','U',$value);
+
+            $value = str_replace('Á','A',$value);
+            $value = str_replace('É','E',$value);
+            $value = str_replace('Í','I',$value);
+            $value = str_replace('Ó','O',$value);
+            $value = str_replace('Ú','U',$value);
+
+            $value = str_replace('  ',' ',$value);
+            $value = str_replace('  ',' ',$value);
+            $value = str_replace('  ',' ',$value);
+            $value = str_replace('  ',' ',$value);
+
+
+            if($value !== ''){
+                $columnas[$this->letras[$key]] = $value;
+            }
+
+        }
+
+
+        return $columnas;
+
+
+    }
+
     private function datos_iniciales(Worksheet $hoja): array|stdClass
     {
         $es_valido = $this->es_valido(hoja: $hoja);
@@ -60,9 +135,15 @@ class _xls_dispersion{
             return (new errores())->error(mensaje: 'Error al obtener $ultima_fila', data: $ultima_fila);
         }
 
+        $columnas = $this->columnas($hoja);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener $columnas', data: $columnas);
+        }
+
         $data = new stdClass();
         $data->fila_inicial = $fila_inicial;
         $data->ultima_fila = $ultima_fila;
+        $data->columnas = $columnas;
 
         return $data;
 
@@ -250,6 +331,7 @@ class _xls_dispersion{
         $data = new stdClass();
         $data->layout_dispersion = $layout_dispersion;
         $data->hoja = $hoja;
+        $data->columnas = $ini->columnas;
 
         return $data;
 
@@ -284,6 +366,32 @@ class _xls_dispersion{
         if($ultima_fila <= $fila_inicial){
             foreach ($hoja->getRowIterator() as $fila) {
                 $valor = $hoja->getCell('B' . $fila->getRowIndex())->getValue();
+                if (!empty($valor)) {
+                    $ultima_fila = $fila->getRowIndex();
+                }
+            }
+        }
+
+        if($ultima_fila <= $fila_inicial){
+            foreach ($hoja->getRowIterator() as $fila) {
+                $valor = $hoja->getCell('C' . $fila->getRowIndex())->getValue();
+                if (!empty($valor)) {
+                    $ultima_fila = $fila->getRowIndex();
+                }
+            }
+        }
+
+        if($ultima_fila <= $fila_inicial){
+            foreach ($hoja->getRowIterator() as $fila) {
+                $valor = $hoja->getCell('D' . $fila->getRowIndex())->getValue();
+                if (!empty($valor)) {
+                    $ultima_fila = $fila->getRowIndex();
+                }
+            }
+        }
+        if($ultima_fila <= $fila_inicial){
+            foreach ($hoja->getRowIterator() as $fila) {
+                $valor = $hoja->getCell('E' . $fila->getRowIndex())->getValue();
                 if (!empty($valor)) {
                     $ultima_fila = $fila->getRowIndex();
                 }

@@ -77,9 +77,27 @@ class controlador_fc_layout_nom extends system{
 
     }
 
+    public function carga_empleados(bool $header, bool $ws = false)
+    {
+        $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener layout', data: $fc_layout_nom, header: $header, ws: $ws);
+        }
+
+        $datos = (new _xls_dispersion())->lee_layout_base(fc_layout_nom: $fc_layout_nom);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener $datos', data: $datos,
+                header: $header, ws: $ws);
+        }
 
 
+        print_r($datos->columnas);exit;
 
+        exit;
+
+
+    }
 
     public function genera_dispersion(bool $header, bool $ws = false)
     {
