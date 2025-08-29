@@ -180,7 +180,7 @@ class controlador_fc_layout_nom extends system{
         $fecha = date('YmdHis');
         $title = "$name_cliente.$periodo.$fecha.xlsx";
 
-        $keys = array('NOMBRE','CLABE','MONTO','CONCEPTO');
+        $keys = array('Nombre','Clabe','Monto','Concepto');
 
         $xls = new Spreadsheet();
         $hoja = $xls->getActiveSheet();
