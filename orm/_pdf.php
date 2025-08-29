@@ -537,7 +537,7 @@ class _pdf
         $this->montos(tabla: $tabla,factura: $factura, pdf: $pdf);
         $this->sellos(data: $data, pdf: $pdf);
         if ($ruta_qr !== '') {
-            if (file_exists($ruta_logo)) {
+            if (file_exists($ruta_qr)) {
                 $pdf->SetXY(10, 196);
                 $pdf->Image($ruta_qr, null, null, 45, 45, 'png');
             }
