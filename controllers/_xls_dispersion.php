@@ -14,7 +14,7 @@ use Throwable;
 
 class _xls_dispersion{
 
-    private array $letras = array();
+    public static array $letras = array();
 
     public function __construct()
     {
@@ -30,7 +30,7 @@ class _xls_dispersion{
             }
         }
 
-        $this->letras = $letras_bin;
+        self::$letras = $letras_bin;
 
     }
 
@@ -104,7 +104,7 @@ class _xls_dispersion{
 
 
             if($value !== ''){
-                $columnas[$this->letras[$key]] = $value;
+                $columnas[self::$letras[$key]] = $value;
             }
 
         }
@@ -332,6 +332,10 @@ class _xls_dispersion{
         $data->layout_dispersion = $layout_dispersion;
         $data->hoja = $hoja;
         $data->columnas = $ini->columnas;
+        $data->fila_inicial = $ini->fila_inicial;
+        $data->ultima_fila = $ini->ultima_fila;
+        $data->primer_columna = array_key_first($ini->columnas);
+        $data->ultima_columna = array_key_last($ini->columnas);
 
         return $data;
 
