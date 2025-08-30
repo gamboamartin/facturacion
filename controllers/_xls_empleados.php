@@ -44,12 +44,32 @@ class _xls_empleados{
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al obtener layout', data: $fc_layout_nom);
         }
-
-
         $rows_empleados = $this->verifica_empleados($fc_layout_nom,$link);
         if(errores::$error){
             return (new errores())->error('Error al generar row', $rows_empleados);
         }
+
+        foreach ($rows_empleados as $row_empleado) {
+
+            $row_low_new['fc_empleado_id'] = $row_empleado['fc_empleado_id'];
+            $row_low_new['fc_layout_nom_id'] = $fc_layout_nom_id;
+            $row_low_new['esta_timbrado'] = 'inactivo';
+            $row_low_new['neto_depositar'] = $row_empleado['NETO A DEPOSITAR'];
+            $row_low_new['banco'] = $row_empleado['BANCO'];
+            $row_low_new['cuenta'] = $row_empleado['CUENTA'];
+            $row_low_new['clabe'] = $row_empleado['CLABE INTERBANCARIA'];
+            $row_low_new['cp'] = $row_empleado['CODIGO POSTAL'];
+            $row_low_new['cve_empleado'] = $row_empleado['CLAVE EMPLEADO'];
+            $row_low_new['nss'] = $row_empleado['NSS'];
+            $row_low_new['rfc'] = $row_empleado['RFC'];
+            $row_low_new['curp'] = $row_empleado['CURP'];
+            $row_low_new['nombre_completo'] = $row_empleado['NOMBRE COMPLETO'];
+
+            
+
+
+        }
+
 
         return $rows_empleados;
 
@@ -177,8 +197,12 @@ class _xls_empleados{
             if(errores::$error){
                 return (new errores())->error(mensaje: 'Error al insertar $empleado', data: $alta_em);
             }
+            $row_empleado['fc_empleado_id'] = $alta_em->registro_id;
         }
-        return $fc_empleados;
+        else{
+            $row_empleado['fc_empleado_id'] = $fc_empleados->registros[0]['id'];
+        }
+        return $row_empleado;
     }
 
     private function verifica_empleados(stdClass $fc_layout_nom, PDO $link): array
@@ -193,11 +217,12 @@ class _xls_empleados{
             return (new errores())->error('Error al generar row', $rows_empleados);
         }
 
-        foreach ($rows_empleados as $row_empleado){
-            $alta_em = $this->transacciona_empleado($row_empleado, $link);
+        foreach ($rows_empleados as $indice=>$row_empleado){
+            $row_empleado = $this->transacciona_empleado($row_empleado, $link);
             if(errores::$error){
-                return (new errores())->error(mensaje: 'Error al insertar $empleado', data: $alta_em);
+                return (new errores())->error(mensaje: 'Error al insertar $empleado', data: $row_empleado);
             }
+            $rows_empleados[$indice] = $row_empleado;
         }
 
         return $rows_empleados;

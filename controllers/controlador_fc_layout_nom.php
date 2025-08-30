@@ -83,17 +83,13 @@ class controlador_fc_layout_nom extends system{
 
     public function carga_empleados(bool $header, bool $ws = false)
     {
-
         $rows_empleados = (new _xls_empleados())->carga_empleados($this->link,$this->registro_id);
         if(errores::$error){
             return (new errores())->error('Error al generar row', $rows_empleados);
         }
-
         exit;
 
-
     }
-
 
     public function genera_dispersion(bool $header, bool $ws = false)
     {
