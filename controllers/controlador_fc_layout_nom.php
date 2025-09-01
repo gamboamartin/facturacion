@@ -71,7 +71,6 @@ class controlador_fc_layout_nom extends system{
     }
 
 
-
     public function carga_empleados(bool $header, bool $ws = false)
     {
         $rows_empleados = (new _xls_empleados())->carga_empleados($this->link,$this->registro_id);
@@ -79,6 +78,40 @@ class controlador_fc_layout_nom extends system{
             return (new errores())->error('Error al generar row', $rows_empleados);
         }
         exit;
+
+    }
+
+    public function descarga_orginal(bool $header, bool $ws = false)
+    {
+        if($this->registro_id <= 0 ){
+            return $this->retorno_error(mensaje: 'Error id debe ser mayor a 0',data:  $this->registro_id,
+                header:  $header,ws:  $ws);
+        }
+        $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener layout', data: $fc_layout_nom, header: $header, ws: $ws);
+        }
+
+        $file_url = $fc_layout_nom->doc_documento_ruta_absoluta;
+
+        if(!file_exists($file_url)){
+            return $this->retorno_error(mensaje: 'Error file_url no existe', data: $file_url,
+                header:  $header,ws:  $ws);
+        }
+
+        $base_name = $this->registro_id.".".$fc_layout_nom->doc_documento_name_out;
+
+        ob_clean();
+        if($header) {
+            header('Content-Type: application/octet-stream');
+            header("Content-Transfer-Encoding: Binary");
+            header("Content-disposition: attachment; filename=\"" . basename($base_name) . "\"");
+            readfile($file_url);
+            exit;
+        }
+        return file_get_contents($file_url);
+
 
     }
 

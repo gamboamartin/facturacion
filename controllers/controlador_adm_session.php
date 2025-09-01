@@ -16,7 +16,7 @@ use PDO;
 use stdClass;
 use Throwable;
 
-final class controlador_adm_session extends \gamboamartin\acl\controllers\controlador_adm_session {
+final class controlador_adm_session extends \gamboamartin\controllers\controlador_adm_session {
     public bool $existe_msj = false;
     public string $include_menu = '';
     public string $mensaje_html = '';
