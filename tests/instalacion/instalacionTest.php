@@ -1,9 +1,12 @@
 <?php
 namespace tests\controllers;
 
+use base\orm\sql;
+use base\orm\sql_bass;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_csd_html;
 use gamboamartin\facturacion\instalacion\instalacion;
+use gamboamartin\modelo\modelo;
 use gamboamartin\test\liberator;
 use gamboamartin\test\test;
 use stdClass;
@@ -122,8 +125,23 @@ class instalacionTest extends test {
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
+        $this->link->beginTransaction();
         $instalacion = new instalacion();
         //$instalacion = new liberator($instalacion);
+
+        $sql = "DELETE FROM fc_layout_nom";
+        $exe = modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);exit;
+        }
+
+        $sql = "DELETE FROM doc_documento";
+        $exe = modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);exit;
+        }
 
         $resultado = $instalacion->limpia(link: $this->link);
 
@@ -132,6 +150,9 @@ class instalacionTest extends test {
         $this->assertNotTrue(errores::$error);
 
         errores::$error = false;
+        if($this->link->inTransaction()) {
+            $this->link->rollBack();
+        }
 
     }
 

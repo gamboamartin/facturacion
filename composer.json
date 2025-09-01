@@ -65,6 +65,7 @@
         "gamboa.martin/proceso": "^24.0.0",
         "gamboa.martin/notificaciones": "^21.0.0",
         "gamboa.martin/banco": "^v17.1.0",
+        "gamboa.martin/modelo": "^v2.0.0",
       "phpunit/phpunit": "^10.0.0",
       "ext-openssl": "*",
       "ext-mysqli": "*",
