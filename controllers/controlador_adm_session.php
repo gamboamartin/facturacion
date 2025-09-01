@@ -10,14 +10,18 @@ namespace gamboamartin\facturacion\controllers;
 
 use config\generales;
 use gamboamartin\errores\errores;
+use gamboamartin\system\system;
 use JsonException;
+use PDO;
 use stdClass;
 use Throwable;
 
-final class controlador_adm_session extends \gamboamartin\controllers\controlador_adm_session {
+final class controlador_adm_session extends \gamboamartin\acl\controllers\controlador_adm_session {
     public bool $existe_msj = false;
     public string $include_menu = '';
     public string $mensaje_html = '';
+
+
 
     /**
      * Funcion de controlador donde se ejecutaran siempre que haya un acceso denegado

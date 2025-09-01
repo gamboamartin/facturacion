@@ -3,23 +3,12 @@ namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_layout_nom_html;
-use gamboamartin\facturacion\models\fc_empleado;
 use gamboamartin\facturacion\models\fc_layout_nom;
-use gamboamartin\src\sql;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template_1\html;
 use PDO;
-use PhpOffice\PhpSpreadsheet\Cell\DataType;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PHPUnit\Runner\Baseline\Writer;
 use stdClass;
-use Throwable;
 
 class controlador_fc_layout_nom extends system{
 
@@ -34,6 +23,8 @@ class controlador_fc_layout_nom extends system{
 
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link,
             paths_conf: $paths_conf);
+
+        $this->lista_get_data = true;
 
     }
 
