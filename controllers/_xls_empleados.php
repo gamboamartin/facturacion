@@ -65,7 +65,7 @@ class _xls_empleados{
             $row_low_new['curp'] = $row_empleado['CURP'];
             $row_low_new['nombre_completo'] = $row_empleado['NOMBRE COMPLETO'];
 
-            
+
 
 
         }

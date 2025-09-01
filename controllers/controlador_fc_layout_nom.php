@@ -81,7 +81,7 @@ class controlador_fc_layout_nom extends system{
 
     }
 
-    public function descarga_orginal(bool $header, bool $ws = false)
+    public function descarga_original(bool $header, bool $ws = false)
     {
         if($this->registro_id <= 0 ){
             return $this->retorno_error(mensaje: 'Error id debe ser mayor a 0',data:  $this->registro_id,
