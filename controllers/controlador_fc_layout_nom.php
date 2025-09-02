@@ -4,6 +4,7 @@ namespace gamboamartin\facturacion\controllers;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_layout_nom_html;
 use gamboamartin\facturacion\models\fc_layout_nom;
+use gamboamartin\facturacion\models\fc_row_layout;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template_1\html;
@@ -13,13 +14,14 @@ use stdClass;
 class controlador_fc_layout_nom extends system{
 
     public stdClass|array $keys_selects = array();
+    public array $fc_rows_layout = array();
 
     public function __construct(PDO $link, html $html = new html(), stdClass $paths_conf = new stdClass()){
         $modelo = new fc_layout_nom(link: $link);
         $html_ = new fc_layout_nom_html(html: $html);
         $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
-        $this->rows_lista = array('id', 'codigo', 'descripcion');
+        $this->rows_lista = array('id', 'codigo', 'descripcion','fecha_pago');
 
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link,
             paths_conf: $paths_conf);
@@ -47,13 +49,23 @@ class controlador_fc_layout_nom extends system{
         $this->inputs->documento = $documento;
 
 
-        $input_descripcion= $this->html->input_descripcion(cols: 12,row_upd: new stdClass(),value_vacio: false);
+        $input_descripcion= $this->html->input_descripcion(cols: 9,row_upd: new stdClass(),value_vacio: false);
 
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar $input_descripcion',
                 data: $input_descripcion,header:  $header,ws:  $ws);
         }
         $this->inputs->descripcion = $input_descripcion;
+
+        $hoy = date('Y-m-d');
+        $input_fecha_pago= $this->html->input_fecha(cols: 3, row_upd: new stdClass(), value_vacio: false,
+            name: 'fecha_pago', place_holder: 'Fecha de Pago', value: $hoy);
+
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar $input_descripcion',
+                data: $input_descripcion,header:  $header,ws:  $ws);
+        }
+        $this->inputs->fecha_pago = $input_fecha_pago;
 
         return $alta;
     }
@@ -146,6 +158,32 @@ class controlador_fc_layout_nom extends system{
         }
 
         exit;
+
+
+    }
+
+    public function ver_empleados(bool $header, bool $ws = false): array|stdClass
+    {
+        $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener layout', data: $fc_layout_nom, header: $header, ws: $ws);
+        }
+
+        $filtro['fc_layout_nom.id'] = $this->registro_id;
+        $rs = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->retorno_error(
+                mensaje: 'Error al obtener r_rows', data: $rs, header: $header, ws: $ws);
+        }
+        $rows = $rs->registros;
+        foreach ($rows as $indice => $row) {
+            $rows[$indice] = (object)$row;
+        }
+
+        $this->fc_rows_layout = $rows;
+
+        return $rows;
 
 
     }

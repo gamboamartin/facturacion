@@ -7,6 +7,7 @@
             <?php include (new views())->ruta_templates."head/title.php"; ?>
             <?php include (new views())->ruta_templates."head/subtitulo.php"; ?>
             <?php include (new views())->ruta_templates."mensajes.php"; ?>
+            <?php echo $controlador->inputs->fecha_pago; ?>
             <?php echo $controlador->inputs->descripcion; ?>
             <?php echo $controlador->inputs->documento; ?>
 

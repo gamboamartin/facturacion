@@ -34,6 +34,19 @@ class _xls_dispersion{
 
     }
 
+    private function asigna_dato_columna(array $columnas, string $key, mixed $value): array
+    {
+        $value = $this->normaliza_value(value: $value);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar value', data: $value);
+        }
+        if($value !== ''){
+            $columnas[self::$letras[$key]] = $value;
+        }
+        return $columnas;
+
+    }
+
     private function autosize(Worksheet $hoja): Worksheet
     {
         $hoja->getColumnDimension('A')->setAutoSize(true);
@@ -66,49 +79,14 @@ class _xls_dispersion{
 
     private function columnas(Worksheet $hoja): array
     {
-        $fila_encabezado = $this->file_encabezado($hoja);
+        $valores_fila = $this->get_encabezados_xls(hoja: $hoja);
         if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener $fila_encabezado', data: $fila_encabezado);
+            return (new errores())->error(mensaje: 'Error al inicializar valores_fila', data: $valores_fila);
         }
-        $valores_fila = $hoja->rangeToArray("A$fila_encabezado:Z$fila_encabezado", null,
-            true, false);
-        if(!isset($valores_fila[0])){
-            return (new errores())->error(mensaje: 'Error al obtener datos de encabezados', data: $valores_fila);
+        $columnas = $this->genera_columnas($valores_fila);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar value', data: $columnas);
         }
-
-
-        $row_xls = $valores_fila[0];
-        $columnas = array();
-        foreach ($row_xls as $key => $value) {
-            if(is_null($value)){
-                $value = '';
-            }
-            $value = trim($value);
-            $value = strtoupper($value);
-            $value = str_replace('á','A',$value);
-            $value = str_replace('é','E',$value);
-            $value = str_replace('í','I',$value);
-            $value = str_replace('ó','O',$value);
-            $value = str_replace('ú','U',$value);
-
-            $value = str_replace('Á','A',$value);
-            $value = str_replace('É','E',$value);
-            $value = str_replace('Í','I',$value);
-            $value = str_replace('Ó','O',$value);
-            $value = str_replace('Ú','U',$value);
-
-            $value = str_replace('  ',' ',$value);
-            $value = str_replace('  ',' ',$value);
-            $value = str_replace('  ',' ',$value);
-            $value = str_replace('  ',' ',$value);
-
-
-            if($value !== ''){
-                $columnas[self::$letras[$key]] = $value;
-            }
-
-        }
-
 
         return $columnas;
 
@@ -167,6 +145,15 @@ class _xls_dispersion{
         $datos->periodo = $periodo;
 
         return $datos;
+
+    }
+
+    private function elimina_doble_esp(string $value): string
+    {
+        $value = str_replace('  ',' ',$value);
+        $value = str_replace('  ',' ',$value);
+        $value = str_replace('  ',' ',$value);
+        return str_replace('  ',' ',$value);
 
     }
     private function es_valido(Worksheet $hoja): bool|array
@@ -244,6 +231,20 @@ class _xls_dispersion{
 
     }
 
+    private function genera_columnas(array $valores_fila): array
+    {
+        $row_xls = $valores_fila[0];
+        $columnas = array();
+        foreach ($row_xls as $key => $value) {
+            $columnas = $this->asigna_dato_columna(columnas: $columnas,key:  $key,value:  $value);
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error al inicializar value', data: $value);
+            }
+        }
+        return $columnas;
+
+    }
+
     private function genera_row_fila(array $valores_fila): stdClass
     {
         $nombre = strtoupper(trim($valores_fila[0]['5']));
@@ -266,6 +267,22 @@ class _xls_dispersion{
 
     }
 
+    private function get_encabezados_xls(Worksheet $hoja): array
+    {
+        $fila_encabezado = $this->file_encabezado($hoja);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener $fila_encabezado', data: $fila_encabezado);
+        }
+        $valores_fila = $hoja->rangeToArray("A$fila_encabezado:Z$fila_encabezado", null,
+            true, false);
+        if(!isset($valores_fila[0])){
+            return (new errores())->error(mensaje: 'Error al obtener datos de encabezados', data: $valores_fila);
+        }
+
+        return $valores_fila;
+
+    }
+
     private function init_valores_fila(Worksheet $hoja, int $recorrido): array
     {
         $valores_fila = $hoja->rangeToArray("A$recorrido:L$recorrido", null, true, false);
@@ -284,6 +301,16 @@ class _xls_dispersion{
         }
 
         return $valores_fila;
+
+    }
+
+    private function init_value(mixed $value): string
+    {
+        if(is_null($value)){
+            $value = '';
+        }
+        $value = trim($value);
+        return strtoupper($value);
 
     }
 
@@ -338,6 +365,61 @@ class _xls_dispersion{
         $data->ultima_columna = array_key_last($ini->columnas);
 
         return $data;
+
+    }
+
+    private function normaliza_value(mixed $value): array|string
+    {
+        $value = $this->init_value(value: $value);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar value', data: $value);
+        }
+        $value = $this->replaces_val(value: $value);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar value', data: $value);
+        }
+        return $value;
+
+    }
+
+    private function replace_may_val(string $value): string
+    {
+        $value = str_replace('Á','A',$value);
+        $value = str_replace('É','E',$value);
+        $value = str_replace('Í','I',$value);
+        $value = str_replace('Ó','O',$value);
+        return str_replace('Ú','U',$value);
+
+    }
+
+    private function replace_min_val(string $value):string
+    {
+        $value = str_replace('á','A',$value);
+        $value = str_replace('é','E',$value);
+        $value = str_replace('í','I',$value);
+        $value = str_replace('ó','O',$value);
+        return str_replace('ú','U',$value);
+
+    }
+
+    private function replaces_val(string $value): array|string
+    {
+        $value = $this->replace_min_val(value: $value);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar value', data: $value);
+        }
+
+        $value = $this->replace_may_val(value: $value);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar value', data: $value);
+        }
+
+        $value = $this->elimina_doble_esp(value: $value);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al inicializar value', data: $value);
+        }
+
+        return $value;
 
     }
 

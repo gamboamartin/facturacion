@@ -71,6 +71,8 @@ class _xls_empleados{
                 $row_low_new['rfc'] = $row_empleado['RFC'];
                 $row_low_new['curp'] = $row_empleado['CURP'];
                 $row_low_new['nombre_completo'] = $row_empleado['NOMBRE COMPLETO'];
+                $row_low_new['tarjeta'] = $row_empleado['TARJETA'];
+                $row_low_new['email'] = $row_empleado['EMAIL'];
 
                 $alta_row = (new fc_row_layout($link))->alta_registro($row_low_new);
                 if (errores::$error) {
@@ -79,9 +81,9 @@ class _xls_empleados{
             }
             $row_upd = array();
             $row_upd['empleados_cargados'] = 'activo';
-            $upd_layput_nom = (new fc_layout_nom($link))->modifica_bd($row_upd, $fc_layout_nom_id);
+            $upd_layout_nom = (new fc_layout_nom($link))->modifica_bd($row_upd, $fc_layout_nom_id);
             if (errores::$error) {
-                return (new errores())->error(mensaje: 'Error al actualzar layout', data: $upd_layput_nom);
+                return (new errores())->error(mensaje: 'Error al actualizar layout', data: $upd_layout_nom);
             }
         }
 

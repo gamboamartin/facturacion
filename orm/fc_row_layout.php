@@ -8,7 +8,7 @@ use PDO;
 class fc_row_layout extends modelo{
     public function __construct(PDO $link){
         $tabla = 'fc_row_layout';
-        $columnas = array($tabla=>false);
+        $columnas = array($tabla=>false,'fc_layout_nom'=>$tabla);
         $campos_obligatorios = array();
         $campos_view = array();
         $no_duplicados = array();
