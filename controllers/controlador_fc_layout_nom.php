@@ -8,6 +8,7 @@ use gamboamartin\facturacion\models\fc_row_layout;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template_1\html;
+use JetBrains\PhpStorm\NoReturn;
 use PDO;
 use stdClass;
 
@@ -83,7 +84,8 @@ class controlador_fc_layout_nom extends system{
     }
 
 
-    public function carga_empleados(bool $header, bool $ws = false)
+    #[NoReturn]
+    public function carga_empleados(bool $header, bool $ws = false): void
     {
         $rows_empleados = (new _xls_empleados())->carga_empleados($this->link,$this->registro_id);
         if(errores::$error){
@@ -178,12 +180,48 @@ class controlador_fc_layout_nom extends system{
         }
         $rows = $rs->registros;
         foreach ($rows as $indice => $row) {
-            $rows[$indice] = (object)$row;
+            $row = (object)$row;
+            $btn_timbra = '';
+            if($row->fc_row_layout_esta_timbrado === 'inactivo'){
+                $params = array();
+                $params['fc_row_layout_id'] = $row->fc_row_layout_id;
+                $btn_timbra = (new html())->button_href(accion: 'timbra_recibo',etiqueta:  'Timbra',
+                    registro_id: $this->registro_id,seccion: 'fc_layout_nom',style: 'warning',params: $params);
+
+                if(errores::$error){
+                    return $this->retorno_error(
+                        mensaje: 'Error al obtener btn_timbra', data: $btn_timbra, header: $header, ws: $ws);
+                }
+            }
+            $row->btn_timbra = $btn_timbra;
+            $rows[$indice] = $row;
         }
 
         $this->fc_rows_layout = $rows;
 
         return $rows;
+
+
+    }
+
+    public function timbra_recibo(bool $header, bool $ws = false): array|stdClass
+    {
+        $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener layout', data: $fc_layout_nom, header: $header, ws: $ws);
+        }
+
+        $fc_row_layout = (new fc_row_layout($this->link))->registro($_GET['fc_row_layout_id'],retorno_obj: true);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener layout', data: $fc_row_layout, header: $header, ws: $ws);
+        }
+
+        print_r($fc_row_layout);exit;
+
+
+        return $fc_row_layout;
 
 
     }

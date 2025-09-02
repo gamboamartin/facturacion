@@ -27,6 +27,7 @@
                 <th>TARJETA</th>
                 <th>EMAIL</th>
                 <th>UUID</th>
+                <th>TIMBRA</th>
             </tr>
             </thead>
             <tbody>
@@ -46,6 +47,7 @@
                     <td><?php echo $fc_row_layout->fc_row_layout_tarjeta; ?></td>
                     <td><?php echo $fc_row_layout->fc_row_layout_email; ?></td>
                     <td><?php echo $fc_row_layout->fc_row_layout_uuid; ?></td>
+                    <td><?php echo $fc_row_layout->btn_timbra; ?></td>
                 </tr>
             <?php } ?>
             </tbody>

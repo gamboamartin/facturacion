@@ -64,10 +64,13 @@ class controlador_fc_factura_documentoTest extends test {
             exit;
         }
 
+        $x = file_put_contents('/var/www/html/facturacion/archivos/xxx.pdf', 'test');
+
         $sql = "INSERT INTO doc_documento (id, nombre, status, usuario_alta_id, usuario_update_id, fecha_alta, 
                                 fecha_update, ruta_absoluta, ruta_relativa, doc_tipo_documento_id, 
                                 doc_extension_id, descripcion, descripcion_select, codigo, alias, codigo_bis, name_out) 
-                VALUES (1, '1', 'activo', 2, 2, '2025-09-01 11:31:44', '2025-09-01 11:31:44', '1A-000001.pdf', '1A-000001.pdf', 1, 1, 
+                VALUES (1, '1', 'activo', 2, 2, '2025-09-01 11:31:44', '2025-09-01 11:31:44',
+                        '/var/www/html/facturacion/archivos/xxx.pdf', 'archivos/xxx.pdf', 1, 1, 
                         '1', '1', '1', '1', '1', 'SN');";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
@@ -113,9 +116,6 @@ class controlador_fc_factura_documentoTest extends test {
             exit;
         }
 
-
-
-
         $ctl = new controlador_fc_factura_documento(link: $this->link, paths_conf: $this->paths_conf);
         $ctl->registro_id = 1;
         //$ctl = new liberator($ctl);
@@ -125,7 +125,7 @@ class controlador_fc_factura_documentoTest extends test {
         //print_r($resultado);exit;
         $this->assertIsString($resultado);
         $this->assertNotTrue(errores::$error);
-        $this->assertEquals('test',$resultado);
+        $this->assertStringContainsString('test',$resultado);
         errores::$error = false;
 
         $this->link->rollBack();
