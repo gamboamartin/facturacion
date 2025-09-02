@@ -73,6 +73,8 @@ class _xls_empleados{
                 $row_low_new['nombre_completo'] = $row_empleado['NOMBRE COMPLETO'];
                 $row_low_new['tarjeta'] = $row_empleado['TARJETA'];
                 $row_low_new['email'] = $row_empleado['EMAIL'];
+                $row_low_new['fecha_pago'] = $fc_layout_nom->fc_layout_nom_fecha_pago;
+                $row_low_new['fecha_emision'] = "{$fc_layout_nom->fc_layout_nom_fecha_pago} 23:59:59";
 
                 $alta_row = (new fc_row_layout($link))->alta_registro($row_low_new);
                 if (errores::$error) {

@@ -217,8 +217,10 @@ class controlador_fc_layout_nom extends system{
                 mensaje: 'Error al obtener layout', data: $fc_row_layout, header: $header, ws: $ws);
         }
 
-        print_r($fc_row_layout);exit;
-
+        $result = (new _make_json($this->link, $fc_row_layout))->getJson();
+        header('Content-Type: application/json');
+        echo $result['json'];
+        exit;
 
         return $fc_row_layout;
 
