@@ -201,7 +201,6 @@ class controlador_fc_layout_nom extends system{
 
         return $rows;
 
-
     }
 
     public function timbra_recibo(bool $header, bool $ws = false): array|stdClass

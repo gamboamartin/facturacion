@@ -1,10 +1,7 @@
 <?php
 namespace tests\controllers;
 
-use base\orm\sql;
-use base\orm\sql_bass;
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\html\fc_csd_html;
 use gamboamartin\facturacion\instalacion\instalacion;
 use gamboamartin\modelo\modelo;
 use gamboamartin\test\liberator;
@@ -20,9 +17,9 @@ class instalacionTest extends test {
         parent::__construct($name);
         $this->errores = new errores();
         $this->paths_conf = new stdClass();
-        $this->paths_conf->generales = '/var/www/html/cat_sat/config/generales.php';
-        $this->paths_conf->database = '/var/www/html/cat_sat/config/database.php';
-        $this->paths_conf->views = '/var/www/html/cat_sat/config/views.php';
+        $this->paths_conf->generales = '/var/www/html/facturacion/config/generales.php';
+        $this->paths_conf->database = '/var/www/html/facturacion/config/database.php';
+        $this->paths_conf->views = '/var/www/html/facturacion/config/views.php';
     }
 
     public function test_campos_doubles_facturacion(): void
@@ -125,18 +122,13 @@ class instalacionTest extends test {
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
-        $this->link->beginTransaction();
         $instalacion = new instalacion();
         //$instalacion = new liberator($instalacion);
 
-        $sql = "DELETE FROM fc_layout_nom";
-        $exe = modelo::ejecuta_transaccion($sql, $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);exit;
-        }
 
-        $sql = "DELETE FROM doc_documento";
+
+
+        $sql = "DELETE FROM fc_cer_pem";
         $exe = modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
             $error = (new errores())->error('Error', $exe);
@@ -150,9 +142,7 @@ class instalacionTest extends test {
         $this->assertNotTrue(errores::$error);
 
         errores::$error = false;
-        if($this->link->inTransaction()) {
-            $this->link->rollBack();
-        }
+
 
     }
 

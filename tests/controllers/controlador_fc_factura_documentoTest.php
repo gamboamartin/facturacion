@@ -44,7 +44,6 @@ class controlador_fc_factura_documentoTest extends test {
         $_SESSION['usuario_id'] = 2;
         $_GET['session_id'] = '1';
 
-        $this->link->beginTransaction();
 
         $sql = "DELETE FROM fc_factura_documento WHERE id = 1";
 
@@ -63,6 +62,58 @@ class controlador_fc_factura_documentoTest extends test {
             print_r($error);
             exit;
         }
+
+        $sql = "DELETE FROM org_sucursal WHERE id = 1";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM org_empresa WHERE id = 1";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+
+        $sql = "INSERT INTO org_empresa (id, descripcion, codigo, status, usuario_alta_id, usuario_update_id, 
+                         fecha_alta, fecha_update, descripcion_select, alias, codigo_bis, cat_sat_regimen_fiscal_id, 
+                         logo, nombre_comercial, fecha_inicio_operaciones, fecha_ultimo_cambio_sat,
+                         dp_calle_pertenece_id, exterior, interior, dp_calle_pertenece_entre1_id, 
+                         dp_calle_pertenece_entre2_id, email_sat, telefono_1, telefono_2, telefono_3, 
+                         rfc, razon_social, pagina_web, org_tipo_empresa_id, cat_sat_tipo_persona_id) 
+                VALUES 
+                    (1, '1', '1', 'activo', 1, 1, '2025-09-02 11:55:37', '2025-09-02 11:55:37', '1', '1', '1', 601, 
+                     '1', '1', '2025-09-02', '2025-09-02', 1, '1', '1', 1, 1, '1', '1', '1', '1', '1', '1', '1', 1, 4);";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "INSERT INTO org_sucursal (id, codigo, status, usuario_alta_id, usuario_update_id, fecha_alta, 
+                          fecha_update, codigo_bis, fecha_inicio_operaciones, dp_calle_pertenece_id, exterior, 
+                          interior, telefono_1, telefono_2, telefono_3, org_empresa_id, descripcion, 
+                          descripcion_select, alias, org_tipo_sucursal_id, serie) 
+                VALUES (1, '1', 'activo', 1, 1, '2025-09-02 11:57:54', '2025-09-02 11:57:54', '1',
+                        '2025-09-02', 1, '1', '1', '1', '1', '1', 1, '1', '1', '1', 1, '1');";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+
 
         $x = file_put_contents('/var/www/html/facturacion/archivos/xxx.pdf', 'test');
 
@@ -91,7 +142,7 @@ class controlador_fc_factura_documentoTest extends test {
                         monto_saldo_aplicado, folio_fiscal, etapa, es_plantilla, cantidad, valor_unitario, descuento) 
                 VALUES (1, 'A A-9999999', 'activo', 2, 2, '2025-08-21 17:48:37', '2025-08-21 20:21:02', 
                         'A-000001 RECURSOS Y RESULTADOS HARIMENI FIXMOBILE MEXICO', 
-                        'A-000001 RECURSOS Y RESULTADOS HARIMENI FIXMOBILE MEXICO', 'A A-9999999', 18, 
+                        'A-000001 RECURSOS Y RESULTADOS HARIMENI FIXMOBILE MEXICO', 'A A-9999999', 1, 
                         'A-9999999', 'A', 99, 2, 161, 350, 3, '', '2025-08-21 09:48:58', 1, 632, '01', 601, 125, 
                         'A-9999999 RECURSOS Y RESULTADOS HARIMENI FIXMOBILE MEXICO', NULL, 0.0000, 91034.6600, 91034.6600, 
                         14565.5500, 0.0000, 'inactivo', 105600.2100, 0.0000, 0.0000, 105600.2100, 0.0000, 
@@ -128,7 +179,7 @@ class controlador_fc_factura_documentoTest extends test {
         $this->assertStringContainsString('test',$resultado);
         errores::$error = false;
 
-        $this->link->rollBack();
+
     }
 
 
