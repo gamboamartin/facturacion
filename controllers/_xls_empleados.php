@@ -4,6 +4,7 @@ namespace gamboamartin\facturacion\controllers;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_empleado;
 use gamboamartin\facturacion\models\fc_layout_nom;
+use gamboamartin\facturacion\models\fc_row_layout;
 use PDO;
 use stdClass;
 
@@ -44,30 +45,44 @@ class _xls_empleados{
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al obtener layout', data: $fc_layout_nom);
         }
-        $rows_empleados = $this->verifica_empleados($fc_layout_nom,$link);
-        if(errores::$error){
-            return (new errores())->error('Error al generar row', $rows_empleados);
-        }
-
-        foreach ($rows_empleados as $row_empleado) {
-
-            $row_low_new['fc_empleado_id'] = $row_empleado['fc_empleado_id'];
-            $row_low_new['fc_layout_nom_id'] = $fc_layout_nom_id;
-            $row_low_new['esta_timbrado'] = 'inactivo';
-            $row_low_new['neto_depositar'] = $row_empleado['NETO A DEPOSITAR'];
-            $row_low_new['banco'] = $row_empleado['BANCO'];
-            $row_low_new['cuenta'] = $row_empleado['CUENTA'];
-            $row_low_new['clabe'] = $row_empleado['CLABE INTERBANCARIA'];
-            $row_low_new['cp'] = $row_empleado['CODIGO POSTAL'];
-            $row_low_new['cve_empleado'] = $row_empleado['CLAVE EMPLEADO'];
-            $row_low_new['nss'] = $row_empleado['NSS'];
-            $row_low_new['rfc'] = $row_empleado['RFC'];
-            $row_low_new['curp'] = $row_empleado['CURP'];
-            $row_low_new['nombre_completo'] = $row_empleado['NOMBRE COMPLETO'];
 
 
+        $rows_empleados = array();
 
+        if($fc_layout_nom->fc_layout_nom_empleados_cargados === 'inactivo') {
 
+            $rows_empleados = $this->verifica_empleados($fc_layout_nom, $link);
+            if (errores::$error) {
+                return (new errores())->error('Error al generar row', $rows_empleados);
+            }
+
+            foreach ($rows_empleados as $row_empleado) {
+
+                $row_low_new['fc_empleado_id'] = $row_empleado['fc_empleado_id'];
+                $row_low_new['fc_layout_nom_id'] = $fc_layout_nom_id;
+                $row_low_new['esta_timbrado'] = 'inactivo';
+                $row_low_new['neto_depositar'] = $row_empleado['NETO A DEPOSITAR'];
+                $row_low_new['banco'] = $row_empleado['BANCO'];
+                $row_low_new['cuenta'] = $row_empleado['CUENTA'];
+                $row_low_new['clabe'] = $row_empleado['CLABE INTERBANCARIA'];
+                $row_low_new['cp'] = $row_empleado['CODIGO POSTAL'];
+                $row_low_new['cve_empleado'] = $row_empleado['CLAVE EMPLEADO'];
+                $row_low_new['nss'] = $row_empleado['NSS'];
+                $row_low_new['rfc'] = $row_empleado['RFC'];
+                $row_low_new['curp'] = $row_empleado['CURP'];
+                $row_low_new['nombre_completo'] = $row_empleado['NOMBRE COMPLETO'];
+
+                $alta_row = (new fc_row_layout($link))->alta_registro($row_low_new);
+                if (errores::$error) {
+                    return (new errores())->error('Error al insertar row', $alta_row);
+                }
+            }
+            $row_upd = array();
+            $row_upd['empleados_cargados'] = 'activo';
+            $upd_layput_nom = (new fc_layout_nom($link))->modifica_bd($row_upd, $fc_layout_nom_id);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al actualzar layout', data: $upd_layput_nom);
+            }
         }
 
 

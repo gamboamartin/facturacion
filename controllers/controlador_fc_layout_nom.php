@@ -75,7 +75,10 @@ class controlador_fc_layout_nom extends system{
     {
         $rows_empleados = (new _xls_empleados())->carga_empleados($this->link,$this->registro_id);
         if(errores::$error){
-            return (new errores())->error('Error al generar row', $rows_empleados);
+
+            $error =  (new errores())->error('Error al generar row', $rows_empleados);
+            print_r($error);
+            exit;
         }
         exit;
 
@@ -135,7 +138,8 @@ class controlador_fc_layout_nom extends system{
                 header: $header, ws: $ws);
         }
 
-        $xls = (new _xls_dispersion())->write_dispersion(hoja_base: $datos->hoja, layout_dispersion: $datos->layout_dispersion);
+        $xls = (new _xls_dispersion())->write_dispersion(hoja_base: $datos->hoja,
+            layout_dispersion: $datos->layout_dispersion);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar $layout_dispersion', data: $xls,
                 header: $header, ws: $ws);
