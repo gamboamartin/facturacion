@@ -206,6 +206,8 @@ class controlador_fc_layout_nom extends system{
 
     public function timbra_recibo(bool $header, bool $ws = false): array|stdClass
     {
+
+        
         $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
         if (errores::$error) {
             return $this->retorno_error(
@@ -222,6 +224,7 @@ class controlador_fc_layout_nom extends system{
 
         $nomina_json = $result['json'];
         $jsonB64 = base64_encode( $nomina_json);
+
         $keyPEM = file_get_contents('/var/www/html/facturacion/pac/CSD_EKU9003173C9_key.pem');
         $cerPEM = file_get_contents('/var/www/html/facturacion/pac/CSD_EKU9003173C9_cer.pem');
         $plantilla = 'nomina';
@@ -236,13 +239,27 @@ class controlador_fc_layout_nom extends system{
                 $extra_data ="RFC: {$JSON->Comprobante->Receptor->Rfc}";
                 $extra_data .=" Nombre: {$JSON->Comprobante->Receptor->Nombre}";
             }
-            $error = (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $rs);
-            print_r($error);
-            echo $nomina_json."<br>";
-            exit;
+
+            if($codigo === '307'){
+                print_r($rs);exit;
+            }
+            else {
+
+                $error = (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $rs);
+                print_r($error);
+                echo $nomina_json . "<br>";
+                exit;
+            }
         }
 
+        $datos = $rs->datos;
+        $datos = json_decode($datos,false);
+        $xml = $datos->XML;
+        $pdf = base64_decode($datos->PDF);
+        $uuid = $datos->UUID;
 
+        file_put_contents("/var/www/html/facturacion/archivos/$_GET[fc_row_layout_id].pdf", $pdf);
+        file_put_contents("/var/www/html/facturacion/archivos/$_GET[fc_row_layout_id].xml", $xml);
         print_r($rs);exit;
         exit;
 

@@ -92,7 +92,7 @@ class _make_json
             $this->r_banco = $banco_array[$this->r_banco];
         }
 
-        $emisor = $this->emisor(nombre: 'RECURSOS Y RESULTADOS HARIMENI',regimen_fiscal:  '601',rfc:  'RRH240411K89');
+        $emisor = $this->emisor(nombre: 'ESCUELA KEMPER URGATE',regimen_fiscal:  '601',rfc:  'EKU9003173C9');
         if(errores::$error){
             return (new errores())->error('Error al generar emisor', $emisor);
         }
@@ -117,7 +117,7 @@ class _make_json
                 "Version" => "4.0",
                 "Serie" => "2025",
                 "Folio" => "{$this->folio}",
-                "Fecha" => "{$this->fecha_emision}T23:59:00",
+                "Fecha" => "{$this->fecha_emision}T12:00:00",
                 "NoCertificado" => "$this->no_certificado",
                 "SubTotal" => "{$this->neto}",
                 "Moneda" => "MXN",
