@@ -5,6 +5,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_layout_nom_html;
 use gamboamartin\facturacion\models\fc_layout_nom;
 use gamboamartin\facturacion\models\fc_row_layout;
+use gamboamartin\facturacion\pac\_cnx_pac;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template_1\html;
@@ -217,9 +218,32 @@ class controlador_fc_layout_nom extends system{
                 mensaje: 'Error al obtener layout', data: $fc_row_layout, header: $header, ws: $ws);
         }
 
-        $result = (new _make_json($this->link, $fc_row_layout))->getJson();
-        header('Content-Type: application/json');
-        echo $result['json'];
+        $result = (new _make_json(link: $this->link,fc_row_layout:  $fc_row_layout))->getJson();
+
+        $nomina_json = $result['json'];
+        $jsonB64 = base64_encode( $nomina_json);
+        $keyPEM = file_get_contents('/var/www/html/facturacion/pac/CSD_EKU9003173C9_key.pem');
+        $cerPEM = file_get_contents('/var/www/html/facturacion/pac/CSD_EKU9003173C9_cer.pem');
+        $plantilla = 'nomina';
+
+        $rs = (new _cnx_pac())->operacion_timbrarJSON2($jsonB64, $keyPEM, $cerPEM, $plantilla);
+        $rs = json_decode($rs, false);
+        $codigo = trim($rs->codigo);
+        if($codigo !== '200'){
+            $JSON = json_decode($nomina_json,false);
+            $extra_data = '';
+            if($codigo === 'CFDI40145'){
+                $extra_data ="RFC: {$JSON->Comprobante->Receptor->Rfc}";
+                $extra_data .=" Nombre: {$JSON->Comprobante->Receptor->Nombre}";
+            }
+            $error = (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $rs);
+            print_r($error);
+            echo $nomina_json."<br>";
+            exit;
+        }
+
+
+        print_r($rs);exit;
         exit;
 
         return $fc_row_layout;

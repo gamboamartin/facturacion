@@ -45,91 +45,12 @@ class controlador_fc_factura_documentoTest extends test {
         $_GET['session_id'] = '1';
 
 
-        $sql = "DELETE FROM fc_factura_documento WHERE id = 1";
-
-        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
-        }
-
-        $sql = "DELETE FROM doc_documento WHERE id = 1";
-
-        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
-        }
-
-        $sql = "DELETE FROM org_sucursal WHERE id = 1";
-
-        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
-        }
-
-        $sql = "DELETE FROM org_empresa WHERE id = 1";
-
-        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
-        }
+        $delete = (new base_test())->delete_org_empresa($this->link);
+        $ins_org_empresa = (new base_test())->insert_org_empresa($this->link);
+        $ins_org_sucursal = (new base_test())->insert_org_sucursal($this->link);
+        $ins_doc_documento = (new base_test())->insert_doc_documento($this->link);
 
 
-        $sql = "INSERT INTO org_empresa (id, descripcion, codigo, status, usuario_alta_id, usuario_update_id, 
-                         fecha_alta, fecha_update, descripcion_select, alias, codigo_bis, cat_sat_regimen_fiscal_id, 
-                         logo, nombre_comercial, fecha_inicio_operaciones, fecha_ultimo_cambio_sat,
-                         dp_calle_pertenece_id, exterior, interior, dp_calle_pertenece_entre1_id, 
-                         dp_calle_pertenece_entre2_id, email_sat, telefono_1, telefono_2, telefono_3, 
-                         rfc, razon_social, pagina_web, org_tipo_empresa_id, cat_sat_tipo_persona_id) 
-                VALUES 
-                    (1, '1', '1', 'activo', 1, 1, '2025-09-02 11:55:37', '2025-09-02 11:55:37', '1', '1', '1', 601, 
-                     '1', '1', '2025-09-02', '2025-09-02', 1, '1', '1', 1, 1, '1', '1', '1', '1', '1', '1', '1', 1, 4);";
-
-        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
-        }
-
-        $sql = "INSERT INTO org_sucursal (id, codigo, status, usuario_alta_id, usuario_update_id, fecha_alta, 
-                          fecha_update, codigo_bis, fecha_inicio_operaciones, dp_calle_pertenece_id, exterior, 
-                          interior, telefono_1, telefono_2, telefono_3, org_empresa_id, descripcion, 
-                          descripcion_select, alias, org_tipo_sucursal_id, serie) 
-                VALUES (1, '1', 'activo', 1, 1, '2025-09-02 11:57:54', '2025-09-02 11:57:54', '1',
-                        '2025-09-02', 1, '1', '1', '1', '1', '1', 1, '1', '1', '1', 1, '1');";
-
-        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
-        }
-
-
-
-        $x = file_put_contents('/var/www/html/facturacion/archivos/xxx.pdf', 'test');
-
-        $sql = "INSERT INTO doc_documento (id, nombre, status, usuario_alta_id, usuario_update_id, fecha_alta, 
-                                fecha_update, ruta_absoluta, ruta_relativa, doc_tipo_documento_id, 
-                                doc_extension_id, descripcion, descripcion_select, codigo, alias, codigo_bis, name_out) 
-                VALUES (1, '1', 'activo', 2, 2, '2025-09-01 11:31:44', '2025-09-01 11:31:44',
-                        '/var/www/html/facturacion/archivos/xxx.pdf', 'archivos/xxx.pdf', 1, 1, 
-                        '1', '1', '1', '1', '1', 'SN');";
-
-        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
-        if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
-        }
 
 
         $sql = "INSERT INTO fc_factura (id, codigo, status, usuario_alta_id, usuario_update_id, fecha_alta, 

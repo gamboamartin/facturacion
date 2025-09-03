@@ -15,6 +15,7 @@
           "gamboamartin\\facturacion\\controllers\\": "controllers",
           "gamboamartin\\facturacion\\models\\": "orm",
           "gamboamartin\\facturacion\\instalacion\\": "instalacion",
+          "gamboamartin\\facturacion\\pac\\": "pac",
           "config\\": "config/",
           "gamboamartin\\facturacion\\tests\\": "tests",
           "links\\": "links/",

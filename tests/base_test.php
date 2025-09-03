@@ -52,6 +52,284 @@ use stdClass;
 
 class base_test{
 
+    private PDO $link;
+
+    final public function delete_org_empresa(PDO $link)
+    {
+        $this->link = $link;
+        $sql = "DELETE FROM fc_factura_documento";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_cer_pem";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_cer_csd";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_key_pem";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_key_csd";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM doc_version";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM com_cliente_documento";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM not_adjunto";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_row_layout";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_layout_nom";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM doc_documento";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_csd_etapa";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_cancelacion";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_cfdi_sellado";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_factura_etapa";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_traslado";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_partida";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_notificacion";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_email";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_factura";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM fc_csd";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM org_sucursal";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+
+        $sql = "DELETE FROM org_empresa";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+        return true;
+
+    }
+
+    final public function insert_doc_documento(PDO $link)
+    {
+        $this->link = $link;
+        $x = file_put_contents('/var/www/html/facturacion/archivos/xxx.pdf', 'test');
+        $sql = "INSERT INTO doc_documento (id, nombre, status, usuario_alta_id, usuario_update_id, fecha_alta, 
+                                fecha_update, ruta_absoluta, ruta_relativa, doc_tipo_documento_id, 
+                                doc_extension_id, descripcion, descripcion_select, codigo, alias, codigo_bis, name_out) 
+                VALUES (1, '1', 'activo', 2, 2, '2025-09-01 11:31:44', '2025-09-01 11:31:44',
+                        '/var/www/html/facturacion/archivos/xxx.pdf', 'archivos/xxx.pdf', 1, 1, 
+                        '1', '1', '1', '1', '1', 'SN');";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+        return true;
+
+    }
+    final public function insert_org_empresa(PDO $link)
+    {
+        $this->link = $link;
+        $sql = "INSERT INTO org_empresa (id, descripcion, codigo, status, usuario_alta_id, usuario_update_id, 
+                         fecha_alta, fecha_update, descripcion_select, alias, codigo_bis, cat_sat_regimen_fiscal_id, 
+                         logo, nombre_comercial, fecha_inicio_operaciones, fecha_ultimo_cambio_sat,
+                         dp_calle_pertenece_id, exterior, interior, dp_calle_pertenece_entre1_id, 
+                         dp_calle_pertenece_entre2_id, email_sat, telefono_1, telefono_2, telefono_3, 
+                         rfc, razon_social, pagina_web, org_tipo_empresa_id, cat_sat_tipo_persona_id) 
+                VALUES 
+                    (1, '1', '1', 'activo', 1, 1, '2025-09-02 11:55:37', '2025-09-02 11:55:37', '1', '1', '1', 601, 
+                     '1', '1', '2025-09-02', '2025-09-02', 1, '1', '1', 1, 1, '1', '1', '1', '1', '1', '1', '1', 1, 4);";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+        return true;
+
+    }
+
+    final public function insert_org_sucursal(PDO $link)
+    {
+        $this->link = $link;
+        $sql = "INSERT INTO org_sucursal (id, codigo, status, usuario_alta_id, usuario_update_id, fecha_alta, 
+                          fecha_update, codigo_bis, fecha_inicio_operaciones, dp_calle_pertenece_id, exterior, 
+                          interior, telefono_1, telefono_2, telefono_3, org_empresa_id, descripcion, 
+                          descripcion_select, alias, org_tipo_sucursal_id, serie) 
+                VALUES (1, '1', 'activo', 1, 1, '2025-09-02 11:57:54', '2025-09-02 11:57:54', '1',
+                        '2025-09-02', 1, '1', '1', '1', '1', '1', 1, '1', '1', '1', 1, '1');";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+        return true;
+
+    }
+
     public function alta_adm_seccion(PDO $link, string $descripcion = 'fc_factura', $id = 1): array|\stdClass
     {
         $alta = (new \gamboamartin\administrador\tests\base_test())->alta_adm_seccion(link: $link,

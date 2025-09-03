@@ -20,6 +20,10 @@ class _make_json
     private ?string $r_tarjeta;
     private string $fecha_emision;
     private string $fecha_pago;
+
+    private string $no_certificado = '30001000000500003416';
+
+    private string $regimen_fiscal_receptor = "605";
     public function __construct(PDO $link, object $fc_row_layout) {
 
         $this->error = new errores();
@@ -40,6 +44,25 @@ class _make_json
         $this->fecha_pago = $fc_row_layout->fc_row_layout_fecha_pago;
         $this->r_banco = $fc_row_layout->fc_row_layout_banco;
 
+    }
+
+    private function concepto(): array
+    {
+        return [
+            "ClaveProdServ" => "84111505",
+            "Cantidad" => "1",
+            "ClaveUnidad" => "ACT",
+            "Descripcion" => "Pago de nómina",
+            "ValorUnitario" => "{$this->neto}",
+            "Importe" => "{$this->neto}",
+            "ObjetoImp" => "01"
+        ];
+
+    }
+
+    private function emisor(string $nombre, string $regimen_fiscal, string $rfc): array
+    {
+        return ["Rfc" => "$rfc", "Nombre" => "$nombre", "RegimenFiscal" => "$regimen_fiscal"];
     }
 
     public function getJson(): array
@@ -64,17 +87,38 @@ class _make_json
 
         if(!isset($this->r_clave_interbancaria) || $this->r_clave_interbancaria === ''){
             if (!$this->r_banco) {
-                return (new errores())->error('Error el banco debe existir', $fc_row_layout);
+                return (new errores())->error('Error el banco debe existir', $this);
             }
             $this->r_banco = $banco_array[$this->r_banco];
         }
+
+        $emisor = $this->emisor(nombre: 'RECURSOS Y RESULTADOS HARIMENI',regimen_fiscal:  '601',rfc:  'RRH240411K89');
+        if(errores::$error){
+            return (new errores())->error('Error al generar emisor', $emisor);
+        }
+
+        $receptor = $this->receptor();
+        if(errores::$error){
+            return (new errores())->error('Error al generar receptor', $receptor);
+        }
+
+        $concepto = $this->concepto();
+        if(errores::$error){
+            return (new errores())->error('Error al generar concepto', $concepto);
+        }
+
+        $nomina = $this->nomina(cuenta: $cuenta);
+        if(errores::$error){
+            return (new errores())->error('Error al generar nomina', $nomina);
+        }
+
         $data = [
             "Comprobante" => [
                 "Version" => "4.0",
                 "Serie" => "2025",
                 "Folio" => "{$this->folio}",
                 "Fecha" => "{$this->fecha_emision}T23:59:00",
-                "NoCertificado" => "00001000000707719966",
+                "NoCertificado" => "$this->no_certificado",
                 "SubTotal" => "{$this->neto}",
                 "Moneda" => "MXN",
                 "TipoCambio" => "1",
@@ -83,87 +127,10 @@ class _make_json
                 "Exportacion" => "01",
                 "MetodoPago" => "PUE",
                 "LugarExpedicion" => "14210",
-
-                "Emisor" => [
-                    "Rfc" => "RRH240411K89",
-                    "Nombre" => "RECURSOS Y RESULTADOS HARIMENI",
-                    "RegimenFiscal" => "601"
-                ],
-
-                "Receptor" => [
-                    "Rfc" => "{$this->r_rfc}",
-                    "Nombre" => "{$this->r_nombre}",
-                    "DomicilioFiscalReceptor" => "{$this->r_cp}",
-                    "RegimenFiscalReceptor" => "605",
-                    "UsoCFDI" => "CN01"
-                ],
-
-                "Conceptos" => [
-                    [
-                        "ClaveProdServ" => "84111505",
-                        "Cantidad" => "1",
-                        "ClaveUnidad" => "ACT",
-                        "Descripcion" => "Pago de nómina",
-                        "ValorUnitario" => "{$this->neto}",
-                        "Importe" => "{$this->neto}",
-                        "ObjetoImp" => "01"
-                    ]
-                ],
-
-                "Complemento" => [
-                    [
-                        "Nomina" => [
-                            "Version" => "1.2",
-                            "TipoNomina" => "E",
-                            "FechaPago" => "{$this->fecha_pago}",
-                            "FechaInicialPago" => "{$this->fecha_pago}",
-                            "FechaFinalPago" => "{$this->fecha_pago}",
-                            "NumDiasPagados" => "1",
-                            "TotalPercepciones" => "{$this->neto}",
-
-                            "Receptor" => [
-                                "Curp" => "{$this->r_curp}",
-                                "NumSeguridadSocial" => "{$this->r_nss}",
-                                "FechaInicioRelLaboral" => "2025-01-01",//dato por defecto para todos
-                                "Antigüedad" => "P10W",
-                                "TipoContrato" => "99",
-                                "Sindicalizado" => "No",
-                                "TipoJornada" => "01",
-                                "TipoRegimen" => "99",
-                                "NumEmpleado" => "{$this->clave_empleado}",
-                                "Departamento" => "0",
-                                "Puesto" => "0",
-                                "RiesgoPuesto" => "1",
-                                "PeriodicidadPago" => "99",
-                                "Banco" => "{$this->r_banco}",
-                                "CuentaBancaria" => "{$cuenta}",
-                                "SalarioBaseCotApor" => "278.80",//dato por defecto para todos
-                                "SalarioDiarioIntegrado" => "292.54",//dato por defecto para todos
-                                "ClaveEntFed" => "CMX"
-                            ],
-
-                            "Percepciones" => [
-                                "TotalJubilacionPensionRetiro" => "{$this->neto}",
-                                "TotalGravado" => "0.0",
-                                "TotalExento" => "{$this->neto}",
-                                "Percepcion" => [
-                                    [
-                                        "TipoPercepcion" => "039",
-                                        "Clave" => "999",
-                                        "Concepto" => "PENSIÓN POR RENTA VITALICIA",
-                                        "ImporteGravado" => "0.00",
-                                        "ImporteExento" => "{$this->neto}"
-                                    ]
-                                ],
-                                "JubilacionPensionRetiro" => [
-                                    "TotalUnaExhibicion" => "0.0",
-                                    "IngresoAcumulable" => "0.0",
-                                    "IngresoNoAcumulable" => "{$this->neto}"
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                "Emisor" => $emisor,
+                "Receptor" => $receptor,
+                "Conceptos" => [$concepto],
+                "Complemento" => [["Nomina" => $nomina]]
             ]
         ];
         if($this->r_clave_interbancaria !== ''){
@@ -171,5 +138,100 @@ class _make_json
         }
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         return ['json' => $json];
+    }
+
+    private function jubilacion(): array
+    {
+        return [
+            "TotalUnaExhibicion" => "0.0",
+            "IngresoAcumulable" => "0.0",
+            "IngresoNoAcumulable" => "{$this->neto}"
+        ];
+
+    }
+
+    private function nomina(string $cuenta): array
+    {
+
+        $receptor_nomina = $this->receptor_nomina(cuenta: $cuenta);
+        if(errores::$error){
+            return (new errores())->error('Error al generar receptor_nomina', $receptor_nomina);
+        }
+
+        $percepciones = $this->percepciones();
+        if(errores::$error){
+            return (new errores())->error('Error al generar percepciones', $percepciones);
+        }
+
+        return [
+            "Version" => "1.2",
+            "TipoNomina" => "E",
+            "FechaPago" => "{$this->fecha_pago}",
+            "FechaInicialPago" => "{$this->fecha_pago}",
+            "FechaFinalPago" => "{$this->fecha_pago}",
+            "NumDiasPagados" => "1",
+            "TotalPercepciones" => "{$this->neto}",
+            "Receptor" => $receptor_nomina,
+            "Percepciones" => $percepciones
+        ];
+
+    }
+
+    private function percepcion(): array
+    {
+        return [
+            "TipoPercepcion" => "039",
+            "Clave" => "999",
+            "Concepto" => "PENSIÓN POR RENTA VITALICIA",
+            "ImporteGravado" => "0.00",
+            "ImporteExento" => "{$this->neto}"
+        ];
+
+    }
+
+    private function percepciones(): array
+    {
+
+        $percepcion = $this->percepcion();
+        if(errores::$error){
+            return (new errores())->error('Error al generar percepcion', $percepcion);
+        }
+
+        $jubilacion = $this->jubilacion();
+        if(errores::$error){
+            return (new errores())->error('Error al generar jubilacion', $jubilacion);
+        }
+
+        return [
+            "TotalJubilacionPensionRetiro" => "{$this->neto}",
+            "TotalGravado" => "0.0",
+            "TotalExento" => "{$this->neto}",
+            "Percepcion" => [$percepcion],
+            "JubilacionPensionRetiro" => $jubilacion
+        ];
+
+    }
+
+    private function receptor(): array
+    {
+        $receptor['Rfc'] = "{$this->r_rfc}";
+        $receptor['Nombre'] = "{$this->r_nombre}";
+        $receptor['DomicilioFiscalReceptor'] = "{$this->r_cp}";
+        $receptor['RegimenFiscalReceptor'] = "{$this->regimen_fiscal_receptor}";
+        $receptor['UsoCFDI'] = "CN01";
+        return $receptor;
+    }
+
+    private function receptor_nomina(string $cuenta): array
+    {
+        return ["Curp" => "{$this->r_curp}", "NumSeguridadSocial" => "{$this->r_nss}",
+            "FechaInicioRelLaboral" => "2025-01-01",//dato por defecto para todos
+            "Antigüedad" => "P10W", "TipoContrato" => "99", "Sindicalizado" => "No", "TipoJornada" => "01",
+            "TipoRegimen" => "99", "NumEmpleado" => "{$this->clave_empleado}", "Departamento" => "0", "Puesto" => "0",
+            "RiesgoPuesto" => "1", "PeriodicidadPago" => "99", "Banco" => "{$this->r_banco}",
+            "CuentaBancaria" => "{$cuenta}", "SalarioBaseCotApor" => "278.80",//dato por defecto para todos
+            "SalarioDiarioIntegrado" => "292.54",//dato por defecto para todos
+            "ClaveEntFed" => "CMX"];
+
     }
 }
