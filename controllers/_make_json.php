@@ -1,11 +1,16 @@
 <?php
 namespace gamboamartin\facturacion\controllers;
+use config\pac;
+use gamboamartin\direccion_postal\models\dp_cp;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_csd;
 use PDO;
 
 class _make_json
 {
     public errores $error;
+
+    private PDO $link;
     private string $folio;
     private float $neto;
     private string $r_rfc;
@@ -22,11 +27,13 @@ class _make_json
     private string $fecha_pago;
 
     private string $no_certificado = '30001000000500003416';
+    private string $lugar_expedicion = '14210';
 
     private string $regimen_fiscal_receptor = "605";
     public function __construct(PDO $link, object $fc_row_layout) {
 
         $this->error = new errores();
+        $this->link = $link;
 
         $this->folio = "FF{$fc_row_layout->fc_row_layout_id}";
         $this->r_cp = $fc_row_layout->fc_row_layout_cp;
@@ -60,8 +67,17 @@ class _make_json
 
     }
 
-    private function emisor(string $nombre, string $regimen_fiscal, string $rfc): array
+    private function emisor(): array
     {
+        $fc_csd_data = $this->obtener_fc_csd_data(pac::$fc_csd_nomina_id);
+        if(errores::$error){
+            return (new errores())->error('Error en obtener_fc_csd_data', $fc_csd_data);
+        }
+
+        $rfc = $fc_csd_data['org_empresa_rfc'];
+        $nombre = $fc_csd_data['org_empresa_razon_social'];
+        $regimen_fiscal = $fc_csd_data['org_empresa_cat_sat_regimen_fiscal_id'];
+
         return ["Rfc" => "$rfc", "Nombre" => "$nombre", "RegimenFiscal" => "$regimen_fiscal"];
     }
 
@@ -92,7 +108,17 @@ class _make_json
             $this->r_banco = $banco_array[$this->r_banco];
         }
 
-        $emisor = $this->emisor(nombre: 'ESCUELA KEMPER URGATE',regimen_fiscal:  '601',rfc:  'EKU9003173C9');
+        $result_udp = $this->obtener_no_certificado();
+        if(errores::$error){
+            return (new errores())->error('Error al obtener num certificado', $result_udp);
+        }
+
+        $result_lg_ex = $this->obtener_lugar_expedicion();
+        if(errores::$error){
+            return (new errores())->error('Error al obtener_lugar_expedicion', $result_lg_ex);
+        }
+
+        $emisor = $this->emisor();
         if(errores::$error){
             return (new errores())->error('Error al generar emisor', $emisor);
         }
@@ -126,7 +152,7 @@ class _make_json
                 "TipoDeComprobante" => "N",
                 "Exportacion" => "01",
                 "MetodoPago" => "PUE",
-                "LugarExpedicion" => "14210",
+                "LugarExpedicion" => "{$this->lugar_expedicion}",
                 "Emisor" => $emisor,
                 "Receptor" => $receptor,
                 "Conceptos" => [$concepto],
@@ -233,5 +259,50 @@ class _make_json
             "SalarioDiarioIntegrado" => "292.54",//dato por defecto para todos
             "ClaveEntFed" => "CMX"];
 
+    }
+
+    private function obtener_no_certificado(): array
+    {
+
+        $fc_csd_data = $this->obtener_fc_csd_data(pac::$fc_csd_nomina_id);
+        if(errores::$error){
+            return (new errores())->error('Error en obtener_fc_csd_data', $fc_csd_data);
+        }
+        $this->no_certificado = $fc_csd_data['fc_csd_no_certificado'];
+
+        return [];
+    }
+
+    private function obtener_lugar_expedicion(): array
+    {
+        $fc_csd_data = $this->obtener_fc_csd_data(pac::$fc_csd_nomina_id);
+        if(errores::$error){
+            return (new errores())->error('Error en obtener_fc_csd_data', $fc_csd_data);
+        }
+        $dp_colonia_postal_dp_cp_id = $fc_csd_data['dp_colonia_postal_dp_cp_id'];
+
+        $dp_cp_modelo = new dp_cp($this->link);
+        $dp_cp_modelo->registro_id = $dp_colonia_postal_dp_cp_id;
+        $result = $dp_cp_modelo->obten_data();
+        if(errores::$error){
+            return (new errores())->error('Error en obten_data de dp_cp', $fc_csd_data);
+        }
+
+        $this->lugar_expedicion = $result['dp_cp_codigo'];
+
+        return [];
+    }
+
+    private function obtener_fc_csd_data(int $fc_csd_id): array
+    {
+        $fc_csd_modelo = new fc_csd($this->link);
+        $fc_csd_modelo->registro_id = $fc_csd_id;
+
+        $result = $fc_csd_modelo->obten_data();
+        if(errores::$error){
+            return (new errores())->error('Error en obten_data de fc_csd', $result);
+        }
+
+        return $result;
     }
 }

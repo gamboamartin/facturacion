@@ -221,6 +221,10 @@ class controlador_fc_layout_nom extends system{
         }
 
         $result = (new _make_json(link: $this->link,fc_row_layout:  $fc_row_layout))->getJson();
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener json', data: $fc_row_layout, header: $header, ws: $ws);
+        }
 
         $nomina_json = $result['json'];
         $jsonB64 = base64_encode( $nomina_json);
