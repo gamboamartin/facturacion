@@ -406,11 +406,11 @@
     <div style="width: 100%; text-align: right; font-weight: bold; margin-top: 5px;"><?= $datos['totales']['letra'] ?></div>
 </div>
 
-<div class="section" style="margin: 25px 0 0 0;">
+<!--<div class="section" style="margin: 25px 0 0 0;">
     <table style="margin-left: auto;">
         <tr>
             <td style="width: 30%; padding: 0 5px 0 0; vertical-align: top;">
-                <img src="<?= $datos['qr'] ?>" style="margin: 0 auto;">
+                <img src="<?php /*= $datos['qr'] */?>" style="margin: 0 auto;">
             </td>
             <td style="width: 70%; padding: 0 0 0 5px;  vertical-align: top;">
                 <table style="width: 100%;">
@@ -425,7 +425,7 @@
                                         <tr>
                                             <td style="padding: 3px 5px 3px 0;">
                                                 <div style="width: 500px; white-space: normal; overflow-wrap: break-word; word-break: break-word;">
-                                                    <?= $datos['sellos']['cadena_original'] ?>
+                                                    <?php /*= $datos['sellos']['cadena_original'] */?>
                                                 </div>
                                             </td>
                                         </tr>
@@ -445,7 +445,7 @@
                                         <tr>
                                             <td style="padding: 3px 5px 3px 0;">
                                                 <div style="width: 500px; white-space: normal; overflow-wrap: break-word; word-break: break-word;">
-                                                    <?= $datos['sellos']['sello_cfdi'] ?>
+                                                    <?php /*= $datos['sellos']['sello_cfdi'] */?>
                                                 </div>
                                             </td>
                                         </tr>
@@ -465,7 +465,7 @@
                                         <tr>
                                             <td style="padding: 3px 5px 3px 0;">
                                                 <div style="width: 500px; white-space: normal; overflow-wrap: break-word; word-break: break-word;">
-                                                    <?= $datos['sellos']['sello_sat'] ?>
+                                                    <?php /*= $datos['sellos']['sello_sat'] */?>
                                                 </div>
                                             </td>
                                         </tr>
@@ -479,7 +479,7 @@
             </td>
         </tr>
     </table>
-</div>
+</div>-->
 
 </body>
 </html>
