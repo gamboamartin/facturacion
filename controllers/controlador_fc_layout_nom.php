@@ -1,7 +1,9 @@
 <?php
 namespace gamboamartin\facturacion\controllers;
 
+use config\generales;
 use config\pac;
+use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_layout_nom_html;
 use gamboamartin\facturacion\models\fc_cer_csd;
@@ -10,6 +12,7 @@ use gamboamartin\facturacion\models\fc_key_csd;
 use gamboamartin\facturacion\models\fc_key_pem;
 use gamboamartin\facturacion\models\fc_layout_nom;
 use gamboamartin\facturacion\models\fc_row_layout;
+use gamboamartin\facturacion\models\fc_row_nomina;
 use gamboamartin\facturacion\pac\_cnx_pac;
 use gamboamartin\modelo\modelo;
 use gamboamartin\system\links_menu;
@@ -257,26 +260,26 @@ class controlador_fc_layout_nom extends system{
         $rs = (new _cnx_pac())->operacion_timbrarJSON2($jsonB64, $keyPEM, $cerPEM, $plantilla);
         $rs = json_decode($rs, false);
         $codigo = trim($rs->codigo);
-        if($codigo !== '200'){
-            $JSON = json_decode($nomina_json,false);
-            $extra_data = '';
-            if($codigo === 'CFDI40145'){
-                $extra_data ="RFC: {$JSON->Comprobante->Receptor->Rfc}";
-                $extra_data .=" Nombre: {$JSON->Comprobante->Receptor->Nombre}";
-            }
-
-            if($codigo === '307'){
-                print_r($rs);exit;
-            }
-            else {
-                $sql = "UPDATE fc_row_layout SET fc_row_layout.error = 'Codigo: $codigo Mensaje: $rs->mensaje' WHERE fc_row_layout.id = $_GET[fc_row_layout_id]";
-                modelo::ejecuta_transaccion($sql, $this->link);
-                $error = (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $rs);
-                print_r($error);
-                echo $nomina_json . "<br>";
-                exit;
-            }
-        }
+//        if($codigo !== '200'){
+//            $JSON = json_decode($nomina_json,false);
+//            $extra_data = '';
+//            if($codigo === 'CFDI40145'){
+//                $extra_data ="RFC: {$JSON->Comprobante->Receptor->Rfc}";
+//                $extra_data .=" Nombre: {$JSON->Comprobante->Receptor->Nombre}";
+//            }
+//
+//            if($codigo === '307'){
+//                print_r($rs);exit;
+//            }
+//            else {
+//                $sql = "UPDATE fc_row_layout SET fc_row_layout.error = 'Codigo: $codigo Mensaje: $rs->mensaje' WHERE fc_row_layout.id = $_GET[fc_row_layout_id]";
+//                modelo::ejecuta_transaccion($sql, $this->link);
+//                $error = (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $rs);
+//                print_r($error);
+//                echo $nomina_json . "<br>";
+//                exit;
+//            }
+//        }
 
         $datos = $rs->datos;
         $datos = json_decode($datos,false);
@@ -284,8 +287,24 @@ class controlador_fc_layout_nom extends system{
         $pdf = base64_decode($datos->PDF);
         $uuid = $datos->UUID;
 
-        file_put_contents("/var/www/html/facturacion/archivos/$_GET[fc_row_layout_id].pdf", $pdf);
-        file_put_contents("/var/www/html/facturacion/archivos/$_GET[fc_row_layout_id].xml", $xml);
+        $result_upl_pdf = $this->subir_pdf(string_pdf: $pdf, fc_row_layout_id: $fc_row_layout->fc_row_layout_id);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al subir pdf', data: $result_upl_pdf, header: $header, ws: $ws);
+        }
+
+        $result_upl_xml = $this->subir_xml(string_xml: $xml, fc_row_layout_id: $fc_row_layout->fc_row_layout_id);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al subir pdf', data: $result_upl_xml, header: $header, ws: $ws);
+        }
+
+//        $result_upl_qr = $this->subir_qr(string_qr_jpg: $qr, fc_row_layout_id: $fc_row_layout->fc_row_layout_id);
+//        if (errores::$error) {
+//            return $this->retorno_error(
+//                mensaje: 'Error al subir qr', data: $result_upl_qr, header: $header, ws: $ws);
+//        }
+
         print_r($rs);exit;
         exit;
 
@@ -366,6 +385,114 @@ class controlador_fc_layout_nom extends system{
 
         return $cer_pem_data->registros[0]['doc_documento_ruta_absoluta'];
 
+    }
+
+    private function subir_pdf(string $string_pdf, int $fc_row_layout_id): array
+    {
+        $nombre_archivo = $fc_row_layout_id.'.pdf';
+        $ruta = (new generales())->path_base.'archivos/'.$nombre_archivo;
+
+        $registro['doc_tipo_documento_id'] = 8;
+        $file = array();
+        $file['name'] = $nombre_archivo;
+        $file['tmp_name'] = $ruta;
+        file_put_contents($ruta, $string_pdf);
+
+        $alta = (new doc_documento(link: $this->link))->alta_documento(registro: $registro,file: $file);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+
+        }
+
+        unlink($ruta);
+        $doc_documento_id = $alta->registro_id;
+
+        $fc_row_nomina_registro = [
+            'doc_documento_id' => $doc_documento_id,
+            'fc_row_layout_id' => $fc_row_layout_id,
+        ];
+
+        $fc_row_nomina_modelo = new fc_row_nomina($this->link);
+        $fc_row_nomina_modelo->registro = $fc_row_nomina_registro;
+        $result = $fc_row_nomina_modelo->alta_bd();
+        if(errores::$error){
+            return (new errores())->error('Error al insertar fc_row_nomina', $result);
+        }
+
+        return [];
+    }
+
+    private function subir_xml(string $string_xml, int $fc_row_layout_id): array
+    {
+        $nombre_archivo = $fc_row_layout_id.'.xml';
+        $ruta = (new generales())->path_base.'archivos/'.$nombre_archivo;
+
+        $registro['doc_tipo_documento_id'] = 2;
+        $file = array();
+        $file['name'] = $nombre_archivo;
+        $file['tmp_name'] = $ruta;
+        file_put_contents($ruta, $string_xml);
+
+        $alta = (new doc_documento(link: $this->link))->alta_documento(registro: $registro,file: $file);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+
+        }
+
+        unlink($ruta);
+        $doc_documento_id = $alta->registro_id;
+
+        $fc_row_nomina_registro = [
+            'doc_documento_id' => $doc_documento_id,
+            'fc_row_layout_id' => $fc_row_layout_id,
+        ];
+
+        $fc_row_nomina_modelo = new fc_row_nomina($this->link);
+        $fc_row_nomina_modelo->registro = $fc_row_nomina_registro;
+        $result = $fc_row_nomina_modelo->alta_bd();
+        if(errores::$error){
+            return (new errores())->error('Error al insertar fc_row_nomina', $result);
+        }
+
+        return [];
+    }
+
+    private function subir_qr(string $string_qr_jpg, int $fc_row_layout_id): array
+    {
+        $nombre_archivo = $fc_row_layout_id.'.jpg';
+        $ruta = (new generales())->path_base.'archivos/'.$nombre_archivo;
+
+        $registro['doc_tipo_documento_id'] = 3;
+        $file = array();
+        $file['name'] = $nombre_archivo;
+        $file['tmp_name'] = $ruta;
+        file_put_contents($ruta, $string_qr_jpg);
+
+        $alta = (new doc_documento(link: $this->link))->alta_documento(registro: $registro,file: $file);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+
+
+        }
+
+        unlink($ruta);
+        $doc_documento_id = $alta->registro_id;
+
+        $fc_row_nomina_registro = [
+            'doc_documento_id' => $doc_documento_id,
+            'fc_row_layout_id' => $fc_row_layout_id,
+        ];
+
+        $fc_row_nomina_modelo = new fc_row_nomina($this->link);
+        $fc_row_nomina_modelo->registro = $fc_row_nomina_registro;
+        $result = $fc_row_nomina_modelo->alta_bd();
+        if(errores::$error){
+            return (new errores())->error('Error al insertar fc_row_nomina', $result);
+        }
+
+        return [];
     }
 
 
