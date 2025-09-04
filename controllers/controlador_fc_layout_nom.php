@@ -11,6 +11,7 @@ use gamboamartin\facturacion\models\fc_key_pem;
 use gamboamartin\facturacion\models\fc_layout_nom;
 use gamboamartin\facturacion\models\fc_row_layout;
 use gamboamartin\facturacion\pac\_cnx_pac;
+use gamboamartin\modelo\modelo;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template_1\html;
@@ -239,8 +240,18 @@ class controlador_fc_layout_nom extends system{
 
         $nomina_json = $result['json'];
         $jsonB64 = base64_encode( $nomina_json);
+
+        $pac = new pac();
+
+
+        if(isset($pac->en_produccion) && !$pac->en_produccion){
+            $rutas['ruta_key_pem'] = "/var/www/html/facturacion/pac/CSD_EKU9003173C9_key.pem";
+            $rutas['ruta_cer_pem'] = "/var/www/html/facturacion/pac/CSD_EKU9003173C9_cer.pem";
+        }
+
         $keyPEM = file_get_contents($rutas['ruta_key_pem']);
         $cerPEM = file_get_contents($rutas['ruta_cer_pem']);
+
         $plantilla = 'nomina';
 
         $rs = (new _cnx_pac())->operacion_timbrarJSON2($jsonB64, $keyPEM, $cerPEM, $plantilla);
@@ -258,7 +269,8 @@ class controlador_fc_layout_nom extends system{
                 print_r($rs);exit;
             }
             else {
-
+                $sql = "UPDATE fc_row_layout SET fc_row_layout.error = 'Codigo: $codigo Mensaje: $rs->mensaje' WHERE fc_row_layout.id = $_GET[fc_row_layout_id]";
+                modelo::ejecuta_transaccion($sql, $this->link);
                 $error = (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $rs);
                 print_r($error);
                 echo $nomina_json . "<br>";

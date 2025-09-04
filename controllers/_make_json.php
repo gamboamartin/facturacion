@@ -47,7 +47,7 @@ class _make_json
         $this->r_clave_interbancaria = $fc_row_layout->fc_row_layout_clabe;
         $this->r_tarjeta = $fc_row_layout->fc_row_layout_tarjeta;
         //ToDo: obtener bien la fecha de emision $fc_row_layout->fc_row_layout_fecha_emision no se encuentra
-        $this->fecha_emision = $fc_row_layout->fc_row_layout_fecha_pago;
+        $this->fecha_emision = str_replace(' ','T',$fc_row_layout->fc_row_layout_fecha_emision);
         $this->fecha_pago = $fc_row_layout->fc_row_layout_fecha_pago;
         $this->r_banco = $fc_row_layout->fc_row_layout_banco;
 
@@ -77,6 +77,16 @@ class _make_json
         $rfc = $fc_csd_data['org_empresa_rfc'];
         $nombre = $fc_csd_data['org_empresa_razon_social'];
         $regimen_fiscal = $fc_csd_data['org_empresa_cat_sat_regimen_fiscal_id'];
+
+        $pac = new pac();
+
+
+        if(isset($pac->en_produccion) && !$pac->en_produccion){
+            $rfc = "EKU9003173C9";
+            $nombre = "ESCUELA KEMPER URGATE";
+
+        }
+
 
         return ["Rfc" => "$rfc", "Nombre" => "$nombre", "RegimenFiscal" => "$regimen_fiscal"];
     }
@@ -138,12 +148,13 @@ class _make_json
             return (new errores())->error('Error al generar nomina', $nomina);
         }
 
+
         $data = [
             "Comprobante" => [
                 "Version" => "4.0",
                 "Serie" => "2025",
                 "Folio" => "{$this->folio}",
-                "Fecha" => "{$this->fecha_emision}T12:00:00",
+                "Fecha" => "$this->fecha_emision",
                 "NoCertificado" => "$this->no_certificado",
                 "SubTotal" => "{$this->neto}",
                 "Moneda" => "MXN",
@@ -269,6 +280,10 @@ class _make_json
             return (new errores())->error('Error en obtener_fc_csd_data', $fc_csd_data);
         }
         $this->no_certificado = $fc_csd_data['fc_csd_no_certificado'];
+        $pac = new pac();
+        if(isset($pac->en_produccion) && !$pac->en_produccion){
+            $this->no_certificado = "30001000000500003416";
+        }
 
         return [];
     }
