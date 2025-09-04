@@ -46,6 +46,11 @@ class controlador_fc_factura_documentoTest extends test {
 
 
         $delete = (new base_test())->delete_org_empresa($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $delete);
+            print_r($error);
+            exit;
+        }
         $ins_fc_factura_documento = (new base_test())->insert_fc_factura_documento($this->link);
 
         

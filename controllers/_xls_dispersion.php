@@ -156,30 +156,61 @@ class _xls_dispersion{
         return str_replace('  ',' ',$value);
 
     }
+
+    /**
+     * REG
+     * Verifica si un layout de dispersión contiene el encabezado esperado en la primera columna.
+     *
+     * Este método recorre hasta un máximo de 200 filas (o el total de filas en la hoja,
+     * lo que sea menor) buscando en la columna A el valor exacto "CLAVE EMPLEADO".
+     *
+     * - Si encuentra el encabezado, retorna `true`.
+     * - Si no lo encuentra en el rango definido, retorna un arreglo de error generado
+     *   por la clase `errores`, que incluye información sobre el encabezado esperado y
+     *   el número de filas escaneadas.
+     *
+     * @param Worksheet $hoja Hoja de cálculo activa a validar.
+     *
+     * @return bool|array
+     *  - `true` si el encabezado "CLAVE EMPLEADO" está presente en la columna A.
+     *  - `array` con detalles de error si no se encuentra el encabezado.
+     *
+     * @example
+     * ```php
+     * $spreadsheet = new Spreadsheet();
+     * $hoja = $spreadsheet->getActiveSheet();
+     * $hoja->setCellValue('A1', 'CLAVE EMPLEADO');
+     *
+     * $resultado = $this->es_valido($hoja);
+     * // $resultado === true
+     * ```
+     */
     private function es_valido(Worksheet $hoja): bool|array
     {
-        $n_fila = 1;
-        $es_valido = false;
+        // Constantes de función (evitan "números mágicos" y facilitan mantenimiento)
+        $HEADER_TEXT  = 'CLAVE EMPLEADO';
+        $SCAN_COLUMN  = 'A';
+        $MAX_SCAN_ROWS = 200;
 
-        foreach ($hoja->getRowIterator() as $fila) {
-            $celda = $hoja->getCell('A' . $fila->getRowIndex());
-            $value = $celda->getValue();
-            if(is_null($value)){
-                $value = '';
-            }
-            $value = trim($value);
-            $value = strtoupper($value);
-            if($value === 'CLAVE EMPLEADO'){
-                $es_valido = true;
-                break;
-            }
-            $n_fila++;
-            if($n_fila >= 200){
-                return (new errores())->error(mensaje: 'Error revise layout', data: $n_fila);
+        // Determinar el límite superior real a escanear (no exceder MAX_SCAN_ROWS)
+        $highestRow = min($hoja->getHighestRow(), $MAX_SCAN_ROWS);
+
+        for ($row = 1; $row <= $highestRow; $row++) {
+            // Leer y normalizar valor de la celda
+            $value = $hoja->getCell($SCAN_COLUMN . $row)->getValue();
+            $value = strtoupper(trim((string)($value ?? '')));
+
+            // Éxito temprano si encontramos el encabezado
+            if ($value === $HEADER_TEXT) {
+                return true;
             }
         }
-        return $es_valido;
 
+        // Si llegamos aquí, no se encontró el encabezado dentro del límite de filas
+        return (new errores())->error(
+            mensaje: 'Error revise layout: no se encontró el encabezado esperado',
+            data: ['encabezado_esperado' => $HEADER_TEXT, 'filas_escaneadas' => $highestRow]
+        );
     }
 
     private function estilos_wr(Worksheet $hoja): Worksheet
@@ -206,29 +237,56 @@ class _xls_dispersion{
 
     }
 
-    private function file_encabezado(Worksheet $hoja): array|int
+    /**
+     * REG
+     * Busca la fila donde se encuentra el encabezado esperado en la hoja de cálculo.
+     *
+     * Este método recorre la columna A de la hoja hasta un máximo de 200 filas (o el total
+     * de filas de la hoja, lo que ocurra primero) y busca la cadena exacta "CLAVE EMPLEADO".
+     *
+     * - Si se encuentra el encabezado, devuelve el número de fila (int).
+     * - Si no se encuentra, devuelve un arreglo de error generado por la clase `errores`.
+     *
+     * @param Worksheet $hoja Hoja de cálculo en la que se realizará la búsqueda.
+     *
+     * @return int|array
+     *   - `int`: Número de fila donde se encuentra el encabezado.
+     *   - `array`: Estructura de error con mensaje y datos de diagnóstico si no se encontró.
+     *
+     * @example
+     * ```php
+     * $spreadsheet = new Spreadsheet();
+     * $hoja = $spreadsheet->getActiveSheet();
+     * $hoja->setCellValue('A5', 'CLAVE EMPLEADO');
+     *
+     * $fila = $this->file_encabezado($hoja);
+     * // $fila === 5
+     * ```
+     */
+    private function file_encabezado(Worksheet $hoja): int|array
     {
-        $fila_encabezado = 1;
-        $n_fila = 1;
-        foreach ($hoja->getRowIterator() as $fila) {
-            $celda = $hoja->getCell('A' . $fila->getRowIndex());
-            $value = $celda->getValue();
-            if(is_null($value)){
-                $value = '';
-            }
-            $value = trim($value);
-            $value = strtoupper($value);
-            if($value === 'CLAVE EMPLEADO'){
-                $fila_encabezado = $n_fila;
-                break;
-            }
-            $n_fila++;
-            if($n_fila >= 200){
-                return (new errores())->error(mensaje: 'Error revise layout', data: $n_fila);
+        // Constantes de función para mayor claridad
+        $HEADER_TEXT   = 'CLAVE EMPLEADO';
+        $SCAN_COLUMN   = 'A';
+        $MAX_SCAN_ROWS = 200;
+
+        // Determinar el límite superior real (no más de MAX_SCAN_ROWS)
+        $highestRow = min($hoja->getHighestRow(), $MAX_SCAN_ROWS);
+
+        for ($row = 1; $row <= $highestRow; $row++) {
+            // Leer y normalizar valor de celda
+            $value = strtoupper(trim((string)($hoja->getCell($SCAN_COLUMN . $row)->getValue() ?? '')));
+
+            if ($value === $HEADER_TEXT) {
+                return $row; // Retorno inmediato: fila encontrada
             }
         }
-        return $fila_encabezado;
 
+        // Error si no se encontró el encabezado
+        return (new errores())->error(
+            mensaje: 'Error revise layout: encabezado no encontrado',
+            data: ['encabezado_esperado' => $HEADER_TEXT, 'filas_escaneadas' => $highestRow]
+        );
     }
 
     private function genera_columnas(array $valores_fila): array

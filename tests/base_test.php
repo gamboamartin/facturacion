@@ -54,214 +54,192 @@ class base_test{
 
     private PDO $link;
 
-    final public function delete_org_empresa(PDO $link)
+    final public function delete_org_empresa(PDO $link): true|array
     {
         $this->link = $link;
         $sql = "DELETE FROM fc_factura_documento";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
         }
 
         $sql = "DELETE FROM fc_cer_pem";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
         }
 
         $sql = "DELETE FROM fc_cer_csd";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
         }
 
         $sql = "DELETE FROM fc_key_pem";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
         }
 
         $sql = "DELETE FROM fc_key_csd";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
         }
 
         $sql = "DELETE FROM doc_version";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
         }
 
         $sql = "DELETE FROM com_cliente_documento";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
         }
 
         $sql = "DELETE FROM not_adjunto";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM fc_row_layout";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM fc_layout_nom";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM doc_documento";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM fc_csd_etapa";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM fc_cancelacion";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM fc_cfdi_sellado";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM fc_factura_etapa";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM fc_traslado";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
+        }
+
+        $sql = "DELETE FROM fc_retenido";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM fc_partida";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM fc_notificacion";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM fc_email";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM fc_factura";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM fc_csd";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM org_sucursal";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
 
         $sql = "DELETE FROM org_empresa";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
+
         }
         return true;
 
