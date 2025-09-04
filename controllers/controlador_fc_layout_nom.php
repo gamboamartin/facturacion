@@ -260,26 +260,26 @@ class controlador_fc_layout_nom extends system{
         $rs = (new _cnx_pac())->operacion_timbrarJSON2($jsonB64, $keyPEM, $cerPEM, $plantilla);
         $rs = json_decode($rs, false);
         $codigo = trim($rs->codigo);
-//        if($codigo !== '200'){
-//            $JSON = json_decode($nomina_json,false);
-//            $extra_data = '';
-//            if($codigo === 'CFDI40145'){
-//                $extra_data ="RFC: {$JSON->Comprobante->Receptor->Rfc}";
-//                $extra_data .=" Nombre: {$JSON->Comprobante->Receptor->Nombre}";
-//            }
-//
-//            if($codigo === '307'){
-//                print_r($rs);exit;
-//            }
-//            else {
-//                $sql = "UPDATE fc_row_layout SET fc_row_layout.error = 'Codigo: $codigo Mensaje: $rs->mensaje' WHERE fc_row_layout.id = $_GET[fc_row_layout_id]";
-//                modelo::ejecuta_transaccion($sql, $this->link);
-//                $error = (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $rs);
-//                print_r($error);
-//                echo $nomina_json . "<br>";
-//                exit;
-//            }
-//        }
+        if($codigo !== '200'){
+            $JSON = json_decode($nomina_json,false);
+            $extra_data = '';
+            if($codigo === 'CFDI40145'){
+                $extra_data ="RFC: {$JSON->Comprobante->Receptor->Rfc}";
+                $extra_data .=" Nombre: {$JSON->Comprobante->Receptor->Nombre}";
+            }
+
+            if($codigo === '307'){
+                print_r($rs);exit;
+            }
+            else {
+                $sql = "UPDATE fc_row_layout SET fc_row_layout.error = 'Codigo: $codigo Mensaje: $rs->mensaje' WHERE fc_row_layout.id = $_GET[fc_row_layout_id]";
+                modelo::ejecuta_transaccion($sql, $this->link);
+                $error = (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $rs);
+                print_r($error);
+                echo $nomina_json . "<br>";
+                exit;
+            }
+        }
 
         $datos = $rs->datos;
         $datos = json_decode($datos,false);
