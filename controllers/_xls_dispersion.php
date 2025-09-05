@@ -959,6 +959,34 @@ class _xls_dispersion{
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al obtener $title', data: $title);
         }
+
+
+
+// Quita caracteres de control (incluye CR/LF)
+        $title = preg_replace('/[\x00-\x1F\x7F]/u', '', $title);
+
+// Reemplaza separadores prohibidos
+        $title = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '_', $title);
+
+// Compacta espacios, quita puntos/espacios extremos
+        $title = preg_replace('/\s+/', ' ', trim($title));
+        $title = preg_replace('/^[\. ]+/', '', $title);
+        $title = preg_replace('/\.+$/', '', $title);
+
+// Garantiza extensión .xlsx
+        if (!preg_match('/\.xlsx$/i', $title)) {
+            $title .= '.xlsx';
+        }
+
+// 2) Limpia cualquier salida previa (evita "headers already sent" y mezcla de bytes/header)
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+// 3) Construye headers sin saltos de línea
+        $encoded = rawurlencode($title);
+
+
         ob_clean();
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="'.$title.'"');
