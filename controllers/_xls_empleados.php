@@ -71,6 +71,37 @@ class _xls_empleados{
                     $row_empleado['EMAIL'] = '';
                 }
 
+
+                if(!isset($row_empleado['NETO A DEPOSITAR'])){
+                    $row_empleado['NETO A DEPOSITAR'] = '';
+                }
+
+                if(!isset($row_empleado['NETOADEPOSITAR'])){
+                    $row_empleado['NETOADEPOSITAR'] = '';
+                }
+
+                if($row_empleado['NETO A DEPOSITAR'] === ''){
+                    if($row_empleado['NETOADEPOSITAR'] !== ''){
+                        $row_empleado['NETO A DEPOSITAR'] = $row_empleado['NETOADEPOSITAR'];
+                    }
+                }
+
+                if(!isset($row_empleado['CLAVE EMPLEADO'])){
+                    $row_empleado['CLAVE EMPLEADO'] = '';
+                }
+
+                if(!isset($row_empleado['CLAVEEMPLEADO'])){
+                    $row_empleado['CLAVEEMPLEADO'] = '';
+                }
+
+                if($row_empleado['CLAVE EMPLEADO'] === ''){
+                    if($row_empleado['CLAVEEMPLEADO'] !== ''){
+                        $row_empleado['CLAVE EMPLEADO'] = $row_empleado['CLAVEEMPLEADO'];
+                    }
+                }
+
+                
+
                 $row_low_new['fc_empleado_id'] = $row_empleado['fc_empleado_id'];
                 $row_low_new['fc_layout_nom_id'] = $fc_layout_nom_id;
                 $row_low_new['esta_timbrado'] = 'inactivo';
@@ -109,7 +140,34 @@ class _xls_empleados{
 
     private function fc_empleado_new(array $row_empleado): array
     {
+
         $fc_empleado_new = array();
+
+        if(!isset($row_empleado['NOMBRE COMPLETO'])){
+            $row_empleado['NOMBRE COMPLETO'] = '';
+        }
+        if(!isset($row_empleado['NOMBRECOMPLETO'])){
+            $row_empleado['NOMBRECOMPLETO'] = '';
+        }
+        if(!isset($row_empleado['CLABE INTERBANCARIA'])){
+            $row_empleado['CLABE INTERBANCARIA'] = '';
+        }
+        if(!isset($row_empleado['CLABEINTERBANCARIA'])){
+            $row_empleado['CLABEINTERBANCARIA'] = '';
+        }
+
+        if($row_empleado['NOMBRE COMPLETO'] === ''){
+            if($row_empleado['NOMBRECOMPLETO'] !== ''){
+                $row_empleado['NOMBRE COMPLETO'] = $row_empleado['NOMBRECOMPLETO'];
+            }
+        }
+
+        if($row_empleado['CLABE INTERBANCARIA'] === ''){
+            if($row_empleado['CLABEINTERBANCARIA'] !== ''){
+                $row_empleado['CLABE INTERBANCARIA'] = $row_empleado['CLABEINTERBANCARIA'];
+            }
+        }
+
 
         $fc_empleado_new['nombre_completo'] = $row_empleado['NOMBRE COMPLETO'];
         $fc_empleado_new['rfc'] = $row_empleado['RFC'];

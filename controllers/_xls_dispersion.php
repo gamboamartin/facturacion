@@ -236,38 +236,30 @@ class _xls_dispersion{
         return $fila_inicial > 0;
     }
 
-    /**
-     * REG
-     * Verifica si un layout de dispersión contiene el encabezado esperado en la primera columna.
-     *
-     * Este método recorre hasta un máximo de 200 filas (o el total de filas en la hoja,
-     * lo que sea menor) buscando en la columna A el valor exacto "CLAVE EMPLEADO".
-     *
-     * - Si encuentra el encabezado, retorna `true`.
-     * - Si no lo encuentra en el rango definido, retorna un arreglo de error generado
-     *   por la clase `errores`, que incluye información sobre el encabezado esperado y
-     *   el número de filas escaneadas.
-     *
-     * @param Worksheet $hoja Hoja de cálculo activa a validar.
-     *
-     * @return bool|array
-     *  - `true` si el encabezado "CLAVE EMPLEADO" está presente en la columna A.
-     *  - `array` con detalles de error si no se encuentra el encabezado.
-     *
-     * @example
-     * ```php
-     * $spreadsheet = new Spreadsheet();
-     * $hoja = $spreadsheet->getActiveSheet();
-     * $hoja->setCellValue('A1', 'CLAVE EMPLEADO');
-     *
-     * $resultado = $this->es_valido($hoja);
-     * // $resultado === true
-     * ```
-     */
+
     private function es_valido(Worksheet $hoja): bool|array
     {
         // Constantes de función (evitan "números mágicos" y facilitan mantenimiento)
         $HEADER_TEXT  = 'CLAVE EMPLEADO';
+        $SCAN_COLUMN  = 'A';
+        $MAX_SCAN_ROWS = 200;
+
+        // Determinar el límite superior real a escanear (no exceder MAX_SCAN_ROWS)
+        $highestRow = min($hoja->getHighestRow(), $MAX_SCAN_ROWS);
+
+        for ($row = 1; $row <= $highestRow; $row++) {
+            // Leer y normalizar valor de la celda
+            $value = $hoja->getCell($SCAN_COLUMN . $row)->getValue();
+            $value = strtoupper(trim((string)($value ?? '')));
+
+            // Éxito temprano si encontramos el encabezado
+            if ($value === $HEADER_TEXT) {
+                return true;
+            }
+        }
+
+
+        $HEADER_TEXT  = 'CLAVEEMPLEADO';
         $SCAN_COLUMN  = 'A';
         $MAX_SCAN_ROWS = 200;
 
@@ -371,36 +363,27 @@ class _xls_dispersion{
         return $fila_encabezado + 1;
     }
 
-    /**
-     * REG
-     * Busca la fila donde se encuentra el encabezado esperado en la hoja de cálculo.
-     *
-     * Este método recorre la columna A de la hoja hasta un máximo de 200 filas (o el total
-     * de filas de la hoja, lo que ocurra primero) y busca la cadena exacta "CLAVE EMPLEADO".
-     *
-     * - Si se encuentra el encabezado, devuelve el número de fila (int).
-     * - Si no se encuentra, devuelve un arreglo de error generado por la clase `errores`.
-     *
-     * @param Worksheet $hoja Hoja de cálculo en la que se realizará la búsqueda.
-     *
-     * @return int|array
-     *   - `int`: Número de fila donde se encuentra el encabezado.
-     *   - `array`: Estructura de error con mensaje y datos de diagnóstico si no se encontró.
-     *
-     * @example
-     * ```php
-     * $spreadsheet = new Spreadsheet();
-     * $hoja = $spreadsheet->getActiveSheet();
-     * $hoja->setCellValue('A5', 'CLAVE EMPLEADO');
-     *
-     * $fila = $this->file_encabezado($hoja);
-     * // $fila === 5
-     * ```
-     */
+
     private function file_encabezado(Worksheet $hoja): int|array
     {
         // Constantes de función para mayor claridad
         $HEADER_TEXT   = 'CLAVE EMPLEADO';
+        $SCAN_COLUMN   = 'A';
+        $MAX_SCAN_ROWS = 200;
+
+        // Determinar el límite superior real (no más de MAX_SCAN_ROWS)
+        $highestRow = min($hoja->getHighestRow(), $MAX_SCAN_ROWS);
+
+        for ($row = 1; $row <= $highestRow; $row++) {
+            // Leer y normalizar valor de celda
+            $value = strtoupper(trim((string)($hoja->getCell($SCAN_COLUMN . $row)->getValue() ?? '')));
+
+            if ($value === $HEADER_TEXT) {
+                return $row; // Retorno inmediato: fila encontrada
+            }
+        }
+
+        $HEADER_TEXT   = 'CLAVEEMPLEADO';
         $SCAN_COLUMN   = 'A';
         $MAX_SCAN_ROWS = 200;
 
