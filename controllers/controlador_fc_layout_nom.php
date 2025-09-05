@@ -328,6 +328,12 @@ class controlador_fc_layout_nom extends system{
             print_r($error);
         }
 
+//        $result = $this->upd_total_dispersion_fc_layout_nom(fc_layout_nom_id: $datos_rec->fc_layout_nom->fc_layout_nom_id);
+//        if(errores::$error) {
+//            $error = (new errores())->error("Error en upd_total_dispersion_fc_layout_nom", $result);
+//            print_r($error);
+//        }
+
         header("Location: " . $_SERVER['HTTP_REFERER']);
         return $datos_rec->fc_row_layout;
 
@@ -509,6 +515,24 @@ class controlador_fc_layout_nom extends system{
         }
         return [];
     }
+
+    private function upd_total_dispersion_fc_layout_nom(int $fc_layout_nom_id): array
+    {
+        $sql = "UPDATE fc_layout_nom
+                SET total_dispersion = (
+                    SELECT IFNULL(SUM(neto_depositar), 0)
+                    FROM fc_row_layout
+                    WHERE fc_layout_nom_id = fc_layout_nom.id
+                )
+                WHERE id = $fc_layout_nom_id ";
+        $rs = modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error) {
+            return (new errores())->error("Error al actualizar upd_total_dispersion_fc_layout_nom", $rs);
+        }
+        return [];
+    }
+
+
 
 
 }
