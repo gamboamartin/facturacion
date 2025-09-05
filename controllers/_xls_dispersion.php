@@ -751,6 +751,7 @@ class _xls_dispersion{
 
     private function normaliza_value(mixed $value): array|string
     {
+
         if(is_null($value)){
             $value = '';
         }
@@ -759,7 +760,7 @@ class _xls_dispersion{
         $value = preg_replace('/\s+/', ' ', trim($value));
         $value = rtrim($value, ".");
         $value = preg_replace('/^[\. ]+/', '', $value);
-        ob_clean();
+
         $value = trim(str_replace("'", '', $value));
         $value = $this->init_value(value: $value);
         if(errores::$error){
@@ -958,7 +959,7 @@ class _xls_dispersion{
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al obtener $title', data: $title);
         }
-
+        ob_clean();
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="'.$title.'"');
         header('Cache-Control: max-age=0');
