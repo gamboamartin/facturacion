@@ -321,6 +321,13 @@ class controlador_fc_layout_nom extends system{
             $error = (new errores())->error("Error al actualizar UUID", $rs);
             print_r($error);
         }
+
+        $result = $this->upd_estado_timbrado_fc_layout_nom(fc_layout_nom_id: $datos_rec->fc_layout_nom->fc_layout_nom_id);
+        if(errores::$error) {
+            $error = (new errores())->error("Error en upd_estado_timbrado_fc_layout_nom", $result);
+            print_r($error);
+        }
+
         header("Location: " . $_SERVER['HTTP_REFERER']);
         return $datos_rec->fc_row_layout;
 
@@ -477,6 +484,30 @@ class controlador_fc_layout_nom extends system{
         }
         return true;
 
+    }
+
+    private function upd_estado_timbrado_fc_layout_nom(int $fc_layout_nom_id): array
+    {
+        $sql = "UPDATE fc_layout_nom
+                SET estado_timbrado = (
+                    SELECT 
+                      CASE 
+                        WHEN SUM(esta_timbrado = 'activo') = 0 THEN 'SIN TIMBRAR'
+                        WHEN SUM(esta_timbrado = 'activo') = COUNT(*) THEN 'TIMBRADO'
+                        WHEN SUM(esta_timbrado = 'activo') > 0 
+                             AND SUM(esta_timbrado = 'activo') < COUNT(*) 
+                             AND SUM(error <> '') > 0 THEN 'TIMBRADO CON ERROR'
+                        ELSE 'TIMBRADO PARCIAL'
+                      END AS estado_timbrado
+                    FROM fc_row_layout
+                    WHERE fc_layout_nom_id = $fc_layout_nom_id
+                )
+                WHERE id = $fc_layout_nom_id";
+        $rs = modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error) {
+            return (new errores())->error("Error al actualizar estado_timbrado_fc_layout_nom", $rs);
+        }
+        return [];
     }
 
 
