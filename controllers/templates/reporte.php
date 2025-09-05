@@ -246,19 +246,19 @@
                         <table style="width: 100%;">
                             <tr>
                                 <td style="padding: 3px 5px 3px 0; font-weight: bold; width: 90px;">Fecha de Pago:</td>
-                                <td style="padding: 3px 5px 3px 0;"><?= $datos['receptor']['nombre'] ?></td>
+                                <td style="padding: 3px 5px 3px 0;"><?= $datos['informacion_pago']['fecha_pago'] ?></td>
                                 <td style="padding: 3px 5px 3px 0; font-weight: bold; width: 90px;">Tipo de cambio:</td>
-                                <td style="padding: 3px 5px 3px 0;"><?= $datos['receptor']['nombre'] ?></td>
+                                <td style="padding: 3px 5px 3px 0;"><?= $datos['informacion_pago']['tipo_cambio'] ?></td>
                             </tr>
                             <tr>
                                 <td style="padding: 3px 5px 3px 0; font-weight: bold; width: 90px;">Forma de Pago:</td>
-                                <td style="padding: 3px 5px 3px 0;"><?= $datos['receptor']['nombre'] ?></td>
+                                <td style="padding: 3px 5px 3px 0;"><?= $datos['informacion_pago']['forma_pago'] ?></td>
                                 <td style="padding: 3px 5px 3px 0; font-weight: bold; width: 90px;">Monto:</td>
-                                <td style="padding: 3px 5px 3px 0;"><?= $datos['receptor']['nombre'] ?></td>
+                                <td style="padding: 3px 5px 3px 0;"><?= $datos['informacion_pago']['monto'] ?></td>
                             </tr>
                             <tr>
-                                <td style="padding: 3px 5px 3px 0; font-weight: bold; width: 90px;">Monto:</td>
-                                <td style="padding: 3px 5px 3px 0;"><?= $datos['receptor']['uso_cfdi'] ?></td>
+                                <td style="padding: 3px 5px 3px 0; font-weight: bold; width: 90px;">Moneda:</td>
+                                <td style="padding: 3px 5px 3px 0;"><?= $datos['informacion_pago']['moneda'] ?></td>
                             </tr>
                         </table>
                     </div>

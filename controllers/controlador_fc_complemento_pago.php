@@ -524,6 +524,21 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             return $this->errores->error(mensaje: 'Error al obtener datos para el reporte', data: $reporte);
         }
 
+        $fc_pago_modelo = new fc_pago(link: $this->link);
+        $fc_pago_total_modelo = new fc_pago_total(link: $this->link);
+        $fc_pago_pago_modelo = new fc_pago_pago(link: $this->link);
+        $fc_docto_relacionado_modelo = new fc_docto_relacionado(link: $this->link);
+        $fc_factura_modelo = new fc_factura(link: $this->link);
+
+        $fc_pagos = $this->fc_pagos(fc_docto_relacionado_modelo: $fc_docto_relacionado_modelo,
+            fc_factura_modelo: $fc_factura_modelo, fc_pago_modelo: $fc_pago_modelo,
+            fc_pago_pago_modelo: $fc_pago_pago_modelo, fc_pago_total_modelo: $fc_pago_total_modelo);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener pagos', data: $reporte);
+        }
+
+        $pagos = count($fc_pagos) > 0 ? $fc_pagos[0]['fc_pago_pagos'][0] : array();
+
         $filtro_cfdi[$this->modelo->key_id] = $reporte[$this->modelo->key_id];
         $cfdi_sellado = (new fc_cfdi_sellado_cp(link: $this->link))->filtro_and(filtro: $filtro_cfdi);
         if (errores::$error) {
@@ -583,6 +598,12 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         if (isset($data->no_certificado_sat)) {
             $no_certificado_sat = $data->no_certificado_sat;
         }
+
+        $fecha_pago = !empty($pagos) ? $pagos['fc_pago_pago_fecha_pago'] : "";
+        $tipo_cambio = !empty($pagos) ? $pagos['com_tipo_cambio_monto'] : "";
+        $forma_pago_info = !empty($pagos) ? mb_convert_encoding($pagos['cat_sat_forma_pago_codigo'] . ' ' . $pagos['cat_sat_forma_pago_descripcion'], 'ISO-8859-1', 'UTF-8') : "";
+        $monto_pago = !empty($pagos) ? $pagos['fc_pago_pago_monto'] : "";
+        $moneda_pago = !empty($pagos) ? $pagos['cat_sat_moneda_codigo'] : "";
 
         $forma_pago = mb_convert_encoding($reporte['cat_sat_forma_pago_codigo'] . ' ' . $reporte['cat_sat_forma_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
         $metodo_pago = mb_convert_encoding($reporte['cat_sat_metodo_pago_codigo'] . ' ' . $reporte['cat_sat_metodo_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
@@ -679,6 +700,13 @@ class controlador_fc_complemento_pago extends _base_system_fc {
                 'exportacion' => 'No aplica',
             ],
             'productos' => $productos,
+            'informacion_pago' => [
+                'fecha_pago' => $fecha_pago,
+                'tipo_cambio' => $tipo_cambio,
+                'forma_pago' => $forma_pago_info,
+                'monto' => $monto_pago,
+                'moneda' => $moneda_pago,
+            ],
             'pagos' => [
                 'forma_pago' => $forma_pago,
                 'metodo_pago' => $metodo_pago,
