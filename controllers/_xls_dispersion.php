@@ -58,6 +58,17 @@ class _xls_dispersion{
 
     }
 
+    private function buscar_primera_coincidencia(Worksheet $hoja, string $col, int $maxFilas, array $candidatos): int {
+        $highest = min($hoja->getHighestRow(), $maxFilas);
+        for ($row = 1; $row <= $highest; $row++) {
+            $val = $this->valor_celda_normalizado($hoja, $col, $row);
+            if ($val !== '' && in_array($val, $candidatos, true)) {
+                return $row;
+            }
+        }
+        return 0;
+    }
+
     private function carga_row_layout(Worksheet $hoja, array $layout_dispersion, int $recorrido): array
     {
         $valores_fila = $this->init_valores_fila(hoja: $hoja,recorrido:  $recorrido);
@@ -75,6 +86,62 @@ class _xls_dispersion{
 
     }
 
+    /**
+     * REG
+     * Verifica si una celda de Excel contiene un valor significativo.
+     *
+     * Flujo de validación:
+     *  1. Se valida que los parámetros ($hoja, $col, $row) sean correctos:
+     *     - `$hoja` debe ser instancia de {@see Worksheet}.
+     *     - `$col` debe cumplir el formato de columna válido (ej. "A", "B", "AA").
+     *     - `$row` debe ser un entero positivo (>=1).
+     *     En caso contrario, retorna un arreglo de error generado por {@see errores}.
+     *
+     *  2. Se intenta leer el valor de la celda con {@see leer_valor_celda()}.
+     *     - Si ocurre una excepción al leer, se captura y retorna `false`
+     *       después de registrar el error.
+     *
+     *  3. Si la lectura es exitosa:
+     *     - Se evalúa con {@see tiene_contenido_no_vacio()} para determinar
+     *       si el contenido es significativo (no nulo, no vacío, no solo espacios).
+     *
+     * Reglas de retorno:
+     *  - `true`  → la celda contiene un valor significativo (ej. "ABC", 0, 123).
+     *  - `false` → la celda está vacía, contiene solo espacios o se atrapó un error de lectura.
+     *  - `array` → error de validación de parámetros (hoja, columna o fila inválida).
+     *
+     * @param Worksheet $hoja  Hoja de cálculo en la que se encuentra la celda.
+     * @param string    $col   Columna en notación Excel (ejemplo: "A", "B", "AA").
+     * @param int       $row   Número de fila (>=1).
+     *
+     * @return bool|array
+     *   - `true` si la celda tiene contenido no vacío.
+     *   - `false` si la celda está vacía o no tiene contenido significativo.
+     *   - `array` con detalles del error si los parámetros son inválidos.
+     *
+     * @example Celda con texto
+     * ```php
+     * $hoja->setCellValue('A1', 'Hola');
+     * $this->celda_tiene_valor($hoja, 'A', 1); // true
+     * ```
+     *
+     * @example Celda con número 0
+     * ```php
+     * $hoja->setCellValue('B2', 0);
+     * $this->celda_tiene_valor($hoja, 'B', 2); // true
+     * ```
+     *
+     * @example Celda vacía
+     * ```php
+     * $this->celda_tiene_valor($hoja, 'C', 3); // false
+     * ```
+     *
+     * @example Columna inválida
+     * ```php
+     * $this->celda_tiene_valor($hoja, '1A', 1);
+     * // retorna array con error
+     * ```
+     */
     private function celda_tiene_valor(Worksheet $hoja, string $col, int $row): bool|array
     {
         if (!$this->es_hoja_valida($hoja)) {
@@ -92,11 +159,10 @@ class _xls_dispersion{
 
         $valor = $this->leer_valor_celda($hoja, $col, $row);
         if ($valor instanceof Throwable) {
-            (new errores())->error(
+            return (new errores())->error(
                 mensaje: 'Error al leer valor de celda',
                 data: ['col' => $col, 'row' => $row, 'exception' => $valor->getMessage()]
             );
-            return false;
         }
 
         return $this->tiene_contenido_no_vacio($valor);
@@ -187,14 +253,76 @@ class _xls_dispersion{
 
     }
 
+    /**
+     * REG
+     * Verifica si una referencia de columna de Excel es válida.
+     *
+     * Una columna se considera válida cuando:
+     *  - Contiene únicamente letras del alfabeto inglés (A–Z).
+     *  - Puede tener una o más letras en mayúsculas (ejemplo: "A", "Z", "AA", "BC", "ZZ").
+     *  - No contiene números, acentos, espacios ni caracteres especiales.
+     *  - No acepta letras en minúsculas.
+     *
+     * Internamente utiliza una expresión regular `/^[A-Z]+$/` para validar el formato.
+     *
+     * @param string $col
+     *   Cadena que representa la columna a validar.
+     *
+     * @return bool
+     *   - `true` si la columna es válida.
+     *   - `false` si contiene caracteres no permitidos o está vacía.
+     *
+     * @example Uso válido
+     * ```php
+     * $this->es_columna_valida("A");   // true
+     * $this->es_columna_valida("AA");  // true
+     * $this->es_columna_valida("ZZ");  // true
+     * ```
+     *
+     * @example Uso inválido
+     * ```php
+     * $this->es_columna_valida("a");   // false (minúscula)
+     * $this->es_columna_valida("A1");  // false (contiene número)
+     * $this->es_columna_valida("Á");   // false (acento)
+     * $this->es_columna_valida("");    // false (vacío)
+     * ```
+     */
     private function es_columna_valida(string $col): bool
     {
         return preg_match('/^[A-Z]+$/', $col) === 1;
     }
 
+    /**
+     * REG
+     * Verifica si un número de fila de Excel es válido.
+     *
+     * Una fila es considerada válida cuando:
+     *  - Es un número entero mayor que cero.
+     *  - Representa un índice de fila existente en una hoja de Excel
+     *    (las filas empiezan en 1, no en 0).
+     *
+     * @param int $row
+     *   Número de fila a validar.
+     *
+     * @return bool
+     *   - `true` si $row es mayor que 0.
+     *   - `false` si $row es 0 o un número negativo.
+     *
+     * @example Uso válido
+     * ```php
+     * $this->es_fila_valida(1);   // true
+     * $this->es_fila_valida(10);  // true
+     * ```
+     *
+     * @example Uso inválido
+     * ```php
+     * $this->es_fila_valida(0);    // false
+     * $this->es_fila_valida(-5);   // false
+     * ```
+     */
     private function es_fila_valida(int $row): bool
     {
-        return is_int($row) && $row > 0;
+        return $row > 0;
     }
 
     /**
@@ -239,49 +367,30 @@ class _xls_dispersion{
 
     private function es_valido(Worksheet $hoja): bool|array
     {
-        // Constantes de función (evitan "números mágicos" y facilitan mantenimiento)
-        $HEADER_TEXT  = 'CLAVE EMPLEADO';
-        $SCAN_COLUMN  = 'A';
-        $MAX_SCAN_ROWS = 200;
-
-        // Determinar el límite superior real a escanear (no exceder MAX_SCAN_ROWS)
-        $highestRow = min($hoja->getHighestRow(), $MAX_SCAN_ROWS);
-
-        for ($row = 1; $row <= $highestRow; $row++) {
-            // Leer y normalizar valor de la celda
-            $value = $hoja->getCell($SCAN_COLUMN . $row)->getValue();
-            $value = strtoupper(trim((string)($value ?? '')));
-
-            // Éxito temprano si encontramos el encabezado
-            if ($value === $HEADER_TEXT) {
-                return true;
-            }
+        if (!$this->es_hoja_valida($hoja)) {
+            return (new errores())->error(
+                mensaje: 'Parámetro $hoja inválido: se esperaba Worksheet',
+                data: ['hoja' => get_debug_type($hoja)]
+            );
         }
 
-
-        $HEADER_TEXT  = 'CLAVEEMPLEADO';
-        $SCAN_COLUMN  = 'A';
-        $MAX_SCAN_ROWS = 200;
-
-        // Determinar el límite superior real a escanear (no exceder MAX_SCAN_ROWS)
-        $highestRow = min($hoja->getHighestRow(), $MAX_SCAN_ROWS);
-
-        for ($row = 1; $row <= $highestRow; $row++) {
-            // Leer y normalizar valor de la celda
-            $value = $hoja->getCell($SCAN_COLUMN . $row)->getValue();
-            $value = strtoupper(trim((string)($value ?? '')));
-
-            // Éxito temprano si encontramos el encabezado
-            if ($value === $HEADER_TEXT) {
-                return true;
-            }
+        $fila_encabezado = $this->file_encabezado($hoja);
+        if (errores::$error) {
+            // Propaga el error enriqueciendo el contexto
+            return (new errores())->error(
+                mensaje: 'Encabezado no encontrado en la hoja (validación de layout)',
+                data: $fila_encabezado
+            );
         }
 
-        // Si llegamos aquí, no se encontró el encabezado dentro del límite de filas
-        return (new errores())->error(
-            mensaje: 'Error revise layout: no se encontró el encabezado esperado',
-            data: ['encabezado_esperado' => $HEADER_TEXT, 'filas_escaneadas' => $highestRow]
-        );
+        if (!is_int($fila_encabezado) || $fila_encabezado < 1) {
+            return (new errores())->error(
+                mensaje: 'Fila de encabezado inválida',
+                data: ['fila_encabezado' => $fila_encabezado]
+            );
+        }
+
+        return true;
     }
 
     private function estilos_wr(Worksheet $hoja): Worksheet
@@ -366,43 +475,39 @@ class _xls_dispersion{
 
     private function file_encabezado(Worksheet $hoja): int|array
     {
-        // Constantes de función para mayor claridad
-        $HEADER_TEXT   = 'CLAVE EMPLEADO';
-        $SCAN_COLUMN   = 'A';
-        $MAX_SCAN_ROWS = 200;
-
-        // Determinar el límite superior real (no más de MAX_SCAN_ROWS)
-        $highestRow = min($hoja->getHighestRow(), $MAX_SCAN_ROWS);
-
-        for ($row = 1; $row <= $highestRow; $row++) {
-            // Leer y normalizar valor de celda
-            $value = strtoupper(trim((string)($hoja->getCell($SCAN_COLUMN . $row)->getValue() ?? '')));
-
-            if ($value === $HEADER_TEXT) {
-                return $row; // Retorno inmediato: fila encontrada
-            }
+        // Validaciones defensivas
+        if (!$this->es_hoja_valida($hoja)) {
+            return (new errores())->error(
+                mensaje: 'Parámetro $hoja inválido: se esperaba Worksheet',
+                data: ['hoja' => get_debug_type($hoja)]
+            );
         }
 
-        $HEADER_TEXT   = 'CLAVEEMPLEADO';
-        $SCAN_COLUMN   = 'A';
-        $MAX_SCAN_ROWS = 200;
+        // Config centralizada (evita números mágicos)
+        $columna           = 'A';
+        $maxFilas          = 200;
+        $headersPermitidos = ['CLAVE EMPLEADO', 'CLAVEEMPLEADO'];
 
-        // Determinar el límite superior real (no más de MAX_SCAN_ROWS)
-        $highestRow = min($hoja->getHighestRow(), $MAX_SCAN_ROWS);
-
-        for ($row = 1; $row <= $highestRow; $row++) {
-            // Leer y normalizar valor de celda
-            $value = strtoupper(trim((string)($hoja->getCell($SCAN_COLUMN . $row)->getValue() ?? '')));
-
-            if ($value === $HEADER_TEXT) {
-                return $row; // Retorno inmediato: fila encontrada
-            }
+        if (!$this->es_columna_valida($columna)) {
+            return (new errores())->error(
+                mensaje: 'Columna inválida: use notación Excel en mayúsculas (A..Z, AA..)',
+                data: ['columna' => $columna]
+            );
         }
 
-        // Error si no se encontró el encabezado
+        $fila = $this->buscar_primera_coincidencia($hoja, $columna, $maxFilas, $headersPermitidos);
+        if ($fila > 0) {
+            return $fila;
+        }
+
+        // Error consistente y contextualizado
         return (new errores())->error(
-            mensaje: 'Error revise layout: encabezado no encontrado',
-            data: ['encabezado_esperado' => $HEADER_TEXT, 'filas_escaneadas' => $highestRow]
+            mensaje: 'Encabezado no encontrado en la columna indicada',
+            data: [
+                'encabezados_esperados' => $headersPermitidos,
+                'columna_escaneada'     => $columna,
+                'filas_escaneadas'      => min($hoja->getHighestRow(), $maxFilas)
+            ]
         );
     }
 
@@ -553,6 +658,54 @@ class _xls_dispersion{
 
     }
 
+    /**
+     * REG
+     * Lee de forma segura el valor de una celda en una hoja de Excel.
+     *
+     * Este método construye la referencia de celda concatenando la columna
+     * (por ejemplo `"A"`) con el número de fila (por ejemplo `1` → `"A1"`)
+     * y obtiene su valor mediante PhpSpreadsheet.
+     *
+     * Comportamiento:
+     *  - Si la celda existe, retorna su valor tal cual lo interpreta PhpSpreadsheet.
+     *    Puede ser `string`, `int`, `float`, `null`, etc.
+     *  - Si ocurre una excepción (por ejemplo, índice de fila/columna fuera de rango),
+     *    se captura y se retorna el objeto `Throwable` correspondiente en lugar
+     *    de interrumpir la ejecución.
+     *
+     * @param Worksheet $hoja
+     *   Instancia de hoja de cálculo donde se leerá el valor.
+     * @param string $col
+     *   Columna en notación Excel (ejemplo: `"A"`, `"B"`, `"AA"`).
+     * @param int $row
+     *   Número de fila (≥ 1).
+     *
+     * @return mixed
+     *   - Valor de la celda (string, int, float, null, etc.).
+     *   - Objeto `Throwable` si ocurre una excepción durante la lectura.
+     *
+     * @example Uso exitoso
+     * ```php
+     * $spreadsheet = new Spreadsheet();
+     * $hoja = $spreadsheet->getActiveSheet();
+     * $hoja->setCellValue('A1', 'Hola');
+     *
+     * $valor = $this->leer_valor_celda($hoja, 'A', 1);
+     * // $valor === "Hola"
+     * ```
+     *
+     * @example Celda vacía
+     * ```php
+     * $valor = $this->leer_valor_celda($hoja, 'B', 2);
+     * // $valor === null
+     * ```
+     *
+     * @example Error controlado
+     * ```php
+     * $valor = $this->leer_valor_celda($hoja, 'ZZZ', 9999);
+     * // $valor es instancia de Throwable (error atrapado)
+     * ```
+     */
     private function leer_valor_celda(Worksheet $hoja, string $col, int $row): mixed
     {
         try {
@@ -560,6 +713,40 @@ class _xls_dispersion{
         } catch (Throwable $e) {
             return $e;
         }
+    }
+
+    /**
+     * REG
+     * Normaliza un valor arbitrario a texto en mayúsculas.
+     *
+     * Reglas de normalización:
+     *  - Si el valor es `null`, se convierte en cadena vacía `""`.
+     *  - Se fuerza conversión a `string` usando `(string)`.
+     *  - Se eliminan espacios en blanco al inicio y al final con `trim()`.
+     *  - El resultado se convierte a mayúsculas con `strtoupper()`.
+     *
+     * Casos especiales:
+     *  - `true`  → `(string)true = "1"` → retorna `"1"`.
+     *  - `false` → `(string)false = ""` → retorna `""`.
+     *  - `0` (int) → `(string)0 = "0"` → retorna `"0"`.
+     *  - Números decimales → se convierten a string y se ponen en mayúsculas (sin cambios relevantes).
+     *
+     * @param mixed $val
+     *   Valor a normalizar. Puede ser de cualquier tipo (string, int, float, bool, null, etc.).
+     *
+     * @return string
+     *   Representación del valor en texto, siempre en mayúsculas y sin espacios sobrantes.
+     *
+     * @example
+     * ```php
+     * $this->normaliza_texto(" hola "); // "HOLA"
+     * $this->normaliza_texto(null);     // ""
+     * $this->normaliza_texto(true);     // "1"
+     * $this->normaliza_texto(123.45);   // "123.45"
+     * ```
+     */
+    private function normaliza_texto(mixed $val): string {
+        return strtoupper(trim((string)($val ?? '')));
     }
 
     private function normaliza_value(mixed $value): array|string
@@ -708,6 +895,18 @@ class _xls_dispersion{
         }
 
         return $lastRow;
+    }
+
+    private function valor_celda_normalizado(Worksheet $hoja, string $col, int $fila): string {
+        if (!$this->es_hoja_valida($hoja) || !$this->es_columna_valida($col) || !$this->es_fila_valida($fila)) {
+            return '';
+        }
+        try {
+            $raw = $hoja->getCell($col.$fila)->getValue();
+            return $this->normaliza_texto($raw);
+        } catch (\Throwable) {
+            return '';
+        }
     }
 
     private function write_data(Worksheet $hoja, array $layout_dispersion): Worksheet|array

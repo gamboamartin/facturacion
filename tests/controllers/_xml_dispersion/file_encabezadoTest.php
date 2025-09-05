@@ -1,5 +1,6 @@
 <?php
 namespace gamboamartin\facturacion\tests\controllers\_xml_dispersion;
+use gamboamartin\errores\errores;
 use PHPUnit\Framework\TestCase;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use gamboamartin\facturacion\controllers\_xls_dispersion;
@@ -11,11 +12,14 @@ final class file_encabezadoTest extends TestCase
 
     protected function setUp(): void
     {
+        errores::$error = false;
         $this->xlsDispersion = new _xls_dispersion();
+        errores::$error = false;
     }
 
     public function testFileEncabezadoEncabezadoEnPrimeraFila(): void
     {
+        errores::$error = false;
         // Arrange
         $spreadsheet = new Spreadsheet();
         $hoja = $spreadsheet->getActiveSheet();
@@ -31,6 +35,7 @@ final class file_encabezadoTest extends TestCase
 
     public function testFileEncabezadoEncabezadoEnFilaIntermedia(): void
     {
+        errores::$error = false;
         // Arrange
         $spreadsheet = new Spreadsheet();
         $hoja = $spreadsheet->getActiveSheet();
@@ -46,6 +51,7 @@ final class file_encabezadoTest extends TestCase
 
     public function testFileEncabezadoSinEncabezado(): void
     {
+        errores::$error = false;
         // Arrange
         $spreadsheet = new Spreadsheet();
         $hoja = $spreadsheet->getActiveSheet();
@@ -58,7 +64,7 @@ final class file_encabezadoTest extends TestCase
         // Assert
         $this->assertIsArray($resultado, 'Debe devolver un arreglo de error si no encuentra encabezado');
         $this->assertArrayHasKey('mensaje', $resultado);
-        $this->assertStringContainsString('Error revise layout', $resultado['mensaje']);
+        $this->assertStringContainsString('Encabezado no encontrado en la columna indicada', $resultado['mensaje']);
     }
 
     /**

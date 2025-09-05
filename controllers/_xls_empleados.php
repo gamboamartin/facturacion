@@ -71,7 +71,6 @@ class _xls_empleados{
                     $row_empleado['EMAIL'] = '';
                 }
 
-
                 if(!isset($row_empleado['NETO A DEPOSITAR'])){
                     $row_empleado['NETO A DEPOSITAR'] = '';
                 }
@@ -100,7 +99,6 @@ class _xls_empleados{
                     }
                 }
 
-                
 
                 $row_low_new['fc_empleado_id'] = $row_empleado['fc_empleado_id'];
                 $row_low_new['fc_layout_nom_id'] = $fc_layout_nom_id;

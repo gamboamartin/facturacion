@@ -51,9 +51,21 @@ class controlador_fc_factura_documentoTest extends test {
             print_r($error);
             exit;
         }
-        $ins_fc_factura_documento = (new base_test())->insert_fc_factura_documento($this->link);
 
-        
+        $delete = (new base_test())->delete_com_tipo_cambio($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $delete);
+            print_r($error);
+            exit;
+        }
+
+        $ins_fc_factura_documento = (new base_test())->insert_fc_factura_documento($this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $ins_fc_factura_documento);
+            print_r($error);
+            exit;
+        }
+
         $ctl = new controlador_fc_factura_documento(link: $this->link, paths_conf: $this->paths_conf);
         $ctl->registro_id = 1;
         //$ctl = new liberator($ctl);

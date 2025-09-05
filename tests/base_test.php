@@ -54,6 +54,22 @@ class base_test{
 
     private PDO $link;
 
+
+    final public function delete_com_tipo_cambio(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM com_tipo_cambio";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
     final public function delete_org_empresa(PDO $link): true|array
     {
         $this->link = $link;
@@ -253,6 +269,27 @@ class base_test{
 
     }
 
+    final public function insert_com_tipo_cambio(PDO $link)
+    {
+        $this->link = $link;
+        $x = file_put_contents('/var/www/html/facturacion/archivos/xxx.pdf', 'test');
+        $sql = "INSERT INTO com_tipo_cambio (id, descripcion, codigo, status, usuario_alta_id, usuario_update_id, 
+                             fecha_alta, fecha_update, descripcion_select, alias, codigo_bis,
+                             fecha, cat_sat_moneda_id, predeterminado, monto) 
+VALUES (1, 'MEX MXN 2025-09-05', 'MEX MXN 2025-09-05', 'activo', 2, 2, '2025-09-05 11:46:24', '2025-09-05 11:46:24', 
+        'MEX MXN 2025-09-05 MEX MXN 2025-09-05', 'MEX MXN 2025-09-05', 'MEX MXN 2025-09-05', '2025-09-05', 161,
+        'inactivo', 1.0000);";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+        return true;
+
+    }
+
     final public function insert_doc_documento(PDO $link)
     {
         $this->link = $link;
@@ -278,6 +315,9 @@ class base_test{
     {
         $this->link = $link;
         $ins_org_sucursal = (new base_test())->insert_org_sucursal($this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $ins_org_sucursal);
+        }
 
 
         $x = file_put_contents('/var/www/html/facturacion/archivos/xxx.pdf', 'test');
@@ -301,6 +341,14 @@ class base_test{
     {
         $this->link = $link;
         $ins_fc_csd = (new base_test())->insert_fc_csd($this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $ins_fc_csd);
+        }
+
+        $ins_com_tipo_cambio = (new base_test())->insert_com_tipo_cambio($this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $ins_com_tipo_cambio);
+        }
 
         $sql = "INSERT INTO fc_factura (id, codigo, status, usuario_alta_id, usuario_update_id, fecha_alta, 
                         fecha_update, descripcion_select, alias, codigo_bis, fc_csd_id, folio, serie, 
@@ -313,16 +361,14 @@ class base_test{
                 VALUES (1, 'A A-9999999', 'activo', 2, 2, '2025-08-21 17:48:37', '2025-08-21 20:21:02', 
                         'A-000001 RECURSOS Y RESULTADOS HARIMENI FIXMOBILE MEXICO', 
                         'A-000001 RECURSOS Y RESULTADOS HARIMENI FIXMOBILE MEXICO', 'A A-9999999', 1, 
-                        'A-9999999', 'A', 99, 2, 161, 350, 3, '', '2025-08-21 09:48:58', 1, 632, '01', 601, 125, 
+                        'A-9999999', 'A', 99, 2, 161, 1, 3, '', '2025-08-21 09:48:58', 1, 632, '01', 601, 1, 
                         'A-9999999 RECURSOS Y RESULTADOS HARIMENI FIXMOBILE MEXICO', NULL, 0.0000, 91034.6600, 91034.6600, 
                         14565.5500, 0.0000, 'inactivo', 105600.2100, 0.0000, 0.0000, 105600.2100, 0.0000, 
                         '12b77e93-3d4e-4197-8bff-b1ce487f8dd4', 'CANCELADO', 'inactivo', 0.00, 0.00, 0.00);";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
         }
         return true;
 
@@ -332,6 +378,9 @@ class base_test{
     {
         $this->link = $link;
         $ins_fc_factura = (new base_test())->insert_fc_factura($this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $ins_fc_factura);
+        }
         $ins_doc_documento = (new base_test())->insert_doc_documento($this->link);
 
 
@@ -364,9 +413,7 @@ class base_test{
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
         }
         return true;
 
@@ -376,6 +423,9 @@ class base_test{
     {
         $this->link = $link;
         $ins_org_empresa = (new base_test())->insert_org_empresa($this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $ins_org_empresa);
+        }
 
 
         $sql = "INSERT INTO org_sucursal (id, codigo, status, usuario_alta_id, usuario_update_id, fecha_alta, 

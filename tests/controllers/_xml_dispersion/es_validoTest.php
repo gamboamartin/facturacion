@@ -2,6 +2,7 @@
 
 namespace gamboamartin\facturacion\tests\controllers\_xml_dispersion;
 
+use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\_xls_dispersion;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\TestCase;
@@ -13,7 +14,9 @@ final class es_validoTest extends TestCase
 
     protected function setUp(): void
     {
+        errores::$error = false;
         $this->xlsDispersion = new _xls_dispersion();
+        errores::$error = false;
     }
 
     public function testEsValidoConEncabezado(): void
@@ -32,6 +35,7 @@ final class es_validoTest extends TestCase
 
     public function testEsValidoSinEncabezado(): void
     {
+        errores::$error = false;
         // Arrange: hoja sin "CLAVE EMPLEADO"
         $spreadsheet = new Spreadsheet();
         $hoja = $spreadsheet->getActiveSheet();
@@ -44,7 +48,8 @@ final class es_validoTest extends TestCase
         // Assert: debe regresar arreglo de error de la clase errores
         $this->assertIsArray($resultado, 'Debe devolver un arreglo de error cuando no encuentra encabezado');
         $this->assertArrayHasKey('mensaje', $resultado);
-        $this->assertStringContainsString('Error revise layout', $resultado['mensaje']);
+        $this->assertStringContainsString('Encabezado no encontrado en la hoja', $resultado['mensaje']);
+
     }
 
     /**
