@@ -297,13 +297,14 @@ class controlador_fc_layout_nom extends system{
                 mensaje: 'Error ya esta timbrado', data: $datos_rec, header: $header, ws: $ws);
         }
 
-        $datos_cfdi = (new _timbra_nomina())->datos_recibo($this->link, $datos_rec->fc_row_layout_id);
+        $datos_cfdi = (new _timbra_nomina())->datos_response_timbre($this->link, $datos_rec->fc_row_layout);
         if(errores::$error){
             return $this->retorno_error(
                 mensaje: 'Error al obtener datos de datos_cfdi', data: $datos_cfdi, header: $header, ws: $ws);
         }
 
-        $rs = (new _cnx_pac())->operacion_timbrarJSON2($datos_cfdi->jsonB64, $datos_cfdi->keyPEM, $datos_cfdi->cerPEM, $datos_cfdi->plantilla);
+        $rs = (new _cnx_pac())->operacion_timbrarJSON2($datos_cfdi->jsonB64, $datos_cfdi->keyPEM,
+            $datos_cfdi->cerPEM, $datos_cfdi->plantilla);
         $rs = json_decode($rs, false);
         $codigo = trim($rs->codigo);
 

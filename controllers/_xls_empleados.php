@@ -64,11 +64,9 @@ class _xls_empleados{
                 if(!isset($row_empleado['CUENTA'])){
                     $row_empleado['CUENTA'] = '';
                 }
-
                 if(!isset($row_empleado['CLABE INTERBANCARIA'])){
                     $row_empleado['CLABE INTERBANCARIA'] = '';
                 }
-
                 if(!isset($row_empleado['EMAIL'])){
                     $row_empleado['EMAIL'] = '';
                 }
@@ -160,6 +158,16 @@ class _xls_empleados{
         if(!isset($row_empleado['CODIGO POSTAL'])){
             $row_empleado['CODIGO POSTAL'] = '';
         }
+        if(!isset($row_empleado['CP'])){
+            $row_empleado['CP'] = '';
+        }
+
+        if($row_empleado['CODIGO POSTAL'] === ''){
+            if($row_empleado['CP'] !== ''){
+                $row_empleado['CODIGO POSTAL'] = $row_empleado['CP'];
+            }
+        }
+
         if($row_empleado['CODIGO POSTAL'] === ''){
             $row_empleado['CODIGO POSTAL'] = 'SIN CP';
         }

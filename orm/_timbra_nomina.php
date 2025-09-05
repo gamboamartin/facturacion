@@ -33,7 +33,7 @@ class _timbra_nomina
             return (new errores())->error(mensaje: 'Error al obtener layout', data: $fc_row_layout);
         }
 
-        $fc_layout_nom = (new fc_layout_nom($link))->registro($fc_row_layout->fc_row_layout_id,retorno_obj: true);
+        $fc_layout_nom = (new fc_layout_nom($link))->registro($fc_row_layout->fc_layout_nom_id,retorno_obj: true);
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al obtener layout', data: $fc_layout_nom);
         }
@@ -46,7 +46,7 @@ class _timbra_nomina
 
     }
 
-    private function datos_response_timbre(PDO $link, stdClass $fc_row_layout): array|stdClass
+    final public function datos_response_timbre(PDO $link, stdClass $fc_row_layout): array|stdClass
     {
         $data_json = $this->jsonb64($link,$fc_row_layout);
         if (errores::$error) {
