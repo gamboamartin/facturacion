@@ -751,6 +751,7 @@ class _xls_dispersion{
 
     private function normaliza_value(mixed $value): array|string
     {
+        $value = trim(str_replace("'", '', $value));
         $value = $this->init_value(value: $value);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al inicializar value', data: $value);
