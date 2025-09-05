@@ -9,6 +9,7 @@ use gamboamartin\facturacion\html\fc_layout_nom_html;
 use gamboamartin\facturacion\models\_timbra_nomina;
 use gamboamartin\facturacion\models\fc_cer_csd;
 use gamboamartin\facturacion\models\fc_cer_pem;
+use gamboamartin\facturacion\models\fc_cfdi_sellado_nomina;
 use gamboamartin\facturacion\models\fc_empleado;
 use gamboamartin\facturacion\models\fc_key_csd;
 use gamboamartin\facturacion\models\fc_key_pem;
@@ -118,6 +119,10 @@ class controlador_fc_layout_nom extends system{
         $pdf = base64_decode($datos->PDF);
         $uuid = $datos->UUID;
 
+        $rs_sellos = $this->llenar_fc_cfdi_sellado_nomina(string_xml:  $xml, fc_row_layout: $fc_row_layout);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error en llenar_fc_cfdi_sellado_nomina', data: $rs_sellos);
+        }
         $docs = $this->subir_docs_timbre(pdf: $pdf,xml:  $xml,fc_row_layout:  $fc_row_layout);
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al subir docs', data: $docs);
@@ -529,6 +534,59 @@ class controlador_fc_layout_nom extends system{
         if(errores::$error) {
             return (new errores())->error("Error al actualizar upd_total_dispersion_fc_layout_nom", $rs);
         }
+        return [];
+    }
+
+    private function llenar_fc_cfdi_sellado_nomina(string $string_xml, stdClass $fc_row_layout): array
+    {// ToDo: metho aun no terminado
+
+        $xml = simplexml_load_string($string_xml);
+
+        // Leer atributos del comprobante
+        $comprobante = $xml->attributes();
+        $comprobante_sello = (string) $comprobante['Sello'];
+        $comprobante_certificado = (string) $comprobante['Certificado'];
+        $comprobante_no_certificado = (string) $comprobante['NoCertificado'];
+
+        // Leer TimbreFiscalDigital (complemento)
+        $xml->registerXPathNamespace('tfd', 'http://www.sat.gob.mx/TimbreFiscalDigital');
+        $tfd = $xml->xpath('//tfd:TimbreFiscalDigital')[0];
+        $complemento_tfd_fecha_timbrado = (string) $tfd['FechaTimbrado'];
+        $complemento_tfd_no_certificado_sat = (string) $tfd['NoCertificadoSAT'];
+        $complemento_tfd_rfc_prov_certif = (string) $tfd['RfcProvCertif'];
+        $complemento_tfd_sello_cfd = (string) $tfd['SelloCFD'];
+        $complemento_tfd_sello_sat = (string) $tfd['SelloSAT'];
+        $uuid = (string) $tfd['UUID'];
+        $complemento_tfd_tfd = $tfd->asXML();
+
+        // Leer FechaPago de nómina
+        $nomina = $xml->xpath('//nomina12:Nomina')[0];
+        $fecha_pago = (string) $nomina['FechaPago'];
+
+        $registro = [
+            'codigo' => 'test_codigo',
+            'descripcion' => 'test_descripcion',
+            'fc_row_layout_id' => $fc_row_layout->fc_row_layout_id,
+            'comprobante_sello' => $comprobante_sello,
+            'comprobante_certificado' => $comprobante_certificado,
+            'comprobante_no_certificado' => $comprobante_no_certificado,
+            'complemento_tfd_fecha_timbrado' => $complemento_tfd_fecha_timbrado,
+            'complemento_tfd_no_certificado_sat' => $complemento_tfd_no_certificado_sat,
+            'complemento_tfd_rfc_prov_certif' => $complemento_tfd_rfc_prov_certif,
+            'complemento_tfd_sello_cfd' => $complemento_tfd_sello_cfd,
+            'complemento_tfd_sello_sat' => $complemento_tfd_sello_sat,
+            'uuid' => $uuid,
+            'complemento_tfd_tfd' => $complemento_tfd_tfd,
+            'fecha_pago' => $fecha_pago,
+        ];
+
+        $fc_cfdi_sellado_nomina = new fc_cfdi_sellado_nomina($this->link);
+        $fc_cfdi_sellado_nomina->registro = $registro;
+        $result = $fc_cfdi_sellado_nomina->alta_bd();
+        if(errores::$error) {
+            return (new errores())->error("Error en alta_bd de fc_cfdi_sellado_nomina", $result);
+        }
+
         return [];
     }
 
