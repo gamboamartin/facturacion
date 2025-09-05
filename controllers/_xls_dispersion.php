@@ -754,13 +754,12 @@ class _xls_dispersion{
         if(is_null($value)){
             $value = '';
         }
-
         $value = preg_replace('/[\x00-\x1F\x7F]/u', '', $value);
         $value = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '', $value);
         $value = preg_replace('/\s+/', ' ', trim($value));
         $value = rtrim($value, ".");
         $value = preg_replace('/^[\. ]+/', '', $value);
-
+        ob_clean();
         $value = trim(str_replace("'", '', $value));
         $value = $this->init_value(value: $value);
         if(errores::$error){
