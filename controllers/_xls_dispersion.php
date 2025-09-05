@@ -977,11 +977,7 @@ class _xls_dispersion{
         if (!preg_match('/\.xlsx$/i', $title)) {
             $title .= '.xlsx';
         }
-
-// 2) Limpia cualquier salida previa (evita "headers already sent" y mezcla de bytes/header)
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
+        
 
 // 3) Construye headers sin saltos de línea
         $encoded = rawurlencode($title);
