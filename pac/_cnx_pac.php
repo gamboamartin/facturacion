@@ -32,6 +32,20 @@ class _cnx_pac
 
     }
 
+    final public function consulta_cfdi(string $uuid)
+    {
+        $res = $this->client->consultarCFDI($this->api_key, $uuid);
+        $this->response = array(
+            'operacion' => 'consultarCFDI',
+            'codigo' => $res->code,
+            'mensaje' => $res->message,
+            'cfdi' => $res->data
+        );
+
+        return json_encode($this->response, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+
+    }
+
     public function operacion_timbrar($apikey, $cfdi)
     {
         $res = $this->client->timbrar($apikey, $cfdi);

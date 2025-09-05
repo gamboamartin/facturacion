@@ -58,6 +58,21 @@ class _xls_empleados{
 
             foreach ($rows_empleados as $row_empleado) {
 
+                if(!isset($row_empleado['TARJETA'])){
+                    $row_empleado['TARJETA'] = '';
+                }
+                if(!isset($row_empleado['CUENTA'])){
+                    $row_empleado['CUENTA'] = '';
+                }
+
+                if(!isset($row_empleado['CLABE INTERBANCARIA'])){
+                    $row_empleado['CLABE INTERBANCARIA'] = '';
+                }
+
+                if(!isset($row_empleado['EMAIL'])){
+                    $row_empleado['EMAIL'] = '';
+                }
+
                 $row_low_new['fc_empleado_id'] = $row_empleado['fc_empleado_id'];
                 $row_low_new['fc_layout_nom_id'] = $fc_layout_nom_id;
                 $row_low_new['esta_timbrado'] = 'inactivo';
@@ -74,7 +89,8 @@ class _xls_empleados{
                 $row_low_new['tarjeta'] = $row_empleado['TARJETA'];
                 $row_low_new['email'] = $row_empleado['EMAIL'];
                 $row_low_new['fecha_pago'] = $fc_layout_nom->fc_layout_nom_fecha_pago;
-                $row_low_new['fecha_emision'] = "{$fc_layout_nom->fc_layout_nom_fecha_pago} 23:59:59";
+                $emision = date('H:i:s');
+                $row_low_new['fecha_emision'] = "{$fc_layout_nom->fc_layout_nom_fecha_pago} $emision";
 
                 $alta_row = (new fc_row_layout($link))->alta_registro($row_low_new);
                 if (errores::$error) {
@@ -88,7 +104,6 @@ class _xls_empleados{
                 return (new errores())->error(mensaje: 'Error al actualizar layout', data: $upd_layout_nom);
             }
         }
-
 
         return $rows_empleados;
 
@@ -219,6 +234,7 @@ class _xls_empleados{
             $row_empleado['fc_empleado_id'] = $alta_em->registro_id;
         }
         else{
+
             $row_empleado['fc_empleado_id'] = $fc_empleados->registros[0]['id'];
         }
         return $row_empleado;

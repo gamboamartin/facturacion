@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\controllers\_xls_empleados;
 use PDO;
 
 
@@ -23,6 +24,20 @@ class fc_row_layout extends modelo{
 
     public function alta_registro(array $registro): array|\stdClass
     {
+        $fc_empleado_modelo = new fc_empleado($this->link);
+        $fc_empleado = $fc_empleado_modelo->registro($registro['fc_empleado_id']);
+        if(errores::$error){
+            return (new errores())->error('Error al obtener empleado', $fc_empleado);
+        }
+
+        if($fc_empleado['fc_empleado_validado_sat'] === 'activo') {
+            $registro['cp'] = $fc_empleado['fc_empleado_cp'];
+            $registro['nss'] = $fc_empleado['fc_empleado_nss'];
+            $registro['rfc'] = $fc_empleado['fc_empleado_rfc'];
+            $registro['curp'] = $fc_empleado['fc_empleado_curp'];
+            $registro['nombre_completo'] = $fc_empleado['fc_empleado_nombre_completo'];
+        }
+
         if(!isset($registro['codigo'])){
             $registro['codigo'] = $registro['fc_empleado_id'];
             $registro['codigo'] .= $registro['fc_layout_nom_id'];
@@ -40,6 +55,7 @@ class fc_row_layout extends modelo{
             $registro['descripcion'] .= ' '.$registro['rfc'];
             $registro['descripcion'] .= ' '.$registro['curp'];
         }
+
         $r_alta = parent::alta_registro($registro);
         if(errores::$error){
             return (new errores())->error('Error al insertar row', $r_alta);

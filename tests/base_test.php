@@ -114,6 +114,14 @@ class base_test{
 
         }
 
+        $sql = "DELETE FROM fc_row_nomina";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+
         $sql = "DELETE FROM fc_row_layout";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);

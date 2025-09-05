@@ -6,8 +6,10 @@ use config\pac;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_layout_nom_html;
+use gamboamartin\facturacion\models\_timbra_nomina;
 use gamboamartin\facturacion\models\fc_cer_csd;
 use gamboamartin\facturacion\models\fc_cer_pem;
+use gamboamartin\facturacion\models\fc_empleado;
 use gamboamartin\facturacion\models\fc_key_csd;
 use gamboamartin\facturacion\models\fc_key_pem;
 use gamboamartin\facturacion\models\fc_layout_nom;
@@ -105,6 +107,71 @@ class controlador_fc_layout_nom extends system{
             exit;
         }
         exit;
+
+    }
+
+    private function cfdi_exito(stdClass $rs, stdClass $fc_row_layout): true|array
+    {
+        $datos = $rs->datos;
+        $datos = json_decode($datos,false);
+        $xml = $datos->XML;
+        $pdf = base64_decode($datos->PDF);
+        $uuid = $datos->UUID;
+
+        $docs = $this->subir_docs_timbre(pdf: $pdf,xml:  $xml,fc_row_layout:  $fc_row_layout);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al subir docs', data: $docs);
+        }
+        $rs = $this->upd_exito($uuid);
+        if(errores::$error) {
+            return (new errores())->error("Error al actualizar UUID", $rs);
+        }
+
+        $fc_empleado_modelo = new fc_empleado($this->link);
+
+        $fc_empleado_upd['validado_sat'] = 'activo';
+        $fc_empleado_upd['nombre_completo'] = $fc_row_layout->fc_row_layout_nombre_completo;
+        $fc_empleado_upd['rfc'] = $fc_row_layout->fc_row_layout_rfc;
+        $fc_empleado_upd['cp'] = $fc_row_layout->fc_row_layout_cp;
+        $fc_empleado_upd['nss'] = $fc_row_layout->fc_row_layout_nss;
+        $fc_empleado_upd['curp'] = $fc_row_layout->fc_row_layout_curp;
+        $fc_empleado_upd['banco'] = $fc_row_layout->fc_row_layout_banco;
+        $fc_empleado_upd['cuenta'] = $fc_row_layout->fc_row_layout_cuenta;
+        $fc_empleado_upd['tarjeta'] = $fc_row_layout->fc_row_layout_tarjeta;
+
+        $rs_upd = $fc_empleado_modelo->modifica_bd($fc_empleado_upd, $fc_row_layout->fc_row_layout_fc_empleado_id);
+        if(errores::$error) {
+            return (new errores())->error("Error al actualizar empleado", $rs_upd);
+        }
+
+        return $rs;
+
+    }
+
+    private function code_error(string $codigo, stdClass $rs, string $nomina_json)
+    {
+        if($codigo !== '200'){
+
+            $JSON = json_decode($nomina_json,false);
+            $extra_data = '';
+            if($codigo === 'CFDI40145'){
+                $extra_data ="RFC: {$JSON->Comprobante->Receptor->Rfc}";
+                $extra_data .=" Nombre: {$JSON->Comprobante->Receptor->Nombre}";
+            }
+
+            if($codigo === '307'){
+                errores::$error = false;
+            }
+
+            else {
+                $upd = $this->upd_error($codigo, $rs);
+                $error = (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $rs);
+                print_r($error);
+                echo $nomina_json . "<br>";
+                exit;
+            }
+        }
+        return $nomina_json;
 
     }
 
@@ -216,174 +283,68 @@ class controlador_fc_layout_nom extends system{
     public function timbra_recibo(bool $header, bool $ws = false): array|stdClass
     {
 
-        
-        $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
-        if (errores::$error) {
+        $fc_row_layout_id = $_GET['fc_row_layout_id'];
+
+
+        $datos_rec = (new _timbra_nomina())->datos_recibo($this->link, $fc_row_layout_id);
+        if(errores::$error){
             return $this->retorno_error(
-                mensaje: 'Error al obtener layout', data: $fc_layout_nom, header: $header, ws: $ws);
+                mensaje: 'Error al obtener datos de recibo', data: $datos_rec, header: $header, ws: $ws);
         }
 
-        $fc_row_layout = (new fc_row_layout($this->link))->registro($_GET['fc_row_layout_id'],retorno_obj: true);
-        if (errores::$error) {
+        if($datos_rec->fc_row_layout->fc_row_layout_esta_timbrado === 'activo'){
             return $this->retorno_error(
-                mensaje: 'Error al obtener layout', data: $fc_row_layout, header: $header, ws: $ws);
+                mensaje: 'Error ya esta timbrado', data: $datos_rec, header: $header, ws: $ws);
         }
 
-        $result = (new _make_json(link: $this->link,fc_row_layout:  $fc_row_layout))->getJson();
-        if (errores::$error) {
+        $datos_cfdi = (new _timbra_nomina())->datos_recibo($this->link, $datos_rec->fc_row_layout_id);
+        if(errores::$error){
             return $this->retorno_error(
-                mensaje: 'Error al obtener json', data: $result, header: $header, ws: $ws);
+                mensaje: 'Error al obtener datos de datos_cfdi', data: $datos_cfdi, header: $header, ws: $ws);
         }
 
-        $rutas = $this->obtener_cer_key(pac::$fc_csd_nomina_id);
-        if (errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al obtener $rutas', data: $rutas, header: $header, ws: $ws);
-        }
-
-        $nomina_json = $result['json'];
-        $jsonB64 = base64_encode( $nomina_json);
-
-        $pac = new pac();
-
-
-        if(isset($pac->en_produccion) && !$pac->en_produccion){
-            $rutas['ruta_key_pem'] = "/var/www/html/facturacion/pac/CSD_EKU9003173C9_key.pem";
-            $rutas['ruta_cer_pem'] = "/var/www/html/facturacion/pac/CSD_EKU9003173C9_cer.pem";
-        }
-
-        $keyPEM = file_get_contents($rutas['ruta_key_pem']);
-        $cerPEM = file_get_contents($rutas['ruta_cer_pem']);
-
-        $plantilla = 'nomina';
-
-        $rs = (new _cnx_pac())->operacion_timbrarJSON2($jsonB64, $keyPEM, $cerPEM, $plantilla);
+        $rs = (new _cnx_pac())->operacion_timbrarJSON2($datos_cfdi->jsonB64, $datos_cfdi->keyPEM, $datos_cfdi->cerPEM, $datos_cfdi->plantilla);
         $rs = json_decode($rs, false);
         $codigo = trim($rs->codigo);
-        if($codigo !== '200'){
-            $JSON = json_decode($nomina_json,false);
-            $extra_data = '';
-            if($codigo === 'CFDI40145'){
-                $extra_data ="RFC: {$JSON->Comprobante->Receptor->Rfc}";
-                $extra_data .=" Nombre: {$JSON->Comprobante->Receptor->Nombre}";
-            }
 
-            if($codigo === '307'){
-                print_r($rs);exit;
-            }
-            else {
-                $sql = "UPDATE fc_row_layout SET fc_row_layout.error = 'Codigo: $codigo Mensaje: $rs->mensaje' WHERE fc_row_layout.id = $_GET[fc_row_layout_id]";
-                modelo::ejecuta_transaccion($sql, $this->link);
-                $error = (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $rs);
-                print_r($error);
-                echo $nomina_json . "<br>";
-                exit;
-            }
+        $code_error = $this->code_error($codigo, $rs, $datos_cfdi->nomina_json);
+        if(errores::$error){
+            $error = (new errores())->error("Error al timbrar", $code_error);
+            print_r($error);
+            echo $datos_cfdi->nomina_json . "<br>";
+            exit;
         }
 
-        $datos = $rs->datos;
-        $datos = json_decode($datos,false);
-        $xml = $datos->XML;
-        $pdf = base64_decode($datos->PDF);
-        $uuid = $datos->UUID;
+        $rs = $this->cfdi_exito($rs, $datos_rec->fc_row_layout);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al actualizar UUID", $rs);
+            print_r($error);
+        }
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+        return $datos_rec->fc_row_layout;
 
+
+    }
+
+
+
+    private function subir_docs_timbre(string $pdf, string $xml, stdClass $fc_row_layout): array|stdClass
+    {
         $result_upl_pdf = $this->subir_pdf(string_pdf: $pdf, fc_row_layout_id: $fc_row_layout->fc_row_layout_id);
         if (errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al subir pdf', data: $result_upl_pdf, header: $header, ws: $ws);
+            return (new errores())->error(mensaje: 'Error al subir pdf', data: $result_upl_pdf);
         }
 
         $result_upl_xml = $this->subir_xml(string_xml: $xml, fc_row_layout_id: $fc_row_layout->fc_row_layout_id);
         if (errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al subir pdf', data: $result_upl_xml, header: $header, ws: $ws);
+            return (new errores())->error(mensaje: 'Error al subir pdf', data: $result_upl_xml);
         }
 
-//        $result_upl_qr = $this->subir_qr(string_qr_jpg: $qr, fc_row_layout_id: $fc_row_layout->fc_row_layout_id);
-//        if (errores::$error) {
-//            return $this->retorno_error(
-//                mensaje: 'Error al subir qr', data: $result_upl_qr, header: $header, ws: $ws);
-//        }
+        $docs = new stdClass();
+        $docs->pdf = $result_upl_pdf;
+        $docs->xml = $result_upl_xml;
 
-        print_r($rs);exit;
-        exit;
-
-        return $fc_row_layout;
-
-
-    }
-
-    private function obtener_cer_key(int $fc_csd_nomina_id): array
-    {
-        $cer = $this->get_cer_pem_path($fc_csd_nomina_id);
-        if(errores::$error){
-            return (new errores())->error('Error al obtener ruta del $cer', $cer);
-        }
-
-        $key = $this->get_key_pem_path($fc_csd_nomina_id);
-        if(errores::$error){
-            return (new errores())->error('Error al obtener ruta del $key', $key);
-        }
-
-        return [
-            'ruta_cer_pem' => $cer,
-            'ruta_key_pem' => $key,
-        ];
-    }
-
-    private function get_key_pem_path(int $fc_csd_nomina_id): string|array
-    {
-
-        $filtro = ['fc_csd_id' => $fc_csd_nomina_id];
-        $fc_key_csd_modelo = new fc_key_csd($this->link);
-        $fc_key_csd_data = $fc_key_csd_modelo->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return (new errores())->error('Error al obtener fc_key_csd', $fc_key_csd_data);
-        }
-
-        if ((int)$fc_key_csd_data->n_registros < 1) {
-            return (new errores())->error('Error no existe fc_key_csd', $fc_key_csd_data);
-        }
-
-        $fc_key_pem_modelo = new fc_key_pem($this->link);
-        $key_pem_data = $fc_key_pem_modelo->filtro_and(filtro: ['fc_key_csd_id' => $fc_key_csd_data->registros[0]['fc_key_csd_id']]);
-        if(errores::$error){
-            return (new errores())->error('Error al obtener fc_key_pem', $key_pem_data);
-        }
-
-        if ((int)$key_pem_data->n_registros < 1) {
-            return (new errores())->error('Error no existe fc_key_pem', $key_pem_data);
-        }
-
-        return $key_pem_data->registros[0]['doc_documento_ruta_absoluta'];
-
-    }
-
-    private function get_cer_pem_path(int $fc_csd_nomina_id): string|array
-    {
-
-        $filtro = ['fc_csd_id' => $fc_csd_nomina_id];
-        $fc_cer_csd_modelo = new fc_cer_csd($this->link);
-        $fc_cer_csd_data = $fc_cer_csd_modelo->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return (new errores())->error('Error al obtener fc_cer_csd', $fc_cer_csd_data);
-        }
-
-        if ((int)$fc_cer_csd_data->n_registros < 1) {
-            return (new errores())->error('Error no existe fc_cer_csd', $fc_cer_csd_data);
-        }
-
-        $fc_cer_pem_modelo = new fc_cer_pem($this->link);
-        $cer_pem_data = $fc_cer_pem_modelo->filtro_and(filtro: ['fc_cer_csd_id' => $fc_cer_csd_data->registros[0]['fc_cer_csd_id']]);
-        if(errores::$error){
-            return (new errores())->error('Error al obtener fc_cer_pem', $cer_pem_data);
-        }
-
-        if ((int)$cer_pem_data->n_registros < 1) {
-            return (new errores())->error('Error no existe fc_cer_pem', $cer_pem_data);
-        }
-
-        return $cer_pem_data->registros[0]['doc_documento_ruta_absoluta'];
+        return $docs;
 
     }
 
@@ -493,6 +454,28 @@ class controlador_fc_layout_nom extends system{
         }
 
         return [];
+    }
+
+    private function upd_error(string $codigo, stdClass $rs_timbre): true
+    {
+        errores::$error = false;
+        $sql = "UPDATE fc_row_layout SET fc_row_layout.error = 'Codigo: $codigo Mensaje: $rs_timbre->mensaje' WHERE fc_row_layout.id = $_GET[fc_row_layout_id]";
+        modelo::ejecuta_transaccion($sql, $this->link);
+        return true;
+
+    }
+
+    private function upd_exito(string $uuid): true
+    {
+        $sql = "UPDATE fc_row_layout SET fc_row_layout.uuid = '$uuid', fc_row_layout.error = '', 
+                         esta_timbrado = 'activo' WHERE fc_row_layout.id = $_GET[fc_row_layout_id]";
+        $rs = modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al actualizar UUID", $rs);
+            print_r($error);
+        }
+        return true;
+
     }
 
 
