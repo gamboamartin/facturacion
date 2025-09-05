@@ -75,7 +75,32 @@ class _xls_dispersion{
 
     }
 
+    private function celda_tiene_valor(Worksheet $hoja, string $col, int $row): bool|array
+    {
+        if (!$this->es_hoja_valida($hoja)) {
+            return (new errores())->error(mensaje: 'Error: hoja inválida, use notación Excel en mayúsculas',
+                data: $col);
+        }
+        if (!$this->es_columna_valida($col)) {
+            return (new errores())->error(mensaje: 'Error: columna inválida, use notación Excel en mayúsculas',
+                data: $col);
+        }
+        if (!$this->es_fila_valida($row)) {
+            return (new errores())->error(mensaje: 'Error: número de fila inválido, debe ser entero positivo',
+                data: $row);
+        }
 
+        $valor = $this->leer_valor_celda($hoja, $col, $row);
+        if ($valor instanceof Throwable) {
+            (new errores())->error(
+                mensaje: 'Error al leer valor de celda',
+                data: ['col' => $col, 'row' => $row, 'exception' => $valor->getMessage()]
+            );
+            return false;
+        }
+
+        return $this->tiene_contenido_no_vacio($valor);
+    }
 
     private function columnas(Worksheet $hoja): array
     {
@@ -91,6 +116,11 @@ class _xls_dispersion{
         return $columnas;
 
 
+    }
+
+    private function columnas_a_escanear(): array
+    {
+        return ['A', 'B', 'C', 'D', 'E'];
     }
 
     private function datos_iniciales(Worksheet $hoja): array|stdClass
@@ -155,6 +185,55 @@ class _xls_dispersion{
         $value = str_replace('  ',' ',$value);
         return str_replace('  ',' ',$value);
 
+    }
+
+    private function es_columna_valida(string $col): bool
+    {
+        return preg_match('/^[A-Z]+$/', $col) === 1;
+    }
+
+    private function es_fila_valida(int $row): bool
+    {
+        return is_int($row) && $row > 0;
+    }
+
+    /**
+     * REG
+     * Verifica si el parámetro recibido es una hoja de cálculo válida.
+     *
+     * Este método evalúa si el valor proporcionado es una instancia de
+     * {@see Worksheet} de PhpSpreadsheet. Es útil como validación defensiva
+     * antes de realizar operaciones sobre el objeto hoja.
+     *
+     * @param mixed $hoja Valor a evaluar; puede ser cualquier tipo de dato.
+     *
+     * @return bool
+     *   - `true`  si $hoja es instancia de {@see Worksheet}.
+     *   - `false` en cualquier otro caso (null, string, int, array, etc.).
+     *
+     * @example Uso con una hoja válida
+     * ```php
+     * $spreadsheet = new Spreadsheet();
+     * $hoja = $spreadsheet->getActiveSheet();
+     *
+     * $valido = $this->es_hoja_valida($hoja);
+     * // $valido === true
+     * ```
+     *
+     * @example Uso con un valor inválido
+     * ```php
+     * $valido = $this->es_hoja_valida("texto");
+     * // $valido === false
+     * ```
+     */
+    private function es_hoja_valida(mixed $hoja): bool
+    {
+        return $hoja instanceof Worksheet;
+    }
+
+    private function es_fila_inicial_valida(int $fila_inicial): bool
+    {
+        return $fila_inicial > 0;
     }
 
     /**
@@ -227,14 +306,69 @@ class _xls_dispersion{
 
     }
 
-    private function fila_inicial(Worksheet $hoja): array|int
+    /**
+     * REG
+     * Determina la fila inicial de los datos en el layout de dispersión.
+     *
+     * Este método localiza la fila donde se encuentra el encabezado esperado
+     * (utilizando {@see file_encabezado()}) y retorna la siguiente fila,
+     * que corresponde al inicio de los datos del layout.
+     *
+     * Flujo:
+     *  - Llama a `file_encabezado` para obtener la fila del encabezado.
+     *  - Valida que la fila obtenida sea un entero positivo.
+     *  - Si es válida, retorna el número de fila + 1.
+     *  - Si ocurre algún error en el proceso, retorna un arreglo de error
+     *    generado por la clase {@see \gamboamartin\errores\errores}.
+     *
+     * @param Worksheet $hoja Hoja de cálculo de Excel donde se buscará el encabezado.
+     *
+     * @return int|array
+     *   - `int`: Número de fila donde comienzan los datos (encabezado + 1).
+     *   - `array`: Estructura de error con mensaje y datos adicionales.
+     *
+     * @example Uso exitoso
+     * ```php
+     * $spreadsheet = new Spreadsheet();
+     * $hoja = $spreadsheet->getActiveSheet();
+     * $hoja->setCellValue('A5', 'CLAVE EMPLEADO'); // Encabezado en fila 5
+     *
+     * $fila_inicial = $this->fila_inicial($hoja);
+     * // $fila_inicial === 6
+     * ```
+     *
+     * @example Encabezado no encontrado
+     * ```php
+     * $spreadsheet = new Spreadsheet();
+     * $hoja = $spreadsheet->getActiveSheet();
+     * $hoja->setCellValue('A1', 'SIN ENCABEZADO');
+     *
+     * $fila_inicial = $this->fila_inicial($hoja);
+     * // $fila_inicial es un array con detalles del error
+     * ```
+     */
+    private function fila_inicial(Worksheet $hoja): int|array
     {
-        $fila_encabezado = $this->file_encabezado(hoja: $hoja);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener $fila_encabezado', data: $fila_encabezado);
-        }
-        return $fila_encabezado + 1;
 
+        // Localiza la fila del encabezado
+        $fila_encabezado = $this->file_encabezado($hoja);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al obtener fila de encabezado',
+                data: $fila_encabezado
+            );
+        }
+
+        // Validación de resultado
+        if (!is_int($fila_encabezado) || $fila_encabezado <= 0) {
+            return (new errores())->error(
+                mensaje: 'Error: fila de encabezado inválida',
+                data: $fila_encabezado
+            );
+        }
+
+        // La fila inicial de datos es la siguiente a la del encabezado
+        return $fila_encabezado + 1;
     }
 
     /**
@@ -287,6 +421,16 @@ class _xls_dispersion{
             mensaje: 'Error revise layout: encabezado no encontrado',
             data: ['encabezado_esperado' => $HEADER_TEXT, 'filas_escaneadas' => $highestRow]
         );
+    }
+
+    private function fila_tiene_datos(Worksheet $hoja, int $row, array $columns): bool
+    {
+        foreach ($columns as $col) {
+            if ($this->celda_tiene_valor($hoja, $col, $row)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function genera_columnas(array $valores_fila): array
@@ -426,6 +570,15 @@ class _xls_dispersion{
 
     }
 
+    private function leer_valor_celda(Worksheet $hoja, string $col, int $row): mixed
+    {
+        try {
+            return $hoja->getCell($col . $row)->getValue();
+        } catch (Throwable $e) {
+            return $e;
+        }
+    }
+
     private function normaliza_value(mixed $value): array|string
     {
         $value = $this->init_value(value: $value);
@@ -481,6 +634,48 @@ class _xls_dispersion{
 
     }
 
+    /**
+     * REG
+     * Verifica si un valor contiene contenido no vacío después de su normalización.
+     *
+     * Reglas de evaluación:
+     *  - Si el valor es `null`, se considera vacío → retorna `false`.
+     *  - El valor recibido se convierte a cadena con `(string)` y se aplica `trim()`.
+     *  - Si el resultado de `trim()` es una cadena vacía, retorna `false`.
+     *  - En cualquier otro caso, retorna `true`.
+     *
+     * Casos particulares:
+     *  - `""` o `"   "` → `false`
+     *  - `0` (int) → `"0"` tras casting, retorna `true`
+     *  - `false` → `""` tras casting, retorna `false`
+     *  - `true` → `"1"` tras casting, retorna `true`
+     *
+     * @param mixed $raw Valor a evaluar. Puede ser de cualquier tipo (string, int, bool, null, etc.).
+     *
+     * @return bool
+     *   - `true`  si el valor contiene contenido significativo no vacío.
+     *   - `false` si es `null` o cadena vacía después de normalizarlo.
+     *
+     * @example
+     * ```php
+     * $this->tiene_contenido_no_vacio(null);     // false
+     * $this->tiene_contenido_no_vacio('');       // false
+     * $this->tiene_contenido_no_vacio('   ');    // false
+     * $this->tiene_contenido_no_vacio('ABC');    // true
+     * $this->tiene_contenido_no_vacio(123);      // true
+     * $this->tiene_contenido_no_vacio(false);    // false
+     * $this->tiene_contenido_no_vacio(true);     // true
+     * ```
+     */
+    private function tiene_contenido_no_vacio(mixed $raw): bool
+    {
+        if ($raw === null) {
+            return false;
+        }
+        $val = trim((string)$raw);
+        return $val !== '';
+    }
+
     private function title_doc(Worksheet $hoja): array|string
     {
         $datos_ly = $this->datos_layout(hoja: $hoja);
@@ -494,56 +689,42 @@ class _xls_dispersion{
 
     }
 
-    private function ultima_fila(int $fila_inicial, Worksheet $hoja): array|int
+    private function ultima_fila(int $fila_inicial, Worksheet $hoja): int|array
     {
-        $ultima_fila = -1;
-        foreach ($hoja->getRowIterator() as $fila) {
-            $valor = $hoja->getCell('A' . $fila->getRowIndex())->getValue();
-            if (!empty($valor)) {
-                $ultima_fila = $fila->getRowIndex();
-            }
+        // Validaciones defensivas
+        if (!$this->es_fila_inicial_valida($fila_inicial)) {
+            return (new errores())->error(
+                mensaje: 'Error: $fila_inicial inválida; se espera entero positivo',
+                data: $fila_inicial
+            );
         }
-        if($ultima_fila <= 0){
-            return (new errores())->error(mensaje: 'Error al obtener ultima fila', data: $ultima_fila);
-        }
-
-        if($ultima_fila <= $fila_inicial){
-            foreach ($hoja->getRowIterator() as $fila) {
-                $valor = $hoja->getCell('B' . $fila->getRowIndex())->getValue();
-                if (!empty($valor)) {
-                    $ultima_fila = $fila->getRowIndex();
-                }
-            }
+        if (!$hoja instanceof Worksheet) {
+            return (new errores())->error(
+                mensaje: 'Error: parámetro $hoja inválido, se esperaba Worksheet',
+                data: $hoja
+            );
         }
 
-        if($ultima_fila <= $fila_inicial){
-            foreach ($hoja->getRowIterator() as $fila) {
-                $valor = $hoja->getCell('C' . $fila->getRowIndex())->getValue();
-                if (!empty($valor)) {
-                    $ultima_fila = $fila->getRowIndex();
-                }
+        $columns   = $this->columnas_a_escanear(); // ['A','B','C','D','E'] (fácil de ampliar)
+        $highest   = (int) $hoja->getHighestRow();
+        $startRow  = max(1, $fila_inicial);
+        $lastRow   = -1;
+
+        // Una sola pasada desde fila_inicial hasta el final de la hoja
+        for ($row = $startRow; $row <= $highest; $row++) {
+            if ($this->fila_tiene_datos($hoja, $row, $columns)) {
+                $lastRow = $row;
             }
         }
 
-        if($ultima_fila <= $fila_inicial){
-            foreach ($hoja->getRowIterator() as $fila) {
-                $valor = $hoja->getCell('D' . $fila->getRowIndex())->getValue();
-                if (!empty($valor)) {
-                    $ultima_fila = $fila->getRowIndex();
-                }
-            }
-        }
-        if($ultima_fila <= $fila_inicial){
-            foreach ($hoja->getRowIterator() as $fila) {
-                $valor = $hoja->getCell('E' . $fila->getRowIndex())->getValue();
-                if (!empty($valor)) {
-                    $ultima_fila = $fila->getRowIndex();
-                }
-            }
+        if ($lastRow < $startRow) {
+            return (new errores())->error(
+                mensaje: 'Error al obtener última fila: no se encontraron datos a partir de la fila inicial',
+                data: ['fila_inicial' => $fila_inicial, 'highestRow' => $highest, 'columns' => $columns]
+            );
         }
 
-        return $ultima_fila;
-
+        return $lastRow;
     }
 
     private function write_data(Worksheet $hoja, array $layout_dispersion): Worksheet|array
