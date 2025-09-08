@@ -751,6 +751,17 @@ class _xls_dispersion{
 
     private function normaliza_value(mixed $value): array|string
     {
+
+        if(is_null($value)){
+            $value = '';
+        }
+        $value = preg_replace('/[\x00-\x1F\x7F]/u', '', $value);
+        $value = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '', $value);
+        $value = preg_replace('/\s+/', ' ', trim($value));
+        $value = rtrim($value, ".");
+        $value = preg_replace('/^[\. ]+/', '', $value);
+
+        $value = trim(str_replace("'", '', $value));
         $value = $this->init_value(value: $value);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al inicializar value', data: $value);
@@ -949,6 +960,30 @@ class _xls_dispersion{
             return (new errores())->error(mensaje: 'Error al obtener $title', data: $title);
         }
 
+
+
+// Quita caracteres de control (incluye CR/LF)
+        $title = preg_replace('/[\x00-\x1F\x7F]/u', '', $title);
+
+// Reemplaza separadores prohibidos
+        $title = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '_', $title);
+
+// Compacta espacios, quita puntos/espacios extremos
+        $title = preg_replace('/\s+/', ' ', trim($title));
+        $title = preg_replace('/^[\. ]+/', '', $title);
+        $title = preg_replace('/\.+$/', '', $title);
+
+// Garantiza extensión .xlsx
+        if (!preg_match('/\.xlsx$/i', $title)) {
+            $title .= '.xlsx';
+        }
+        
+
+// 3) Construye headers sin saltos de línea
+        $encoded = rawurlencode($title);
+
+
+        ob_clean();
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="'.$title.'"');
         header('Cache-Control: max-age=0');
