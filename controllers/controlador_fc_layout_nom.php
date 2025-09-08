@@ -19,6 +19,7 @@ use gamboamartin\template_1\html;
 use JetBrains\PhpStorm\NoReturn;
 use PDO;
 use stdClass;
+use ZipArchive;
 
 class controlador_fc_layout_nom extends system{
 
@@ -30,7 +31,7 @@ class controlador_fc_layout_nom extends system{
         $html_ = new fc_layout_nom_html(html: $html);
         $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
-        $this->rows_lista = array('id', 'codigo', 'descripcion','fecha_pago');
+        $this->rows_lista = array('id', 'codigo', 'descripcion','estado_timbrado','fecha_pago');
 
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link,
             paths_conf: $paths_conf);
@@ -323,6 +324,74 @@ class controlador_fc_layout_nom extends system{
         // header('Content-Length: '.strlen($xmlString));
 
         echo $xmlString;
+        exit;
+
+
+    }
+
+    public function descarga_rec_zip(bool $header, bool $ws = false)
+    {
+        $generales = new generales();
+        $path_base = $generales->path_base."archivos/";
+        $datos_recibo = (new _timbra_nomina())->datos_recibo(link: $this->link,
+            fc_row_layout_id: $_GET['fc_row_layout_id']);
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener datos del recibo',data: $datos_recibo,
+                header: $header, ws: $ws);
+        }
+        $filtro = array();
+        $filtro['fc_row_layout.id'] = $_GET['fc_row_layout_id'];
+        $filtro['doc_tipo_documento.id'] = 2;
+        $r_fc_row_nomina = (new fc_row_nomina($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener datos del recibo',data: $r_fc_row_nomina,
+                header: $header, ws: $ws);
+        }
+        if($r_fc_row_nomina->n_registros === 0){
+            return $this->retorno_error(mensaje: 'No existe xml',data: $r_fc_row_nomina,header: $header, ws: $ws);
+        }
+
+        $fc_row_nomina_xml = $r_fc_row_nomina->registros[0];
+
+        $filtro = array();
+        $filtro['fc_row_layout.id'] = $_GET['fc_row_layout_id'];
+        $filtro['doc_tipo_documento.id'] = 8;
+        $r_fc_row_nomina = (new fc_row_nomina($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener datos del recibo',data: $r_fc_row_nomina,
+                header: $header, ws: $ws);
+        }
+        if($r_fc_row_nomina->n_registros === 0){
+            return $this->retorno_error(mensaje: 'No existe xml',data: $r_fc_row_nomina,header: $header, ws: $ws);
+        }
+
+        $fc_row_nomina_pdf = $r_fc_row_nomina->registros[0];
+
+        $zip = new ZipArchive();
+        $zipFile = $path_base.$fc_row_nomina_pdf['fc_layout_nom_id'].'.'.$fc_row_nomina_pdf['fc_row_layout_rfc'].'.zip';
+        if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
+            exit("No se pudo crear el archivo ZIP\n");
+        }
+
+        //print_r($zipFile);exit;
+
+        $f_xml = $fc_row_nomina_pdf['fc_layout_nom_id'].'.'.$fc_row_nomina_pdf['fc_row_layout_rfc'].'.xml';
+        $f_pdf = $fc_row_nomina_pdf['fc_layout_nom_id'].'.'.$fc_row_nomina_pdf['fc_row_layout_rfc'].'.pdf';
+
+        $f_xml_ct = file_get_contents($fc_row_nomina_xml['doc_documento_ruta_absoluta']);
+        $f_pdf_ct = file_get_contents($fc_row_nomina_pdf['doc_documento_ruta_absoluta']);
+
+        $zip->addFromString($f_xml, $f_xml_ct);
+        $zip->addFromString($f_pdf, $f_pdf_ct);
+        $zip->close();
+
+        $name = $fc_row_nomina_pdf['fc_layout_nom_id'].'.'.$fc_row_nomina_pdf['fc_row_layout_rfc'].".zip";
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="'.$name.'"');
+        header('Content-Length: ' . filesize($zipFile));
+        readfile($zipFile);
+        unlink($zipFile);
+
         exit;
 
 

@@ -30,6 +30,7 @@
                 <th>ERROR</th>
                 <th>DESCARGA XML</th>
                 <th>DESCARGA PDF</th>
+                <th>DESCARGA ZIP</th>
                 <th>TIMBRA</th>
             </tr>
             </thead>
