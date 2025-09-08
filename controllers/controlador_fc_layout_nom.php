@@ -270,6 +270,49 @@ class controlador_fc_layout_nom extends system{
                         mensaje: 'Error al obtener btn_timbra', data: $btn_timbra, header: $header, ws: $ws);
                 }
             }
+            $btn_descarga_xml = '';
+            if($row->fc_row_layout_esta_timbrado === 'activo'){
+                $params = array();
+                $params['fc_row_layout_id'] = $row->fc_row_layout_id;
+                $btn_descarga_xml = (new html())->button_href(accion: 'descarga_rec_xml',etiqueta:  'XML',
+                    registro_id: $this->registro_id,seccion: 'fc_layout_nom',style: 'success',params: $params);
+
+                if(errores::$error){
+                    return $this->retorno_error(
+                        mensaje: 'Error al obtener btn_descarga_xml', data: $btn_descarga_xml, header: $header, ws: $ws);
+                }
+            }
+
+
+            $btn_descarga_pdf = '';
+            if($row->fc_row_layout_esta_timbrado === 'activo'){
+                $params = array();
+                $params['fc_row_layout_id'] = $row->fc_row_layout_id;
+                $btn_descarga_pdf = (new html())->button_href(accion: 'descarga_rec_pdf',etiqueta:  'PDF',
+                    registro_id: $this->registro_id,seccion: 'fc_layout_nom',style: 'success',params: $params);
+
+                if(errores::$error){
+                    return $this->retorno_error(
+                        mensaje: 'Error al obtener btn_descarga_pdf', data: $btn_descarga_pdf, header: $header, ws: $ws);
+                }
+            }
+
+            $btn_descarga_zip = '';
+            if($row->fc_row_layout_esta_timbrado === 'activo'){
+                $params = array();
+                $params['fc_row_layout_id'] = $row->fc_row_layout_id;
+                $btn_descarga_zip = (new html())->button_href(accion: 'descarga_rec_zip',etiqueta:  'ZIP',
+                    registro_id: $this->registro_id,seccion: 'fc_layout_nom',style: 'success',params: $params);
+
+                if(errores::$error){
+                    return $this->retorno_error(
+                        mensaje: 'Error al obtener btn_descarga_pdf', data: $btn_descarga_pdf, header: $header, ws: $ws);
+                }
+            }
+
+            $row->btn_descarga_zip = $btn_descarga_zip;
+            $row->btn_descarga_pdf = $btn_descarga_pdf;
+            $row->btn_descarga_xml = $btn_descarga_xml;
             $row->btn_timbra = $btn_timbra;
             $rows[$indice] = $row;
         }
