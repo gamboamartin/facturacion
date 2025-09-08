@@ -429,6 +429,25 @@ class controlador_fc_layout_nom extends system{
 
     }
 
+    public function modifica_datos(bool $header, bool $ws = false)
+    {
+        $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener layout', data: $fc_layout_nom, header: $header, ws: $ws);
+        }
+
+        $this->inputs = new stdClass();
+
+        $nss = $this->html->input_text(cols: 3,disabled: false, name: 'nss',place_holder: 'NSS',row_upd: new stdClass(),value_vacio: false);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener inputs', data: $nss, header: $header, ws: $ws);
+        }
+
+        $this->inputs->nss = $nss;
+    }
+
     public function ver_empleados(bool $header, bool $ws = false): array|stdClass
     {
         $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
@@ -446,6 +465,18 @@ class controlador_fc_layout_nom extends system{
         $rows = $rs->registros;
         foreach ($rows as $indice => $row) {
             $row = (object)$row;
+            $btn_modifica = '';
+            if($row->fc_row_layout_error !== '' && $row->fc_row_layout_error !== NULL){
+                $params = array();
+                $params['fc_row_layout_id'] = $row->fc_row_layout_id;
+                $btn_modifica = (new html())->button_href(accion: 'modifica_datos',etiqueta:  'Modificar',
+                    registro_id: $this->registro_id,seccion: 'fc_layout_nom',style: 'info',params: $params);
+
+                if(errores::$error){
+                    return $this->retorno_error(
+                        mensaje: 'Error al obtener btn_timbra', data: $btn_modifica, header: $header, ws: $ws);
+                }
+            }
             $btn_timbra = '';
             if($row->fc_row_layout_esta_timbrado === 'inactivo'){
                 $params = array();
@@ -502,6 +533,7 @@ class controlador_fc_layout_nom extends system{
             $row->btn_descarga_pdf = $btn_descarga_pdf;
             $row->btn_descarga_xml = $btn_descarga_xml;
             $row->btn_timbra = $btn_timbra;
+            $row->btn_modifica = $btn_modifica;
             $rows[$indice] = $row;
         }
 
