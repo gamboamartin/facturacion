@@ -100,6 +100,21 @@ class _xls_empleados{
                 }
 
 
+                if(!isset($row_empleado['NOMBRE COMPLETO'])){
+                    $row_empleado['NOMBRE COMPLETO'] = '';
+                }
+
+                if(!isset($row_empleado['NOMBRECOMPLETO'])){
+                    $row_empleado['NOMBRECOMPLETO'] = '';
+                }
+
+                if($row_empleado['NOMBRE COMPLETO'] === ''){
+                    if($row_empleado['NOMBRECOMPLETO'] !== ''){
+                        $row_empleado['NOMBRE COMPLETO'] = $row_empleado['NOMBRECOMPLETO'];
+                    }
+                }
+
+
                 $row_low_new['fc_empleado_id'] = $row_empleado['fc_empleado_id'];
                 $row_low_new['fc_layout_nom_id'] = $fc_layout_nom_id;
                 $row_low_new['esta_timbrado'] = 'inactivo';

@@ -2,17 +2,12 @@
 namespace gamboamartin\facturacion\controllers;
 
 use config\generales;
-use config\pac;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_layout_nom_html;
 use gamboamartin\facturacion\models\_timbra_nomina;
-use gamboamartin\facturacion\models\fc_cer_csd;
-use gamboamartin\facturacion\models\fc_cer_pem;
 use gamboamartin\facturacion\models\fc_cfdi_sellado_nomina;
 use gamboamartin\facturacion\models\fc_empleado;
-use gamboamartin\facturacion\models\fc_key_csd;
-use gamboamartin\facturacion\models\fc_key_pem;
 use gamboamartin\facturacion\models\fc_layout_nom;
 use gamboamartin\facturacion\models\fc_row_layout;
 use gamboamartin\facturacion\models\fc_row_nomina;
@@ -210,6 +205,125 @@ class controlador_fc_layout_nom extends system{
             exit;
         }
         return file_get_contents($file_url);
+
+
+    }
+
+    public function descarga_rec_pdf(bool $header, bool $ws = false)
+    {
+
+        $datos_recibo = (new _timbra_nomina())->datos_recibo(link: $this->link,
+            fc_row_layout_id: $_GET['fc_row_layout_id']);
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener datos del recibo',data: $datos_recibo,
+                header: $header, ws: $ws);
+        }
+        $filtro['fc_row_layout.id'] = $_GET['fc_row_layout_id'];
+        $filtro['doc_tipo_documento.id'] = 8;
+        $r_fc_row_nomina = (new fc_row_nomina($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener datos del recibo',data: $r_fc_row_nomina,
+                header: $header, ws: $ws);
+        }
+        if($r_fc_row_nomina->n_registros === 0){
+            return $this->retorno_error(mensaje: 'No existe xml',data: $r_fc_row_nomina,header: $header, ws: $ws);
+        }
+
+        $fc_row_nomina = $r_fc_row_nomina->registros[0];
+
+        if (!is_file($fc_row_nomina['doc_documento_ruta_absoluta'])) {
+            http_response_code(404);
+            exit('Archivo no encontrado');
+        }
+
+        $filename = $fc_row_nomina['fc_layout_nom_id'].'.'.$fc_row_nomina['fc_row_layout_rfc'].'.pdf';
+
+        // Sanitiza filename (sin separadores ni control chars)
+        $safeName = preg_replace('/[\x00-\x1F\x7F\/\\\:\*\?"<>\|]+/', '_', $filename);
+        if (!preg_match('/\.pdf$/i', $safeName)) {
+            $safeName .= '.pdf';
+        }
+        if (function_exists('ob_get_level')) {
+            while (ob_get_level() > 0) { ob_end_clean(); }
+        }
+
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="'.$safeName.'"; filename*=UTF-8\'\''.rawurlencode($safeName));
+        header('Content-Transfer-Encoding: binary');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        header('X-Content-Type-Options: nosniff');
+        header('Last-Modified: '.gmdate('D, d M Y H:i:s', filemtime($fc_row_nomina['doc_documento_ruta_absoluta'])).' GMT');
+        header('Content-Length: '.filesize($fc_row_nomina['doc_documento_ruta_absoluta']));
+
+        // (Opcional) si quieres Content-Length:
+        // header('Content-Length: '.strlen($xmlString));
+
+        readfile($fc_row_nomina['doc_documento_ruta_absoluta']);
+        exit;
+
+
+    }
+
+    public function descarga_rec_xml(bool $header, bool $ws = false)
+    {
+
+        $datos_recibo = (new _timbra_nomina())->datos_recibo(link: $this->link,
+            fc_row_layout_id: $_GET['fc_row_layout_id']);
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener datos del recibo',data: $datos_recibo,
+                header: $header, ws: $ws);
+        }
+        $filtro['fc_row_layout.id'] = $_GET['fc_row_layout_id'];
+        $filtro['doc_tipo_documento.id'] = 2;
+        $r_fc_row_nomina = (new fc_row_nomina($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener datos del recibo',data: $r_fc_row_nomina,
+                header: $header, ws: $ws);
+        }
+        if($r_fc_row_nomina->n_registros === 0){
+            return $this->retorno_error(mensaje: 'No existe xml',data: $r_fc_row_nomina,header: $header, ws: $ws);
+        }
+
+        $fc_row_nomina = $r_fc_row_nomina->registros[0];
+
+        $xmlString = file_get_contents($fc_row_nomina['doc_documento_ruta_absoluta']);
+
+        if (!str_starts_with($xmlString, '<?xml')) {
+            $xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" . $xmlString;
+        }
+        // Quita BOM si existiera
+        $xmlString = preg_replace('/^\xEF\xBB\xBF/', '', $xmlString);
+
+
+        $filename = $fc_row_nomina['fc_layout_nom_id'].'.'.$fc_row_nomina['fc_row_layout_rfc'].'.xml';
+
+        // Sanitiza filename (sin separadores ni control chars)
+        $safeName = preg_replace('/[\x00-\x1F\x7F\/\\\:\*\?"<>\|]+/', '_', $filename);
+        if (!preg_match('/\.xml$/i', $safeName)) {
+            $safeName .= '.xml';
+        }
+
+        // Limpia buffers para evitar bytes extra
+        if (function_exists('ob_get_level')) {
+            while (ob_get_level() > 0) { ob_end_clean(); }
+        }
+
+        header('Content-Type: application/xml; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="'.$safeName.'"; filename*=UTF-8\'\''.rawurlencode($safeName));
+        header('Content-Transfer-Encoding: binary');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        header('X-Content-Type-Options: nosniff');
+        header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
+
+        // (Opcional) si quieres Content-Length:
+        // header('Content-Length: '.strlen($xmlString));
+
+        echo $xmlString;
+        exit;
 
 
     }

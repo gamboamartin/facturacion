@@ -8,7 +8,8 @@ use PDO;
 class fc_row_nomina extends modelo{
     public function __construct(PDO $link){
         $tabla = 'fc_row_nomina';
-        $columnas = array($tabla=>false, 'fc_row_layout'=>$tabla, 'doc_documento'=>$tabla);
+        $columnas = array($tabla=>false, 'fc_row_layout'=>$tabla, 'doc_documento'=>$tabla,
+            'doc_tipo_documento'=>'doc_documento','fc_layout_nom'=>'fc_row_layout');
         $campos_obligatorios = array();
         $campos_view = array();
         $no_duplicados = array();

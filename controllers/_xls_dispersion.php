@@ -343,11 +343,7 @@ class _xls_dispersion{
 
     private function elimina_doble_esp(string $value): string
     {
-        $value = str_replace('  ',' ',$value);
-        $value = str_replace('  ',' ',$value);
-        $value = str_replace('  ',' ',$value);
-        return str_replace('  ',' ',$value);
-
+        return preg_replace('/\s{2,}/', ' ', $value) ?? $value;
     }
 
     /**
@@ -720,15 +716,42 @@ class _xls_dispersion{
 
     private function fila_tiene_datos(Worksheet $hoja, int $row, array $columns): bool|array
     {
+        // Guard clauses: validaciones defensivas
+        if (!$this->es_hoja_valida($hoja)) {
+            return (new errores())->error(
+                mensaje: 'Parámetro $hoja inválido: se esperaba Worksheet',
+                data: ['hoja' => get_debug_type($hoja)]
+            );
+        }
+        if (!$this->es_fila_valida($row)) {
+            return (new errores())->error(
+                mensaje: 'Número de fila inválido: debe ser entero positivo (>=1)',
+                data: ['row' => $row]
+            );
+        }
+
+        $okCols = $this->valida_columnas($columns);
+        if (is_array($okCols)) {
+            // $okCols ya es un array de error contextualizado
+            return $okCols;
+        }
+
+        // Escaneo corto-circuito: retorna en cuanto encuentra un valor
         foreach ($columns as $col) {
-            $tiene_valor = $this->celda_tiene_valor($hoja, $col, $row);
-            if(errores::$error) {
-                return (new errores())->error('Error al verificar si existe valor', $tiene_valor);
+            $tiene = $this->celda_tiene_valor($hoja, $col, $row);
+
+            if (is_array($tiene)) {
+                // Propagar error con contexto adicional
+                return (new errores())->error(
+                    mensaje: 'Error al verificar si la celda tiene valor',
+                    data: ['col' => $col, 'row' => $row, 'detalle' => $tiene]
+                );
             }
-            if ($tiene_valor) {
+            if ($tiene === true) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -805,14 +828,37 @@ class _xls_dispersion{
 
     }
 
+    /**
+     * REG
+     * Normaliza un valor para uso interno.
+     *
+     * Reglas de transformación:
+     * - Si el valor es `null`, retorna una cadena vacía (`""`).
+     * - Cualquier valor se convierte explícitamente a cadena (`(string)`).
+     * - Se eliminan espacios en blanco al inicio y al final con `trim()`.
+     * - Se transforma todo a mayúsculas con `strtoupper()`.
+     *
+     * Esto asegura que todos los datos procesados tengan un formato homogéneo,
+     * evitando problemas por nulos, espacios o diferencias de mayúsculas/minúsculas.
+     *
+     * @param mixed $value Valor a normalizar. Puede ser `null`, string, número o booleano.
+     *
+     * @return string Valor normalizado en mayúsculas y sin espacios sobrantes.
+     *
+     * @example
+     *   $this->init_value(null);        // ""
+     *   $this->init_value(" hola ");    // "HOLA"
+     *   $this->init_value("Test123");   // "TEST123"
+     *   $this->init_value(true);        // "1"
+     *   $this->init_value(false);       // ""
+     *   $this->init_value(45.67);       // "45.67"
+     */
     private function init_value(mixed $value): string
     {
-        if(is_null($value)){
-            $value = '';
+        if ($value === null) {
+            return '';
         }
-        $value = trim($value);
-        return strtoupper($value);
-
+        return strtoupper(trim((string) $value));
     }
 
     private function layout_dispersion(Worksheet $hoja, stdClass $ini): array
@@ -987,22 +1033,28 @@ class _xls_dispersion{
 
     private function replace_may_val(string $value): string
     {
-        $value = str_replace('Á','A',$value);
-        $value = str_replace('É','E',$value);
-        $value = str_replace('Í','I',$value);
-        $value = str_replace('Ó','O',$value);
-        return str_replace('Ú','U',$value);
+        $map = [
+            'Á' => 'A',
+            'É' => 'E',
+            'Í' => 'I',
+            'Ó' => 'O',
+            'Ú' => 'U',
+        ];
 
+        return strtr($value, $map);
     }
 
-    private function replace_min_val(string $value):string
+    private function replace_min_val(string $value): string
     {
-        $value = str_replace('á','A',$value);
-        $value = str_replace('é','E',$value);
-        $value = str_replace('í','I',$value);
-        $value = str_replace('ó','O',$value);
-        return str_replace('ú','U',$value);
+        $map = [
+            'á' => 'A',
+            'é' => 'E',
+            'í' => 'I',
+            'ó' => 'O',
+            'ú' => 'U',
+        ];
 
+        return strtr($value, $map);
     }
 
     private function replaces_val(string $value): array|string
@@ -1115,6 +1167,27 @@ class _xls_dispersion{
         }
 
         return $lastRow;
+    }
+
+    private function valida_columnas(array $columns): true|array
+    {
+        if ($columns === []) {
+            return (new errores())->error(
+                mensaje: 'Parámetro $columns inválido: se esperaba arreglo no vacío de columnas',
+                data: ['columns' => $columns]
+            );
+        }
+
+        foreach ($columns as $col) {
+            if (!is_string($col) || !$this->es_columna_valida($col)) {
+                return (new errores())->error(
+                    mensaje: 'Columna inválida detectada en $columns: use notación Excel en mayúsculas',
+                    data: ['columna' => $col, 'columns' => $columns]
+                );
+            }
+        }
+
+        return true;
     }
 
     /**
