@@ -26,6 +26,8 @@ class controlador_fc_layout_nom extends system{
     public stdClass|array $keys_selects = array();
     public array $fc_rows_layout = array();
 
+    public string $link_modifica_datos_bd = '';
+
     public function __construct(PDO $link, html $html = new html(), stdClass $paths_conf = new stdClass()){
         $modelo = new fc_layout_nom(link: $link);
         $html_ = new fc_layout_nom_html(html: $html);
@@ -431,21 +433,117 @@ class controlador_fc_layout_nom extends system{
 
     public function modifica_datos(bool $header, bool $ws = false)
     {
-        $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
+        $fc_row_layout = (new fc_row_layout($this->link))->registro($_GET['fc_row_layout_id'],retorno_obj: true);
         if (errores::$error) {
             return $this->retorno_error(
-                mensaje: 'Error al obtener layout', data: $fc_layout_nom, header: $header, ws: $ws);
+                mensaje: 'Error al obtener layout', data: $fc_row_layout, header: $header, ws: $ws);
         }
 
         $this->inputs = new stdClass();
 
-        $nss = $this->html->input_text(cols: 3,disabled: false, name: 'nss',place_holder: 'NSS',row_upd: new stdClass(),value_vacio: false);
+        $cp = $this->html->input_text(
+            cols: 6,
+            disabled: false,
+            name: 'cp',
+            place_holder: 'CODIGO POSTAL',
+            row_upd: new stdClass(),
+            value_vacio: false,
+            value: $fc_row_layout->fc_row_layout_cp,
+
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener inputs', data: $cp, header: $header, ws: $ws);
+        }
+
+        $this->inputs->cp = $cp;
+
+        $nss = $this->html->input_text(
+            cols: 6,
+            disabled: false,
+            name: 'nss',
+            place_holder: 'NSS',
+            row_upd: new stdClass(),
+            value_vacio: false,
+            value: $fc_row_layout->fc_row_layout_nss,
+        );
         if (errores::$error) {
             return $this->retorno_error(
                 mensaje: 'Error al obtener inputs', data: $nss, header: $header, ws: $ws);
         }
 
         $this->inputs->nss = $nss;
+
+        $rfc = $this->html->input_text(
+            cols: 6,
+            disabled: false,
+            name: 'rfc',
+            place_holder: 'RFC',
+            row_upd: new stdClass(),
+            value_vacio: false,
+            value: $fc_row_layout->fc_row_layout_rfc,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener inputs', data: $rfc, header: $header, ws: $ws);
+        }
+
+        $this->inputs->rfc = $rfc;
+
+        $curp = $this->html->input_text(
+            cols: 6,
+            disabled: false,
+            name: 'curp',
+            place_holder: 'CURP',
+            row_upd: new stdClass(),
+            value_vacio: false,
+            value: $fc_row_layout->fc_row_layout_curp,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener inputs', data: $curp, header: $header, ws: $ws);
+        }
+
+        $this->inputs->curp = $curp;
+
+        $nombre_completo = $this->html->input_text(
+            cols: 6,
+            disabled: false,
+            name: 'nombre_completo',
+            place_holder: 'Nombre Completo',
+            row_upd: new stdClass(),
+            value_vacio: false,
+            value: $fc_row_layout->fc_row_layout_nombre_completo,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener inputs', data: $nombre_completo, header: $header, ws: $ws);
+        }
+
+        $link = "index.php?seccion=fc_layout_nom&accion=modifica_datos_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
+        $link .= "&fc_row_layout_id={$_GET['fc_row_layout_id']}";
+        $this->link_modifica_datos_bd = $link;
+
+        $this->inputs->nombre_completo = $nombre_completo;
+    }
+
+    public function modifica_datos_bd(bool $header, bool $ws = false): array|stdClass
+    {
+        $fc_row_layout_id = $_GET['fc_row_layout_id'];
+
+        $fc_row_layout_modelo = new fc_row_layout($this->link);
+        $upd_row['cp'] = $_POST['cp'];
+        $upd_row['nss'] = $_POST['nss'];
+        $upd_row['rfc'] = $_POST['rfc'];
+        $upd_row['curp'] = $_POST['curp'];
+        $upd_row['nombre_completo'] = $_POST['nombre_completo'];
+        $result = $fc_row_layout_modelo->modifica_bd($upd_row, $fc_row_layout_id);
+        if(errores::$error){
+            return $this->retorno_error(
+                mensaje: 'Error al modifica_bd de fc_row_layout', data: $result, header: $header, ws: $ws);
+        }
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+        return $result;
     }
 
     public function ver_empleados(bool $header, bool $ws = false): array|stdClass
