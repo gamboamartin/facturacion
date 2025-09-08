@@ -504,6 +504,9 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $options = new Options();
         $options->set('isRemoteEnabled', true);
         $options->set('defaultFont', 'DejaVu Sans');
+        $options->set('is_local_enabled', true);
+        $options->set('isHtml5ParserEnabled', true);
+        $dompdf = new Dompdf($options);
         $dompdf = new Dompdf($options);
 
         $dompdf->loadHtml($html, 'UTF-8');
@@ -713,6 +716,17 @@ class controlador_fc_complemento_pago extends _base_system_fc {
                 'tipo_comprobante' => $tipo_comprobante,
                 'condiciones_pago' => $condiciones_pago,
                 'moneda' => $moneda,
+            ],
+            'relacionados' => [
+                'folio_fiscal' => $folio_fiscal,
+                'serie' => $reporte['fc_complemento_pago_serie'],
+                'folio' => $reporte['fc_complemento_pago_folio'],
+                'moneda' => $reporte['cat_sat_moneda_codigo'],
+                'tipo_cambio' => $reporte['com_tipo_cambio_descripcion'],
+                'numero_parcialidad' => '84111506',
+                'saldo_anterior' => '$0.00',
+                'importe_pagado' => '$0.00',
+                'saldo_insoluto' => '$0.00',
             ],
             'totales' => [
                 'subtotal' => $totales_sub_total,
