@@ -15,6 +15,9 @@ use Throwable;
 class _xls_dispersion{
 
     public static array $letras = array();
+    private const string ENCABEZADO_COL          = 'A';
+    private const int ENCABEZADO_MAX_FILAS    = 200;
+    private const array ENCABEZADOS_PERMITIDOS  = ['CLAVE EMPLEADO', 'CLAVEEMPLEADO'];
 
     public function __construct()
     {
@@ -58,14 +61,82 @@ class _xls_dispersion{
 
     }
 
-    private function buscar_primera_coincidencia(Worksheet $hoja, string $col, int $maxFilas, array $candidatos): int {
+    /**
+     * REG
+     * Busca en una columna de la hoja la primera fila que contenga un valor
+     * coincidente con alguno de los candidatos esperados.
+     *
+     * Flujo de validación:
+     *  1. Verifica que los parámetros sean válidos:
+     *     - `$hoja` debe ser instancia de {@see Worksheet}.
+     *     - `$col` debe cumplir el formato de columna de Excel en mayúsculas (ej. "A", "B", "AA").
+     *     - `$maxFilas` debe ser un entero positivo (≥1).
+     *     Si alguna validación falla, retorna inmediatamente `0`.
+     *
+     *  2. Determina el rango de filas a escanear:
+     *     - Toma el mínimo entre `$maxFilas` y `getHighestRow()` de la hoja.
+     *
+     *  3. Itera fila por fila desde 1 hasta `$highest`:
+     *     - Obtiene el valor con {@see valor_celda_normalizado()}.
+     *     - Si el valor no es vacío y coincide estrictamente con alguno de los `$candidatos`
+     *       (comparación estricta con `in_array(..., true)`), retorna el número de fila.
+     *
+     *  4. Si no encuentra ninguna coincidencia, retorna `0`.
+     *
+     * Reglas de retorno:
+     *  - `int` con la fila donde se encontró la primera coincidencia.
+     *  - `0` si no se encontró ninguna coincidencia o los parámetros eran inválidos.
+     *
+     * @param Worksheet $hoja       Hoja de cálculo donde se realizará la búsqueda.
+     * @param string    $col        Columna en notación Excel (ejemplo: "A", "B", "AA").
+     * @param int       $maxFilas   Número máximo de filas a escanear (≥1).
+     * @param array     $candidatos Lista de valores normalizados a buscar.
+     *
+     * @return int Fila de la primera coincidencia; `0` si no hay coincidencias o parámetros inválidos.
+     *
+     * @example Uso exitoso
+     * ```php
+     * $hoja->setCellValue('A5', 'CLAVE EMPLEADO');
+     * $fila = $this->buscar_primera_coincidencia($hoja, 'A', 200, ['CLAVE EMPLEADO', 'CLAVEEMPLEADO']);
+     * // $fila === 5
+     * ```
+     *
+     * @example Sin coincidencias
+     * ```php
+     * $hoja->setCellValue('A1', 'SIN MATCH');
+     * $fila = $this->buscar_primera_coincidencia($hoja, 'A', 100, ['CLAVE EMPLEADO']);
+     * // $fila === 0
+     * ```
+     *
+     * @example Parámetros inválidos
+     * ```php
+     * $fila = $this->buscar_primera_coincidencia("no-hoja", "A", 10, ['X']); // 0
+     * $fila = $this->buscar_primera_coincidencia($hoja, "1A", 10, ['X']);   // 0
+     * $fila = $this->buscar_primera_coincidencia($hoja, "A", 0, ['X']);    // 0
+     * ```
+     */
+    private function buscar_primera_coincidencia(
+        Worksheet $hoja,
+        string $col,
+        int $maxFilas,
+        array $candidatos
+    ): int {
+        // Guard clauses: validaciones defensivas
+        if (!$this->es_hoja_valida($hoja))   return 0;
+        if (!$this->es_columna_valida($col)) return 0;
+        if ($maxFilas < 1)                   return 0;
+
+        // Determinar el límite superior real
         $highest = min($hoja->getHighestRow(), $maxFilas);
+
+        // Escaneo fila por fila
         for ($row = 1; $row <= $highest; $row++) {
             $val = $this->valor_celda_normalizado($hoja, $col, $row);
             if ($val !== '' && in_array($val, $candidatos, true)) {
                 return $row;
             }
         }
+
         return 0;
     }
 
@@ -184,6 +255,32 @@ class _xls_dispersion{
 
     }
 
+    /**
+     * REG
+     * Devuelve la lista de columnas que se deben escanear al determinar
+     * la existencia de datos en una fila.
+     *
+     * Actualmente, se consideran las primeras cinco columnas de la hoja
+     * de cálculo: **A, B, C, D y E**.
+     * Esta configuración sirve como límite de exploración inicial para
+     * detectar si una fila contiene información relevante.
+     *
+     * Notas de mantenimiento:
+     * - El método centraliza la definición de columnas a revisar, evitando
+     *   el uso de "números mágicos" en el código.
+     * - Si en el futuro es necesario ampliar o reducir el rango de columnas
+     *   a validar, este método puede ajustarse fácilmente.
+     *
+     * @return array<string>
+     *   Arreglo indexado con las letras de las columnas a escanear.
+     *   Ejemplo: ['A', 'B', 'C', 'D', 'E'].
+     *
+     * @example Uso típico
+     * ```php
+     * $cols = $this->columnas_a_escanear();
+     * // $cols === ['A', 'B', 'C', 'D', 'E']
+     * ```
+     */
     private function columnas_a_escanear(): array
     {
         return ['A', 'B', 'C', 'D', 'E'];
@@ -359,14 +456,60 @@ class _xls_dispersion{
         return $hoja instanceof Worksheet;
     }
 
+    /**
+     * REG
+     * Verifica si un número de fila inicial es válido.
+     *
+     * Una fila inicial se considera válida cuando:
+     *  - Es un número entero mayor que cero.
+     *  - Representa el punto de partida correcto para procesar un layout
+     *    (las filas en Excel comienzan en 1, no en 0).
+     *
+     * Reglas:
+     *  - Retorna `true` si `$fila_inicial > 0`.
+     *  - Retorna `false` en cualquier otro caso (0 o números negativos).
+     *
+     * @param int $fila_inicial
+     *   Número de fila a validar.
+     *
+     * @return bool
+     *   - `true` si la fila inicial es válida.
+     *   - `false` si es cero o negativa.
+     *
+     * @example Uso válido
+     * ```php
+     * $this->es_fila_inicial_valida(1);   // true
+     * $this->es_fila_inicial_valida(10);  // true
+     * ```
+     *
+     * @example Uso inválido
+     * ```php
+     * $this->es_fila_inicial_valida(0);   // false
+     * $this->es_fila_inicial_valida(-3);  // false
+     * ```
+     */
     private function es_fila_inicial_valida(int $fila_inicial): bool
     {
         return $fila_inicial > 0;
     }
 
 
+    /**
+     * REG
+     * Valida que la hoja tenga un layout correcto (encabezado presente).
+     *
+     * Reglas:
+     *  - Verifica que $hoja sea Worksheet válido.
+     *  - Usa {@see file_encabezado()} para localizar el encabezado.
+     *  - Retorna `true` si la fila del encabezado es un entero >= 1.
+     *  - En cualquier otra situación, retorna un arreglo de error contextualizado.
+     *
+     * @param Worksheet $hoja
+     * @return bool|array `true` si es válido; `array` con error si no.
+     */
     private function es_valido(Worksheet $hoja): bool|array
     {
+        // 1) Validación defensiva del parámetro
         if (!$this->es_hoja_valida($hoja)) {
             return (new errores())->error(
                 mensaje: 'Parámetro $hoja inválido: se esperaba Worksheet',
@@ -374,15 +517,18 @@ class _xls_dispersion{
             );
         }
 
+        // 2) Localizar encabezado (delegado)
         $fila_encabezado = $this->file_encabezado($hoja);
-        if (errores::$error) {
-            // Propaga el error enriqueciendo el contexto
+
+        // Si file_encabezado propagó error (array) o se marcó error global, enriquecer y retornar
+        if (is_array($fila_encabezado) || errores::$error) {
             return (new errores())->error(
                 mensaje: 'Encabezado no encontrado en la hoja (validación de layout)',
                 data: $fila_encabezado
             );
         }
 
+        // 3) Validar el resultado
         if (!is_int($fila_encabezado) || $fila_encabezado < 1) {
             return (new errores())->error(
                 mensaje: 'Fila de encabezado inválida',
@@ -473,9 +619,69 @@ class _xls_dispersion{
     }
 
 
+    /**
+     * REG
+     * Localiza la fila del encabezado dentro de una hoja de Excel.
+     *
+     * Este método escanea una columna específica (definida por la constante
+     * {@see self::ENCABEZADO_COL}) hasta un número máximo de filas
+     * ({@see self::ENCABEZADO_MAX_FILAS}) en busca de alguno de los valores
+     * de encabezado permitidos ({@see self::ENCABEZADOS_PERMITIDOS}).
+     *
+     * Flujo:
+     *  1. Validación defensiva:
+     *     - Verifica que `$hoja` sea una instancia válida de {@see Worksheet}.
+     *     - Verifica que la columna configurada sea válida.
+     *     En caso contrario, retorna un arreglo de error generado por {@see errores}.
+     *
+     *  2. Escaneo:
+     *     - Llama a {@see buscar_primera_coincidencia()} con la columna, el límite de filas
+     *       y la lista de encabezados permitidos.
+     *     - Si encuentra una coincidencia, retorna el número de fila (>0).
+     *
+     *  3. Error:
+     *     - Si no encuentra coincidencia, retorna un arreglo de error con detalles
+     *       del contexto (encabezados esperados, columna escaneada y número de filas revisadas).
+     *
+     * Reglas de retorno:
+     *  - `int`   → Número de fila donde se encontró el encabezado.
+     *  - `array` → Error con mensaje descriptivo y datos de contexto.
+     *
+     * @param Worksheet $hoja Hoja de cálculo de Excel donde se buscará el encabezado.
+     *
+     * @return int|array
+     *   - int  → Fila del encabezado encontrada (>0).
+     *   - array→ Estructura de error si no se encuentra el encabezado o la hoja/columna son inválidas.
+     *
+     * @example Uso exitoso
+     * ```php
+     * $spreadsheet = new Spreadsheet();
+     * $hoja = $spreadsheet->getActiveSheet();
+     * $hoja->setCellValue('A5', 'CLAVE EMPLEADO');
+     *
+     * $fila = $this->file_encabezado($hoja);
+     * // $fila === 5
+     * ```
+     *
+     * @example Hoja inválida
+     * ```php
+     * $fila = $this->file_encabezado("no-hoja");
+     * // Retorna array con mensaje "Parámetro $hoja inválido"
+     * ```
+     *
+     * @example Encabezado no encontrado
+     * ```php
+     * $spreadsheet = new Spreadsheet();
+     * $hoja = $spreadsheet->getActiveSheet();
+     * $hoja->setCellValue('A1', 'SIN MATCH');
+     *
+     * $fila = $this->file_encabezado($hoja);
+     * // Retorna array con mensaje "Encabezado no encontrado en la columna indicada"
+     * ```
+     */
     private function file_encabezado(Worksheet $hoja): int|array
     {
-        // Validaciones defensivas
+        // 1) Validaciones defensivas
         if (!$this->es_hoja_valida($hoja)) {
             return (new errores())->error(
                 mensaje: 'Parámetro $hoja inválido: se esperaba Worksheet',
@@ -483,10 +689,10 @@ class _xls_dispersion{
             );
         }
 
-        // Config centralizada (evita números mágicos)
-        $columna           = 'A';
-        $maxFilas          = 200;
-        $headersPermitidos = ['CLAVE EMPLEADO', 'CLAVEEMPLEADO'];
+        // Lectura de configuración (sin números mágicos)
+        $columna   = self::ENCABEZADO_COL;
+        $maxFilas  = self::ENCABEZADO_MAX_FILAS;
+        $candidatos = self::ENCABEZADOS_PERMITIDOS;
 
         if (!$this->es_columna_valida($columna)) {
             return (new errores())->error(
@@ -495,26 +701,31 @@ class _xls_dispersion{
             );
         }
 
-        $fila = $this->buscar_primera_coincidencia($hoja, $columna, $maxFilas, $headersPermitidos);
+        // 2) Búsqueda de la primera coincidencia
+        $fila = $this->buscar_primera_coincidencia($hoja, $columna, $maxFilas, $candidatos);
         if ($fila > 0) {
             return $fila;
         }
 
-        // Error consistente y contextualizado
+        // 3) Error consistente y contextualizado
         return (new errores())->error(
             mensaje: 'Encabezado no encontrado en la columna indicada',
             data: [
-                'encabezados_esperados' => $headersPermitidos,
+                'encabezados_esperados' => $candidatos,
                 'columna_escaneada'     => $columna,
                 'filas_escaneadas'      => min($hoja->getHighestRow(), $maxFilas)
             ]
         );
     }
 
-    private function fila_tiene_datos(Worksheet $hoja, int $row, array $columns): bool
+    private function fila_tiene_datos(Worksheet $hoja, int $row, array $columns): bool|array
     {
         foreach ($columns as $col) {
-            if ($this->celda_tiene_valor($hoja, $col, $row)) {
+            $tiene_valor = $this->celda_tiene_valor($hoja, $col, $row);
+            if(errores::$error) {
+                return (new errores())->error('Error al verificar si existe valor', $tiene_valor);
+            }
+            if ($tiene_valor) {
                 return true;
             }
         }
@@ -879,12 +1090,6 @@ class _xls_dispersion{
                 data: $fila_inicial
             );
         }
-        if (!$hoja instanceof Worksheet) {
-            return (new errores())->error(
-                mensaje: 'Error: parámetro $hoja inválido, se esperaba Worksheet',
-                data: $hoja
-            );
-        }
 
         $columns   = $this->columnas_a_escanear(); // ['A','B','C','D','E'] (fácil de ampliar)
         $highest   = (int) $hoja->getHighestRow();
@@ -893,7 +1098,11 @@ class _xls_dispersion{
 
         // Una sola pasada desde fila_inicial hasta el final de la hoja
         for ($row = $startRow; $row <= $highest; $row++) {
-            if ($this->fila_tiene_datos($hoja, $row, $columns)) {
+            $tiene_datos = $this->fila_tiene_datos($hoja, $row, $columns);
+            if(errores::$error){
+                return (new errores())->error('Error al verificar si tiene datos',$tiene_datos);
+            }
+            if ($tiene_datos) {
                 $lastRow = $row;
             }
         }
@@ -908,16 +1117,78 @@ class _xls_dispersion{
         return $lastRow;
     }
 
-    private function valor_celda_normalizado(Worksheet $hoja, string $col, int $fila): string {
-        if (!$this->es_hoja_valida($hoja) || !$this->es_columna_valida($col) || !$this->es_fila_valida($fila)) {
+    /**
+     * REG
+     * Obtiene y normaliza el valor textual de una celda de Excel.
+     *
+     * Flujo de ejecución:
+     *  1. Validaciones defensivas:
+     *     - Verifica que `$hoja` sea instancia válida de {@see Worksheet}.
+     *     - Verifica que `$col` sea una referencia de columna válida (ej. "A", "B", "AA").
+     *     - Verifica que `$fila` sea un número entero positivo (>=1).
+     *     En caso de no cumplir alguna validación, retorna cadena vacía `""`.
+     *
+     *  2. Lectura de valor:
+     *     - Utiliza {@see leer_valor_celda()} para obtener el valor de la celda.
+     *     - Si ocurre un error y `leer_valor_celda` devuelve un `Throwable`,
+     *       se retorna cadena vacía `""` en lugar de propagar la excepción.
+     *
+     *  3. Normalización:
+     *     - El valor leído se procesa con {@see normaliza_texto()}:
+     *         - `null` → `""`
+     *         - Se elimina espacios con `trim()`
+     *         - Se convierte a mayúsculas con `strtoupper()`
+     *     - Retorna el valor siempre como `string` en formato limpio y consistente.
+     *
+     * Reglas de retorno:
+     *  - `""` si los parámetros son inválidos o hubo error al leer la celda.
+     *  - `string` con el valor normalizado en mayúsculas en caso exitoso.
+     *
+     * @param Worksheet $hoja Hoja de cálculo donde se buscará la celda.
+     * @param string    $col  Columna en notación Excel (ejemplo: "A", "B", "AA").
+     * @param int       $fila Número de fila (>=1).
+     *
+     * @return string Valor normalizado de la celda o `""` en caso de error o celda vacía.
+     *
+     * @example Celda con texto
+     * ```php
+     * $hoja->setCellValue('A1', ' hola ');
+     * $this->valor_celda_normalizado($hoja, 'A', 1); // "HOLA"
+     * ```
+     *
+     * @example Celda con número
+     * ```php
+     * $hoja->setCellValue('B2', 123);
+     * $this->valor_celda_normalizado($hoja, 'B', 2); // "123"
+     * ```
+     *
+     * @example Celda vacía
+     * ```php
+     * $this->valor_celda_normalizado($hoja, 'C', 3); // ""
+     * ```
+     *
+     * @example Parámetros inválidos
+     * ```php
+     * $this->valor_celda_normalizado("no-hoja", "A", 1); // ""
+     * $this->valor_celda_normalizado($hoja, "1A", 1);    // ""
+     * $this->valor_celda_normalizado($hoja, "A", 0);     // ""
+     * ```
+     */
+    private function valor_celda_normalizado(Worksheet $hoja, string $col, int $fila): string
+    {
+        // Validaciones defensivas (guard clauses)
+        if (!$this->es_hoja_valida($hoja))    return '';
+        if (!$this->es_columna_valida($col))  return '';
+        if (!$this->es_fila_valida($fila))    return '';
+
+        // Lectura segura (no duplicar lógica: usa helper centralizado)
+        $valor = $this->leer_valor_celda($hoja, $col, $fila);
+        if ($valor instanceof Throwable) {
             return '';
         }
-        try {
-            $raw = $hoja->getCell($col.$fila)->getValue();
-            return $this->normaliza_texto($raw);
-        } catch (\Throwable) {
-            return '';
-        }
+
+        // Normalización consistente en todo el proyecto
+        return $this->normaliza_texto($valor);
     }
 
     private function write_data(Worksheet $hoja, array $layout_dispersion): Worksheet|array
