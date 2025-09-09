@@ -606,6 +606,8 @@ class controlador_fc_layout_nom extends system{
         }
         $rows = $r_rows->registros;
 
+        $nombre_original_excel = $rows[0]['fc_layout_nom_descripcion'];
+
         foreach ($rows as $row) {
             $timbra = (new _timbra_nomina())->timbra_recibo(link: $this->link,fc_row_layout_id:  $row['fc_row_layout_id']);
             if(errores::$error) {
@@ -620,7 +622,14 @@ class controlador_fc_layout_nom extends system{
                 mensaje: 'Error al generar spreadsheet', data: $spreadsheet, header: $header, ws: $ws);
         }
 
-        $filename = 'TIMBRADO.xlsx';
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
+
+        $info = pathinfo($nombre_original_excel);
+        $nuevo_nombre_excel = $info['filename'] . '_TIMBRADO.' . $info['extension'];
+
+        $filename = $nuevo_nombre_excel;
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: max-age=0, no-store, no-cache, must-revalidate');
