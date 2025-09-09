@@ -291,12 +291,12 @@
                             <tbody>
                             <?php foreach ($datos['productos'] as $p): ?>
                                 <tr>
-                                    <td style="text-align: center"><?= $p['cantidad'] ?></td>
+                                    <td style="text-align: center">1</td>
                                     <td style="text-align: center"><?= $p['unidad'] ?></td>
                                     <td style="text-align: center"><?= $p['clave'] ?></td>
                                     <td style="text-align: center"><?= $p['descripcion'] ?></td>
                                     <td style="text-align: center"><?= $p['obj_impuesto'] ?></td>
-                                    <td style="text-align: center">$<?= $p['valor_unitario'] ?></td>
+                                    <td style="text-align: center"><?= $p['valor_unitario'] ?></td>
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>
@@ -324,19 +324,19 @@
         </tr>
         </thead>
         <tbody>
-        <?php foreach ($datos['productos'] as $p): ?>
+<!--        --><?php //foreach ($datos['productos'] as $p): ?>
             <tr>
-                <td style="padding: 5px; text-align: center;"><?= $p['cantidad'] ?></td>
-                <td style="padding: 5px; text-align: center;"><?= $p['unidad'] ?></td>
-                <td style="padding: 5px; text-align: center;"><?= $p['clave'] ?></td>
-                <td style="padding: 5px; text-align: center;"><?= $p['clave'] ?></td>
-                <td style="padding: 5px; text-align: center;"><?= $p['clave'] ?></td>
-                <td style="padding: 5px; text-align: center;"><?= $p['clave'] ?></td>
-                <td style="padding: 5px; text-align: center;">$<?= $p['valor_unitario'] ?></td>
-                <td style="padding: 5px; text-align: center;">$<?= $p['valor_unitario'] ?></td>
-                <td style="padding: 5px; text-align: center;">$<?= $p['valor_unitario'] ?></td>
+                <td style="padding: 5px; text-align: center;"><?= $datos['relacionados']['folio_fiscal'] ?></td>
+                <td style="padding: 5px; text-align: center;"><?= $datos['relacionados']['serie'] ?></td>
+                <td style="padding: 5px; text-align: center;"><?= $datos['relacionados']['folio'] ?></td>
+                <td style="padding: 5px; text-align: center;"><?= $datos['relacionados']['moneda'] ?></td>
+                <td style="padding: 5px; text-align: center;"><?= $datos['relacionados']['tipo_cambio'] ?></td>
+                <td style="padding: 5px; text-align: center;"><?= $datos['relacionados']['numero_parcialidad'] ?></td>
+                <td style="padding: 5px; text-align: center;"><?= $datos['relacionados']['saldo_anterior'] ?></td>
+                <td style="padding: 5px; text-align: center;"><?= $datos['relacionados']['importe_pagado'] ?></td>
+                <td style="padding: 5px; text-align: center;"><?= $datos['relacionados']['saldo_insoluto'] ?></td>
             </tr>
-        <?php endforeach; ?>
+<!--        --><?php //endforeach; ?>
         </tbody>
     </table>
 </div>
