@@ -335,6 +335,14 @@ class _cnx_pac
         return json_encode($this->response, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
     }
 
+    /**
+     * OUT
+     * @param $jsonB64
+     * @param $keyPEM
+     * @param $cerPEM
+     * @param $plantilla
+     * @return false|string
+     */
     public function operacion_timbrarJSON2( $jsonB64, $keyPEM, $cerPEM, $plantilla)
     {
         $res = $this->client->timbrarJSON2($this->api_key, $jsonB64, $keyPEM, $cerPEM, $plantilla);

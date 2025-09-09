@@ -53,6 +53,10 @@ class _make_json
 
     }
 
+    /**
+     * OUT
+     * @return string[]
+     */
     private function concepto(): array
     {
         return [
@@ -67,6 +71,10 @@ class _make_json
 
     }
 
+    /**
+     * OUT
+     * @return string[]
+     */
     private function emisor(): array
     {
         $fc_csd_data = $this->obtener_fc_csd_data(pac::$fc_csd_nomina_id);
@@ -91,6 +99,10 @@ class _make_json
         return ["Rfc" => "$rfc", "Nombre" => "$nombre", "RegimenFiscal" => "$regimen_fiscal"];
     }
 
+    /**
+     * OUT
+     * @return array
+     */
     public function getJson(): array
     {
 
@@ -177,6 +189,10 @@ class _make_json
         return ['json' => $json];
     }
 
+    /**
+     * OUT
+     * @return string[]
+     */
     private function jubilacion(): array
     {
         return [
@@ -187,6 +203,11 @@ class _make_json
 
     }
 
+    /**
+     * OUT
+     * @param string $cuenta
+     * @return array
+     */
     private function nomina(string $cuenta): array
     {
 
@@ -214,6 +235,10 @@ class _make_json
 
     }
 
+    /**
+     * OUT
+     * @return string[]
+     */
     private function percepcion(): array
     {
         return [
@@ -226,6 +251,10 @@ class _make_json
 
     }
 
+    /**
+     * OUT
+     * @return array
+     */
     private function percepciones(): array
     {
 
@@ -249,6 +278,10 @@ class _make_json
 
     }
 
+    /**
+     * OUT
+     * @return array
+     */
     private function receptor(): array
     {
         $receptor['Rfc'] = "{$this->r_rfc}";
@@ -259,6 +292,11 @@ class _make_json
         return $receptor;
     }
 
+    /**
+     * OUT
+     * @param string $cuenta
+     * @return string[]
+     */
     private function receptor_nomina(string $cuenta): array
     {
         return ["Curp" => "{$this->r_curp}", "NumSeguridadSocial" => "{$this->r_nss}",
@@ -272,6 +310,10 @@ class _make_json
 
     }
 
+    /**
+     * OUT
+     * @return array
+     */
     private function obtener_no_certificado(): array
     {
 
@@ -288,6 +330,10 @@ class _make_json
         return [];
     }
 
+    /**
+     * OUT
+     * @return array
+     */
     private function obtener_lugar_expedicion(): array
     {
         $fc_csd_data = $this->obtener_fc_csd_data(pac::$fc_csd_nomina_id);
@@ -308,6 +354,11 @@ class _make_json
         return [];
     }
 
+    /**
+     * OUT
+     * @param int $fc_csd_id
+     * @return array
+     */
     private function obtener_fc_csd_data(int $fc_csd_id): array
     {
         $fc_csd_modelo = new fc_csd($this->link);

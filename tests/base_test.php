@@ -55,12 +55,203 @@ class base_test{
     private PDO $link;
 
 
+    final public function delete_com_cliente_documento(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM com_cliente_documento";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
     final public function delete_com_tipo_cambio(PDO $link): true|array
     {
         $this->link = $link;
 
 
         $sql = "DELETE FROM com_tipo_cambio";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
+
+    final public function delete_doc_documento(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM doc_documento";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
+
+    final public function delete_doc_version(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM doc_version";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
+
+    final public function delete_fc_cer_csd(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM fc_cer_csd";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
+
+    final public function delete_fc_cer_pem(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM fc_cer_pem";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
+
+    final public function delete_fc_factura_documento(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM fc_factura_documento";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
+
+    final public function delete_fc_key_csd(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM fc_key_csd";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
+
+    final public function delete_fc_key_pem(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM fc_key_pem";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
+
+    final public function delete_fc_layout_nom(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM fc_layout_nom";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
+
+    final public function delete_fc_row_layout(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM fc_row_layout";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
+
+    final public function delete_fc_row_nomina(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM fc_row_nomina";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            return (new errores())->error('Error', $exe);
+
+        }
+        return true;
+
+    }
+
+    final public function delete_not_adjunto(PDO $link): true|array
+    {
+        $this->link = $link;
+
+
+        $sql = "DELETE FROM not_adjunto";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
@@ -303,9 +494,7 @@ VALUES (1, 'MEX MXN 2025-09-05', 'MEX MXN 2025-09-05', 'activo', 2, 2, '2025-09-
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
-            $error = (new errores())->error('Error', $exe);
-            print_r($error);
-            exit;
+            return (new errores())->error('Error', $exe);
         }
         return true;
 
@@ -388,6 +577,51 @@ VALUES (1, 'MEX MXN 2025-09-05', 'MEX MXN 2025-09-05', 'activo', 2, 2, '2025-09-
                                   fecha_update, descripcion_select, alias, codigo_bis, descripcion, fc_factura_id, 
                                   doc_documento_id) VALUES (1, '1', 'actvo', 2, 2, '2025-09-01 11:35:21', 
                                                             '2025-09-01 11:35:21', '2', '2', '2', '2', 1, 1);";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+        return true;
+
+    }
+
+    final public function insert_fc_layout_nom(PDO $link)
+    {
+        $this->link = $link;
+
+        $sql = "INSERT INTO fc_layout_nom (id, codigo, status, usuario_alta_id, usuario_update_id, fecha_alta, 
+                           fecha_update, descripcion, descripcion_select, alias, codigo_bis, doc_documento_id, 
+                           empleados_cargados, fecha_pago, estado_timbrado, total_dispersion) 
+                VALUES (1, 'LDN.20250828145332.59', 'activo', 16, 16, '2025-08-28 22:53:32', '2025-08-28 22:53:32', 
+                        'CARTONCITY SEM 35 280825 CARTONCITY SEM 35.xlsx', '', '', 'LDN.20250828145332.40', 1, 
+                        'inactivo', '1900-01-01', 'SIN TIMBRAR', 0.00);";
+
+        $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
+        if(errores::$error){
+            $error = (new errores())->error('Error', $exe);
+            print_r($error);
+            exit;
+        }
+        return true;
+
+    }
+
+    final public function insert_fc_row_layout(PDO $link)
+    {
+        $this->link = $link;
+
+        $sql = "INSERT INTO fc_row_layout (id, descripcion, codigo, status, usuario_alta_id, usuario_update_id, 
+                           fecha_alta, fecha_update, descripcion_select, alias, codigo_bis, predeterminado, 
+                           fc_empleado_id, fc_layout_nom_id, doc_documento_id, uuid, esta_timbrado, neto_depositar,
+                           banco, cuenta, clabe, cp, cve_empleado, nss, rfc, curp, nombre_completo, tarjeta, email, 
+                           fecha_pago, fecha_emision, error) VALUES (1, '1', '1', 'activo', 2, 2, '2025-09-09 10:09:08', 
+                                                                     '2025-09-09 10:09:08', '2', '2', '1', 'inactivo', 
+                                                                     1, 1, 1, '1', 'inactivo', 1.00, '1', '1', '1', 
+                                                                     '1', '1', '1', '1', '1', '1', '1', '1', '1900-01-01', 
+                                                                     '1900-01-01 00:00:00', '1');";
 
         $exe = \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $this->link);
         if(errores::$error){
