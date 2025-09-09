@@ -474,7 +474,10 @@ class controlador_fc_layout_nom extends system{
             return $this->retorno_error(
                 mensaje: 'Error al modifica_bd de fc_row_layout', data: $result, header: $header, ws: $ws);
         }
-        header("Location: " . $_SERVER['HTTP_REFERER']);
+
+        $link = "index.php?seccion=fc_layout_nom&accion=ver_empleados&registro_id={$this->registro_id}";
+        $link .= "&adm_menu_id=-1&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
         return $result;
     }
 
