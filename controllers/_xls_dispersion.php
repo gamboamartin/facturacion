@@ -716,42 +716,30 @@ class _xls_dispersion{
 
     private function fila_tiene_datos(Worksheet $hoja, int $row, array $columns): bool|array
     {
-        // Guard clauses: validaciones defensivas
-        if (!$this->es_hoja_valida($hoja)) {
+        // 1) Validaciones defensivas
+        $validacion = $this->validar_entrada_fila_tiene_datos($hoja, $row, $columns);
+        if (errores::$error) {
             return (new errores())->error(
-                mensaje: 'Parámetro $hoja inválido: se esperaba Worksheet',
-                data: ['hoja' => get_debug_type($hoja)]
-            );
-        }
-        if (!$this->es_fila_valida($row)) {
-            return (new errores())->error(
-                mensaje: 'Número de fila inválido: debe ser entero positivo (>=1)',
-                data: ['row' => $row]
+                mensaje: 'Error al validar entradas en fila_tiene_datos',
+                data: ['detalle' => $validacion, 'row' => $row, 'columns' => $columns]
             );
         }
 
-        $okCols = $this->valida_columnas($columns);
-        if (is_array($okCols)) {
-            // $okCols ya es un array de error contextualizado
-            return $okCols;
-        }
-
-        // Escaneo corto-circuito: retorna en cuanto encuentra un valor
+        // 2) Escaneo corto-circuito: retorna en cuanto encuentre una celda con valor
         foreach ($columns as $col) {
-            $tiene = $this->celda_tiene_valor($hoja, $col, $row);
-
-            if (is_array($tiene)) {
-                // Propagar error con contexto adicional
+            $tieneValor = $this->celda_tiene_valor($hoja, $col, $row);
+            if (errores::$error) {
                 return (new errores())->error(
                     mensaje: 'Error al verificar si la celda tiene valor',
-                    data: ['col' => $col, 'row' => $row, 'detalle' => $tiene]
+                    data: ['col' => $col, 'row' => $row, 'detalle' => $tieneValor]
                 );
             }
-            if ($tiene === true) {
+            if ($tieneValor === true) {
                 return true;
             }
         }
 
+        // 3) Ninguna celda tuvo contenido no vacío
         return false;
     }
 
@@ -809,7 +797,8 @@ class _xls_dispersion{
 
     private function init_valores_fila(Worksheet $hoja, int $recorrido): array
     {
-        $valores_fila = $hoja->rangeToArray("A$recorrido:L$recorrido", null, true, false);
+        $valores_fila = $hoja->rangeToArray(range: "A$recorrido:L$recorrido",
+            nullValue: null, calculateFormulas: true, formatData: false);
 
         if(is_null($valores_fila[0]['5'])){
             $valores_fila[0]['5'] = '';
@@ -1144,6 +1133,9 @@ class _xls_dispersion{
         }
 
         $columns   = $this->columnas_a_escanear(); // ['A','B','C','D','E'] (fácil de ampliar)
+        if(errores::$error){
+            return (new errores())->error('Error al obtener columnas', data: $columns);
+        }
         $highest   = (int) $hoja->getHighestRow();
         $startRow  = max(1, $fila_inicial);
         $lastRow   = -1;
@@ -1169,6 +1161,46 @@ class _xls_dispersion{
         return $lastRow;
     }
 
+    /**
+     * REG
+     * Valida que el arreglo de columnas contenga únicamente nombres de columna válidos en notación Excel.
+     *
+     * Reglas de validación:
+     * - El parámetro `$columns` no puede ser un arreglo vacío.
+     * - Cada elemento debe ser de tipo string.
+     * - Cada string debe cumplir con el formato de columna Excel en mayúsculas (ej. "A", "B", ..., "Z", "AA", "AB"...).
+     *
+     * En caso de error:
+     * - Devuelve un arreglo generado por `errores()->error()` con el mensaje y los datos problemáticos.
+     * - Además, se activa la bandera estática `errores::$error = true`.
+     *
+     * En caso de éxito:
+     * - Retorna `true`.
+     *
+     * @param array<int, string> $columns Lista de columnas a validar.
+     *
+     * @return true|array `true` si todas las columnas son válidas,
+     *                    o `array` con la estructura de error en caso contrario.
+     *
+     * @example
+     * ```php
+     * // Ejemplo válido
+     * $resultado = $this->valida_columnas(['A', 'B', 'C']);
+     * // Resultado: true
+     *
+     * // Ejemplo inválido (arreglo vacío)
+     * $resultado = $this->valida_columnas([]);
+     * // Resultado: ['mensaje' => 'Parámetro $columns inválido: ...', 'data' => ['columns' => []]]
+     *
+     * // Ejemplo inválido (columna en minúscula)
+     * $resultado = $this->valida_columnas(['a', 'B']);
+     * // Resultado: ['mensaje' => 'Columna inválida detectada ...', 'data' => ['columna' => 'a', 'columns' => ['a','B']]]
+     *
+     * // Ejemplo inválido (columna no string)
+     * $resultado = $this->valida_columnas(['A', 123]);
+     * // Resultado: ['mensaje' => 'Columna inválida detectada ...', 'data' => ['columna' => 123, 'columns' => ['A',123]]]
+     * ```
+     */
     private function valida_columnas(array $columns): true|array
     {
         if ($columns === []) {
@@ -1262,6 +1294,33 @@ class _xls_dispersion{
 
         // Normalización consistente en todo el proyecto
         return $this->normaliza_texto($valor);
+    }
+
+    private function validar_entrada_fila_tiene_datos(mixed $hoja, int $row, array $columns): true|array
+    {
+        if (!$this->es_hoja_valida($hoja)) {
+            return (new errores())->error(
+                mensaje: 'Parámetro $hoja inválido: se esperaba Worksheet',
+                data: ['hoja' => get_debug_type($hoja)]
+            );
+        }
+
+        if (!$this->es_fila_valida($row)) {
+            return (new errores())->error(
+                mensaje: 'Número de fila inválido: debe ser entero positivo (>=1)',
+                data: ['row' => $row]
+            );
+        }
+
+        $okCols = $this->valida_columnas($columns);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al validar columnas: use notación Excel en mayúsculas',
+                data: ['columns' => $columns, 'detalle' => $okCols]
+            );
+        }
+
+        return true;
     }
 
     private function write_data(Worksheet $hoja, array $layout_dispersion): Worksheet|array
