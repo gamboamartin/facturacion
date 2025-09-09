@@ -646,6 +646,127 @@ class controlador_fc_layout_nom extends system{
 
     }
 
+    public function descarga_timbres(bool $header, bool $ws = false)
+    {
+        $filtro['fc_layout_nom.id'] = $this->registro_id;
+        $filtro['fc_row_layout.esta_timbrado'] = 'activo';
+
+        $r_rows = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al obtener registros", $r_rows);
+            print_r($error);
+            exit;
+        }
+
+        $rows = $r_rows->registros;
+
+        if (count($rows) === 0) {
+            $error = (new errores())->error("Error el layout no tiene registros timbrados", $r_rows);
+            print_r($error);
+            exit;
+        }
+
+        $archivos = [];
+        foreach ($rows as $row) {
+            $fc_row_layout_id = $row['fc_row_layout_id'];
+            $filtro['fc_row_nomina.fc_row_layout_id'] =$fc_row_layout_id;
+            $result = (new fc_row_nomina($this->link))->filtro_and(filtro: $filtro);
+            if(errores::$error) {
+                $error = (new errores())->error("Error en filtro_and de fc_row_nomina", $result);
+                print_r($error);
+                exit;
+            }
+            $docs = $result->registros;
+            foreach ($docs as $doc) {
+                $archivo = [
+                    'ruta' => $doc['doc_documento_ruta_absoluta'],
+                    'rfc' => $doc['fc_row_layout_rfc'],
+                    'fecha_pago' => $doc['fc_row_layout_fecha_pago'],
+                ];
+                $archivos[] = $archivo;
+            }
+
+        }//  end foreach ($rows as $row)
+
+        // --- Guardar XLSX en archivo temporal ---
+
+        $spreadsheet = $this->generar_spreadsheet(fc_layout_nom_id: $this->registro_id);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar spreadsheet', data: $spreadsheet, header: $header, ws: $ws);
+        }
+
+        $nombre_original_excel = $rows[0]['fc_layout_nom_descripcion'];
+        $info = pathinfo($nombre_original_excel);
+        $nombre_zip = $info['filename'] . '.zip';
+        $nuevo_nombre_excel = $info['filename'] . '_TIMBRADO.' . $info['extension'];
+
+        $tmpDir = sys_get_temp_dir();
+        $xlsxName = $nuevo_nombre_excel;
+        $xlsxPath = $tmpDir . DIRECTORY_SEPARATOR . $xlsxName;
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($xlsxPath);
+
+        // ---Finaliza Guardar XLSX en archivo temporal ---
+
+        $zipName = $nombre_zip;
+        $tmpZip = tempnam(sys_get_temp_dir(), 'zip_');
+
+        $zip = new ZipArchive();
+        if ($zip->open($tmpZip, ZipArchive::OVERWRITE) !== true) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar archivo zip', data: [], header: $header, ws: $ws);
+        }
+
+        // Guardamos el excel dentro del ZIP
+        $nombreDentroZip = $nuevo_nombre_excel;
+        $zip->addFile($xlsxPath, $nombreDentroZip);
+
+        foreach ($archivos as $item) {
+            $ruta = $item['ruta'];
+            if (!file_exists($ruta)) {
+                continue;
+            }
+
+            // Obtenemos la extensión del archivo original
+            $extension = pathinfo($ruta, PATHINFO_EXTENSION);
+
+            // Construimos el nombre con el formato RFC_FECHA.ext
+            $nombreArchivo = $item['rfc'] . '_' . $item['fecha_pago'] . '.' . $extension;
+
+            // Agregamos al ZIP con el nuevo nombre
+            $zip->addFile($ruta, $nombreArchivo);
+        }
+
+        $zip->close();
+
+        // Limpiamos buffers
+        while (ob_get_level() > 0) { ob_end_clean(); }
+
+        // Cabeceras para descarga
+        header('Content-Type: application/zip');
+        header("Content-Disposition: attachment; filename*=UTF-8''" . rawurlencode($zipName));
+        header('Content-Length: ' . filesize($tmpZip));
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('X-Accel-Buffering: no');
+
+        // Enviamos el archivo
+        $fp = fopen($tmpZip, 'rb');
+        $chunkSize = 1024 * 1024; // 1MB
+        while (!feof($fp)) {
+            echo fread($fp, $chunkSize);
+            flush();
+        }
+        fclose($fp);
+
+        unlink($tmpZip);
+        unlink($xlsxPath);
+        exit;
+
+    }
+
     private function generar_spreadsheet(int $fc_layout_nom_id): Spreadsheet|array
     {
         $filtro = array();
