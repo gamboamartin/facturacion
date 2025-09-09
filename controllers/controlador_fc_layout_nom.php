@@ -15,6 +15,10 @@ use gamboamartin\system\system;
 use gamboamartin\template_1\html;
 use JetBrains\PhpStorm\NoReturn;
 use PDO;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use stdClass;
 use ZipArchive;
 
@@ -581,6 +585,139 @@ class controlador_fc_layout_nom extends system{
 
         header("Location: " . $_SERVER['HTTP_REFERER']);
         return $result->datos_rec->fc_row_layout;
+
+
+    }
+
+    public function timbra_recibos(bool $header, bool $ws = false): array|stdClass
+    {
+
+        $filtro['fc_layout_nom.id'] = $this->registro_id;
+        $filtro['fc_row_layout.esta_timbrado'] = 'inactivo';
+
+        $r_rows = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al obtener registros", $r_rows);
+            print_r($error);
+            exit;
+        }
+        $rows = $r_rows->registros;
+
+        foreach ($rows as $row) {
+            $timbra = (new _timbra_nomina())->timbra_recibo(link: $this->link,fc_row_layout_id:  $row['fc_row_layout_id']);
+            if(errores::$error) {
+                (new errores())->error("Error al timbrar", $timbra);
+                errores::$error = false;
+            }
+        }
+
+        $filtro = array();
+        $filtro['fc_layout_nom.id'] = $this->registro_id;
+
+        $r_rows = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al obtener registros", $r_rows);
+            print_r($error);
+            exit;
+        }
+        $rows = $r_rows->registros;
+
+
+        $filas_exito = array();
+        foreach ($rows as $row) {
+            if($row['fc_row_layout_esta_timbrado'] === 'inactivo'){
+                continue;
+            }
+            $row_exito[] = $row['fc_row_layout_rfc'];
+            $row_exito[] = $row['fc_row_layout_nss'];
+            $row_exito[] = $row['fc_row_layout_curp'];
+            $row_exito[] = $row['fc_row_layout_cp'];
+            $row_exito[] = $row['fc_row_layout_nombre_completo'];
+            $row_exito[] = $row['fc_row_layout_uuid'];
+            $filas_exito[] = $row_exito;
+        }
+
+        $filas_error = array();
+        foreach ($rows as $row) {
+            if(!isset($row['fc_row_layout_error'])){
+                $row['fc_row_layout_error'] = '';
+            }
+
+            if(trim($row['fc_row_layout_error']) === ''){
+                continue;
+            }
+            $row_exito[] = $row['fc_row_layout_rfc'];
+            $row_exito[] = $row['fc_row_layout_nss'];
+            $row_exito[] = $row['fc_row_layout_curp'];
+            $row_exito[] = $row['fc_row_layout_cp'];
+            $row_exito[] = $row['fc_row_layout_nombre_completo'];
+            $row_exito[] = $row['fc_row_layout_error'];
+            $filas_error[] = $row_exito;
+        }
+
+
+
+        $ss = new Spreadsheet();
+        $hoja = $ss->getActiveSheet();
+        $hoja->setTitle('EXITO');
+
+        $encabezados = ['RFC', 'NSS', 'CURP', 'CP','NOMBRE COMPLETO','UUID'];
+        $hoja->fromArray($encabezados, null, 'A1');
+
+        $ultimaCol = Coordinate::stringFromColumnIndex(count($encabezados));
+        $rangoEnc = "A1:{$ultimaCol}1";
+        $hoja->getStyle($rangoEnc)->getFont()->setBold(true);
+        $hoja->getStyle($rangoEnc)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        if ($filas_exito !== []) {
+            $hoja->fromArray($filas_exito, null, 'A2', true);
+        }
+
+        foreach (range('A', $hoja->getHighestDataColumn()) as $col) {
+            $hoja->getColumnDimension($col)->setAutoSize(true);
+        }
+        $hoja->freezePane('A2');
+
+
+        $hoja = $ss->createSheet();
+        $hoja->setTitle('ERROR');
+        $encabezados = ['RFC', 'NSS', 'CURP', 'CP','NOMBRE COMPLETO','ERROR'];
+        $hoja->fromArray($encabezados, null, 'A1');
+
+        $ultimaCol = Coordinate::stringFromColumnIndex(count($encabezados));
+        $rangoEnc = "A1:{$ultimaCol}1";
+        $hoja->getStyle($rangoEnc)->getFont()->setBold(true);
+        $hoja->getStyle($rangoEnc)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        if ($filas_error !== []) {
+            $hoja->fromArray($filas_error, null, 'A2', true);
+        }
+
+        foreach (range('A', $hoja->getHighestDataColumn()) as $col) {
+            $hoja->getColumnDimension($col)->setAutoSize(true);
+        }
+        $hoja->freezePane('A2');
+
+
+        $ss->getProperties()
+            ->setCreator('Sistema de Facturación')
+            ->setTitle('Reporte XLSX')
+            ->setDescription('Archivo generado automáticamente');
+
+        $filename = 'TIMBRADO.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0, no-store, no-cache, must-revalidate');
+        header('Pragma: no-cache');
+
+        $writer = new Xlsx($ss);
+        $writer->setPreCalculateFormulas(false);
+        $writer->save('php://output');
+        exit;
+        print_r($rows);exit;
+
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+        return $rows;
 
 
     }

@@ -47,7 +47,7 @@ class _timbra_nomina
         $response = json_decode($response, false);
         $codigo = trim($response->codigo);
 
-        $code_error = (new _salida()) ->code_error($codigo, $response, $datos_cfdi->nomina_json,$link);
+        $code_error = (new _salida()) ->code_error($codigo, $response, $datos_cfdi->nomina_json,$link,$fc_row_layout_id);
         if(errores::$error){
             return (new errores())->error("Error al timbrar", $code_error);
         }
