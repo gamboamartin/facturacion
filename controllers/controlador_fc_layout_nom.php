@@ -614,23 +614,47 @@ class controlador_fc_layout_nom extends system{
             }
         }
 
+        $spreadsheet = $this->generar_spreadsheet(fc_layout_nom_id: $this->registro_id);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar spreadsheet', data: $spreadsheet, header: $header, ws: $ws);
+        }
+
+        $filename = 'TIMBRADO.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0, no-store, no-cache, must-revalidate');
+        header('Pragma: no-cache');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->setPreCalculateFormulas(false);
+        $writer->save('php://output');
+        exit;
+        print_r($rows);exit;
+
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+        return $rows;
+
+    }
+
+    private function generar_spreadsheet(int $fc_layout_nom_id): Spreadsheet|array
+    {
         $filtro = array();
-        $filtro['fc_layout_nom.id'] = $this->registro_id;
+        $filtro['fc_layout_nom.id'] = $fc_layout_nom_id;
 
         $r_rows = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
         if(errores::$error) {
-            $error = (new errores())->error("Error al obtener registros", $r_rows);
-            print_r($error);
-            exit;
+            return (new errores())->error("Error al obtener registros", $r_rows);
         }
-        $rows = $r_rows->registros;
 
+        $rows = $r_rows->registros;
 
         $filas_exito = array();
         foreach ($rows as $row) {
             if($row['fc_row_layout_esta_timbrado'] === 'inactivo'){
                 continue;
             }
+            $row_exito = [];
             $row_exito[] = $row['fc_row_layout_rfc'];
             $row_exito[] = $row['fc_row_layout_nss'];
             $row_exito[] = $row['fc_row_layout_curp'];
@@ -649,16 +673,15 @@ class controlador_fc_layout_nom extends system{
             if(trim($row['fc_row_layout_error']) === ''){
                 continue;
             }
-            $row_exito[] = $row['fc_row_layout_rfc'];
-            $row_exito[] = $row['fc_row_layout_nss'];
-            $row_exito[] = $row['fc_row_layout_curp'];
-            $row_exito[] = $row['fc_row_layout_cp'];
-            $row_exito[] = $row['fc_row_layout_nombre_completo'];
-            $row_exito[] = $row['fc_row_layout_error'];
-            $filas_error[] = $row_exito;
+            $row_error = [];
+            $row_error[] = $row['fc_row_layout_rfc'];
+            $row_error[] = $row['fc_row_layout_nss'];
+            $row_error[] = $row['fc_row_layout_curp'];
+            $row_error[] = $row['fc_row_layout_cp'];
+            $row_error[] = $row['fc_row_layout_nombre_completo'];
+            $row_error[] = $row['fc_row_layout_error'];
+            $filas_error[] = $row_error;
         }
-
-
 
         $ss = new Spreadsheet();
         $hoja = $ss->getActiveSheet();
@@ -681,7 +704,6 @@ class controlador_fc_layout_nom extends system{
         }
         $hoja->freezePane('A2');
 
-
         $hoja = $ss->createSheet();
         $hoja->setTitle('ERROR');
         $encabezados = ['RFC', 'NSS', 'CURP', 'CP','NOMBRE COMPLETO','ERROR'];
@@ -699,30 +721,15 @@ class controlador_fc_layout_nom extends system{
         foreach (range('A', $hoja->getHighestDataColumn()) as $col) {
             $hoja->getColumnDimension($col)->setAutoSize(true);
         }
-        $hoja->freezePane('A2');
 
+        $hoja->freezePane('A2');
 
         $ss->getProperties()
             ->setCreator('Sistema de Facturación')
             ->setTitle('Reporte XLSX')
             ->setDescription('Archivo generado automáticamente');
 
-        $filename = 'TIMBRADO.xlsx';
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Cache-Control: max-age=0, no-store, no-cache, must-revalidate');
-        header('Pragma: no-cache');
-
-        $writer = new Xlsx($ss);
-        $writer->setPreCalculateFormulas(false);
-        $writer->save('php://output');
-        exit;
-        print_r($rows);exit;
-
-        header("Location: " . $_SERVER['HTTP_REFERER']);
-        return $rows;
-
-
+        return $ss;
     }
 
 
