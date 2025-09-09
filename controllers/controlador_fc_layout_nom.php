@@ -572,7 +572,6 @@ class controlador_fc_layout_nom extends system{
     }
 
 
-
     private function subir_docs_timbre(string $pdf, string $xml, stdClass $fc_row_layout): array|stdClass
     {
         $result_upl_pdf = $this->subir_pdf(string_pdf: $pdf, fc_row_layout_id: $fc_row_layout->fc_row_layout_id);
