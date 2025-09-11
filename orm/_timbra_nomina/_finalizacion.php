@@ -37,7 +37,7 @@ class _finalizacion{
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al subir docs', data: $docs);
         }
-        $rs = $this->upd_exito($uuid,$link);
+        $rs = $this->upd_exito($uuid,$link,$fc_row_layout->fc_row_layout_id);
         if(errores::$error) {
             return (new errores())->error("Error al actualizar UUID", $rs);
         }
@@ -267,16 +267,11 @@ class _finalizacion{
         return [];
     }
 
-    /**
-     * OUT
-     * @param string $uuid
-     * @param PDO $link
-     * @return array|true
-     */
-    private function upd_exito(string $uuid, PDO $link)
+
+    private function upd_exito(string $uuid, PDO $link, int $fc_row_layout_id)
     {
         $sql = "UPDATE fc_row_layout SET fc_row_layout.uuid = '$uuid', fc_row_layout.error = '', 
-                         esta_timbrado = 'activo' WHERE fc_row_layout.id = $_GET[fc_row_layout_id]";
+                         esta_timbrado = 'activo' WHERE fc_row_layout.id = $fc_row_layout_id";
         $rs = modelo::ejecuta_transaccion($sql, $link);
         if(errores::$error) {
             return (new errores())->error("Error al actualizar UUID", $rs);
