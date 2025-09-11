@@ -578,6 +578,11 @@ class controlador_fc_layout_nom extends system{
 
     public function timbra_recibo(bool $header, bool $ws = false): array|stdClass
     {
+        if($this->registro_id <= 178){
+            $error = (new errores())->error(mensaje: 'Error timbrado version anterior', data: $this->registro_id);
+            print_r($error);
+            exit;
+        }
 
         $result = (new _timbra_nomina())->timbra_recibo(link: $this->link,fc_row_layout_id:  $_GET['fc_row_layout_id']);
         if(errores::$error) {
@@ -594,6 +599,12 @@ class controlador_fc_layout_nom extends system{
 
     public function timbra_recibos(bool $header, bool $ws = false): array|stdClass
     {
+
+        if($this->registro_id <= 178){
+            $error = (new errores())->error(mensaje: 'Error timbrado version anterior', data: $this->registro_id);
+            print_r($error);
+            exit;
+        }
 
         $filtro['fc_layout_nom.id'] = $this->registro_id;
         $filtro['fc_row_layout.esta_timbrado'] = 'inactivo';

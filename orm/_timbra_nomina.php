@@ -33,6 +33,10 @@ class _timbra_nomina
             return (new errores())->error(mensaje: 'Error al obtener datos de recibo', data: $datos_rec);
         }
 
+        if((int)$datos_rec->fc_layout_nom->fc_layout_nom_id <= 178){
+            return (new errores())->error(mensaje: 'Error timbrado version anterior', data: $datos_rec);
+        }
+
         if($datos_rec->fc_row_layout->fc_row_layout_esta_timbrado === 'activo'){
             return (new errores())->error(mensaje: 'Error ya esta timbrado', data: $datos_rec);
         }
