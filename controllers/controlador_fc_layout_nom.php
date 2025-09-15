@@ -465,6 +465,21 @@ class controlador_fc_layout_nom extends system{
         $link .= "&fc_row_layout_id={$_GET['fc_row_layout_id']}";
         $this->link_modifica_datos_bd = $link;
 
+        $fecha_emision = $this->html->input_fecha(
+            cols: 6,
+            disabled: $this->disabled,
+            name: 'fecha_emision',
+            place_holder: 'Fecha de Emisión',
+            row_upd: new stdClass(),
+            value_vacio: false,
+            value: $fc_row_layout->fc_row_layout_fecha_emision,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener inputs', data: $fecha_emision, header: $header, ws: $ws);
+        }
+
+        $this->inputs->fecha_emision = $fecha_emision;
         $this->inputs->nombre_completo = $nombre_completo;
     }
 
@@ -478,6 +493,7 @@ class controlador_fc_layout_nom extends system{
         $upd_row['rfc'] = $_POST['rfc'];
         $upd_row['curp'] = $_POST['curp'];
         $upd_row['nombre_completo'] = $_POST['nombre_completo'];
+        $upd_row['fecha_emision'] = $_POST['fecha_emision'];
         $result = $fc_row_layout_modelo->modifica_bd($upd_row, $fc_row_layout_id);
         if(errores::$error){
             return $this->retorno_error(
