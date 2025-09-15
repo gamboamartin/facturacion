@@ -28,6 +28,8 @@ class controlador_fc_layout_nom extends system{
     public array $fc_rows_layout = array();
 
     public string $link_modifica_datos_bd = '';
+    public bool $disabled = false;
+    public string $fecha_emision = '';
 
     public function __construct(PDO $link, html $html = new html(), stdClass $paths_conf = new stdClass()){
         $modelo = new fc_layout_nom(link: $link);
@@ -371,11 +373,18 @@ class controlador_fc_layout_nom extends system{
                 mensaje: 'Error al obtener layout', data: $fc_row_layout, header: $header, ws: $ws);
         }
 
+        $this->fecha_emision = $fc_row_layout->fc_row_layout_fecha_emision;
+
+        if ($fc_row_layout->fc_row_layout_esta_timbrado === 'activo') {
+            $this->disabled = true;
+        }
+
+
         $this->inputs = new stdClass();
 
         $cp = $this->html->input_text(
             cols: 6,
-            disabled: false,
+            disabled: $this->disabled,
             name: 'cp',
             place_holder: 'CODIGO POSTAL',
             row_upd: new stdClass(),
@@ -392,7 +401,7 @@ class controlador_fc_layout_nom extends system{
 
         $nss = $this->html->input_text(
             cols: 6,
-            disabled: false,
+            disabled: $this->disabled,
             name: 'nss',
             place_holder: 'NSS',
             row_upd: new stdClass(),
@@ -408,7 +417,7 @@ class controlador_fc_layout_nom extends system{
 
         $rfc = $this->html->input_text(
             cols: 6,
-            disabled: false,
+            disabled: $this->disabled,
             name: 'rfc',
             place_holder: 'RFC',
             row_upd: new stdClass(),
@@ -424,7 +433,7 @@ class controlador_fc_layout_nom extends system{
 
         $curp = $this->html->input_text(
             cols: 6,
-            disabled: false,
+            disabled: $this->disabled,
             name: 'curp',
             place_holder: 'CURP',
             row_upd: new stdClass(),
@@ -440,7 +449,7 @@ class controlador_fc_layout_nom extends system{
 
         $nombre_completo = $this->html->input_text(
             cols: 6,
-            disabled: false,
+            disabled: $this->disabled,
             name: 'nombre_completo',
             place_holder: 'Nombre Completo',
             row_upd: new stdClass(),
