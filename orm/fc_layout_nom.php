@@ -47,6 +47,9 @@ class fc_layout_nom extends modelo{
         $this->registro['status'] = 'activo';
         $this->registro['descripcion'] = $this->registro['descripcion'].' '.$doc_documento_ins['name_out'];
         $this->registro['doc_documento_id'] = $doc_documento_id;
+        $this->registro['fecha_emision'] = $_POST['fecha_pago'].'T'.date('H:i:s');
+
+        $_POST['fecha_emision'] = $_POST['fecha_pago'].'T'.date('H:i:s');
 
         $r_alta = parent::alta_bd();
         if(errores::$error){
