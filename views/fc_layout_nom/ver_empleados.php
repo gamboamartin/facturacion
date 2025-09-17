@@ -10,7 +10,7 @@
 </div>
 <div class="col-lg-12">
     <div class="table table-responsive">
-        <table class="table table-striped">
+        <table class="table table-striped" id="tabla_empleados">
             <thead>
             <tr>
                 <th>Id</th>
