@@ -367,17 +367,31 @@ class controlador_fc_layout_nom extends system{
 
     public function modifica_datos(bool $header, bool $ws = false)
     {
+        // Validar que fc_row_layout_id esté presente
+        if(!isset($_GET['fc_row_layout_id']) || empty($_GET['fc_row_layout_id'])){
+            return $this->retorno_error(
+                mensaje: 'Error: fc_row_layout_id es requerido', data: array(), header: $header, ws: $ws);
+        }
+
         $fc_row_layout = (new fc_row_layout($this->link))->registro($_GET['fc_row_layout_id'],retorno_obj: true);
         if (errores::$error) {
             return $this->retorno_error(
                 mensaje: 'Error al obtener layout', data: $fc_row_layout, header: $header, ws: $ws);
         }
 
-        $this->fecha_emision = $fc_row_layout->fc_row_layout_fecha_emision;
-
-        if ($fc_row_layout->fc_row_layout_esta_timbrado === 'activo') {
-            $this->disabled = true;
+        // Validar que el fc_row_layout pertenece al fc_layout_nom actual
+        if($fc_row_layout->fc_row_layout_fc_layout_nom_id != $this->registro_id){
+            return $this->retorno_error(
+                mensaje: 'Error: No tiene permisos para modificar este registro', data: array(), header: $header, ws: $ws);
         }
+
+        // Validar que el registro no esté timbrado
+        if ($fc_row_layout->fc_row_layout_esta_timbrado === 'activo') {
+            return $this->retorno_error(
+                mensaje: 'Error: No se puede modificar un registro que ya está timbrado', data: array(), header: $header, ws: $ws);
+        }
+
+        $this->fecha_emision = $fc_row_layout->fc_row_layout_fecha_emision;
 
 
         $this->inputs = new stdClass();
@@ -485,7 +499,32 @@ class controlador_fc_layout_nom extends system{
 
     public function modifica_datos_bd(bool $header, bool $ws = false): array|stdClass
     {
+        // Validar que fc_row_layout_id esté presente
+        if(!isset($_GET['fc_row_layout_id']) || empty($_GET['fc_row_layout_id'])){
+            return $this->retorno_error(
+                mensaje: 'Error: fc_row_layout_id es requerido', data: array(), header: $header, ws: $ws);
+        }
+
         $fc_row_layout_id = $_GET['fc_row_layout_id'];
+
+        // Validar que el registro existe y obtener sus datos
+        $fc_row_layout = (new fc_row_layout($this->link))->registro($fc_row_layout_id, retorno_obj: true);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener fc_row_layout', data: $fc_row_layout, header: $header, ws: $ws);
+        }
+
+        // Validar que el fc_row_layout pertenece al fc_layout_nom actual
+        if($fc_row_layout->fc_row_layout_fc_layout_nom_id != $this->registro_id){
+            return $this->retorno_error(
+                mensaje: 'Error: No tiene permisos para modificar este registro', data: array(), header: $header, ws: $ws);
+        }
+
+        // Validar que el registro no esté timbrado
+        if ($fc_row_layout->fc_row_layout_esta_timbrado === 'activo') {
+            return $this->retorno_error(
+                mensaje: 'Error: No se puede modificar un registro que ya está timbrado', data: array(), header: $header, ws: $ws);
+        }
 
         $fc_row_layout_modelo = new fc_row_layout($this->link);
         $upd_row['cp'] = $_POST['cp'];
