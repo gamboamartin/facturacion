@@ -84,11 +84,11 @@ class fc_layout_nom extends modelo{
     private function modifica_fecha_emision_row_layout(int $fc_layout_nom_id, string $fecha_emision)
     {
         $fc_row_layout_modelo = new fc_row_layout(link: $this->link);
-        $filtro = [
-            'fc_row_layout.fc_layout_nom_id' => $fc_layout_nom_id,
-            'fc_row_layout.esta_timbrado' => 'inactivo',
-        ];
+        $filtro = array();
+        $filtro['fc_row_layout.fc_layout_nom_id'] = $fc_layout_nom_id;
+        $filtro['fc_row_layout.esta_timbrado'] = 'inactivo';
 
+        $upd_row = array();
         $upd_row['fecha_emision'] = $fecha_emision;
 
         $result = $fc_row_layout_modelo->filtro_and(filtro: $filtro);

@@ -30,6 +30,7 @@ class controlador_fc_layout_nom extends system{
     public string $link_modifica_datos_bd = '';
     public bool $disabled = false;
     public string $fecha_emision = '';
+    public string $btn_modifica_fecha_emision = '';
 
     public function __construct(PDO $link, html $html = new html(), stdClass $paths_conf = new stdClass()){
         $modelo = new fc_layout_nom(link: $link);
@@ -545,6 +546,116 @@ class controlador_fc_layout_nom extends system{
         return $result;
     }
 
+
+    public function modifica_fecha_emision(bool $header, bool $ws = false): array|stdClass
+    {
+        $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id, retorno_obj: true);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener fc_layout_nom', data: $fc_layout_nom, header: $header, ws: $ws);
+        }
+
+        // Verificar que el layout no esté timbrado
+        if ($fc_layout_nom->fc_layout_nom_estado_timbrado !== 'SIN TIMBRAR') {
+            return $this->retorno_error(
+                mensaje: 'Error: No se puede modificar la fecha de emisión de un layout timbrado', 
+                data: array(), header: $header, ws: $ws);
+        }
+
+        // Configurar el link para el formulario
+        $link = "index.php?seccion=fc_layout_nom&accion=modifica_fecha_emision_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
+        $this->link_modifica_datos_bd = $link;
+
+        // Obtener la fecha de emisión actual o usar fecha_pago como default
+        $fecha_emision_valor = $fc_layout_nom->fc_layout_nom_fecha_emision ?? $fc_layout_nom->fecha_emision ?? null;
+        if (empty($fecha_emision_valor) || $fecha_emision_valor === '1900-01-01') {
+            $fecha_emision_valor = $fc_layout_nom->fc_layout_nom_fecha_pago ?? $fc_layout_nom->fecha_pago ?? '1900-01-01';
+        }
+
+        // Convertir la fecha al formato date para el input HTML
+        if (!empty($fecha_emision_valor) && $fecha_emision_valor !== '1900-01-01') {
+            $this->fecha_emision = date('Y-m-d', strtotime($fecha_emision_valor));
+        } else {
+            $this->fecha_emision = '';
+        }
+
+        return $fc_layout_nom;
+    }
+
+    public function modifica_fecha_emision_bd(bool $header, bool $ws = false): array|stdClass
+    {
+        // Validar que se recibió la fecha de emisión
+        if (!isset($_POST['fecha_emision']) || empty($_POST['fecha_emision'])) {
+            return $this->retorno_error(
+                mensaje: 'Error: La fecha de emisión es requerida', data: array(), header: $header, ws: $ws);
+        }
+
+        // Obtener el registro actual
+        $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id, retorno_obj: true);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener fc_layout_nom', data: $fc_layout_nom, header: $header, ws: $ws);
+        }
+
+        // Verificar que el layout no esté timbrado
+        $estado_timbrado = $fc_layout_nom->fc_layout_nom_estado_timbrado ?? $fc_layout_nom->estado_timbrado ?? 'SIN TIMBRAR';
+        if ($estado_timbrado !== 'SIN TIMBRAR') {
+            return $this->retorno_error(
+                mensaje: 'Error: No se puede modificar la fecha de emisión de un layout timbrado', 
+                data: array(), header: $header, ws: $ws);
+        }
+
+        // Convertir la fecha del formato date a formato de base de datos
+        $fecha_emision_input = $_POST['fecha_emision'];
+        $fecha_emision_bd = $fecha_emision_input; // Ya viene en formato Y-m-d
+
+        // Actualizar todos los fc_row_layout que pertenecen a este fc_layout_nom
+        $filtro = array();
+        $filtro['fc_layout_nom.id'] = $this->registro_id;
+        $rs = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->retorno_error(
+                mensaje: 'Error al obtener r_rows', data: $rs, header: $header, ws: $ws);
+        }
+        
+        $fc_row_layout_modelo = new fc_row_layout($this->link);
+        $upd_row = array();
+        $upd_row['fecha_emision'] = $fecha_emision_bd;
+        
+        $result = array();
+        foreach ($rs->registros as $row) {
+            $row = (object)$row;
+            // Solo actualizar si no está timbrado
+            if($row->fc_row_layout_esta_timbrado === 'inactivo'){
+                $result_row = $fc_row_layout_modelo->modifica_bd($upd_row, $row->fc_row_layout_id);
+                if(errores::$error){
+                    return $this->retorno_error(
+                        mensaje: 'Error al actualizar fecha_emision en fc_row_layout', data: $result_row, header: $header, ws: $ws);
+                }
+                $result[] = $result_row;
+            }
+        }
+        
+        // También actualizar la tabla fc_layout_nom directamente con SQL
+        $sql = "UPDATE fc_layout_nom SET fecha_emision = ? WHERE id = ?";
+        $stmt = $this->link->prepare($sql);
+        $result_layout = $stmt->execute([$fecha_emision_bd, $this->registro_id]);
+        if (!$result_layout) {
+            return $this->retorno_error(
+                mensaje: 'Error al actualizar fecha_emision en fc_layout_nom', data: $stmt->errorInfo(), header: $header, ws: $ws);
+        }
+        
+        if (errores::$error) {
+            return $t   his->retorno_error(
+                mensaje: 'Error al actualizar la fecha de emisión', data: $result, header: $header, ws: $ws);
+        }
+
+        // Redireccionar de vuelta a la lista de layouts de nómina
+        $link = "index.php?seccion=fc_layout_nom&accion=lista&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        return $result;
+    }
+
     public function ver_empleados(bool $header, bool $ws = false): array|stdClass
     {
         $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
@@ -634,6 +745,25 @@ class controlador_fc_layout_nom extends system{
             $rows[$indice] = $row;
         }
 
+        // Agregar botón para modificar fecha de emisión del layout completo
+        $btn_modifica_fecha_emision = '';
+        if ($fc_layout_nom->fc_layout_nom_estado_timbrado === 'SIN TIMBRAR') {
+            $btn_modifica_fecha_emision = (new html())->button_href(
+                accion: 'modifica_fecha_emision',
+                etiqueta: 'Modificar Fecha Emisión',
+                registro_id: $this->registro_id,
+                seccion: 'fc_layout_nom',
+                style: 'primary'
+            );
+
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al obtener btn_modifica_fecha_emision', 
+                    data: $btn_modifica_fecha_emision, header: $header, ws: $ws);
+            }
+        }
+
+        $this->btn_modifica_fecha_emision = $btn_modifica_fecha_emision;
         $this->fc_rows_layout = $rows;
 
         return $rows;
