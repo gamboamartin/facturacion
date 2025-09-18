@@ -671,6 +671,8 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             ];
         }
 
+        $ruta_logo = 'data:image/png;base64,' . base64_encode(file_get_contents($ruta_logo));
+
         $datos = [
             'folio' => $reporte['fc_complemento_pago_folio'],
             'logo' => $ruta_logo,
