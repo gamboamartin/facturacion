@@ -556,11 +556,11 @@ class controlador_fc_layout_nom extends system{
         }
 
         // Verificar que el layout no esté timbrado
-        if ($fc_layout_nom->fc_layout_nom_estado_timbrado !== 'SIN TIMBRAR') {
-            return $this->retorno_error(
-                mensaje: 'Error: No se puede modificar la fecha de emisión de un layout timbrado', 
-                data: array(), header: $header, ws: $ws);
-        }
+//        if ($fc_layout_nom->fc_layout_nom_estado_timbrado === 'TIMBRADO') {
+//            return $this->retorno_error(
+//                mensaje: 'Error: No se puede modificar la fecha de emisión de un layout timbrado',
+//                data: array(), header: $header, ws: $ws);
+//        }
 
         // Configurar el link para el formulario
         $link = "index.php?seccion=fc_layout_nom&accion=modifica_fecha_emision_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
@@ -610,44 +610,40 @@ class controlador_fc_layout_nom extends system{
         $fecha_emision_bd = $fecha_emision_input; // Ya viene en formato Y-m-d
 
         // Actualizar todos los fc_row_layout que pertenecen a este fc_layout_nom
-        $filtro = array();
-        $filtro['fc_layout_nom.id'] = $this->registro_id;
-        $rs = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return $this->retorno_error(
-                mensaje: 'Error al obtener r_rows', data: $rs, header: $header, ws: $ws);
-        }
+//        $filtro = array();
+//        $filtro['fc_row_layout.fc_layout_nom_id'] = $this->registro_id;
+//        $rs = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
+//        if(errores::$error){
+//            return $this->retorno_error(
+//                mensaje: 'Error al obtener r_rows', data: $rs, header: $header, ws: $ws);
+//        }
         
-        $fc_row_layout_modelo = new fc_row_layout($this->link);
-        $upd_row = array();
-        $upd_row['fecha_emision'] = $fecha_emision_bd;
-        
-        $result = array();
-        foreach ($rs->registros as $row) {
-            $row = (object)$row;
-            // Solo actualizar si no está timbrado
-            if($row->fc_row_layout_esta_timbrado === 'inactivo'){
-                $result_row = $fc_row_layout_modelo->modifica_bd($upd_row, $row->fc_row_layout_id);
-                if(errores::$error){
-                    return $this->retorno_error(
-                        mensaje: 'Error al actualizar fecha_emision en fc_row_layout', data: $result_row, header: $header, ws: $ws);
-                }
-                $result[] = $result_row;
-            }
-        }
-        
-        // También actualizar la tabla fc_layout_nom directamente con SQL
-        $sql = "UPDATE fc_layout_nom SET fecha_emision = ? WHERE id = ?";
-        $stmt = $this->link->prepare($sql);
-        $result_layout = $stmt->execute([$fecha_emision_bd, $this->registro_id]);
-        if (!$result_layout) {
-            return $this->retorno_error(
-                mensaje: 'Error al actualizar fecha_emision en fc_layout_nom', data: $stmt->errorInfo(), header: $header, ws: $ws);
-        }
-        
+//        $fc_row_layout_modelo = new fc_row_layout($this->link);
+//        $upd_row = array();
+//        $upd_row['fecha_emision'] = $fecha_emision_bd;
+//
+//        $result = array();
+//        foreach ($rs->registros as $row) {
+//            $row = (object)$row;
+//            // Solo actualizar si no está timbrado
+//            if($row->fc_row_layout_esta_timbrado === 'inactivo'){
+//                $result_row = $fc_row_layout_modelo->modifica_bd($upd_row, $row->fc_row_layout_id);
+//                if(errores::$error){
+//                    return $this->retorno_error(
+//                        mensaje: 'Error al actualizar fecha_emision en fc_row_layout', data: $result_row, header: $header, ws: $ws);
+//                }
+//                $result[] = $result_row;
+//            }
+//        }
+
+        $fc_layout_nom_modelo = new fc_layout_nom($this->link);
+        $upd_row = [
+            'fecha_emision' => $fecha_emision_bd,
+        ];
+        $rs = $fc_layout_nom_modelo->modifica_bd($upd_row, $this->registro_id);
         if (errores::$error) {
             return $this->retorno_error(
-                mensaje: 'Error al actualizar la fecha de emisión', data: $result, header: $header, ws: $ws);
+                mensaje: 'Error al actualizar la fecha de emisión', data: $rs, header: $header, ws: $ws);
         }
 
         // Redireccionar de vuelta a la lista de layouts de nómina
