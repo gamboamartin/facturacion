@@ -646,7 +646,7 @@ class controlador_fc_layout_nom extends system{
         }
         
         if (errores::$error) {
-            return $t   his->retorno_error(
+            return $this->retorno_error(
                 mensaje: 'Error al actualizar la fecha de emisión', data: $result, header: $header, ws: $ws);
         }
 
