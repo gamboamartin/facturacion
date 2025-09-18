@@ -50,8 +50,11 @@ class _salida{
      */
     private function upd_error(string $codigo, stdClass $rs_timbre, PDO $link, int $fc_row_layout_id): true
     {
+        $mensaje = str_replace("'", "\'", $rs_timbre->mensaje);
+        $codigo = str_replace("'", "\'", $codigo);
+
         errores::$error = false;
-        $sql = "UPDATE fc_row_layout SET fc_row_layout.error = 'Codigo: $codigo Mensaje: $rs_timbre->mensaje' WHERE fc_row_layout.id = $fc_row_layout_id";
+        $sql = "UPDATE fc_row_layout SET fc_row_layout.error = 'Codigo: $codigo Mensaje: $mensaje' WHERE fc_row_layout.id = $fc_row_layout_id";
         modelo::ejecuta_transaccion($sql, $link);
         return true;
 
