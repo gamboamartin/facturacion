@@ -899,7 +899,7 @@ class controlador_fc_layout_nom extends system{
 
         $nombre_original_excel = $rows[0]['fc_layout_nom_descripcion'];
         $info = pathinfo($nombre_original_excel);
-        $nombre_zip = $info['filename'] . '.zip';
+        $nombre_zip = $this->registro_id.'.'.$info['filename'] . '.zip';
         $nuevo_nombre_excel = $info['filename'] . '_TIMBRADO.' . $info['extension'];
 
         $tmpDir = sys_get_temp_dir();
