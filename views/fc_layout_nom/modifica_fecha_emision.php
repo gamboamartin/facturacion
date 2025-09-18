@@ -16,7 +16,7 @@ if ($controlador->disabled){
             <div class="control-group col-sm-6">
                 <label class="control-label" for="fecha_emision">FECHA EMISIÓN</label>
                 <div class="controls">
-                    <input type="date" value="<?php echo $controlador->fecha_emision ?>" <?php echo $disabled ?> name="fecha_emision" class="form-control fecha_emision" required="" id="fecha_emision" title="Fecha Emisión">
+                    <input type="datetime-local" value="<?php echo $controlador->fecha_emision ?>" <?php echo $disabled ?> name="fecha_emision" class="form-control fecha_emision" required="" id="fecha_emision" title="Fecha Emisión">
                 </div>
             </div>
             

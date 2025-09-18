@@ -572,9 +572,9 @@ class controlador_fc_layout_nom extends system{
             $fecha_emision_valor = $fc_layout_nom->fc_layout_nom_fecha_pago ?? $fc_layout_nom->fecha_pago ?? '1900-01-01';
         }
 
-        // Convertir la fecha al formato date para el input HTML
+        // Convertir la fecha al formato datetime-local para el input HTML
         if (!empty($fecha_emision_valor) && $fecha_emision_valor !== '1900-01-01') {
-            $this->fecha_emision = date('Y-m-d', strtotime($fecha_emision_valor));
+            $this->fecha_emision = date('Y-m-d\TH:i', strtotime($fecha_emision_valor));
         } else {
             $this->fecha_emision = '';
         }
@@ -605,9 +605,9 @@ class controlador_fc_layout_nom extends system{
                 data: array(), header: $header, ws: $ws);
         }
 
-        // Convertir la fecha del formato date a formato de base de datos
+        // Convertir la fecha del formato datetime-local a formato de base de datos
         $fecha_emision_input = $_POST['fecha_emision'];
-        $fecha_emision_bd = $fecha_emision_input; // Ya viene en formato Y-m-d
+        $fecha_emision_bd = date('Y-m-d H:i:s', strtotime($fecha_emision_input));
 
         // Actualizar todos los fc_row_layout que pertenecen a este fc_layout_nom
 //        $filtro = array();
