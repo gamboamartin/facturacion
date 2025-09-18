@@ -91,12 +91,23 @@ class fc_layout_nom extends modelo{
 
         $upd_row['fecha_emision'] = $fecha_emision;
 
-        $result = $fc_row_layout_modelo->modifica_con_filtro_and($filtro, $upd_row);
+        $result = $fc_row_layout_modelo->filtro_and(filtro: $filtro);
         if(errores::$error){
-            return $this->error->error(mensaje: 'Error al modificar los registros',data: $result);
+            return $this->error->error(mensaje: 'Error al obtener los registros',data: $result);
         }
 
-        return $result;
+        $data = [];
+
+        foreach ($result->registros as $registro) {
+            $id = $registro['fc_row_layout_id'];
+            $rs_upd = $fc_row_layout_modelo->modifica_bd($upd_row, $id);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al modificar el registro',data: $result);
+            }
+            $data[] = $rs_upd;
+        }
+
+        return $data;
     }
 
 }
