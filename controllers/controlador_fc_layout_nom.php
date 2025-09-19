@@ -555,12 +555,13 @@ class controlador_fc_layout_nom extends system{
                 mensaje: 'Error al obtener fc_layout_nom', data: $fc_layout_nom, header: $header, ws: $ws);
         }
 
-        // Verificar que el layout no esté timbrado
-//        if ($fc_layout_nom->fc_layout_nom_estado_timbrado === 'TIMBRADO') {
-//            return $this->retorno_error(
-//                mensaje: 'Error: No se puede modificar la fecha de emisión de un layout timbrado',
-//                data: array(), header: $header, ws: $ws);
-//        }
+        // Verificar que el layout no esté completamente timbrado
+        $estado_timbrado = $fc_layout_nom->fc_layout_nom_estado_timbrado ?? $fc_layout_nom->estado_timbrado ?? 'SIN TIMBRAR';
+        if ($estado_timbrado === 'TIMBRADO') {
+            return $this->retorno_error(
+                mensaje: 'Error: No se puede modificar la fecha de emisión de un layout completamente timbrado',
+                data: array(), header: $header, ws: $ws);
+        }
 
         // Configurar el link para el formulario
         $link = "index.php?seccion=fc_layout_nom&accion=modifica_fecha_emision_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
@@ -597,11 +598,11 @@ class controlador_fc_layout_nom extends system{
                 mensaje: 'Error al obtener fc_layout_nom', data: $fc_layout_nom, header: $header, ws: $ws);
         }
 
-        // Verificar que el layout no esté timbrado
+        // Verificar que el layout no esté completamente timbrado
         $estado_timbrado = $fc_layout_nom->fc_layout_nom_estado_timbrado ?? $fc_layout_nom->estado_timbrado ?? 'SIN TIMBRAR';
-        if ($estado_timbrado !== 'SIN TIMBRAR') {
+        if ($estado_timbrado === 'TIMBRADO') {
             return $this->retorno_error(
-                mensaje: 'Error: No se puede modificar la fecha de emisión de un layout timbrado', 
+                mensaje: 'Error: No se puede modificar la fecha de emisión de un layout completamente timbrado', 
                 data: array(), header: $header, ws: $ws);
         }
 
@@ -743,7 +744,8 @@ class controlador_fc_layout_nom extends system{
 
         // Agregar botón para modificar fecha de emisión del layout completo
         $btn_modifica_fecha_emision = '';
-        if ($fc_layout_nom->fc_layout_nom_estado_timbrado === 'SIN TIMBRAR') {
+        $estado_timbrado = $fc_layout_nom->fc_layout_nom_estado_timbrado ?? $fc_layout_nom->estado_timbrado ?? 'SIN TIMBRAR';
+        if ($estado_timbrado !== 'TIMBRADO') {
             $btn_modifica_fecha_emision = (new html())->button_href(
                 accion: 'modifica_fecha_emision',
                 etiqueta: 'Modificar Fecha Emisión',
