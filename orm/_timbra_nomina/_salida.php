@@ -40,6 +40,7 @@ class _salida{
             }
 
             if($con_error){
+                echo '<br>Entro a actualizar error<br>';
                 $upd = $this->upd_error($codigo, $rs, $link,$fc_row_layout_id);
                 return (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $upd);
             }
