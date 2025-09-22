@@ -1,6 +1,7 @@
 <?php
 namespace gamboamartin\facturacion\models\_timbra_nomina;
 
+use base\orm\modelo;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\_make_json;
 use gamboamartin\facturacion\models\fc_layout_nom;
@@ -109,6 +110,11 @@ class _datos{
     {
         $result = (new _make_json(link: $link,fc_row_layout:  $fc_row_layout))->getJson();
         if (errores::$error) {
+            errores::$error = false;
+            $upd_err = addslashes($result['mensaje']);
+            $sql = "UPDATE fc_row_layout SET fc_row_layout.error = '$upd_err' WHERE fc_row_layout.id = $fc_row_layout->fc_row_layout_id";
+            \gamboamartin\modelo\modelo::ejecuta_transaccion($sql, $link);
+            errores::$error = false;
             return (new errores())->error(mensaje: 'Error al obtener json', data: $result);
         }
         $nomina_json = $result['json'];

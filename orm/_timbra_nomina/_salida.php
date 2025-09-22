@@ -56,14 +56,14 @@ class _salida{
      * @param PDO $link
      * @return true
      */
-    private function upd_error(string $codigo, stdClass $rs_timbre, PDO $link, int $fc_row_layout_id): true
+    final public function upd_error(string $codigo, stdClass $rs_timbre, PDO $link, int $fc_row_layout_id): true
     {
         errores::$error = false;
         $upd_err = addslashes("Codigo: $codigo Mensaje: $rs_timbre->mensaje");
         $sql = "UPDATE fc_row_layout SET fc_row_layout.error = '$upd_err' WHERE fc_row_layout.id = $fc_row_layout_id";
-        $rs = modelo::ejecuta_transaccion($sql, $link);
-        print_r($rs);
+        modelo::ejecuta_transaccion($sql, $link);
 
+        errores::$error = false;
         return true;
 
     }
