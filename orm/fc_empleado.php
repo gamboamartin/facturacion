@@ -28,15 +28,20 @@ class fc_empleado extends modelo{
      */
     private function sanitizar_campos(array &$registro): void
     {
-        $campos_a_sanitizar = ['rfc', 'nss', 'clabe', 'cuenta'];
+        $campos_a_sanitizar = ['rfc', 'nss', 'clabe', 'cuenta', 'nombre_completo'];
         
         foreach ($campos_a_sanitizar as $campo) {
             if (isset($registro[$campo]) && is_string($registro[$campo])) {
-                // Eliminar espacios y guiones
-                $registro[$campo] = str_replace([' ', '-'], '', $registro[$campo]);
-                // Convertir a mayúsculas para RFC
-                if ($campo === 'rfc') {
-                    $registro[$campo] = strtoupper($registro[$campo]);
+                if ($campo === 'nombre_completo') {
+                    // Para nombre_completo: solo eliminar espacios al inicio y final
+                    $registro[$campo] = trim($registro[$campo]);
+                } else {
+                    // Para otros campos: eliminar espacios y guiones
+                    $registro[$campo] = str_replace([' ', '-'], '', $registro[$campo]);
+                    // Convertir a mayúsculas para RFC
+                    if ($campo === 'rfc') {
+                        $registro[$campo] = strtoupper($registro[$campo]);
+                    }
                 }
             }
         }
