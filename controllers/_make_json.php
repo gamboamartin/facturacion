@@ -3,6 +3,7 @@ namespace gamboamartin\facturacion\controllers;
 use config\pac;
 use gamboamartin\direccion_postal\models\dp_cp;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\_timbra_nomina\_salida;
 use gamboamartin\facturacion\models\fc_csd;
 use PDO;
 
@@ -125,7 +126,8 @@ class _make_json
 
         if(!isset($this->r_clave_interbancaria) || $this->r_clave_interbancaria === ''){
             if (!$this->r_banco) {
-                return (new errores())->error('Error el banco debe existir', $this);
+                $error = "Clave: $this->r_clave_interbancaria, Si tiene clave debe tener banco";
+                return (new errores())->error('Error el banco debe existir', $error);
             }
             $this->r_banco = $banco_array[$this->r_banco];
         }
