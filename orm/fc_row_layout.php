@@ -23,7 +23,7 @@ class fc_row_layout extends modelo{
     }
 
     /**
-     * Sanitiza campos eliminando espacios y guiones
+     * Sanitiza campos eliminando espacios, guiones y caracteres especiales
      */
     private function sanitizar_campos(array &$registro): void
     {
@@ -34,8 +34,11 @@ class fc_row_layout extends modelo{
                 if ($campo === 'nombre_completo') {
                     // Para nombre_completo: solo eliminar espacios al inicio y final
                     $registro[$campo] = trim($registro[$campo]);
+                } elseif ($campo === 'clabe' || $campo === 'cuenta') {
+                    // Para clabe y cuenta: solo números (eliminar TODOS los caracteres no numéricos)
+                    $registro[$campo] = preg_replace('/[^0-9]/', '', $registro[$campo]);
                 } else {
-                    // Para otros campos: eliminar espacios y guiones
+                    // Para RFC y NSS: eliminar espacios y guiones
                     $registro[$campo] = str_replace([' ', '-'], '', $registro[$campo]);
                     // Convertir a mayúsculas para RFC
                     if ($campo === 'rfc') {
