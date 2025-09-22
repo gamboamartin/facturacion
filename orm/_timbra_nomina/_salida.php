@@ -40,7 +40,7 @@ class _salida{
             }
 
             if($con_error){
-                echo '<br>Entro a actualizar error<br>';
+
                 $upd = $this->upd_error($codigo, $rs, $link,$fc_row_layout_id);
                 return (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $upd);
             }
@@ -60,7 +60,9 @@ class _salida{
     {
         errores::$error = false;
         $sql = "UPDATE fc_row_layout SET fc_row_layout.error = 'Codigo: $codigo Mensaje: $rs_timbre->mensaje' WHERE fc_row_layout.id = $fc_row_layout_id";
-        modelo::ejecuta_transaccion($sql, $link);
+        $rs = modelo::ejecuta_transaccion($sql, $link);
+        print_r($rs);
+
         return true;
 
     }
