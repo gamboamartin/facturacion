@@ -9,6 +9,10 @@ use gamboamartin\facturacion\models\fc_cfdi_sellado_nomina;
 use gamboamartin\facturacion\models\fc_empleado;
 use gamboamartin\facturacion\models\fc_row_nomina;
 use gamboamartin\modelo\modelo;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\Data\QRData;
 use PDO;
 use stdClass;
 
@@ -133,7 +137,7 @@ class _finalizacion{
      */
     private function subir_docs_timbre(string $pdf, string $xml, stdClass $fc_row_layout, PDO $link): array|stdClass
     {
-        $result_upl_pdf = $this->subir_pdf(string_pdf: $pdf, fc_row_layout_id: $fc_row_layout->fc_row_layout_id, link: $link);
+        $result_upl_pdf = $this->subir_pdf(string_pdf: $pdf, string_xml: $xml, fc_row_layout_id: $fc_row_layout->fc_row_layout_id, link: $link);
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al subir pdf', data: $result_upl_pdf);
         }
@@ -158,7 +162,7 @@ class _finalizacion{
      * @param PDO $link
      * @return array
      */
-    private function subir_pdf(string $string_pdf, int $fc_row_layout_id, PDO $link): array
+    private function subir_pdf(string $string_pdf, string $string_xml, int $fc_row_layout_id, PDO $link): array
     {
         $nombre_archivo = $fc_row_layout_id.'.pdf';
         $ruta = (new generales())->path_base.'archivos/'.$nombre_archivo;
@@ -167,7 +171,13 @@ class _finalizacion{
         $file = array();
         $file['name'] = $nombre_archivo;
         $file['tmp_name'] = $ruta;
-        file_put_contents($ruta, $string_pdf);
+
+        $pdf_string = $this->generarReciboNomina(string_xml: $string_xml);
+        if(errores::$error){
+            return (new errores())->error('Error al generarReciboNomina', $pdf_string);
+        }
+
+        file_put_contents($ruta, $pdf_string);
 
         $alta = (new doc_documento(link: $link))->alta_documento(registro: $registro,file: $file);
         if(errores::$error){
@@ -279,6 +289,338 @@ class _finalizacion{
         }
         return true;
 
+    }
+
+    private function generarReciboNomina(string $string_xml): array|string|null
+    {
+        if (empty($string_xml)) {
+            return (new errores())->error("El contenido del XML está vacío", $string_xml);
+        }
+
+        libxml_use_internal_errors(true);
+        $xml = simplexml_load_string($string_xml);
+        if ($xml === false) {
+            $errs = array_map(fn($e) => $e->message, libxml_get_errors());
+            return (new errores())->error("Error al leer XML:\n".implode("\n", $errs), []);
+        }
+
+        // Namespaces
+        $xml->registerXPathNamespace('cfdi', 'http://www.sat.gob.mx/cfd/4');
+        $xml->registerXPathNamespace('nomina12', 'http://www.sat.gob.mx/nomina12');
+        $xml->registerXPathNamespace('tfd', 'http://www.sat.gob.mx/TimbreFiscalDigital');
+
+        // Nodos base
+        $comprobante = $xml; // cfdi:Comprobante
+        $emisor = $xml->xpath('cfdi:Emisor')[0] ?? null;
+        $receptor = $xml->xpath('cfdi:Receptor')[0] ?? null;
+        $conceptos = $xml->xpath('cfdi:Conceptos/cfdi:Concepto') ?? [];
+        $timbre = $xml->xpath('cfdi:Complemento/tfd:TimbreFiscalDigital')[0] ?? null;
+        $nomina = $xml->xpath('cfdi:Complemento/nomina12:Nomina')[0] ?? null;
+
+
+        // Atributos Comprobante
+        $compAttrs = $comprobante ? $comprobante->attributes() : null;
+        $fecha = (string)($compAttrs['Fecha'] ?? '');
+        $serie = (string)($compAttrs['Serie'] ?? '');
+        $folio = (string)($compAttrs['Folio'] ?? '');
+        $subtotal = (string)($compAttrs['SubTotal'] ?? '0');
+        $descuento = (string)($compAttrs['Descuento'] ?? '0');
+        $total = (string)($compAttrs['Total'] ?? '0');
+        $lugarexp = (string)($compAttrs['LugarExpedicion'] ?? '');
+
+        // Emisor/Receptor
+        $em = $emisor ? $emisor->attributes() : null;
+        $emNombre = (string)($em['Nombre'] ?? '');
+        $emRfc = (string)($em['Rfc'] ?? '');
+        $emRegimen = (string)($em['RegimenFiscal'] ?? '');
+
+        $re = $receptor ? $receptor->attributes() : null;
+        $reNombre = (string)($re['Nombre'] ?? '');
+        $reRfc = (string)($re['Rfc'] ?? '');
+
+        // Timbre
+        $tf = $timbre ? $timbre->attributes() : null;
+        $uuid = (string)($tf['UUID'] ?? '');
+        $fechaTimbrado = (string)($tf['FechaTimbrado'] ?? '');
+        $noCertSAT = (string)($tf['NoCertificadoSAT'] ?? '');
+        $selloCFD = (string)($tf['SelloCFD'] ?? '');
+        $selloSAT = (string)($tf['SelloSAT'] ?? '');
+
+        // Nómina 1.2 (periodo, percepciones, deducciones)
+        $no = $nomina ? $nomina->attributes() : null;
+        $tipoNomina = (string)($no['TipoNomina'] ?? '');
+        $fechaPago = (string)($no['FechaPago'] ?? '');
+        $fechaInicialPago = (string)($no['FechaInicialPago'] ?? '');
+        $fechaFinalPago = (string)($no['FechaFinalPago'] ?? '');
+        $numDiasPagados = (string)($no['NumDiasPagados'] ?? '');
+        $totalPercep = (string)($no['TotalPercepciones'] ?? '0');
+        $totalDeduc = (string)($no['TotalDeducciones'] ?? '0');
+        $totalOtrosPagos = (string)($no['TotalOtrosPagos'] ?? '0');
+
+        // Empleado (Receptor de Nomina12:Receptor)
+        $nomRec = $xml->xpath('cfdi:Complemento/nomina12:Nomina/nomina12:Receptor')[0] ?? null;
+        $nr = $nomRec ? $nomRec->attributes() : null;
+        $curp = (string)($nr['Curp'] ?? '');
+        $numEmpleado = (string)($nr['NumEmpleado'] ?? '');
+
+        // Percepciones
+        $percepciones = [];
+        $percs = $xml->xpath('cfdi:Complemento/nomina12:Nomina/nomina12:Percepciones/nomina12:Percepcion') ?? [];
+        foreach ($percs as $p) {
+            $a = $p->attributes();
+            $percepciones[] = [
+                'TipoPercepcion' => (string)$a['TipoPercepcion'],
+                'Clave' => (string)$a['Clave'],
+                'Concepto' => (string)$a['Concepto'],
+                'ImporteGravado' => (string)$a['ImporteGravado'],
+                'ImporteExento' => (string)$a['ImporteExento'],
+            ];
+        }
+
+        // Deducciones
+        $deducciones = [];
+        $deds = $xml->xpath('cfdi:Complemento/nomina12:Nomina/nomina12:Deducciones/nomina12:Deduccion') ?? [];
+        foreach ($deds as $d) {
+            $a = $d->attributes();
+            $deducciones[] = [
+                'TipoDeduccion' => (string)$a['TipoDeduccion'],
+                'Clave' => (string)$a['Clave'],
+                'Concepto' => (string)$a['Concepto'],
+                'Importe' => (string)$a['Importe'],
+            ];
+        }
+
+        // Otros pagos (opcional)
+        $otrosPagos = [];
+        $ops = $xml->xpath('cfdi:Complemento/nomina12:Nomina/nomina12:OtrosPagos/nomina12:OtroPago') ?? [];
+        foreach ($ops as $op) {
+            $a = $op->attributes();
+            $otrosPagos[] = [
+                'TipoOtroPago' => (string)$a['TipoOtroPago'],
+                'Clave' => (string)$a['Clave'],
+                'Concepto' => (string)$a['Concepto'],
+                'Importe' => (string)$a['Importe'],
+            ];
+        }
+
+        /**
+         * QR CFDI:
+         * https://verificacfdi.factura.sat.gob.mx/default.aspx
+         * formato (CFDI 4.0): ?re=RFC_EMISOR&rr=RFC_RECEPTOR&tt=TOTAL_6DEC&id=UUID
+         */
+        $qrURL = sprintf(
+            'https://verificacfdi.factura.sat.gob.mx/default.aspx?re=%s&rr=%s&tt=%s&id=%s',
+            urlencode($emRfc),
+            urlencode($reRfc),
+            $this->satAmt6($total),
+            urlencode($uuid)
+        );
+
+        // Genera PNG del QR en base64 para insertarlo al HTML
+        $qrPng = (new QRCode)->render($qrURL);
+        $qrBase64 = 'data:image/png;base64,' . base64_encode($qrPng);
+
+        /**
+         * Genera HTML del recibo
+         */
+        $css = <<<CSS
+        body{
+            font-family: DejaVu Sans, Arial, sans-serif;
+            font-size:9px;              /* más pequeño */
+            color:#111;
+            margin:10px;                /* margen reducido */
+        }
+        h1{ font-size:12px; margin:0 0 4px; }
+        h2{ font-size:10px; margin:6px 0 3px; border-bottom:1px solid #aaa; padding-bottom:2px;}
+        table{ width:100%; border-collapse:collapse; margin:4px 0 8px; }
+        th, td{ border:1px solid #ccc; padding:3px 4px; vertical-align:top; }
+        th{ background:#eee; text-align:left; font-size:9px; }
+        .right{ text-align:right; }
+        .mono{ font-family:"DejaVu Sans Mono", monospace; font-size:8px; overflow-wrap:anywhere; }
+        .small{ font-size:8px; color:#444; }
+        .badge{ padding:1px 4px; border:1px solid #999; border-radius:3px; display:inline-block; font-size:8px;}
+        .totals td{ font-weight:bold; font-size:9px; }
+        CSS;
+
+        $percepcionesRows = '';
+        foreach($percepciones as $p){
+            $percepcionesRows .= sprintf(
+                '<tr><td>%s</td><td class="mono">%s</td><td>%s</td><td class="right">%s</td><td class="right">%s</td></tr>',
+                htmlspecialchars($p['TipoPercepcion']),
+                htmlspecialchars($p['Clave']),
+                htmlspecialchars($p['Concepto']),
+                $this->moneyMX($p['ImporteGravado']),
+                $this->moneyMX($p['ImporteExento'])
+            );
+        }
+        if($percepcionesRows===''){
+            $percepcionesRows = '<tr><td colspan="5" class="small">Sin percepciones</td></tr>';
+        }
+
+        $deduccionesRows = '';
+        foreach($deducciones as $d){
+            $deduccionesRows .= sprintf(
+                '<tr><td>%s</td><td class="mono">%s</td><td>%s</td><td class="right">%s</td></tr>',
+                htmlspecialchars($d['TipoDeduccion']),
+                htmlspecialchars($d['Clave']),
+                htmlspecialchars($d['Concepto']),
+                $this->moneyMX($d['Importe'])
+            );
+        }
+        if($deduccionesRows===''){
+            $deduccionesRows = '<tr><td colspan="4" class="small">Sin deducciones</td></tr>';
+        }
+
+        $otrosPagosRows = '';
+        foreach($otrosPagos as $op){
+            $otrosPagosRows .= sprintf(
+                '<tr><td>%s</td><td class="mono">%s</td><td>%s</td><td class="right">%s</td></tr>',
+                htmlspecialchars($op['TipoOtroPago']),
+                htmlspecialchars($op['Clave']),
+                htmlspecialchars($op['Concepto']),
+                $this->moneyMX($op['Importe'])
+            );
+        }
+        if($otrosPagosRows===''){
+            $otrosPagosRows = '<tr><td colspan="4" class="small">Sin otros pagos</td></tr>';
+        }
+
+        // Conceptos (suele venir uno con Nómina)
+        $conceptoRows = '';
+        foreach($conceptos as $c){
+            $a = $c->attributes();
+            $qty = (string)($a['Cantidad'] ?? '1');
+            $desc = (string)($a['Descripcion'] ?? '');
+            $imp = (string)($a['Importe'] ?? '0');
+            $valorUnit = (string)($a['ValorUnitario'] ?? '0');
+            $conceptoRows .= sprintf(
+                '<tr><td class="right">%s</td><td>%s</td><td class="right">%s</td><td class="right">%s</td></tr>',
+                htmlspecialchars($qty),
+                htmlspecialchars($desc),
+                $this->moneyMX($valorUnit),
+                $this->moneyMX($imp)
+            );
+        }
+
+        $subtotalMX      =  $this->moneyMX($subtotal);
+        $descuentoMX     =  $this->moneyMX($descuento);
+        $totalPercepMX   =  $this->moneyMX($totalPercep);
+        $totalDeducMX    =  $this->moneyMX($totalDeduc);
+        $totalMX         =  $this->moneyMX($total);
+
+        $html = <<<HTML
+        <!doctype html>
+        <html>
+        <head>
+        <meta charset="utf-8">
+        <style>$css</style>
+        <title>Recibo de Nómina CFDI</title>
+        </head>
+        <body>
+        <div class="wrap">
+        
+            <div class="row">
+                <div class="col">
+                    <h1>Recibo de Nómina <span class="badge">CFDI 4.0</span></h1>
+                    <div><strong>Serie/Folio:</strong> {$serie}{$folio}</div>
+                    <div><strong>Lugar de expedición:</strong> {$lugarexp}</div>
+                    <div><strong>Fecha CFDI:</strong> {$fecha}</div>
+                </div>
+                <div class="col" style="text-align:right">
+                    <img src="$qrBase64" alt="QR CFDI" style="width:140px;height:140px;">
+                    <div class="small">UUID: <span class="mono">$uuid</span></div>
+                    <div class="small">Timbrado: $fechaTimbrado</div>
+                    <div class="small">Cert. SAT: <span class="mono">$noCertSAT</span></div>
+                </div>
+            </div>
+        
+            <h2>Emisor</h2>
+            <table>
+                <tr><th>RFC</th><th>Nombre</th><th>Régimen</th></tr>
+                <tr><td class="mono">$emRfc</td><td>$emNombre</td><td class="mono">$emRegimen</td></tr>
+            </table>
+        
+            <h2>DATOS DEL ADHERIDO</h2>
+            <table>
+                <tr><th>No. Adherido</th><th>RFC</th><th>Nombre</th><th>CURP</th></tr>
+                <tr>
+                    <td class="mono">$numEmpleado</td>
+                    <td class="mono">$reRfc</td>
+                    <td>$reNombre</td>
+                    <td class="mono">$curp</td>
+                </tr>
+            </table>
+        
+            <h2>INFORMACIÓN DE PAGO</h2>
+            <table>
+                <tr><th>Fecha Pago</th><th>Inicial</th><th>Final</th></tr>
+                <tr>
+                    <td>$fechaPago</td>
+                    <td>$fechaInicialPago</td>
+                    <td>$fechaFinalPago</td>
+                </tr>
+            </table>
+        
+            <h2>Conceptos (CFDI)</h2>
+            <table>
+                <tr><th>Cantidad</th><th>Descripción</th><th>Valor Unitario</th><th>Importe</th></tr>
+                $conceptoRows
+            </table>
+        
+            <h2>Percepciones</h2>
+            <table>
+                <tr><th>Tipo</th><th>Clave</th><th>Concepto</th><th>Gravado</th><th>Exento</th></tr>
+                $percepcionesRows
+            </table>
+        
+            <h2>Deducciones</h2>
+            <table>
+                <tr><th>Tipo</th><th>Clave</th><th>Concepto</th><th>Importe</th></tr>
+                $deduccionesRows
+            </table>
+        
+            <table class="totals">
+                <tr><td class="right">Subtotal</td><td class="right" style="width:150px;">\$ {$subtotalMX}</td></tr>
+                <tr><td class="right">Descuento</td><td class="right">\$ {$descuentoMX}</td></tr>
+                <tr><td class="right">Total Percepciones</td><td class="right">\$ {$totalPercepMX}</td></tr>
+                <tr><td class="right">Total Deducciones</td><td class="right">\$ {$totalDeducMX}</td></tr>
+                <tr><td class="right">Total (CFDI)</td><td class="right">\$ {$totalMX}</td></tr>
+            </table>
+        
+            <h2>Sello Digital</h2>
+            <div class="small">
+                <div><strong>Sello CFDI:</strong> <span class="mono">$selloCFD</span></div>
+                <div><strong>Sello SAT:</strong> <span class="mono">$selloSAT</span></div>
+            </div>
+        
+            <div class="small" style="margin-top:12px;">
+                <em>Este documento es una representación impresa de un CFDI. Para verificarlo escanee el QR o visite el portal del SAT.</em>
+            </div>
+        
+        </div>
+        </body>
+        </html>
+        HTML;
+        // y configuras Dompdf:
+        $options = new Options();
+        $options->set('isRemoteEnabled', true);
+        $options->set('isHtml5ParserEnabled', true);
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html, 'UTF-8');
+        $dompdf->setPaper('letter', 'portrait');
+        $dompdf->render();
+
+        return $dompdf->output();
+
+    }
+
+    private function moneyMX($v): string {
+        return number_format((float)$v, 2, '.', ',');
+    }
+
+    private function satAmt6($v): string {
+        return number_format((float)$v, 6, '.', '');
     }
 
 
