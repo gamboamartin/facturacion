@@ -748,6 +748,16 @@ class controlador_fc_layout_nom extends system{
                 mensaje: 'Error al obtener layout', data: $fc_layout_nom, header: $header, ws: $ws);
         }
 
+        // Título dinámico para identificar el origen de los empleados
+        $descripcion_layout = $fc_layout_nom->fc_layout_nom_descripcion ?? ($fc_layout_nom->descripcion ?? '');
+        $nombre_archivo = $fc_layout_nom->doc_documento_name_out ?? '';
+        // Sección y título de lista usados por los templates head/title.php y head/subtitulo.php
+        $this->seccion_titulo = 'Empleados del Layout';
+        if ($descripcion_layout !== '') {
+            $this->seccion_titulo .= ': ' . $descripcion_layout;
+        }
+        $this->titulo_lista = 'Archivo origen: ' . ($nombre_archivo !== '' ? $nombre_archivo : 'No disponible');
+
         $filtro['fc_layout_nom.id'] = $this->registro_id;
         $rs = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
         if(errores::$error){
