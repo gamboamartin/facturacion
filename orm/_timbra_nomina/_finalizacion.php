@@ -172,9 +172,9 @@ class _finalizacion{
         $file['name'] = $nombre_archivo;
         $file['tmp_name'] = $ruta;
 
-        $pdf_string = $this->generarReciboNomina(string_xml: $string_xml);
+        $pdf_string = $this->generarReciboNomina_stringXml(string_xml: $string_xml);
         if(errores::$error){
-            return (new errores())->error('Error al generarReciboNomina', $pdf_string);
+            return (new errores())->error('Error al generarReciboNomina_stringXml', $pdf_string);
         }
 
         file_put_contents($ruta, $pdf_string);
@@ -291,7 +291,32 @@ class _finalizacion{
 
     }
 
-    private function generarReciboNomina(string $string_xml): array|string|null
+    private function generarReciboNomina_rutaXml(string $ruta_xml): array|string|null
+    {
+        if (empty($ruta_xml)) {
+            return (new errores())->error("La ruta del XML está vacía", $ruta_xml);
+        }
+
+        if (!is_file($ruta_xml)) {
+            return (new errores())->error("No se encontró el archivo XML: $ruta_xml", $ruta_xml);
+        }
+
+        libxml_use_internal_errors(true);
+        $xml = simplexml_load_file($ruta_xml);
+        if ($xml === false) {
+            $errs = array_map(fn($e) => $e->message, libxml_get_errors());
+            return (new errores())->error("Error al leer XML:\n".implode("\n", $errs), []);
+        }
+
+        $rs = $this->generarReciboNomina($xml);
+        if (errores::$error) {
+            return (new errores())->error("Error al generarReciboNomina", $rs);
+        }
+
+        return $rs;
+    }
+
+    private function generarReciboNomina_stringXml(string $string_xml): array|string|null
     {
         if (empty($string_xml)) {
             return (new errores())->error("El contenido del XML está vacío", $string_xml);
@@ -303,6 +328,17 @@ class _finalizacion{
             $errs = array_map(fn($e) => $e->message, libxml_get_errors());
             return (new errores())->error("Error al leer XML:\n".implode("\n", $errs), []);
         }
+
+        $rs = $this->generarReciboNomina($xml);
+        if (errores::$error) {
+            return (new errores())->error("Error al generarReciboNomina", $rs);
+        }
+
+        return $rs;
+    }
+
+    private function generarReciboNomina($xml): array|string|null
+    {
 
         // Namespaces
         $xml->registerXPathNamespace('cfdi', 'http://www.sat.gob.mx/cfd/4');
