@@ -127,6 +127,26 @@ class _finalizacion{
         return [];
     }
 
+    final public function regenera_nomina_pdf(int $fc_row_layout_id, PDO $link)
+    {
+        $ruta_nomina_xml_timbrado = (new fc_row_nomina($link))->obtener_ruta_documento(
+            fc_row_layout_id: $fc_row_layout_id,
+            doc_tipo_documento_id: 2
+        );
+        if(errores::$error) {
+            return (new errores())->error("Error al obtener datos del recibo", $ruta_nomina_xml);
+        }
+
+        $ruta_nomina_pdf = (new fc_row_nomina($link))->obtener_ruta_documento(
+            fc_row_layout_id: $fc_row_layout_id,
+            doc_tipo_documento_id: 8
+        );
+        if(errores::$error) {
+            return (new errores())->error("Error al obtener datos del recibo", $ruta_nomina_xml);
+        }
+
+    }
+
     /**
      * OUT
      * @param string $pdf

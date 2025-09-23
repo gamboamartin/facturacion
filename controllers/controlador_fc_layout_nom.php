@@ -147,6 +147,11 @@ class controlador_fc_layout_nom extends system{
 
     }
 
+    public function regenera_rec_pdf(bool $header, bool $ws = false)
+    {
+        $fc_row_layout_id = $_GET['fc_row_layout_id'];
+    }
+
     public function descarga_rec_pdf(bool $header, bool $ws = false)
     {
 
@@ -787,6 +792,19 @@ class controlador_fc_layout_nom extends system{
                 }
             }
 
+            $btn_regenera_pdf = '';
+            if($row->fc_row_layout_esta_timbrado === 'activo'){
+                $params = array();
+                $params['fc_row_layout_id'] = $row->fc_row_layout_id;
+                $btn_regenera_pdf = (new html())->button_href(accion: 'regenera_rec_pdf',etiqueta:  'REGENERA PDF',
+                    registro_id: $this->registro_id,seccion: 'fc_layout_nom',style: 'success',params: $params);
+
+                if(errores::$error){
+                    return $this->retorno_error(
+                        mensaje: 'Error al obtener btn_regenera_pdf', data: $btn_regenera_pdf, header: $header, ws: $ws);
+                }
+            }
+
             $btn_descarga_zip = '';
             if($row->fc_row_layout_esta_timbrado === 'activo'){
                 $params = array();
@@ -802,6 +820,7 @@ class controlador_fc_layout_nom extends system{
 
             $row->btn_descarga_zip = $btn_descarga_zip;
             $row->btn_descarga_pdf = $btn_descarga_pdf;
+            $row->btn_regenera_pdf = $btn_regenera_pdf;
             $row->btn_descarga_xml = $btn_descarga_xml;
             $row->btn_timbra = $btn_timbra;
             $row->btn_modifica = $btn_modifica;
