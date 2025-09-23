@@ -127,14 +127,14 @@ class _finalizacion{
         return [];
     }
 
-    final public function regenera_nomina_pdf(int $fc_row_layout_id, PDO $link)
+    final public function regenera_nomina_pdf(int $fc_row_layout_id, PDO $link): array
     {
         $ruta_nomina_xml_timbrado = (new fc_row_nomina($link))->obtener_ruta_documento(
             fc_row_layout_id: $fc_row_layout_id,
             doc_tipo_documento_id: 2
         );
         if(errores::$error) {
-            return (new errores())->error("Error al obtener datos del recibo", $ruta_nomina_xml);
+            return (new errores())->error("Error al obtener_ruta_documento xml", $ruta_nomina_xml_timbrado);
         }
 
         $ruta_nomina_pdf = (new fc_row_nomina($link))->obtener_ruta_documento(
@@ -142,9 +142,17 @@ class _finalizacion{
             doc_tipo_documento_id: 8
         );
         if(errores::$error) {
-            return (new errores())->error("Error al obtener datos del recibo", $ruta_nomina_xml);
+            return (new errores())->error("Error al obtener_ruta_documento pdf", $ruta_nomina_pdf);
         }
 
+        $pdf_string = $this->generarReciboNomina_rutaXml(ruta_xml: $ruta_nomina_xml_timbrado);
+        if(errores::$error){
+            return (new errores())->error('Error al generarReciboNomina_rutaXml', $pdf_string);
+        }
+
+        file_put_contents($ruta_nomina_pdf, $pdf_string);
+
+        return [];
     }
 
     /**
