@@ -17,6 +17,10 @@ if ($controlador->disabled){
             <?php echo $controlador->inputs->rfc; ?>
             <?php echo $controlador->inputs->curp; ?>
             <?php echo $controlador->inputs->nombre_completo; ?>
+            <?php echo $controlador->inputs->banco; ?>
+            <?php echo $controlador->inputs->cuenta; ?>
+            <?php echo $controlador->inputs->clabe; ?>
+            <?php echo $controlador->inputs->neto_depositar; ?>
             <div class="control-group col-sm-6">
                 <label class="control-label" for="fecha_emision">FECHA EMISION</label>
                 <div class="controls">

@@ -476,6 +476,63 @@ class controlador_fc_layout_nom extends system{
                 mensaje: 'Error al obtener inputs', data: $nombre_completo, header: $header, ws: $ws);
         }
 
+        // Nuevos inputs: banco, cuenta, clabe, neto_depositar
+        $banco = $this->html->input_text(
+            cols: 6,
+            disabled: $this->disabled,
+            name: 'banco',
+            place_holder: 'BANCO',
+            row_upd: new stdClass(),
+            value_vacio: false,
+            value: $fc_row_layout->fc_row_layout_banco,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input banco', data: $banco, header: $header, ws: $ws);
+        }
+
+        $cuenta = $this->html->input_text(
+            cols: 6,
+            disabled: $this->disabled,
+            name: 'cuenta',
+            place_holder: 'CUENTA',
+            row_upd: new stdClass(),
+            value_vacio: false,
+            value: $fc_row_layout->fc_row_layout_cuenta,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input cuenta', data: $cuenta, header: $header, ws: $ws);
+        }
+
+        $clabe = $this->html->input_text(
+            cols: 6,
+            disabled: $this->disabled,
+            name: 'clabe',
+            place_holder: 'CLABE',
+            row_upd: new stdClass(),
+            value_vacio: false,
+            value: $fc_row_layout->fc_row_layout_clabe,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input clabe', data: $clabe, header: $header, ws: $ws);
+        }
+
+        $neto_depositar = $this->html->input_text(
+            cols: 6,
+            disabled: $this->disabled,
+            name: 'neto_depositar',
+            place_holder: 'NETO A DEPOSITAR',
+            row_upd: new stdClass(),
+            value_vacio: false,
+            value: $fc_row_layout->fc_row_layout_neto_depositar,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input neto_depositar', data: $neto_depositar, header: $header, ws: $ws);
+        }
+
         $link = "index.php?seccion=fc_layout_nom&accion=modifica_datos_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
         $link .= "&fc_row_layout_id={$_GET['fc_row_layout_id']}";
         $this->link_modifica_datos_bd = $link;
@@ -496,6 +553,10 @@ class controlador_fc_layout_nom extends system{
 
         $this->inputs->fecha_emision = $fecha_emision;
         $this->inputs->nombre_completo = $nombre_completo;
+        $this->inputs->banco = $banco;
+        $this->inputs->cuenta = $cuenta;
+        $this->inputs->clabe = $clabe;
+        $this->inputs->neto_depositar = $neto_depositar;
     }
 
     public function modifica_datos_bd(bool $header, bool $ws = false): array|stdClass
@@ -534,6 +595,11 @@ class controlador_fc_layout_nom extends system{
         $upd_row['curp'] = $_POST['curp'];
         $upd_row['nombre_completo'] = $_POST['nombre_completo'];
         $upd_row['fecha_emision'] = $_POST['fecha_emision'];
+        // Nuevos campos a actualizar
+        if (isset($_POST['banco'])) $upd_row['banco'] = $_POST['banco'];
+        if (isset($_POST['cuenta'])) $upd_row['cuenta'] = $_POST['cuenta'];
+        if (isset($_POST['clabe'])) $upd_row['clabe'] = $_POST['clabe'];
+        if (isset($_POST['neto_depositar'])) $upd_row['neto_depositar'] = $_POST['neto_depositar'];
         $result = $fc_row_layout_modelo->modifica_bd($upd_row, $fc_row_layout_id);
         if(errores::$error){
             return $this->retorno_error(
