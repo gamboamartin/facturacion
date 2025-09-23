@@ -31,11 +31,11 @@ class fc_empleado extends modelo{
         $campos_a_sanitizar = ['rfc', 'nss', 'clabe', 'cuenta', 'nombre_completo'];
         
         foreach ($campos_a_sanitizar as $campo) {
-            if (isset($registro[$campo]) && is_string($registro[$campo])) {
+            if (isset($registro[$campo]) && is_string($registro[$campo]) && !empty($registro[$campo])) {
                 if ($campo === 'nombre_completo') {
                     // Para nombre_completo: solo eliminar espacios al inicio y final
                     $registro[$campo] = trim($registro[$campo]);
-                } elseif ($campo === 'clabe' || $campo === 'cuenta') {
+                } elseif ($campo === 'clabe' || ($campo === 'cuenta' && !empty($registro[$campo]))) {
                     // Para clabe y cuenta: solo números (eliminar TODOS los caracteres no numéricos)
                     $registro[$campo] = preg_replace('/[^0-9]/', '', $registro[$campo]);
                 } else {
