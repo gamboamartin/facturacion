@@ -518,6 +518,7 @@ class controlador_fc_layout_nom extends system{
             place_holder: 'CUENTA',
             row_upd: new stdClass(),
             value_vacio: true,
+            required: false,
             value: $fc_row_layout->fc_row_layout_cuenta,
         );
         if (errores::$error) {
