@@ -6,6 +6,7 @@ use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_layout_nom_html;
 use gamboamartin\facturacion\models\_timbra_nomina;
+use gamboamartin\facturacion\models\_timbra_nomina\_finalizacion;
 use gamboamartin\facturacion\models\fc_layout_nom;
 use gamboamartin\facturacion\models\fc_row_layout;
 use gamboamartin\facturacion\models\fc_row_nomina;
@@ -150,6 +151,20 @@ class controlador_fc_layout_nom extends system{
     public function regenera_rec_pdf(bool $header, bool $ws = false)
     {
         $fc_row_layout_id = $_GET['fc_row_layout_id'];
+
+        $result = (new _finalizacion())->regenera_nomina_pdf(
+            fc_row_layout_id: $fc_row_layout_id,
+            link:  $this->link
+        );
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al regenera_rec_pdf',data: $result,
+                header: $header, ws: $ws);
+        }
+
+        $link = "index.php?seccion=fc_layout_nom&accion=ver_empleados&registro_id={$this->registro_id}";
+        $link .= "&adm_menu_id=-1&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
     }
 
     public function descarga_rec_pdf(bool $header, bool $ws = false)
