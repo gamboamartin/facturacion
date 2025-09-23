@@ -32,6 +32,7 @@
                 <th>DESCARGA PDF</th>
                 <th>DESCARGA ZIP</th>
                 <th>MODIFICAR</th>
+                <th>REGENERA PDF</th>
                 <th>TIMBRA</th>
             </tr>
             </thead>
@@ -57,6 +58,7 @@
                     <td><?php echo $fc_row_layout->btn_descarga_pdf; ?></td>
                     <td><?php echo $fc_row_layout->btn_descarga_zip; ?></td>
                     <td><?php echo $fc_row_layout->btn_modifica; ?></td>
+                    <td><?php echo $fc_row_layout->btn_regenera_pdf; ?></td>
                     <td><?php echo $fc_row_layout->btn_timbra; ?></td>
                 </tr>
             <?php } ?>
