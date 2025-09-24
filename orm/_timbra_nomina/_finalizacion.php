@@ -554,7 +554,7 @@ class _finalizacion{
         foreach($conceptos as $c){
             $a = $c->attributes();
             $qty = (string)($a['Cantidad'] ?? '1');
-            $desc = (string)($a['Descripcion'] ?? '');
+            $desc = 'CONVENIO MASC';
             $imp = (string)($a['Importe'] ?? '0');
             $valorUnit = (string)($a['ValorUnitario'] ?? '0');
             $conceptoRows .= sprintf(
@@ -585,7 +585,7 @@ class _finalizacion{
         
             <div class="row">
                 <div class="col">
-                    <h1>Recibo de Nómina <span class="badge">CFDI 4.0</span></h1>
+                    <h1>Recibo <span class="badge">CFDI 4.0</span></h1>
                     <div><strong>Serie/Folio:</strong> {$serie}{$folio}</div>
                     <div><strong>Lugar de expedición:</strong> {$lugarexp}</div>
                     <div><strong>Fecha CFDI:</strong> {$fecha}</div>
