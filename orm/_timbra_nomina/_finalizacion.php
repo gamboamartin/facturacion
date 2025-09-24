@@ -578,7 +578,7 @@ class _finalizacion{
         <head>
         <meta charset="utf-8">
         <style>$css</style>
-        <title>Recibo de Nómina CFDI</title>
+        <title>Recibo</title>
         </head>
         <body>
         <div class="wrap">
