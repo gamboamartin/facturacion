@@ -3,6 +3,8 @@ namespace gamboamartin\facturacion\models\_timbra_nomina;
 
 
 use config\generales;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Writer\PngWriter;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_cfdi_sellado_nomina;
@@ -469,20 +471,25 @@ class _finalizacion{
 
         /**
          * QR CFDI:
-         * https://verificacfdi.factura.sat.gob.mx/default.aspx
+         * https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx
          * formato (CFDI 4.0): ?re=RFC_EMISOR&rr=RFC_RECEPTOR&tt=TOTAL_6DEC&id=UUID
          */
-        $qrURL = sprintf(
-            'https://verificacfdi.factura.sat.gob.mx/default.aspx?re=%s&rr=%s&tt=%s&id=%s',
-            urlencode($emRfc),
-            urlencode($reRfc),
-            $this->satAmt6($total),
-            urlencode($uuid)
-        );
 
-        // Genera PNG del QR en base64 para insertarlo al HTML
-        $qrPng = (new QRCode)->render($qrURL);
-        $qrBase64 = 'data:image/png;base64,' . base64_encode($qrPng);
+        $qrURL = 'https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx'
+            . "?id=".urlencode($uuid)
+            . "&re=".urlencode($emRfc)
+            . "&rr=".urlencode($reRfc)
+            . "&tt=". $this->formatearNumeroFijo($total)
+            . "&fe=".$this->obtenerUltimosOcho($selloCFD);
+
+        $result = Builder::create()
+            ->writer(new PngWriter())
+            ->data($qrURL)
+            ->build();
+
+        // --- 3. Obtiene el contenido del PNG y lo codifica en Base64
+        $qrPngContent = $result->getString();
+        $qrBase64 = 'data:image/png;base64,' . base64_encode($qrPngContent);
 
         /**
          * Genera HTML del recibo
@@ -685,6 +692,29 @@ class _finalizacion{
 
     private function satAmt6($v): string {
         return number_format((float)$v, 6, '.', '');
+    }
+
+    private function obtenerUltimosOcho($cadena): string
+    {
+        return substr($cadena, -8);
+    }
+
+    private function formatearNumeroFijo($numero): string
+    {
+        // Convierte el número a un tipo flotante para asegurar que se maneje correctamente
+        $numero = floatval($numero);
+
+            // Formatea el número con la precisión decimal deseada
+        $formato = sprintf('%.'. 6 . 'f', $numero);
+
+            // Separa la parte entera y la parte decimal
+        list($parteEntera, $parteDecimal) = explode('.', $formato);
+
+            // Rellena la parte entera con ceros a la izquierda
+        $parteEnteraRellenada = str_pad($parteEntera, 10, '0', STR_PAD_LEFT);
+
+            // Combina las partes y devuelve el resultado
+        return $parteEnteraRellenada . '.' . $parteDecimal;
     }
 
 
