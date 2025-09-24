@@ -90,13 +90,17 @@ class controlador_fc_layout_nom extends system{
     public function alta_bd(bool $header, bool $ws = false): array|stdClass
     {
 
-        $r_alta = parent::alta_bd($header, $ws);
+        $r_alta = parent::alta_bd(header: false, ws: $ws);
         if (errores::$error) {
             return $this->retorno_error(
                 mensaje: 'Error al guardar', data: $r_alta, header: $header, ws: $ws);
         }
-        return $r_alta;
-
+        $link = "index.php?seccion=fc_layout_nom&accion=lista";
+        if (isset($_GET['session_id'])) {
+            $link .= "&session_id={$_GET['session_id']}";
+        }
+        header("Location: " . $link);
+        exit;
     }
 
 
