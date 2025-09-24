@@ -70,12 +70,10 @@
       "phpunit/phpunit": "^10.0.0",
       "ext-openssl": "*",
       "ext-mysqli": "*",
-      "ext-libxml": "*"
+      "ext-libxml": "*",
+    "endroid/qr-code": "^5.1"
     },
-    "require-dev": {
-
-    },
-  "config": {
+    "config": {
     "allow-plugins": {
       "phpdocumentor/shim": false
     }

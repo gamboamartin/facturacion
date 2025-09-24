@@ -306,8 +306,8 @@ class _make_json
             "Antigüedad" => "P10W", "TipoContrato" => "99", "Sindicalizado" => "No", "TipoJornada" => "01",
             "TipoRegimen" => "99", "NumEmpleado" => "{$this->clave_empleado}", "Departamento" => "0", "Puesto" => "0",
             "RiesgoPuesto" => "1", "PeriodicidadPago" => "99", "Banco" => "{$this->r_banco}",
-            "CuentaBancaria" => "{$cuenta}", "SalarioBaseCotApor" => "278.80",//dato por defecto para todos
-            "SalarioDiarioIntegrado" => "292.54",//dato por defecto para todos
+            "CuentaBancaria" => "{$cuenta}", "SalarioBaseCotApor" => "0",//dato por defecto para todos
+            "SalarioDiarioIntegrado" => "0",//dato por defecto para todos
             "ClaveEntFed" => "CMX"];
 
     }
