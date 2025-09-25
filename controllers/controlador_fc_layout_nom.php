@@ -1016,9 +1016,9 @@ class controlador_fc_layout_nom extends system{
     {
 
         if($this->registro_id <= 178){
-            $error = (new errores())->error(mensaje: 'Error timbrado version anterior', data: $this->registro_id);
-            print_r($error);
-            exit;
+            //$error = (new errores())->error(mensaje: 'Error timbrado version anterior', data: $this->registro_id);
+            //print_r($error);
+            //exit;
         }
 
         $filtro['fc_layout_nom.id'] = $this->registro_id;
