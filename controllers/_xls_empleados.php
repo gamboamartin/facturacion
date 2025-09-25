@@ -130,6 +130,9 @@ class _xls_empleados{
                     }
                 }
 
+                if((int)$row_empleado['fc_empleado_id'] === -1){
+                    continue;
+                }
 
                 $row_low_new['fc_empleado_id'] = $row_empleado['fc_empleado_id'];
                 $row_low_new['fc_layout_nom_id'] = $fc_layout_nom_id;
