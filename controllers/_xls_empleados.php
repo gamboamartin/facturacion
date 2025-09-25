@@ -19,7 +19,7 @@ class _xls_empleados{
             return (new errores())->error('Error al generar row', $fc_empleado_new);
         }
 
-        $keys = array('nombre_completo','rfc','regimen_fiscal','clabe','nss','curp');
+        $keys = array('rfc','regimen_fiscal','clabe','nss','curp');
         $vacios = true;
         foreach ($keys as $key) {
             if(!isset($fc_empleado_new[$key])){
