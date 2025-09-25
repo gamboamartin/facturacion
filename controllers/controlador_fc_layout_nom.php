@@ -120,6 +120,10 @@ class controlador_fc_layout_nom extends system{
 
     public function carga_files_layout(bool $header, bool $ws = false)
     {
+        if(!isset($_GET['dir'])){
+            echo 'Integra dir por get';
+            exit;
+        }
         $dir = $_GET['dir'];
         $generales = new generales();
 
