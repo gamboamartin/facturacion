@@ -118,6 +118,69 @@ class controlador_fc_layout_nom extends system{
 
     }
 
+    public function carga_files_layout(bool $header, bool $ws = false)
+    {
+        $dir = $_GET['dir'];
+        $generales = new generales();
+
+        $dir_explode = (explode(".",$dir));
+        $fecha_pago = $dir_explode[0].'-'.$dir_explode[1].'-'.$dir_explode[2];
+
+
+        $ruta_carpeta = $generales->path_base."/archivos/doc_documento/$dir";
+        $elementos = scandir($ruta_carpeta);
+        $model = new fc_layout_nom($this->link);
+
+        foreach ($elementos as $elemento) {
+            if ($elemento != "." && $elemento != "..") {
+                $explode_doc = explode('.',$elemento);
+                $row_insert = array();
+                $row_insert['id'] = $explode_doc[0];
+
+                $name_new = "";
+                foreach ($explode_doc as $indice=>$explode_ind) {
+                    if($indice === 0){
+                        continue;
+                    }
+                    $punto = '';
+                    if($name_new !== ''){
+                        $punto = '.';
+                    }
+                    $name_new .= $punto.$explode_ind;
+                }
+
+                $name_new = str_replace('  ', ' ', $name_new);
+                $name_new = trim($name_new);
+
+                $file_ruta = $ruta_carpeta."/".$elemento;
+                $_FILES['documento']['name'] = $name_new;
+                $_FILES['documento']['tmp_name'] = $file_ruta;
+
+
+                $row_insert['descripcion'] = trim($name_new);
+                $row_insert['descripcion_select'] = trim($name_new);
+                $row_insert['fecha_pago'] = $fecha_pago;
+                $_POST['fecha_pago'] = $fecha_pago;
+
+                $model->registro = $row_insert;
+
+                $alta_row = $model->alta_bd();
+                if(errores::$error){
+                    $error =  (new errores())->error('Error al generar row', $alta_row);
+                    print_r($error);
+                    exit;
+
+                }
+                print_r($alta_row);
+            }
+        }
+
+        print_r($elementos);exit;
+
+        exit;
+
+    }
+
     public function descarga_original(bool $header, bool $ws = false)
     {
         if($this->registro_id <= 0 ){
@@ -927,9 +990,9 @@ class controlador_fc_layout_nom extends system{
     public function timbra_recibo(bool $header, bool $ws = false): array|stdClass
     {
         if($this->registro_id <= 178){
-            $error = (new errores())->error(mensaje: 'Error timbrado version anterior', data: $this->registro_id);
-            print_r($error);
-            exit;
+       //     $error = (new errores())->error(mensaje: 'Error timbrado version anterior', data: $this->registro_id);
+       //     print_r($error);
+       //     exit;
         }
 
         $result = (new _timbra_nomina())->timbra_recibo(link: $this->link,fc_row_layout_id:  $_GET['fc_row_layout_id']);

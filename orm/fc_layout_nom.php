@@ -27,6 +27,18 @@ class fc_layout_nom extends modelo{
 
     public function alta_bd(): array|stdClass
     {
+        $rand_code = mt_rand(10,99);
+        if(isset($this->registro['id'])){
+            $existe = $this->existe_by_id($this->registro['id']);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al ver si existe', data: $existe);
+            }
+            if($existe){
+                return new stdClass();
+            }
+            $rand_code = $rand_code.$this->registro['id'];
+
+        }
 
         $file = $_FILES['documento'];
 
@@ -42,8 +54,8 @@ class fc_layout_nom extends modelo{
 
         $doc_documento_id = $doc_documento_alta->registro_id;
 
-        $this->registro['codigo'] = 'LDN.'.date('YmdHis').'.'.mt_rand(10,99);
-        $this->registro['codigo_bis'] = 'LDN.'.date('YmdHis').'.'.mt_rand(10,99);
+        $this->registro['codigo'] = 'LDN.'.date('YmdHis').'.'.mt_rand(10,99).$rand_code;
+        $this->registro['codigo_bis'] = 'LDN.'.date('YmdHis').'.'.mt_rand(10,99).$rand_code;
         $this->registro['status'] = 'activo';
         $this->registro['descripcion'] = $this->registro['descripcion'].' '.$doc_documento_ins['name_out'];
         $this->registro['doc_documento_id'] = $doc_documento_id;

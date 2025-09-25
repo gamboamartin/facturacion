@@ -34,7 +34,7 @@ class _timbra_nomina
         }
 
         if((int)$datos_rec->fc_layout_nom->fc_layout_nom_id <= 178){
-            return (new errores())->error(mensaje: 'Error timbrado version anterior', data: $datos_rec);
+            //return (new errores())->error(mensaje: 'Error timbrado version anterior', data: $datos_rec);
         }
 
         if($datos_rec->fc_row_layout->fc_row_layout_esta_timbrado === 'activo'){
