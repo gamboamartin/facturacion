@@ -17,7 +17,7 @@ class _xls_dispersion{
     public static array $letras = array();
     private const string ENCABEZADO_COL          = 'A';
     private const int ENCABEZADO_MAX_FILAS    = 200;
-    private const array ENCABEZADOS_PERMITIDOS  = ['CLAVE EMPLEADO', 'CLAVEEMPLEADO'];
+    private const array ENCABEZADOS_PERMITIDOS  = ['CLAVE EMPLEADO', 'CLAVEEMPLEADO','# EMPLEADO'];
 
     public function __construct()
     {
