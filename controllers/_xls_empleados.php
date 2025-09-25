@@ -18,9 +18,25 @@ class _xls_empleados{
         if(errores::$error){
             return (new errores())->error('Error al generar row', $fc_empleado_new);
         }
-        $alta_em = $fc_empleado_modelo->alta_registro($fc_empleado_new);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al insertar $empleado', data: $alta_em);
+
+        $keys = array('nombre_completo','rfc','cp','regimen_fiscal','clabe','nss','curp');
+        $vacios = true;
+        foreach ($keys as $key) {
+            if(!isset($fc_empleado_new[$key])){
+                $fc_empleado_new[$key] = '';
+            }
+            if(trim($fc_empleado_new[$key]) !== ''){
+                $vacios = false;
+                break;
+            }
+        }
+        $alta_em = new stdClass();
+        $alta_em->registro_id = -1;
+        if(!$vacios) {
+            $alta_em = $fc_empleado_modelo->alta_registro($fc_empleado_new);
+            if (errores::$error) {
+                return (new errores())->error(mensaje: 'Error al insertar $empleado', data: $alta_em);
+            }
         }
         return $alta_em;
 
@@ -182,6 +198,7 @@ class _xls_empleados{
         }
 
 
+
         $fc_empleado_new['nombre_completo'] = $row_empleado['NOMBRE COMPLETO'];
         $fc_empleado_new['rfc'] = $row_empleado['RFC'];
         $fc_empleado_new['cp'] = $row_empleado['CODIGO POSTAL'];
@@ -336,6 +353,7 @@ class _xls_empleados{
             if(errores::$error){
                 return (new errores())->error(mensaje: 'Error al insertar $empleado', data: $row_empleado);
             }
+
             $rows_empleados[$indice] = $row_empleado;
         }
 
