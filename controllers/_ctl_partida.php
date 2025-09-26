@@ -229,7 +229,7 @@ class _ctl_partida extends _base{
         }
         $keys_selects['unidad']->disabled = true;
 
-        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 4, key: 'impuesto',
+        $keys_selects = (new \base\controller\init())->key_select_txt(cols: 12, key: 'impuesto',
             keys_selects: $keys_selects, place_holder: 'Objeto del Impuesto');
         if (errores::$error) {
             return $this->errores->error(mensaje: 'Error al maquetar key_selects', data: $keys_selects);
