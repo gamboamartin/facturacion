@@ -943,6 +943,19 @@ class controlador_fc_layout_nom extends system{
                 }
             }
 
+            $btn_cancelar_recibo = '';
+            if($row->fc_row_layout_esta_timbrado === 'activo'){
+                $params = array();
+                $params['fc_row_layout_id'] = $row->fc_row_layout_id;
+                $btn_cancelar_recibo = (new html())->button_href(accion: 'cancelar_recibo',etiqueta:  'CANCELAR RECIBO',
+                    registro_id: $this->registro_id,seccion: 'fc_layout_nom',style: 'danger',params: $params);
+
+                if(errores::$error){
+                    return $this->retorno_error(
+                        mensaje: 'Error al obtener btn_regenera_pdf', data: $btn_cancelar_recibo, header: $header, ws: $ws);
+                }
+            }
+
             $btn_descarga_zip = '';
             if($row->fc_row_layout_esta_timbrado === 'activo'){
                 $params = array();
@@ -960,6 +973,7 @@ class controlador_fc_layout_nom extends system{
             $row->btn_descarga_pdf = $btn_descarga_pdf;
             $row->btn_regenera_pdf = $btn_regenera_pdf;
             $row->btn_descarga_xml = $btn_descarga_xml;
+            $row->btn_cancelar_recibo = $btn_cancelar_recibo;
             $row->btn_timbra = $btn_timbra;
             $row->btn_modifica = $btn_modifica;
             $rows[$indice] = $row;
