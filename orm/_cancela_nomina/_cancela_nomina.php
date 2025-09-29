@@ -2,14 +2,18 @@
 
 namespace gamboamartin\facturacion\models\_cancela_nomina;
 
+use config\generales;
 use config\pac;
+use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_timbra_nomina\_certificado;
 use gamboamartin\facturacion\models\_timbra_nomina\_datos;
+use gamboamartin\facturacion\models\fc_cancelacion_recibo;
 use gamboamartin\facturacion\models\fc_cer_csd;
 use gamboamartin\facturacion\models\fc_cer_pem;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_key_csd;
+use gamboamartin\facturacion\models\fc_row_nomina;
 use gamboamartin\facturacion\pac\_cnx_pac;
 use PDO;
 use stdClass;
@@ -53,6 +57,15 @@ class _cancela_nomina
         $resultado = $response->resultado;
         $codigo = $response->codigo;
         $acuse = $response->acuse;
+
+        if ($resultado !== 'success') {
+            return (new errores())->error(mensaje: $response->mensaje, data: $response);
+        }
+
+        $subir_acuse_result = $this->subir_xml_acuse_cancelacion(string_xml: $acuse, fc_row_layout_id: $fc_row_layout_id, link: $link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error en subir_xml_acuse_cancelacion', data: $subir_acuse_result);
+        }
 
         $out = new stdClass();
         $out->datos_rec = $datos_rec;
@@ -216,6 +229,40 @@ class _cancela_nomina
 
         return $password;
 
+    }
+
+    private function subir_xml_acuse_cancelacion(string $string_xml, int $fc_row_layout_id, PDO $link): array
+    {
+        $nombre_archivo = $fc_row_layout_id.'.xml';
+        $ruta = (new generales())->path_base.'archivos/'.$nombre_archivo;
+
+        $registro['doc_tipo_documento_id'] = 12;
+        $file = array();
+        $file['name'] = $nombre_archivo;
+        $file['tmp_name'] = $ruta;
+        file_put_contents($ruta, $string_xml);
+
+        $alta = (new doc_documento(link: $link))->alta_documento(registro: $registro,file: $file);
+        if(errores::$error){
+            return (new errores())->error('Error al insertar', $alta);
+        }
+
+        unlink($ruta);
+        $doc_documento_id = $alta->registro_id;
+
+        $fc_cancela_recibo_registro = [
+            'doc_documento_id' => $doc_documento_id,
+            'fc_row_layout_id' => $fc_row_layout_id,
+        ];
+
+        $fc_cancelacion_recibo_modelo = new fc_cancelacion_recibo($link);
+        $fc_cancelacion_recibo_modelo->registro = $fc_cancela_recibo_registro;
+        $result = $fc_cancelacion_recibo_modelo->alta_bd();
+        if(errores::$error){
+            return (new errores())->error('Error al insertar fc_cancelacion_recibo', $result);
+        }
+
+        return [];
     }
 
 }

@@ -5,6 +5,7 @@ use config\generales;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_layout_nom_html;
+use gamboamartin\facturacion\models\_cancela_nomina\_cancela_nomina;
 use gamboamartin\facturacion\models\_timbra_nomina;
 use gamboamartin\facturacion\models\_timbra_nomina\_finalizacion;
 use gamboamartin\facturacion\models\fc_layout_nom;
@@ -103,6 +104,25 @@ class controlador_fc_layout_nom extends system{
         exit;
     }
 
+    public function cancelar_recibo(bool $header, bool $ws = false)
+    {
+        $fc_row_layout_id = $_GET['fc_row_layout_id'];
+
+        $result = (new _cancela_nomina())->cancela_recibo(
+            link: $this->link,
+            fc_row_layout_id: $fc_row_layout_id
+        );
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al cancelar recibo',data: $result,
+                header: $header, ws: $ws);
+        }
+
+        $link = "index.php?seccion=fc_layout_nom&accion=ver_empleados&registro_id={$this->registro_id}";
+        $link .= "&adm_menu_id=-1&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+
+    }
 
     #[NoReturn]
     public function carga_empleados(bool $header, bool $ws = false): void
