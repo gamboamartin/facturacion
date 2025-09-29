@@ -6,7 +6,10 @@ use config\pac;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_timbra_nomina\_certificado;
 use gamboamartin\facturacion\models\_timbra_nomina\_datos;
+use gamboamartin\facturacion\models\fc_cer_csd;
+use gamboamartin\facturacion\models\fc_cer_pem;
 use gamboamartin\facturacion\models\fc_csd;
+use gamboamartin\facturacion\models\fc_key_csd;
 use gamboamartin\facturacion\pac\_cnx_pac;
 use PDO;
 use stdClass;
@@ -33,13 +36,31 @@ class _cancela_nomina
             return (new errores())->error(mensaje: 'Error al obtener datos de datos_cfdi', data: $datos_cfdi);
         }
 
-//        $response = (new _cnx_pac())->operacion_timbrarJSON2($datos_cfdi->jsonB64, $datos_cfdi->keyPEM,
-//            $datos_cfdi->cerPEM, $datos_cfdi->plantilla);
-//        $response = json_decode($response, false);
+        $response = (new _cnx_pac())->operacion_cancelar2(
+            apikey: (new pac)->usuario_integrador,
+            keyCSD: $datos_cfdi->key,
+            cerCSD: $datos_cfdi->cer,
+            passCSD: $datos_cfdi->csd_password,
+            uuid: $datos_cfdi->uuid,
+            rfcEmisor: $datos_cfdi->emisorRFC,
+            rfcReceptor: $datos_cfdi->receptorRFC,
+            total: $datos_cfdi->total,
+            motivo: 'cancelacion desde el sistema',
+            folioSustitucion: '',
+        );
 
-
+        $response = json_decode($response, false);
+        $resultado = $response->resultado;
+        $codigo = $response->codigo;
+        $acuse = $response->acuse;
 
         $out = new stdClass();
+        $out->datos_rec = $datos_rec;
+        $out->datos_cfdi = $datos_cfdi;
+        $out->response = $response;
+        $out->codigo = $codigo;
+        $out->acuse = $acuse;
+        $out->resultado = $resultado;
         return $out;
 
     }
@@ -47,7 +68,7 @@ class _cancela_nomina
     private function datos_response_cancelacion(PDO $link, stdClass $fc_row_layout): array|stdClass
     {
 
-        $datos_csd = (new _certificado())->datos_csd($link);
+        $datos_csd = $this->datos_csd(link: $link);
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al obtener datos_csd', data: $datos_csd);
         }
@@ -58,8 +79,9 @@ class _cancela_nomina
         }
 
         $datos = new stdClass();
-        $datos->keyPEM = $datos_csd->keyPEM;
-        $datos->cerPEM = $datos_csd->cerPEM;
+        $datos->key = $datos_csd->key;
+        $datos->cer = $datos_csd->cer;
+        $datos->csd_password = $datos_csd->csd_password;
         $datos->uuid = $fc_row_layout->fc_row_layout_uuid;
         $datos->receptorRFC = $fc_row_layout->fc_row_layout_rfc;
         $datos->emisorRFC = $emisor_rfc;
@@ -87,10 +109,113 @@ class _cancela_nomina
 
         return (string)$result['org_empresa_rfc'];
     }
-//$fc_row_layout_id = $_GET['fc_row_layout_id'];
-//$r = (new _cancela_nomina())->cancela_recibo(link: $this->link, fc_row_layout_id: $fc_row_layout_id);
-//echo '<pre>';
-//print_r($r);
-//echo '</pre>';exit;
+
+    private function datos_csd(PDO $link): array|stdClass
+    {
+        $ruta_cer = $this->get_cer_path(fc_csd_nomina_id: pac::$fc_csd_nomina_id, link: $link);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al obtener ruta_cer', data: $ruta_cer);
+        }
+
+        $ruta_key = $this->get_key_path(fc_csd_nomina_id: pac::$fc_csd_nomina_id, link: $link);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al obtener ruta_key', data: $ruta_cer);
+        }
+
+        $cer = base64_encode(file_get_contents($ruta_cer));
+        $key = base64_encode(file_get_contents($ruta_key));
+
+        $csd_password = $this->get_csd_password(fc_csd_nomina_id: pac::$fc_csd_nomina_id, link: $link);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al obtener ruta_key', data: $ruta_cer);
+        }
+
+        $datos = (new stdClass());
+        $datos->key = $key;
+        $datos->cer = $cer;
+        $datos->csd_password = $csd_password;
+        return $datos;
+
+    }
+
+    private function get_cer_path(int $fc_csd_nomina_id, PDO $link): string|array
+    {
+
+        $filtro = ['fc_csd_id' => $fc_csd_nomina_id];
+        $fc_cer_csd_modelo = new fc_cer_csd($link);
+        $fc_cer_csd_data = $fc_cer_csd_modelo->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return (new errores())->error('Error al obtener fc_cer_csd', $fc_cer_csd_data);
+        }
+
+        if ((int)$fc_cer_csd_data->n_registros < 1) {
+            return (new errores())->error('Error no existe fc_cer_csd', $fc_cer_csd_data);
+        }
+
+        $registro = $fc_cer_csd_data->registros[0];
+
+        $ruta_absoluta = $registro['doc_documento_ruta_absoluta'];
+
+        $pac = new pac();
+
+        if(isset($pac->en_produccion) && !$pac->en_produccion){
+            $ruta_absoluta = "/var/www/html/facturacion/pac/CSD_EKU9003173C9.cer";
+        }
+
+        return $ruta_absoluta;
+
+    }
+
+    private function get_key_path(int $fc_csd_nomina_id, PDO $link): string|array
+    {
+
+        $filtro = ['fc_csd_id' => $fc_csd_nomina_id];
+        $fc_key_csd_modelo = new fc_key_csd($link);
+        $fc_key_csd_data = $fc_key_csd_modelo->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return (new errores())->error('Error al obtener fc_key_csd', $fc_key_csd_data);
+        }
+
+        if ((int)$fc_key_csd_data->n_registros < 1) {
+            return (new errores())->error('Error no existe fc_key_csd', $fc_key_csd_data);
+        }
+
+        $registro = $fc_key_csd_data->registros[0];
+
+        $ruta_absoluta = $registro['doc_documento_ruta_absoluta'];
+
+        $pac = new pac();
+
+        if(isset($pac->en_produccion) && !$pac->en_produccion){
+            $ruta_absoluta = "/var/www/html/facturacion/pac/CSD_EKU9003173C9.key";
+        }
+
+        return $ruta_absoluta;
+
+    }
+
+    private function get_csd_password(int $fc_csd_nomina_id, PDO $link): string|array
+    {
+        $filtro = ['fc_csd.id' => $fc_csd_nomina_id];
+        $fc_csd_modelo = new fc_csd($link);
+        $fc_csd_data = $fc_csd_modelo->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return (new errores())->error('Error al obtener fc_csd', $fc_csd_data);
+        }
+
+        if ((int)$fc_csd_data->n_registros < 1) {
+            return (new errores())->error('Error no existe fc_csd', $fc_csd_data);
+        }
+
+        $registro = $fc_csd_data->registros[0];
+        $password = $registro['fc_csd_password'];
+
+        if(isset($pac->en_produccion) && !$pac->en_produccion){
+            $password = "12345678a";
+        }
+
+        return $password;
+
+    }
 
 }
