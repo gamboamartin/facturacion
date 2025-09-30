@@ -497,20 +497,20 @@ class _finalizacion{
         $css = <<<CSS
         body{
             font-family: DejaVu Sans, Arial, sans-serif;
-            font-size:9px;              /* más pequeño */
+            font-size:8px;              /* más pequeño */
             color:#111;
-            margin:10px;                /* margen reducido */
+            margin:8px;                /* margen reducido */
         }
-        h1{ font-size:12px; margin:0 0 4px; }
-        h2{ font-size:10px; margin:6px 0 3px; border-bottom:1px solid #aaa; padding-bottom:2px;}
-        table{ width:100%; border-collapse:collapse; margin:4px 0 8px; }
-        th, td{ border:1px solid #ccc; padding:3px 4px; vertical-align:top; }
-        th{ background:#eee; text-align:left; font-size:9px; }
+        h1{ font-size:11px; margin:0 0 3px; }
+        h2{ font-size:9px; margin:4px 0 2px; border-bottom:1px solid #aaa; padding-bottom:1px;}
+        table{ width:100%; border-collapse:collapse; margin:2px 0 4px; }
+        th, td{ border:1px solid #ccc; padding:2px 3px; vertical-align:top; }
+        th{ background:#eee; text-align:left; font-size:8px; }
         .right{ text-align:right; }
-        .mono{ font-family:"DejaVu Sans Mono", monospace; font-size:8px; overflow-wrap:anywhere; }
-        .small{ font-size:8px; color:#444; }
-        .badge{ padding:1px 4px; border:1px solid #999; border-radius:3px; display:inline-block; font-size:8px;}
-        .totals td{ font-weight:bold; font-size:9px; }
+        .mono{ font-family:"DejaVu Sans Mono", monospace; font-size:7px; overflow-wrap:anywhere; }
+        .small{ font-size:7px; color:#444; }
+        .badge{ padding:1px 3px; border:1px solid #999; border-radius:3px; display:inline-block; font-size:7px;}
+        .totals td{ font-weight:bold; font-size:8px; }
         CSS;
 
         $percepcionesRows = '';
@@ -596,12 +596,9 @@ class _finalizacion{
                     <div><strong>Serie/Folio:</strong> {$serie}{$folio}</div>
                     <div><strong>Lugar de expedición:</strong> {$lugarexp}</div>
                     <div><strong>Fecha CFDI:</strong> {$fecha}</div>
-                </div>
-                <div class="col" style="text-align:right">
-                    <img src="$qrBase64" alt="QR CFDI" style="width:140px;height:140px;">
-                    <div class="small">UUID: <span class="mono">$uuid</span></div>
-                    <div class="small">Timbrado: $fechaTimbrado</div>
-                    <div class="small">Cert. SAT: <span class="mono">$noCertSAT</span></div>
+                    <div class="small" style="margin-top:8px;"><strong>UUID:</strong> <span class="mono">$uuid</span></div>
+                    <div class="small"><strong>Timbrado:</strong> $fechaTimbrado</div>
+                    <div class="small"><strong>Cert. SAT:</strong> <span class="mono">$noCertSAT</span></div>
                 </div>
             </div>
         
@@ -664,7 +661,11 @@ class _finalizacion{
                 <div><strong>Sello SAT:</strong> <span class="mono">$selloSAT</span></div>
             </div>
         
-            <div class="small" style="margin-top:12px;">
+            <div style="text-align:right; margin-top:8px;">
+                <img src="$qrBase64" alt="QR CFDI" style="width:100px;height:100px;">
+            </div>
+        
+            <div class="small" style="margin-top:4px; text-align:center;">
                 <em>Este documento es una representación impresa de un CFDI. Para verificarlo escanee el QR o visite el portal del SAT.</em>
             </div>
         
