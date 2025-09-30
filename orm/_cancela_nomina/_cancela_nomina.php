@@ -13,6 +13,7 @@ use gamboamartin\facturacion\models\fc_cer_csd;
 use gamboamartin\facturacion\models\fc_cer_pem;
 use gamboamartin\facturacion\models\fc_csd;
 use gamboamartin\facturacion\models\fc_key_csd;
+use gamboamartin\facturacion\models\fc_row_layout;
 use gamboamartin\facturacion\models\fc_row_nomina;
 use gamboamartin\facturacion\pac\_cnx_pac;
 use PDO;
@@ -55,17 +56,25 @@ class _cancela_nomina
 
         $response = json_decode($response, false);
         $resultado = $response->resultado;
-        $codigo = $response->codigo;
+        $codigo = (int)$response->codigo;
         $acuse = $response->acuse;
 
         if ($resultado !== 'success') {
             return (new errores())->error(mensaje: $response->mensaje, data: $response);
         }
 
-        $subir_acuse_result = $this->subir_xml_acuse_cancelacion(string_xml: $acuse, fc_row_layout_id: $fc_row_layout_id, link: $link);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error en subir_xml_acuse_cancelacion', data: $subir_acuse_result);
+        $codigos = [311];
+        if (in_array($codigo, $codigos)) {
+            $subir_acuse_result = $this->subir_xml_acuse_cancelacion(string_xml: $acuse, fc_row_layout_id: $fc_row_layout_id, link: $link);
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error en subir_xml_acuse_cancelacion', data: $subir_acuse_result);
+            }
         }
+
+//        $result = $this->upd_fc_row_layout(link: $link, fc_row_layout_id: $fc_row_layout_id);
+//        if(errores::$error){
+//            return (new errores())->error(mensaje: 'Error en upd_fc_row_layout', data: $result);
+//        }
 
         $out = new stdClass();
         $out->datos_rec = $datos_rec;
@@ -76,6 +85,19 @@ class _cancela_nomina
         $out->resultado = $resultado;
         return $out;
 
+    }
+
+    private function upd_fc_row_layout(PDO $link, int $fc_row_layout_id): array
+    {
+
+        $upd_row['esta_cancelado'] = 'activo';
+
+        $fc_row_layout_modelo = new fc_row_layout(link: $link);
+        $upd_result = $fc_row_layout_modelo->modifica_bd($upd_row, $fc_row_layout_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error en upd fc_row_layout', data: $upd_result);
+        }
+        return [];
     }
 
     private function datos_response_cancelacion(PDO $link, stdClass $fc_row_layout): array|stdClass
