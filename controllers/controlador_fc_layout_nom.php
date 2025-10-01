@@ -124,6 +124,46 @@ class controlador_fc_layout_nom extends system{
 
     }
 
+    public function cancela_recibos(bool $header, bool $ws = false)
+    {
+        $filtro = [
+            'fc_row_layout.fc_layout_nom_id' => $this->registro_id,
+            'fc_row_layout.esta_timbrado' => 'activo',
+        ];
+
+        $fc_row_layout = (new fc_row_layout($this->link))->filtro_and(columnas: ['fc_row_layout_id'], filtro: $filtro);
+
+
+        if ((int)$fc_row_layout->n_registros === 0) {
+            return $this->retorno_error(mensaje: 'No existen registros timbrados',data: $fc_row_layout,
+                header: $header, ws: $ws);
+        }
+
+        $registros = $fc_row_layout->registros;
+
+        foreach ($registros as $registro) {
+
+            $fc_row_layout_id = $registro['fc_row_layout_id'];
+
+            $result = (new _cancela_nomina())->cancela_recibo(
+                link: $this->link,
+                fc_row_layout_id: $fc_row_layout_id
+            );
+            if(errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al regenera_rec_pdf fc_row_layout_id='.$fc_row_layout_id,
+                    data: $result,
+                    header: $header,
+                    ws: $ws
+                );
+            }
+        }
+
+        $link = "index.php?seccion=fc_layout_nom&accion=lista&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+    }
+
     #[NoReturn]
     public function carga_empleados(bool $header, bool $ws = false): void
     {
