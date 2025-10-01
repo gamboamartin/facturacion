@@ -71,10 +71,10 @@ class _cancela_nomina
             }
         }
 
-//        $result = $this->upd_fc_row_layout(link: $link, fc_row_layout_id: $fc_row_layout_id);
-//        if(errores::$error){
-//            return (new errores())->error(mensaje: 'Error en upd_fc_row_layout', data: $result);
-//        }
+        $result = $this->upd_fc_row_layout(link: $link, fc_row_layout_id: $fc_row_layout_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error en upd_fc_row_layout', data: $result);
+        }
 
         $out = new stdClass();
         $out->datos_rec = $datos_rec;
