@@ -93,6 +93,72 @@ class fc_row_layout extends modelo{
         return $r_alta;
     }
 
+    public function elimina_bd(int $id): array|\stdClass
+    {
+        // 1. Validar que el registro no esté timbrado
+        $registro = $this->registro(registro_id: $id, retorno_obj: true);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener registro fc_row_layout',data: $registro);
+        }
+
+        if($registro->fc_row_layout_esta_timbrado === 'activo'){
+            return $this->error->error(
+                mensaje: 'No se puede eliminar el registro porque está timbrado. Los documentos timbrados no pueden eliminarse',
+                data: array('fc_row_layout_id' => $id, 'esta_timbrado' => 'activo')
+            );
+        }
+
+        $this->link->beginTransaction();
+
+        // 2. Eliminar fc_cfdi_sellado_nomina relacionados
+        $fc_cfdi_sellado_modelo = new fc_cfdi_sellado_nomina(link: $this->link);
+        $filtro_cfdi = array();
+        $filtro_cfdi['fc_cfdi_sellado_nomina.fc_row_layout_id'] = $id;
+
+        $result_cfdi = $fc_cfdi_sellado_modelo->filtro_and(filtro: $filtro_cfdi);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->error->error(mensaje: 'Error al obtener fc_cfdi_sellado_nomina',data: $result_cfdi);
+        }
+
+        foreach ($result_cfdi->registros as $registro_cfdi) {
+            $rs_del = $fc_cfdi_sellado_modelo->elimina_bd($registro_cfdi['fc_cfdi_sellado_nomina_id']);
+            if(errores::$error){
+                $this->link->rollBack();
+                return $this->error->error(mensaje: 'Error al eliminar fc_cfdi_sellado_nomina',data: $rs_del);
+            }
+        }
+
+        // 3. Eliminar fc_row_nomina relacionados
+        $fc_row_nomina_modelo = new fc_row_nomina(link: $this->link);
+        $filtro_nomina = array();
+        $filtro_nomina['fc_row_nomina.fc_row_layout_id'] = $id;
+
+        $result_nomina = $fc_row_nomina_modelo->filtro_and(filtro: $filtro_nomina);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->error->error(mensaje: 'Error al obtener fc_row_nomina',data: $result_nomina);
+        }
+
+        foreach ($result_nomina->registros as $registro_nomina) {
+            $rs_del = $fc_row_nomina_modelo->elimina_bd($registro_nomina['fc_row_nomina_id']);
+            if(errores::$error){
+                $this->link->rollBack();
+                return $this->error->error(mensaje: 'Error al eliminar fc_row_nomina',data: $rs_del);
+            }
+        }
+
+        // 4. Eliminar el fc_row_layout
+        $r_elimina_bd = parent::elimina_bd($id);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->error->error(mensaje: 'Error al eliminar fc_row_layout',data: $r_elimina_bd);
+        }
+
+        $this->link->commit();
+        return $r_elimina_bd;
+    }
+
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|\stdClass
     {
         // Sanitizar campos antes de actualizar

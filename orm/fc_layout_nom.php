@@ -93,6 +93,59 @@ class fc_layout_nom extends modelo{
         return $r_modifica_bd;
     }
 
+    public function elimina_bd(int $id): array|stdClass
+    {
+        // 1. Validar que no existan registros timbrados
+        $fc_row_layout_modelo = new fc_row_layout(link: $this->link);
+        $filtro_timbrados = array();
+        $filtro_timbrados['fc_row_layout.fc_layout_nom_id'] = $id;
+        $filtro_timbrados['fc_row_layout.esta_timbrado'] = 'activo';
+
+        $result_timbrados = $fc_row_layout_modelo->filtro_and(filtro: $filtro_timbrados);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al verificar registros timbrados',data: $result_timbrados);
+        }
+
+        if($result_timbrados->n_registros > 0){
+            return $this->error->error(
+                mensaje: 'No se puede eliminar el layout porque tiene '.$result_timbrados->n_registros.' recibo(s) timbrado(s). Los documentos timbrados no pueden eliminarse',
+                data: array('fc_layout_nom_id' => $id, 'recibos_timbrados' => $result_timbrados->n_registros)
+            );
+        }
+
+        $this->link->beginTransaction();
+
+        // 2. Obtener todos los fc_row_layout relacionados (solo no timbrados)
+        $filtro = array();
+        $filtro['fc_row_layout.fc_layout_nom_id'] = $id;
+
+        $result = $fc_row_layout_modelo->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->error->error(mensaje: 'Error al obtener fc_row_layout',data: $result);
+        }
+
+        // 3. Eliminar cada fc_row_layout (que no esté timbrado)
+        foreach ($result->registros as $registro) {
+            $fc_row_layout_id = $registro['fc_row_layout_id'];
+            $rs_del = $fc_row_layout_modelo->elimina_bd($fc_row_layout_id);
+            if(errores::$error){
+                $this->link->rollBack();
+                return $this->error->error(mensaje: 'Error al eliminar fc_row_layout',data: $rs_del);
+            }
+        }
+
+        // 4. Eliminar el fc_layout_nom
+        $r_elimina_bd = parent::elimina_bd($id);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->error->error(mensaje: 'Error al eliminar fc_layout_nom',data: $r_elimina_bd);
+        }
+
+        $this->link->commit();
+        return $r_elimina_bd;
+    }
+
     private function modifica_fecha_emision_row_layout(int $fc_layout_nom_id, string $fecha_emision)
     {
         $fc_row_layout_modelo = new fc_row_layout(link: $this->link);
