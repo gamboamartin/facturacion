@@ -305,6 +305,7 @@ class _xls_empleados{
             if(errores::$error){
                 return (new errores())->error('Error al generar row', $row_emp_val);
             }
+            $this->sanitizar_campos($row_emp_val);
             $rows_empleados[] = $row_emp_val;
             $recorrido++;
         }
@@ -361,6 +362,30 @@ class _xls_empleados{
         }
 
         return $rows_empleados;
+    }
+
+    private function sanitizar_campos(array &$registro): void
+    {
+        $campos_a_sanitizar = ['RFC', 'NSS', 'CLABE INTERBANCARIA', 'CUENTA', 'NOMBRE COMPLETO'];
+
+        foreach ($campos_a_sanitizar as $campo) {
+            if (isset($registro[$campo]) && is_string($registro[$campo])) {
+                if ($campo === 'NOMBRE COMPLETO') {
+                    // Para nombre_completo: solo eliminar espacios al inicio y final
+                    $registro[$campo] = trim($registro[$campo]);
+                } elseif ($campo === 'CLABE INTERBANCARIA' || $campo === 'CUENTA') {
+                    // Para clabe y cuenta: solo números (eliminar TODOS los caracteres no numéricos)
+                    $registro[$campo] = preg_replace('/[^0-9]/', '', $registro[$campo]);
+                } else {
+                    // Para RFC y NSS: eliminar espacios y guiones
+                    $registro[$campo] = str_replace([' ', '-'], '', $registro[$campo]);
+                    // Convertir a mayúsculas para RFC
+                    if ($campo === 'RFC') {
+                        $registro[$campo] = strtoupper($registro[$campo]);
+                    }
+                }
+            }
+        }
     }
 
 
