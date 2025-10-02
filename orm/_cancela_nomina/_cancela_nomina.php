@@ -75,9 +75,14 @@ class _cancela_nomina
             }
         }
 
-        $result = $this->upd_fc_row_layout(link: $link, fc_row_layout_id: $fc_row_layout_id);
+        $result_layout = $this->upd_fc_row_layout(link: $link, fc_row_layout_id: $fc_row_layout_id);
         if(errores::$error){
-            return (new errores())->error(mensaje: 'Error en upd_fc_row_layout', data: $result);
+            return (new errores())->error(mensaje: 'Error en upd_fc_row_layout', data: $result_layout);
+        }
+
+        $result_nomina = $this->upd_fc_row_nomina(link: $link, fc_row_layout_id: $fc_row_layout_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error en upd_fc_row_nomina', data: $result_nomina);
         }
 
         $out = new stdClass();
@@ -102,6 +107,35 @@ class _cancela_nomina
             return (new errores())->error(mensaje: 'Error en upd fc_row_layout', data: $upd_result);
         }
         return [];
+    }
+
+    private function upd_fc_row_nomina(PDO $link, int $fc_row_layout_id)
+    {
+        $fc_row_nomina_modelo = new fc_row_nomina(link: $link);
+
+        $filtro = [
+            'fc_row_nomina.fc_row_layout_id' => $fc_row_layout_id,
+            'fc_row_nomina.status' => 'activo',
+        ];
+
+        $result = $fc_row_nomina_modelo->filtro_and(columnas: ['fc_row_nomina_id'], filtro: $filtro);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error en filtro_and de $fc_row_nomina_modelo', data: $result);
+        }
+
+        $registros = $result->registros;
+
+        $upd_row['status'] = 'inactivo';
+        $response = [];
+        foreach ($registros as $registro) {
+            $upd_result = $fc_row_nomina_modelo->modifica_bd($upd_row, $registro['fc_row_nomina_id']);
+            if(errores::$error){
+                return (new errores())->error(mensaje: 'Error en upd fc_row_nomina', data: $upd_result);
+            }
+            $response[] = $upd_result;
+        }
+
+        return $response;
     }
 
     private function datos_response_cancelacion(PDO $link, stdClass $fc_row_layout): array|stdClass
