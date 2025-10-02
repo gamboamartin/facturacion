@@ -36,6 +36,10 @@ class _cancela_nomina
             return (new errores())->error(mensaje: 'Error al obtener datos de recibo', data: $datos_rec);
         }
 
+        if($datos_rec->fc_row_layout->fc_row_layout_esta_timbrado === 'inactivo'){
+            return (new errores())->error(mensaje: 'Error no se puede cancelar un registro que no esta timbrado', data: $datos_rec);
+        }
+
         $datos_cfdi = $this->datos_response_cancelacion($link, $datos_rec->fc_row_layout);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al obtener datos de datos_cfdi', data: $datos_cfdi);
