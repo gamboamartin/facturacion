@@ -940,7 +940,7 @@ class controlador_fc_layout_nom extends system{
         foreach ($rows as $indice => $row) {
             $row = (object)$row;
             $btn_modifica = '';
-            if($row->fc_row_layout_error !== '' && $row->fc_row_layout_error !== NULL){
+            if( ($row->fc_row_layout_error !== '' && $row->fc_row_layout_error !== NULL) || ($row->fc_row_layout_esta_timbrado === 'activo' && $row->fc_row_layout_esta_cancelado === 'activo')){
                 $params = array();
                 $params['fc_row_layout_id'] = $row->fc_row_layout_id;
                 $btn_modifica = (new html())->button_href(accion: 'modifica_datos',etiqueta:  'Modificar',
@@ -1004,7 +1004,7 @@ class controlador_fc_layout_nom extends system{
             }
 
             $btn_cancelar_recibo = '';
-            if($row->fc_row_layout_esta_timbrado === 'activo'){
+            if($row->fc_row_layout_esta_timbrado === 'activo' && $row->fc_row_layout_esta_cancelado === 'inactivo'){
                 $params = array();
                 $params['fc_row_layout_id'] = $row->fc_row_layout_id;
                 $btn_cancelar_recibo = (new html())->button_href(accion: 'cancelar_recibo',etiqueta:  'CANCELAR RECIBO',
