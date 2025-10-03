@@ -304,16 +304,11 @@ class _xls_empleados{
             $row_emp_val = $this->genera_row_emp_val($datos, $recorrido);
             if(errores::$error){
                 return (new errores())->error('Error al generar row', $row_emp_val);
-            }echo '<pre>';
-            var_dump($row_emp_val);
-            echo '</pre>';
+            }
             $this->sanitizar_campos($row_emp_val);
-            echo '<pre>';
-            var_dump($row_emp_val);
-            echo '</pre>';
             $rows_empleados[] = $row_emp_val;
             $recorrido++;
-        }exit;
+        }
 
         return $rows_empleados;
 
