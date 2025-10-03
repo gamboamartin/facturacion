@@ -93,7 +93,11 @@ class fc_row_layout extends modelo{
         return $r_alta;
     }
 
-    public function elimina_bd(int $id): array|\stdClass
+    /**
+     * Método privado para eliminar sin manejo de transacción
+     * Se usa cuando se llama desde fc_layout_nom que ya maneja la transacción
+     */
+    private function elimina_con_hijos(int $id): array|\stdClass
     {
         // 1. Validar que el registro no esté timbrado
         $registro = $this->registro(registro_id: $id, retorno_obj: true);
@@ -108,8 +112,6 @@ class fc_row_layout extends modelo{
             );
         }
 
-        $this->link->beginTransaction();
-
         // 2. Eliminar fc_cfdi_sellado_nomina relacionados
         $fc_cfdi_sellado_modelo = new fc_cfdi_sellado_nomina(link: $this->link);
         $filtro_cfdi = array();
@@ -117,14 +119,12 @@ class fc_row_layout extends modelo{
 
         $result_cfdi = $fc_cfdi_sellado_modelo->filtro_and(filtro: $filtro_cfdi);
         if(errores::$error){
-            $this->link->rollBack();
             return $this->error->error(mensaje: 'Error al obtener fc_cfdi_sellado_nomina',data: $result_cfdi);
         }
 
         foreach ($result_cfdi->registros as $registro_cfdi) {
             $rs_del = $fc_cfdi_sellado_modelo->elimina_bd($registro_cfdi['fc_cfdi_sellado_nomina_id']);
             if(errores::$error){
-                $this->link->rollBack();
                 return $this->error->error(mensaje: 'Error al eliminar fc_cfdi_sellado_nomina',data: $rs_del);
             }
         }
@@ -136,14 +136,12 @@ class fc_row_layout extends modelo{
 
         $result_nomina = $fc_row_nomina_modelo->filtro_and(filtro: $filtro_nomina);
         if(errores::$error){
-            $this->link->rollBack();
             return $this->error->error(mensaje: 'Error al obtener fc_row_nomina',data: $result_nomina);
         }
 
         foreach ($result_nomina->registros as $registro_nomina) {
             $rs_del = $fc_row_nomina_modelo->elimina_bd($registro_nomina['fc_row_nomina_id']);
             if(errores::$error){
-                $this->link->rollBack();
                 return $this->error->error(mensaje: 'Error al eliminar fc_row_nomina',data: $rs_del);
             }
         }
@@ -151,12 +149,38 @@ class fc_row_layout extends modelo{
         // 4. Eliminar el fc_row_layout
         $r_elimina_bd = parent::elimina_bd($id);
         if(errores::$error){
-            $this->link->rollBack();
             return $this->error->error(mensaje: 'Error al eliminar fc_row_layout',data: $r_elimina_bd);
         }
 
-        $this->link->commit();
         return $r_elimina_bd;
+    }
+
+    /**
+     * Método público para eliminar con manejo de transacción
+     * Se usa cuando se llama directamente desde el controlador
+     */
+    public function elimina_bd(int $id): array|\stdClass
+    {
+        // Verificar si ya hay una transacción activa
+        $transaccion_iniciada = false;
+        if(!$this->link->inTransaction()){
+            $this->link->beginTransaction();
+            $transaccion_iniciada = true;
+        }
+
+        $resultado = $this->elimina_con_hijos($id);
+        
+        if(errores::$error){
+            if($transaccion_iniciada){
+                $this->link->rollBack();
+            }
+            return $resultado;
+        }
+
+        if($transaccion_iniciada){
+            $this->link->commit();
+        }
+        return $resultado;
     }
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|\stdClass

@@ -113,7 +113,12 @@ class fc_layout_nom extends modelo{
             );
         }
 
-        $this->link->beginTransaction();
+        // Verificar si ya hay una transacción activa
+        $transaccion_iniciada = false;
+        if(!$this->link->inTransaction()){
+            $this->link->beginTransaction();
+            $transaccion_iniciada = true;
+        }
 
         // 2. Obtener todos los fc_row_layout relacionados (solo no timbrados)
         $filtro = array();
@@ -121,16 +126,87 @@ class fc_layout_nom extends modelo{
 
         $result = $fc_row_layout_modelo->filtro_and(filtro: $filtro);
         if(errores::$error){
-            $this->link->rollBack();
+            if($transaccion_iniciada){
+                $this->link->rollBack();
+            }
             return $this->error->error(mensaje: 'Error al obtener fc_row_layout',data: $result);
         }
 
-        // 3. Eliminar cada fc_row_layout (que no esté timbrado)
+        // 3. Eliminar cada fc_row_layout y sus hijos (que no esté timbrado)
         foreach ($result->registros as $registro) {
             $fc_row_layout_id = $registro['fc_row_layout_id'];
-            $rs_del = $fc_row_layout_modelo->elimina_bd($fc_row_layout_id);
+            
+            // Validar que el registro no esté timbrado
+            $registro_row = $fc_row_layout_modelo->registro(registro_id: $fc_row_layout_id, retorno_obj: true);
             if(errores::$error){
-                $this->link->rollBack();
+                if($transaccion_iniciada){
+                    $this->link->rollBack();
+                }
+                return $this->error->error(mensaje: 'Error al obtener fc_row_layout',data: $registro_row);
+            }
+
+            if($registro_row->fc_row_layout_esta_timbrado === 'activo'){
+                if($transaccion_iniciada){
+                    $this->link->rollBack();
+                }
+                return $this->error->error(
+                    mensaje: 'No se puede eliminar porque el recibo está timbrado',
+                    data: array('fc_row_layout_id' => $fc_row_layout_id)
+                );
+            }
+
+            // Eliminar fc_cfdi_sellado_nomina relacionados
+            $fc_cfdi_sellado_modelo = new fc_cfdi_sellado_nomina(link: $this->link);
+            $filtro_cfdi = array();
+            $filtro_cfdi['fc_cfdi_sellado_nomina.fc_row_layout_id'] = $fc_row_layout_id;
+
+            $result_cfdi = $fc_cfdi_sellado_modelo->filtro_and(filtro: $filtro_cfdi);
+            if(errores::$error){
+                if($transaccion_iniciada){
+                    $this->link->rollBack();
+                }
+                return $this->error->error(mensaje: 'Error al obtener fc_cfdi_sellado_nomina',data: $result_cfdi);
+            }
+
+            foreach ($result_cfdi->registros as $registro_cfdi) {
+                $rs_del = $fc_cfdi_sellado_modelo->elimina_bd($registro_cfdi['fc_cfdi_sellado_nomina_id']);
+                if(errores::$error){
+                    if($transaccion_iniciada){
+                        $this->link->rollBack();
+                    }
+                    return $this->error->error(mensaje: 'Error al eliminar fc_cfdi_sellado_nomina',data: $rs_del);
+                }
+            }
+
+            // Eliminar fc_row_nomina relacionados
+            $fc_row_nomina_modelo = new fc_row_nomina(link: $this->link);
+            $filtro_nomina = array();
+            $filtro_nomina['fc_row_nomina.fc_row_layout_id'] = $fc_row_layout_id;
+
+            $result_nomina = $fc_row_nomina_modelo->filtro_and(filtro: $filtro_nomina);
+            if(errores::$error){
+                if($transaccion_iniciada){
+                    $this->link->rollBack();
+                }
+                return $this->error->error(mensaje: 'Error al obtener fc_row_nomina',data: $result_nomina);
+            }
+
+            foreach ($result_nomina->registros as $registro_nomina) {
+                $rs_del = $fc_row_nomina_modelo->elimina_bd($registro_nomina['fc_row_nomina_id']);
+                if(errores::$error){
+                    if($transaccion_iniciada){
+                        $this->link->rollBack();
+                    }
+                    return $this->error->error(mensaje: 'Error al eliminar fc_row_nomina',data: $rs_del);
+                }
+            }
+
+            // Eliminar el fc_row_layout
+            $rs_del = $fc_row_layout_modelo->elimina_base(id: $fc_row_layout_id);
+            if(errores::$error){
+                if($transaccion_iniciada){
+                    $this->link->rollBack();
+                }
                 return $this->error->error(mensaje: 'Error al eliminar fc_row_layout',data: $rs_del);
             }
         }
@@ -138,11 +214,15 @@ class fc_layout_nom extends modelo{
         // 4. Eliminar el fc_layout_nom
         $r_elimina_bd = parent::elimina_bd($id);
         if(errores::$error){
-            $this->link->rollBack();
+            if($transaccion_iniciada){
+                $this->link->rollBack();
+            }
             return $this->error->error(mensaje: 'Error al eliminar fc_layout_nom',data: $r_elimina_bd);
         }
 
-        $this->link->commit();
+        if($transaccion_iniciada){
+            $this->link->commit();
+        }
         return $r_elimina_bd;
     }
 
