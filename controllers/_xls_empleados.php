@@ -321,6 +321,11 @@ class _xls_empleados{
             return (new errores())->error(mensaje: 'Error al obtener $datos', data: $row_empleado);
         }
 
+        $row_empleado = $this->upd_rfc_si_existe_codigo($row_empleado,$link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener $datos', data: $row_empleado);
+        }
+
         $fc_empleados =  $this->get_empleados_by_rfc($row_empleado,$link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al obtener $datos', data: $fc_empleados);
@@ -362,6 +367,24 @@ class _xls_empleados{
         }
 
         return $rows_empleados;
+    }
+
+    private function upd_rfc_si_existe_codigo(array $row_empleado, PDO $link): array|stdClass
+    {
+        $fc_empleado_modelo = new fc_empleado($link);
+        $codigo= strtoupper(trim($row_empleado['RFC'])).strtoupper(trim($row_empleado['CURP']));
+        $sql = "SELECT * FROM fc_empleado WHERE codigo = '$codigo' and validado_sat = 'activo'";
+        $fc_empleados =  $fc_empleado_modelo->ejecuta_consulta($sql);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener $datos upd_rfc_si_existe_codigo', data: $fc_empleados);
+        }
+
+        if((int)$fc_empleados->n_registros === 1){
+            $row_empleado['RFC'] = $fc_empleados->registros_obj[0]->rfc;
+        }
+
+        return $row_empleado;
+
     }
 
     private function sanitizar_campos(array &$registro): void
