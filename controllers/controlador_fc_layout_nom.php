@@ -951,6 +951,20 @@ class controlador_fc_layout_nom extends system{
                         mensaje: 'Error al obtener btn_timbra', data: $btn_modifica, header: $header, ws: $ws);
                 }
             }
+
+            $btn_retimbra = '';
+            if($row->fc_row_layout_esta_timbrado === 'activo' && $row->fc_row_layout_esta_cancelado === 'activo'){
+                $params = array();
+                $params['fc_row_layout_id'] = $row->fc_row_layout_id;
+                $btn_retimbra = (new html())->button_href(accion: 'retimbrar_recibo',etiqueta:  'RETIMBRAR RECIBO',
+                    registro_id: $this->registro_id,seccion: 'fc_layout_nom',style: 'warning',params: $params);
+
+                if(errores::$error){
+                    return $this->retorno_error(
+                        mensaje: 'Error al obtener btn_regenera_pdf', data: $btn_retimbra, header: $header, ws: $ws);
+                }
+            }
+
             $btn_timbra = '';
             if($row->fc_row_layout_esta_timbrado === 'inactivo'){
                 $params = array();
@@ -1035,6 +1049,7 @@ class controlador_fc_layout_nom extends system{
             $row->btn_descarga_xml = $btn_descarga_xml;
             $row->btn_cancelar_recibo = $btn_cancelar_recibo;
             $row->btn_timbra = $btn_timbra;
+            $row->btn_retimbra = $btn_retimbra;
             $row->btn_modifica = $btn_modifica;
             $rows[$indice] = $row;
         }

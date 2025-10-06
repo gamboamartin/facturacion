@@ -61,7 +61,7 @@
                     <td><?php echo $fc_row_layout->btn_regenera_pdf; ?></td>
                     <td><?php echo $fc_row_layout->btn_cancelar_recibo; ?></td>
                     <td><?php echo $fc_row_layout->btn_modifica; ?></td>
-                    <td><?php echo $fc_row_layout->btn_timbra; ?></td>
+                    <td><?php echo $fc_row_layout->btn_timbra; ?><?php echo $fc_row_layout->btn_retimbra; ?></td>
                 </tr>
             <?php } ?>
             </tbody>
