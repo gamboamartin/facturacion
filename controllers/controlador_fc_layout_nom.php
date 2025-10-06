@@ -1175,6 +1175,40 @@ class controlador_fc_layout_nom extends system{
 
     }
 
+    public function retimbrar_recibos(bool $header, bool $ws = false): array|stdClass
+    {
+        $filtro['fc_layout_nom.id'] = $this->registro_id;
+        $filtro['fc_row_layout.esta_timbrado'] = 'activo';
+        $filtro['fc_row_layout.esta_cancelado'] = 'activo';
+
+        $r_rows = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al obtener registros", $r_rows);
+            print_r($error);
+            exit;
+        }
+
+        if ($r_rows->n_registros === 0) {
+            $error = (new errores())->error("Error no existen registros que retimbrar", $r_rows);
+            print_r($error);
+            exit;
+        }
+
+        $rows = $r_rows->registros;
+
+        foreach ($rows as $row) {
+            $retimbra = (new _timbra_nomina())->retimbra_recibo(link: $this->link,fc_row_layout_id:  $row['fc_row_layout_id']);
+            if(errores::$error) {
+                (new errores())->error("Error al retimbra_recibo", $retimbra);
+                errores::$error = false;
+            }
+        }
+
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+        return $rows;
+
+    }
+
     public function descarga_timbres(bool $header, bool $ws = false)
     {
         $filtro['fc_layout_nom.id'] = $this->registro_id;
