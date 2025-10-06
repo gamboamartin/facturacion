@@ -76,5 +76,52 @@ class _timbra_nomina
 
     }
 
+    final public function retimbra_recibo(PDO $link, int $fc_row_layout_id): array|stdClass
+    {
+
+        $datos_rec = (new _datos())->datos_recibo($link, $fc_row_layout_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener datos de recibo', data: $datos_rec);
+        }
+
+        if($datos_rec->fc_row_layout->fc_row_layout_esta_cancelado !== 'activo'){
+            return (new errores())->error(mensaje: 'Error no se puede retimbrar un recibo que no se a cancelado', data: $datos_rec);
+        }
+
+        $datos_cfdi = (new _datos())->datos_response_timbre($link, $datos_rec->fc_row_layout);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener datos de datos_cfdi', data: $datos_cfdi);
+        }
+
+        $response = (new _cnx_pac())->operacion_timbrarJSON2($datos_cfdi->jsonB64, $datos_cfdi->keyPEM,
+            $datos_cfdi->cerPEM, $datos_cfdi->plantilla);
+        $response = json_decode($response, false);
+        $codigo = trim($response->codigo);
+
+        $code_error = (new _salida()) ->code_error($codigo, $response, $datos_cfdi->nomina_json,$link,$fc_row_layout_id);
+        if(errores::$error){
+            return (new errores())->error("Error al timbrar", $code_error);
+        }
+
+        $rs_exito = (new _finalizacion())->cfdi_exito($response, $datos_rec->fc_row_layout,$link);
+        if(errores::$error) {
+            return (new errores())->error("Error al actualizar UUID", $rs_exito);
+        }
+
+        $rs_esta_cancelado = (new _finalizacion())->upd_esta_cancelado_fc_row_layout(link: $link,fc_row_layout_id:  $fc_row_layout_id);
+        if(errores::$error) {
+            return (new errores())->error("Error al actualizar esta_cancelado", $rs_exito);
+        }
+
+        $out = new stdClass();
+        $out->datos_rec = $datos_rec;
+        $out->datos_cfdi = $datos_cfdi;
+        $out->response = $response;
+        $out->rs_exito = $rs_exito;
+        $out->rs_esta_cancelado = $rs_esta_cancelado;
+        return $out;
+
+    }
+
 
 }

@@ -961,7 +961,7 @@ class controlador_fc_layout_nom extends system{
 
                 if(errores::$error){
                     return $this->retorno_error(
-                        mensaje: 'Error al obtener btn_regenera_pdf', data: $btn_retimbra, header: $header, ws: $ws);
+                        mensaje: 'Error al obtener btn_retimbra', data: $btn_retimbra, header: $header, ws: $ws);
                 }
             }
 
@@ -1091,6 +1091,20 @@ class controlador_fc_layout_nom extends system{
         $result = (new _timbra_nomina())->timbra_recibo(link: $this->link,fc_row_layout_id:  $_GET['fc_row_layout_id']);
         if(errores::$error) {
             $error = (new errores())->error("Error al timbrar", $result);
+            print_r($error);
+            exit;
+        }
+
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+        return $result->datos_rec->fc_row_layout;
+
+
+    }
+    public function retimbrar_recibo(bool $header, bool $ws = false): array|stdClass
+    {
+        $result = (new _timbra_nomina())->retimbra_recibo(link: $this->link,fc_row_layout_id:  $_GET['fc_row_layout_id']);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al retimbrar", $result);
             print_r($error);
             exit;
         }
