@@ -579,7 +579,7 @@ class controlador_fc_layout_nom extends system{
         }
 
         // Validar que el registro no esté timbrado
-        if ($fc_row_layout->fc_row_layout_esta_timbrado === 'activo') {
+        if ($fc_row_layout->fc_row_layout_esta_timbrado === 'activo' && $fc_row_layout->fc_row_layout_esta_cancelado === 'inactivo') {
             return $this->retorno_error(
                 mensaje: 'Error: No se puede modificar un registro que ya está timbrado', data: array(), header: $header, ws: $ws);
         }
@@ -776,7 +776,7 @@ class controlador_fc_layout_nom extends system{
         }
 
         // Validar que el registro no esté timbrado
-        if ($fc_row_layout->fc_row_layout_esta_timbrado === 'activo') {
+        if ($fc_row_layout->fc_row_layout_esta_timbrado === 'activo' && $fc_row_layout->fc_row_layout_esta_cancelado === 'inactivo') {
             return $this->retorno_error(
                 mensaje: 'Error: No se puede modificar un registro que ya está timbrado', data: array(), header: $header, ws: $ws);
         }
@@ -951,6 +951,20 @@ class controlador_fc_layout_nom extends system{
                         mensaje: 'Error al obtener btn_timbra', data: $btn_modifica, header: $header, ws: $ws);
                 }
             }
+
+            $btn_retimbra = '';
+            if($row->fc_row_layout_esta_timbrado === 'activo' && $row->fc_row_layout_esta_cancelado === 'activo'){
+                $params = array();
+                $params['fc_row_layout_id'] = $row->fc_row_layout_id;
+                $btn_retimbra = (new html())->button_href(accion: 'retimbrar_recibo',etiqueta:  'RETIMBRAR RECIBO',
+                    registro_id: $this->registro_id,seccion: 'fc_layout_nom',style: 'warning',params: $params);
+
+                if(errores::$error){
+                    return $this->retorno_error(
+                        mensaje: 'Error al obtener btn_retimbra', data: $btn_retimbra, header: $header, ws: $ws);
+                }
+            }
+
             $btn_timbra = '';
             if($row->fc_row_layout_esta_timbrado === 'inactivo'){
                 $params = array();
@@ -1035,6 +1049,7 @@ class controlador_fc_layout_nom extends system{
             $row->btn_descarga_xml = $btn_descarga_xml;
             $row->btn_cancelar_recibo = $btn_cancelar_recibo;
             $row->btn_timbra = $btn_timbra;
+            $row->btn_retimbra = $btn_retimbra;
             $row->btn_modifica = $btn_modifica;
             $rows[$indice] = $row;
         }
@@ -1076,6 +1091,20 @@ class controlador_fc_layout_nom extends system{
         $result = (new _timbra_nomina())->timbra_recibo(link: $this->link,fc_row_layout_id:  $_GET['fc_row_layout_id']);
         if(errores::$error) {
             $error = (new errores())->error("Error al timbrar", $result);
+            print_r($error);
+            exit;
+        }
+
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+        return $result->datos_rec->fc_row_layout;
+
+
+    }
+    public function retimbrar_recibo(bool $header, bool $ws = false): array|stdClass
+    {
+        $result = (new _timbra_nomina())->retimbra_recibo(link: $this->link,fc_row_layout_id:  $_GET['fc_row_layout_id']);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al retimbrar", $result);
             print_r($error);
             exit;
         }

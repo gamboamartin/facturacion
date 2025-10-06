@@ -9,6 +9,7 @@ use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_cfdi_sellado_nomina;
 use gamboamartin\facturacion\models\fc_empleado;
+use gamboamartin\facturacion\models\fc_row_layout;
 use gamboamartin\facturacion\models\fc_row_nomina;
 use gamboamartin\modelo\modelo;
 use Dompdf\Dompdf;
@@ -861,6 +862,19 @@ class _finalizacion{
 
             // Combina las partes y devuelve el resultado
         return $parteEnteraRellenada . '.' . $parteDecimal;
+    }
+
+    public function upd_esta_cancelado_fc_row_layout(PDO $link, int $fc_row_layout_id): array
+    {
+
+        $upd_row['esta_cancelado'] = 'inactivo';
+
+        $fc_row_layout_modelo = new fc_row_layout(link: $link);
+        $upd_result = $fc_row_layout_modelo->modifica_bd($upd_row, $fc_row_layout_id);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error en upd fc_row_layout', data: $upd_result);
+        }
+        return [];
     }
 
 

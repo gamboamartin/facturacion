@@ -321,6 +321,11 @@ class _xls_empleados{
             return (new errores())->error(mensaje: 'Error al obtener $datos', data: $row_empleado);
         }
 
+        $row_empleado = $this->upd_rfc_si_existe_codigo($row_empleado,$link);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener $datos', data: $row_empleado);
+        }
+
         $fc_empleados =  $this->get_empleados_by_rfc($row_empleado,$link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al obtener $datos', data: $fc_empleados);
@@ -364,9 +369,27 @@ class _xls_empleados{
         return $rows_empleados;
     }
 
+    private function upd_rfc_si_existe_codigo(array $row_empleado, PDO $link): array|stdClass
+    {
+        $fc_empleado_modelo = new fc_empleado($link);
+        $codigo= strtoupper(trim($row_empleado['RFC'])).strtoupper(trim($row_empleado['CURP']));
+        $sql = "SELECT * FROM fc_empleado WHERE codigo = '$codigo' and validado_sat = 'activo'";
+        $fc_empleados =  $fc_empleado_modelo->ejecuta_consulta($sql);
+        if(errores::$error){
+            return (new errores())->error(mensaje: 'Error al obtener $datos upd_rfc_si_existe_codigo', data: $fc_empleados);
+        }
+
+        if((int)$fc_empleados->n_registros === 1){
+            $row_empleado['RFC'] = $fc_empleados->registros_obj[0]->rfc;
+        }
+
+        return $row_empleado;
+
+    }
+
     private function sanitizar_campos(array &$registro): void
     {
-        $campos_a_sanitizar = ['RFC', 'NSS', 'CLABE INTERBANCARIA', 'CUENTA', 'NOMBRE COMPLETO'];
+        $campos_a_sanitizar = ['CURP', 'RFC', 'NSS', 'CLABE INTERBANCARIA', 'CUENTA', 'NOMBRE COMPLETO'];
 
         foreach ($campos_a_sanitizar as $campo) {
             if (isset($registro[$campo]) && is_string($registro[$campo])) {
@@ -380,7 +403,7 @@ class _xls_empleados{
                     // Para RFC y NSS: eliminar espacios y guiones
                     $registro[$campo] = str_replace([' ', '-'], '', $registro[$campo]);
                     // Convertir a mayúsculas para RFC
-                    if ($campo === 'RFC') {
+                    if ($campo === 'RFC' || $campo === 'CURP') {
                         $registro[$campo] = strtoupper($registro[$campo]);
                     }
                 }
