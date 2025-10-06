@@ -579,7 +579,7 @@ class controlador_fc_layout_nom extends system{
         }
 
         // Validar que el registro no esté timbrado
-        if ($fc_row_layout->fc_row_layout_esta_timbrado === 'activo') {
+        if ($fc_row_layout->fc_row_layout_esta_timbrado === 'activo' && $fc_row_layout->fc_row_layout_esta_cancelado === 'inactivo') {
             return $this->retorno_error(
                 mensaje: 'Error: No se puede modificar un registro que ya está timbrado', data: array(), header: $header, ws: $ws);
         }
@@ -776,7 +776,7 @@ class controlador_fc_layout_nom extends system{
         }
 
         // Validar que el registro no esté timbrado
-        if ($fc_row_layout->fc_row_layout_esta_timbrado === 'activo') {
+        if ($fc_row_layout->fc_row_layout_esta_timbrado === 'activo' && $fc_row_layout->fc_row_layout_esta_cancelado === 'inactivo') {
             return $this->retorno_error(
                 mensaje: 'Error: No se puede modificar un registro que ya está timbrado', data: array(), header: $header, ws: $ws);
         }
