@@ -350,6 +350,7 @@ class controlador_fc_layout_nom extends system{
         }
         $filtro['fc_row_layout.id'] = $_GET['fc_row_layout_id'];
         $filtro['doc_tipo_documento.id'] = 8;
+        $filtro['fc_row_nomina.status'] = 'activo';
         $r_fc_row_nomina = (new fc_row_nomina($this->link))->filtro_and(filtro: $filtro);
         if(errores::$error) {
             return $this->retorno_error(mensaje: 'Error al obtener datos del recibo',data: $r_fc_row_nomina,
@@ -407,6 +408,7 @@ class controlador_fc_layout_nom extends system{
         }
         $filtro['fc_row_layout.id'] = $_GET['fc_row_layout_id'];
         $filtro['doc_tipo_documento.id'] = 2;
+        $filtro['fc_row_nomina.status'] = 'activo';
         $r_fc_row_nomina = (new fc_row_nomina($this->link))->filtro_and(filtro: $filtro);
         if(errores::$error) {
             return $this->retorno_error(mensaje: 'Error al obtener datos del recibo',data: $r_fc_row_nomina,
@@ -471,6 +473,7 @@ class controlador_fc_layout_nom extends system{
         $filtro = array();
         $filtro['fc_row_layout.id'] = $_GET['fc_row_layout_id'];
         $filtro['doc_tipo_documento.id'] = 2;
+        $filtro['fc_row_nomina.status'] = 'activo';
         $r_fc_row_nomina = (new fc_row_nomina($this->link))->filtro_and(filtro: $filtro);
         if(errores::$error) {
             return $this->retorno_error(mensaje: 'Error al obtener datos del recibo',data: $r_fc_row_nomina,
@@ -485,6 +488,7 @@ class controlador_fc_layout_nom extends system{
         $filtro = array();
         $filtro['fc_row_layout.id'] = $_GET['fc_row_layout_id'];
         $filtro['doc_tipo_documento.id'] = 8;
+        $filtro['fc_row_nomina.status'] = 'activo';
         $r_fc_row_nomina = (new fc_row_nomina($this->link))->filtro_and(filtro: $filtro);
         if(errores::$error) {
             return $this->retorno_error(mensaje: 'Error al obtener datos del recibo',data: $r_fc_row_nomina,
@@ -1233,6 +1237,7 @@ class controlador_fc_layout_nom extends system{
         foreach ($rows as $row) {
             $fc_row_layout_id = $row['fc_row_layout_id'];
             $filtro['fc_row_nomina.fc_row_layout_id'] =$fc_row_layout_id;
+            $filtro['fc_row_nomina.status'] = 'activo';
             $result = (new fc_row_nomina($this->link))->filtro_and(filtro: $filtro);
             if(errores::$error) {
                 $error = (new errores())->error("Error en filtro_and de fc_row_nomina", $result);

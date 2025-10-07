@@ -27,6 +27,7 @@ class fc_row_nomina extends modelo{
 
         $filtro['fc_row_layout.id'] = $fc_row_layout_id;
         $filtro['doc_tipo_documento.id'] = $doc_tipo_documento_id;
+        $filtro['fc_row_nomina.status'] = 'activo';
         $r_fc_row_nomina = $this->filtro_and(filtro: $filtro);
         if(errores::$error) {
             return (new errores())->error("Error al obtener datos del recibo", $r_fc_row_nomina);
