@@ -77,6 +77,14 @@ sl_com_sucursal.change(function () {
 ejecuciones_partida(entidad_factura,entidad_partida);
 
 btn_alta_partida.click(function () {
+    const $boton = $(this);
+
+    if ($boton.prop('disabled')) {
+        return false;
+    }
+
+    $boton.prop('disabled', true);
+    $boton.text('Procesando...');
 
     let cantidad = txt_cantidad.val();
     let valor_unitario = txt_valor_unitario.val();
@@ -91,36 +99,50 @@ btn_alta_partida.click(function () {
     if(cantidad <=0.0){
         alert('La cantidad debe ser mayor a 0');
         txt_cantidad.focus();
+        $boton.prop('disabled', false);
+        $boton.text('Alta');
         return false;
     }
     if(valor_unitario <= 0.0){
         alert('La valor unitario debe ser mayor a 0');
         txt_valor_unitario.focus();
+        $boton.prop('disabled', false);
+        $boton.text('Alta');
         return false;
     }
     if (!/^\d+(\.\d{1,2})?$/.test(valor_unitario)) {
         alert('El valor unitario no tiene el formato correcto');
         txt_valor_unitario.focus();
+        $boton.prop('disabled', false);
+        $boton.text('Alta');
         return false;
     }
     if(com_producto_id === ''){
         alert('La seleccione un producto');
         sl_com_producto.focus();
+        $boton.prop('disabled', false);
+        $boton.text('Alta');
         return false;
     }
     if(cat_sat_obj_imp_id === ''){
         alert('La seleccione una Configuracion');
         sl_cat_sat_obj_imp_id.focus();
+        $boton.prop('disabled', false);
+        $boton.text('Alta');
         return false;
     }
     if(cat_sat_conf_imps_id === ''){
         alert('La seleccione una Configuracion');
         sl_cat_sat_conf_imps_id.focus();
+        $boton.prop('disabled', false);
+        $boton.text('Alta');
         return false;
     }
     if(descripcion === ''){
         alert('Integre una descripcion');
         txt_descripcion.focus();
+        $boton.prop('disabled', false);
+        $boton.text('Alta');
         return false;
     }
     if(descuento === ''){
@@ -130,6 +152,8 @@ btn_alta_partida.click(function () {
     if (!/^\d+(\.\d{1,2})?$/.test(descuento)) {
         alert('El descuento no tiene el formato correcto');
         txt_valor_unitario.focus();
+        $boton.prop('disabled', false);
+        $boton.text('Alta');
         return false;
     }
 
@@ -141,6 +165,8 @@ btn_alta_partida.click(function () {
         if(txt_cuenta_predial.val() === ''){
             alert('Agregue una cuenta predial');
             txt_cuenta_predial.focus();
+            $boton.prop('disabled', false);
+            $boton.text('Alta');
             return false;
         }
     }
@@ -208,6 +234,8 @@ btn_alta_partida.click(function () {
                 alert(url);
                 if(json.error === 1) {
                     return false;
+                    $boton.prop('disabled', false);
+                    $boton.text('Alta');
                 }
             }
 
@@ -253,6 +281,8 @@ btn_alta_partida.click(function () {
             $("#row-partida").prepend(table_full);
 
             ejecuciones_partida(entidad_factura,entidad_partida);
+            $boton.prop('disabled', false);
+            $boton.text('Alta');
 
         },
 
@@ -271,12 +301,15 @@ btn_alta_partida.click(function () {
             txt_valor_unitario.val(0);
             txt_subtotal.val(0);
             txt_total.val(0);
+            $boton.prop('disabled', false);
+            $boton.text('Alta');
 
         },
 
         // código a ejecutar sin importar si la petición falló o no
         complete : function(xhr, status) {
-            //alert('Petición realizada');
+            $boton.prop('disabled', false);
+            $boton.text('Alta');
         }
     });
 
