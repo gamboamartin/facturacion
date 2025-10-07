@@ -148,7 +148,15 @@ class _finalizacion{
             return (new errores())->error("Error al obtener_ruta_documento pdf", $ruta_nomina_pdf);
         }
 
-        $pdf_string = $this->generarReciboNomina_rutaXml(ruta_xml: $ruta_nomina_xml_timbrado);
+        $recibo_cancelado = (new fc_row_layout($link))->recibo_cancelado(id: $fc_row_layout_id);
+        if(errores::$error) {
+            return (new errores())->error("Error al obtener informacion del recibo", $ruta_nomina_pdf);
+        }
+
+        $pdf_string = $this->generarReciboNomina_rutaXml(
+            ruta_xml: $ruta_nomina_xml_timbrado,
+            cancelado:  $recibo_cancelado
+        );
         if(errores::$error){
             return (new errores())->error('Error al generarReciboNomina_rutaXml', $pdf_string);
         }
@@ -322,7 +330,7 @@ class _finalizacion{
 
     }
 
-    private function generarReciboNomina_rutaXml(string $ruta_xml): array|string|null
+    private function generarReciboNomina_rutaXml(string $ruta_xml, bool $cancelado = false): array|string|null
     {
         if (empty($ruta_xml)) {
             return (new errores())->error("La ruta del XML está vacía", $ruta_xml);
@@ -339,7 +347,7 @@ class _finalizacion{
             return (new errores())->error("Error al leer XML:\n".implode("\n", $errs), []);
         }
 
-        $rs = $this->generarReciboNomina($xml);
+        $rs = $this->generarReciboNomina($xml, $cancelado);
         if (errores::$error) {
             return (new errores())->error("Error al generarReciboNomina", $rs);
         }
@@ -368,7 +376,7 @@ class _finalizacion{
         return $rs;
     }
 
-    private function generarReciboNomina($xml): array|string|null
+    private function generarReciboNomina($xml, bool $cancelado = false): array|string|null
     {
 
         // Namespaces
@@ -828,6 +836,32 @@ class _finalizacion{
         $dompdf->loadHtml($html, 'UTF-8');
         $dompdf->setPaper('letter', 'portrait');
         $dompdf->render();
+
+        /* === AGREGAR MARCA DE AGUA SI ESTÁ CANCELADO === */
+        if ($cancelado) {
+            $canvas = $dompdf->getCanvas();
+            $w = $canvas->get_width();
+            $h = $canvas->get_height();
+
+            $canvas->save();
+            // Rotamos el canvas 45° alrededor del centro
+            $canvas->rotate(45, $w/2, $h/2);
+
+            // Ajustamos transparencia
+            $canvas->set_opacity(0.1);
+
+            // Escribimos el texto "CANCELADO" grande y centrado
+            $canvas->page_text(
+                $w/4,         // posición X aproximada
+                ($h/2) - 150,         // posición Y aproximada
+                'CANCELADO',  // texto
+                null,         // fuente por defecto (Helvetica)
+                100,          // tamaño de letra grande
+                [1, 0, 0]     // color RGB rojo
+            );
+
+            $canvas->restore();
+        }
 
         return $dompdf->output();
 

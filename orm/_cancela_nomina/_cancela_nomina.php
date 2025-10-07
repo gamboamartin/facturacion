@@ -8,6 +8,7 @@ use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_timbra_nomina\_certificado;
 use gamboamartin\facturacion\models\_timbra_nomina\_datos;
+use gamboamartin\facturacion\models\_timbra_nomina\_finalizacion;
 use gamboamartin\facturacion\models\fc_cancelacion_recibo;
 use gamboamartin\facturacion\models\fc_cer_csd;
 use gamboamartin\facturacion\models\fc_cer_pem;
@@ -83,6 +84,14 @@ class _cancela_nomina
         $result_nomina = $this->upd_fc_row_nomina(link: $link, fc_row_layout_id: $fc_row_layout_id);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error en upd_fc_row_nomina', data: $result_nomina);
+        }
+
+        $result_regenera_nomina_pdf = (new _finalizacion())->regenera_nomina_pdf(
+            fc_row_layout_id: $fc_row_layout_id,
+            link:  $link
+        );
+        if(errores::$error) {
+            return (new errores())->error(mensaje: 'Error al regenera_rec_pdf', data: $result_regenera_nomina_pdf);
         }
 
         $out = new stdClass();
