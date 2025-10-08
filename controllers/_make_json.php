@@ -117,11 +117,26 @@ class _make_json
         $banco_array = [
             'BANAMEX' => '002',
             'SANTANDER' => '012',
-            'BBVA' => '014',
-            'BANCOMER' => '014',
+            'BBVA' => '012',
+            'BANCOMER' => '012',
             'HSBC' => '021',
-            'SCOTIABANK' => '032',
+            'SCOTIABANK' => '044',
             'BANORTE' => '072',
+            'BANCO AZTECA' => '127',
+            'AZTECA' => '127',
+            'INBURSA' => '036',
+            'AFIRME' => '062',
+            'BANREGIO' => '058',
+            'INVEX' => '059',
+            'MIFEL' => '042',
+            'BANJERCITO' => '019',
+            'BAJIO' => '030',
+            'BAJÍO' => '030',
+            'CIBANCO' => '143',
+            'COMPARTAMOS' => '130',
+            'MULTIVA' => '132',
+            'BANCO DEL BIENESTAR' => '166',
+            'BIENESTAR' => '166',
         ];
 
         if(!isset($this->r_clave_interbancaria) || $this->r_clave_interbancaria === ''){
@@ -129,6 +144,14 @@ class _make_json
                 $error = "Clave: $this->r_clave_interbancaria, Si tiene clave debe tener banco";
                 return (new errores())->error('Error el banco debe existir', $error);
             }
+            
+            // Validar que el banco exista en el catálogo SAT
+            if(!isset($banco_array[$this->r_banco])){
+                $bancos_disponibles = implode(', ', array_keys($banco_array));
+                $error = "El banco '{$this->r_banco}' no está en el catálogo SAT. Bancos disponibles: {$bancos_disponibles}";
+                return (new errores())->error('Error: Banco no encontrado en catálogo SAT', $error);
+            }
+            
             $this->r_banco = $banco_array[$this->r_banco];
         }
 
