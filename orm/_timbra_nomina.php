@@ -113,6 +113,14 @@ class _timbra_nomina
             return (new errores())->error("Error al actualizar esta_cancelado", $rs_exito);
         }
 
+        $result_regenera_nomina_pdf = (new _finalizacion())->regenera_nomina_pdf(
+            fc_row_layout_id: $fc_row_layout_id,
+            link:  $link
+        );
+        if(errores::$error) {
+            return (new errores())->error(mensaje: 'Error al regenera_rec_pdf', data: $result_regenera_nomina_pdf);
+        }
+
         $out = new stdClass();
         $out->datos_rec = $datos_rec;
         $out->datos_cfdi = $datos_cfdi;

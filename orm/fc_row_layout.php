@@ -133,4 +133,17 @@ class fc_row_layout extends modelo{
         return $r_modifica;
     }
 
+    public function recibo_cancelado(int $id): array|bool
+    {
+        $registro = $this->registro(registro_id: $id, retorno_obj: true);
+        if(errores::$error){
+            return (new errores())->error('Error al obtener informacion del registro', $registro);
+        }
+        if ($registro->fc_row_layout_esta_cancelado  === 'activo') {
+            return true;
+        }
+
+        return false;
+    }
+
 }
