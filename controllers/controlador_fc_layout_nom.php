@@ -34,6 +34,8 @@ class controlador_fc_layout_nom extends system{
     public string $fecha_emision = '';
     public string $btn_modifica_fecha_emision = '';
 
+    public int $tipo_dispersion;
+
     public function __construct(PDO $link, html $html = new html(), stdClass $paths_conf = new stdClass()){
         $modelo = new fc_layout_nom(link: $link);
         $html_ = new fc_layout_nom_html(html: $html);
@@ -45,6 +47,11 @@ class controlador_fc_layout_nom extends system{
             paths_conf: $paths_conf);
 
         $this->lista_get_data = true;
+
+        $this->tipo_dispersion = 1;
+        if (isset($this->conf_generales->tipo_dispersion)) {
+            $this->tipo_dispersion = $this->conf_generales->tipo_dispersion;
+        }
 
     }
 
@@ -532,6 +539,10 @@ class controlador_fc_layout_nom extends system{
 
     public function genera_dispersion(bool $header, bool $ws = false)
     {
+        $clase_dispersion = new _xls_dispersion();
+        if ($this->tipo_dispersion === 2) {
+            $clase_dispersion = new _xls_dispersion2();
+        }
         $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
         if (errores::$error) {
             return $this->retorno_error(
@@ -550,7 +561,7 @@ class controlador_fc_layout_nom extends system{
                 header: $header, ws: $ws);
         }
 
-        $xls = (new _xls_dispersion())->write_dispersion(hoja_base: $datos->hoja,
+        $xls = $clase_dispersion->write_dispersion(hoja_base: $datos->hoja,
             layout_dispersion: $datos->layout_dispersion);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al generar $layout_dispersion', data: $xls,
