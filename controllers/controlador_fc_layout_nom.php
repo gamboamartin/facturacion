@@ -541,7 +541,7 @@ class controlador_fc_layout_nom extends system{
     {
         $clase_dispersion = new _xls_dispersion();
         if ($this->tipo_dispersion === 2) {
-            $clase_dispersion = new _xls_dispersion2();
+            $clase_dispersion = new _xls_dispersion2($this->link);
         }
         $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
         if (errores::$error) {
@@ -555,7 +555,7 @@ class controlador_fc_layout_nom extends system{
                 header: $header, ws: $ws);
         }
 
-        $datos = (new _xls_dispersion())->lee_layout_base(fc_layout_nom: $fc_layout_nom);
+        $datos = $clase_dispersion->lee_layout_base(fc_layout_nom: $fc_layout_nom);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener $datos', data: $datos,
                 header: $header, ws: $ws);
@@ -1495,9 +1495,6 @@ class controlador_fc_layout_nom extends system{
         }
         return [];
     }
-
-
-
 
 
 

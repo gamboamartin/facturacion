@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
+use PDO;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -14,13 +15,16 @@ use Throwable;
 
 class _xls_dispersion2{
 
+    public PDO $link;
+    private stdClass $fc_layout_nom;
     public static array $letras = array();
     private const string ENCABEZADO_COL          = 'A';
     private const int ENCABEZADO_MAX_FILAS    = 200;
     private const array ENCABEZADOS_PERMITIDOS  = ['CLAVE EMPLEADO', 'CLAVEEMPLEADO','# EMPLEADO'];
 
-    public function __construct()
+    public function __construct(PDO $link)
     {
+        $this->link = $link;
         $letras = array('A','B','D','E','F','G','H','I','J','K','L','M','N','O','P','Q',
             'R','S','T','U','V','W','X','X','Z');
 
@@ -56,6 +60,21 @@ class _xls_dispersion2{
         $hoja->getColumnDimension('B')->setAutoSize(true);
         $hoja->getColumnDimension('C')->setAutoSize(true);
         $hoja->getColumnDimension('D')->setAutoSize(true);
+        $hoja->getColumnDimension('E')->setAutoSize(true);
+        $hoja->getColumnDimension('F')->setAutoSize(true);
+        $hoja->getColumnDimension('G')->setAutoSize(true);
+        $hoja->getColumnDimension('H')->setAutoSize(true);
+        $hoja->getColumnDimension('I')->setAutoSize(true);
+        $hoja->getColumnDimension('J')->setAutoSize(true);
+        $hoja->getColumnDimension('K')->setAutoSize(true);
+        $hoja->getColumnDimension('L')->setAutoSize(true);
+        $hoja->getColumnDimension('M')->setAutoSize(true);
+        $hoja->getColumnDimension('N')->setAutoSize(true);
+        $hoja->getColumnDimension('O')->setAutoSize(true);
+        $hoja->getColumnDimension('P')->setAutoSize(true);
+        $hoja->getColumnDimension('Q')->setAutoSize(true);
+        $hoja->getColumnDimension('R')->setAutoSize(true);
+        $hoja->getColumnDimension('S')->setAutoSize(true);
 
         return $hoja;
 
@@ -537,13 +556,13 @@ class _xls_dispersion2{
 
     private function estilos_wr(Worksheet $hoja): Worksheet
     {
-        $hoja->getStyle('B:B')
-            ->getNumberFormat()
-            ->setFormatCode('@');
-
-        $hoja->getStyle('C:C')
-            ->getNumberFormat()
-            ->setFormatCode('0.00');
+//        $hoja->getStyle('B:B')
+//            ->getNumberFormat()
+//            ->setFormatCode('@');
+//
+//        $hoja->getStyle('C:C')
+//            ->getNumberFormat()
+//            ->setFormatCode('0.00');
 
         return $hoja;
 
@@ -760,6 +779,9 @@ class _xls_dispersion2{
     private function genera_row_fila(array $valores_fila): stdClass
     {
         $nombre = strtoupper(trim($valores_fila[0]['5']));
+        $correo = trim($valores_fila[0]['11']);
+        $fecha_pago = $this->fc_layout_nom->fc_layout_nom_fecha_pago;
+        $fecha_emision = substr($this->fc_layout_nom->fc_layout_nom_fecha_pago, 0, 10);
         $clabe = strtoupper(trim($valores_fila[0]['9']));
         if($clabe === ''){
             $clabe = strtoupper(trim($valores_fila[0]['10']));
@@ -770,9 +792,24 @@ class _xls_dispersion2{
         }
 
         $row = new stdClass();
+        $row->clave_programa = 'D20251010094617';
+        $row->nombre_programa = 'Pagos del día';
+        $row->uso_futuro = '';
+        $row->importe_total_programa = '';
+        $row->clave_beneficiario = '';
+        $row->clave_banco = '';
+        $row->tipo_cuenta = '';
+        $row->referencia = '';
+        $row->grupo = '';
+        $row->id_referencia_cliente = '';
+        $row->curp_rfc = '';
+        $row->celular = '';
         $row->nombre = $nombre;
         $row->clabe = $clabe;
         $row->monto = $monto;
+        $row->correo = $correo;
+        $row->fecha_pago = $fecha_pago;
+        $row->fecha_emision = $fecha_emision;
         $row->concepto = 'PENSION POR RENTA VITALICIA';
 
         return $row;
@@ -867,8 +904,11 @@ class _xls_dispersion2{
 
     }
 
-    final public function lee_layout_base(stdClass$fc_layout_nom): array|stdClass
+    final public function lee_layout_base(stdClass $fc_layout_nom): array|stdClass
     {
+
+        $this->fc_layout_nom = $fc_layout_nom;
+
         $archivo = $fc_layout_nom->doc_documento_ruta_absoluta;
         $spreadsheet = IOFactory::load($archivo);
         $hoja = $spreadsheet->getActiveSheet();
@@ -1405,9 +1445,14 @@ class _xls_dispersion2{
 
     private function write_keys(Worksheet $hoja): Worksheet|array
     {
-        $keys = array('Nombreeee','Clabe','Monto','Concepto');
+        $keys = [
+            'Clave Programa Dispersión','Nombre Programa','Fecha Elab','Fecha Pago',
+            'Uso Futuro','Importe Total del Programa','Clave Beneficiario en Peibo',
+            'Nombre del Beneficiario','Clave Banco','Clabe','tipo cuenta','importe',
+            'Correo Beneficiario','Referencia','Concepto','Grupo','Id Referencia Cliente',
+            'RFC/CURP','Celular'
+        ];
         $hoja->fromArray($keys);
-
 
         try {
             $hoja->getStyle('A1:Z1')->applyFromArray([
@@ -1426,10 +1471,26 @@ class _xls_dispersion2{
 
     private function write_row(Worksheet $hoja_wr, stdClass $row, int $row_ini): Worksheet
     {
-        $hoja_wr->setCellValueExplicit("A$row_ini", $row->nombre, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("B$row_ini", $row->clabe, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("C$row_ini", $row->monto, DataType::TYPE_NUMERIC);
-        $hoja_wr->setCellValueExplicit("D$row_ini", $row->concepto, DataType::TYPE_STRING);
+
+        $hoja_wr->setCellValueExplicit("A$row_ini", $row->clave_programa, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("B$row_ini", $row->nombre_programa, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("C$row_ini", $row->fecha_emision, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("D$row_ini", $row->fecha_pago, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("E$row_ini", $row->uso_futuro, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("F$row_ini", $row->importe_total_programa, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("G$row_ini", $row->clave_beneficiario, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("H$row_ini", $row->nombre, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("I$row_ini", $row->clave_banco, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("J$row_ini", $row->clabe, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("K$row_ini", $row->tipo_cuenta, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("L$row_ini", $row->monto, DataType::TYPE_NUMERIC);
+        $hoja_wr->setCellValueExplicit("M$row_ini", $row->correo, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("N$row_ini", $row->referencia, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("O$row_ini", $row->concepto, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("P$row_ini", $row->grupo, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("Q$row_ini", $row->id_referencia_cliente, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("R$row_ini", $row->curp_rfc, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("S$row_ini", $row->celular, DataType::TYPE_STRING);
 
         return $hoja_wr;
 
