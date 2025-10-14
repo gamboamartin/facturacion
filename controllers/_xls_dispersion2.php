@@ -1,6 +1,7 @@
 <?php
 namespace gamboamartin\facturacion\controllers;
 
+use gamboamartin\banco\models\bn_banco;
 use gamboamartin\errores\errores;
 use PDO;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
@@ -776,14 +777,22 @@ class _xls_dispersion2{
 
     }
 
-    private function genera_row_fila(array $valores_fila): stdClass
+    private function genera_row_fila(array $valores_fila): stdClass|array
     {
         $nombre = strtoupper(trim($valores_fila[0]['5']));
         $correo = trim($valores_fila[0]['11']);
         $fecha_pago = $this->fc_layout_nom->fc_layout_nom_fecha_pago;
         $fecha_emision = substr($this->fc_layout_nom->fc_layout_nom_fecha_pago, 0, 10);
         $clabe = strtoupper(trim($valores_fila[0]['9']));
+
+        $curp_rfc = strtoupper(trim($valores_fila[0]['4']));
+        if($curp_rfc === ''){
+            $curp_rfc = strtoupper(trim($valores_fila[0]['3']));
+        }
+
+        $tipo_cuenta = 'CLABE INTERBANCARIA';
         if($clabe === ''){
+            $tipo_cuenta = 'TARJETA';
             $clabe = strtoupper(trim($valores_fila[0]['10']));
         }
         $monto = strtoupper(trim($valores_fila[0]['6']));
@@ -791,18 +800,22 @@ class _xls_dispersion2{
             $monto = round($monto,2);
         }
 
+        $nombre_banco = strtoupper(trim($valores_fila[0]['7']));
+
+        $clave_banco = $this->get_clave_banco(nombre_banco: $nombre_banco);
+
         $row = new stdClass();
         $row->clave_programa = 'D20251010094617';
         $row->nombre_programa = 'Pagos del día';
         $row->uso_futuro = '';
         $row->importe_total_programa = '';
         $row->clave_beneficiario = '';
-        $row->clave_banco = '';
-        $row->tipo_cuenta = '';
+        $row->clave_banco = $clave_banco;
+        $row->tipo_cuenta = $tipo_cuenta;
         $row->referencia = '';
         $row->grupo = '';
         $row->id_referencia_cliente = '';
-        $row->curp_rfc = '';
+        $row->curp_rfc = $curp_rfc;
         $row->celular = '';
         $row->nombre = $nombre;
         $row->clabe = $clabe;
@@ -1511,4 +1524,37 @@ class _xls_dispersion2{
 
     }
 
+    private function get_clave_banco(string $nombre_banco): string
+    {
+        $banco_array = [
+            'BANAMEX' => '002',
+            'SANTANDER' => '012',
+            'BBVA' => '012',
+            'BANCOMER' => '012',
+            'HSBC' => '021',
+            'SCOTIABANK' => '044',
+            'BANORTE' => '072',
+            'BANCO AZTECA' => '127',
+            'AZTECA' => '127',
+            'INBURSA' => '036',
+            'AFIRME' => '062',
+            'BANREGIO' => '058',
+            'INVEX' => '059',
+            'MIFEL' => '042',
+            'BANJERCITO' => '019',
+            'BAJIO' => '030',
+            'BAJÍO' => '030',
+            'CIBANCO' => '143',
+            'COMPARTAMOS' => '130',
+            'MULTIVA' => '132',
+            'BANCO DEL BIENESTAR' => '166',
+            'BIENESTAR' => '166',
+        ];
+        if (!isset($banco_array[$nombre_banco])) {
+            return '';
+        }
+
+        return $banco_array[$nombre_banco];
+
+    }
 }
