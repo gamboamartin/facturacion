@@ -3,12 +3,14 @@ namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\banco\models\bn_banco;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_empleado;
 use PDO;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use stdClass;
@@ -560,10 +562,18 @@ class _xls_dispersion2{
 //        $hoja->getStyle('B:B')
 //            ->getNumberFormat()
 //            ->setFormatCode('@');
+        $hoja->getStyle('C:C')
+            ->getNumberFormat()
+            ->setFormatCode(NumberFormat::FORMAT_DATE_DDMMYYYY);
 //
-//        $hoja->getStyle('C:C')
-//            ->getNumberFormat()
-//            ->setFormatCode('0.00');
+        $hoja->getStyle('F:F')
+            ->getNumberFormat()
+            ->setFormatCode('0.00');
+
+        $hoja->getStyle('L:L')
+            ->getNumberFormat()
+            ->setFormatCode('0.00');
+
 
         return $hoja;
 
@@ -790,6 +800,10 @@ class _xls_dispersion2{
             $curp_rfc = strtoupper(trim($valores_fila[0]['3']));
         }
 
+        $rfc = strtoupper(trim($valores_fila[0]['3']));
+
+        $empleado_id = $this->obtener_fc_empleado_id(rfc: $rfc);
+
         $tipo_cuenta = 'CLABE INTERBANCARIA';
         if($clabe === ''){
             $tipo_cuenta = 'TARJETA';
@@ -808,8 +822,8 @@ class _xls_dispersion2{
         $row->clave_programa = 'D20251010094617';
         $row->nombre_programa = 'Pagos del día';
         $row->uso_futuro = '';
-        $row->importe_total_programa = '';
-        $row->clave_beneficiario = '';
+        $row->importe_total_programa = $monto;
+        $row->clave_beneficiario = $empleado_id;
         $row->clave_banco = $clave_banco;
         $row->tipo_cuenta = $tipo_cuenta;
         $row->referencia = '';
@@ -827,6 +841,23 @@ class _xls_dispersion2{
 
         return $row;
 
+    }
+
+    private function obtener_fc_empleado_id(string $rfc): string
+    {
+        if ($rfc === '') {
+            return '';
+        }
+        $fc_empleado_modelo = new fc_empleado($this->link);
+        $filtro = ['fc_empleado.rfc' => $rfc];
+        $rs = $fc_empleado_modelo->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return '';
+        }
+        if ((int)$rs->n_registros !== 1) {
+            return '';
+        }
+        return (string)$rs->registros_obj[0]->fc_empleado_id;
     }
 
     private function get_encabezados_xls(Worksheet $hoja): array
@@ -1490,7 +1521,7 @@ class _xls_dispersion2{
         $hoja_wr->setCellValueExplicit("C$row_ini", $row->fecha_emision, DataType::TYPE_STRING);
         $hoja_wr->setCellValueExplicit("D$row_ini", $row->fecha_pago, DataType::TYPE_STRING);
         $hoja_wr->setCellValueExplicit("E$row_ini", $row->uso_futuro, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("F$row_ini", $row->importe_total_programa, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("F$row_ini", $row->importe_total_programa, DataType::TYPE_NUMERIC);
         $hoja_wr->setCellValueExplicit("G$row_ini", $row->clave_beneficiario, DataType::TYPE_STRING);
         $hoja_wr->setCellValueExplicit("H$row_ini", $row->nombre, DataType::TYPE_STRING);
         $hoja_wr->setCellValueExplicit("I$row_ini", $row->clave_banco, DataType::TYPE_STRING);
