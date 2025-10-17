@@ -1,7 +1,6 @@
 <?php
 namespace gamboamartin\facturacion\controllers;
 
-use gamboamartin\banco\models\bn_banco;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_empleado;
 use PDO;
@@ -10,9 +9,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use stdClass;
 use Throwable;
 
@@ -559,12 +557,7 @@ class _xls_dispersion2{
 
     private function estilos_wr(Worksheet $hoja): Worksheet
     {
-//        $hoja->getStyle('B:B')
-//            ->getNumberFormat()
-//            ->setFormatCode('@');
-        $hoja->getStyle('C:C')
-            ->getNumberFormat()
-            ->setFormatCode(NumberFormat::FORMAT_DATE_DDMMYYYY);
+
 //
         $hoja->getStyle('F:F')
             ->getNumberFormat()
@@ -788,7 +781,9 @@ class _xls_dispersion2{
     }
 
     private function genera_row_fila(array $valores_fila): stdClass|array
-    {
+    {echo '<pre>';
+    print_r($this->fc_layout_nom);
+    echo '</pre>';exit;
         $nombre = strtoupper(trim($valores_fila[0]['5']));
         $correo = trim($valores_fila[0]['11']);
         $fecha_pago = $this->fc_layout_nom->fc_layout_nom_fecha_pago;
@@ -804,9 +799,9 @@ class _xls_dispersion2{
 
         $empleado_id = $this->obtener_fc_empleado_id(rfc: $rfc);
 
-        $tipo_cuenta = 'CLABE INTERBANCARIA';
+        $tipo_cuenta = 'clabe';
         if($clabe === ''){
-            $tipo_cuenta = 'TARJETA';
+            $tipo_cuenta = 'tarjeta';
             $clabe = strtoupper(trim($valores_fila[0]['10']));
         }
         $monto = strtoupper(trim($valores_fila[0]['6']));
@@ -819,8 +814,8 @@ class _xls_dispersion2{
         $clave_banco = $this->get_clave_banco(nombre_banco: $nombre_banco);
 
         $row = new stdClass();
-        $row->clave_programa = 'D20251010094617';
-        $row->nombre_programa = 'Pagos del día';
+        $row->clave_programa = 'D' . date('YmdHis');
+        $row->nombre_programa = date('dmY') . '_I'.$this->fc_layout_nom->fc_layout_nom_id;
         $row->uso_futuro = '';
         $row->importe_total_programa = $monto;
         $row->clave_beneficiario = $empleado_id;
@@ -832,11 +827,11 @@ class _xls_dispersion2{
         $row->curp_rfc = $curp_rfc;
         $row->celular = '';
         $row->nombre = $nombre;
-        $row->clabe = $clabe;
+        $row->clabe = "'".$clabe;
         $row->monto = $monto;
         $row->correo = $correo;
-        $row->fecha_pago = $fecha_pago;
-        $row->fecha_emision = $fecha_emision;
+        $row->fecha_pago = "'".$fecha_pago;
+        $row->fecha_emision = "'".$fecha_emision;
         $row->concepto = 'PENSION POR RENTA VITALICIA';
 
         return $row;
@@ -1202,7 +1197,7 @@ class _xls_dispersion2{
 
 
         $fecha = date('YmdHis');
-        return "$datos_ly->name_cliente.$datos_ly->periodo.$fecha.xlsx";
+        return "$datos_ly->name_cliente.$datos_ly->periodo.$fecha.csv";
 
     }
 
@@ -1448,42 +1443,37 @@ class _xls_dispersion2{
         }
 
 
-
-// Quita caracteres de control (incluye CR/LF)
         $title = preg_replace('/[\x00-\x1F\x7F]/u', '', $title);
-
-// Reemplaza separadores prohibidos
         $title = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '_', $title);
-
-// Compacta espacios, quita puntos/espacios extremos
         $title = preg_replace('/\s+/', ' ', trim($title));
         $title = preg_replace('/^[\. ]+/', '', $title);
         $title = preg_replace('/\.+$/', '', $title);
 
-// Garantiza extensión .xlsx
-        if (!preg_match('/\.xlsx$/i', $title)) {
-            $title .= '.xlsx';
+        if (!preg_match('/\.csv$/i', $title)) {
+            $title .= '.csv';
         }
-        
 
-// 3) Construye headers sin saltos de línea
         $encoded = rawurlencode($title);
 
-
         ob_clean();
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Type: text/csv; charset=UTF-8');
         header('Content-Disposition: attachment; filename="'.$title.'"');
         header('Cache-Control: max-age=0');
 
         try {
-            $writer = new Xlsx($xls);
+            $writer = new Csv($xls);
+
+            // Opciones recomendadas para CSV
+            $writer->setDelimiter(',');
+
+            // Evita problemas de codificación en Excel (agrega BOM UTF-8)
+            echo "\xEF\xBB\xBF";
+
             $writer->save('php://output');
             exit;
-        }
-        catch (Throwable $e) {
+        } catch (Throwable $e) {
             return (new errores())->error(mensaje: 'Error al guardar file', data: $e);
         }
-
 
     }
 
