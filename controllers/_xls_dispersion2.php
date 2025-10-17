@@ -781,9 +781,7 @@ class _xls_dispersion2{
     }
 
     private function genera_row_fila(array $valores_fila): stdClass|array
-    {echo '<pre>';
-    print_r($this->fc_layout_nom);
-    echo '</pre>';exit;
+    {
         $nombre = strtoupper(trim($valores_fila[0]['5']));
         $correo = trim($valores_fila[0]['11']);
         $fecha_pago = $this->fc_layout_nom->fc_layout_nom_fecha_pago;
