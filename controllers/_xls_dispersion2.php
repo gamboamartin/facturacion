@@ -76,6 +76,7 @@ class _xls_dispersion2{
         $hoja->getColumnDimension('Q')->setAutoSize(true);
         $hoja->getColumnDimension('R')->setAutoSize(true);
         $hoja->getColumnDimension('S')->setAutoSize(true);
+        $hoja->getColumnDimension('T')->setAutoSize(true);
 
         return $hoja;
 
@@ -559,11 +560,11 @@ class _xls_dispersion2{
     {
 
 //
-        $hoja->getStyle('F:F')
+        $hoja->getStyle('G:G')
             ->getNumberFormat()
             ->setFormatCode('0.00');
 
-        $hoja->getStyle('L:L')
+        $hoja->getStyle('M:M')
             ->getNumberFormat()
             ->setFormatCode('0.00');
 
@@ -816,7 +817,7 @@ class _xls_dispersion2{
         $row->nombre_programa = date('dmY') . '_I'.$this->fc_layout_nom->fc_layout_nom_id;
         $row->uso_futuro = '';
         $row->importe_total_programa = $monto;
-        $row->clave_beneficiario = $empleado_id;
+        $row->clave_beneficiario = '';
         $row->clave_banco = $clave_banco;
         $row->tipo_cuenta = $tipo_cuenta;
         $row->referencia = '';
@@ -1479,7 +1480,7 @@ class _xls_dispersion2{
     {
         $keys = [
             'Clave Programa Dispersión','Nombre Programa','Fecha Elab','Fecha Pago',
-            'Uso Futuro','Importe Total del Programa','Clave Beneficiario en Peibo',
+            'Uso Futuro','Uso Futuro', 'Importe Total del Programa','Clave Beneficiario en Peibo',
             'Nombre del Beneficiario','Clave Banco','Clabe','tipo cuenta','importe',
             'Correo Beneficiario','Referencia','Concepto','Grupo','Id Referencia Cliente',
             'RFC/CURP','Celular'
@@ -1509,20 +1510,49 @@ class _xls_dispersion2{
         $hoja_wr->setCellValueExplicit("C$row_ini", $row->fecha_emision, DataType::TYPE_STRING);
         $hoja_wr->setCellValueExplicit("D$row_ini", $row->fecha_pago, DataType::TYPE_STRING);
         $hoja_wr->setCellValueExplicit("E$row_ini", $row->uso_futuro, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("F$row_ini", $row->importe_total_programa, DataType::TYPE_NUMERIC);
-        $hoja_wr->setCellValueExplicit("G$row_ini", $row->clave_beneficiario, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("H$row_ini", $row->nombre, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("I$row_ini", $row->clave_banco, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("J$row_ini", $row->clabe, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("K$row_ini", $row->tipo_cuenta, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("L$row_ini", $row->monto, DataType::TYPE_NUMERIC);
-        $hoja_wr->setCellValueExplicit("M$row_ini", $row->correo, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("N$row_ini", $row->referencia, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("O$row_ini", $row->concepto, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("P$row_ini", $row->grupo, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("Q$row_ini", $row->id_referencia_cliente, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("R$row_ini", $row->curp_rfc, DataType::TYPE_STRING);
-        $hoja_wr->setCellValueExplicit("S$row_ini", $row->celular, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("F$row_ini", $row->uso_futuro, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("G$row_ini", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("H$row_ini", $row->clave_beneficiario, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("I$row_ini", $row->nombre, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("J$row_ini", $row->clave_banco, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("K$row_ini", $row->clabe, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("L$row_ini", $row->tipo_cuenta, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("M$row_ini", $row->monto, DataType::TYPE_NUMERIC);
+        $hoja_wr->setCellValueExplicit("N$row_ini", $row->correo, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("O$row_ini", $row->referencia, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("P$row_ini", $row->concepto, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("Q$row_ini", $row->grupo, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("R$row_ini", $row->id_referencia_cliente, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("S$row_ini", $row->curp_rfc, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("T$row_ini", $row->celular, DataType::TYPE_STRING);
+
+        return $hoja_wr;
+
+    }
+
+    private function write_row_base(Worksheet $hoja_wr, stdClass $row, float $importe_total = 0): Worksheet
+    {
+
+        $hoja_wr->setCellValueExplicit("A2", $row->clave_programa, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("B2", $row->nombre_programa, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("C2", $row->fecha_emision, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("D2", $row->fecha_pago, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("E2", $row->uso_futuro, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("F2", $row->uso_futuro, DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("G2", $importe_total, DataType::TYPE_NUMERIC);
+        $hoja_wr->setCellValueExplicit("H2", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("I2", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("J2", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("K2", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("L2", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("M2", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("N2", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("O2", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("P2", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("Q2", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("R2", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("S2", '', DataType::TYPE_STRING);
+        $hoja_wr->setCellValueExplicit("T2", '', DataType::TYPE_STRING);
 
         return $hoja_wr;
 
@@ -1530,50 +1560,168 @@ class _xls_dispersion2{
 
     private function write_rows(Worksheet $hoja_wr, array $layout_dispersion): Worksheet|array
     {
-        $row_ini = 2;
+        $row_ini = 3;
+        $total = 0;
         foreach ($layout_dispersion as $row){
+            $total += $row->importe_total_programa;
             $hoja_wr = $this->write_row($hoja_wr, $row, $row_ini);
             if(errores::$error){
                 return (new errores())->error(mensaje: 'Error al obtener $hoja_wr', data: $hoja_wr);
             }
             $row_ini++;
         }
-
+        $this->write_row_base($hoja_wr, $layout_dispersion[0], $total);
         return $hoja_wr;
 
     }
 
     private function get_clave_banco(string $nombre_banco): string
     {
+        // Normaliza acentos, mayúsculas y espacios
+        $nombre_banco = strtoupper(trim($nombre_banco));
+        $nombre_banco = str_replace(
+            ['Á', 'É', 'Í', 'Ó', 'Ú'],
+            ['A', 'E', 'I', 'O', 'U'],
+            $nombre_banco
+        );
+
         $banco_array = [
-            'BANAMEX' => '002',
-            'SANTANDER' => '012',
-            'BBVA' => '012',
-            'BANCOMER' => '012',
-            'HSBC' => '021',
-            'SCOTIABANK' => '044',
-            'BANORTE' => '072',
-            'BANCO AZTECA' => '127',
-            'AZTECA' => '127',
-            'INBURSA' => '036',
-            'AFIRME' => '062',
-            'BANREGIO' => '058',
-            'INVEX' => '059',
-            'MIFEL' => '042',
-            'BANJERCITO' => '019',
-            'BAJIO' => '030',
-            'BAJÍO' => '030',
-            'CIBANCO' => '143',
-            'COMPARTAMOS' => '130',
-            'MULTIVA' => '132',
+            'ACCENDO BANCO' => '83',
+            'ACCIVAL' => '12',
+            'ACTINVER' => '26',
+            'AFIRME' => '15',
+            'ALBO' => '139',
+            'AMERICAN EXPRES' => '17',
+            'ARCUS FI' => '125',
+            'ASP INTEGRA OPC' => '31',
+            'AXA' => '101',
+            'AZTECA' => '21',
+            'B&B' => '35',
+            'BABIEN' => '34',
+            'BANAMEX' => '1',
+            'BANBAJIO' => '6',
+            'BANCO COVALTO' => '113',
+            'BANCO FAMSA' => '24',
+            'BANCO S3' => '123',
+            'BANCOMEXT' => '37',
+            'BANCOPPEL' => '29',
+            'BANCREA' => '98',
+            'BANJERCITO' => '4',
+            'BANK OF AMERICA' => '36',
+            'BANK OF CHINA' => '132',
+            'BANKAOOL' => '18',
+            'BANOBRAS' => '38',
+            'BANORTE' => '16',
+            'BANREGIO' => '28',
+            'BANSI' => '14',
+            'BANXICO' => '39',
+            'BARCLAYS' => '40',
+            'BBASE' => '41',
+            'BBVA MEXICO' => '2',
+            'BBVA' => '2',
+            'BMONEX' => '19',
+            'CAJA POP MEXICA' => '102',
+            'CAJA TELEFONIST' => '108',
+            'CASHI CUENTA' => '133',
+            'CB ACTINVER' => '43',
+            'CB INTERCAM' => '44',
+            'CB JPMORGAN' => '45',
+            'CBDEUTSCHE' => '46',
+            'CI BOLSA' => '54',
+            'CITY MEXICO' => '58',
+            'CLS' => '134',
+            'COMPARTAMOS' => '23',
+            'CONSUBANCO' => '56',
+            'CREDICAPITAL' => '51',
+            'CREDICLUB' => '135',
+            'CREDIT SUISSE' => '57',
+            'CRISTOBAL COLON' => '105',
+            'CUENCA' => '129',
+            'DEP Y PAG DIG' => '141',
+            'DONDE' => '97',
+            'ESTRUCTURADORES' => '59',
+            'EVERCORE' => '60',
+            'FINAMEX' => '61',
+            'FINCO PAY' => '137',
+            'FINCOMUN' => '48',
+            'FND' => '104',
+            'FONDEADORA' => '128',
+            'FONDO (FIRA)' => '109',
+            'FORJADORES' => '95',
+            'GBM' => '62',
+            'GNP' => '100',
+            'HDI SEGUROS' => '63',
+            'HEY BANCO' => '138',
+            'HIPOTECARIA FED' => '64',
+            'HSBC' => '5',
+            'HUASTECAS' => '99',
+            'ICBC' => '114',
+            'INBURSA' => '8',
+            'INDEVAL' => '65',
+            'INFONAVIT' => '111',
+            'INMOBILIARIO' => '96',
+            'INTERACCIONES' => '9',
+            'INTERCAM BANCO' => '66',
+            'INVERCAP' => '110',
+            'INVEX' => '13',
+            'JP MORGAN' => '67',
+            'KAPITAL' => '22',
+            'KLAR' => '126',
+            'KUSPIT' => '68',
+            'LIBERTAD' => '69',
+            'MAPFRE' => '70',
+            'MASARI' => '71',
+            'MERCADO PAGO W' => '127',
+            'MERRILL LYNCH' => '72',
+            'MEXPAGO' => '140',
+            'MIFEL' => '10',
+            'MIZUHO BANK' => '116',
+            'MONEXCB' => '73',
+            'MUFG' => '85',
+            'MULTIVA BANCO' => '25',
+            'NAFIN' => '74',
+            'NU MEXICO' => '49',
+            'NVIO' => '124',
+            'OACTIN' => '75',
+            'ORDER' => '76',
+            'OSKNDIA' => '77',
+            'PAGATODO' => '94',
+            'PEIBO' => '131',
+            'PERSEVERANCIA' => '107',
+            'PRINCIPAL' => '106',
+            'PROFUTURO' => '78',
+            'REFORMA' => '47',
+            'SABADELL' => '115',
+            'SANTANDER' => '3',
+            'SCOTIABANK' => '11',
+            'SEGMTY' => '79',
+            'SKANDIA' => '80',
+            'SOFIEXPRESS' => '52',
+            'SPIN BY OXXO' => '130',
+            'STP' => '82',
+            'SURA' => '103',
+            'TELECOMM' => '50',
+            'TESORED' => '136',
+            'TIBER' => '84',
+            'TRANSFER' => '118',
+            'UALA' => '30',
+            'UBS BANK' => '86',
+            'UNAGRA' => '53',
+            'UNICA' => '87',
+            'VALMEX' => '88',
+            'VALUE' => '89',
+            'VE POR MAS' => '20',
+            'VECTOR' => '90',
+            'VOLKSWAGEN' => '32',
+            'WAL-MART' => '27',
+            'ZURICH' => '91',
+            'ZURICHVI' => '92',
             'BANCO DEL BIENESTAR' => '166',
             'BIENESTAR' => '166',
+            'CIBANCO' => '143'
         ];
-        if (!isset($banco_array[$nombre_banco])) {
-            return '';
-        }
 
-        return $banco_array[$nombre_banco];
-
+        return $banco_array[$nombre_banco] ?? '';
     }
+
 }
