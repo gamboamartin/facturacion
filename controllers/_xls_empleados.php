@@ -74,6 +74,12 @@ class _xls_empleados{
 
             foreach ($rows_empleados as $row_empleado) {
 
+                if(!isset($row_empleado['NSS'])){
+                    if(isset($row_empleado['IMSS'])){
+                        $row_empleado['NSS'] = $row_empleado['IMSS'];
+                    }
+                }
+
                 if(!isset($row_empleado['TARJETA'])){
                     $row_empleado['TARJETA'] = '';
                 }
