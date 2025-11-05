@@ -9,6 +9,8 @@
             <?php include (new views())->ruta_templates."mensajes.php"; ?>
             <?php echo $controlador->inputs->fecha_pago; ?>
             <?php echo $controlador->inputs->descripcion; ?>
+            <?php echo $controlador->inputs->sucursal; ?>
+
             <?php echo $controlador->inputs->documento; ?>
 
             <?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>

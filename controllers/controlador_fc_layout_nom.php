@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use config\generales;
+use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_layout_nom_html;
@@ -91,6 +92,17 @@ class controlador_fc_layout_nom extends system{
                 data: $input_descripcion,header:  $header,ws:  $ws);
         }
         $this->inputs->fecha_pago = $input_fecha_pago;
+
+        $modelo_com_sucursal = new com_sucursal(link: $this->link);
+        $filtro_input_select_sucursal = [];
+
+        $input_select = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
+            modelo: $modelo_com_sucursal, columns_ds: ['com_sucursal_descripcion_select'],
+            disabled: false, filtro: $filtro_input_select_sucursal, label: 'Sucursal',name: 'com_sucursal_id',
+            registros: [], required: true
+        );
+
+        $this->inputs->sucursal = $input_select;
 
         return $alta;
     }
