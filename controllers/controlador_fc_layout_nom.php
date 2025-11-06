@@ -42,10 +42,30 @@ class controlador_fc_layout_nom extends system{
         $html_ = new fc_layout_nom_html(html: $html);
         $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
-        $this->rows_lista = array('id', 'codigo', 'descripcion','estado_timbrado','fecha_pago');
+        $columns["fc_layout_nom_id"]["titulo"] = "Id";
+        $columns["fc_layout_nom_codigo"]["titulo"] = "Codigo";
+        $columns["com_cliente_razon_social"]["titulo"] = "Cliente Razon Social";
+        $columns["com_cliente_rfc"]["titulo"] = "Cliente RFC";
+        $columns["fc_layout_nom_descripcion"]["titulo"] = "Descripcion";
+        $columns["fc_layout_nom_estado_timbrado"]["titulo"] = "Estado Timbrado";
+        $columns["fc_layout_nom_fecha_pago"]["titulo"] = "Fecha Pago";
+
+        $filtro = [
+            "fc_layout_nom.id",
+            "fc_layout_nom.codigo",
+            "com_cliente.razon_social",
+            "com_cliente.rfc",
+            "fc_layout_nom.descripcion",
+            "fc_layout_nom.estado_timbrado",
+            "fc_layout_nom.fecha_pago",
+        ];
+
+        $datatables = new stdClass();
+        $datatables->columns = $columns;
+        $datatables->filtro = $filtro;
 
         parent::__construct(html:$html_, link: $link,modelo:  $modelo, obj_link: $obj_link,
-            paths_conf: $paths_conf);
+            datatables: $datatables, paths_conf: $paths_conf);
 
         $this->lista_get_data = true;
 

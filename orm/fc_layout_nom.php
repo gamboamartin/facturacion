@@ -10,7 +10,10 @@ use stdClass;
 class fc_layout_nom extends modelo{
     public function __construct(PDO $link){
         $tabla = 'fc_layout_nom';
-        $columnas = array($tabla=>false,'doc_documento'=>$tabla);
+        $columnas = [
+            $tabla=>false, 'doc_documento'=>$tabla, 'com_sucursal'=>$tabla,
+            'com_cliente' => 'com_sucursal'
+        ];
 
         $campos_view = array();
         $campos_obligatorios = array();
