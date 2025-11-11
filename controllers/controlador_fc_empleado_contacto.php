@@ -31,7 +31,7 @@ class controlador_fc_empleado_contacto extends system {
         $columns["fc_empleado_contacto_descripcion"]["titulo"] = "Contacto";
         $columns["fc_empleado_contacto_telefono"]["titulo"] = "Telefono";
         $columns["fc_empleado_contacto_correo"]["titulo"] = "Correo";
-        $columns["fc_empleado_contacto_estatus_correo"]["titulo"] = "Estatus correo";
+        $columns["fc_empleado_contacto_estatus_correo"]["titulo"] = "Validacion Correo";
 
         $filtro = [
             "fc_empleado.nombre_completo",
