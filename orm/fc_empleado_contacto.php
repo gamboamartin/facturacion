@@ -1,6 +1,7 @@
 <?php
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
+use config\generales;
 use gamboamartin\errores\errores;
 use gamboamartin\validacion\validacion;
 use stdClass;
@@ -22,6 +23,24 @@ class fc_empleado_contacto extends modelo{
         $this->NAMESPACE = __NAMESPACE__;
 
         $this->etiqueta = 'Empleado Contacto';
+    }
+
+    public function genera_link_validacion(string $correo, int $registro_id)
+    {
+        $token = $this->get_codigo_aleatorio(longitud: 16);
+        $fecha_token_validacion = date('Y-m-d H:i:s');
+        $url_validacion = (new generales())->url_base;
+        $url_validacion .= "valida_correo.php?correo={$correo}&token={$token}";
+
+        $rs = $this->modifica_bd(
+            registro: ['token_validacion' => $token, 'fecha_token_validacion' => $fecha_token_validacion],
+            id: $registro_id
+        );
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al actualizar el token de validacion', data: $rs);
+        }
+
+        return $url_validacion;
     }
 
     public function alta_bd(): array|stdClass

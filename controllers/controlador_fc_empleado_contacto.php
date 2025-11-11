@@ -16,6 +16,10 @@ use stdClass;
 
 
 class controlador_fc_empleado_contacto extends system {
+
+    public const string STATUS_NO_VALIDADO = 'no validado';
+    public const string STATUS_LINK_ENVIADO = 'link enviado';
+    public const string STATUS_VALIDADO = 'validado';
     public function __construct(PDO $link, html $html = new html(), stdClass $paths_conf = new stdClass()){
 
         $modelo = new fc_empleado_contacto(link: $link);
@@ -81,6 +85,38 @@ class controlador_fc_empleado_contacto extends system {
         }
 
         return $modifica;
+    }
+
+    public function valida_correo(bool $header, bool $ws = false)
+    {
+
+        $data = $this->modelo->obten_data();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener data',
+                data: $data, header: $header, ws: $ws);
+
+        }
+
+        $registro_id = $data['fc_empleado_contacto_id'];
+        $correo = $data['fc_empleado_contacto_correo'];
+
+        if ($data['fc_empleado_contacto_estatus_correo'] === self::STATUS_VALIDADO) {
+            return $this->retorno_error(mensaje: 'El correo ya fue validado',
+                data: $data, header: $header, ws: $ws);
+        }
+
+        $modelo_fc_empleado_contacto = new fc_empleado_contacto(link: $this->link);
+
+        $url_validacion = $modelo_fc_empleado_contacto->genera_link_validacion($correo, $registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener url validacion',
+                data: $data, header: $header, ws: $ws);
+        }
+
+        echo '<pre>';
+        print_r($url_validacion);
+        echo '</pre>';exit;
+
     }
 
     private function generar_inputs(array $registro, bool $value_vacio): array
