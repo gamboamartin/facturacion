@@ -31,6 +31,7 @@ class controlador_fc_empleado_contacto extends system {
         $columns["fc_empleado_contacto_descripcion"]["titulo"] = "Contacto";
         $columns["fc_empleado_contacto_telefono"]["titulo"] = "Telefono";
         $columns["fc_empleado_contacto_correo"]["titulo"] = "Correo";
+        $columns["fc_empleado_contacto_estatus_correo"]["titulo"] = "Estatus correo";
 
         $filtro = [
             "fc_empleado.nombre_completo",
@@ -38,6 +39,7 @@ class controlador_fc_empleado_contacto extends system {
             "fc_empleado_contacto.descripcion",
             "fc_empleado_contacto.telefono",
             "fc_empleado_contacto.correo",
+            "fc_empleado_contacto.estatus_correo",
         ];
 
         $datatables = new stdClass();
