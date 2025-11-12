@@ -2,7 +2,9 @@
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 use config\generales;
+use DateTime;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\controllers\controlador_fc_empleado_contacto;
 use gamboamartin\validacion\validacion;
 use stdClass;
 use PDO;
@@ -23,6 +25,49 @@ class fc_empleado_contacto extends modelo{
         $this->NAMESPACE = __NAMESPACE__;
 
         $this->etiqueta = 'Empleado Contacto';
+    }
+
+    public function valida_tiempo_tokens(): void
+    {
+        $filtro = [
+          'fc_empleado_contacto.estatus_correo' => controlador_fc_empleado_contacto::STATUS_LINK_ENVIADO,
+        ];
+
+        $columnas = [
+            'fc_empleado_contacto_id',
+            'fc_empleado_contacto_fecha_token_validacion',
+        ];
+        $response = $this->filtro_and(columnas: $columnas, filtro: $filtro);
+        if (errores::$error) {
+            exit;
+        }
+
+        foreach ($response->registros as $registro) {
+            $fecha_token = $registro['fc_empleado_contacto_fecha_token_validacion'];
+            $registro_id = $registro['fc_empleado_contacto_id'];
+
+            $fecha_actual = new DateTime();       // fecha y hora actual
+
+            try {
+                $fecha_token_dt = new DateTime($fecha_token);
+                $diferencia = $fecha_actual->diff($fecha_token_dt);
+                if ($diferencia->days > 2 ) {
+                    $row_update = [
+                        'estatus_correo' => (controlador_fc_empleado_contacto::STATUS_NO_VALIDADO),
+                        'token_validacion' => '',
+                    ];
+                    $rs = $this->modifica_bd(
+                        registro: $row_update,
+                        id: $registro_id
+                    );
+                    if (errores::$error) {
+                        exit;
+                    }
+                }
+            } catch (\DateMalformedStringException $e) {
+
+            }
+        }
     }
 
     public function actualiza_estado_correo(int $registro_id, string $estado)
@@ -74,6 +119,22 @@ class fc_empleado_contacto extends modelo{
         }
 
         return $r_alta_bd;
+    }
+
+    public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
+    {
+        $registro['descripcion'] = $registro['nombre'] . ' ' . $registro['ap'];
+
+        if (array_key_exists('am', $registro)) {
+            $registro['descripcion'] .= ' ' . $registro['am'];
+        }
+
+        $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al dar de modifica_bd fc_empleado_contacto', data: $r_modifica_bd);
+        }
+
+        return $r_modifica_bd;
     }
 
 
