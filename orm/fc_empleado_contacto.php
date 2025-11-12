@@ -25,6 +25,19 @@ class fc_empleado_contacto extends modelo{
         $this->etiqueta = 'Empleado Contacto';
     }
 
+    public function actualiza_estado_correo(int $registro_id, string $estado)
+    {
+        $rs = $this->modifica_bd(
+            registro: ['estatus_correo' => $estado ],
+            id: $registro_id
+        );
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al actualizar el estatus_correo', data: $rs);
+        }
+
+        return [];
+    }
+
     public function genera_link_validacion(string $correo, int $registro_id)
     {
         $token = $this->get_codigo_aleatorio(longitud: 16);

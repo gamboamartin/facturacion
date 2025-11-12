@@ -5,6 +5,7 @@ namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\comercial\models\com_tipo_contacto;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\_email_validacion;
 use gamboamartin\facturacion\models\fc_empleado;
 use gamboamartin\facturacion\models\fc_empleado_contacto;
 use gamboamartin\system\html_controler;
@@ -115,9 +116,31 @@ class controlador_fc_empleado_contacto extends system {
                 data: $data, header: $header, ws: $ws);
         }
 
-        echo '<pre>';
-        print_r($url_validacion);
-        echo '</pre>';exit;
+        $rs = $modelo_fc_empleado_contacto->actualiza_estado_correo(
+            registro_id: $registro_id,
+            estado: self::STATUS_LINK_ENVIADO
+        );
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error en actualiza_estado_correo',
+                data: $rs, header: $header, ws: $ws);
+        }
+
+        $email = new _email_validacion();
+        $resultado = $email->enviar_validacion(
+            correo_destino: $correo,
+            url_validacion: $url_validacion,
+            link: $this->link
+        );
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error en enviar_validacion',
+                data: $resultado, header: $header, ws: $ws);
+        }
+
+        $_SESSION['exito'][]['mensaje'] = 'link de validacion enviado exitosamente';
+        $link = "index.php?seccion=fc_empleado_contacto&accion=lista&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
 
     }
 
