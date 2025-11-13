@@ -121,6 +121,48 @@ class fc_empleado_contacto extends modelo{
         return $r_alta_bd;
     }
 
+    public function alta_registro(array $registro): array|stdClass
+    {
+
+        $email = strtolower($registro['email']);
+        $nombre_completo = strtolower($registro['nombre_completo']);
+        $nombre_completo = str_replace('  ', ' ', $nombre_completo);
+        $nombre_completo = str_replace('   ', ' ', $nombre_completo);
+        $nombre_completo = str_replace('    ', ' ', $nombre_completo);
+
+        $nombre_separado = $this->separarNombreCompleto($nombre_completo);
+
+        $registro_alta['codigo'] = $this->get_codigo_aleatorio();
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error generar codigo', data: $registro_alta);
+        }
+
+        $registro_alta['nombre'] = $nombre_separado['nombres'];
+        $registro_alta['ap'] = $nombre_separado['apellido_paterno'];
+        $registro_alta['am'] = $nombre_separado['apellido_materno'];
+        $registro_alta['correo'] = $email;
+        $registro_alta['telefono'] = '1000000000';
+        $registro_alta['descripcion'] = $nombre_completo;
+        $registro_alta['com_tipo_contacto_id'] = -1;
+        $registro_alta['fc_empleado_id'] = $registro['fc_empleado_id'];
+
+        $rs = $this->filtro_and(filtro: ['fc_empleado_contacto.correo' => $email]);
+        if (errores::$error) {
+            return $this->error->error(mensaje: "Error al buscar correo:{$email} en fc_empleado_contacto", data: $rs);
+        }
+
+        if ((int)$rs->n_registros !== 0){
+            return [];
+        }
+
+        $r_alta_registro = parent::alta_registro($registro_alta);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al dar de alta fc_empleado_contacto', data: $r_alta_registro);
+        }
+
+        return $r_alta_registro;
+    }
+
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
         $registro['descripcion'] = $registro['nombre'] . ' ' . $registro['ap'];
@@ -194,5 +236,54 @@ class fc_empleado_contacto extends modelo{
 
         return $datos;
     }
+
+    private function separarNombreCompleto($nombreCompleto): array
+    {
+        // Limpiar dobles espacios y convertir a mayúsculas o minúsculas si se desea
+        $nombreCompleto = trim(preg_replace('/\s+/', ' ', $nombreCompleto));
+
+        // Convertir a array de palabras
+        $partes = explode(' ', $nombreCompleto);
+        $total = count($partes);
+
+        // Validación rápida
+        if ($total < 2) {
+            return [
+                'nombres' => $nombreCompleto,
+                'apellido_paterno' => '',
+                'apellido_materno' => ''
+            ];
+        }
+
+        // Listas comunes para identificar nombres compuestos
+        $prefijosNombres = ['de', 'del', 'de la', 'de los', 'la', 'las', 'los'];
+        $prefijosApellidos = ['del', 'de', 'de la', 'de las', 'de los'];
+
+        // AP MATERNO = última palabra(s)
+        $apellido_materno = array_pop($partes);
+
+        // AP PATERNO = palabra(s) anteriores
+        $apellido_paterno = array_pop($partes);
+
+        // Si el apellido paterno trae prefijos como "de", "del", etc.
+        if (in_array(strtolower($apellido_paterno), $prefijosApellidos) && count($partes) > 0) {
+            $apellido_paterno = $apellido_paterno . ' ' . array_pop($partes);
+        }
+
+        // Nombres = todo lo que quedó
+        $nombres = implode(' ', $partes);
+
+        return [
+            'nombres' => $this->capitalizar($nombres),
+            'apellido_paterno' => $this->capitalizar($apellido_paterno),
+            'apellido_materno' => $this->capitalizar($apellido_materno)
+        ];
+    }
+
+    private function capitalizar($texto): array|false|string|null
+    {
+        return mb_convert_case($texto, MB_CASE_TITLE, "UTF-8");
+    }
+
 
 }
