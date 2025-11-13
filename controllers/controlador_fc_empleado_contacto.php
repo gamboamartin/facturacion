@@ -73,16 +73,16 @@ class controlador_fc_empleado_contacto extends system {
         return $alta;
     }
 
-//    public function lista(bool $header, bool $ws = false): array
-//    {
-//        (new fc_empleado_contacto(link: $this->link))->valida_tiempo_tokens();
-//        $lista = parent::lista($header, $ws);
-//        if(errores::$error){
-//            return $this->retorno_error(mensaje: 'Error en lista', data: $lista, header:  $header,ws:  $ws);
-//        }
-//
-//        return $lista;
-//    }
+    public function lista(bool $header, bool $ws = false): array
+    {
+        (new fc_empleado_contacto(link: $this->link))->valida_tiempo_tokens();
+        $lista = parent::lista($header, $ws);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error en lista', data: $lista, header:  $header,ws:  $ws);
+        }
+
+        return $lista;
+    }
 
     public function modifica(bool $header, bool $ws = false): array|stdClass
     {
