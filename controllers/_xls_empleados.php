@@ -165,10 +165,10 @@ class _xls_empleados{
                     return (new errores())->error('Error al insertar row', $alta_row);
                 }
 
-//                $alta_row_fc_empleado_contacto = (new fc_empleado_contacto($link))->alta_registro($row_low_new);
-//                if (errores::$error) {
-//                    return (new errores())->error('Error en alta_registro fc_empleado_contacto', $alta_row_fc_empleado_contacto);
-//                }
+                $alta_row_fc_empleado_contacto = (new fc_empleado_contacto($link))->alta_registro($row_low_new);
+                if (errores::$error) {
+                    return (new errores())->error('Error en alta_registro fc_empleado_contacto', $alta_row_fc_empleado_contacto);
+                }
             }
             $row_upd = array();
             $row_upd['empleados_cargados'] = 'activo';

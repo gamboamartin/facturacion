@@ -123,6 +123,9 @@ class fc_empleado_contacto extends modelo{
 
     public function alta_registro(array $registro): array|stdClass
     {
+        if ($registro['email'] === ''){
+            return [];
+        }
 
         $email = strtolower($registro['email']);
         $nombre_completo = strtolower($registro['nombre_completo']);
