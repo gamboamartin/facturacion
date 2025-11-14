@@ -145,6 +145,19 @@ class fc_layout_nom extends modelo{
         return $r_elimina_bd;
     }
 
+    public function cambiar_status_layout(int $registro_id, string $status_layout)
+    {
+        $r_modifica = $this->modifica_bd(
+            registro: ['estado_layout' => $status_layout],
+            id: $registro_id,
+        );
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al modificar estado_layout',data: $r_modifica);
+        }
+
+        return $r_modifica;
+    }
+
     private function modifica_fecha_emision_row_layout(int $fc_layout_nom_id, string $fecha_emision)
     {
         $fc_row_layout_modelo = new fc_row_layout(link: $this->link);

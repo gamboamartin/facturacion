@@ -27,6 +27,11 @@ use ZipArchive;
 
 class controlador_fc_layout_nom extends system{
 
+    public const string ESTADO_LAYOUT_INICIAL = 'Descarga Layout';
+    public const string ESTADO_LAYOUT_INTERMEDIO = 'Descargado o Generado';
+    public const string ESTADO_LAYOUT_PAGADO = 'Pagado';
+    public const string ESTADO_LAYOUT_FINAL = 'Enviado al Cliente';
+
     public stdClass|array $keys_selects = array();
     public array $fc_rows_layout = array();
 
@@ -48,6 +53,7 @@ class controlador_fc_layout_nom extends system{
         $columns["com_cliente_rfc"]["titulo"] = "Cliente RFC";
         $columns["fc_layout_nom_descripcion"]["titulo"] = "Descripcion";
         $columns["fc_layout_nom_estado_timbrado"]["titulo"] = "Estado Timbrado";
+        $columns["fc_layout_nom_estado_layout"]["titulo"] = "Estado Layout";
         $columns["fc_layout_nom_fecha_pago"]["titulo"] = "Fecha Pago";
 
         $filtro = [
@@ -57,6 +63,7 @@ class controlador_fc_layout_nom extends system{
             "com_cliente.rfc",
             "fc_layout_nom.descripcion",
             "fc_layout_nom.estado_timbrado",
+            "fc_layout_nom.estado_layout",
             "fc_layout_nom.fecha_pago",
         ];
 
@@ -590,6 +597,15 @@ class controlador_fc_layout_nom extends system{
         $datos = $clase_dispersion->lee_layout_base(fc_layout_nom: $fc_layout_nom);
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al obtener $datos', data: $datos,
+                header: $header, ws: $ws);
+        }
+
+        $rs = (new fc_layout_nom($this->link))->cambiar_status_layout(
+            registro_id: $this->registro_id,
+            status_layout: controlador_fc_layout_nom::ESTADO_LAYOUT_INTERMEDIO,
+        );
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al cambiar_status_layout', data: $rs,
                 header: $header, ws: $ws);
         }
 
