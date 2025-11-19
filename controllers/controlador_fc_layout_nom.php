@@ -31,6 +31,10 @@ class controlador_fc_layout_nom extends system{
     public const string ESTADO_LAYOUT_INTERMEDIO = 'Descargado o Generado';
     public const string ESTADO_LAYOUT_PAGADO = 'Pagado';
     public const string ESTADO_LAYOUT_FINAL = 'Enviado al Cliente';
+    public const string ESTADO_SIN_TIMBRAR = 'SIN TIMBRAR';
+    public const string ESTADO_TIMBRADO_PARCIAL = 'TIMBRADO PARCIAL';
+    public const string ESTADO_TIMBRADO_CON_ERROR = 'TIMBRADO CON ERROR';
+    public const string ESTADO_TIMBRADO = 'TIMBRADO';
 
     public stdClass|array $keys_selects = array();
     public array $fc_rows_layout = array();
@@ -1171,6 +1175,13 @@ class controlador_fc_layout_nom extends system{
        //     exit;
         }
 
+        $rs = $this->valida_timbrado(fc_layout_nom_id: $this->registro_id);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al valida_timbrado", $rs);
+            print_r($error);
+            exit;
+        }
+
         $result = (new _timbra_nomina())->timbra_recibo(link: $this->link,fc_row_layout_id:  $_GET['fc_row_layout_id']);
         if(errores::$error) {
             $error = (new errores())->error("Error al timbrar", $result);
@@ -1205,6 +1216,13 @@ class controlador_fc_layout_nom extends system{
             //$error = (new errores())->error(mensaje: 'Error timbrado version anterior', data: $this->registro_id);
             //print_r($error);
             //exit;
+        }
+
+        $rs = $this->valida_timbrado(fc_layout_nom_id: $this->registro_id);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al valida_timbrado", $rs);
+            print_r($error);
+            exit;
         }
 
         $filtro['fc_layout_nom.id'] = $this->registro_id;
@@ -1561,6 +1579,24 @@ class controlador_fc_layout_nom extends system{
         if(errores::$error) {
             return (new errores())->error("Error al actualizar upd_total_dispersion_fc_layout_nom", $rs);
         }
+        return [];
+    }
+
+    private function valida_timbrado(int $fc_layout_nom_id): array
+    {
+        $fc_layout_nom_modelo = new fc_layout_nom($this->link);
+        $fc_layout_nom_modelo->registro_id = $fc_layout_nom_id;
+        $data = $fc_layout_nom_modelo->obten_data();
+
+        $fc_layout_nom_estado_layout = $data['fc_layout_nom_estado_layout'];
+
+        if ($fc_layout_nom_estado_layout !== controlador_fc_layout_nom::ESTADO_LAYOUT_PAGADO) {
+            return (new errores())->error(
+                "Error no se puede timbrar si el Layout no esta ". controlador_fc_layout_nom::ESTADO_LAYOUT_PAGADO,
+                []
+            );
+        }
+
         return [];
     }
 
