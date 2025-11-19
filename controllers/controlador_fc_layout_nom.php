@@ -621,6 +621,26 @@ class controlador_fc_layout_nom extends system{
 
     }
 
+    public function layout_pagado(bool $header, bool $ws = false): array
+    {
+
+        $rs = (new fc_layout_nom($this->link))->cambiar_status_layout(
+            registro_id: $this->registro_id,
+            status_layout: self::ESTADO_LAYOUT_PAGADO,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al cambiar_status_layout', data: $rs, header: $header, ws: $ws);
+        }
+
+        $_SESSION['exito'][]['mensaje'] = 'Se cambio el estado layout correctamente';
+        $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+    }
+
+
     public function modifica_datos(bool $header, bool $ws = false)
     {
         // Validar que fc_row_layout_id esté presente
