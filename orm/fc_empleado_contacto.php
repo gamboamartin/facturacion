@@ -127,7 +127,9 @@ class fc_empleado_contacto extends modelo{
             return [];
         }
 
-        $email = strtolower($registro['email']);
+        $email = trim($registro['email']);
+        $email = preg_replace('/[^\S\r\n]+/u', '', $email); // elimina todos los tipos de espacios
+        $email = strtolower($email);
         $nombre_completo = strtolower($registro['nombre_completo']);
         $nombre_completo = str_replace('  ', ' ', $nombre_completo);
         $nombre_completo = str_replace('   ', ' ', $nombre_completo);
@@ -160,6 +162,9 @@ class fc_empleado_contacto extends modelo{
 
         $r_alta_registro = parent::alta_registro($registro_alta);
         if (errores::$error) {
+            echo '<pre>';
+            var_dump($registro_alta['correo']);
+            echo '</pre>';exit;
             return $this->error->error(mensaje: 'Error al dar de alta fc_empleado_contacto', data: $r_alta_registro);
         }
 
