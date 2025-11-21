@@ -187,6 +187,34 @@ class fc_empleado_contacto extends modelo{
         return $r_modifica_bd;
     }
 
+    public function envia_nomina_fc_empleado_contacto(int $fc_empleado_contacto_id, array $adjuntos = [])
+    {
+        $this->registro_id = $fc_empleado_contacto_id;
+        $rs = $this->obten_data();
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener data', data: $rs);
+        }
+
+        $correo = $rs['fc_empleado_contacto_correo'];
+        $estatus_correo = $rs['fc_empleado_contacto_estatus_correo'];
+
+        if ($estatus_correo !== controlador_fc_empleado_contacto::STATUS_VALIDADO) {
+            return [];
+        }
+
+        $rs_mail = (new _email_nomina())->enviar_nomina(
+            correo: $correo,
+            adjuntos: $adjuntos,
+            link: $this->link
+        );
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al enviar _email_nomina', data: $rs_mail);
+        }
+
+        return $rs_mail;
+
+    }
+
 
     protected function inicializa_campos(array $registros): array
     {
