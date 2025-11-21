@@ -187,16 +187,25 @@ class fc_empleado_contacto extends modelo{
         return $r_modifica_bd;
     }
 
-    public function envia_nomina_fc_empleado_contacto(int $fc_empleado_contacto_id, array $adjuntos = [])
+    public function envia_nomina_fc_empleado_contacto(int $fc_empleado_id, array $adjuntos = [])
     {
-        $this->registro_id = $fc_empleado_contacto_id;
-        $rs = $this->obten_data();
+        $filtro = [
+            'fc_empleado_contacto.fc_empleado_id' => $fc_empleado_id,
+        ];
+
+        $rs = $this->filtro_and(filtro: $filtro);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener data', data: $rs);
+            return $this->error->error(mensaje: 'Error al obtener registro del empleado contacto', data: $rs);
         }
 
-        $correo = $rs['fc_empleado_contacto_correo'];
-        $estatus_correo = $rs['fc_empleado_contacto_estatus_correo'];
+        $n_registros = $rs->n_registros;
+
+        if ((int)$n_registros !== 1) {
+            return [];
+        }
+
+        $estatus_correo = $rs->registros[0]['fc_empleado_contacto_estatus_correo'];
+        $correo = $rs->registros[0]['fc_empleado_contacto_correo'];
 
         if ($estatus_correo !== controlador_fc_empleado_contacto::STATUS_VALIDADO) {
             return [];
@@ -213,6 +222,32 @@ class fc_empleado_contacto extends modelo{
 
         return $rs_mail;
 
+    }
+
+    public function tiene_correo_validado(int $fc_empleado_id)
+    {
+        $filtro = [
+            'fc_empleado_contacto.fc_empleado_id' => $fc_empleado_id,
+        ];
+
+        $rs = $this->filtro_and(columnas: ['fc_empleado_contacto_estatus_correo'], filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener registro del empleado contacto', data: $rs);
+        }
+
+        $n_registros = $rs->n_registros;
+
+        if ((int)$n_registros !== 1) {
+            return false;
+        }
+
+        $estatus_correo = $rs->registros[0]['fc_empleado_contacto_estatus_correo'];
+
+        if ($estatus_correo !== controlador_fc_empleado_contacto::STATUS_VALIDADO) {
+            return false;
+        }
+
+        return true;
     }
 
 
