@@ -146,4 +146,62 @@ class fc_row_layout extends modelo{
         return false;
     }
 
+    public function envia_nomina(int $fc_row_layout_id)
+    {
+        $this->registro_id = $fc_row_layout_id;
+        $rs = $this->obten_data();
+        if(errores::$error){
+            return (new errores())->error('Error al obten_data de fc_row_layout ', $rs);
+        }
+
+        $fc_empleado_id = $rs['fc_row_layout_fc_empleado_id'];
+
+        $fc_empleado_contacto_modelo = new fc_empleado_contacto($this->link);
+
+        $tiene_correo_valido = $fc_empleado_contacto_modelo->tiene_correo_validado(
+            fc_empleado_id: $fc_empleado_id
+        );
+        if(errores::$error){
+            return (new errores())->error('Error al validar correo', $tiene_correo_valido);
+        }
+
+        if (!$tiene_correo_valido) {
+            return [];
+        }
+
+        $result = (new fc_row_nomina($this->link))->filtro_and(
+            filtro: ['fc_row_nomina.fc_row_layout_id' => $fc_row_layout_id],
+        );
+        if(errores::$error){
+            return (new errores())->error('Error al obtener registro fc_row_nomina', $result);
+        }
+
+        $n_registros = $result->n_registros;
+        if ((int)$n_registros === 0){
+            return [];
+        }
+
+        $adjuntos = [];
+
+        foreach ($result->registros as $registro) {
+            $extension = pathinfo($registro['doc_documento_nombre'], PATHINFO_EXTENSION);
+            $not_adjunto_name_out = $registro['fc_row_layout_uuid'] . '.' . $extension;
+
+            $adjuntos[] = [
+                'doc_documento_ruta_absoluta' => $registro['doc_documento_ruta_absoluta'],
+                'not_adjunto_name_out' => $not_adjunto_name_out,
+            ];
+        }
+
+        $rs_envia_nomina = $fc_empleado_contacto_modelo->envia_nomina_fc_empleado_contacto(
+            fc_empleado_id: $fc_empleado_id,
+            adjuntos:  $adjuntos,
+        );
+        if(errores::$error){
+            return (new errores())->error('Error al envia_nomina_fc_empleado_contacto', $rs_envia_nomina);
+        }
+
+        return $rs_envia_nomina;
+    }
+
 }
