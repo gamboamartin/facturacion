@@ -155,6 +155,11 @@ class fc_row_layout extends modelo{
         }
 
         $fc_empleado_id = $rs['fc_row_layout_fc_empleado_id'];
+        $nomina_enviada = $rs['fc_row_layout_nomina_enviada'];
+
+        if ($nomina_enviada === 'activo') {
+            return [];
+        }
 
         $fc_empleado_contacto_modelo = new fc_empleado_contacto($this->link);
 
@@ -201,7 +206,15 @@ class fc_row_layout extends modelo{
             return (new errores())->error('Error al envia_nomina_fc_empleado_contacto', $rs_envia_nomina);
         }
 
-        return $rs_envia_nomina;
+        $rs_modifica = $this->modifica_bd(
+            registro: ['nomina_enviada' => 'activo'],
+            id: $fc_row_layout_id
+        );
+        if(errores::$error){
+            return (new errores())->error('Error al modificar fc_row_layout', $rs_modifica);
+        }
+
+        return ['correo_enviado'];
     }
 
 }

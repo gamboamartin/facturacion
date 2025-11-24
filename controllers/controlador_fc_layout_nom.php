@@ -579,6 +579,65 @@ class controlador_fc_layout_nom extends system{
 
 
     }
+    public function envia_nominas(bool $header, bool $ws = false)
+    {
+        $this->modelo->registro_id = $this->registro_id;
+        $rs = $this->modelo->obten_data();
+        if(errores::$error) {
+            $error = (new errores())->error("Error al obtener data fc_layout_nom", $rs);
+            print_r($error);
+            exit;
+        }
+
+        $fc_layout_nom_envia_nomina_empleado = $rs['fc_layout_nom_envia_nomina_empleado'];
+
+        if ($fc_layout_nom_envia_nomina_empleado === 'inactivo') {
+            $_SESSION['exito'][]['mensaje'] = "El layout no tiene configurado el envio de correos a empleados";
+            $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
+            $link .= "&session_id={$_GET['session_id']}";
+            header("Location: " . $link);
+            exit;
+        }
+
+        $rs = $this->valida_envio(fc_layout_nom_id: $this->registro_id);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al envia_nominas", $rs);
+            print_r($error);
+            exit;
+        }
+
+        $filtro['fc_layout_nom.id'] = $this->registro_id;
+        $filtro['fc_row_layout.nomina_enviada'] = 'inactivo';
+
+        $r_rows = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al obtener registros", $r_rows);
+            print_r($error);
+            exit;
+        }
+        $rows = $r_rows->registros;
+
+        $n_correos_enviados = 0;
+        foreach ($rows as $row) {
+            $enviar_nomina = (new fc_row_layout($this->link))->envia_nomina(
+                fc_row_layout_id: $row['fc_row_layout_id']
+            );
+            if(errores::$error) {
+                (new errores())->error("Error al envia_nomina", $enviar_nomina);
+                errores::$error = false;
+            }
+            if ((int)count($enviar_nomina) > 0) {
+                $n_correos_enviados++;
+            }
+        }
+
+        $_SESSION['exito'][]['mensaje'] = "Se enviaron {$n_correos_enviados} correos";
+        $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+
+    }
 
     public function genera_dispersion(bool $header, bool $ws = false)
     {
@@ -643,7 +702,6 @@ class controlador_fc_layout_nom extends system{
         header("Location: " . $link);
         exit;
     }
-
 
     public function modifica_datos(bool $header, bool $ws = false)
     {
@@ -891,7 +949,6 @@ class controlador_fc_layout_nom extends system{
         header("Location: " . $link);
         return $result;
     }
-
 
     public function modifica_fecha_emision(bool $header, bool $ws = false): array|stdClass
     {
@@ -1194,6 +1251,7 @@ class controlador_fc_layout_nom extends system{
 
 
     }
+
     public function retimbrar_recibo(bool $header, bool $ws = false): array|stdClass
     {
         $result = (new _timbra_nomina())->retimbra_recibo(link: $this->link,fc_row_layout_id:  $_GET['fc_row_layout_id']);
@@ -1527,7 +1585,6 @@ class controlador_fc_layout_nom extends system{
         return $ss;
     }
 
-
     private function subir_qr(string $string_qr_jpg, int $fc_row_layout_id): array
     {
         $nombre_archivo = $fc_row_layout_id.'.jpg';
@@ -1564,8 +1621,6 @@ class controlador_fc_layout_nom extends system{
         return [];
     }
 
-
-
     private function upd_total_dispersion_fc_layout_nom(int $fc_layout_nom_id): array
     {
         $sql = "UPDATE fc_layout_nom
@@ -1593,6 +1648,31 @@ class controlador_fc_layout_nom extends system{
         if ($fc_layout_nom_estado_layout !== controlador_fc_layout_nom::ESTADO_LAYOUT_PAGADO) {
             return (new errores())->error(
                 "Error no se puede timbrar si el Layout no esta ". controlador_fc_layout_nom::ESTADO_LAYOUT_PAGADO,
+                []
+            );
+        }
+
+        return [];
+    }
+    private function valida_envio(int $fc_layout_nom_id): array
+    {
+        $fc_layout_nom_modelo = new fc_layout_nom($this->link);
+        $fc_layout_nom_modelo->registro_id = $fc_layout_nom_id;
+        $data = $fc_layout_nom_modelo->obten_data();
+
+        $fc_layout_nom_estado_layout = $data['fc_layout_nom_estado_layout'];
+        $fc_layout_nom_estado_timbrado = $data['fc_layout_nom_estado_timbrado'];
+
+        if ($fc_layout_nom_estado_layout !== controlador_fc_layout_nom::ESTADO_LAYOUT_PAGADO) {
+            return (new errores())->error(
+                "Error no se puede enviar si el Layout no esta ". controlador_fc_layout_nom::ESTADO_LAYOUT_PAGADO,
+                []
+            );
+        }
+
+        if ($fc_layout_nom_estado_timbrado !== controlador_fc_layout_nom::ESTADO_TIMBRADO) {
+            return (new errores())->error(
+                "Error no se puede enviar si el Layout no esta ". controlador_fc_layout_nom::ESTADO_TIMBRADO,
                 []
             );
         }
