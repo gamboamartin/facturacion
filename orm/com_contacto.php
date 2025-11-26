@@ -32,9 +32,26 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
         return $url_validacion;
     }
 
-    public function actualiza_estado_correo(array $new_data, int $registro_id, string $estado)
+    public function actualiza_estado_correo(int $registro_id, string $estado, bool $borrar_token = false)
     {
+        $this->registro_id = $registro_id;
+        $data = $this->obten_data();
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener la data del contacto', data: $data);
+        }
+
+        $new_data = [
+            'correo' => $data['com_contacto_correo'],
+            'telefono' => $data['com_contacto_telefono'],
+            'nombre' => $data['com_contacto_nombre'],
+            'ap' => $data['com_contacto_ap'],
+            'am' => $data['com_contacto_am'],
+        ];
         $new_data['estatus_correo'] = $estado;
+        if ($borrar_token) {
+            $new_data['token_validacion'] = '';
+        }
+
         $rs = $this->modifica_bd(
             registro: $new_data,
             id: $registro_id
@@ -72,13 +89,10 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
                 $fecha_token_dt = new DateTime($fecha_token);
                 $diferencia = $fecha_actual->diff($fecha_token_dt);
                 if ($diferencia->days > 2 ) {
-                    $row_update = [
-                        'estatus_correo' => (controlador_com_contacto::STATUS_NO_VALIDADO),
-                        'token_validacion' => '',
-                    ];
-                    $rs = $this->modifica_bd(
-                        registro: $row_update,
-                        id: $registro_id
+                    $rs = $this->actualiza_estado_correo(
+                        registro_id:$registro_id,
+                        estado: controlador_com_contacto::STATUS_NO_VALIDADO,
+                        borrar_token: true
                     );
                     if (errores::$error) {
                         exit;

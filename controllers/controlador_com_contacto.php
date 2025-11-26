@@ -58,7 +58,6 @@ class controlador_com_contacto extends \gamboamartin\comercial\controllers\contr
         }
 
         $rs = $modelo_com_contacto->actualiza_estado_correo(
-            new_data: $new_data,
             registro_id: $registro_id,
             estado: self::STATUS_LINK_ENVIADO
         );

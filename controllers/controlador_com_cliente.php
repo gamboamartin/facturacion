@@ -10,6 +10,7 @@ namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\com_cliente;
+use gamboamartin\facturacion\models\com_contacto;
 use gamboamartin\template\html;
 use PDO;
 use stdClass;
@@ -37,6 +38,7 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
 
     public function asigna_contacto(bool $header, bool $ws = false, array $not_actions = array()): array|string
     {
+        (new com_contacto($this->link))->valida_tiempo_tokens();
         $this->accion_titulo = 'Asignar contacto';
 
         $r_modifica = $this->init_modifica();
