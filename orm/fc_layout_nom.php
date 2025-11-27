@@ -189,7 +189,7 @@ class fc_layout_nom extends modelo{
         return $data;
     }
 
-    public function obten_correos_contactos_cliente(int $fc_layout_nom_id)
+    public function obten_correos_contactos_cliente(int $fc_layout_nom_id): array
     {
         $this->registro_id = $fc_layout_nom_id;
         $data = $this->obten_data(['com_sucursal_id']);

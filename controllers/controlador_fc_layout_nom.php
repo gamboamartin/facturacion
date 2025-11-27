@@ -7,6 +7,7 @@ use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_layout_nom_html;
 use gamboamartin\facturacion\models\_cancela_nomina\_cancela_nomina;
+use gamboamartin\facturacion\models\_email_nomina_cliente;
 use gamboamartin\facturacion\models\_timbra_nomina;
 use gamboamartin\facturacion\models\_timbra_nomina\_finalizacion;
 use gamboamartin\facturacion\models\fc_layout_nom;
@@ -581,6 +582,83 @@ class controlador_fc_layout_nom extends system{
 
 
     }
+
+    public function envia_nomina_cliente(bool $header, bool $ws = false)
+    {
+        $rs = $this->valida_envio(fc_layout_nom_id: $this->registro_id);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al envia_nomina_cliente", $rs);
+            print_r($error);
+            exit;
+        }
+
+        $correos = (new fc_layout_nom($this->link))->obten_correos_contactos_cliente(
+            fc_layout_nom_id: $this->registro_id
+        );
+        if(errores::$error) {
+            $error = (new errores())->error("Error al obtener correos", $correos);
+            print_r($error);
+            exit;
+        }
+
+        if (count($correos) === 0) {
+            if(errores::$error) {
+                $error = (new errores())->error("Error no se encontraron correos para el envió", $correos);
+                print_r($error);
+                exit;
+            }
+        }
+
+        $this->modelo->registro_id = $this->registro_id;
+        $data = $this->modelo->obten_data();
+        if(errores::$error) {
+            $error = (new errores())->error("Error en obten_data de fc_layout_nom", $data);
+            print_r($error);
+            exit;
+        }
+
+        $com_sucursal_nombre_contacto = $data['com_sucursal_nombre_contacto'];
+        $fc_layout_nom_fecha_pago = $data['fc_layout_nom_fecha_pago'];
+
+        $asunto = "Nomina $fc_layout_nom_fecha_pago $com_sucursal_nombre_contacto";
+
+
+        $zip = $this->obten_ruta_nombre_zip(fc_layout_nom_id: $this->registro_id);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al obtener ruta y nombre del zip", $zip);
+            print_r($error);
+            exit;
+        }
+
+        $adjuntos[] = [
+            'doc_documento_ruta_absoluta' => $zip['ruta'],
+            'not_adjunto_name_out' => $zip['nombre_archivo'],
+        ];
+
+        foreach ($correos as $correo) {
+            $result = (new _email_nomina_cliente())->enviar_nomina_cliente(
+                asunto: $asunto,
+                correo: $correo,
+                adjuntos: $adjuntos,
+                link: $this->link
+            );
+
+            if(errores::$error) {
+                $error = (new errores())->error("Error al enviar correo a $correo", $result);
+                print_r($error);
+                exit;
+            }
+        }
+
+        unlink($zip['ruta']);
+
+        $_SESSION['exito'][]['mensaje'] = "Se enviaron los correos de manera exitosa";
+        $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+    }
+
     public function envia_nominas(bool $header, bool $ws = false)
     {
         $this->modelo->registro_id = $this->registro_id;
@@ -1407,99 +1485,15 @@ class controlador_fc_layout_nom extends system{
 
     public function descarga_timbres(bool $header, bool $ws = false)
     {
-        $filtro['fc_layout_nom.id'] = $this->registro_id;
-        $filtro['fc_row_layout.esta_timbrado'] = 'activo';
-
-        $r_rows = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
+        $zip = $this->obten_ruta_nombre_zip(fc_layout_nom_id: $this->registro_id);
         if(errores::$error) {
-            $error = (new errores())->error("Error al obtener registros", $r_rows);
+            $error = (new errores())->error("Error al obtener ruta y nombre del zip", $zip);
             print_r($error);
             exit;
         }
 
-        $rows = $r_rows->registros;
-
-        if (count($rows) === 0) {
-            $error = (new errores())->error("Error el layout no tiene registros timbrados", $r_rows);
-            print_r($error);
-            exit;
-        }
-
-        $archivos = [];
-        foreach ($rows as $row) {
-            $fc_row_layout_id = $row['fc_row_layout_id'];
-            $filtro['fc_row_nomina.fc_row_layout_id'] =$fc_row_layout_id;
-            $filtro['fc_row_nomina.status'] = 'activo';
-            $result = (new fc_row_nomina($this->link))->filtro_and(filtro: $filtro);
-            if(errores::$error) {
-                $error = (new errores())->error("Error en filtro_and de fc_row_nomina", $result);
-                print_r($error);
-                exit;
-            }
-            $docs = $result->registros;
-            foreach ($docs as $doc) {
-                $archivo = [
-                    'ruta' => $doc['doc_documento_ruta_absoluta'],
-                    'rfc' => $doc['fc_row_layout_rfc'],
-                    'fecha_pago' => $doc['fc_row_layout_fecha_pago'],
-                ];
-                $archivos[] = $archivo;
-            }
-
-        }//  end foreach ($rows as $row)
-
-        // --- Guardar XLSX en archivo temporal ---
-
-        $spreadsheet = $this->generar_spreadsheet(fc_layout_nom_id: $this->registro_id);
-        if (errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al generar spreadsheet', data: $spreadsheet, header: $header, ws: $ws);
-        }
-
-        $nombre_original_excel = $rows[0]['fc_layout_nom_descripcion'];
-        $info = pathinfo($nombre_original_excel);
-        $nombre_zip = $this->registro_id.'.'.$info['filename'] . '.zip';
-        $nuevo_nombre_excel = $info['filename'] . '_TIMBRADO.' . $info['extension'];
-
-        $tmpDir = sys_get_temp_dir();
-        $xlsxName = $nuevo_nombre_excel;
-        $xlsxPath = $tmpDir . DIRECTORY_SEPARATOR . $xlsxName;
-
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($xlsxPath);
-
-        // ---Finaliza Guardar XLSX en archivo temporal ---
-
-        $zipName = $nombre_zip;
-        $tmpZip = tempnam(sys_get_temp_dir(), 'zip_');
-
-        $zip = new ZipArchive();
-        if ($zip->open($tmpZip, ZipArchive::OVERWRITE) !== true) {
-            return $this->retorno_error(
-                mensaje: 'Error al generar archivo zip', data: [], header: $header, ws: $ws);
-        }
-
-        // Guardamos el excel dentro del ZIP
-        $nombreDentroZip = $nuevo_nombre_excel;
-        $zip->addFile($xlsxPath, $nombreDentroZip);
-
-        foreach ($archivos as $item) {
-            $ruta = $item['ruta'];
-            if (!file_exists($ruta)) {
-                continue;
-            }
-
-            // Obtenemos la extensión del archivo original
-            $extension = pathinfo($ruta, PATHINFO_EXTENSION);
-
-            // Construimos el nombre con el formato RFC_FECHA.ext
-            $nombreArchivo = $item['rfc'] . '_' . $item['fecha_pago'] . '.' . $extension;
-
-            // Agregamos al ZIP con el nuevo nombre
-            $zip->addFile($ruta, $nombreArchivo);
-        }
-
-        $zip->close();
+        $tmpZip = $zip['ruta'];
+        $zipName = $zip['nombre_archivo'];
 
         // Limpiamos buffers
         while (ob_get_level() > 0) { ob_end_clean(); }
@@ -1522,7 +1516,6 @@ class controlador_fc_layout_nom extends system{
         fclose($fp);
 
         unlink($tmpZip);
-        unlink($xlsxPath);
         exit;
 
     }
@@ -1715,6 +1708,105 @@ class controlador_fc_layout_nom extends system{
         }
 
         return [];
+    }
+
+    private function obten_ruta_nombre_zip(int $fc_layout_nom_id): array
+    {
+        $filtro['fc_layout_nom.id'] = $fc_layout_nom_id;
+        $filtro['fc_row_layout.esta_timbrado'] = 'activo';
+
+        $r_rows = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
+
+        if(errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al obtener registros',
+                data: $r_rows
+            );
+        }
+
+        $rows = $r_rows->registros;
+
+        if (count($rows) === 0) {
+            return (new errores())->error("Error el layout no tiene registros timbrados", $r_rows);
+        }
+
+        $archivos = [];
+        foreach ($rows as $row) {
+            $fc_row_layout_id = $row['fc_row_layout_id'];
+            $filtro['fc_row_nomina.fc_row_layout_id'] =$fc_row_layout_id;
+            $filtro['fc_row_nomina.status'] = 'activo';
+            $result = (new fc_row_nomina($this->link))->filtro_and(filtro: $filtro);
+            if(errores::$error) {
+                return (new errores())->error("Error en filtro_and de fc_row_nomina", $result);
+            }
+            $docs = $result->registros;
+            foreach ($docs as $doc) {
+                $archivo = [
+                    'ruta' => $doc['doc_documento_ruta_absoluta'],
+                    'rfc' => $doc['fc_row_layout_rfc'],
+                    'fecha_pago' => $doc['fc_row_layout_fecha_pago'],
+                ];
+                $archivos[] = $archivo;
+            }
+
+        }//  end foreach ($rows as $row)
+
+        // --- Guardar XLSX en archivo temporal ---
+
+        $spreadsheet = $this->generar_spreadsheet(fc_layout_nom_id: $this->registro_id);
+        if (errores::$error) {
+            return (new errores())->error("Error al generar spreadsheet", $spreadsheet);
+        }
+
+        $nombre_original_excel = $rows[0]['fc_layout_nom_descripcion'];
+        $info = pathinfo($nombre_original_excel);
+        $nombre_zip = $this->registro_id.'.'.$info['filename'] . '.zip';
+        $nuevo_nombre_excel = $info['filename'] . '_TIMBRADO.' . $info['extension'];
+
+        $tmpDir = sys_get_temp_dir();
+        $xlsxName = $nuevo_nombre_excel;
+        $xlsxPath = $tmpDir . DIRECTORY_SEPARATOR . $xlsxName;
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($xlsxPath);
+
+        // ---Finaliza Guardar XLSX en archivo temporal ---
+
+        $zipName = $nombre_zip;
+        $tmpZip = tempnam(sys_get_temp_dir(), 'zip_');
+
+        $zip = new ZipArchive();
+        if ($zip->open($tmpZip, ZipArchive::OVERWRITE) !== true) {
+            return (new errores())->error("Error al generar archivo zip", []);
+        }
+
+        // Guardamos el excel dentro del ZIP
+        $nombreDentroZip = $nuevo_nombre_excel;
+        $zip->addFile($xlsxPath, $nombreDentroZip);
+
+        foreach ($archivos as $item) {
+            $ruta = $item['ruta'];
+            if (!file_exists($ruta)) {
+                continue;
+            }
+
+            // Obtenemos la extensión del archivo original
+            $extension = pathinfo($ruta, PATHINFO_EXTENSION);
+
+            // Construimos el nombre con el formato RFC_FECHA.ext
+            $nombreArchivo = $item['rfc'] . '_' . $item['fecha_pago'] . '.' . $extension;
+
+            // Agregamos al ZIP con el nuevo nombre
+            $zip->addFile($ruta, $nombreArchivo);
+        }
+
+        $zip->close();
+        unlink($xlsxPath);
+
+        return [
+            'ruta' => $tmpZip,
+            'nombre_archivo' => $zipName,
+        ];
     }
 
 
