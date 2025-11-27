@@ -40,6 +40,8 @@ class controlador_fc_layout_nom extends system{
     public array $fc_rows_layout = array();
 
     public string $link_modifica_datos_bd = '';
+    public string $link_modifica_sucursal_bd = '';
+    public string $descripcion_nom_layout = '';
     public bool $disabled = false;
     public string $fecha_emision = '';
     public string $btn_modifica_fecha_emision = '';
@@ -1013,33 +1015,6 @@ class controlador_fc_layout_nom extends system{
         $fecha_emision_input = $_POST['fecha_emision'];
         $fecha_emision_bd = date('Y-m-d H:i:s', strtotime($fecha_emision_input));
 
-        // Actualizar todos los fc_row_layout que pertenecen a este fc_layout_nom
-//        $filtro = array();
-//        $filtro['fc_row_layout.fc_layout_nom_id'] = $this->registro_id;
-//        $rs = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
-//        if(errores::$error){
-//            return $this->retorno_error(
-//                mensaje: 'Error al obtener r_rows', data: $rs, header: $header, ws: $ws);
-//        }
-        
-//        $fc_row_layout_modelo = new fc_row_layout($this->link);
-//        $upd_row = array();
-//        $upd_row['fecha_emision'] = $fecha_emision_bd;
-//
-//        $result = array();
-//        foreach ($rs->registros as $row) {
-//            $row = (object)$row;
-//            // Solo actualizar si no está timbrado
-//            if($row->fc_row_layout_esta_timbrado === 'inactivo'){
-//                $result_row = $fc_row_layout_modelo->modifica_bd($upd_row, $row->fc_row_layout_id);
-//                if(errores::$error){
-//                    return $this->retorno_error(
-//                        mensaje: 'Error al actualizar fecha_emision en fc_row_layout', data: $result_row, header: $header, ws: $ws);
-//                }
-//                $result[] = $result_row;
-//            }
-//        }
-
         $fc_layout_nom_modelo = new fc_layout_nom($this->link);
         $upd_row = [
             'fecha_emision' => $fecha_emision_bd,
@@ -1053,7 +1028,69 @@ class controlador_fc_layout_nom extends system{
         // Redireccionar de vuelta a la lista de layouts de nómina
         $link = "index.php?seccion=fc_layout_nom&accion=lista&session_id={$_GET['session_id']}";
         header("Location: " . $link);
-        return $result;
+        exit;
+    }
+
+    public function modifica_sucursal(bool $header, bool $ws = false)
+    {
+        $registro_id = $this->registro_id;
+        $this->modelo->registro_id = $registro_id;
+        $data = $this->modelo->obten_data();
+
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener data de fc_layout_nom', data: $data, header: $header, ws: $ws);
+        }
+
+
+        $this->descripcion_nom_layout = $data['fc_layout_nom_descripcion'];
+
+        $fc_layout_nom_com_sucursal_id = $data['fc_layout_nom_com_sucursal_id'];
+        $select_sucursal_id = -1;
+
+        if ((int)$fc_layout_nom_com_sucursal_id > 0) {
+            $select_sucursal_id = $fc_layout_nom_com_sucursal_id;
+        }
+
+        // Configurar el link para el formulario
+        $link = "index.php?seccion=fc_layout_nom&accion=modifica_sucursal_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
+        $this->link_modifica_sucursal_bd = $link;
+
+        $this->inputs = new stdClass();
+
+        $modelo_com_sucursal = new com_sucursal(link: $this->link);
+        $filtro_input_select_sucursal = [];
+
+        $input_select = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: $select_sucursal_id,
+            modelo: $modelo_com_sucursal, columns_ds: ['com_sucursal_descripcion_select'],
+            disabled: false, filtro: $filtro_input_select_sucursal, label: 'Sucursal',name: 'com_sucursal_id',
+            registros: [], required: true
+        );
+
+        $this->inputs->sucursal = $input_select;
+    }
+
+    public function modifica_sucursal_bd(bool $header, bool $ws = false)
+    {
+        $fc_layout_nom_id = $_POST['fc_layout_nom_id'];
+        $com_sucursal_id = $_POST['com_sucursal_id'];
+
+        $rs = $this->modelo->modifica_bd(
+            registro: ['com_sucursal_id' => $com_sucursal_id],
+            id: $fc_layout_nom_id
+        );
+
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al modificar la sucursal en fc_layout_nom', data: $rs, header: $header, ws: $ws);
+        }
+
+        $_SESSION['exito'][]['mensaje'] = 'sucursal modificada exitosamente';
+        $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+
     }
 
     public function ver_empleados(bool $header, bool $ws = false): array|stdClass
