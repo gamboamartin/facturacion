@@ -8,12 +8,12 @@
 
             <div class="col-lg-12">
 
+                <?php include (new views())->ruta_templates . "head/title.php"; ?>
+                <?php include (new views())->ruta_templates . "mensajes.php"; ?>
                 <div class="widget  widget-box box-container form-main widget-form-cart" id="form" >
 
+                    <?php include (new views())->ruta_templates . "head/subtitulo.php"; ?>
                     <form method="post" action="<?php echo $controlador->link_asigna_contacto_bd; ?>" class="form-additional">
-                        <?php include (new views())->ruta_templates . "head/title.php"; ?>
-                        <?php include (new views())->ruta_templates . "head/subtitulo.php"; ?>
-                        <?php include (new views())->ruta_templates . "mensajes.php"; ?>
                         <?php echo $controlador->inputs->com_tipo_contacto_id; ?>
                         <?php echo $controlador->inputs->nombre; ?>
                         <?php echo $controlador->inputs->ap; ?>

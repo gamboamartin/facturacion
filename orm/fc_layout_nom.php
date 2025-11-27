@@ -1,8 +1,10 @@
 <?php
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
+use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\controllers\controlador_com_contacto;
 use PDO;
 use stdClass;
 
@@ -185,6 +187,66 @@ class fc_layout_nom extends modelo{
         }
 
         return $data;
+    }
+
+    public function obten_correos_contactos_cliente(int $fc_layout_nom_id)
+    {
+        $this->registro_id = $fc_layout_nom_id;
+        $data = $this->obten_data(['com_sucursal_id']);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al obtener datos de fc_layout_nom_id='.$fc_layout_nom_id,
+                data: $data
+            );
+        }
+
+        $com_sucursal_id = $data['com_sucursal_id'];
+        if (!$com_sucursal_id) {
+            return $this->error->error(
+                mensaje: 'Error no existe una sucursal relacionada al fc_layout_nom_id='.$fc_layout_nom_id,
+                data: $data
+            );
+        }
+
+        $com_sucursal_modelo = new com_sucursal($this->link);
+        $com_sucursal_modelo->registro_id = $com_sucursal_id;
+        $data_com_sucursal = $com_sucursal_modelo->obten_data();
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al obtener datos de com_sucursal_id='.$com_sucursal_id,
+                data: $data_com_sucursal
+            );
+        }
+
+        $com_cliente_id = $data_com_sucursal['com_cliente_id'];
+
+        if (!$com_cliente_id) {
+            return $this->error->error(
+                mensaje: 'Error no existe un cliente relacionada al com_sucursal_id='.$com_sucursal_id,
+                data: $data_com_sucursal
+            );
+        }
+
+        $filtro = [
+            'com_contacto.com_cliente_id' => $com_cliente_id,
+            'com_contacto.estatus_correo' => controlador_com_contacto::STATUS_VALIDADO,
+        ];
+
+        $rs = (new com_contacto($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al obtener datos de com_contacto',
+                data: $rs
+            );
+        }
+
+        $correos = [];
+        foreach ($rs->registros as $registro) {
+            $correos[] = $registro['com_contacto_correo'];
+        }
+
+        return $correos;
+
     }
 
 }
