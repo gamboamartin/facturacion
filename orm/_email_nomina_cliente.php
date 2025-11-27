@@ -11,8 +11,9 @@ use stdClass;
 class _email_nomina_cliente extends _mail {
 
     /**
-     * Envía un correo con XML/PDF de nómina.
+     * Envía un correo con ZIP de las nóminas.
      *
+     * @param string $asunto     Asunto del Correo
      * @param string $correo     Correo destino
      * @param array $adjuntos    Arreglo de rutas absolutas a XML / PDF
      * @param PDO $link          Conexión PDO
