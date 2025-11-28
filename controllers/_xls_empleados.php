@@ -333,11 +333,10 @@ class _xls_empleados{
             return (new errores())->error(mensaje: 'Error al obtener $datos', data: $row_empleado);
         }
 
-        $row_empleado = $this->upd_rfc_si_existe_codigo($row_empleado,$link);
-        if(errores::$error){
-            return (new errores())->error(mensaje: 'Error al obtener $datos', data: $row_empleado);
-        }
-
+//        $row_empleado = $this->upd_rfc_si_existe_codigo($row_empleado,$link);
+//        if(errores::$error){
+//            return (new errores())->error(mensaje: 'Error al obtener $datos', data: $row_empleado);
+//        }
         $fc_empleados =  $this->get_empleados_by_rfc($row_empleado,$link);
         if(errores::$error){
             return (new errores())->error(mensaje: 'Error al obtener $datos', data: $fc_empleados);
