@@ -659,56 +659,18 @@ class controlador_fc_layout_nom extends system{
         exit;
     }
 
-    public function envia_nominas(bool $header, bool $ws = false)
+    public function envia_nomina_empleados(bool $header, bool $ws = false): void
     {
-        $this->modelo->registro_id = $this->registro_id;
-        $rs = $this->modelo->obten_data();
+        $n_correos_enviados = $this->enviar_nomina_empleados_fc_layout_nom_id(
+            fc_layout_nom_id:  $this->registro_id
+        );
         if(errores::$error) {
-            $error = (new errores())->error("Error al obtener data fc_layout_nom", $rs);
-            print_r($error);
-            exit;
-        }
-
-        $fc_layout_nom_envia_nomina_empleado = $rs['fc_layout_nom_envia_nomina_empleado'];
-
-        if ($fc_layout_nom_envia_nomina_empleado === 'inactivo') {
-            $_SESSION['exito'][]['mensaje'] = "El layout no tiene configurado el envio de correos a empleados";
-            $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
-            $link .= "&session_id={$_GET['session_id']}";
-            header("Location: " . $link);
-            exit;
-        }
-
-        $rs = $this->valida_envio(fc_layout_nom_id: $this->registro_id);
-        if(errores::$error) {
-            $error = (new errores())->error("Error al envia_nominas", $rs);
-            print_r($error);
-            exit;
-        }
-
-        $filtro['fc_layout_nom.id'] = $this->registro_id;
-        $filtro['fc_row_layout.nomina_enviada'] = 'inactivo';
-
-        $r_rows = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
-        if(errores::$error) {
-            $error = (new errores())->error("Error al obtener registros", $r_rows);
-            print_r($error);
-            exit;
-        }
-        $rows = $r_rows->registros;
-
-        $n_correos_enviados = 0;
-        foreach ($rows as $row) {
-            $enviar_nomina = (new fc_row_layout($this->link))->envia_nomina(
-                fc_row_layout_id: $row['fc_row_layout_id']
+            $error = (new errores())->error(
+                mensaje:  "Error al enviar_nomina_empleados_fc_layout_nom_id",
+                data: $n_correos_enviados
             );
-            if(errores::$error) {
-                (new errores())->error("Error al envia_nomina", $enviar_nomina);
-                errores::$error = false;
-            }
-            if ((int)count($enviar_nomina) > 0) {
-                $n_correos_enviados++;
-            }
+            print_r($error);
+            exit;
         }
 
         $_SESSION['exito'][]['mensaje'] = "Se enviaron {$n_correos_enviados} correos";
@@ -716,7 +678,14 @@ class controlador_fc_layout_nom extends system{
         $link .= "&session_id={$_GET['session_id']}";
         header("Location: " . $link);
         exit;
+    }
 
+    public function envia_nominas(bool $header, bool $ws = false)
+    {
+
+        echo '<pre>';
+        print_r('Trabajando...');
+        echo '</pre>';exit;
     }
 
     public function genera_dispersion(bool $header, bool $ws = false)
@@ -1807,6 +1776,41 @@ class controlador_fc_layout_nom extends system{
             'ruta' => $tmpZip,
             'nombre_archivo' => $zipName,
         ];
+    }
+
+    private function enviar_nomina_empleados_fc_layout_nom_id(int $fc_layout_nom_id)
+    {
+        $rs = $this->valida_envio(fc_layout_nom_id: $fc_layout_nom_id);
+        if(errores::$error) {
+            return (new errores())->error("Error al envia_nominas", $rs);
+        }
+
+        $filtro['fc_layout_nom.id'] = $fc_layout_nom_id;
+        $filtro['fc_row_layout.nomina_enviada'] = 'inactivo';
+
+        $r_rows = (new fc_row_layout($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error) {
+            $error = (new errores())->error("Error al obtener registros", $r_rows);
+            print_r($error);
+            exit;
+        }
+        $rows = $r_rows->registros;
+
+        $n_correos_enviados = 0;
+        foreach ($rows as $row) {
+            $enviar_nomina = (new fc_row_layout($this->link))->envia_nomina(
+                fc_row_layout_id: $row['fc_row_layout_id']
+            );
+            if(errores::$error) {
+                (new errores())->error("Error al envia_nomina", $enviar_nomina);
+                errores::$error = false;
+            }
+            if ((int)count($enviar_nomina) > 0) {
+                $n_correos_enviados++;
+            }
+        }
+
+        return (int)$n_correos_enviados;
     }
 
 
