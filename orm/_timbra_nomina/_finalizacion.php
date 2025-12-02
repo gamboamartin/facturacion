@@ -53,6 +53,8 @@ class _finalizacion{
 
         $fc_empleado_upd['validado_sat'] = 'activo';
         $fc_empleado_upd['nombre_completo'] = $fc_row_layout->fc_row_layout_nombre_completo;
+        $fc_empleado_upd['codigo'] = trim("{$fc_row_layout->fc_row_layout_rfc}{$fc_row_layout->fc_row_layout_curp}");
+        $fc_empleado_upd['descripcion'] = trim("{$fc_empleado_upd['codigo']}{$fc_empleado_upd['nombre_completo']}");
         $fc_empleado_upd['rfc'] = $fc_row_layout->fc_row_layout_rfc;
         $fc_empleado_upd['cp'] = $fc_row_layout->fc_row_layout_cp;
         $fc_empleado_upd['nss'] = $fc_row_layout->fc_row_layout_nss;
