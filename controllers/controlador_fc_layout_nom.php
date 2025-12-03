@@ -585,74 +585,19 @@ class controlador_fc_layout_nom extends system{
 
     public function envia_nomina_cliente(bool $header, bool $ws = false)
     {
-        $rs = $this->valida_envio(fc_layout_nom_id: $this->registro_id);
-        if(errores::$error) {
-            $error = (new errores())->error("Error al envia_nomina_cliente", $rs);
-            print_r($error);
-            exit;
-        }
-
-        $correos = (new fc_layout_nom($this->link))->obten_correos_contactos_cliente(
-            fc_layout_nom_id: $this->registro_id
+        $n_correos_enviados = $this->enviar_nomina_cliente_fc_layout_nom_id(
+            fc_layout_nom_id:  $this->registro_id
         );
         if(errores::$error) {
-            $error = (new errores())->error("Error al obtener correos", $correos);
-            print_r($error);
-            exit;
-        }
-
-        if (count($correos) === 0) {
-            if(errores::$error) {
-                $error = (new errores())->error("Error no se encontraron correos para el envió", $correos);
-                print_r($error);
-                exit;
-            }
-        }
-
-        $this->modelo->registro_id = $this->registro_id;
-        $data = $this->modelo->obten_data();
-        if(errores::$error) {
-            $error = (new errores())->error("Error en obten_data de fc_layout_nom", $data);
-            print_r($error);
-            exit;
-        }
-
-        $com_sucursal_nombre_contacto = $data['com_sucursal_nombre_contacto'];
-        $fc_layout_nom_fecha_pago = $data['fc_layout_nom_fecha_pago'];
-
-        $asunto = "Nomina $fc_layout_nom_fecha_pago $com_sucursal_nombre_contacto";
-
-
-        $zip = $this->obten_ruta_nombre_zip(fc_layout_nom_id: $this->registro_id);
-        if(errores::$error) {
-            $error = (new errores())->error("Error al obtener ruta y nombre del zip", $zip);
-            print_r($error);
-            exit;
-        }
-
-        $adjuntos[] = [
-            'doc_documento_ruta_absoluta' => $zip['ruta'],
-            'not_adjunto_name_out' => $zip['nombre_archivo'],
-        ];
-
-        foreach ($correos as $correo) {
-            $result = (new _email_nomina_cliente())->enviar_nomina_cliente(
-                asunto: $asunto,
-                correo: $correo,
-                adjuntos: $adjuntos,
-                link: $this->link
+            $error = (new errores())->error(
+                mensaje:  "Error al enviar_nomina_cliente_fc_layout_nom_id",
+                data: $n_correos_enviados
             );
-
-            if(errores::$error) {
-                $error = (new errores())->error("Error al enviar correo a $correo", $result);
-                print_r($error);
-                exit;
-            }
+            print_r($error);
+            exit;
         }
 
-        unlink($zip['ruta']);
-
-        $_SESSION['exito'][]['mensaje'] = "Se enviaron los correos de manera exitosa";
+        $_SESSION['exito'][]['mensaje'] = "Se enviaron {$n_correos_enviados} correos de manera exitosa al cliente";
         $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
         $link .= "&session_id={$_GET['session_id']}";
         header("Location: " . $link);
@@ -673,7 +618,7 @@ class controlador_fc_layout_nom extends system{
             exit;
         }
 
-        $_SESSION['exito'][]['mensaje'] = "Se enviaron {$n_correos_enviados} correos";
+        $_SESSION['exito'][]['mensaje'] = "Se envió el correo de manera exitosa a {$n_correos_enviados} empleados";
         $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
         $link .= "&session_id={$_GET['session_id']}";
         header("Location: " . $link);
@@ -682,10 +627,69 @@ class controlador_fc_layout_nom extends system{
 
     public function envia_nominas(bool $header, bool $ws = false)
     {
+        $fc_layout_nom_modelo = new fc_layout_nom($this->link);
+        $fc_layout_nom_modelo->registro_id = $this->registro_id;
+        $data = $fc_layout_nom_modelo->obten_data();
+        if(errores::$error) {
+            $error = (new errores())->error(
+                mensaje:  "Error al obtener datos del fc_layout_nom",
+                data: $data
+            );
+            print_r($error);
+            exit;
+        }
 
-        echo '<pre>';
-        print_r('Trabajando...');
-        echo '</pre>';exit;
+        $fc_layout_nom_envia_nomina_empleado = $data['fc_layout_nom_envia_nomina_empleado'];
+        $fc_layout_nom_envia_nomina_cliente = $data['fc_layout_nom_envia_nomina_cliente'];
+
+        if ($fc_layout_nom_envia_nomina_empleado === 'inactivo' && $fc_layout_nom_envia_nomina_cliente === 'inactivo') {
+            $msj = "El fc_layout_nom_id={$this->registro_id} no tiene el envió de correo activo para ningún tipo de contacto";
+            $_SESSION['exito'][]['mensaje'] = $msj;
+            $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
+            $link .= "&session_id={$_GET['session_id']}";
+            header("Location: " . $link);
+            exit;
+        }
+
+        $msj = '';
+
+        if ($fc_layout_nom_envia_nomina_empleado === 'activo') {
+            $n_correos_enviados = $this->enviar_nomina_empleados_fc_layout_nom_id(
+                fc_layout_nom_id:  $this->registro_id
+            );
+            if(errores::$error) {
+                $error = (new errores())->error(
+                    mensaje:  "Error al enviar_nomina_empleados_fc_layout_nom_id",
+                    data: $n_correos_enviados
+                );
+                print_r($error);
+                exit;
+            }
+            $msj .= "\nSe envió el correo de manera exitosa a {$n_correos_enviados} empleados";
+        }
+
+        if ($fc_layout_nom_envia_nomina_cliente === 'activo') {
+            $n_correos_enviados = $this->enviar_nomina_cliente_fc_layout_nom_id(
+                fc_layout_nom_id:  $this->registro_id
+            );
+            if(errores::$error) {
+                $error = (new errores())->error(
+                    mensaje:  "Error al enviar_nomina_cliente_fc_layout_nom_id",
+                    data: $n_correos_enviados
+                );
+                print_r($error);
+                exit;
+            }
+            $msj .= "\nSe enviaron {$n_correos_enviados} correos de manera exitosa al cliente";
+        }
+
+        $_SESSION['exito'][]['mensaje'] = $msj;
+        $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+
+
     }
 
     public function genera_dispersion(bool $header, bool $ws = false)
@@ -1811,6 +1815,61 @@ class controlador_fc_layout_nom extends system{
         }
 
         return (int)$n_correos_enviados;
+    }
+
+    private function enviar_nomina_cliente_fc_layout_nom_id(int $fc_layout_nom_id): array|int
+    {
+        $fc_layout_nom_modelo = new fc_layout_nom($this->link);
+        $rs = $this->valida_envio(fc_layout_nom_id: $fc_layout_nom_id);
+        if(errores::$error) {
+            return (new errores())->error("Error al envia_nomina_cliente", $rs);
+        }
+
+        $correos = $fc_layout_nom_modelo->obten_correos_contactos_cliente(
+            fc_layout_nom_id: $fc_layout_nom_id
+        );
+        if(errores::$error) {
+            return (new errores())->error("Error al obtener correos", $correos);
+        }
+
+        $fc_layout_nom_modelo->registro_id = $this->registro_id;
+        $data = $fc_layout_nom_modelo->obten_data();
+        if(errores::$error) {
+            return (new errores())->error("Error en obten_data de fc_layout_nom", $data);
+        }
+
+        $com_sucursal_nombre_contacto = $data['com_sucursal_nombre_contacto'];
+        $fc_layout_nom_fecha_pago = $data['fc_layout_nom_fecha_pago'];
+
+        $asunto = "Nomina $fc_layout_nom_fecha_pago $com_sucursal_nombre_contacto";
+
+
+        $zip = $this->obten_ruta_nombre_zip(fc_layout_nom_id: $this->registro_id);
+        if(errores::$error) {
+            return (new errores())->error("Error al obtener ruta y nombre del zip", $zip);
+        }
+
+        $adjuntos[] = [
+            'doc_documento_ruta_absoluta' => $zip['ruta'],
+            'not_adjunto_name_out' => $zip['nombre_archivo'],
+        ];
+
+        foreach ($correos as $correo) {
+            $result = (new _email_nomina_cliente())->enviar_nomina_cliente(
+                asunto: $asunto,
+                correo: $correo,
+                adjuntos: $adjuntos,
+                link: $this->link
+            );
+
+            if(errores::$error) {
+                return (new errores())->error("Error al enviar correo a $correo", $result);
+            }
+        }
+
+        unlink($zip['ruta']);
+        return count($correos);
+
     }
 
 
