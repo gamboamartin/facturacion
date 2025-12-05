@@ -17,6 +17,7 @@ use stdClass;
 
 class controlador_com_cliente extends \gamboamartin\comercial\controllers\controlador_com_cliente {
     public string $link_asigna_contacto_bd = '';
+    public string $link_modifica_porcentaje_comision_bd = '';
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass())
     {
@@ -84,5 +85,99 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         }
 
         return $contenido_table;
+    }
+
+    public function modifica_porcentaje_comision(bool $header, bool $ws = false): array|string
+    {
+
+        $this->accion_titulo = 'Modificar porcentaje comision';
+        $this->inputs = new stdClass();
+
+        $com_cliente_modelo = new com_cliente($this->link);
+        $com_cliente_modelo->registro_id = $this->registro_id;
+        $data_cliente = $com_cliente_modelo->obten_data();
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener $data_cliente',
+                data: $data_cliente, header: $header, ws: $ws
+            );
+        }
+
+        $com_cliente_porcentaje_comision = $data_cliente['com_cliente_porcentaje_comision'];
+
+        $porcentaje_comision = $this->html->input_text(
+            cols: 12,
+            disabled: false,
+            name: 'porcentaje_comision',
+            place_holder: 'Porcentaje Comision',
+            row_upd: new stdClass(),
+            value_vacio: false,
+            value: $com_cliente_porcentaje_comision,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener inputs', data: $porcentaje_comision, header: $header, ws: $ws);
+        }
+
+        $this->inputs->porcentaje_comision = $porcentaje_comision;
+
+        $link = "index.php?seccion=com_cliente&accion=modifica_porcentaje_comision_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
+        $this->link_modifica_porcentaje_comision_bd = $link;
+        return [];
+
+    }
+
+    public function modifica_porcentaje_comision_bd(bool $header, bool $ws = false): array|string
+    {
+
+        $porcentaje_comision = $_POST ['porcentaje_comision'];
+        $com_cliente_id = $_POST ['com_cliente_id'];
+
+        $rs = (new com_cliente($this->link))->modifica_bd(
+            registro: ['porcentaje_comision' => $porcentaje_comision],
+            id: $com_cliente_id,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al modificar el porcentaje comision',
+                data: $rs, header: $header, ws: $ws
+            );
+        }
+
+        $_SESSION['exito'][]['mensaje'] = "Se modifico el porcentaje de comision del com_cliente con ID {$com_cliente_id}";
+        $link = "index.php?seccion=com_cliente&accion=lista&adm_menu_id=41";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+
+    }
+
+    protected function init_datatable(): stdClass
+    {
+        // Definición de las columnas con sus respectivos títulos
+        $columns["com_cliente_id"]["titulo"] = "Id";
+        $columns["com_cliente_codigo"]["titulo"] = "Código";
+        $columns["com_cliente_razon_social"]["titulo"] = "Razón Social";
+        $columns["com_cliente_rfc"]["titulo"] = "RFC";
+        $columns["cat_sat_regimen_fiscal_descripcion"]["titulo"] = "Régimen Fiscal";
+        $columns["com_cliente_n_sucursales"]["titulo"] = "Sucursales";
+        $columns["com_cliente_porcentaje_comision"]["titulo"] = "% Comision";
+
+        // Filtros aplicables en la búsqueda del DataTable
+        $filtro = array(
+            "com_cliente.id",
+            "com_cliente.codigo",
+            "com_cliente.razon_social",
+            "com_cliente.rfc",
+            "cat_sat_regimen_fiscal.descripcion"
+        );
+
+        // Creación del objeto de configuración del DataTable
+        $datatables = new stdClass();
+        $datatables->columns = $columns; // Asignación de las columnas
+        $datatables->filtro = $filtro; // Asignación de los filtros
+        $datatables->menu_active = true; // Activación del menú
+
+        return $datatables;
     }
 }
