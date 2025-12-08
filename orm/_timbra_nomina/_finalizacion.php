@@ -55,6 +55,7 @@ class _finalizacion{
         $fc_empleado_upd['nombre_completo'] = $fc_row_layout->fc_row_layout_nombre_completo;
         $fc_empleado_upd['codigo'] = trim("{$fc_row_layout->fc_row_layout_rfc}{$fc_row_layout->fc_row_layout_curp}");
         $fc_empleado_upd['descripcion'] = trim("{$fc_empleado_upd['codigo']}{$fc_empleado_upd['nombre_completo']}");
+        $fc_empleado_upd['codigo_bis'] = $fc_empleado_upd['descripcion'];
         $fc_empleado_upd['rfc'] = $fc_row_layout->fc_row_layout_rfc;
         $fc_empleado_upd['cp'] = $fc_row_layout->fc_row_layout_cp;
         $fc_empleado_upd['nss'] = $fc_row_layout->fc_row_layout_nss;
@@ -63,12 +64,44 @@ class _finalizacion{
         $fc_empleado_upd['cuenta'] = $fc_row_layout->fc_row_layout_cuenta;
         $fc_empleado_upd['tarjeta'] = $fc_row_layout->fc_row_layout_tarjeta;
 
-        $rs_upd = $fc_empleado_modelo->modifica_bd($fc_empleado_upd, $fc_row_layout->fc_row_layout_fc_empleado_id);
+        $filtro = [
+            'fc_empleado.codigo' => $fc_empleado_upd['codigo'],
+            'fc_empleado.descripcion' => $fc_empleado_upd['descripcion'],
+            'fc_empleado.rfc' => $fc_empleado_upd['rfc'],
+            'fc_empleado.cp' => $fc_empleado_upd['cp'],
+            'fc_empleado.nss' => $fc_empleado_upd['nss'],
+            'fc_empleado.curp' => $fc_empleado_upd['curp'],
+        ];
+
+        $rs = $fc_empleado_modelo->filtro_and(columnas: [],filtro: $filtro);
         if(errores::$error) {
-            return (new errores())->error("Error al actualizar empleado", $rs_upd);
+            return (new errores())->error("Error al buscar empleado", $rs);
         }
 
-        return $rs;
+        $nuevo_empleado_id = $rs->registros[0]['fc_empleado_id'];
+        $n_registros = $rs->n_registros;
+
+        if ($n_registros === 0) {
+            $rs_upd = $fc_empleado_modelo->modifica_bd(
+                registro: $fc_empleado_upd,
+                id: $fc_row_layout->fc_row_layout_fc_empleado_id
+            );
+            if(errores::$error) {
+                return (new errores())->error("Error al actualizar empleado", $rs_upd);
+            }
+        }
+
+        if ($n_registros > 0) {
+            $rs_upd = (new fc_row_layout($link))->modifica_bd(
+                registro: ['fc_empleado_id' => $nuevo_empleado_id],
+                id: $fc_row_layout->fc_row_layout_id
+            );
+            if(errores::$error) {
+                return (new errores())->error("Error al actualizar fc_row_layout", $rs_upd);
+            }
+        }
+
+        return [];
 
     }
 
