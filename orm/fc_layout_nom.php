@@ -57,6 +57,16 @@ class fc_layout_nom extends modelo{
             return $this->error->error(mensaje: 'Error al insertar doc', data: $doc_documento_alta);
         }
 
+        $porcentaje_comision_cliente = $this->obtener_porcentaje_comision_by_com_sucursal_id(
+            com_sucursal_id: $_POST['com_sucursal_id']
+        );
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al obtener el porcentaje_comision_cliente',
+                data: $porcentaje_comision_cliente
+            );
+        }
+
         $doc_documento_id = $doc_documento_alta->registro_id;
 
         $this->registro['codigo'] = 'LDN.'.date('YmdHis').'.'.mt_rand(10,99).$rand_code;
@@ -65,8 +75,10 @@ class fc_layout_nom extends modelo{
         $this->registro['descripcion'] = $this->registro['descripcion'].' '.$doc_documento_ins['name_out'];
         $this->registro['doc_documento_id'] = $doc_documento_id;
         $this->registro['fecha_emision'] = $_POST['fecha_pago'].'T'.date('H:i:s');
+        $this->registro['porcentaje_comision_cliente'] = $porcentaje_comision_cliente;
 
         $_POST['fecha_emision'] = $_POST['fecha_pago'].'T'.date('H:i:s');
+        $_POST['porcentaje_comision_cliente'] = $porcentaje_comision_cliente;
 
         $r_alta = parent::alta_bd();
         if(errores::$error){
@@ -247,6 +259,27 @@ class fc_layout_nom extends modelo{
 
         return $correos;
 
+    }
+
+    private function obtener_porcentaje_comision_by_com_sucursal_id(int $com_sucursal_id)
+    {
+        $com_sucursal_modelo = new com_sucursal($this->link);
+        $com_sucursal_modelo->registro_id = $com_sucursal_id;
+        $data_com_sucursal = $com_sucursal_modelo->obten_data(['com_cliente_id']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener registro com_sucursal',data: $data_com_sucursal);
+        }
+
+        $com_cliente_id = $data_com_sucursal['com_cliente_id'];
+
+        $com_cliente_modelo = new com_cliente($this->link);
+        $com_cliente_modelo->registro_id = $com_cliente_id;
+        $data_com_cliente = $com_cliente_modelo->obten_data(['com_cliente_porcentaje_comision']);
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al obtener registro com_cliente',data: $data_com_cliente);
+        }
+
+        return (float)$data_com_cliente['com_cliente_porcentaje_comision'];
     }
 
 }
