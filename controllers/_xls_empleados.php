@@ -159,6 +159,7 @@ class _xls_empleados{
                 $row_low_new['fecha_pago'] = $fc_layout_nom->fc_layout_nom_fecha_pago;
                 $emision = date('H:i:s');
                 $row_low_new['fecha_emision'] = "{$fc_layout_nom->fc_layout_nom_fecha_pago} $emision";
+                $row_low_new['porcentaje_comision_cliente'] = $fc_layout_nom->fc_layout_nom_porcentaje_comision_cliente;
 
                 $alta_row = (new fc_row_layout($link))->alta_registro($row_low_new);
                 if (errores::$error) {
