@@ -217,4 +217,51 @@ class fc_row_layout extends modelo{
         return ['correo_enviado'];
     }
 
+    public function recalcula_cliente_comision(int $fc_row_layout_id): array
+    {
+        $this->registro_id = $fc_row_layout_id;
+        $rs = $this->obten_data([
+            'fc_layout_nom_id',
+            'fc_row_layout_porcentaje_comision_cliente',
+            'fc_row_layout_neto_depositar',
+        ]);
+        if(errores::$error){
+            return (new errores())->error('Error al obten_data de fc_row_layout ', $rs);
+        }
+
+        $fc_layout_nom_id = $rs['fc_layout_nom_id'];
+
+        $neto_depositar = $rs['fc_row_layout_neto_depositar'];
+        $porcentaje_comision = $rs['fc_row_layout_porcentaje_comision_cliente'];
+        $comision  = $neto_depositar * ($porcentaje_comision / 100);
+
+        $rs = $this->modifica_bd(
+            registro: ['comision_cliente' => $comision],
+            id: $fc_row_layout_id
+        );
+        if(errores::$error){
+            return (new errores())->error('Error al modificar la comision de fc_row_layout ', $rs);
+        }
+
+        $filtro = ['fc_row_layout.fc_layout_nom_id' => $fc_layout_nom_id];
+        $campos['total_comision_cliente'] = 'fc_row_layout.comision_cliente';
+        $result = $this->suma(campos: $campos, filtro: $filtro);
+        if(errores::$error){
+            return (new errores())->error('Error al obtener total_comision_cliente', $rs);
+        }
+
+        $total_comision_cliente = $result['total_comision_cliente'];
+
+        $rs = (new fc_layout_nom($this->link))->modifica_bd(
+            registro: ['comision_cliente' => $total_comision_cliente],
+            id: $fc_layout_nom_id
+        );
+        if(errores::$error){
+            return (new errores())->error('Error al modificar la comision de fc_layout_nom ', $rs);
+        }
+
+        return [];
+
+    }
+
 }
