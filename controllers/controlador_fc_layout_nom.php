@@ -156,6 +156,79 @@ class controlador_fc_layout_nom extends system{
         header("Location: " . $link);
         exit;
     }
+    public function actualiza_porcentaje_comision(bool $header, bool $ws = false)
+    {
+        $this->modelo->registro_id = $this->registro_id;
+        $data = $this->modelo->obten_data();
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener data fc_layout_nom',data: $data,
+                header: $header, ws: $ws);
+        }
+
+        $fc_layout_nom_com_sucursal_id = $data['fc_layout_nom_com_sucursal_id'];
+
+        $porcentaje_comision_cliente = $this->modelo->obtener_porcentaje_comision_by_com_sucursal_id(
+            com_sucursal_id: $fc_layout_nom_com_sucursal_id
+        );
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener el porcentaje_comision_cliente',
+                data: $porcentaje_comision_cliente,
+                header: $header,
+                ws: $ws
+            );
+        }
+
+        $r_modifica_bd = $this->modelo->modifica_bd(
+            registro: ['porcentaje_comision_cliente' => $porcentaje_comision_cliente],
+            id: $this->registro_id
+        );
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al modificar fc_layout_nom',
+                data: $r_modifica_bd,
+                header: $header,
+                ws: $ws
+            );
+        }
+
+        $filtro = [
+            'fc_row_layout.fc_layout_nom_id' => $this->registro_id,
+        ];
+
+        $fc_row_layout_modelo = new fc_row_layout($this->link);
+
+        $rs = $fc_row_layout_modelo->filtro_and(filtro: $filtro);
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener datos fc_row_layout',
+                data: $rs,
+                header: $header,
+                ws: $ws
+            );
+        }
+
+        foreach ($rs->registros as $registro) {
+            $fc_row_layout_id = $registro['fc_row_layout_id'];
+            $r_modifica_bd = $fc_row_layout_modelo->modifica_bd(
+                registro: ['porcentaje_comision_cliente' => $porcentaje_comision_cliente],
+                id: $fc_row_layout_id
+            );
+            if(errores::$error) {
+                return $this->retorno_error(mensaje: 'Error al modificar fc_row_layout',
+                    data: $r_modifica_bd,
+                    header: $header,
+                    ws: $ws
+                );
+            }
+
+        }
+
+        $_SESSION['exito'][]['mensaje'] = "fc_layout_nom_id={$this->registro_id} porcentaje comision cliente ";
+        $_SESSION['exito'][]['mensaje'] .= "actualizado correctamente al {$porcentaje_comision_cliente}%";
+        $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+
+    }
 
     public function cancelar_recibo(bool $header, bool $ws = false)
     {

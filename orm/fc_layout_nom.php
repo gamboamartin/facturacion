@@ -261,7 +261,7 @@ class fc_layout_nom extends modelo{
 
     }
 
-    private function obtener_porcentaje_comision_by_com_sucursal_id(int $com_sucursal_id)
+    public function obtener_porcentaje_comision_by_com_sucursal_id(int $com_sucursal_id)
     {
         $com_sucursal_modelo = new com_sucursal($this->link);
         $com_sucursal_modelo->registro_id = $com_sucursal_id;
