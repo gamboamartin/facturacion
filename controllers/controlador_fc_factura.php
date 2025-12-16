@@ -123,6 +123,28 @@ class controlador_fc_factura extends _base_system_fc
         $this->link_exportar_xls = $link_exportar_xls;
     }
 
+    public function actualiza_porcentaje_comision(bool $header, bool $ws = false)
+    {
+        $fc_factura_id = $this->registro_id;
+        $nuevo_porcentaje_comision = $this->modelo->actualiza_porcentaje_comision(fc_factura_id: $fc_factura_id);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error en actualiza_porcentaje_comision',
+                data: $nuevo_porcentaje_comision,
+                header: $header,
+                ws: $ws
+            );
+        }
+
+        $_SESSION['exito'][]['mensaje'] = "fc_factura_id {$fc_factura_id}. porcentaje comision cliente ";
+        $_SESSION['exito'][]['mensaje'] .= "actualizado correctamente al {$nuevo_porcentaje_comision}%";
+        $link = "index.php?seccion=fc_factura&accion=lista&adm_menu_id=44";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+
+    }
+
     public function adjunta(bool $header, bool $ws = false): array|stdClass
     {
         $this->modelo_entidad = new fc_factura(link: $this->link);

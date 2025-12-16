@@ -105,5 +105,44 @@ class fc_factura extends _transacciones_fc
         return $respuesta;
     }
 
+    public function actualiza_porcentaje_comision(int $fc_factura_id)
+    {
+        $fc_factura_data = $this->obtener_datos_factura(fc_factura_id: $fc_factura_id);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obtener fc_factura_data',
+                data:  $fc_factura_data
+            );
+        }
+
+        $nuevo_porcentaje_comision = $fc_factura_data['com_cliente_porcentaje_comision'];
+
+        $consulta = "UPDATE fc_factura SET ";
+        $consulta .= " fc_factura.porcentaje_comision_cliente = {$nuevo_porcentaje_comision}";
+        $consulta .= " WHERE fc_factura.id = {$fc_factura_id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error('Error al modificar la comision de fc_layout_nom ', $rs);
+        }
+
+        return $nuevo_porcentaje_comision;
+
+    }
+
+    private function obtener_datos_factura(int $fc_factura_id)
+    {
+
+        $this->registro_id = $fc_factura_id;
+        $rs = $this->obten_data();
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obten_data de fc_factura',
+                data:  $rs
+            );
+        }
+
+        return $rs;
+    }
+
 
 }
