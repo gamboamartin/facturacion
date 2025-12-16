@@ -208,10 +208,6 @@ class fc_factura extends _transacciones_fc
             return (new errores())->error('Error al actualiza_recalcula_comison_cliente', $rs);
         }
 
-        echo '<pre>';
-        print_r($rs);
-        echo '</pre>';exit;
-
         return [];
     }
 
