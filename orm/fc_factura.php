@@ -44,6 +44,17 @@ class fc_factura extends _transacciones_fc
             return $this->error->error(mensaje: 'Error al regenera',data:  $regenera);
         }
 
+        $fc_factura_id = $r_alta_bd->registro_id;
+
+        $rs = $this->actualiza_recalcula_comison_cliente(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al actualizar y calcular comision en la factura',
+                data:  $rs
+            );
+        }
+
+
         return $r_alta_bd;
     }
 
@@ -169,6 +180,39 @@ class fc_factura extends _transacciones_fc
         }
 
         return $rs;
+    }
+
+    private function actualiza_recalcula_comison_cliente(int $fc_factura_id)
+    {
+        $fc_factura_data = $this->obtener_datos_factura(fc_factura_id: $fc_factura_id);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obtener fc_factura_data',
+                data:  $fc_factura_data
+            );
+        }
+
+        $sub_total_factura = $fc_factura_data['fc_factura_sub_total'];
+        $nuevo_porcentaje_comision = $fc_factura_data['com_cliente_porcentaje_comision'];
+
+
+        $valor_base = $sub_total_factura / (1 + ($nuevo_porcentaje_comision / 100));
+        $valor_comision = round($sub_total_factura - $valor_base, 2);
+
+        $consulta = "UPDATE fc_factura SET ";
+        $consulta .= " fc_factura.comision_cliente = {$valor_comision} ,";
+        $consulta .= " fc_factura.porcentaje_comision_cliente = {$nuevo_porcentaje_comision}";
+        $consulta .= " WHERE fc_factura.id = {$fc_factura_id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error('Error al actualiza_recalcula_comison_cliente', $rs);
+        }
+
+        echo '<pre>';
+        print_r($rs);
+        echo '</pre>';exit;
+
+        return [];
     }
 
 
