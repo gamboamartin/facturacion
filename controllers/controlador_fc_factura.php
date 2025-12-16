@@ -221,6 +221,27 @@ class controlador_fc_factura extends _base_system_fc
 
     }
 
+    public function calcula_comision(bool $header, bool $ws = false)
+    {
+        $fc_factura_id = $this->registro_id;
+        $nuevo_porcentaje_comision = $this->modelo->recalcula_porcentaje_comision_cliente(fc_factura_id: $fc_factura_id);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error en recalcula_porcentaje_comision_cliente',
+                data: $nuevo_porcentaje_comision,
+                header: $header,
+                ws: $ws
+            );
+        }
+
+        $_SESSION['exito'][]['mensaje'] = "Recalculo de comisión del cliente realizado correctamente.";
+        $link = "index.php?seccion=fc_factura&accion=lista&adm_menu_id=44";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+
+    }
+
     public function cancela(bool $header, bool $ws = false)
     {
         $this->modelo_entidad = new fc_factura(link: $this->link);
