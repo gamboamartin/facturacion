@@ -211,5 +211,29 @@ class fc_factura extends _transacciones_fc
         return [];
     }
 
+    public function asigna_bd(int $id): array
+    {
+
+        $consulta = "UPDATE {$this->tabla} SET {$this->tabla}.asignado_fc_layout = 'activo' WHERE {$this->tabla}.id = {$id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error("Error al asignar {$this->tabla}", $rs);
+        }
+
+        return [];
+    }
+
+    public function desasigna_bd(int $id): array
+    {
+
+        $consulta = "UPDATE {$this->tabla} SET {$this->tabla}.asignado_fc_layout = 'inactivo' WHERE {$this->tabla}.id = {$id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error("Error al desasignar {$this->tabla}", $rs);
+        }
+
+        return [];
+    }
+
 
 }

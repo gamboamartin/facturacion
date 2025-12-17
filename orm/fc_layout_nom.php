@@ -11,6 +11,7 @@ use stdClass;
 
 class fc_layout_nom extends modelo{
     public function __construct(PDO $link){
+        $this->campo_asignacion = 'asignado_fc_factura'; //campo necesario para la accion asigna modelo
         $tabla = 'fc_layout_nom';
         $columnas = [
             $tabla=>false, 'doc_documento'=>$tabla, 'com_sucursal'=>$tabla,
@@ -280,6 +281,30 @@ class fc_layout_nom extends modelo{
         }
 
         return (float)$data_com_cliente['com_cliente_porcentaje_comision'];
+    }
+
+    public function asigna_bd(int $id): array
+    {
+
+        $consulta = "UPDATE {$this->tabla} SET {$this->tabla}.asignado_fc_factura = 'activo' WHERE {$this->tabla}.id = {$id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error("Error al asignar {$this->tabla}", $rs);
+        }
+
+        return [];
+    }
+
+    public function desasigna_bd(int $id): array
+    {
+
+        $consulta = "UPDATE {$this->tabla} SET {$this->tabla}.asignado_fc_factura = 'inactivo' WHERE {$this->tabla}.id = {$id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error("Error al desasignar {$this->tabla}", $rs);
+        }
+
+        return [];
     }
 
 }
