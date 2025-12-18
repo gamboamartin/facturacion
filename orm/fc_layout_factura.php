@@ -69,16 +69,82 @@ class fc_layout_factura extends modelo{
             'fc_layout_factura.fc_factura_id' => $fc_factura_id,
         ];
 
-        $rs = $this->filtro_and(filtro: $filtro);
+        $rs1 = $this->filtro_and(filtro: $filtro);
         if(errores::$error){
             return $this->error->error(
-                mensaje: 'Error al buscar registro fc_layout_factura',data: $rs
+                mensaje: 'Error al buscar registro fc_layout_factura',data: $rs1
             );
         }
 
-        echo '<pre>';
-        print_r($rs);
-        echo '</pre>';exit;
+        $rs2 = $this->elimina_registros(registros: $rs1->registros);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error en elimina_registros',data: $rs2
+            );
+        }
+
+        return [];
+
+    }
+
+    public function elimina_relacion_con_layout_nom_id(int $fc_layout_nom_id)
+    {
+        $filtro = [
+            'fc_layout_factura.fc_layout_nom_id' => $fc_layout_nom_id,
+        ];
+
+        $rs1 = $this->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al buscar registro fc_layout_factura',data: $rs1
+            );
+        }
+
+        $rs2 = $this->elimina_registros(registros: $rs1->registros);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error en elimina_registros',data: $rs2
+            );
+        }
+
+        return [];
+
+    }
+
+    private function elimina_registros(array $registros)
+    {
+        $fc_factura_modelo = new fc_factura($this->link);
+        $fc_layout_nom_modelo = new fc_layout_nom($this->link);
+
+        foreach ($registros as $registro){
+            $fc_layout_factura_id = $registro['fc_layout_factura_id'];
+            $fc_layout_nom_id = $registro['fc_layout_factura_fc_layout_nom_id'];
+            $fc_factura_id = $registro['fc_layout_factura_fc_factura_id'];
+
+            $rs1 = $fc_factura_modelo->desasigna_bd(id: $fc_factura_id);
+            if(errores::$error){
+                return $this->error->error(
+                    mensaje: 'Error en desasigna_bd fc_factura',data: $rs1
+                );
+            }
+
+            $rs2 = $fc_layout_nom_modelo->desasigna_bd(id: $fc_layout_nom_id);
+            if(errores::$error){
+                return $this->error->error(
+                    mensaje: 'Error en desasigna_bd fc_layout_nom',data: $rs2
+                );
+            }
+
+            $rs3 = $this->elimina_bd(id: $fc_layout_factura_id);
+            if(errores::$error){
+                return $this->error->error(
+                    mensaje: 'Error en elimina_bd fc_layout_factura',data: $rs3
+                );
+            }
+
+        }
+
+        return [];
     }
 
 }
