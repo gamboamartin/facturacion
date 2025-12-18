@@ -2,13 +2,14 @@
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
 use gamboamartin\errores\errores;
+use gamboamartin\proceso\models\pr_entidad;
 use PDO;
 
 
 class fc_layout_factura extends modelo{
     public function __construct(PDO $link){
         $tabla = 'fc_layout_factura';
-        $columnas = [$tabla=>false];
+        $columnas = [$tabla=>false, 'fc_factura'=>$tabla, 'fc_layout_nom'=>$tabla];
         $campos_obligatorios = [];
         $campos_view = [];
         $no_duplicados = [];
@@ -21,9 +22,35 @@ class fc_layout_factura extends modelo{
         $this->etiqueta = 'Layouts y Facturas';
     }
 
-    public function relaciona_factura_con_layout(int $fc_factura_id, int $fc_layout_nom_id){
-
+    public function relaciona_layout_con_factura(int $fc_layout_nom_id, int $fc_factura_id)
+    {
         $this->link->beginTransaction();
+
+        $rs1 = $this->elimina_relacion_con_layout_nom_id(fc_layout_nom_id: $fc_layout_nom_id);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->error->error(
+                mensaje: 'Error en elimina_relacion_con_layout_nom_id',data: $rs1
+            );
+        }
+
+        $rs2 = $this->relaciona_factura_y_layout(
+            fc_factura_id:  $fc_factura_id,
+            fc_layout_nom_id: $fc_layout_nom_id
+        );
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->error->error(
+                mensaje: 'Error en relaciona_factura_con_layout',data: $rs2
+            );
+        }
+
+        $this->link->commit();
+
+        return [];
+    }
+
+    private function relaciona_factura_y_layout(int $fc_factura_id, int $fc_layout_nom_id){
 
         $user_id = $_SESSION['usuario_id'];
 
@@ -32,7 +59,6 @@ class fc_layout_factura extends modelo{
         $consulta .= " VALUES ({$fc_layout_nom_id}, {$fc_factura_id}, 'activo', {$user_id}, {$user_id})";
         $rs = $this->ejecuta_sql($consulta);
         if(errores::$error){
-            $this->link->rollback();
             return $this->error->error(
                 mensaje: 'Error al dar de alta relacion',data: $rs
             );
@@ -43,7 +69,6 @@ class fc_layout_factura extends modelo{
 
         $rs_asigna_factura = $fc_factura_modelo->asigna_bd(id: $fc_factura_id);
         if(errores::$error){
-            $this->link->rollback();
             return $this->error->error(
                 mensaje: 'Error al marcar fc_factura como asignada', data: $rs_asigna_factura
             );
@@ -51,13 +76,10 @@ class fc_layout_factura extends modelo{
 
         $rs_asigna_layout = $fc_layout_nom_modelo->asigna_bd(id: $fc_layout_nom_id);
         if(errores::$error){
-            $this->link->rollback();
             return $this->error->error(
                 mensaje: 'Error al marcar fc_layout_nom como asignada', data: $rs_asigna_layout
             );
         }
-
-        $this->link->commit();
 
         return [];
 

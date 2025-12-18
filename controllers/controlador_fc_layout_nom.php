@@ -46,6 +46,7 @@ class controlador_fc_layout_nom extends system{
     public string $link_modifica_sucursal_bd = '';
     public string $link_asigna_factura_bd = '';
     public string $descripcion_nom_layout = '';
+    public string $folio_factura_asignada = '';
     public bool $disabled = false;
     public string $fecha_emision = '';
     public string $btn_modifica_fecha_emision = '';
@@ -242,6 +243,22 @@ class controlador_fc_layout_nom extends system{
                 header: $header, ws: $ws);
         }
 
+        $filtro = [
+            'fc_layout_factura.fc_layout_nom_id' => $fc_layout_nom_id,
+        ];
+
+        $rs1 = (new fc_layout_factura($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->retorno_error(
+                mensaje: 'Error al buscar registro fc_layout_factura',
+                data: $data,
+                header: $header, ws: $ws);
+        }
+
+        if ($rs1->n_registros > 0) {
+            $this->folio_factura_asignada = $rs1->registros[0]['fc_factura_folio'];
+        }
+
         $com_cliente_id = $data['com_cliente_id'];
 
         $this->descripcion_nom_layout = $data['fc_layout_nom_descripcion'];
@@ -287,9 +304,9 @@ class controlador_fc_layout_nom extends system{
         $fc_factura_id = $_POST['fc_factura_id'];
         $fc_layout_nom_id = $_POST['fc_layout_nom_id'];
 
-        $rs = (new fc_layout_factura($this->link))->relaciona_factura_con_layout(
+        $rs = (new fc_layout_factura($this->link))->relaciona_layout_con_factura(
+            fc_layout_nom_id: $fc_layout_nom_id,
             fc_factura_id: $fc_factura_id,
-            fc_layout_nom_id: $fc_layout_nom_id
         );
         if(errores::$error) {
             return $this->retorno_error(
