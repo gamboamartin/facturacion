@@ -10,6 +10,8 @@ use gamboamartin\facturacion\models\_cancela_nomina\_cancela_nomina;
 use gamboamartin\facturacion\models\_email_nomina_cliente;
 use gamboamartin\facturacion\models\_timbra_nomina;
 use gamboamartin\facturacion\models\_timbra_nomina\_finalizacion;
+use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\models\fc_layout_factura;
 use gamboamartin\facturacion\models\fc_layout_nom;
 use gamboamartin\facturacion\models\fc_row_layout;
 use gamboamartin\facturacion\models\fc_row_nomina;
@@ -42,6 +44,7 @@ class controlador_fc_layout_nom extends system{
 
     public string $link_modifica_datos_bd = '';
     public string $link_modifica_sucursal_bd = '';
+    public string $link_asigna_factura_bd = '';
     public string $descripcion_nom_layout = '';
     public bool $disabled = false;
     public string $fecha_emision = '';
@@ -228,6 +231,79 @@ class controlador_fc_layout_nom extends system{
         header("Location: " . $link);
         exit;
 
+    }
+    public function asigna_factura(bool $header, bool $ws = false)
+    {
+        $fc_layout_nom_id = $this->registro_id;
+        $this->modelo->registro_id = $fc_layout_nom_id;
+        $data = $this->modelo->obten_data();
+        if(errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener data fc_layout_nom',data: $data,
+                header: $header, ws: $ws);
+        }
+
+        $com_cliente_id = $data['com_cliente_id'];
+
+        $this->descripcion_nom_layout = $data['fc_layout_nom_descripcion'];
+
+        $link = "index.php?seccion=fc_layout_nom&accion=asigna_factura_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
+        $this->link_asigna_factura_bd = $link;
+
+        $this->inputs = new stdClass();
+
+        $modelo_com_sucursal = new fc_factura(link: $this->link);
+        $filtro_input_select_factura = [
+            'com_cliente.id' => $com_cliente_id,
+            'fc_factura.etapa' => 'TIMBRADO',
+            'fc_factura.asignado_fc_layout' => 'inactivo',
+        ];
+        $columnas_input_select_factura = [
+            'fc_factura_folio','fc_factura_total','com_cliente_razon_social',
+            'fc_factura_fecha'
+        ];
+
+        $input_select_factura = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
+            modelo: $modelo_com_sucursal, columns_ds: $columnas_input_select_factura,
+            disabled: false, filtro: $filtro_input_select_factura, label: 'Factura',name: 'fc_factura_id',
+            registros: [], required: true
+        );
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar input_select_factura',
+                data: $input_select_factura,
+                header: $header, ws: $ws
+            );
+        }
+
+        $this->inputs->input_select_factura = $input_select_factura;
+
+        return [];
+
+    }
+
+    public function asigna_factura_bd(bool $header, bool $ws = false)
+    {
+
+        $fc_factura_id = $_POST['fc_factura_id'];
+        $fc_layout_nom_id = $_POST['fc_layout_nom_id'];
+
+        $rs = (new fc_layout_factura($this->link))->relaciona_factura_con_layout(
+            fc_factura_id: $fc_factura_id,
+            fc_layout_nom_id: $fc_layout_nom_id
+        );
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al relaciona_factura_con_layout',
+                data: $rs,
+                header: $header, ws: $ws
+            );
+        }
+
+        $_SESSION['exito'][]['mensaje'] = "fc_factura_id={$fc_factura_id} asignada correctamente al fc_layout_nom_id={$this->registro_id}";
+        $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
     }
 
     public function cancelar_recibo(bool $header, bool $ws = false)
@@ -1190,6 +1266,13 @@ class controlador_fc_layout_nom extends system{
             disabled: false, filtro: $filtro_input_select_sucursal, label: 'Sucursal',name: 'com_sucursal_id',
             registros: [], required: true
         );
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar input_select_sucursal',
+                data: $input_select,
+                header: $header, ws: $ws
+            );
+        }
 
         $this->inputs->sucursal = $input_select;
     }
