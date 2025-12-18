@@ -185,7 +185,8 @@ class fc_layout_nom extends modelo{
             return $this->error->error(mensaje: 'Error al desactiva_bd de fc_layout_nom',data: $r_desactiva);
         }
 
-        $rs = (new fc_layout_factura($this->link))->elimina_relacion_con_layout_nom_id(fc_layout_nom_id: $id);
+        $rs = (new fc_layout_factura($this->link))
+            ->elimina_relacion_con_layout_nom_id(fc_layout_nom_id: $this->registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al elimina_relacion_con_layout_nom_id',data: $rs);
         }
