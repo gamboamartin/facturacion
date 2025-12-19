@@ -258,7 +258,7 @@ class fc_factura extends _transacciones_fc
 
         $columnas = [
             'fc_factura_folio','fc_factura_total','com_cliente_razon_social',
-            'fc_factura_fecha'
+            'fc_factura_fecha','fc_factura_id'
         ];
 
         $rs2 = $this->filtro_and(columnas: $columnas, filtro: $filtro);
