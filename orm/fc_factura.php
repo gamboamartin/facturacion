@@ -2,6 +2,7 @@
 
 namespace gamboamartin\facturacion\models;
 
+use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\errores\errores;
 use PDO;
 use stdClass;
@@ -233,6 +234,43 @@ class fc_factura extends _transacciones_fc
         }
 
         return [];
+    }
+
+    public function obtener_facturas_con_sucursal(int $com_sucursal_id): array
+    {
+        $com_sucursal_modelo = new com_sucursal($this->link);
+        $com_sucursal_modelo->registro_id = $com_sucursal_id;
+        $rs1 = $com_sucursal_modelo->obten_data(columnas: ['com_cliente_id']);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obtener data de sucursal',
+                data:  $rs1
+            );
+        }
+
+        $com_cliente_id = $rs1['com_cliente_id'];
+
+        $filtro = [
+            'com_cliente.id' => $com_cliente_id,
+            'fc_factura.etapa' => 'TIMBRADO',
+            'fc_factura.asignado_fc_layout' => 'inactivo',
+        ];
+
+        $columnas = [
+            'fc_factura_folio','fc_factura_total','com_cliente_razon_social',
+            'fc_factura_fecha'
+        ];
+
+        $rs2 = $this->filtro_and(columnas: $columnas, filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obtener facturas',
+                data:  $rs2
+            );
+        }
+
+        return $rs2->registros;
+
     }
 
 

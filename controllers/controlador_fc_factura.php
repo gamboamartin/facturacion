@@ -663,5 +663,24 @@ class controlador_fc_factura extends _base_system_fc
         return $respuesta;
     }
 
+    public function filtro_and(bool $header, bool $ws): array
+    {
+        if (!isset($_POST['com_sucursal_id'])) {
+            return $this->retorno_error('Error $_POST[com_sucursal_id] debe existir', $_POST, $header, $ws);
+        }
 
+        $rs = $this->modelo->obtener_facturas_con_sucursal(com_sucursal_id: $_POST['com_sucursal_id']);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener_facturas_con_sucursal',
+                data: $rs, header: $header, ws: $ws
+            );
+        }
+
+        ob_clean();
+        header('Content-Type: application/json');
+        $registros = $rs;
+        echo json_encode($registros);
+        exit;
+    }
 }
