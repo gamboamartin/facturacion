@@ -178,11 +178,33 @@ class controlador_fc_layout_nom extends system{
     public function alta_bd(bool $header, bool $ws = false): array|stdClass
     {
 
+        if (isset($_POST['fc_factura_id'])){
+            if ((int)$_POST['fc_factura_id'] !== -1 ) {
+                $fc_factura_id = $_POST['fc_factura_id'];
+            }
+            unset($_POST['fc_factura_id']);
+        }
+
         $r_alta = parent::alta_bd(header: false, ws: $ws);
         if (errores::$error) {
             return $this->retorno_error(
                 mensaje: 'Error al guardar', data: $r_alta, header: $header, ws: $ws);
         }
+
+        if (isset($fc_factura_id)) {
+            $fc_layout_nom_id = $r_alta->registro_id;
+            $rs = (new fc_layout_factura($this->link))->relaciona_layout_con_factura(
+                fc_layout_nom_id: $fc_layout_nom_id,
+                fc_factura_id: $fc_factura_id
+            );
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error en relaciona_layout_con_factura',
+                    data: $rs, header: $header, ws: $ws
+                );
+            }
+        }
+
         $link = "index.php?seccion=fc_layout_nom&accion=lista";
         if (isset($_GET['session_id'])) {
             $link .= "&session_id={$_GET['session_id']}";
