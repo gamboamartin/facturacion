@@ -145,8 +145,32 @@ class controlador_fc_layout_nom extends system{
             disabled: false, filtro: $filtro_input_select_sucursal, label: 'Sucursal',name: 'com_sucursal_id',
             registros: [], required: true
         );
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar input_select_sucursal',
+                data: $input_select,
+                header: $header, ws: $ws
+            );
+        }
 
         $this->inputs->sucursal = $input_select;
+
+        $modelo_fc_factura = new fc_factura(link: $this->link);
+
+        $input_select_factura = $this->html->select_catalogo(cols: 12, con_registros: false, id_selected: -1,
+            modelo: $modelo_fc_factura, columns_ds: [],
+            disabled: false, filtro: [], label: 'Factura',name: 'fc_factura_id',
+            registros: [], required: true
+        );
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar input_select_factura',
+                data: $input_select_factura,
+                header: $header, ws: $ws
+            );
+        }
+
+        $this->inputs->input_select_factura = $input_select_factura;
 
         return $alta;
     }
@@ -274,7 +298,7 @@ class controlador_fc_layout_nom extends system{
 
         $this->inputs = new stdClass();
 
-        $modelo_com_sucursal = new fc_factura(link: $this->link);
+        $modelo_fc_factura = new fc_factura(link: $this->link);
         $filtro_input_select_factura = [
             'com_cliente.id' => $com_cliente_id,
             'fc_factura.etapa' => 'TIMBRADO',
@@ -286,7 +310,7 @@ class controlador_fc_layout_nom extends system{
         ];
 
         $input_select_factura = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
-            modelo: $modelo_com_sucursal, columns_ds: $columnas_input_select_factura,
+            modelo: $modelo_fc_factura, columns_ds: $columnas_input_select_factura,
             disabled: false, filtro: $filtro_input_select_factura, label: 'Factura',name: 'fc_factura_id',
             registros: [], required: true
         );
