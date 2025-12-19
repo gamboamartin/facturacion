@@ -52,6 +52,7 @@ class controlador_fc_layout_nom extends system{
     public string $btn_modifica_fecha_emision = '';
 
     public int $tipo_dispersion;
+    public bool $aplica_relacion_layout_factura;
 
     public function __construct(PDO $link, html $html = new html(), stdClass $paths_conf = new stdClass()){
         $modelo = new fc_layout_nom(link: $link);
@@ -90,6 +91,11 @@ class controlador_fc_layout_nom extends system{
         $this->tipo_dispersion = 1;
         if (isset($this->conf_generales->tipo_dispersion)) {
             $this->tipo_dispersion = $this->conf_generales->tipo_dispersion;
+        }
+
+        $this->aplica_relacion_layout_factura = false;
+        if (isset($this->conf_generales->aplica_relacion_layout_factura)) {
+            $this->aplica_relacion_layout_factura = $this->conf_generales->aplica_relacion_layout_factura;
         }
 
     }
