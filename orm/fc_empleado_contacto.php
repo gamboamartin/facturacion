@@ -142,6 +142,14 @@ class fc_empleado_contacto extends modelo{
             return $this->error->error(mensaje: 'Error generar codigo', data: $registro_alta);
         }
 
+        if (mb_strlen($nombre_separado['apellido_paterno'], 'UTF-8') <= 3) {
+            $nombre_separado['apellido_paterno'] = "Sin Apellido";
+        }
+
+        if (mb_strlen($nombre_separado['apellido_materno'], 'UTF-8') <= 3) {
+            $nombre_separado['apellido_materno'] = "Sin Apellido";
+        }
+
         $registro_alta['nombre'] = $nombre_separado['nombres'];
         $registro_alta['ap'] = $nombre_separado['apellido_paterno'];
         $registro_alta['am'] = $nombre_separado['apellido_materno'];
