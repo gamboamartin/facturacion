@@ -11,7 +11,7 @@ use stdClass;
 
 class fc_layout_nom extends modelo{
     public function __construct(PDO $link){
-        $this->campo_asignacion = 'asignado_fc_factura'; //campo necesario para la accion asigna modelo
+
         $tabla = 'fc_layout_nom';
         $columnas = [
             $tabla=>false, 'doc_documento'=>$tabla, 'com_sucursal'=>$tabla,
