@@ -310,6 +310,9 @@ class fc_empleado_contacto extends modelo{
         // Limpiar dobles espacios y convertir a mayúsculas o minúsculas si se desea
         $nombreCompleto = trim(preg_replace('/\s+/', ' ', $nombreCompleto));
 
+        // 2. Convertir a minúsculas
+        $nombreCompleto = mb_strtolower($nombreCompleto, 'UTF-8');
+
         // Convertir a array de palabras
         $partes = explode(' ', $nombreCompleto);
         $total = count($partes);
