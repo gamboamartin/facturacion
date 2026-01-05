@@ -21,6 +21,8 @@ use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
 use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
+use gamboamartin\facturacion\models\fc_layout_factura;
+use gamboamartin\facturacion\models\fc_layout_nom;
 use gamboamartin\facturacion\models\fc_notificacion;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
@@ -29,6 +31,7 @@ use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\models\fc_uuid_fc;
 use gamboamartin\plugins\exportador;
 use gamboamartin\template\html;
+use NumberFormatter;
 use PDO;
 use stdClass;
 
@@ -40,10 +43,13 @@ class controlador_fc_factura extends _base_system_fc
 
     public string $rfc = '';
     public string $razon_social = '';
+    public string $descripcion_fc_factura = '';
+    public string $layout_asignado = '';
 
     public string $link_fc_factura_nueva_partida = '';
 
     public string $link_fc_email_alta_bd = '';
+    public string $link_asigna_layout_bd = '';
 
     public string $link_com_producto = '';
 
@@ -219,6 +225,101 @@ class controlador_fc_factura extends _base_system_fc
 
         return $r_alta_partida;
 
+    }
+
+    public function asigna_layout_nom(bool $header, bool $ws = false)
+    {
+        $fc_factura_id = $this->registro_id;
+        $fc_factura_modelo = new fc_factura(link: $this->link);
+        $fc_factura_modelo->registro_id = $fc_factura_id;
+        $fc_factura_data = $fc_factura_modelo->obten_data();
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener datos de la factura',
+                data: $fc_factura_data,
+                header: $header, ws: $ws
+            );
+        }
+
+        $monto = $fc_factura_data['fc_factura_total'];
+        $fmt = new NumberFormatter('es_MX', NumberFormatter::CURRENCY);
+        $monto_formateado = $fmt->formatCurrency($monto, 'MXN');
+
+        $this->descripcion_fc_factura = "{$fc_factura_data['fc_factura_folio']} {$fc_factura_data['com_cliente_descripcion_select']} $monto_formateado";
+
+        $filtro = [
+            'fc_layout_factura.fc_factura_id' => $fc_factura_id,
+        ];
+
+        $rs1 = (new fc_layout_factura($this->link))->filtro_and(filtro: $filtro);
+        if(errores::$error){
+            return $this->retorno_error(
+                mensaje: 'Error al buscar registro fc_layout_factura',
+                data: $rs1,
+                header: $header, ws: $ws);
+        }
+
+        if ($rs1->n_registros > 0) {
+            $d = $rs1->registros[0];
+            $this->layout_asignado = "Id:{$d['fc_layout_nom_id']} Descripcion:{$d['fc_layout_nom_descripcion']}";
+        }
+
+        $link = "index.php?seccion=fc_factura&accion=asigna_layout_nom_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
+        $this->link_asigna_layout_bd = $link;
+
+        $com_cliente_id = $fc_factura_data['com_cliente_id'];
+
+        $this->inputs = new stdClass();
+
+        $modelo_fc_layout_nom = new fc_layout_nom(link: $this->link);
+        $filtro_input_select_layout_nom = [
+            'com_cliente.id' => $com_cliente_id,
+            'fc_layout_nom.asignado_fc_factura' => 'inactivo',
+        ];
+        $columnas_input_select_layout_nom = [
+            'fc_layout_nom_id','fc_layout_nom_descripcion',
+        ];
+
+        $input_select_layout_nom = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
+            modelo: $modelo_fc_layout_nom, columns_ds: $columnas_input_select_layout_nom,
+            disabled: false, filtro: $filtro_input_select_layout_nom, label: 'Layout',name: 'fc_layout_nom_id',
+            registros: [], required: true
+        );
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar $input_select_layout_nom',
+                data: $input_select_layout_nom,
+                header: $header, ws: $ws
+            );
+        }
+
+        $this->inputs->input_select_layout_nom = $input_select_layout_nom;
+
+
+        return [];
+    }
+    public function asigna_layout_nom_bd(bool $header, bool $ws = false)
+    {
+        $fc_factura_id = $_POST['fc_factura_id'];
+        $fc_layout_nom_id = $_POST['fc_layout_nom_id'];
+
+        $rs = (new fc_layout_factura($this->link))->relaciona_factura_con_layout(
+            fc_factura_id: $fc_factura_id,
+            fc_layout_nom_id: $fc_layout_nom_id,
+        );
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al relaciona_factura_con_layout',
+                data: $rs,
+                header: $header, ws: $ws
+            );
+        }
+
+        $_SESSION['exito'][]['mensaje'] = "fc_layout_nom_id={$fc_layout_nom_id} asignada correctamente al fc_factura_id={$fc_factura_id}";
+        $link = "index.php?seccion=fc_factura&accion=lista&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
     }
 
     public function calcula_comision(bool $header, bool $ws = false)

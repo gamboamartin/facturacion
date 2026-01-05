@@ -22,6 +22,34 @@ class fc_layout_factura extends modelo{
         $this->etiqueta = 'Layouts y Facturas';
     }
 
+    public function relaciona_factura_con_layout(int $fc_factura_id, int $fc_layout_nom_id)
+    {
+        $this->link->beginTransaction();
+
+        $rs1 = $this->elimina_relacion_con_factura_id(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->error->error(
+                mensaje: 'Error en elimina_relacion_con_factura_id',data: $rs1
+            );
+        }
+
+        $rs2 = $this->relaciona_factura_y_layout(
+            fc_factura_id:  $fc_factura_id,
+            fc_layout_nom_id: $fc_layout_nom_id
+        );
+        if(errores::$error){
+            $this->link->rollBack();
+            return $this->error->error(
+                mensaje: 'Error en relaciona_factura_con_layout',data: $rs2
+            );
+        }
+
+        $this->link->commit();
+
+        return [];
+    }
+
     public function relaciona_layout_con_factura(int $fc_layout_nom_id, int $fc_factura_id)
     {
         $this->link->beginTransaction();
