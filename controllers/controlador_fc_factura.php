@@ -63,6 +63,7 @@ class controlador_fc_factura extends _base_system_fc
     public int $fc_factura_id = -1;
     public int $fc_partida_id = -1;
 
+    public bool $aplica_relacion_layout_factura;
 
     public array $facturas_cliente = array();
 
@@ -127,6 +128,11 @@ class controlador_fc_factura extends _base_system_fc
         }
 
         $this->link_exportar_xls = $link_exportar_xls;
+
+        $this->aplica_relacion_layout_factura = false;
+        if (isset($this->conf_generales->aplica_relacion_layout_factura)) {
+            $this->aplica_relacion_layout_factura = $this->conf_generales->aplica_relacion_layout_factura;
+        }
     }
 
     public function actualiza_porcentaje_comision(bool $header, bool $ws = false)
@@ -203,7 +209,67 @@ class controlador_fc_factura extends _base_system_fc
             return $this->retorno_error(mensaje: 'Error al generar template', data: $r_alta, header: $header, ws: $ws);
         }
 
+        $modelo_fc_layout_nom = new fc_layout_nom(link: $this->link);
+        $filtro_input_select_layout_nom = [
+            'fc_layout_nom.asignado_fc_factura' => 'inactivo',
+        ];
+        $columnas_input_select_layout_nom = [
+            'fc_layout_nom_id','fc_layout_nom_descripcion',
+        ];
+
+        $input_select_layout = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
+            modelo: $modelo_fc_layout_nom, columns_ds: $columnas_input_select_layout_nom,
+            disabled: false, filtro: $filtro_input_select_layout_nom, label: 'Layout',name: 'fc_layout_nom_id'
+        );
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar input_select_factura',
+                data: $input_select_layout,
+                header: $header, ws: $ws
+            );
+        }
+
+        $this->inputs->input_select_layout = $input_select_layout;
+
         return $r_alta;
+    }
+
+    public function alta_bd(bool $header, bool $ws = false): array|stdClass
+    {
+        if (isset($_POST['fc_layout_nom_id'])){
+            $v = (int)$_POST['fc_layout_nom_id'];
+            if ($v !== -1 && $v !== 0) {
+                $fc_layout_nom_id = $_POST['fc_layout_nom_id'];
+            }
+            unset($_POST['fc_layout_nom_id']);
+        }
+
+        $r_alta = parent::alta_bd(header: false, ws: $ws);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al guardar', data: $r_alta, header: $header, ws: $ws);
+        }
+
+        $fc_factura_id = $r_alta->registro_id;
+
+        if (isset($fc_layout_nom_id)) {
+            $rs = (new fc_layout_factura($this->link))->relaciona_factura_con_layout(
+                fc_factura_id: $fc_factura_id,
+                fc_layout_nom_id: $fc_layout_nom_id,
+            );
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error en relaciona_layout_con_factura',
+                    data: $rs, header: $header, ws: $ws
+                );
+            }
+        }
+
+        $link = "index.php?seccion=fc_factura&accion=modifica&registro_id={$fc_factura_id}";
+        $link .= "&adm_menu_id=44&session_id={$_GET['session_id']}";
+
+        header("Location: " . $link);
+        exit;
     }
 
     public function alta_partida_bd(bool $header, bool $ws = false)
