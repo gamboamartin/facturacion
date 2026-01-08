@@ -887,6 +887,9 @@ class _xls_dispersion2{
         if(is_null($valores_fila[0]['10'])){
             $valores_fila[0]['10'] = '';
         }
+        if(is_null($valores_fila[0]['11'])){
+            $valores_fila[0]['11'] = '';
+        }
 
         return $valores_fila;
 
