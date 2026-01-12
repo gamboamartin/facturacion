@@ -150,6 +150,10 @@ class fc_empleado_contacto extends modelo{
             $nombre_separado['apellido_materno'] = "Sin Apellido";
         }
 
+        if (mb_strlen($nombre_separado['nombres'], 'UTF-8') <= 3) {
+            $nombre_separado['nombres'] = "Sin nombres";
+        }
+
         $registro_alta['nombre'] = $nombre_separado['nombres'];
         $registro_alta['ap'] = $nombre_separado['apellido_paterno'];
         $registro_alta['am'] = $nombre_separado['apellido_materno'];
