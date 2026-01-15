@@ -182,10 +182,14 @@ class fc_empleado_contacto extends modelo{
 
     public function modifica_bd(array $registro, int $id, bool $reactiva = false): array|stdClass
     {
-        $registro['descripcion'] = $registro['nombre'] . ' ' . $registro['ap'];
 
-        if (array_key_exists('am', $registro)) {
-            $registro['descripcion'] .= ' ' . $registro['am'];
+        if (array_key_exists('nombre', $registro) && array_key_exists('ap', $registro)) {
+
+            $registro['descripcion'] = $registro['nombre'] . ' ' . $registro['ap'];
+
+            if (array_key_exists('am', $registro)) {
+                $registro['descripcion'] .= ' ' . $registro['am'];
+            }
         }
 
         $r_modifica_bd = parent::modifica_bd($registro, $id, $reactiva);
