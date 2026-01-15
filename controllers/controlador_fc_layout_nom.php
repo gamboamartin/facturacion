@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use config\generales;
+use DateTime;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
@@ -45,6 +46,7 @@ class controlador_fc_layout_nom extends system{
     public string $link_modifica_datos_bd = '';
     public string $link_modifica_sucursal_bd = '';
     public string $link_asigna_factura_bd = '';
+    public string $link_reporte_facturacion_bd = '';
     public string $descripcion_nom_layout = '';
     public string $folio_factura_asignada = '';
     public bool $disabled = false;
@@ -1562,6 +1564,68 @@ class controlador_fc_layout_nom extends system{
         header("Location: " . $_SERVER['HTTP_REFERER']);
         return $result->datos_rec->fc_row_layout;
 
+
+    }
+
+    public function reporte_facturacion(bool $header, bool $ws = false)
+    {
+        $link = "index.php?seccion=fc_layout_nom&accion=reporte_facturacion_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
+        $this->link_reporte_facturacion_bd = $link;
+
+        $this->inputs = new stdClass();
+
+        $fecha_actual = new DateTime();
+        $fecha_semana_antes = (clone $fecha_actual)->modify('-1 week');
+
+        $fecha_fin_valor = $fecha_actual->format('Y-m-d');
+        $fecha_inicio_valor = $fecha_semana_antes->format('Y-m-d');
+
+        $fecha_inicio = $this->html->input_fecha(
+            cols: 6,
+            row_upd: new stdClass(),
+            value_vacio: false,
+            name: 'fecha_inicio',
+            place_holder: 'Fecha Inicio',
+            value: $fecha_inicio_valor,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener inputs', data: $fecha_inicio, header: $header, ws: $ws);
+        }
+
+        $fecha_fin = $this->html->input_fecha(
+            cols: 6,
+            row_upd: new stdClass(),
+            value_vacio: false,
+            name: 'fecha_fin',
+            place_holder: 'Fecha Fin',
+            value: $fecha_fin_valor,
+        );
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener inputs', data: $fecha_fin, header: $header, ws: $ws);
+        }
+
+        $this->inputs->fecha_inicio = $fecha_inicio;
+        $this->inputs->fecha_fin = $fecha_fin;
+    }
+
+    public function reporte_facturacion_bd(bool $header, bool $ws = false)
+    {
+
+        $fecha_inicial = $_POST['fecha_inicio'];
+        $fecha_fin = $_POST['fecha_fin'];
+
+        $filtro_especial[0]['fc_factura.fecha_alta']['operador'] = '>=';
+        $filtro_especial[0]['fc_factura.fecha_alta']['valor'] = $fecha_inicial;
+        $filtro_especial[0]['fc_factura.fecha_alta']['operador'] = '<=';
+        $filtro_especial[0]['fc_factura.fecha_alta']['valor'] = $fecha_fin;
+
+        $rs = (new fc_factura($this->link))->filtro_and(filtro_especial: $filtro_especial);
+
+        echo '<pre>';
+        print_r($rs);
+        echo '</pre>';exit;
 
     }
 
