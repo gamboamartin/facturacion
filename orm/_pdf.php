@@ -261,6 +261,10 @@ class _pdf
             $pdf->MultiCell(65, 2.5, $regimen, 0, 'L');
         }
 
+        if ($factura['org_empresa_rfc'] === "RCO250314HH5") {
+            $pdf->MultiCell(65, 2.5, $regimen, 0, 'L');
+        }
+
         if ($factura['org_empresa_rfc'] === "FIN171207CKA") {
             $pdf->MultiCell(65, 2.5, $regimen, 0, 'L');
         }
@@ -272,6 +276,13 @@ class _pdf
         if ($factura['org_empresa_rfc'] === "RRH240411K89") {
             $pdf->SetXY($x, 31.5);
             $dom = "14210";
+            $dom = mb_convert_encoding($dom, 'ISO-8859-1', 'UTF-8');
+            $pdf->MultiCell(60, 3, $dom, 0);
+        }
+
+        if ($factura['org_empresa_rfc'] === "RCO250314HH5") {
+            $pdf->SetXY($x, 31.5);
+            $dom = "11560";
             $dom = mb_convert_encoding($dom, 'ISO-8859-1', 'UTF-8');
             $pdf->MultiCell(60, 3, $dom, 0);
         }
