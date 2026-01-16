@@ -278,5 +278,23 @@ class fc_factura extends _transacciones_fc
 
     }
 
+    public function obtener_registros_reporte_facturacion(array $request): array
+    {
+        $fecha_inicial = $request['fecha_inicio'];
+        $fecha_fin = $request['fecha_fin'];
+
+        $filtro_rango['fc_factura.fecha']['valor1'] = $fecha_inicial;
+        $filtro_rango['fc_factura.fecha']['valor2'] = $fecha_fin;
+
+        $filtro = ['fc_factura.etapa' => 'TIMBRADO'];
+
+        $rs = $this->filtro_and(filtro: $filtro, filtro_rango: $filtro_rango);
+        if(errores::$error){
+            return (new errores())->error("Error al obtener datos", $rs);
+        }
+
+        return $rs->registros;
+    }
+
 
 }

@@ -1612,20 +1612,46 @@ class controlador_fc_layout_nom extends system{
 
     public function reporte_facturacion_bd(bool $header, bool $ws = false)
     {
+        $fecha_inicial = $_POST['fecha_inicio'] ?? null;
+        $fecha_fin     = $_POST['fecha_fin'] ?? null;
 
-        $fecha_inicial = $_POST['fecha_inicio'];
-        $fecha_fin = $_POST['fecha_fin'];
+        if (!$fecha_inicial || !$fecha_fin) {
+            return $this->retorno_error(
+                mensaje: 'Fechas no proporcionadas',
+                data: $_POST,
+                header: $header,
+                ws: $ws
+            );
+        }
 
-        $filtro_especial[0]['fc_factura.fecha_alta']['operador'] = '>=';
-        $filtro_especial[0]['fc_factura.fecha_alta']['valor'] = $fecha_inicial;
-        $filtro_especial[0]['fc_factura.fecha_alta']['operador'] = '<=';
-        $filtro_especial[0]['fc_factura.fecha_alta']['valor'] = $fecha_fin;
+        $registros = (new fc_factura($this->link))->obtener_registros_reporte_facturacion(request: $_POST);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener registros para reporte_facturacion',
+                data: $registros, header: $header, ws: $ws
+            );
+        }
 
-        $rs = (new fc_factura($this->link))->filtro_and(filtro_especial: $filtro_especial);
+        $spreadsheet = (new _reporte_facturacion(registros: $registros))->descarga_reporte();
 
-        echo '<pre>';
-        print_r($rs);
-        echo '</pre>';exit;
+        $fi = DateTime::createFromFormat('Y-m-d', $fecha_inicial);
+        $ff = DateTime::createFromFormat('Y-m-d', $fecha_fin);
+
+        $filename = sprintf(
+            'Reporte_Facturacion_%s_al_%s.xlsx',
+            $fi->format('Ymd'),
+            $ff->format('Ymd')
+        );
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+        header('Expires: 0');
+        header('Pragma: public');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
 
     }
 
