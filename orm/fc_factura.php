@@ -100,6 +100,15 @@ class fc_factura extends _transacciones_fc
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al modificar', data: $r_modifica_bd);
         }
+
+        $rs = $this->recalcula_porcentaje_comision_cliente(fc_factura_id: $id);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al calcular comision en la factura',
+                data:  $rs
+            );
+        }
+
         return $r_modifica_bd;
     }
 
