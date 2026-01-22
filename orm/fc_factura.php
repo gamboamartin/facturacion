@@ -55,6 +55,13 @@ class fc_factura extends _transacciones_fc
             );
         }
 
+        $rs = $this->actualiza_agente_operacion_en_fc_factura(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al actualiza_agente_operacion_alta en la factura',
+                data:  $rs
+            );
+        }
 
         return $r_alta_bd;
     }
@@ -331,6 +338,8 @@ class fc_factura extends _transacciones_fc
                 data: $rs
             );
         }
+
+        return [];
     }
 
 
