@@ -16,6 +16,8 @@ use Throwable;
 class _pdf
 {
     private errores $error;
+    private array $cfg = []; // nuevo 
+
 
     public function __construct()
     {
@@ -212,6 +214,23 @@ class _pdf
         return true;
     }
 
+    // nuevo 
+    private function buildCfg(array $factura): array
+    {
+        $cfg = [
+            'regimen_w' => 65,
+            'dom_txt'   => ':',
+        ];
+
+        // si tienes un "layout" o "plantilla" en BD, usa eso aquí
+        if (($factura['layout'] ?? '') === 'telj') {
+            $cfg['regimen_w'] = 90;
+        }
+
+
+        return $cfg;
+    }
+    // aca termina
 
     private function header(string $tabla, stdClass $data, array $factura, Fpdi $pdf)
     {
@@ -257,35 +276,25 @@ class _pdf
             return (new errores())->error(mensaje: 'Error al obtener $regimen', data: $regimen);
         }
 
-        if ($factura['org_empresa_rfc'] === "RRH240411K89") {
-            $pdf->MultiCell(65, 2.5, $regimen, 0, 'L');
-        }
+    
+        $this->cfg = $this->buildCfg($factura);
 
-        if ($factura['org_empresa_rfc'] === "RCO250314HH5") {
-            $pdf->MultiCell(65, 2.5, $regimen, 0, 'L');
-        }
+    
+        $regimenW = (float)($this->cfg['regimen_w'] ?? 65);
+        $pdf->MultiCell($regimenW, 2.5, $regimen, 0, 'L');
 
-        if ($factura['org_empresa_rfc'] === "FIN171207CKA") {
-            $pdf->MultiCell(65, 2.5, $regimen, 0, 'L');
-        }
 
-        if ($factura['org_empresa_rfc'] === "TELJ470913GY5") {
-            $pdf->MultiCell(90, 2.5, $regimen, 0, 'L');
-        }
+    
+        $pdf->SetXY($x, 31.5);
 
-        if ($factura['org_empresa_rfc'] === "RRH240411K89") {
-            $pdf->SetXY($x, 31.5);
-            $dom = "14210";
-            $dom = mb_convert_encoding($dom, 'ISO-8859-1', 'UTF-8');
-            $pdf->MultiCell(60, 3, $dom, 0);
-        }
+        $cpEmisor = trim((string)($factura['org_empresa_cp_txt'] ?? ''));
+        $domTxt   = (string)($this->cfg['dom_txt'] ?? ':');
 
-        if ($factura['org_empresa_rfc'] === "RCO250314HH5") {
-            $pdf->SetXY($x, 31.5);
-            $dom = "11560";
-            $dom = mb_convert_encoding($dom, 'ISO-8859-1', 'UTF-8');
-            $pdf->MultiCell(60, 3, $dom, 0);
-        }
+        $dom = mb_convert_encoding(trim($domTxt . ' ' . $cpEmisor), 'ISO-8859-1', 'UTF-8');
+        $pdf->MultiCell(60, 3, $dom, 0, 'L');
+
+
+
 
         if ($factura['org_empresa_rfc'] === "FIN171207CKA") {
             $pdf->SetXY($x, 31.5);
@@ -589,6 +598,11 @@ class _pdf
             return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
         }
 
+        // nuevo 
+        $cpEmisorId = (int)($factura['org_empresa_dp_cp_id'] ?? 0);
+        $factura['org_empresa_cp_txt'] = $this->cp_txt($link, $cpEmisorId);
+        //aca termina
+
         $ruta_qr = $modelo_documento->get_factura_documento(key_entidad_filter_id: $modelo_entidad->key_filtro_id,
             registro_id: $registro_id, tipo_documento: "qr_cfdi");
         if (errores::$error) {
@@ -854,4 +868,29 @@ class _pdf
         }
         return $nombre_documento;
     }
+
+    // nuevo 
+    /**
+ * Obtiene el CP (texto) desde dp_cp por id.
+ * Devuelve '' si no existe o viene vacío.
+ */
+    private function cp_txt(PDO $link, int $dp_cp_id): string
+    {
+        if ($dp_cp_id <= 0) {
+            return '';
+        }
+
+        $sql = "SELECT descripcion FROM dp_cp WHERE id = :id LIMIT 1";
+        $stmt = $link->prepare($sql);
+        $stmt->execute([':id' => $dp_cp_id]);
+
+        $val = $stmt->fetchColumn();
+        if ($val === false || $val === null) {
+            return '';
+        }
+
+        return trim((string)$val);
+    }
+
+
 }
