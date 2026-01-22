@@ -305,5 +305,33 @@ class fc_factura extends _transacciones_fc
         return $rs->registros;
     }
 
+    public function actualiza_agente_operacion_en_fc_factura(
+        int $fc_factura_id,
+        string $campo = 'agente_operacion_alta_id'
+    ):array {
+        $agente_operacion_id = (new com_agente(link: $this->link))->obtener_agente_operador_id();
+        if(errores::$error){
+            return (new errores())->error(
+                mensaje: "Error al obtener_agente_operador_id",
+                data: $agente_operacion_id
+            );
+        }
+
+        if ($agente_operacion_id === -1) {
+            return [];
+        }
+
+        $consulta = "UPDATE fc_factura SET ";
+        $consulta .= " fc_factura.{$campo} = {$agente_operacion_id}";
+        $consulta .= " WHERE fc_factura.id = {$fc_factura_id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error(
+                mensaje: "Error al modificar agente_operacion_alta_id en fc_factura",
+                data: $rs
+            );
+        }
+    }
+
 
 }
