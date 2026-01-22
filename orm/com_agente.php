@@ -5,7 +5,7 @@ use config\generales;
 use gamboamartin\errores\errores;
 
 class com_agente extends \gamboamartin\comercial\models\com_agente {
-     public function obtener_agente_operador(): int
+     public function obtener_agente_operador_id(): int
      {
          $tipo_agente_id = 0;
          if (isset(generales::$tipo_agente_operador)){
