@@ -723,6 +723,11 @@ class controlador_fc_factura extends _base_system_fc
                 ws: $ws, class: __CLASS__, file: __FILE__, function: __FUNCTION__, line: __LINE__);
         }
 
+        $rs = (new fc_factura(link: $this->link))->actualiza_agente_operacion_en_fc_factura(
+            fc_factura_id: $this->registro_id,
+            campo: 'agente_operacion_timbrado_id',
+        );
+
         return $r_timbra;
 
     }
