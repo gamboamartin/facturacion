@@ -1713,8 +1713,16 @@ class controlador_fc_layout_nom extends system{
             );
         }
 
+        $registros = (new fc_factura($this->link))->obtener_registros_reporte_ventas(request: $_POST);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener registros para reporte_facturacion',
+                data: $registros, header: $header, ws: $ws
+            );
+        }
+
         echo '<pre>';
-        print_r($_POST);
+        print_r($registros);
         echo '</pre>';exit;
 
 

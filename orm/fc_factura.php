@@ -343,4 +343,26 @@ class fc_factura extends _transacciones_fc
     }
 
 
+    public function obtener_registros_reporte_ventas(array $request): array
+    {
+        $fecha_inicial = $request['fecha_inicio'];
+        $fecha_fin = $request['fecha_fin'];
+
+        $consulta = "SELECT";
+        $consulta .= " fc_factura.fecha As fecha ";
+        $consulta .= " FROM fc_factura";
+        $consulta .= " WHERE fc_factura.fecha >= {$fecha_inicial}";
+        $consulta .= " AND fc_factura.fecha <= {$fecha_fin}";
+        $rs = $this->ejecuta_consulta(consulta: $consulta);
+        if(errores::$error){
+            return (new errores())->error('Error al ejecutar consulta sql', $rs);
+        }
+        echo '<pre>';
+        print_r($rs);
+        echo '</pre>';exit;
+
+        return $rs->registros;
+    }
+
+
 }
