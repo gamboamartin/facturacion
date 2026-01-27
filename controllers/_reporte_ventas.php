@@ -41,7 +41,7 @@ class _reporte_ventas{
         return $this->spreadsheet;
     }
 
-    private function crear_sheet_operador(int $agente_operador_id, string $nombre)
+    private function crear_sheet_operador(int $agente_operador_id, string $nombre): void
     {
         $sheet = $this->spreadsheet->createSheet();
         $sheet->setTitle(substr($nombre, 0, 31));
@@ -58,9 +58,23 @@ class _reporte_ventas{
                 continue;
             }
 
+            $porcentaje_comision = $registro['fc_factura_porcentaje_comision_cliente'] / 100;
+            $subtotal = $registro['fc_factura_sub_total'];
+            $archivo = $subtotal / (1 + $porcentaje_comision);
+
             $sheet->setCellValue("A{$fila}", $nombre);
             $sheet->setCellValue("B{$fila}", $registro['com_cliente_id']);
             $sheet->setCellValue("C{$fila}", $registro['com_cliente_razon_social']);
+            $sheet->setCellValue("I{$fila}", $registro['fc_factura_id']);
+            $sheet->setCellValue("J{$fila}",
+                \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(
+                    strtotime($registro['fc_factura_fecha'])
+                )
+            );
+            $sheet->setCellValue("K{$fila}", $porcentaje_comision);
+            $sheet->setCellValue("L{$fila}", $archivo);
+            $sheet->setCellValue("M{$fila}", $registro['fc_factura_total_traslados']);
+            $sheet->setCellValue("N{$fila}", $registro['fc_factura_total']);
 
             $fila++;
         }
@@ -116,6 +130,16 @@ class _reporte_ventas{
         } catch (Exception $e) {
 
         }
+
+        $sheet->getStyle("K2:K{$ultimaFila}")
+            ->getNumberFormat()->setFormatCode('0.00%');
+
+        $sheet->getStyle("J2:J{$ultimaFila}")
+            ->getNumberFormat()->setFormatCode('yyyy-mm-dd');
+
+        $sheet->getStyle("L2:N{$ultimaFila}")
+            ->getNumberFormat()->setFormatCode('"$"#,##0.00');
+
 
         $sheet->getRowDimension(1)->setRowHeight(35);
         $sheet->getStyle('A1:N1')->getAlignment()
