@@ -11,6 +11,7 @@ use gamboamartin\facturacion\models\_cancela_nomina\_cancela_nomina;
 use gamboamartin\facturacion\models\_email_nomina_cliente;
 use gamboamartin\facturacion\models\_timbra_nomina;
 use gamboamartin\facturacion\models\_timbra_nomina\_finalizacion;
+use gamboamartin\facturacion\models\com_agente;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_layout_factura;
 use gamboamartin\facturacion\models\fc_layout_nom;
@@ -1721,9 +1722,35 @@ class controlador_fc_layout_nom extends system{
             );
         }
 
-        echo '<pre>';
-        print_r($registros);
-        echo '</pre>';exit;
+        $operadores = (new com_agente($this->link))->obtener_operadores();
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener registros para reporte_facturacion',
+                data: $registros, header: $header, ws: $ws
+            );
+        }
+
+        $spreadsheet = (new _reporte_ventas(registros: $registros, operadores: $operadores))
+            ->descarga_reporte();
+
+        $fi = DateTime::createFromFormat('Y-m-d', $fecha_inicial);
+        $ff = DateTime::createFromFormat('Y-m-d', $fecha_fin);
+
+        $filename = sprintf(
+            'Reporte_Ventas_Por_Operador_%s_al_%s.xlsx',
+            $fi->format('Ymd'),
+            $ff->format('Ymd')
+        );
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+        header('Expires: 0');
+        header('Pragma: public');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
 
 
 

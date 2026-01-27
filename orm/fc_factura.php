@@ -299,8 +299,8 @@ class fc_factura extends _transacciones_fc
         $fecha_inicial = $request['fecha_inicio'];
         $fecha_fin = $request['fecha_fin'];
 
-        $filtro_rango['fc_factura.fecha']['valor1'] = $fecha_inicial;
-        $filtro_rango['fc_factura.fecha']['valor2'] = $fecha_fin;
+        $filtro_rango['fc_factura.fecha']['valor1'] = "$fecha_inicial 00:00:00";
+        $filtro_rango['fc_factura.fecha']['valor2'] = "$fecha_fin 23:59:59";
 
         $filtro = ['fc_factura.etapa' => 'TIMBRADO'];
 
@@ -348,18 +348,15 @@ class fc_factura extends _transacciones_fc
         $fecha_inicial = $request['fecha_inicio'];
         $fecha_fin = $request['fecha_fin'];
 
-        $consulta = "SELECT";
-        $consulta .= " fc_factura.fecha As fecha ";
-        $consulta .= " FROM fc_factura";
-        $consulta .= " WHERE fc_factura.fecha >= {$fecha_inicial}";
-        $consulta .= " AND fc_factura.fecha <= {$fecha_fin}";
-        $rs = $this->ejecuta_consulta(consulta: $consulta);
+        $filtro_rango['fc_factura.fecha']['valor1'] = "$fecha_inicial 00:00:00";
+        $filtro_rango['fc_factura.fecha']['valor2'] = "$fecha_fin 23:59:59";
+
+        $filtro = ['fc_factura.etapa' => 'TIMBRADO'];
+
+        $rs = $this->filtro_and(filtro: $filtro, filtro_rango: $filtro_rango);
         if(errores::$error){
-            return (new errores())->error('Error al ejecutar consulta sql', $rs);
+            return (new errores())->error("Error al obtener datos", $rs);
         }
-        echo '<pre>';
-        print_r($rs);
-        echo '</pre>';exit;
 
         return $rs->registros;
     }
