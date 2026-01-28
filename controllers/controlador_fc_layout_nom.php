@@ -1730,8 +1730,17 @@ class controlador_fc_layout_nom extends system{
             );
         }
 
-        $spreadsheet = (new _reporte_ventas(registros: $registros, operadores: $operadores))
-            ->descarga_reporte();
+        $spreadsheet = (new _reporte_ventas(
+            registros: $registros,
+            operadores: $operadores,
+            link: $this->link,
+        ))->descarga_reporte();
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al crear el spreadsheet',
+                data: $spreadsheet, header: $header, ws: $ws
+            );
+        }
 
         $fi = DateTime::createFromFormat('Y-m-d', $fecha_inicial);
         $ff = DateTime::createFromFormat('Y-m-d', $fecha_fin);

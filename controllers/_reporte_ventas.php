@@ -2,6 +2,10 @@
 
 namespace gamboamartin\facturacion\controllers;
 
+use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\fc_layout_factura;
+use gamboamartin\facturacion\models\fc_row_layout;
+use PDO;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -12,11 +16,13 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class _reporte_ventas{
     private array $registros;
     private array $operadores;
+    private PDO $link ;
     private Spreadsheet $spreadsheet;
 
-    public function __construct(array $registros, array $operadores){
+    public function __construct(array $registros, array $operadores, PDO $link){
         $this->registros = $registros;
         $this->operadores = $operadores;
+        $this->link = $link;
         $this->spreadsheet = new Spreadsheet();
         try {
             $this->spreadsheet->removeSheetByIndex(0);
@@ -27,21 +33,27 @@ class _reporte_ventas{
         return $this;
     }
 
-    public function descarga_reporte(): Spreadsheet
+    public function descarga_reporte(): Spreadsheet|array
     {
 
 
         foreach ($this->operadores as $operador) {
-            $this->crear_sheet_operador(
+            $rs = $this->crear_sheet_operador(
                 agente_operador_id: $operador['com_agente_id'],
                 nombre: $operador['com_agente_descripcion']
             );
+            if(errores::$error){
+                return (new errores())->error(
+                    mensaje: 'Error al obtener informacion adicional',
+                    data:  $rs,
+                );
+            }
         }
 
         return $this->spreadsheet;
     }
 
-    private function crear_sheet_operador(int $agente_operador_id, string $nombre): void
+    private function crear_sheet_operador(int $agente_operador_id, string $nombre): array
     {
         $sheet = $this->spreadsheet->createSheet();
         $sheet->setTitle(substr($nombre, 0, 31));
@@ -76,11 +88,63 @@ class _reporte_ventas{
             $sheet->setCellValue("M{$fila}", $registro['fc_factura_total_traslados']);
             $sheet->setCellValue("N{$fila}", $registro['fc_factura_total']);
 
+            $informacion_adicional = $this->obtener_informacion_adicional(fc_factura_id: $registro['fc_factura_id']);
+            if(errores::$error){
+                return (new errores())->error(
+                    mensaje: 'Error al obtener informacion adicional',
+                    data:  $informacion_adicional,
+                );
+            }
+
+            $sheet->setCellValue("G{$fila}", $informacion_adicional['periodo']);
+            $sheet->setCellValue("H{$fila}", $informacion_adicional['numero_empleados']);
+
             $fila++;
         }
 
         $ultimaFila = $fila > 2 ? $fila - 1 : 1;
         $this->DarEstilos(sheet: $sheet, ultimaFila: $ultimaFila);
+        return [];
+    }
+
+    private function obtener_informacion_adicional(int $fc_factura_id)
+    {
+        $rs = (new fc_layout_factura(link: $this->link))
+            ->filtro_and(filtro: ['fc_layout_factura.fc_factura_id' => $fc_factura_id]);
+        if(errores::$error){
+            return (new errores())->error(
+                mensaje: 'Error al buscar la relacion de factura con layout',
+                data:  $rs
+            );
+        }
+
+        if ((int)$rs->n_registros < 1) {
+            return [
+                'numero_empleados' => 0,
+                'periodo' => 'Fac sin Rel'
+            ];
+        }
+
+        $registro = $rs->registros[0];
+
+        $fc_layout_nom_id = (int)$registro['fc_layout_factura_fc_layout_nom_id'];
+
+
+        $rs = (new fc_row_layout(link: $this->link))
+            ->filtro_and(filtro: ['fc_row_layout.fc_layout_nom_id' => $fc_layout_nom_id]);
+        if(errores::$error){
+            return (new errores())->error(
+                mensaje: 'Error al buscar el numero de empleados',
+                data:  $rs
+            );
+        }
+
+        $numero_empleados = (int)$rs->n_registros;
+
+        return [
+            'numero_empleados' => $numero_empleados,
+            'periodo' => 'en desarrollo'
+        ];
 
     }
 
