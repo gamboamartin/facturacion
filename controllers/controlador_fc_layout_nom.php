@@ -15,6 +15,7 @@ use gamboamartin\facturacion\models\com_agente;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\models\fc_layout_factura;
 use gamboamartin\facturacion\models\fc_layout_nom;
+use gamboamartin\facturacion\models\fc_layout_periodo;
 use gamboamartin\facturacion\models\fc_row_layout;
 use gamboamartin\facturacion\models\fc_row_nomina;
 use gamboamartin\modelo\modelo;
@@ -175,6 +176,23 @@ class controlador_fc_layout_nom extends system{
         }
 
         $this->inputs->input_select_factura = $input_select_factura;
+
+        $modelo_fc_layout_periodo = new fc_layout_periodo(link: $this->link);
+
+        $input_select_periodo = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
+            modelo: $modelo_fc_layout_periodo, columns_ds: ['fc_layout_periodo_descripcion_select'],
+            disabled: false, filtro: $filtro_input_select_sucursal, label: 'Periodo',name: 'fc_layout_periodo_id',
+            registros: [], required: true
+        );
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar $input_select_periodo',
+                data: $input_select,
+                header: $header, ws: $ws
+            );
+        }
+
+        $this->inputs->input_select_periodo = $input_select_periodo;
 
         return $alta;
     }

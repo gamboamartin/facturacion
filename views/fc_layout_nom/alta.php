@@ -16,6 +16,7 @@
             <?php if ($controlador->aplica_relacion_layout_factura): ?>
                 <input type="hidden" id="aplica_relacion" value="1">
                 <?php echo $controlador->inputs->input_select_factura; ?>
+                <?php echo $controlador->inputs->input_select_periodo; ?>
             <?php endif; ?>
 
             <?php echo $controlador->inputs->documento; ?>
