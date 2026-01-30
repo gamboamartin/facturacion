@@ -47,6 +47,7 @@ class controlador_fc_layout_nom extends system{
 
     public string $link_modifica_datos_bd = '';
     public string $link_modifica_sucursal_bd = '';
+    public string $link_modifica_layout_periodo_bd = '';
     public string $link_asigna_factura_bd = '';
     public string $link_reporte_facturacion_bd = '';
     public string $link_reporte_ventas_por_operador_bd = '';
@@ -1320,6 +1321,54 @@ class controlador_fc_layout_nom extends system{
         $link = "index.php?seccion=fc_layout_nom&accion=lista&session_id={$_GET['session_id']}";
         header("Location: " . $link);
         exit;
+    }
+
+    public function modifica_layout_periodo(bool $header, bool $ws = false): array|stdClass
+    {
+        $registro_id = $this->registro_id;
+        $this->modelo->registro_id = $registro_id;
+        $data = $this->modelo->obten_data();
+
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener data de fc_layout_nom', data: $data, header: $header, ws: $ws);
+        }
+
+
+        $this->descripcion_nom_layout = $data['fc_layout_nom_descripcion'];
+
+        $fc_layout_periodo_id = $data['fc_layout_nom_fc_layout_periodo_id'];
+
+
+        $link = "index.php?seccion=fc_layout_nom&accion=modifica_layout_periodo_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
+        $this->link_modifica_layout_periodo_bd = $link;
+
+        $this->inputs = new stdClass();
+
+        $modelo_fc_layout_periodo = new fc_layout_periodo(link: $this->link);
+
+        $input_select_periodo = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: $fc_layout_periodo_id,
+            modelo: $modelo_fc_layout_periodo, columns_ds: ['fc_layout_periodo_descripcion_select'],
+            disabled: false, filtro: [], label: 'Periodo',name: 'fc_layout_periodo_id',
+            registros: [], required: true
+        );
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar input_select_sucursal',
+                data: $input_select_periodo,
+                header: $header, ws: $ws
+            );
+        }
+
+        $this->inputs->input_select_periodo = $input_select_periodo;
+
+        return [];
+
+    }
+
+    public function modifica_layout_periodo_bd(bool $header, bool $ws = false): array|stdClass
+    {
+
     }
 
     public function modifica_sucursal(bool $header, bool $ws = false)

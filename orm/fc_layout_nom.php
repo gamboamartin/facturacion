@@ -15,7 +15,7 @@ class fc_layout_nom extends modelo{
         $tabla = 'fc_layout_nom';
         $columnas = [
             $tabla=>false, 'doc_documento'=>$tabla, 'com_sucursal'=>$tabla,
-            'com_cliente' => 'com_sucursal'
+            'com_cliente' => 'com_sucursal','fc_layout_periodo' => $tabla
         ];
 
         $campos_view = array();
