@@ -1368,7 +1368,24 @@ class controlador_fc_layout_nom extends system{
 
     public function modifica_layout_periodo_bd(bool $header, bool $ws = false): array|stdClass
     {
+        $fc_layout_nom_id = $_POST['fc_layout_nom_id'];
+        $fc_layout_periodo_id = $_POST['fc_layout_periodo_id'];
 
+        $rs = $this->modelo->modifica_bd(
+            registro: ['fc_layout_periodo_id' => $fc_layout_periodo_id],
+            id: $fc_layout_nom_id
+        );
+
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al modificar el periodo en fc_layout_nom', data: $rs, header: $header, ws: $ws);
+        }
+
+        $_SESSION['exito'][]['mensaje'] = 'periodo modificado exitosamente';
+        $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
     }
 
     public function modifica_sucursal(bool $header, bool $ws = false)
