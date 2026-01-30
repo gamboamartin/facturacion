@@ -8,9 +8,12 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
+use config\generales;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\com_agente;
 use gamboamartin\facturacion\models\com_cliente;
 use gamboamartin\facturacion\models\com_contacto;
+use gamboamartin\facturacion\models\fc_layout_periodo;
 use gamboamartin\template\html;
 use PDO;
 use stdClass;
@@ -18,6 +21,8 @@ use stdClass;
 class controlador_com_cliente extends \gamboamartin\comercial\controllers\controlador_com_cliente {
     public string $link_asigna_contacto_bd = '';
     public string $link_modifica_porcentaje_comision_bd = '';
+    public string $link_modifica_asesor_bd = '';
+    public string $descripcion_cliente = '';
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass())
     {
@@ -85,6 +90,79 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         }
 
         return $contenido_table;
+    }
+
+    public function modifica_asesor(bool $header, bool $ws = false): array|stdClass
+    {
+        $registro_id = $this->registro_id;
+        $this->modelo->registro_id = $registro_id;
+        $data = $this->modelo->obten_data();
+
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener data de com_cliente', data: $data, header: $header, ws: $ws);
+        }
+
+        $this->descripcion_cliente = $data['com_cliente_razon_social'];
+
+        $com_agente_asesor_id = $data['com_cliente_com_agente_asesor_id'];
+
+
+        $link = "index.php?seccion=com_cliente&accion=modifica_asesor_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
+        $this->link_modifica_asesor_bd = $link;
+
+        $this->inputs = new stdClass();
+
+        $modelo_com_agente = new com_agente(link: $this->link);
+
+        $com_tipo_agente_id = -1;
+
+        if (isset(generales::$tipo_agente_asesor)){
+            $com_tipo_agente_id = generales::$tipo_agente_asesor;
+        }
+
+        $filtro_select_agente_asesor = ['com_agente.com_tipo_agente_id' => $com_tipo_agente_id];
+
+        $input_select_agente_asesor = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: $com_agente_asesor_id,
+            modelo: $modelo_com_agente, columns_ds: ['com_agente_descripcion_select'],
+            disabled: false, filtro: $filtro_select_agente_asesor, label: 'Asesor',name: 'com_agente_asesor_id',
+            registros: [], required: true
+        );
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar input_select_agente_asesor',
+                data: $input_select_agente_asesor,
+                header: $header, ws: $ws
+            );
+        }
+
+        $this->inputs->input_select_agente_asesor = $input_select_agente_asesor;
+
+        return [];
+
+    }
+
+    public function modifica_asesor_bd(bool $header, bool $ws = false): array|stdClass
+    {
+
+        $com_cliente_id = $_POST['com_cliente_id'];
+        $com_agente_asesor_id = $_POST['com_agente_asesor_id'];
+
+        $rs = $this->modelo->modifica_bd(
+            registro: ['com_agente_asesor_id' => $com_agente_asesor_id],
+            id: $com_cliente_id
+        );
+
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al modificar el asesor en com_cliente', data: $rs, header: $header, ws: $ws);
+        }
+
+        $_SESSION['exito'][]['mensaje'] = 'asesor modificado exitosamente';
+        $link = "index.php?seccion=com_cliente&accion=lista&adm_menu_id=41";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
     }
 
     public function modifica_porcentaje_comision(bool $header, bool $ws = false): array|string
