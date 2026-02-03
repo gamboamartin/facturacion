@@ -3,6 +3,7 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\com_agente;
 use gamboamartin\facturacion\models\fc_layout_factura;
 use gamboamartin\facturacion\models\fc_row_layout;
 use PDO;
@@ -70,14 +71,18 @@ class _reporte_ventas{
                 continue;
             }
 
+            $com_agente_asesor_id = $registro['com_cliente_com_agente_asesor_id'];
+            $com_cliente_id = $registro['com_cliente_id'];
+
             $porcentaje_comision = $registro['fc_factura_porcentaje_comision_cliente'] / 100;
             $subtotal = $registro['fc_factura_sub_total'];
             $archivo = $subtotal / (1 + $porcentaje_comision);
 
             $sheet->setCellValue("A{$fila}", $nombre);
-            $sheet->setCellValue("B{$fila}", $registro['com_cliente_id']);
+            $sheet->setCellValue("B{$fila}", $this->formatea_digitos($com_cliente_id));
             $sheet->setCellValue("C{$fila}", $registro['com_cliente_razon_social']);
-            $sheet->setCellValue("I{$fila}", $registro['fc_factura_id']);
+            $sheet->setCellValue("E{$fila}", $this->formatea_digitos($com_agente_asesor_id));
+            $sheet->setCellValue("I{$fila}", $this->formatea_digitos($registro['fc_factura_id']));
             $sheet->setCellValue("J{$fila}",
                 \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(
                     strtotime($registro['fc_factura_fecha'])
@@ -88,7 +93,10 @@ class _reporte_ventas{
             $sheet->setCellValue("M{$fila}", $registro['fc_factura_total_traslados']);
             $sheet->setCellValue("N{$fila}", $registro['fc_factura_total']);
 
-            $informacion_adicional = $this->obtener_informacion_adicional(fc_factura_id: $registro['fc_factura_id']);
+            $informacion_adicional = $this->obtener_informacion_adicional(
+                fc_factura_id: $registro['fc_factura_id'],
+                com_agente_asesor_id: $com_agente_asesor_id,
+            );
             if(errores::$error){
                 return (new errores())->error(
                     mensaje: 'Error al obtener informacion adicional',
@@ -96,6 +104,7 @@ class _reporte_ventas{
                 );
             }
 
+            $sheet->setCellValue("F{$fila}", $informacion_adicional['nombre_asesor']);
             $sheet->setCellValue("G{$fila}", $informacion_adicional['periodo']);
             $sheet->setCellValue("H{$fila}", $informacion_adicional['numero_empleados']);
 
@@ -107,8 +116,16 @@ class _reporte_ventas{
         return [];
     }
 
-    private function obtener_informacion_adicional(int $fc_factura_id)
+    private function obtener_informacion_adicional(int $fc_factura_id, int $com_agente_asesor_id)
     {
+        $nombre_asesor = (new com_agente($this->link))->obtener_nombre_asesor($com_agente_asesor_id);
+        if(errores::$error){
+            return (new errores())->error(
+                mensaje: 'Error al buscar el nombre del asesor',
+                data:  $nombre_asesor
+            );
+        }
+
         $rs = (new fc_layout_factura(link: $this->link))
             ->filtro_and(filtro: ['fc_layout_factura.fc_factura_id' => $fc_factura_id]);
         if(errores::$error){
@@ -121,11 +138,17 @@ class _reporte_ventas{
         if ((int)$rs->n_registros < 1) {
             return [
                 'numero_empleados' => 0,
-                'periodo' => 'Fac sin Rel'
+                'periodo' => 'Fac sin Rel',
+                'nombre_asesor' => $nombre_asesor,
             ];
         }
 
         $registro = $rs->registros[0];
+
+        $periodo = 'Layout sin periodo';
+        if ((int)$registro['fc_layout_periodo_id'] !== 0){
+            $periodo = $registro['fc_layout_periodo_descripcion'];
+        }
 
         $fc_layout_nom_id = (int)$registro['fc_layout_factura_fc_layout_nom_id'];
 
@@ -143,7 +166,8 @@ class _reporte_ventas{
 
         return [
             'numero_empleados' => $numero_empleados,
-            'periodo' => 'en desarrollo'
+            'periodo' => $periodo,
+            'nombre_asesor' => $nombre_asesor,
         ];
 
     }
@@ -210,6 +234,15 @@ class _reporte_ventas{
             ->setWrapText(true)->setVertical(Alignment::VERTICAL_CENTER)
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
+        $sheet->getStyle("B2:B{$ultimaFila}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle("E2:E{$ultimaFila}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle("I2:I{$ultimaFila}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
         $sheet->getColumnDimension('A')->setWidth(16);
         $sheet->getColumnDimension('B')->setWidth(10);
         $sheet->getColumnDimension('C')->setWidth(45);
@@ -224,6 +257,10 @@ class _reporte_ventas{
         $sheet->getColumnDimension('L')->setWidth(18);
         $sheet->getColumnDimension('M')->setWidth(18);
         $sheet->getColumnDimension('N')->setWidth(18);
+    }
+
+    private function formatea_digitos(int $numero): string {
+        return str_pad((string)$numero, 7, '0', STR_PAD_LEFT);
     }
 
 

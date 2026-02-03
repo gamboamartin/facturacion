@@ -55,4 +55,37 @@ class com_agente extends \gamboamartin\comercial\models\com_agente {
 
          return $rs_filtro_and->registros;
      }
+
+     public function obtener_nombre_asesor(int $com_agente_asesor_id)
+     {
+        if ($com_agente_asesor_id === -1){
+            return 'El cliente no tiene asesor';
+        }
+
+         $tipo_agente_id = 0;
+         if (isset(generales::$tipo_agente_asesor)){
+             $tipo_agente_id = generales::$tipo_agente_asesor;
+         }
+
+         $filtro = [
+             'com_agente.id' => $com_agente_asesor_id,
+             'com_tipo_agente.id' => $tipo_agente_id,
+         ];
+
+         $columnas = [];
+         $rs_filtro_and = $this->filtro_and(columnas: $columnas,filtro: $filtro);
+         if(errores::$error){
+             return $this->error->error(
+                 mensaje: 'Error al buscar asesor en com_agente ',
+                 data:  $rs_filtro_and
+             );
+         }
+
+         if ((int)$rs_filtro_and->n_registros === 0) {
+             return 'El Id de asesor no existe';
+         }
+
+         return $rs_filtro_and->registros[0]['com_agente_descripcion'];
+
+     }
 }

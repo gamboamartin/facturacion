@@ -9,7 +9,10 @@ use PDO;
 class fc_layout_factura extends modelo{
     public function __construct(PDO $link){
         $tabla = 'fc_layout_factura';
-        $columnas = [$tabla=>false, 'fc_factura'=>$tabla, 'fc_layout_nom'=>$tabla];
+        $columnas = [
+                $tabla=>false, 'fc_factura'=>$tabla,
+                'fc_layout_nom'=>$tabla, 'fc_layout_periodo'=>'fc_layout_nom'
+        ];
         $campos_obligatorios = [];
         $campos_view = [];
         $no_duplicados = [];
