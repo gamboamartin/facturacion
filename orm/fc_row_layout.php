@@ -265,12 +265,14 @@ class fc_row_layout extends modelo{
 
         $filtro = ['fc_row_layout.fc_layout_nom_id' => $fc_layout_nom_id];
         $campos['total_comision_cliente'] = 'fc_row_layout.comision_cliente';
+        $campos['total_neto_depositar'] = 'fc_row_layout.neto_depositar';
         $result = $this->suma(campos: $campos, filtro: $filtro);
         if(errores::$error){
             return (new errores())->error('Error al obtener total_comision_cliente', $rs);
         }
 
-        $total_comision_cliente = $result['total_comision_cliente'];
+        $total_neto_depositar = $result['total_neto_depositar'];
+        $total_comision_cliente = $total_neto_depositar * ($porcentaje_comision / 100);
 
         $consulta = "UPDATE fc_layout_nom SET fc_layout_nom.comision_cliente = $total_comision_cliente WHERE fc_layout_nom.id = $fc_layout_nom_id";
         $rs = $this->ejecuta_sql($consulta);
