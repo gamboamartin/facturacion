@@ -10,6 +10,7 @@
             <input type="hidden" id="aplica_relacion" value="1">
             <?php echo $controlador->inputs->input_select_layout; ?>
         <?php endif; ?>
+        <?php echo $controlador->inputs->input_select_com_tipo_producto; ?>
         <?php include $controlador->include_inputs_alta; ?>
     </form>
 </div>

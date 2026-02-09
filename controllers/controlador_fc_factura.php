@@ -9,6 +9,7 @@
 
 namespace gamboamartin\facturacion\controllers;
 
+use gamboamartin\comercial\models\com_tipo_producto;
 use gamboamartin\controllers\_controlador_adm_reporte\_filtros;
 use gamboamartin\controllers\_controlador_adm_reporte\_table;
 use gamboamartin\errores\errores;
@@ -230,6 +231,22 @@ class controlador_fc_factura extends _base_system_fc
         }
 
         $this->inputs->input_select_layout = $input_select_layout;
+
+        $modelo_com_tipo_producto = new com_tipo_producto(link: $this->link);
+
+        $input_select_com_tipo_producto = $this->html->select_catalogo(cols: 12, con_registros: true,
+            id_selected: -1, modelo: $modelo_com_tipo_producto, columns_ds: ['com_tipo_producto_descripcion'],
+            label: 'Producto', name: 'com_tipo_producto_id', required: true,
+        );
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al generar input_select_com_tipo_producto',
+                data: $input_select_com_tipo_producto,
+                header: $header, ws: $ws
+            );
+        }
+
+        $this->inputs->input_select_com_tipo_producto = $input_select_com_tipo_producto;
 
         return $r_alta;
     }
