@@ -59,7 +59,7 @@ class _transacciones_fc extends modelo
             'dp_calle' => 'dp_calle_pertenece', 'dp_colonia_postal' => 'dp_calle_pertenece',
             'dp_colonia' => 'dp_colonia_postal', 'dp_cp' => 'dp_colonia_postal', 'dp_municipio' => 'dp_cp',
             'dp_estado' => 'dp_municipio', 'dp_pais' => 'dp_estado', 'org_sucursal' => 'fc_csd',
-            'org_empresa' => 'org_sucursal','com_tipo_cliente'=>'com_cliente');
+            'org_empresa' => 'org_sucursal','com_tipo_cliente'=>'com_cliente', 'com_tipo_producto'=> $tabla);
 
         $renombres['cat_sat_tipo_persona_cliente']['nombre_original'] = 'cat_sat_tipo_persona';
         $renombres['cat_sat_tipo_persona_cliente']['enlace'] = 'com_cliente';

@@ -81,6 +81,7 @@ class _reporte_ventas{
             $sheet->setCellValue("A{$fila}", $nombre);
             $sheet->setCellValue("B{$fila}", $this->formatea_digitos($com_cliente_id));
             $sheet->setCellValue("C{$fila}", $registro['com_cliente_razon_social']);
+            $sheet->setCellValue("D{$fila}", $registro['com_tipo_producto_descripcion']);
             $sheet->setCellValue("E{$fila}", $this->formatea_digitos($com_agente_asesor_id));
             $sheet->setCellValue("I{$fila}", $this->formatea_digitos($registro['fc_factura_id']));
             $sheet->setCellValue("J{$fila}",
