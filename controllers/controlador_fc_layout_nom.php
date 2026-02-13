@@ -49,6 +49,7 @@ class controlador_fc_layout_nom extends system{
     public string $link_modifica_sucursal_bd = '';
     public string $link_modifica_layout_periodo_bd = '';
     public string $link_asigna_factura_bd = '';
+    public string $link_reporte_anual_bd = '';
     public string $link_reporte_facturacion_bd = '';
     public string $link_reporte_ventas_por_operador_bd = '';
     public string $descripcion_nom_layout = '';
@@ -1653,6 +1654,12 @@ class controlador_fc_layout_nom extends system{
 
     }
 
+    public function reporte_anual(bool $header, bool $ws = false)
+    {
+        $link = "index.php?seccion=fc_layout_nom&accion=reporte_anual_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
+        $this->link_reporte_anual_bd = $link;
+    }
+
     public function reporte_facturacion(bool $header, bool $ws = false)
     {
         $link = "index.php?seccion=fc_layout_nom&accion=reporte_facturacion_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
@@ -1729,15 +1736,7 @@ class controlador_fc_layout_nom extends system{
             $ff->format('Ymd')
         );
 
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        header('Cache-Control: max-age=0');
-        header('Expires: 0');
-        header('Pragma: public');
-
-        $writer = new Xlsx($spreadsheet);
-        $writer->save('php://output');
-        exit;
+        $this->genera_parte_final_excel(filename: $filename,spreadsheet:  $spreadsheet);
 
     }
 
@@ -1835,17 +1834,7 @@ class controlador_fc_layout_nom extends system{
             $ff->format('Ymd')
         );
 
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        header('Cache-Control: max-age=0');
-        header('Expires: 0');
-        header('Pragma: public');
-
-        $writer = new Xlsx($spreadsheet);
-        $writer->save('php://output');
-        exit;
-
-
+        $this->genera_parte_final_excel(filename: $filename,spreadsheet:  $spreadsheet);
 
     }
 
@@ -2379,6 +2368,19 @@ class controlador_fc_layout_nom extends system{
         unlink($zip['ruta']);
         return count($correos);
 
+    }
+
+    private function genera_parte_final_excel(string $filename, Spreadsheet $spreadsheet)
+    {
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+        header('Expires: 0');
+        header('Pragma: public');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
     }
 
 
