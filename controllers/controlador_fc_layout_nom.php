@@ -1660,6 +1660,18 @@ class controlador_fc_layout_nom extends system{
         $this->link_reporte_anual_bd = $link;
     }
 
+    public function reporte_anual_bd(bool $header, bool $ws = false)
+    {
+        $year = 2026;
+        $spreadsheet = (new _reporte_anual(year: $year, link: $this->link))->descarga_reporte();
+        $filename = sprintf(
+            'Reporte_Anual_%s.xlsx',
+            $year,
+        );
+
+        $this->genera_parte_final_excel(filename: $filename,spreadsheet:  $spreadsheet);
+    }
+
     public function reporte_facturacion(bool $header, bool $ws = false)
     {
         $link = "index.php?seccion=fc_layout_nom&accion=reporte_facturacion_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
