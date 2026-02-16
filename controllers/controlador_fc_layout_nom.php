@@ -1662,8 +1662,24 @@ class controlador_fc_layout_nom extends system{
 
     public function reporte_anual_bd(bool $header, bool $ws = false)
     {
-        $year = 2026;
+
+        $year = (int)$_POST['year'] ?? null;
+
+        if (!$year) {
+            return $this->retorno_error(
+                mensaje: 'Fecha no proporcionadas',
+                data: $_POST,
+                header: $header,
+                ws: $ws
+            );
+        }
+
         $spreadsheet = (new _reporte_anual(year: $year, link: $this->link))->descarga_reporte();
+        if(errores::$error) {
+            $error = (new errores())->error("Error crear spreadsheet", $spreadsheet);
+            print_r($error);
+            exit;
+        }
         $filename = sprintf(
             'Reporte_Anual_%s.xlsx',
             $year,

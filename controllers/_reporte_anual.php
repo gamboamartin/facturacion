@@ -3,10 +3,8 @@
 namespace gamboamartin\facturacion\controllers;
 
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\models\com_agente;
-use gamboamartin\facturacion\models\fc_layout_factura;
-use gamboamartin\facturacion\models\fc_row_layout;
 use PDO;
+use PDOException;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -37,7 +35,16 @@ class _reporte_anual{
 
     public function descarga_reporte(): Spreadsheet|array
     {
-        $this->crear_sheet_mes_fmt1(mes: '01', nombre_mes: 'ENERO');
+        foreach ($this->meses() as $mes => $nombre_mes) {
+            $rs_sheet = $this->crear_sheet_mes_fmt1(mes: $mes, nombre_mes: $nombre_mes);
+            if(errores::$error){
+                return (new errores())->error(
+                    mensaje: 'Error al crear_sheet_mes_fmt1',
+                    data:  $rs_sheet
+                );
+            }
+        }
+
         return $this->spreadsheet;
     }
 
@@ -51,6 +58,44 @@ class _reporte_anual{
         }
 
         $fila = 2;
+
+        $registros = $this->obtener_data_fmt1(mes: $mes);
+        if(errores::$error){
+            return (new errores())->error(
+                mensaje: 'Error al obtener_data_fmt1',
+                data:  $registros
+            );
+        }
+
+        foreach ($registros as $registro) {
+
+            $porcentaje_comision = $registro['porcentaje_comision'] / 100;
+            $subtotal = $registro['sub_total'];
+            $monto_dispersion = $subtotal / (1 + $porcentaje_comision);
+
+            $sheet->setCellValue("A{$fila}", $registro['operador']);
+            $sheet->setCellValue("B{$fila}", $this->formatea_digitos((int)$registro['numero_cliente']));
+            $sheet->setCellValue("C{$fila}", $registro['cliente']);
+            $sheet->setCellValue("D{$fila}", ""); // EMPRESA PAGADORA
+            $sheet->setCellValue("E{$fila}", $this->formatea_digitos((int)$registro['numero_asesor']));
+            $sheet->setCellValue("F{$fila}", $registro['asesor']);
+            $sheet->setCellValue("G{$fila}", $registro['periodo']);
+            $sheet->setCellValue("H{$fila}", $registro['numero_empleados']); // NUMERO DE EMPLEADOS
+            $sheet->setCellValue("I{$fila}", $this->formatea_digitos((int)$registro['numero_factura']));
+            $sheet->setCellValue("J{$fila}",
+                \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(
+                    strtotime($registro['fecha_operacion'])
+                )
+            );
+            $sheet->setCellValue("K{$fila}", $registro['producto']);
+            $sheet->setCellValue("L{$fila}", $porcentaje_comision);
+            $sheet->setCellValue("M{$fila}", $monto_dispersion); //MONTO DE DISPERSION
+            $sheet->setCellValue("N{$fila}", $registro['iva']);
+            $sheet->setCellValue("O{$fila}", $registro['total']);
+
+            $fila++;
+
+        }// end foreach ($registros as $registro)
 
         $ultimaFila = $fila > 2 ? $fila - 1 : 1;
         $this->fmt1_styles(sheet: $sheet, ultimaFila: $ultimaFila);
@@ -144,15 +189,21 @@ class _reporte_anual{
         $sheet->getStyle("E2:E{$ultimaFila}")->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
+        $sheet->getStyle("H2:H{$ultimaFila}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle("J2:J{$ultimaFila}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
         $sheet->getStyle("I2:I{$ultimaFila}")->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        $sheet->getColumnDimension('A')->setWidth(16);
+        $sheet->getColumnDimension('A')->setWidth(35);
         $sheet->getColumnDimension('B')->setWidth(10);
-        $sheet->getColumnDimension('C')->setWidth(45);
+        $sheet->getColumnDimension('C')->setWidth(35);
         $sheet->getColumnDimension('D')->setWidth(12);
         $sheet->getColumnDimension('E')->setWidth(12);
-        $sheet->getColumnDimension('F')->setWidth(30);
+        $sheet->getColumnDimension('F')->setWidth(25);
         $sheet->getColumnDimension('G')->setWidth(18);
         $sheet->getColumnDimension('H')->setWidth(15);
         $sheet->getColumnDimension('I')->setWidth(15);
@@ -168,8 +219,14 @@ class _reporte_anual{
         return str_pad((string)$numero, 7, '0', STR_PAD_LEFT);
     }
 
-    private function obtener_data_fmt1(string $mes)
+    private function obtener_data_fmt1(string $mes): array
     {
+        $mes = str_pad($mes, 2, '0', STR_PAD_LEFT);
+
+        $fecha_inicio = "{$this->year}-{$mes}-01";
+        $fecha_fin = date("Y-m-t", strtotime($fecha_inicio));
+        // t = último día real del mes (28,29,30,31)
+
         $query = "SELECT
                         COALESCE(operador.descripcion, 'NO ASIGNADO') AS operador,
                         com_cliente.id AS numero_cliente,
@@ -177,11 +234,13 @@ class _reporte_anual{
                         asesor.id AS numero_asesor,
                         COALESCE(asesor.descripcion, 'NO ASIGNADO') AS asesor,
                         periodo.descripcion AS periodo,
+                        (SELECT COUNT(*) FROM fc_row_layout WHERE fc_row_layout.fc_layout_nom_id = fc_layout_nom.id) AS numero_empleados,
                         fc_factura.id AS numero_factura,
                         fc_factura.fecha AS fecha_operacion,
                         producto.descripcion AS producto,
                         fc_factura.porcentaje_comision_cliente AS porcentaje_comision,
                         fc_factura.total_traslados AS iva,
+                        fc_factura.sub_total,
                         fc_factura.total AS total 
                     FROM
                         fc_factura
@@ -194,13 +253,27 @@ class _reporte_anual{
                         LEFT JOIN fc_layout_periodo AS periodo ON fc_layout_nom.fc_layout_periodo_id = periodo.id
                         LEFT JOIN com_tipo_producto AS producto ON fc_factura.com_tipo_producto_id = producto.id 
                     WHERE
-                        fc_factura.fecha BETWEEN '2026-01-01' 
-                        AND '2026-01-30' 
-                    ORDER BY
-                        periodo.id,
-                        operador.descripcion ASC";
-        $stmt = $this->link->query("");
-        $rs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+                    fc_factura.fecha BETWEEN :fecha_inicio
+                    AND :fecha_fin
+                ORDER BY
+                    periodo.id,
+                    operador.descripcion ASC";
+
+        try {
+            $stmt = $this->link->prepare($query);
+            $stmt->execute([
+                ':fecha_inicio' => $fecha_inicio,
+                ':fecha_fin'    => $fecha_fin
+            ]);
+            $rs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return (new errores())->error(
+                mensaje: $e->getMessage(),
+                data:  $e
+            );
+        }
+
+        return $rs;
     }
 
 }
