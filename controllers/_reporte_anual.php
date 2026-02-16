@@ -36,11 +36,19 @@ class _reporte_anual{
     public function descarga_reporte(): Spreadsheet|array
     {
         foreach ($this->meses() as $mes => $nombre_mes) {
-            $rs_sheet = $this->crear_sheet_mes_fmt1(mes: $mes, nombre_mes: $nombre_mes);
+            $rs_sheet_fmt1 = $this->crear_sheet_mes_fmt1(mes: $mes, nombre_mes: $nombre_mes);
             if(errores::$error){
                 return (new errores())->error(
                     mensaje: 'Error al crear_sheet_mes_fmt1',
-                    data:  $rs_sheet
+                    data:  $rs_sheet_fmt1
+                );
+            }
+
+            $rs_sheet_fmt2 = $this->crear_sheet_mes_fmt2(mes: $mes, nombre_mes: $nombre_mes);
+            if(errores::$error){
+                return (new errores())->error(
+                    mensaje: 'Error al crear_sheet_mes_fmt2',
+                    data:  $rs_sheet_fmt2
                 );
             }
         }
@@ -48,16 +56,10 @@ class _reporte_anual{
         return $this->spreadsheet;
     }
 
-    private function crear_sheet_mes_fmt1(string $mes, string $nombre_mes)
+    private function crear_sheet_mes_fmt1(string $mes, string $nombre_mes): array
     {
         $sheet = $this->spreadsheet->createSheet();
         $sheet->setTitle(substr($nombre_mes, 0, 31));
-
-        foreach ($this->headers_fmt1() as $cell => $text) {
-            $sheet->setCellValue($cell, $text);
-        }
-
-        $fila = 2;
 
         $registros = $this->obtener_data_fmt1(mes: $mes);
         if(errores::$error){
@@ -66,6 +68,37 @@ class _reporte_anual{
                 data:  $registros
             );
         }
+
+        $this->recorre_registros(registros: $registros,sheet:  $sheet);
+
+        return [];
+    }
+
+    private function crear_sheet_mes_fmt2(string $mes, string $nombre_mes): array
+    {
+        $sheet = $this->spreadsheet->createSheet();
+        $sheet->setTitle(substr("{$nombre_mes}(2)", 0, 31));
+
+        $registros = $this->obtener_data_fmt2(mes: $mes);
+        if(errores::$error){
+            return (new errores())->error(
+                mensaje: 'Error al obtener_data_fmt1',
+                data:  $registros
+            );
+        }
+
+        $this->recorre_registros(registros: $registros,sheet:  $sheet);
+
+        return [];
+    }
+
+    private function recorre_registros(array $registros,Worksheet $sheet): void
+    {
+        foreach ($this->headers_fmt1_fmt2() as $cell => $text) {
+            $sheet->setCellValue($cell, $text);
+        }
+
+        $fila = 2;
 
         foreach ($registros as $registro) {
 
@@ -98,11 +131,10 @@ class _reporte_anual{
         }// end foreach ($registros as $registro)
 
         $ultimaFila = $fila > 2 ? $fila - 1 : 1;
-        $this->fmt1_styles(sheet: $sheet, ultimaFila: $ultimaFila);
-        return [];
+        $this->fmt1_fmt2_styles(sheet: $sheet, ultimaFila: $ultimaFila);
     }
 
-    private function headers_fmt1(): array
+    private function headers_fmt1_fmt2(): array
     {
         return [
             'A1' => 'Nombre Operador',
@@ -141,7 +173,7 @@ class _reporte_anual{
         ];
     }
 
-    private function fmt1_styles(Worksheet $sheet, int $ultimaFila): void
+    private function fmt1_fmt2_styles(Worksheet $sheet, int $ultimaFila): void
     {
         try {
             $sheet->getStyle('A1:O1')->applyFromArray([
@@ -274,6 +306,67 @@ class _reporte_anual{
         }
 
         return $rs;
+    }
+
+    private function obtener_data_fmt2(string $mes): array
+    {
+        $mes = str_pad($mes, 2, '0', STR_PAD_LEFT);
+
+        $fecha_inicio = "{$this->year}-{$mes}-01";
+        $fecha_fin = date("Y-m-t", strtotime($fecha_inicio));
+        // t = último día real del mes (28,29,30,31)
+
+        $query = "{$this->base_query()}
+                ORDER BY
+                    com_cliente.razon_social ASC";
+
+        try {
+            $stmt = $this->link->prepare($query);
+            $stmt->execute([
+                ':fecha_inicio' => $fecha_inicio,
+                ':fecha_fin'    => $fecha_fin
+            ]);
+            $rs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return (new errores())->error(
+                mensaje: $e->getMessage(),
+                data:  $e
+            );
+        }
+
+        return $rs;
+    }
+
+    private function base_query(): string
+    {
+        return "SELECT
+                        COALESCE(operador.descripcion, 'NO ASIGNADO') AS operador,
+                        com_cliente.id AS numero_cliente,
+                        com_cliente.razon_social AS cliente,
+                        asesor.id AS numero_asesor,
+                        COALESCE(asesor.descripcion, 'NO ASIGNADO') AS asesor,
+                        periodo.descripcion AS periodo,
+                        (SELECT COUNT(*) FROM fc_row_layout WHERE fc_row_layout.fc_layout_nom_id = fc_layout_nom.id) AS numero_empleados,
+                        fc_factura.id AS numero_factura,
+                        fc_factura.fecha AS fecha_operacion,
+                        producto.descripcion AS producto,
+                        fc_factura.porcentaje_comision_cliente AS porcentaje_comision,
+                        fc_factura.total_traslados AS iva,
+                        fc_factura.sub_total,
+                        fc_factura.total AS total 
+                    FROM
+                        fc_factura
+                        LEFT JOIN com_agente AS operador ON fc_factura.agente_operacion_alta_id = operador.id
+                        LEFT JOIN com_sucursal ON fc_factura.com_sucursal_id = com_sucursal.id
+                        LEFT JOIN com_cliente ON com_sucursal.com_cliente_id = com_cliente.id
+                        LEFT JOIN com_agente AS asesor ON com_cliente.com_agente_asesor_id = asesor.id
+                        LEFT JOIN fc_layout_factura ON fc_factura.id = fc_layout_factura.fc_factura_id
+                        LEFT JOIN fc_layout_nom ON fc_layout_factura.fc_layout_nom_id = fc_layout_nom.id
+                        LEFT JOIN fc_layout_periodo AS periodo ON fc_layout_nom.fc_layout_periodo_id = periodo.id
+                        LEFT JOIN com_tipo_producto AS producto ON fc_factura.com_tipo_producto_id = producto.id 
+                    WHERE
+                    fc_factura.fecha BETWEEN :fecha_inicio
+                    AND :fecha_fin";
     }
 
 }
