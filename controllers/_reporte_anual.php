@@ -91,6 +91,19 @@ class _reporte_anual{
         $total_diciembre = 0.00;
 
         foreach ($this->datos_fmt3 as $registro) {
+            $total_actual = 0.00;
+            $total_actual += (float)($registro['01'] ?? 0.00);
+            $total_actual += (float)($registro['02'] ?? 0.00);
+            $total_actual += (float)($registro['03'] ?? 0.00);
+            $total_actual += (float)($registro['04'] ?? 0.00);
+            $total_actual += (float)($registro['05'] ?? 0.00);
+            $total_actual += (float)($registro['06'] ?? 0.00);
+            $total_actual += (float)($registro['07'] ?? 0.00);
+            $total_actual += (float)($registro['08'] ?? 0.00);
+            $total_actual += (float)($registro['09'] ?? 0.00);
+            $total_actual += (float)($registro['10'] ?? 0.00);
+            $total_actual += (float)($registro['11'] ?? 0.00);
+            $total_actual += (float)($registro['12'] ?? 0.00);
 
             $total_enero +=      (float)($registro['01'] ?? 0.00);
             $total_febrero +=    (float)($registro['02'] ?? 0.00);
@@ -135,7 +148,7 @@ class _reporte_anual{
             $sheet->setCellValue("P{$fila}", $octubre);
             $sheet->setCellValue("Q{$fila}", $noviembre);
             $sheet->setCellValue("R{$fila}", $diciembre);
-            $sheet->setCellValue("S{$fila}", '-');
+            $sheet->setCellValue("S{$fila}", $total_actual);
 
             $fila++;
         }
@@ -449,6 +462,10 @@ class _reporte_anual{
             ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $sheet->getStyle("G{$ultimaFila}:S{$ultimaFila}")
+            ->getFont()
+            ->setBold(true);
+
+        $sheet->getStyle("S2:S{$ultimaFila}")
             ->getFont()
             ->setBold(true);
 
