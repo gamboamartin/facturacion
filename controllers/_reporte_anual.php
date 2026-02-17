@@ -18,6 +18,7 @@ class _reporte_anual{
     private PDO $link ;
     private int $year;
     private Spreadsheet $spreadsheet;
+    private array $datos_fmt3 = [];
 
     public function __construct(int $year, PDO $link){
 
@@ -53,7 +54,110 @@ class _reporte_anual{
             }
         }
 
+        $rs_sheet_fmt3 = $this->crear_sheet_fmt3();
+        if(errores::$error){
+            return (new errores())->error(
+                mensaje: 'Error al crear_sheet_fmt3',
+                data:  $rs_sheet_fmt3
+            );
+        }
+
         return $this->spreadsheet;
+    }
+
+    private function crear_sheet_fmt3(): array
+    {
+        $sheet = $this->spreadsheet->createSheet();
+        $sheet->setTitle(substr("CONCENTRADO DE VENTAS {$this->year}", 0, 31));
+
+        foreach ($this->headers_fmt3() as $cell => $text) {
+            $sheet->setCellValue($cell, $text);
+        }
+        $sheet->setCellValue('S1', "TOTAL {$this->year}");
+
+        $fila = 2;
+
+        $total_enero = 0.00;
+        $total_febrero = 0.00;
+        $total_marzo = 0.00;
+        $total_abril = 0.00;
+        $total_mayo = 0.00;
+        $total_junio = 0.00;
+        $total_julio = 0.00;
+        $total_agosto = 0.00;
+        $total_septiembre = 0.00;
+        $total_octubre = 0.00;
+        $total_noviembre = 0.00;
+        $total_diciembre = 0.00;
+
+        foreach ($this->datos_fmt3 as $registro) {
+
+            $total_enero +=      (float)($registro['01'] ?? 0.00);
+            $total_febrero +=    (float)($registro['02'] ?? 0.00);
+            $total_marzo +=      (float)($registro['03'] ?? 0.00);
+            $total_abril +=      (float)($registro['04'] ?? 0.00);
+            $total_mayo +=       (float)($registro['05'] ?? 0.00);
+            $total_junio +=      (float)($registro['06'] ?? 0.00);
+            $total_julio +=      (float)($registro['07'] ?? 0.00);
+            $total_agosto +=     (float)($registro['08'] ?? 0.00);
+            $total_septiembre += (float)($registro['09'] ?? 0.00);
+            $total_octubre +=    (float)($registro['10'] ?? 0.00);
+            $total_noviembre +=  (float)($registro['11'] ?? 0.00);
+            $total_diciembre +=  (float)($registro['12'] ?? 0.00);
+
+            $enero =      $registro['01'] ?? '-';
+            $febrero =    $registro['02'] ?? '-';
+            $marzo =      $registro['03'] ?? '-';
+            $abril =      $registro['04'] ?? '-';
+            $mayo =       $registro['05'] ?? '-';
+            $junio =      $registro['06'] ?? '-';
+            $julio =      $registro['07'] ?? '-';
+            $agosto =     $registro['08'] ?? '-';
+            $septiembre = $registro['09'] ?? '-';
+            $octubre =    $registro['10'] ?? '-';
+            $noviembre =  $registro['11'] ?? '-';
+            $diciembre =  $registro['12'] ?? '-';
+
+            $sheet->setCellValue("A{$fila}", $registro['cliente']);
+            $sheet->setCellValue("B{$fila}", $registro['asesor']);
+            $sheet->setCellValue("C{$fila}", ($registro['comision']/100));
+            $sheet->setCellValue("D{$fila}", $this->year);
+
+            $sheet->setCellValue("G{$fila}", $enero);
+            $sheet->setCellValue("H{$fila}", $febrero);
+            $sheet->setCellValue("I{$fila}", $marzo);
+            $sheet->setCellValue("J{$fila}", $abril);
+            $sheet->setCellValue("K{$fila}", $mayo);
+            $sheet->setCellValue("L{$fila}", $junio);
+            $sheet->setCellValue("M{$fila}", $julio);
+            $sheet->setCellValue("N{$fila}", $agosto);
+            $sheet->setCellValue("O{$fila}", $septiembre);
+            $sheet->setCellValue("P{$fila}", $octubre);
+            $sheet->setCellValue("Q{$fila}", $noviembre);
+            $sheet->setCellValue("R{$fila}", $diciembre);
+            $sheet->setCellValue("S{$fila}", '-');
+
+            $fila++;
+        }
+
+        $sheet->setCellValue("G{$fila}", $total_enero);
+        $sheet->setCellValue("H{$fila}", $total_febrero);
+        $sheet->setCellValue("I{$fila}", $total_marzo);
+        $sheet->setCellValue("J{$fila}", $total_abril);
+        $sheet->setCellValue("K{$fila}", $total_mayo);
+        $sheet->setCellValue("L{$fila}", $total_junio);
+        $sheet->setCellValue("M{$fila}", $total_julio);
+        $sheet->setCellValue("N{$fila}", $total_agosto);
+        $sheet->setCellValue("O{$fila}", $total_septiembre);
+        $sheet->setCellValue("P{$fila}", $total_octubre);
+        $sheet->setCellValue("Q{$fila}", $total_noviembre);
+        $sheet->setCellValue("R{$fila}", $total_diciembre);
+        $fila++;
+
+        $ultimaFila = $fila > 2 ? $fila - 1 : 1;
+        $this->fmt3_styles(sheet: $sheet, ultimaFila: $ultimaFila);
+
+        return [];
     }
 
     private function crear_sheet_mes_fmt1(string $mes, string $nombre_mes): array
@@ -82,10 +186,12 @@ class _reporte_anual{
         $registros = $this->obtener_data_fmt2(mes: $mes);
         if(errores::$error){
             return (new errores())->error(
-                mensaje: 'Error al obtener_data_fmt1',
+                mensaje: 'Error al obtener_data_fmt2',
                 data:  $registros
             );
         }
+
+        $this->procesa_registros_fmt3(registros: $registros, mes: $mes);
 
         $this->recorre_registros(registros: $registros,sheet:  $sheet);
 
@@ -134,6 +240,33 @@ class _reporte_anual{
         $this->fmt1_fmt2_styles(sheet: $sheet, ultimaFila: $ultimaFila);
     }
 
+    private function procesa_registros_fmt3(array $registros, string $mes): void
+    {
+
+        foreach ($registros as $registro) {
+            $numero_cliente = $registro['numero_cliente'];
+            $cliente = $registro['cliente'];
+            $asesor = $registro['asesor'];
+            $porcentaje_comision = $registro['porcentaje_comision'];
+            $total = (float)$registro['total'];
+
+            if (!isset($this->datos_fmt3[$numero_cliente])) {
+                $this->datos_fmt3[$numero_cliente] = [
+                    'cliente' => $cliente,
+                    'asesor' => $asesor,
+                    'comision' => $porcentaje_comision,
+                ];
+            }
+
+            if (!isset($this->datos_fmt3[$numero_cliente][$mes])) {
+                $this->datos_fmt3[$numero_cliente][$mes] = $total;
+            }else{
+                $this->datos_fmt3[$numero_cliente][$mes] += $total;
+            }
+
+        }
+    }
+
     private function headers_fmt1_fmt2(): array
     {
         return [
@@ -152,6 +285,30 @@ class _reporte_anual{
             'M1' => 'MONTO DE DISPERSION',
             'N1' => 'IVA',
             'O1' => 'TOTAL FACTURA',
+        ];
+    }
+
+    private function headers_fmt3(): array
+    {
+        return [
+            'A1' => 'CLIENTE',
+            'B1' => 'ASESOR',
+            'C1' => 'COMISION',
+            'D1' => 'AÑO',
+            'E1' => 'BNI',
+            'F1' => '',
+            'G1' => 'TOTAL FACTURADO ENERO',
+            'H1' => 'TOTAL FACTURADO FEBRERO',
+            'I1' => 'TOTAL FACTURADO MARZO',
+            'J1' => 'TOTAL FACTURADO ABRIL',
+            'K1' => 'TOTAL FACTURADO MAYO',
+            'L1' => 'TOTAL FACTURADO JUNIO',
+            'M1' => 'TOTAL FACTURADO JULIO',
+            'N1' => 'TOTAL FACTURADO AGOSTO',
+            'O1' => 'TOTAL FACTURADO SEPTIEMBRE',
+            'P1' => 'TOTAL FACTURADO OCTUBRE',
+            'Q1' => 'TOTAL FACTURADO NOVIEMBRE',
+            'R1' => 'TOTAL FACTURADO DICIEMBRE',
         ];
     }
 
@@ -245,6 +402,77 @@ class _reporte_anual{
         $sheet->getColumnDimension('M')->setWidth(18);
         $sheet->getColumnDimension('N')->setWidth(18);
         $sheet->getColumnDimension('O')->setWidth(18);
+    }
+    private function fmt3_styles(Worksheet $sheet, int $ultimaFila): void
+    {
+        try {
+            $sheet->getStyle('A1:S1')->applyFromArray([
+                'font' => [
+                    'bold' => true,
+                    'color' => ['rgb' => 'FFFFFF'],
+                ],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '5983b0'],
+                ],
+                'borders' => [
+                    'outline' => [ // bordes exteriores
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color'       => ['rgb' => '000000'],
+                    ],
+                    'inside' => [ // bordes internos
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color'       => ['rgb' => '000000'],
+                    ],
+                ],
+            ]);
+        } catch (Exception $e) {
+
+        }
+
+        $sheet->getStyle("C2:C{$ultimaFila}")
+            ->getNumberFormat()->setFormatCode('0.00%');
+
+        $sheet->getStyle("G2:S{$ultimaFila}")
+            ->getNumberFormat()->setFormatCode('"$"#,##0.00');
+
+
+        $sheet->getRowDimension(1)->setRowHeight(45);
+        $sheet->getStyle('A1:S1')->getAlignment()
+            ->setWrapText(true)->setVertical(Alignment::VERTICAL_CENTER)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle("C2:D{$ultimaFila}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle("G2:S{$ultimaFila}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle("G{$ultimaFila}:S{$ultimaFila}")
+            ->getFont()
+            ->setBold(true);
+
+
+        $sheet->getColumnDimension('A')->setWidth(30);
+        $sheet->getColumnDimension('B')->setWidth(30);
+        $sheet->getColumnDimension('C')->setWidth(10);
+        $sheet->getColumnDimension('D')->setWidth(10);
+        $sheet->getColumnDimension('E')->setWidth(10);
+        $sheet->getColumnDimension('F')->setWidth(10);
+
+        $sheet->getColumnDimension('G')->setWidth(14);
+        $sheet->getColumnDimension('H')->setWidth(14);
+        $sheet->getColumnDimension('I')->setWidth(14);
+        $sheet->getColumnDimension('J')->setWidth(14);
+        $sheet->getColumnDimension('K')->setWidth(14);
+        $sheet->getColumnDimension('L')->setWidth(14);
+        $sheet->getColumnDimension('M')->setWidth(14);
+        $sheet->getColumnDimension('N')->setWidth(14);
+        $sheet->getColumnDimension('O')->setWidth(14);
+        $sheet->getColumnDimension('P')->setWidth(14);
+        $sheet->getColumnDimension('Q')->setWidth(14);
+        $sheet->getColumnDimension('R')->setWidth(14);
+        $sheet->getColumnDimension('S')->setWidth(14);
     }
 
     private function formatea_digitos(int $numero): string {
