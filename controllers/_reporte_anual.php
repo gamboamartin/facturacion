@@ -2,6 +2,7 @@
 
 namespace gamboamartin\facturacion\controllers;
 
+use config\generales;
 use gamboamartin\errores\errores;
 use PDO;
 use PDOException;
@@ -20,6 +21,8 @@ class _reporte_anual{
     private Spreadsheet $spreadsheet;
     private array $datos_fmt3 = [];
 
+    private string $empresa_pagadora = '';
+
     public function __construct(int $year, PDO $link){
 
         $this->link = $link;
@@ -29,6 +32,10 @@ class _reporte_anual{
             $this->spreadsheet->removeSheetByIndex(0);
         } catch (Exception $e) {
 
+        }
+
+        if (isset(generales::$empresa_pagadora_reportes)){
+            $this->empresa_pagadora = generales::$empresa_pagadora_reportes;
         }
 
         return $this;
@@ -228,7 +235,7 @@ class _reporte_anual{
             $sheet->setCellValue("A{$fila}", $registro['operador']);
             $sheet->setCellValue("B{$fila}", $this->formatea_digitos((int)$registro['numero_cliente']));
             $sheet->setCellValue("C{$fila}", $registro['cliente']);
-            $sheet->setCellValue("D{$fila}", ""); // EMPRESA PAGADORA
+            $sheet->setCellValue("D{$fila}", $this->empresa_pagadora); // EMPRESA PAGADORA
             $sheet->setCellValue("E{$fila}", $this->formatea_digitos((int)$registro['numero_asesor']));
             $sheet->setCellValue("F{$fila}", $registro['asesor']);
             $sheet->setCellValue("G{$fila}", $registro['periodo']);
