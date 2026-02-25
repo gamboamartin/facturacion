@@ -1,0 +1,35 @@
+/* Barra superior (donde está el menú) */
+.top-bar.color-primary {
+  background-color: #590492 !important;
+}
+
+/* Secondary (paginación, botones, etc.) */
+body .pagination li.page-item a:hover,
+body .pagination li.page-item a.active,
+body .pagination-carousel li a:hover,
+body .pagination-carousel li.active a,
+.header .top-bar .pull-right,
+body .color-secondary,
+body .btn.color-secondary {
+  background-color: #590492 !important;
+}
+
+body .border-color-secondary {
+  border-color: #590492 !important;
+}
+
+
+/* Flechas del paginador dentro del menú de acciones (DataTables) */
+.dataTables_wrapper .dropdown-menu .prev-page,
+.dataTables_wrapper .dropdown-menu .next-page{
+    font-size: 20px;    
+    line-height: 1;
+    padding: 2px 8px;    
+    font-weight: 700;
+}
+
+/* visualmente por estilos del tema */
+.dataTables_wrapper .dropdown-menu .prev-page.btn-link,
+.dataTables_wrapper .dropdown-menu .next-page.btn-link{
+    text-decoration: none;
+}
