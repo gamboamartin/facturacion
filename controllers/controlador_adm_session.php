@@ -21,7 +21,18 @@ final class controlador_adm_session extends \gamboamartin\controllers\controlado
     public string $include_menu = '';
     public string $mensaje_html = '';
 
+    // nuevo
 
+    public ?string $logo_empresa_url = null;
+
+
+    /////////////////////////////////////////////////////
+
+ public function __construct(...$args)
+    {
+        parent::__construct(...$args);
+        $this->set_logo_empresa_url_global();
+    }
 
     /**
      * Funcion de controlador donde se ejecutaran siempre que haya un acceso denegado
@@ -130,7 +141,67 @@ final class controlador_adm_session extends \gamboamartin\controllers\controlado
         return $login;
 
     }
+//////////////////////////////////////////////////////////////////////////////////////
+    protected function set_logo_empresa_url_global(): void
+    {
+        $this->logo_empresa_url = null;
 
+        try {
+            $org_empresa_id = (int)($_GET['org_empresa_id'] ?? 0);
 
+            if ($org_empresa_id <= 0) {
+                $modelo_empresa = new \gamboamartin\organigrama\models\org_empresa($this->link);
+                $r_emp = $modelo_empresa->filtro_and(
+                    aplica_seguridad: false,
+                    columnas: ['org_empresa_id'],
+                    filtro: ['org_empresa.status' => 'activo'],
+                    limit: 1,
+                    order: ['org_empresa.id' => 'ASC']
+                );
+                if (\gamboamartin\errores\errores::$error) return;
+                $org_empresa_id = (int)($r_emp->registros[0]['org_empresa_id'] ?? 0);
+            }
+
+            if ($org_empresa_id <= 0) return;
+
+            $modelo_logo = new \gamboamartin\organigrama\models\org_logo($this->link);
+
+            // 1) Traer doc_documento_id del logo principal
+            $r_logo = $modelo_logo->filtro_and(
+                aplica_seguridad: false,
+                columnas: ['org_logo_doc_documento_id'],
+                filtro: [
+                    'org_logo.status' => 'activo',
+                    'org_logo.es_principal' => 'activo',
+                    'org_logo.org_empresa_id' => $org_empresa_id
+                ],
+                limit: 1,
+                order: ['org_logo.id' => 'DESC']
+            );
+            if (\gamboamartin\errores\errores::$error) return;
+
+            $doc_id = (int)($r_logo->registros[0]['org_logo_doc_documento_id'] ?? 0);
+            if ($doc_id <= 0) return;
+
+            // 2) Traer ruta del documento
+            $modelo_doc = new \gamboamartin\documento\models\doc_documento($this->link);
+            $r_doc = $modelo_doc->filtro_and(
+                aplica_seguridad: false,
+                columnas: ['doc_documento_ruta_relativa'],
+                filtro: ['doc_documento.id' => $doc_id],
+                limit: 1
+            );
+            if (\gamboamartin\errores\errores::$error) return;
+
+            $ruta = (string)($r_doc->registros[0]['doc_documento_ruta_relativa'] ?? '');
+            if ($ruta === '') return;
+
+            $this->logo_empresa_url = '/facturacion/' . ltrim($ruta, '/');
+        } catch (\Throwable $e) {
+            $this->logo_empresa_url = null;
+        }
+    }
+
+//////////////////////////////////////////////////////////////////////////////
 
 }

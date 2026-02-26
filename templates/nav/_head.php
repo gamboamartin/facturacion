@@ -13,7 +13,7 @@ $path_base_template = $views_cfg->ruta_templates;
         <section class="header-inner">
             <div style="display: flex; flex-direction: column; justify-content: center; padding: 0 35px;">
                 <?php if($data->menu){ ?>
-                    <?php include $path_base_template.'nav/menu.php' ?>
+                    <?php include $views_cfg->template_path('nav/menu.php'); ?>
                 <?php } ?>
             </div>
         </section><!-- /.menu-->

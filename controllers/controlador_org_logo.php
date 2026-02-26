@@ -18,16 +18,7 @@ class controlador_org_logo extends \gamboamartin\organigrama\controllers\control
 
     //AQUI TERMINA
 
-    // nuevo logo
-    public ?string $logo_empresa_url = null;
 
-    //aca termina
-
-    public function __construct() {
-        // aca comienza lo nuevo
-        $this->set_logo_empresa_url();
-        // aca termina
-    }
 
     //AQUI COMIENZA LO NUEVO
     public function subir_logo(bool $header, bool $ws = false): array|stdClass
@@ -209,69 +200,6 @@ class controlador_org_logo extends \gamboamartin\organigrama\controllers\control
         return ['ok' => true];
     }
 
-
-    protected function set_logo_empresa_url(): void
-{
-    $this->logo_empresa_url = null;
-
-    try {
-        // 1) Resolver empresa (GET o fallback primera activa)
-        $org_empresa_id = (int)($_GET['org_empresa_id'] ?? 0);
-
-        if ($org_empresa_id <= 0) {
-            $modelo_empresa = new \gamboamartin\organigrama\models\org_empresa($this->link);
-
-            $r_emp = $modelo_empresa->filtro_and(
-                aplica_seguridad: false,
-                columnas: ['org_empresa_id'],
-                filtro: ['org_empresa.status' => 'activo'],
-                limit: 1,
-                order: ['org_empresa.id' => 'ASC']
-            );
-
-            if (\gamboamartin\errores\errores::$error) {
-                $this->logo_empresa_url = null;
-                return;
-            }
-
-            $org_empresa_id = (int)($r_emp->registros[0]['org_empresa_id'] ?? 0);
-        }
-
-        if ($org_empresa_id <= 0) {
-            $this->logo_empresa_url = null;
-            return;
-        }
-
-        // 2) Buscar logo principal activo de esa empresa
-        $modelo_logo = new \gamboamartin\organigrama\models\org_logo($this->link);
-
-        $r_logo = $modelo_logo->filtro_and(
-            aplica_seguridad: false,
-            columnas: ['doc_documento_ruta_relativa'], // alias del join
-            filtro: [
-                'org_logo.status' => 'activo',
-                'org_logo.es_principal' => 'activo',
-                'org_logo.org_empresa_id' => $org_empresa_id
-            ],
-            limit: 1,
-            order: ['org_logo.id' => 'DESC']
-        );
-
-        if (\gamboamartin\errores\errores::$error) {
-            $this->logo_empresa_url = null;
-            return;
-        }
-
-        $ruta = (string)($r_logo->registros[0]['doc_documento_ruta_relativa'] ?? '');
-
-        if ($ruta !== '') {
-            // Ajusta el prefijo si en tu instancia no es /facturacion/
-            $this->logo_empresa_url = '/facturacion/' . ltrim($ruta, '/');
-        }
-    } catch (\Throwable $e) {
-        $this->logo_empresa_url = null;
-    }
-}
 
 
     // AQUI TERMINA LO NUEVO

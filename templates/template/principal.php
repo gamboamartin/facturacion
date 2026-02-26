@@ -26,7 +26,7 @@ $links_menu = (new links_menu(link:$controlador->link, registro_id: -1))->links;
 <div id="fb-root"></div>
 <div class="container container-wrapper">
     <header class="header">
-        <?php include $path_base_template.'nav/_head.php'?>
+       <?php include (new \config\views())->template_path('nav/_head.php'); ?>
     </header><!-- /.header-->
 
     <main class="main section-color-primary">
