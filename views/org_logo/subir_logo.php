@@ -32,8 +32,8 @@
     <div style="font-weight:600; margin-bottom:8px;">Selecciona un logo para usar como principal</div>
 
     <form method="POST"
-          action="index.php?seccion=org_logo&accion=activar_logo_bd&session_id=<?= htmlspecialchars($_GET['session_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-          onsubmit="return confirm('¿Quieres usar este logo como logo principal del sistema?');">
+      action="index.php?seccion=org_logo&accion=activar_logo_bd&session_id=<?= htmlspecialchars($_GET['session_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+      onsubmit="if(!confirm('¿Quieres usar este logo como logo principal del sistema?')) return false; setTimeout(function(){ window.location.href='index.php?seccion=org_logo&accion=lista&session_id=<?= htmlspecialchars($_GET['session_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>'; }, 600); return true;">
 
       <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px;">
         <?php foreach ($logos as $l): ?>
