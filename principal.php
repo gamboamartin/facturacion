@@ -1,4 +1,5 @@
 <?php
 use config\views;
-$path_base_template = (new views())->ruta_templates;
-include $path_base_template.'principal.php';
+
+$views_cfg = new views();
+include $views_cfg->template_path('template/principal.php');
