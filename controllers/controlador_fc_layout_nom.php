@@ -981,8 +981,26 @@ class controlador_fc_layout_nom extends system{
 
     public function layout_pagado(bool $header, bool $ws = false): array
     {
+        $modelo_fc_layout_nom = new fc_layout_nom($this->link);
+        $modelo_fc_layout_nom->registro_id = $this->registro_id;
+        $data = $modelo_fc_layout_nom->obten_data(columnas: ['fc_layout_nom_estado_layout']);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtner data del layout', data: $data, header: $header, ws: $ws);
+        }
 
-        $rs = (new fc_layout_nom($this->link))->cambiar_status_layout(
+        $estado_layout_actual = $data['fc_layout_nom_estado_layout'];
+
+        if ($estado_layout_actual === self::ESTADO_LAYOUT_INICIAL) {
+            return $this->retorno_error(
+                mensaje: 'No se puede poner como pagado un Layout del cual no se a generado una dispersion',
+                data: [],
+                header: $header,
+                ws: $ws
+            );
+        }
+
+        $rs = $modelo_fc_layout_nom->cambiar_status_layout(
             registro_id: $this->registro_id,
             status_layout: self::ESTADO_LAYOUT_PAGADO,
         );
