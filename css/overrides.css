@@ -1,6 +1,20 @@
-/* Barra superior (donde está el menú) */
-.top-bar.color-primary {
-  background-color: #590492 !important;
+:root{
+  /* Base */
+  --color-primary-azul: #232F5C;
+  --color-primary-morado: #590492;
+
+  /* Color efectivo del sistema:
+     - Si quieres morado: deja esta línea como está
+     - Si quieres azul: comenta o borra esta línea para que caiga al fallback */
+  --color-primary: var(--color-primary-morado);
+
+  /* Fallback global (azul) */
+  --color-primary-fallback: var(--color-primary-azul);
+}
+
+/* Barra superior (menú) */
+.top-bar.color-primary{
+  background-color: var(--color-primary, var(--color-primary-fallback)) !important;
 }
 
 /* Secondary (paginación, botones, etc.) */
@@ -10,26 +24,25 @@ body .pagination-carousel li a:hover,
 body .pagination-carousel li.active a,
 .header .top-bar .pull-right,
 body .color-secondary,
-body .btn.color-secondary {
-  background-color: #590492 !important;
+body .btn.color-secondary{
+  background-color: var(--color-primary, var(--color-primary-fallback)) !important;
 }
 
-body .border-color-secondary {
-  border-color: #590492 !important;
+body .border-color-secondary{
+  border-color: var(--color-primary, var(--color-primary-fallback)) !important;
 }
-
 
 /* Flechas del paginador dentro del menú de acciones (DataTables) */
 .dataTables_wrapper .dropdown-menu .prev-page,
 .dataTables_wrapper .dropdown-menu .next-page{
-    font-size: 20px;    
-    line-height: 1;
-    padding: 2px 8px;    
-    font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  padding: 2px 8px;
+  font-weight: 700;
 }
 
-/* visualmente por estilos del tema */
+/* Visualmente por estilos del tema */
 .dataTables_wrapper .dropdown-menu .prev-page.btn-link,
 .dataTables_wrapper .dropdown-menu .next-page.btn-link{
-    text-decoration: none;
+  text-decoration: none;
 }
