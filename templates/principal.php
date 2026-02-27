@@ -17,7 +17,7 @@ $links_menu = (new links_menu(link:$controlador->link, registro_id: -1))->links;
     <title><?php echo (new views())->titulo_sistema; ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
-   <?php include (new \config\views())->template_path('template/css.php'); ?>
+   <?php include (new \config\views())->template_path('css.php'); ?>
     <?php echo $data->css_custom->css; ?>
 
 </head>
