@@ -986,7 +986,7 @@ class controlador_fc_layout_nom extends system{
         $data = $modelo_fc_layout_nom->obten_data(columnas: ['fc_layout_nom_estado_layout']);
         if (errores::$error) {
             return $this->retorno_error(
-                mensaje: 'Error al obtner data del layout', data: $data, header: $header, ws: $ws);
+                mensaje: 'Error al obtener data del layout', data: $data, header: $header, ws: $ws);
         }
 
         $estado_layout_actual = $data['fc_layout_nom_estado_layout'];
