@@ -1,5 +1,17 @@
 <?php use config\generales;
-use config\views; ?>
+use config\views;
+
+
+
+?>
+<style>
+:root{
+    --color-primary-fallback: #232F5C;
+    <?php if (isset(views::$nav_bg_color)) : ?>
+        --color-primary: <?php echo views::$nav_bg_color; ?>
+    <?php endif; ?>
+}
+</style>
 <link rel="icon" href="<?php echo (new generales())->url_base; ?>img/icons/Icono-TIQUE.png" type="image/x-icon" />
 <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,800,700&amp;subset=latin,cyrillic' rel='stylesheet' type='text/css' />
 <link rel="stylesheet" href="<?php echo (new views())->url_assets; ?>libraries/font-awesome/css/font-awesome.min.css" />

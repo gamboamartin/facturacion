@@ -1,17 +1,3 @@
-:root{
-  /* Base */
-  --color-primary-azul: #232F5C;
-  --color-primary-morado: #590492;
-
-  /* Color efectivo del sistema:
-     - Si quieres morado: deja esta línea como está
-     - Si quieres azul: comenta o borra esta línea para que caiga al fallback */
-  --color-primary: var(--color-primary-morado);
-
-  /* Fallback global (azul) */
-  --color-primary-fallback: var(--color-primary-azul);
-}
-
 /* Barra superior (menú) */
 .top-bar.color-primary{
   background-color: var(--color-primary, var(--color-primary-fallback)) !important;
