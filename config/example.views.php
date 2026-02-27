@@ -17,6 +17,7 @@ class views
     public string $url_js = '';
     public stdClass $heads;
     public array $subtitulos_menu = array();
+    public static string $nav_bg_color = '#232F5C';
 
     public function __construct(){
         $this->heads = new stdClass();
