@@ -609,16 +609,28 @@ class _pdf
             return $this->error->error(mensaje: 'Error al obtener QR', data: $ruta_qr);
         }
 
+        // LOGO dinámico: principal activo por empresa
         $filtro = array();
-        $filtro['org_empresa.id'] = $factura['org_empresa_id'];
-        $r_org_logo = (new org_logo(link: $link))->filtro_and(filtro: $filtro);
+        $filtro['org_logo.status'] = 'activo';
+        $filtro['org_logo.es_principal'] = 'activo';
+        $filtro['org_logo.org_empresa_id'] = (int)$factura['org_empresa_id'];
+
+        $r_org_logo = (new org_logo(link: $link))->filtro_and(
+            aplica_seguridad: false,
+            columnas: ['doc_documento_ruta_absoluta'],
+            filtro: $filtro,
+            limit: 1,
+            order: ['org_logo.id' => 'DESC']
+        );
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener Logo', data: $r_org_logo);
         }
+
         $ruta_logo = '';
         if ($r_org_logo->n_registros > 0) {
-            $ruta_logo = $r_org_logo->registros[0]['doc_documento_ruta_absoluta'];
+            $ruta_logo = (string)$r_org_logo->registros[0]['doc_documento_ruta_absoluta'];
         }
+        // aca termina logo dinámico
 
         $filtro = array();
         $filtro[$modelo_entidad->key_id] = $factura[$modelo_entidad->key_id];

@@ -1,0 +1,55 @@
+<?php
+/**
+ * @var base\controller\controlador_base $controlador
+ * @var links_menu $links_menu
+ */
+require_once __DIR__ . '/../logo_service.php';
+use gamboamartin\system\links_menu;
+
+$seccion = $_GET['seccion'] ?? '';
+$accion  = $_GET['accion'] ?? '';
+$es_login = ($seccion === 'adm_session' && in_array($accion, ['login'], true));
+?>
+<?php if (!$es_login): ?>
+<link rel="stylesheet" href="/facturacion/css/overrides.css?v=1">
+<div class="top-bar color-primary">
+  <div class="clearfix">
+    <div class="pull-right" style="display:flex;justify-content:space-between;width:100%;padding:0 35px;">
+    <?php
+    $logo_url = $controlador->logo_empresa_url ?? null;
+
+    if (empty($logo_url)) {
+        $logo_url = logo_empresa_url_framework($controlador->link, '/facturacion/');
+    }
+
+    // Link del logo (inicio)
+    $href_logo = $links_menu->adm_session->inicio ?? '/facturacion/';
+    ?>
+
+      <?php if (!empty($logo_url)): ?>
+      <a href="<?= htmlspecialchars($href_logo, ENT_QUOTES, 'UTF-8') ?>"
+        style="display:inline-flex;align-items:center;margin-right:12px;">
+        <img src="<?= htmlspecialchars($logo_url, ENT_QUOTES, 'UTF-8') ?>"
+            alt="Logo Empresa"
+            style="height:60px;width:auto;display:block;">
+      </a>
+    <?php endif; ?>
+
+      <ul class="social-nav clearfix">
+        <?php echo $controlador->menu_header; ?>
+      </ul>
+
+      <?php if (isset($_SESSION['activa']) && (int)$_SESSION['activa'] === 1): ?>
+        <div class="pull-right col-md-12" style="text-align:right;">
+          <a role="button" class="btn btn-info cerrar-session" href="<?php echo $links_menu->adm_session->inicio; ?>">Inicio</a>
+          <a role="button" class="btn btn-danger cerrar-session"
+             href="<?php echo (new links_menu(link: $controlador->link, registro_id: $controlador->registro_id))->links->adm_session->logout; ?>">
+             Salir
+          </a>
+        </div>
+      <?php endif; ?>
+
+    </div>
+  </div>
+</div>
+<?php endif; ?>

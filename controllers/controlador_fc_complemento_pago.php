@@ -553,13 +553,50 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             return $this->errores->error(mensaje: 'Error al asignar datos', data: $data);
         }
 
-        $filtro_ruta['org_empresa.id'] = $reporte['org_empresa_id'];
-        $ruta_logo = (new org_logo(link: $this->link))->filtro_and(filtro: $filtro_ruta);
+        /**
+         * ====== INICIO CAMBIO LOGO DINÁMICO ======
+         * Trae logo principal activo por empresa y lo convierte a base64 desde ruta absoluta.
+         */
+        $modelo_logo = new org_logo(link: $this->link);
+
+        $r_logo = $modelo_logo->filtro_and(
+            aplica_seguridad: false,
+            columnas: ['doc_documento_ruta_relativa'],
+            filtro: [
+                'org_logo.status' => 'activo',
+                'org_logo.es_principal' => 'activo',
+                'org_logo.org_empresa_id' => (int)$reporte['org_empresa_id']
+            ],
+            limit: 1,
+            order: ['org_logo.id' => 'DESC']
+        );
+
         if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al obtener Logo', data: $ruta_logo);
+            return $this->errores->error(mensaje: 'Error al obtener Logo', data: $r_logo);
         }
 
-        $ruta_logo = $ruta_logo->n_registros > 0 ? $ruta_logo->registros[0]['doc_documento_ruta_relativa'] : '';
+        $ruta_rel = $r_logo->n_registros > 0 ? (string)$r_logo->registros[0]['doc_documento_ruta_relativa'] : '';
+        $ruta_abs = '';
+        $logo_base64 = '';
+
+        if ($ruta_rel !== '') {
+            // Ajusta la raíz si tu instancia no vive en /var/www/html/facturacion/
+            $ruta_abs = '/var/www/html/facturacion/' . ltrim($ruta_rel, '/');
+        }
+
+        if ($ruta_abs !== '' && is_file($ruta_abs)) {
+            $ext = strtolower(pathinfo($ruta_abs, PATHINFO_EXTENSION));
+            $mime = match ($ext) {
+                'jpg', 'jpeg' => 'image/jpeg',
+                'webp' => 'image/webp',
+                default => 'image/png',
+            };
+
+            $logo_base64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($ruta_abs));
+        }
+        /**
+         * ====== FIN CAMBIO LOGO DINÁMICO ======
+         */
 
         $ruta_qr = (new fc_complemento_pago_documento(link: $this->link))->get_factura_documento(key_entidad_filter_id: $this->modelo->key_filtro_id,
             registro_id: $this->registro_id, tipo_documento: "qr_cfdi");
@@ -671,11 +708,9 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             ];
         }
 
-//        $ruta_logo = 'data:image/png;base64,' . base64_encode(file_get_contents($ruta_logo));
-        $ruta_logo = '';
         $datos = [
             'folio' => $reporte['fc_complemento_pago_folio'],
-            'logo' => $ruta_logo,
+            'logo' => $logo_base64,
             'qr' => $ruta_qr,
             'emisor' => [
                 'emisor' => $reporte['org_empresa_razon_social'],

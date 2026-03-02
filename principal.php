@@ -1,4 +1,10 @@
 <?php
 use config\views;
-$path_base_template = (new views())->ruta_templates;
-include $path_base_template.'principal.php';
+
+$views_cfg = new views();
+
+if (is_callable([$views_cfg, 'template_path'])) {
+    include $views_cfg->template_path('principal.php');
+} else {
+    include $views_cfg->ruta_templates . 'principal.php';
+}
