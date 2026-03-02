@@ -37,7 +37,7 @@ use config\views;
 <!-- End blueimp  -->
 <!-- Start custom template style  -->
 <link rel="stylesheet" href="<?php echo (new views())->url_assets; ?>css/custom_template_style.css" />
-<link rel="stylesheet" href="/facturacion/css/overrides.css?v=<?= time() ?>" />
+<link rel="stylesheet" href="<?php echo (new views())->url; ?>css/overrides.css?v=<?= time() ?>" />
 
 <!-- End custom template style   -->
 <link rel="stylesheet" href="<?php echo (new views())->url_assets; ?>libraries/footable-jquery/css/footable.bootstrap.min.css" />
