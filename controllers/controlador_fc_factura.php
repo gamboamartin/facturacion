@@ -211,7 +211,7 @@ class controlador_fc_factura extends _base_system_fc
             return $this->retorno_error(mensaje: 'Error al generar template', data: $r_alta, header: $header, ws: $ws);
         }
 
-        if (generales::$es_konsulta) {
+        if ((new generales())->aplica_relacion_layout_factura) {
             $modelo_fc_layout_nom = new fc_layout_nom(link: $this->link);
             $filtro_input_select_layout_nom = [
                 'fc_layout_nom.asignado_fc_factura' => 'inactivo',

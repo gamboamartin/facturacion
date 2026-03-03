@@ -20,7 +20,6 @@ class generales{
     public int $tipo_dispersion = 1; // especifico de konsulta
 
     public string $ruta_factura_pdf = "/var/www/html/facturacion/plantillas/factura_finarq.pdf"; // aqui va la ruta del pdf que se usara como plantilla para generar las facturas, se recomienda que sea un pdf con campos editables para facilitar la generacion de las facturas
-    public static bool $es_konsulta = false; // al poner en true activa logica y codigos especificos de konsulta
     public bool $aplica_relacion_layout_factura = false; // especifico de konsulta
     public static int $tipo_agente_operador = 1; // especifico de konsulta
     public static int $tipo_agente_asesor = 2; // especifico de konsulta

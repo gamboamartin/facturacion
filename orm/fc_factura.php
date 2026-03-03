@@ -48,23 +48,23 @@ class fc_factura extends _transacciones_fc
 
         $fc_factura_id = $r_alta_bd->registro_id;
 
-        if (generales::$es_konsulta) {
-            $rs = $this->actualiza_recalcula_comison_cliente(fc_factura_id: $fc_factura_id);
-            if(errores::$error){
-                return $this->error->error(
-                    mensaje: 'Error al actualizar y calcular comision en la factura',
-                    data:  $rs
-                );
-            }
 
-            $rs = $this->actualiza_agente_operacion_en_fc_factura(fc_factura_id: $fc_factura_id);
-            if(errores::$error){
-                return $this->error->error(
-                    mensaje: 'Error al actualiza_agente_operacion_alta en la factura',
-                    data:  $rs
-                );
-            }
+        $rs = $this->actualiza_recalcula_comison_cliente(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al actualizar y calcular comision en la factura',
+                data:  $rs
+            );
         }
+
+        $rs = $this->actualiza_agente_operacion_en_fc_factura(fc_factura_id: $fc_factura_id);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al actualiza_agente_operacion_alta en la factura',
+                data:  $rs
+            );
+        }
+
 
         return $r_alta_bd;
     }
@@ -86,7 +86,7 @@ class fc_factura extends _transacciones_fc
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al eliminar',data:  $del);
         }
-        if (generales::$es_konsulta) {
+        if ((new generales())->aplica_relacion_layout_factura) {
 
             $result = (new fc_layout_factura(link: $this->link))->elimina_relacion_con_factura_id(fc_factura_id: $id);
             if (errores::$error) {
@@ -112,15 +112,15 @@ class fc_factura extends _transacciones_fc
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al modificar', data: $r_modifica_bd);
         }
-        if (generales::$es_konsulta) {
-            $rs = $this->recalcula_porcentaje_comision_cliente(fc_factura_id: $id);
-            if (errores::$error) {
-                return $this->error->error(
-                    mensaje: 'Error al calcular comision en la factura',
-                    data: $rs
-                );
-            }
+
+        $rs = $this->recalcula_porcentaje_comision_cliente(fc_factura_id: $id);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al calcular comision en la factura',
+                data: $rs
+            );
         }
+
 
         return $r_modifica_bd;
     }
