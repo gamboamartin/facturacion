@@ -9,6 +9,7 @@
 
 namespace gamboamartin\facturacion\controllers;
 
+use config\generales;
 use gamboamartin\comercial\models\com_tipo_producto;
 use gamboamartin\controllers\_controlador_adm_reporte\_filtros;
 use gamboamartin\controllers\_controlador_adm_reporte\_table;
@@ -210,43 +211,45 @@ class controlador_fc_factura extends _base_system_fc
             return $this->retorno_error(mensaje: 'Error al generar template', data: $r_alta, header: $header, ws: $ws);
         }
 
-        $modelo_fc_layout_nom = new fc_layout_nom(link: $this->link);
-        $filtro_input_select_layout_nom = [
-            'fc_layout_nom.asignado_fc_factura' => 'inactivo',
-        ];
-        $columnas_input_select_layout_nom = [
-            'fc_layout_nom_id','fc_layout_nom_descripcion',
-        ];
+        if (generales::$es_konsulta) {
+            $modelo_fc_layout_nom = new fc_layout_nom(link: $this->link);
+            $filtro_input_select_layout_nom = [
+                'fc_layout_nom.asignado_fc_factura' => 'inactivo',
+            ];
+            $columnas_input_select_layout_nom = [
+                'fc_layout_nom_id','fc_layout_nom_descripcion',
+            ];
 
-        $input_select_layout = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
-            modelo: $modelo_fc_layout_nom, columns_ds: $columnas_input_select_layout_nom,
-            disabled: false, filtro: $filtro_input_select_layout_nom, label: 'Layout',name: 'fc_layout_nom_id'
-        );
-        if(errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al generar input_select_factura',
-                data: $input_select_layout,
-                header: $header, ws: $ws
+            $input_select_layout = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
+                modelo: $modelo_fc_layout_nom, columns_ds: $columnas_input_select_layout_nom,
+                disabled: false, filtro: $filtro_input_select_layout_nom, label: 'Layout',name: 'fc_layout_nom_id'
             );
-        }
+            if(errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al generar input_select_factura',
+                    data: $input_select_layout,
+                    header: $header, ws: $ws
+                );
+            }
 
-        $this->inputs->input_select_layout = $input_select_layout;
+            $this->inputs->input_select_layout = $input_select_layout;
 
-        $modelo_com_tipo_producto = new com_tipo_producto(link: $this->link);
+            $modelo_com_tipo_producto = new com_tipo_producto(link: $this->link);
 
-        $input_select_com_tipo_producto = $this->html->select_catalogo(cols: 12, con_registros: true,
-            id_selected: -1, modelo: $modelo_com_tipo_producto, columns_ds: ['com_tipo_producto_descripcion'],
-            label: 'Producto', name: 'com_tipo_producto_id', required: true,
-        );
-        if(errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al generar input_select_com_tipo_producto',
-                data: $input_select_com_tipo_producto,
-                header: $header, ws: $ws
+            $input_select_com_tipo_producto = $this->html->select_catalogo(cols: 12, con_registros: true,
+                id_selected: -1, modelo: $modelo_com_tipo_producto, columns_ds: ['com_tipo_producto_descripcion'],
+                label: 'Producto', name: 'com_tipo_producto_id', required: true,
             );
-        }
+            if(errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al generar input_select_com_tipo_producto',
+                    data: $input_select_com_tipo_producto,
+                    header: $header, ws: $ws
+                );
+            }
 
-        $this->inputs->input_select_com_tipo_producto = $input_select_com_tipo_producto;
+            $this->inputs->input_select_com_tipo_producto = $input_select_com_tipo_producto;
+        }
 
         return $r_alta;
     }
