@@ -564,7 +564,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             columnas: ['doc_documento_ruta_relativa'],
             filtro: [
                 'org_logo.status' => 'activo',
-                'org_logo.es_principal' => 'activo',
+                'org_logo.logo_pdf' => 'activo',
                 'org_logo.org_empresa_id' => (int)$reporte['org_empresa_id']
             ],
             limit: 1,

@@ -612,7 +612,7 @@ class _pdf
         // LOGO dinámico: principal activo por empresa
         $filtro = array();
         $filtro['org_logo.status'] = 'activo';
-        $filtro['org_logo.es_principal'] = 'activo';
+        $filtro['org_logo.logo_pdf'] = 'activo';
         $filtro['org_logo.org_empresa_id'] = (int)$factura['org_empresa_id'];
 
         $r_org_logo = (new org_logo(link: $link))->filtro_and(
