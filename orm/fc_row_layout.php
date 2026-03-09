@@ -273,8 +273,18 @@ class fc_row_layout extends modelo{
 
         $total_neto_depositar = $result['total_neto_depositar'];
         $total_comision_cliente = $total_neto_depositar * ($porcentaje_comision / 100);
+        $sub_total = $total_neto_depositar + $total_comision_cliente;
+        $total = $sub_total * 1.16;
 
-        $consulta = "UPDATE fc_layout_nom SET fc_layout_nom.comision_cliente = $total_comision_cliente WHERE fc_layout_nom.id = $fc_layout_nom_id";
+        $consulta = "UPDATE 
+                        fc_layout_nom 
+                    SET 
+                        fc_layout_nom.total_dispersion = $total_neto_depositar ,
+                        fc_layout_nom.comision_cliente = $total_comision_cliente ,
+                        fc_layout_nom.sub_total = $sub_total ,
+                        fc_layout_nom.total = $total ,
+                        fc_layout_nom.monto_por_asignar = $total 
+                    WHERE fc_layout_nom.id = $fc_layout_nom_id";
         $rs = $this->ejecuta_sql($consulta);
         if(errores::$error){
             return (new errores())->error('Error al modificar la comision de fc_layout_nom ', $rs);
