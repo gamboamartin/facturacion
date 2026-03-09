@@ -154,6 +154,8 @@ class fc_factura extends _transacciones_fc
             );
         }
 
+        $total_factura = $fc_factura_data['fc_factura_total'];
+
         $sub_total_factura = $fc_factura_data['fc_factura_sub_total'];
         $porcentaje_comision_cliente = $fc_factura_data['fc_factura_porcentaje_comision_cliente'];
 
@@ -161,7 +163,8 @@ class fc_factura extends _transacciones_fc
         $valor_comision = round($sub_total_factura - $valor_base, 2);
 
         $consulta = "UPDATE fc_factura SET ";
-        $consulta .= " fc_factura.comision_cliente = {$valor_comision}";
+        $consulta .= " fc_factura.comision_cliente = {$valor_comision},";
+        $consulta .= " fc_factura.monto_por_asignar = {$total_factura}";
         $consulta .= " WHERE fc_factura.id = {$fc_factura_id}";
         $rs = $this->ejecuta_sql($consulta);
         if(errores::$error){
@@ -220,6 +223,8 @@ class fc_factura extends _transacciones_fc
             );
         }
 
+        $total_factura = $fc_factura_data['fc_factura_total'];
+
         $sub_total_factura = $fc_factura_data['fc_factura_sub_total'];
         $nuevo_porcentaje_comision = $fc_factura_data['com_cliente_porcentaje_comision'];
 
@@ -229,6 +234,7 @@ class fc_factura extends _transacciones_fc
 
         $consulta = "UPDATE fc_factura SET ";
         $consulta .= " fc_factura.comision_cliente = {$valor_comision} ,";
+        $consulta .= " fc_factura.monto_por_asignar = {$total_factura},";
         $consulta .= " fc_factura.porcentaje_comision_cliente = {$nuevo_porcentaje_comision}";
         $consulta .= " WHERE fc_factura.id = {$fc_factura_id}";
         $rs = $this->ejecuta_sql($consulta);
