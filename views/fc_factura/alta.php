@@ -9,7 +9,7 @@ use config\views; ?>
     <form method="post" action="<?php echo $controlador->link_alta_bd; ?>" class="form-additional" enctype="multipart/form-data" id="<?php echo 'form_'.$controlador->seccion."_".$controlador->accion; ?>">
         <?php if ((new generales())->aplica_relacion_layout_factura): ?>
             <input type="hidden" id="aplica_relacion" value="1">
-            <?php echo $controlador->inputs->input_select_layout; ?>
+            <?php //echo $controlador->inputs->input_select_layout; ?>
             <?php echo $controlador->inputs->input_select_com_tipo_producto; ?>
         <?php endif; ?>
         <?php include $controlador->include_inputs_alta; ?>
