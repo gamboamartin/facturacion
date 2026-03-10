@@ -6,6 +6,7 @@ use config\generales;
 use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\errores\errores;
 use PDO;
+use PDOException;
 use stdClass;
 
 class fc_factura extends _transacciones_fc
@@ -371,6 +372,43 @@ class fc_factura extends _transacciones_fc
         }
 
         return $rs->registros;
+    }
+
+    public function obten_registros_relacionables(int $com_cliente_id)
+    {
+        $query = "
+                SELECT
+                    fc_factura.id as fc_factura_id,
+                    fc_factura.folio as fc_factura_folio,
+                    fc_factura.total as fc_factura_total,
+                    com_cliente.razon_social as com_cliente_razon_social,
+                    fc_factura.fecha as fc_factura_fecha,
+                    fc_factura.asignado_fc_layout,
+                    fc_factura.monto_por_asignar
+                FROM
+                    fc_factura
+                    LEFT JOIN com_sucursal ON fc_factura.com_sucursal_id = com_sucursal.id
+                    LEFT JOIN com_cliente ON com_sucursal.com_cliente_id = com_cliente.id
+                    WHERE
+                    com_cliente.id = :com_cliente_id 
+                    AND fc_factura.etapa = 'TIMBRADO' 
+                    AND (fc_factura.asignado_fc_layout = 'inactivo' OR fc_factura.monto_por_asignar > 0)
+        ";
+
+        try {
+            $stmt = $this->link->prepare($query);
+            $stmt->execute([
+                ':com_cliente_id' => $com_cliente_id,
+            ]);
+            $rs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return (new errores())->error(
+                mensaje: $e->getMessage(),
+                data:  $e
+            );
+        }
+
+        return $rs;
     }
 
 

@@ -236,6 +236,7 @@ class controlador_fc_layout_nom extends system{
         header("Location: " . $link);
         exit;
     }
+
     public function actualiza_porcentaje_comision(bool $header, bool $ws = false)
     {
         $this->modelo->registro_id = $this->registro_id;
@@ -309,6 +310,7 @@ class controlador_fc_layout_nom extends system{
         exit;
 
     }
+
     public function asigna_factura(bool $header, bool $ws = false)
     {
         $fc_layout_nom_id = $this->registro_id;
@@ -317,6 +319,24 @@ class controlador_fc_layout_nom extends system{
         if(errores::$error) {
             return $this->retorno_error(mensaje: 'Error al obtener data fc_layout_nom',data: $data,
                 header: $header, ws: $ws);
+        }
+
+        if ($data['fc_layout_nom_estado_layout'] !== self::ESTADO_LAYOUT_PAGADO
+            && $data['fc_layout_nom_estado_layout'] !== self::ESTADO_LAYOUT_FINAL) {
+            return $this->retorno_error(
+                mensaje: 'Error, no se puede relacionar un layout que no este pagado',
+                data: [],
+                header: $header, ws: $ws
+            );
+        }
+
+        if ($data['fc_layout_nom_asignado_fc_factura'] === 'activo'
+            && (float)$data['fc_layout_nom_monto_por_asignar'] == 0) {
+            return $this->retorno_error(
+                mensaje: 'Error, este layout ya no se puede relacionar',
+                data: [],
+                header: $header, ws: $ws
+            );
         }
 
         $filtro = [
@@ -345,20 +365,25 @@ class controlador_fc_layout_nom extends system{
         $this->inputs = new stdClass();
 
         $modelo_fc_factura = new fc_factura(link: $this->link);
-        $filtro_input_select_factura = [
-            'com_cliente.id' => $com_cliente_id,
-            'fc_factura.etapa' => 'TIMBRADO',
-            'fc_factura.asignado_fc_layout' => 'inactivo',
-        ];
+
         $columnas_input_select_factura = [
             'fc_factura_folio','fc_factura_total','com_cliente_razon_social',
             'fc_factura_fecha'
         ];
 
-        $input_select_factura = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
+        $registros = $modelo_fc_factura->obten_registros_relacionables(com_cliente_id: $com_cliente_id);
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obten_registros_relacionables',
+                data: $registros,
+                header: $header, ws: $ws
+            );
+        }
+
+        $input_select_factura = $this->html->select_catalogo(cols: 12, con_registros: false, id_selected: -1,
             modelo: $modelo_fc_factura, columns_ds: $columnas_input_select_factura,
-            disabled: false, filtro: $filtro_input_select_factura, label: 'Factura',name: 'fc_factura_id',
-            registros: [], required: true
+            disabled: false, filtro: [], label: 'Factura',name: 'fc_factura_id',
+            registros: $registros, required: true
         );
         if(errores::$error) {
             return $this->retorno_error(
