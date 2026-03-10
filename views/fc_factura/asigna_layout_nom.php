@@ -21,12 +21,12 @@
                                 <input type="text" disabled="disabled"  value="<?php echo $controlador->descripcion_fc_factura; ?>" class="form-control descripcion" id="descripcion" title="CODIGO POSTAL">
                             </div>
                         </div>
-                        <div class="control-group col-sm-12">
-                            <label class="control-label" for="descripcion">Layout Asignado</label>
-                            <div class="controls">
-                                <input type="text" disabled="disabled"  value="<?php echo $controlador->layout_asignado; ?>" class="form-control descripcion" id="descripcion" title="CODIGO POSTAL">
-                            </div>
-                        </div>
+<!--                        <div class="control-group col-sm-12">-->
+<!--                            <label class="control-label" for="descripcion">Layout Asignado</label>-->
+<!--                            <div class="controls">-->
+<!--                                <input type="text" disabled="disabled"  value="--><?php //echo $controlador->layout_asignado; ?><!--" class="form-control descripcion" id="descripcion" title="CODIGO POSTAL">-->
+<!--                            </div>-->
+<!--                        </div>-->
                         <?php echo $controlador->inputs->input_select_layout_nom; ?>
                         <input type="hidden" name="fc_factura_id" value="<?php echo $_GET['registro_id'] ?>">
                         <div class="control-group btn-alta">

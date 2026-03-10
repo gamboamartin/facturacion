@@ -327,6 +327,22 @@ class controlador_fc_factura extends _base_system_fc
             );
         }
 
+        if ($fc_factura_data['fc_factura_etapa'] !== 'TIMBRADO') {
+            return $this->retorno_error(
+                mensaje: 'Error, no se puede relacionar una factura no timbrada',
+                data: [],
+                header: $header, ws: $ws
+            );
+        }
+
+        if ($fc_factura_data['fc_factura_asignado_fc_layout'] === 'activo' && (float)$fc_factura_data['fc_factura_monto_por_asignar'] == 0) {
+            return $this->retorno_error(
+                mensaje: 'Error, esta factura ya no se puede relacionar',
+                data: [],
+                header: $header, ws: $ws
+            );
+        }
+
         $monto = $fc_factura_data['fc_factura_total'];
         $fmt = new NumberFormatter('es_MX', NumberFormatter::CURRENCY);
         $monto_formateado = $fmt->formatCurrency($monto, 'MXN');
@@ -353,23 +369,28 @@ class controlador_fc_factura extends _base_system_fc
         $link = "index.php?seccion=fc_factura&accion=asigna_layout_nom_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
         $this->link_asigna_layout_bd = $link;
 
-        $com_cliente_id = $fc_factura_data['com_cliente_id'];
+        $com_sucursal_id = $fc_factura_data['fc_factura_com_sucursal_id'];
 
         $this->inputs = new stdClass();
 
         $modelo_fc_layout_nom = new fc_layout_nom(link: $this->link);
-        $filtro_input_select_layout_nom = [
-            'com_cliente.id' => $com_cliente_id,
-            'fc_layout_nom.asignado_fc_factura' => 'inactivo',
-        ];
         $columnas_input_select_layout_nom = [
             'fc_layout_nom_id','fc_layout_nom_descripcion',
         ];
 
-        $input_select_layout_nom = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
+        $registros = $modelo_fc_layout_nom->obten_registros_relacionables(com_sucursal_id: $com_sucursal_id);
+        if(errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obten_registros_relacionables',
+                data: $registros,
+                header: $header, ws: $ws
+            );
+        }
+
+        $input_select_layout_nom = $this->html->select_catalogo(cols: 12, con_registros: false, id_selected: -1,
             modelo: $modelo_fc_layout_nom, columns_ds: $columnas_input_select_layout_nom,
-            disabled: false, filtro: $filtro_input_select_layout_nom, label: 'Layout',name: 'fc_layout_nom_id',
-            registros: [], required: true
+            disabled: false, filtro: [], label: 'Layout',name: 'fc_layout_nom_id',
+            registros: $registros, required: true
         );
         if(errores::$error) {
             return $this->retorno_error(

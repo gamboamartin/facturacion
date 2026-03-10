@@ -6,6 +6,7 @@ use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_com_contacto;
 use PDO;
+use PDOException;
 use stdClass;
 
 
@@ -328,4 +329,35 @@ class fc_layout_nom extends modelo{
         return [];
     }
 
+    public function obten_registros_relacionables(int $com_sucursal_id): array
+    {
+        $query = "
+                SELECT
+                    fc_layout_nom.id As fc_layout_nom_id,
+                    fc_layout_nom.descripcion As fc_layout_nom_descripcion,
+                    fc_layout_nom.asignado_fc_factura As fc_layout_nom_asignado_fc_factura,
+                    fc_layout_nom.monto_por_asignar As fc_layout_nom_monto_por_asignar
+                FROM
+                    fc_layout_nom
+                WHERE
+                    fc_layout_nom.com_sucursal_id = :com_sucursal_id 
+                    AND (fc_layout_nom.estado_layout = 'Pagado' OR fc_layout_nom.estado_layout = 'Enviado al Cliente')
+                    AND (fc_layout_nom.asignado_fc_factura = 'inactivo' OR fc_layout_nom.monto_por_asignar > 0)
+        ";
+
+        try {
+            $stmt = $this->link->prepare($query);
+            $stmt->execute([
+                ':com_sucursal_id' => $com_sucursal_id,
+            ]);
+            $rs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return (new errores())->error(
+                mensaje: $e->getMessage(),
+                data:  $e
+            );
+        }
+
+        return $rs;
+    }
 }
