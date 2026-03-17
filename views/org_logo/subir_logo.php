@@ -8,7 +8,7 @@
   // Aliases reales del ORM (tabla_campo)
   $ruta_activa = (string)($activo['doc_documento_ruta_relativa'] ?? '');
   $logo_activo_url = $ruta_activa !== ''
-      ? '/facturacion/' . ltrim($ruta_activa, '/')
+      ? asset_url_framework($ruta_activa)
       : null;
   ?>
 
@@ -39,7 +39,7 @@
         <?php foreach ($logos as $l): ?>
           <?php
           $ruta = (string)($l['doc_documento_ruta_relativa'] ?? '');
-          $url = $ruta !== '' ? '/facturacion/' . ltrim($ruta, '/') : '';
+          $url = $ruta !== '' ? asset_url_framework($ruta) : '';
           $isPrincipal = (($l['org_logo_es_principal'] ?? '') === 'activo');
           $org_logo_id = (int)($l['org_logo_id'] ?? 0);
           ?>

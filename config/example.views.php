@@ -32,9 +32,14 @@ class views
         $this->url_js = $url.'vendor/gamboa.martin/js_base/src/'; // aqui va la url de los js, se recomienda que sea la del template original osea el vendor para facilitar la personalización sin tocar el template original osea el vendor, se recomienda no cambiarlo a menos que sepas lo que estas haciendo
     }
 
-    public function template_path(string $rel): string
+ 
+public function template_path(string $rel): string
     {
         $rel = ltrim($rel, '/');
+
+        if (!isset($this->ruta_templates_local)) {
+            return rtrim($this->ruta_templates, '/').'/'.$rel;
+        }
 
         $local = rtrim($this->ruta_templates_local, '/').'/'.$rel;
         if (is_file($local)) {
@@ -44,4 +49,6 @@ class views
         return rtrim($this->ruta_templates, '/').'/'.$rel;
     }
 
+
 } // esta funcion se encarga de generar la ruta del template, primero busca en la carpeta de templates locales y si no lo encuentra busca en la carpeta de templates original osea el vendor, se recomienda usar esta funcion para generar la ruta de los templates para facilitar la personalización sin tocar el template original osea el vendor y asi se evita rompe el sistema en caso de que el template original osea el vendor se actualice y cambie la estructura de los templates, se recomienda no usar rutas absolutas para los templates para evitar problemas de seguridad y facilitar la personalización sin tocar el template original osea el vendor
+

@@ -11,7 +11,7 @@ $accion  = $_GET['accion'] ?? '';
 $es_login = ($seccion === 'adm_session' && in_array($accion, ['login'], true));
 ?>
 <?php if (!$es_login): ?>
-<link rel="stylesheet" href="/facturacion/css/overrides.css?v=1">
+<!-- <link rel="stylesheet" href="/css/overrides.css?v=1"> -->
 <div class="top-bar color-primary">
   <div class="clearfix">
     <div class="pull-right" style="display:flex;justify-content:space-between;width:100%;padding:0 35px;">
@@ -19,11 +19,11 @@ $es_login = ($seccion === 'adm_session' && in_array($accion, ['login'], true));
     $logo_url = $controlador->logo_empresa_url ?? null;
 
     if (empty($logo_url)) {
-        $logo_url = logo_empresa_url_framework($controlador->link, '/facturacion/');
+        $logo_url = logo_empresa_url_framework($controlador->link);
     }
 
     // Link del logo (inicio)
-    $href_logo = $links_menu->adm_session->inicio ?? '/facturacion/';
+    // $href_logo = $links_menu->adm_session->inicio ?? '/facturacion/';
     ?>
 
       <?php if (!empty($logo_url)): ?>
