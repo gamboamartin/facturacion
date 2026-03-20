@@ -157,6 +157,28 @@ class controlador_fc_empleado_contacto extends system {
 
     }
 
+    public function valida_telefono(bool $header, bool $ws = false)
+    {
+        $registro_id = $this->registro_id;
+
+        $rs = $this->modelo->valida_telefono(registro_id: $registro_id);
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al validar telefono',
+                data: $rs, header: $header, ws: $ws);
+        }
+
+        echo '<pre>';
+        print_r($rs);
+        echo '</pre>';exit;
+
+        $_SESSION['exito'][]['mensaje'] = 'link de validacion enviado exitosamente';
+        $link = "index.php?seccion=fc_empleado_contacto&accion=lista&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+
+    }
+
     private function generar_inputs(array $registro, bool $value_vacio): array
     {
 

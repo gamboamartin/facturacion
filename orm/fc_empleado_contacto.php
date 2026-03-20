@@ -101,6 +101,24 @@ class fc_empleado_contacto extends modelo{
         return $url_validacion;
     }
 
+    public function genera_link_validacion_telefono(string $telefono, int $registro_id)
+    {
+        $token = $this->get_codigo_aleatorio(longitud: 16);
+        $fecha_token_validacion = date('Y-m-d H:i:s');
+        $url_validacion = (new generales())->url_base;
+        $url_validacion .= "valida_telefono.php?telefono={$telefono}&token={$token}";
+
+        $rs = $this->modifica_bd(
+            registro: ['token_telefono' => $token, 'fecha_token_telefono' => $fecha_token_validacion],
+            id: $registro_id
+        );
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al actualizar el token del  telefono', data: $rs);
+        }
+
+        return $url_validacion;
+    }
+
     public function alta_bd(): array|stdClass
     {
         $validacion = $this->validacion(datos: $this->registro, registro_id: -1);
@@ -319,6 +337,33 @@ class fc_empleado_contacto extends modelo{
         }
 
         return $datos;
+    }
+
+    public function valida_telefono(int $registro_id)
+    {
+        $this->registro_id = $registro_id;
+        $rs = $this->obten_data();
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error de obtener data', data: $rs);
+        }
+
+        if ($rs['fc_empleado_contacto_estatus_telefono'] === controlador_fc_empleado_contacto::STATUS_VALIDADO) {
+            return $this->error->error(mensaje: 'El telefono ya fue validado', data: []);
+        }
+
+        $telefono = $rs['fc_empleado_contacto_telefono'];
+        if ($telefono == '1000000000') {
+            return $this->error->error(mensaje: 'Error telefono no valido 1000000000', data: []);
+        }
+
+        $url = $this->genera_link_validacion_telefono(telefono: $telefono, registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error de obtener url', data: $url);
+        }
+
+        //ToDo: Enviar el url y el telefono  al trigger de n8n
+        return ['url' => $url];
+
     }
 
     private function separarNombreCompleto($nombreCompleto): array
