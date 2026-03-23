@@ -78,7 +78,7 @@ class _finalizacion{
             return (new errores())->error("Error al buscar empleado", $rs);
         }
 
-        $nuevo_empleado_id = $rs->registros[0]['fc_empleado_id'];
+
         $n_registros = $rs->n_registros;
 
         if ($n_registros === 0) {
@@ -92,6 +92,7 @@ class _finalizacion{
         }
 
         if ($n_registros > 0) {
+            $nuevo_empleado_id = $rs->registros[0]['fc_empleado_id'];
             $rs_upd = (new fc_row_layout($link))->modifica_bd(
                 registro: ['fc_empleado_id' => $nuevo_empleado_id],
                 id: $fc_row_layout->fc_row_layout_id
