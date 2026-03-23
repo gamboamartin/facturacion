@@ -327,16 +327,28 @@ class _pdf
         $x = 140;
 
         $pdf->SetXY($x, 14);
-        $pdf->Write(10, $factura[$tabla.'_fecha']);
+        $pdf->Write(10, $factura[$tabla . '_fecha']);
 
         $fecha_hora_emision = $this->fecha_hora_emision(data: $data, pdf: $pdf, x: $x);
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al escribir $fecha_hora_emision', data: $fecha_hora_emision);
         }
 
+        $key_observaciones = $tabla . '_observaciones';
+        $observaciones = trim((string)($factura[$key_observaciones] ?? ''));
+        $observaciones = mb_convert_encoding($observaciones, 'ISO-8859-1', 'UTF-8');
 
+        if ($observaciones !== '') {
+            $pdf->SetFont('Arial', 'B', '8');
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetXY($x, 34);
+            $pdf->MultiCell(50, 3.5, 'Observaciones:', 0, 'L');
+
+            $pdf->SetFont('Arial', '', '8');
+            $pdf->SetXY($x, 38);
+            $pdf->MultiCell(50, 3.5, $observaciones, 0, 'L');
+        }
     }
-
     private function receptor(array $factura, Fpdi $pdf): void
     {
 
