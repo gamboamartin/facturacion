@@ -270,21 +270,13 @@ class _pdf
             $pdf->SetXY($x, 25.5);
         }
 
-
         $regimen = $this->regimen(factura: $factura);
         if (errores::$error) {
             return (new errores())->error(mensaje: 'Error al obtener $regimen', data: $regimen);
         }
-
-    
         $this->cfg = $this->buildCfg($factura);
-
-    
         $regimenW = (float)($this->cfg['regimen_w'] ?? 65);
         $pdf->MultiCell($regimenW, 2.5, $regimen, 0, 'L');
-
-
-    
         $pdf->SetXY($x, 31.5);
 
         $cpEmisor = trim((string)($factura['org_empresa_cp_txt'] ?? ''));
@@ -292,9 +284,6 @@ class _pdf
 
         $dom = mb_convert_encoding(trim($domTxt . ' ' . $cpEmisor), 'ISO-8859-1', 'UTF-8');
         $pdf->MultiCell(60, 3, $dom, 0, 'L');
-
-
-
 
         if ($factura['org_empresa_rfc'] === "FIN171207CKA") {
             $pdf->SetXY($x, 31.5);
@@ -323,7 +312,6 @@ class _pdf
 
         }
 
-
         $x = 140;
 
         $pdf->SetXY($x, 14);
@@ -338,17 +326,16 @@ class _pdf
         $observaciones = trim((string)($factura[$key_observaciones] ?? ''));
         $observaciones = mb_convert_encoding($observaciones, 'ISO-8859-1', 'UTF-8');
 
-        if ($observaciones !== '') {
-            $pdf->SetFont('Arial', 'B', '8');
-            $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetXY($x, 34);
-            $pdf->MultiCell(50, 3.5, 'Observaciones:', 0, 'L');
+        $pdf->SetFont('Arial', 'B', '8');
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY($x, 34);
+        $pdf->MultiCell(50, 3.5, 'Observaciones:', 0, 'L');
 
-            $pdf->SetFont('Arial', '', '8');
-            $pdf->SetXY($x, 38);
-            $pdf->MultiCell(50, 3.5, $observaciones, 0, 'L');
-        }
+        $pdf->SetFont('Arial', '', '8');
+        $pdf->SetXY($x, 38);
+        $pdf->MultiCell(50, 3.5, $observaciones, 0, 'L');
     }
+
     private function receptor(array $factura, Fpdi $pdf): void
     {
 
