@@ -51,7 +51,8 @@ $fc_empleado_contacto_id = $registro['fc_empleado_contacto_id'];
 
 $row_update = [
     'estatus_telefono' => (controlador_fc_empleado_contacto::STATUS_VALIDADO),
-    'token_validacion' => '',
+    'token_telefono' => '',
+    'fecha_token_telefono' => '',
 ];
 
 $rs = $modelo->modifica_bd(registro: $row_update, id: $fc_empleado_contacto_id);
