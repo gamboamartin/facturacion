@@ -24,6 +24,7 @@ class generales{
     public static int $tipo_agente_operador = 1; // especifico de konsulta
     public static int $tipo_agente_asesor = 2; // especifico de konsulta
     public static string $empresa_pagadora_reportes = 'RECURSOS Y RESULTADOS HARIMENI'; // especifico de konsulta
+    public static string $key_datos_constancia = 'VHn9JjiujaWPok5yNMb5sYj9';
 
     public function __construct(){
         $this->path_base = '/var/www/html/facturacion/'; // aqui va la ruta base del sistema, se usa para generar rutas absolutas en los templates y en el sistema en general
