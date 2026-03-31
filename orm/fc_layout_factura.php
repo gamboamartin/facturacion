@@ -98,6 +98,7 @@ class fc_layout_factura extends modelo{
 
         $resto_factura = 0;
         $resto_layout_nom = 0;
+        $monto_relacionado = 0;
 
         if (isset($montos['monto_resto_factura'])) {
             $resto_factura = $montos['monto_resto_factura'];
@@ -107,11 +108,15 @@ class fc_layout_factura extends modelo{
             $resto_layout_nom = $montos['monto_resto_layout'];
         }
 
+        if (isset($montos['monto_relacionado'])) {
+            $monto_relacionado = $montos['monto_relacionado'];
+        }
+
         $consulta = "INSERT INTO fc_layout_factura ";
         $consulta .= " (fc_layout_nom_id, fc_factura_id, status, usuario_alta_id, usuario_update_id, ";
-        $consulta .= " resto_asignar_factura, resto_asignar_layout_nom)";
+        $consulta .= " monto_relacionado, resto_asignar_factura, resto_asignar_layout_nom)";
         $consulta .= " VALUES ({$fc_layout_nom_id}, {$fc_factura_id}, 'activo', {$user_id}, {$user_id}, ";
-        $consulta .= " {$resto_factura}, {$resto_layout_nom})";
+        $consulta .= " {$monto_relacionado}, {$resto_factura}, {$resto_layout_nom})";
         $rs = $this->ejecuta_sql($consulta);
         if(errores::$error){
             return $this->error->error(
@@ -166,6 +171,8 @@ class fc_layout_factura extends modelo{
 
         $resto_layout = 0;
         $resto_factura = 0;
+
+        $monto_relacionado = min($monto_factura, $monto_layout);
 
         if ($monto_factura > $monto_layout) {
 
@@ -251,6 +258,7 @@ class fc_layout_factura extends modelo{
         return [
             'monto_resto_factura' => $resto_factura,
             'monto_resto_layout' => $resto_layout,
+            'monto_relacionado' => $monto_relacionado,
         ];
     }
 
