@@ -434,8 +434,10 @@ class fc_factura extends _transacciones_fc
 
         $data = $fc_layout_factura_modelo->filtro_and(
             columnas: [
+                'fc_layout_factura_id',
                 'fc_layout_factura_monto_relacionado',
                 'fc_layout_nom_id',
+                'fc_factura_id',
                 'fc_layout_nom_codigo',
                 'fc_layout_nom_total',
                 'com_cliente_razon_social',
@@ -452,7 +454,17 @@ class fc_factura extends _transacciones_fc
 
         $data = $data->registros;
 
-        $response['relaciones'] = $data;
+        $relaciones = [];
+        foreach ($data as $key => $registro) {
+            $link = "index.php?seccion=fc_layout_factura&accion=elimina_relacion";
+            $link .= "&registro_id={$registro['fc_layout_factura_id']}";
+            $link .= "&session_id={$_GET['session_id']}";
+            $link .= "&view=factura&view_id={$registro['fc_factura_id']}";
+            $relaciones[$key] = $registro;
+            $relaciones[$key]['url_eliminar'] = $link;
+        }
+
+        $response['relaciones'] = $relaciones;
 
         return $response;
     }
