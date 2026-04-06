@@ -556,6 +556,30 @@ class controlador_fc_factura extends _base_system_fc
 
     }
 
+    public function elimina_relacion(bool $header, bool $ws = false)
+    {
+        $this->link->beginTransaction();
+        $fc_layout_factura_id = $this->registro_id;
+        $fc_layout_factura_modelo = new fc_layout_factura(link: $this->link);
+        $rs = $fc_layout_factura_modelo->elimina_relacion_con_registro_id(fc_layout_factura_id: $fc_layout_factura_id);
+        if (errores::$error) {
+            $this->link->rollBack();
+            return $this->retorno_error(
+                mensaje: 'Error al eliminar relacion',
+                data: $rs,
+                header: $header,
+                ws: $ws
+            );
+        }
+        $fc_factura_id = $rs['fc_factura_id'];
+
+        $this->link->commit();
+
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+        exit;
+
+    }
+
     public function envia_cfdi(bool $header, bool $ws = false)
     {
         $this->modelo_email = new fc_email(link: $this->link);

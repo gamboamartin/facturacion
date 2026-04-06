@@ -93,6 +93,71 @@ class fc_layout_factura extends modelo{
         return [];
     }
 
+    public function elimina_relacion_con_registro_id(int $fc_layout_factura_id)
+    {
+        $fc_layout_factura_modelo = new fc_layout_factura(link: $this->link);
+        $fc_layout_factura_modelo->registro_id = $fc_layout_factura_id;
+        $data = $fc_layout_factura_modelo->obten_data(columnas: [
+            'fc_layout_factura_fc_layout_nom_id',
+            'fc_layout_factura_fc_factura_id',
+            'fc_layout_factura_monto_relacionado',
+            'fc_factura_monto_por_asignar',
+            'fc_layout_nom_monto_por_asignar',
+
+        ]);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error obtener el registro de la relacion',data: $data
+            );
+        }
+
+        $fc_factura_id = $data['fc_layout_factura_fc_factura_id'];
+        $fc_layout_nom_id = $data['fc_layout_factura_fc_layout_nom_id'];
+
+        $monto_relacionado = (double)$data['fc_layout_factura_monto_relacionado'];
+        $monto_factura = (double)$data['fc_factura_monto_por_asignar'];
+        $monto_layout_nom = (double)$data['fc_layout_nom_monto_por_asignar'];
+
+        $nuevo_monto_factura = $monto_relacionado + $monto_factura;
+        $nuevo_monto_layout_nom = $monto_relacionado + $monto_layout_nom;
+
+        $rs_update_factura = $this->modifica_monto_por_asignar(
+            tabla: 'fc_factura',
+            nuevo_monto: $nuevo_monto_factura,
+            registro_id: $fc_factura_id
+        );
+
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al modificar monto en la factura',data: $rs_update_factura
+            );
+        }
+
+        $rs_update_layout_nom = $this->modifica_monto_por_asignar(
+            tabla: 'fc_layout_nom',
+            nuevo_monto: $nuevo_monto_layout_nom,
+            registro_id: $fc_layout_nom_id
+        );
+
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al modificar monto en el layout_nom',data: $rs_update_layout_nom
+            );
+        }
+
+        $rs_delete_relacion = $fc_layout_factura_modelo->elimina_bd(id: $fc_layout_factura_id);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al eliminar relacion',data: $rs_delete_relacion
+            );
+        }
+
+        return [
+            'fc_factura_id' => $fc_factura_id,
+            'fc_layout_nom_id' => $fc_layout_nom_id,
+        ];
+    }
+
     private function relaciona_factura_y_layout(int $fc_factura_id, int $fc_layout_nom_id, array $montos){
 
         $user_id = $_SESSION['usuario_id'];
@@ -261,90 +326,6 @@ class fc_layout_factura extends modelo{
             'monto_resto_layout' => $resto_layout,
             'monto_relacionado' => $monto_relacionado,
         ];
-    }
-
-    public function elimina_relacion_con_factura_id(int $fc_factura_id)
-    {
-        $filtro = [
-            'fc_layout_factura.fc_factura_id' => $fc_factura_id,
-        ];
-
-        $rs1 = $this->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return $this->error->error(
-                mensaje: 'Error al buscar registro fc_layout_factura',data: $rs1
-            );
-        }
-
-        $rs2 = $this->elimina_registros(registros: $rs1->registros);
-        if(errores::$error){
-            return $this->error->error(
-                mensaje: 'Error en elimina_registros',data: $rs2
-            );
-        }
-
-        return [];
-
-    }
-
-    public function elimina_relacion_con_layout_nom_id(int $fc_layout_nom_id)
-    {
-        $filtro = [
-            'fc_layout_factura.fc_layout_nom_id' => $fc_layout_nom_id,
-        ];
-
-        $rs1 = $this->filtro_and(filtro: $filtro);
-        if(errores::$error){
-            return $this->error->error(
-                mensaje: 'Error al buscar registro fc_layout_factura',data: $rs1
-            );
-        }
-
-        $rs2 = $this->elimina_registros(registros: $rs1->registros);
-        if(errores::$error){
-            return $this->error->error(
-                mensaje: 'Error en elimina_registros',data: $rs2
-            );
-        }
-
-        return [];
-
-    }
-
-    private function elimina_registros(array $registros)
-    {
-        $fc_factura_modelo = new fc_factura($this->link);
-        $fc_layout_nom_modelo = new fc_layout_nom($this->link);
-
-        foreach ($registros as $registro){
-            $fc_layout_factura_id = $registro['fc_layout_factura_id'];
-            $fc_layout_nom_id = $registro['fc_layout_factura_fc_layout_nom_id'];
-            $fc_factura_id = $registro['fc_layout_factura_fc_factura_id'];
-
-            $rs1 = $fc_factura_modelo->desasigna_bd(id: $fc_factura_id);
-            if(errores::$error){
-                return $this->error->error(
-                    mensaje: 'Error en desasigna_bd fc_factura',data: $rs1
-                );
-            }
-
-            $rs2 = $fc_layout_nom_modelo->desasigna_bd(id: $fc_layout_nom_id);
-            if(errores::$error){
-                return $this->error->error(
-                    mensaje: 'Error en desasigna_bd fc_layout_nom',data: $rs2
-                );
-            }
-
-            $rs3 = $this->elimina_bd(id: $fc_layout_factura_id);
-            if(errores::$error){
-                return $this->error->error(
-                    mensaje: 'Error en elimina_bd fc_layout_factura',data: $rs3
-                );
-            }
-
-        }
-
-        return [];
     }
 
     private function modifica_monto_por_asignar(string $tabla, $nuevo_monto, int $registro_id): array
