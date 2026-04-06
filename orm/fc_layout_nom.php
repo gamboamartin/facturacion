@@ -360,4 +360,62 @@ class fc_layout_nom extends modelo{
 
         return $rs;
     }
+
+    public function obtener_registro_de_relaciones(int $layout_nom_id): array
+    {
+        $response = [];
+
+        $this->registro_id = $layout_nom_id;
+        $rs = $this->obten_data(
+            columnas: [
+                'fc_layout_nom_id',
+                'fc_layout_nom_codigo',
+                'fc_layout_nom_total',
+                'fc_layout_nom_monto_por_asignar',
+                'com_cliente_razon_social'
+            ]
+        );
+        if(errores::$error){
+            return (new errores())->error("Error al obtener info de el layout", $rs);
+        }
+
+        $response['layout'] = $rs;
+
+        $fc_layout_factura_modelo = new fc_layout_factura(link: $this->link);
+
+        $data = $fc_layout_factura_modelo->filtro_and(
+            columnas: [
+                'fc_layout_factura_id',
+                'fc_layout_factura_monto_relacionado',
+                'fc_factura_id',
+                'fc_layout_nom_id',
+                'fc_factura_folio',
+                'fc_factura_total',
+                'com_cliente_razon_social'
+            ],
+            filtro: [
+                'fc_layout_factura.fc_layout_nom_id' => $layout_nom_id
+            ]
+        );
+
+        if(errores::$error){
+            return (new errores())->error("Error filtrar en fc_layout_factura", $data);
+        }
+
+        $data = $data->registros;
+
+        $relaciones = [];
+        foreach ($data as $key => $registro) {
+            $link = "index.php?seccion=fc_layout_factura&accion=elimina_relacion";
+            $link .= "&registro_id={$registro['fc_layout_factura_id']}";
+            $link .= "&session_id={$_GET['session_id']}";
+            $link .= "&view=layout&view_id={$registro['fc_layout_nom_id']}";
+            $relaciones[$key] = $registro;
+            $relaciones[$key]['url_eliminar'] = $link;
+        }
+
+        $response['relaciones'] = $relaciones;
+
+        return $response;
+    }
 }

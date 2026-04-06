@@ -60,6 +60,7 @@ class controlador_fc_layout_nom extends system{
 
     public int $tipo_dispersion;
     public bool $aplica_relacion_layout_factura;
+    public array $info_relaciones = array();
 
     public function __construct(PDO $link, html $html = new html(), stdClass $paths_conf = new stdClass()){
         $modelo = new fc_layout_nom(link: $link);
@@ -1667,6 +1668,22 @@ class controlador_fc_layout_nom extends system{
 
         return $rows;
 
+    }
+
+    public function ver_relaciones(bool $header, bool $ws = false)
+    {
+        $fc_layout_nom_id = $this->registro_id;
+        $info = $this->modelo->obtener_registro_de_relaciones(layout_nom_id:  $fc_layout_nom_id);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener informacion de las relaciones',
+                data: $info,
+                header: $header,
+                ws: $ws
+            );
+        }
+
+        $this->info_relaciones = $info;
     }
 
     public function timbra_recibo(bool $header, bool $ws = false): array|stdClass
