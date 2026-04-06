@@ -960,6 +960,30 @@ class controlador_fc_layout_nom extends system{
 
     }
 
+    public function elimina_relacion(bool $header, bool $ws = false)
+    {
+        $this->link->beginTransaction();
+        $fc_layout_factura_id = $this->registro_id;
+        $fc_layout_factura_modelo = new fc_layout_factura(link: $this->link);
+        $rs = $fc_layout_factura_modelo->elimina_relacion_con_registro_id(fc_layout_factura_id: $fc_layout_factura_id);
+        if (errores::$error) {
+            $this->link->rollBack();
+            return $this->retorno_error(
+                mensaje: 'Error al eliminar relacion',
+                data: $rs,
+                header: $header,
+                ws: $ws
+            );
+        }
+        $fc_layout_nom_id = $rs['fc_layout_nom_id'];
+
+        $this->link->commit();
+
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+        exit;
+
+    }
+
     public function genera_dispersion(bool $header, bool $ws = false)
     {
         $clase_dispersion = new _xls_dispersion();

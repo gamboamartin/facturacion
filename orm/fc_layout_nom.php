@@ -395,10 +395,11 @@ class fc_layout_nom extends modelo{
 
         $relaciones = [];
         foreach ($data as $key => $registro) {
-            $link = "index.php?seccion=fc_layout_factura&accion=elimina_relacion";
+            $link = "index.php?seccion=fc_layout_nom&accion=elimina_relacion";
             $link .= "&registro_id={$registro['fc_layout_factura_id']}";
             $link .= "&session_id={$_GET['session_id']}";
             $link .= "&view=layout&view_id={$registro['fc_layout_nom_id']}";
+            $link .= "&adm_menu_id=75";
             $relaciones[$key] = $registro;
             $relaciones[$key]['url_eliminar'] = $link;
         }
