@@ -411,5 +411,51 @@ class fc_factura extends _transacciones_fc
         return $rs;
     }
 
+    public function obtener_registro_de_relaciones(int $factura_id): array
+    {
+        $response = [];
+
+        $this->registro_id = $factura_id;
+        $rs = $this->obten_data(
+            columnas: [
+                'fc_factura_folio',
+                'fc_factura_total',
+                'fc_factura_monto_por_asignar',
+                'com_cliente_razon_social'
+            ]
+        );
+        if(errores::$error){
+            return (new errores())->error("Error al obtener info de la factura", $rs);
+        }
+
+        $response['factura'] = $rs;
+
+        $fc_layout_factura_modelo = new fc_layout_factura(link: $this->link);
+
+        $data = $fc_layout_factura_modelo->filtro_and(
+            columnas: [
+                'fc_layout_factura_monto_relacionado',
+                'fc_layout_nom_id',
+                'fc_layout_nom_codigo',
+                'fc_layout_nom_total',
+                'com_cliente_razon_social',
+                'fc_layout_periodo_descripcion_select'
+            ],
+            filtro: [
+                'fc_layout_factura.fc_factura_id' => $factura_id
+            ]
+        );
+
+        if(errores::$error){
+            return (new errores())->error("Error filtrar en fc_layout_factura", $data);
+        }
+
+        $data = $data->registros;
+
+        $response['relaciones'] = $data;
+
+        return $response;
+    }
+
 
 }

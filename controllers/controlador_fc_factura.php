@@ -68,6 +68,7 @@ class controlador_fc_factura extends _base_system_fc
     public bool $aplica_relacion_layout_factura;
 
     public array $facturas_cliente = array();
+    public array $info_relaciones = array();
 
     public function __construct(PDO      $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass())
@@ -771,6 +772,23 @@ class controlador_fc_factura extends _base_system_fc
 
         return $r_timbra;
 
+    }
+
+    public function ver_relaciones(bool $header, bool $ws = false)
+    {
+        $fc_factura_id = $this->registro_id;
+
+        $info = $this->modelo->obtener_registro_de_relaciones(factura_id: $fc_factura_id);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener informacion de las relaciones',
+                data: $info,
+                header: $header,
+                ws: $ws
+            );
+        }
+
+        $this->info_relaciones = $info;
     }
 
     public function verifica_cancelacion(bool $header, bool $ws = false)
