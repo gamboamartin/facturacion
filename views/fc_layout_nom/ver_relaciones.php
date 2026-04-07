@@ -5,6 +5,9 @@
     $layout = $controlador->info_relaciones['layout'];
     $relaciones = $controlador->info_relaciones['relaciones'];
     $formatter = new NumberFormatter('es_MX', NumberFormatter::CURRENCY);
+    $url_relacion = $layout['url'];
+
+    $monto_por_relacionar = (double)$layout['fc_layout_nom_monto_por_asignar'];
 ?>
 
 <main class="main section-color-primary">
@@ -25,7 +28,7 @@
                     <h4 class="h-side-title page-title text-color-primary">
                         Monto por relacionar:
                         <?php
-                            echo $formatter->formatCurrency($layout['fc_layout_nom_monto_por_asignar'], 'MXN');
+                            echo $formatter->formatCurrency($monto_por_relacionar, 'MXN');
                         ?>
                     </h4>
                 </section> <!-- /. content-header -->
@@ -48,7 +51,7 @@
                         <tbody>
                             <?php foreach ($relaciones as $relacion): ?>
                                 <tr>
-                                    <td><?php echo $relacion['fc_layout_factura_id']; ?></td>
+                                    <td><?php echo $relacion['fc_factura_id']; ?></td>
                                     <td><?php echo $relacion['fc_factura_folio']; ?></td>
                                     <td><?php echo $relacion['com_cliente_razon_social']; ?></td>
                                     <td class="txt-center">
@@ -74,6 +77,12 @@
 
                         </tbody>
                     </table>
+                    <?php if ($monto_por_relacionar > 0) : ?>
+                        <a class="btn btn-info btn-sm flex-fill"
+                           href="<?php echo $url_relacion ?>">
+                            Relacionar otra Factura
+                        </a>
+                    <?php endif; ?>
 
                 </div>
 

@@ -419,8 +419,8 @@ class controlador_fc_layout_nom extends system{
         }
 
         $_SESSION['exito'][]['mensaje'] = "fc_factura_id={$fc_factura_id} asignada correctamente al fc_layout_nom_id={$this->registro_id}";
-        $link = "index.php?seccion=fc_layout_nom&accion=lista&adm_menu_id=75";
-        $link .= "&session_id={$_GET['session_id']}";
+        $link = "index.php?seccion=fc_layout_nom&accion=ver_relaciones&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}&registro_id={$fc_layout_nom_id}";
         header("Location: " . $link);
         exit;
     }

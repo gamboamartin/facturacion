@@ -368,6 +368,10 @@ class fc_layout_nom extends modelo{
             return (new errores())->error("Error al obtener info de el layout", $rs);
         }
 
+        $link_nueva_relacion = "index.php?seccion=fc_layout_nom&accion=asigna_factura";
+        $link_nueva_relacion .= "&session_id={$_GET['session_id']}&adm_menu_id=75&registro_id={$rs['fc_layout_nom_id']}";
+
+        $rs['url'] = $link_nueva_relacion;
         $response['layout'] = $rs;
 
         $fc_layout_factura_modelo = new fc_layout_factura(link: $this->link);
