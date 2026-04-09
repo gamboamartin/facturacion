@@ -5,6 +5,9 @@
     $factura = $controlador->info_relaciones['factura'];
     $relaciones = $controlador->info_relaciones['relaciones'];
     $formatter = new NumberFormatter('es_MX', NumberFormatter::CURRENCY);
+    $url_relacion = $factura['url'];
+
+    $monto_por_relacionar = (double)$factura['fc_factura_monto_por_asignar'];
 ?>
 
 <main class="main section-color-primary">
@@ -74,6 +77,12 @@
 
                         </tbody>
                     </table>
+                    <?php if ($monto_por_relacionar > 0) : ?>
+                        <a class="btn btn-info btn-sm flex-fill"
+                           href="<?php echo $url_relacion ?>">
+                            Relacionar otra Factura
+                        </a>
+                    <?php endif; ?>
 
                 </div>
 

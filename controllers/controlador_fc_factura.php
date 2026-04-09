@@ -424,7 +424,8 @@ class controlador_fc_factura extends _base_system_fc
         }
 
         $_SESSION['exito'][]['mensaje'] = "fc_layout_nom_id={$fc_layout_nom_id} asignada correctamente al fc_factura_id={$fc_factura_id}";
-        $link = "index.php?seccion=fc_factura&accion=lista&adm_menu_id=75";
+        $link = "index.php?seccion=fc_factura&accion=ver_relaciones&adm_menu_id=44";
+        $link .= "&registro_id={$fc_factura_id}";
         $link .= "&session_id={$_GET['session_id']}";
         header("Location: " . $link);
         exit;

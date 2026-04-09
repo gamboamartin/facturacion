@@ -414,6 +414,7 @@ class fc_factura extends _transacciones_fc
         $this->registro_id = $factura_id;
         $rs = $this->obten_data(
             columnas: [
+                'fc_factura_id',
                 'fc_factura_folio',
                 'fc_factura_total',
                 'fc_factura_monto_por_asignar',
@@ -424,6 +425,10 @@ class fc_factura extends _transacciones_fc
             return (new errores())->error("Error al obtener info de la factura", $rs);
         }
 
+        $link_nueva_relacion = "index.php?seccion=fc_factura&accion=asigna_layout_nom&adm_menu_id=44";
+        $link_nueva_relacion .= "&session_id={$_GET['session_id']}&registro_id={$rs['fc_factura_id']}";
+
+        $rs['url'] = $link_nueva_relacion;
         $response['factura'] = $rs;
 
         $fc_layout_factura_modelo = new fc_layout_factura(link: $this->link);
