@@ -93,6 +93,36 @@ class fc_layout_factura extends modelo{
         return [];
     }
 
+    public function elimina_con_layout_nom_id(int $fc_layout_nom_id)
+    {
+        $rs = $this->elimina_por_filtro(
+            filtro: ['fc_layout_factura.fc_layout_nom_id' => $fc_layout_nom_id]
+        );
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al elimina_por_filtro',data: $rs
+            );
+        }
+
+        return [];
+
+    }
+
+    public function elimina_con_factura_id(int $fc_factura_id)
+    {
+
+        $rs = $this->elimina_por_filtro(
+            filtro: ['fc_layout_factura.fc_factura_id' => $fc_factura_id]
+        );
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al elimina_por_filtro',data: $rs
+            );
+        }
+
+        return [];
+    }
+
     public function elimina_relacion_con_registro_id(int $fc_layout_factura_id)
     {
         $fc_layout_factura_modelo = new fc_layout_factura(link: $this->link);
@@ -349,6 +379,44 @@ class fc_layout_factura extends modelo{
                 mensaje: $e->getMessage(),
                 data:  $e
             );
+        }
+
+        return [];
+    }
+
+    private function elimina_por_filtro(array $filtro): array
+    {
+        $fc_layout_factura_modelo = new fc_layout_factura(link: $this->link);
+
+        $rs = $fc_layout_factura_modelo->filtro_and(
+            columnas: ['fc_layout_factura_id'],
+            filtro: $filtro
+        );
+
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al filtrar datos',
+                data: $rs
+            );
+        }
+
+        if ((int)$rs->n_registros === 0) {
+            return [];
+        }
+
+        foreach ($rs->registros as $registro) {
+            $registro_id = (int)$registro['fc_layout_factura_id'];
+
+            $rs_delete = $fc_layout_factura_modelo->elimina_relacion_con_registro_id(
+                fc_layout_factura_id: $registro_id
+            );
+
+            if (errores::$error) {
+                return $this->error->error(
+                    mensaje: 'Error al eliminar relación con registro_id ' . $registro_id,
+                    data: $rs_delete
+                );
+            }
         }
 
         return [];
