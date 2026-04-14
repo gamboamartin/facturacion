@@ -86,14 +86,6 @@ class _cancela_nomina
             return (new errores())->error(mensaje: 'Error en upd_fc_row_nomina', data: $result_nomina);
         }
 
-        $result_regenera_nomina_pdf = (new _finalizacion())->regenera_nomina_pdf(
-            fc_row_layout_id: $fc_row_layout_id,
-            link:  $link
-        );
-        if(errores::$error) {
-            return (new errores())->error(mensaje: 'Error al regenera_rec_pdf', data: $result_regenera_nomina_pdf);
-        }
-
         $out = new stdClass();
         $out->datos_rec = $datos_rec;
         $out->datos_cfdi = $datos_cfdi;
