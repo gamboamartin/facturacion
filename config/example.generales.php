@@ -24,7 +24,7 @@ class generales{
     public static int $tipo_agente_operador = 1; // especifico de konsulta
     public static int $tipo_agente_asesor = 2; // especifico de konsulta
     public static string $empresa_pagadora_reportes = 'RECURSOS Y RESULTADOS HARIMENI'; // especifico de konsulta
-    public static string $key_datos_constancia = 'VHn9JjiujaWPok5yNMb5sYj9';
+    public static string $key_n8n = 'VHn9JjiujaWPok5yNMb5sYj9';
     public static string $url_base_n8n = 'https://richito.ivitec.mx/';
 
     public function __construct(){
