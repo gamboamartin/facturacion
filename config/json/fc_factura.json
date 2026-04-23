@@ -1,0 +1,151 @@
+{
+  "modulo": "facturacion",
+  "escenario": "descarga_factura",
+  "version": "1.1",
+  "estructura": {
+    "input": ["FL", "UUID", "RFC", "DOC"],
+    "output": ["FL", "UUID", "TOT", "FEC", "RS", "RFC", "ETP", "PDF", "XML", "STS", "MSG", "URL_PDF", "URL_XML"]
+  },
+  "campos": {
+    "FID": {
+      "nombre_sistema": "fc_factura_id",
+      "tipo": "integer",
+      "origen": "db",
+      "uso": "interno",
+      "exponer": false,
+      "descripcion": "Identificador interno único de la factura"
+    },
+    "FL": {
+      "nombre_sistema": "fc_factura_folio",
+      "tipo": "string",
+      "origen": "db",
+      "uso": "entrada/salida",
+      "exponer": true,
+      "descripcion": "Folio principal de búsqueda"
+    },
+    "UUID": {
+      "nombre_sistema": "fc_factura_uuid",
+      "tipo": "string",
+      "origen": "db",
+      "uso": "entrada/salida",
+      "exponer": true,
+      "descripcion": "UUID fiscal del CFDI"
+    },
+    "TOT": {
+      "nombre_sistema": "fc_factura_total",
+      "tipo": "decimal(14,2)",
+      "origen": "db",
+      "uso": "salida",
+      "exponer": true,
+      "descripcion": "Importe total de la factura"
+    },
+    "FEC": {
+      "nombre_sistema": "fc_factura_fecha",
+      "tipo": "datetime",
+      "origen": "db",
+      "uso": "salida",
+      "exponer": true,
+      "descripcion": "Fecha de emisión"
+    },
+    "RS": {
+      "nombre_sistema": "com_cliente_razon_social",
+      "tipo": "string",
+      "origen": "db",
+      "uso": "salida",
+      "exponer": true,
+      "descripcion": "Razón social del cliente"
+    },
+    "RFC": {
+      "nombre_sistema": "com_cliente_rfc",
+      "tipo": "string",
+      "origen": "db/request",
+      "uso": "entrada/salida",
+      "exponer": true,
+      "descripcion": "RFC del cliente"
+    },
+    "ETP": {
+      "nombre_sistema": "fc_factura_etapa",
+      "tipo": "string",
+      "origen": "db",
+      "uso": "interno/salida",
+      "exponer": true,
+      "descripcion": "Estado operativo de la factura"
+    },
+    "PDF": {
+      "nombre_sistema": "pdf_disponible",
+      "tipo": "boolean",
+      "origen": "calculated",
+      "uso": "salida",
+      "exponer": true,
+      "descripcion": "Indica si el PDF está disponible"
+    },
+    "XML": {
+      "nombre_sistema": "xml_disponible",
+      "tipo": "boolean",
+      "origen": "calculated",
+      "uso": "salida",
+      "exponer": true,
+      "descripcion": "Indica si el XML está disponible"
+    },
+    "DOC": {
+      "nombre_sistema": "documento_solicitado",
+      "tipo": "string",
+      "origen": "request",
+      "uso": "entrada",
+      "exponer": false,
+      "valores_permitidos": ["pdf", "xml"],
+      "descripcion": "Documento solicitado por el usuario"
+    },
+    "STS": {
+      "nombre_sistema": "status_consulta",
+      "tipo": "string",
+      "origen": "response",
+      "uso": "salida",
+      "exponer": true,
+      "valores_permitidos": ["ok", "no_encontrado", "ambiguo", "no_disponible", "error"],
+      "descripcion": "Resultado de la operación"
+    },
+    "MSG": {
+      "nombre_sistema": "mensaje",
+      "tipo": "string",
+      "origen": "response",
+      "uso": "salida",
+      "exponer": true,
+      "descripcion": "Mensaje funcional para el usuario"
+    },
+    "URL_PDF": {
+      "nombre_sistema": "url_pdf",
+      "tipo": "string",
+      "origen": "generated",
+      "uso": "salida",
+      "exponer": true,
+      "descripcion": "URL temporal del PDF"
+    },
+    "URL_XML": {
+      "nombre_sistema": "url_xml",
+      "tipo": "string",
+      "origen": "generated",
+      "uso": "salida",
+      "exponer": true,
+      "descripcion": "URL temporal del XML"
+    }
+  },
+  "reglas": {
+    "busqueda": {
+      "principal": "FL",
+      "alternativa": ["UUID"],
+      "validacion": ["RFC"]
+    },
+    "resultado": {
+      "sin_coincidencia": "no_encontrado",
+      "multiple": "ambiguo",
+      "no_disponible": "no_disponible",
+      "exito": "ok"
+    },
+    "restricciones": {
+      "etapas_validas": ["TIMBRADO", "ACTIVO"],
+      "exponer_solo_campos_definidos": true,
+      "modo": "consulta_descarga"
+    }
+  }
+}

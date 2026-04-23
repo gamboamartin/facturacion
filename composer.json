@@ -70,7 +70,8 @@
     "ext-openssl": "*",
     "ext-mysqli": "*",
     "ext-libxml": "*",
-    "endroid/qr-code": "^5.1"
+    "endroid/qr-code": "^5.1",
+    "yosymfony/toml": "^1.0"
   },
   "config": {
     "allow-plugins": {

@@ -1,0 +1,87 @@
+modulo = "facturacion"
+escenario = "descarga_factura"
+version = "1.0"
+
+[input]
+
+# Campos que el sistema acepta desde n8n/agente
+permitidos = ["FL", "UUID", "RFC", "DOC"]
+
+# Campo principal de búsqueda
+principal = "FL"
+
+# Campos alternativos
+alternos = ["UUID"]
+
+# Campo de validación adicional
+validacion = ["RFC"]
+
+# Documento solicitado
+documento_default = "pdf"
+documentos_permitidos = ["pdf", "xml"]
+
+[output]
+
+# Campos que se pueden exponer al exterior
+permitidos = [
+  "FL",
+  "TOT",
+  "FEC",
+  "RS",
+  "RFC",
+  "ETP",
+  "PDF",
+  "XML",
+  "STS",
+  "MSG",
+  "URL_PDF",
+  "URL_XML"
+]
+
+# Campos obligatorios en la respuesta
+obligatorios = ["STS", "MSG"]
+
+[reglas]
+
+busqueda_principal = "FL"
+busqueda_alterna = "UUID"
+validacion_secundaria = "RFC"
+
+# Etapas válidas para permitir descarga
+etapas_validas = ["TIMBRADO", "ACTIVO"]
+
+# Estados posibles de respuesta
+status_validos = [
+  "ok",
+  "no_encontrado",
+  "ambiguo",
+  "no_disponible",
+  "error"
+]
+
+
+
+[comportamiento]
+
+# Permitir múltiples resultados
+permitir_multiples = false
+
+# Requiere documento en request
+requiere_documento = true
+
+# Ocultar campos no definidos
+filtrar_campos = true
+
+# Generar URLs temporales
+urls_temporales = true
+
+
+[mapping]
+
+FL = "fc_factura.folio"
+UUID = "fc_factura.folio_fiscal"
+TOT = "fc_factura.total"
+FEC = "fc_factura.fecha"
+ETP = "fc_factura.etapa"
+RS = "com_cliente.razon_social"
+RFC = "com_cliente.rfc"
