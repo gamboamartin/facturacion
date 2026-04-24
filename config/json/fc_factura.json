@@ -3,8 +3,8 @@
   "escenario": "descarga_factura",
   "version": "1.1",
   "estructura": {
-    "input": ["FL", "UUID", "RFC", "DOC"],
-    "output": ["FL", "UUID", "TOT", "FEC", "RS", "RFC", "ETP", "PDF", "XML", "STS", "MSG", "URL_PDF", "URL_XML"]
+    "input": ["FL", "RFC", "DOC"],
+    "output": ["FL", "TOT", "FEC", "RS", "RFC", "ETP", "PDF", "XML", "STS", "MSG", "URL_PDF", "URL_XML"]
   },
   "campos": {
     "FID": {
@@ -27,9 +27,9 @@
       "nombre_sistema": "fc_factura_uuid",
       "tipo": "string",
       "origen": "db",
-      "uso": "entrada/salida",
-      "exponer": true,
-      "descripcion": "UUID fiscal del CFDI"
+      "uso": "interno",
+      "exponer": false,
+      "descripcion": "UUID fiscal del CFDI usado solo como dato interno del sistema"
     },
     "TOT": {
       "nombre_sistema": "fc_factura_total",
@@ -133,7 +133,7 @@
   "reglas": {
     "busqueda": {
       "principal": "FL",
-      "alternativa": ["UUID"],
+      "alternativa": [],
       "validacion": ["RFC"]
     },
     "resultado": {

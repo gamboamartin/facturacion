@@ -15,11 +15,6 @@ require 'vendor/autoload.php';
 $con = new conexion();
 $link = conexion::$link;
 
-/**
- * =========================================================
- * CARGA DE ESCENARIO TOML
- * =========================================================
- */
 
 $toml_path = __DIR__ . '/config/escenario/descarga_factura.toml';
 
@@ -41,11 +36,38 @@ try {
     exit;
 }
 
-/**
- * =========================================================
- * CONFIG TOML
- * =========================================================
- */
+
+$diccionario_path = __DIR__ . '/config/json/fc_factura.json';
+
+if (!file_exists($diccionario_path)) {
+    echo json_encode(array(
+        'STS' => 'error',
+        'MSG' => 'No existe el diccionario de datos'
+    ), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+$diccionario_json = file_get_contents($diccionario_path);
+$diccionario = json_decode($diccionario_json, true);
+
+if (json_last_error() !== JSON_ERROR_NONE) {
+    echo json_encode(array(
+        'STS' => 'error',
+        'MSG' => 'No fue posible leer el diccionario de datos'
+    ), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+$campos_diccionario_exponibles = array();
+
+if (isset($diccionario['campos']) && is_array($diccionario['campos'])) {
+    foreach ($diccionario['campos'] as $clave => $campo) {
+        if (isset($campo['exponer']) && $campo['exponer'] === true) {
+            $campos_diccionario_exponibles[] = $clave;
+        }
+    }
+}
+
 
 $documentos_permitidos = array('pdf', 'xml');
 if (isset($escenario['input']['documentos_permitidos']) && is_array($escenario['input']['documentos_permitidos'])) {
@@ -67,11 +89,6 @@ if (isset($escenario['comportamiento']['filtrar_campos'])) {
     $filtrar_campos = (bool)$escenario['comportamiento']['filtrar_campos'];
 }
 
-/**
- * =========================================================
- * VALIDACIONES DE ENTRADA
- * =========================================================
- */
 
 if (!isset($_GET['doc'])) {
     echo 'no existe doc en GET';
@@ -116,19 +133,9 @@ if ($folio === '' && $uuid === '') {
     exit;
 }
 
-/**
- * =========================================================
- * MODELO
- * =========================================================
- */
 
 $modelo = new fc_factura($link);
 
-/**
- * =========================================================
- * FILTRO PRINCIPAL
- * =========================================================
- */
 
 $filtro = array();
 
@@ -138,11 +145,6 @@ if ($folio !== '') {
     $filtro['fc_factura.folio_fiscal'] = $uuid;
 }
 
-/**
- * =========================================================
- * CONSULTA
- * =========================================================
- */
 
 $rs = $modelo->filtro_and(filtro: $filtro);
 if (errores::$error) {
@@ -170,11 +172,6 @@ if ($n_registros > 1) {
 
 $registro = $rs->registros[0];
 
-/**
- * =========================================================
- * RFC SECUNDARIO
- * =========================================================
- */
 
 if ($rfc !== '') {
     $rfc_bd = '';
@@ -192,11 +189,6 @@ if ($rfc !== '') {
     }
 }
 
-/**
- * =========================================================
- * VALIDAR ETAPA DESDE TOML
- * =========================================================
- */
 
 $etapa = '';
 
@@ -214,11 +206,6 @@ if ($etapa === '' || !in_array(strtoupper($etapa), $etapas_validas_normalizadas,
     exit;
 }
 
-/**
- * =========================================================
- * ID DE FACTURA
- * =========================================================
- */
 
 $fc_factura_id = 0;
 
@@ -234,13 +221,30 @@ if ($fc_factura_id <= 0) {
     exit;
 }
 
-/**
- * =========================================================
- * URLS OFICIALES DEL SISTEMA
- * =========================================================
- */
 
-$base_url = 'http://localhost/facturacion/';
+$protocolo = 'http://';
+
+if (
+    (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+    (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
+) {
+    $protocolo = 'https://';
+}
+
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+$base_path = '/';
+
+if (
+    strpos($host, 'localhost') !== false ||
+    strpos($host, '127.0.0.1') !== false
+) {
+    $base_path = '/facturacion/';
+}
+
+$base_url = $protocolo . $host . $base_path;
+
+
 $url_pdf = '';
 $url_xml = '';
 
@@ -255,11 +259,6 @@ if ($doc === 'xml') {
 $pdf_disponible = ($url_pdf !== '');
 $xml_disponible = ($url_xml !== '');
 
-/**
- * =========================================================
- * RESPUESTA BASE
- * =========================================================
- */
 
 $respuesta = array(
     'STS' => 'ok',
@@ -276,21 +275,18 @@ $respuesta = array(
     'URL_XML' => $url_xml
 );
 
-/**
- * =========================================================
- * FILTRAR RESPUESTA SEGUN TOML
- * =========================================================
- */
 
-if ($filtrar_campos && !empty($campos_salida_permitidos)) {
-    $respuesta = array_intersect_key($respuesta, array_flip($campos_salida_permitidos));
+if ($filtrar_campos) {
+
+    if (!empty($campos_salida_permitidos)) {
+        $respuesta = array_intersect_key($respuesta, array_flip($campos_salida_permitidos));
+    }
+
+    if (!empty($campos_diccionario_exponibles)) {
+        $respuesta = array_intersect_key($respuesta, array_flip($campos_diccionario_exponibles));
+    }
 }
 
-/**
- * =========================================================
- * RESPUESTA FINAL
- * =========================================================
- */
 
 echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
 
