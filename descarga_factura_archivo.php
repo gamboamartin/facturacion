@@ -1,6 +1,12 @@
 <?php
 
 require "init.php";
+require 'vendor/autoload.php';
+
+use config\generales;
+
+$generales = new generales();
+$secret_key = $generales->cache_secret_key;
 
 $token = $_GET['token'] ?? '';
 
@@ -19,7 +25,7 @@ if (count($partes) !== 2) {
 $payload = $partes[0];
 $firma = $partes[1];
 
-$firma_valida = hash_hmac('sha256', $payload, CACHE_SECRET_KEY);
+$firma_valida = hash_hmac('sha256', $payload, $secret_key);
 
 if (!hash_equals($firma_valida, $firma)) {
     http_response_code(403);

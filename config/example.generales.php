@@ -26,6 +26,7 @@ class generales{
     public static string $empresa_pagadora_reportes = 'RECURSOS Y RESULTADOS HARIMENI'; // especifico de konsulta
     public static string $key_n8n = 'VHn9JjiujaWPok5yNMb5sYj9';
     public static string $url_base_n8n = 'https://richito.ivitec.mx/';
+    public string $cache_secret_key = 'f9a8c7d6e5b4a360_super_secret_key_ivitec';
 
     public function __construct(){
         $this->path_base = '/var/www/html/facturacion/'; // aqui va la ruta base del sistema, se usa para generar rutas absolutas en los templates y en el sistema en general

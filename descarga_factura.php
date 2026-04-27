@@ -15,16 +15,20 @@ use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\models\fc_uuid_fc;
 use Yosymfony\Toml\Toml;
+require "init.php";
+require 'vendor/autoload.php';
 
-define('CACHE_SECRET_KEY', 'your_secure_secret_key_here'); // Replace with actual secure key from config
+use config\generales;
+
+$generales = new generales();
+$secret_key = $generales->cache_secret_key;
+
 
 header('Content-Type: application/json; charset=utf-8');
 
 $_SESSION['usuario_id'] = 2;
 $_SESSION['grupo_id'] = 2;
 
-require "init.php";
-require 'vendor/autoload.php';
 
 $con = new conexion();
 $link = conexion::$link;
@@ -324,7 +328,7 @@ if ($doc === 'pdf') {
         'exp' => $exp
     ]));
 
-    $firma = hash_hmac('sha256', $payload, CACHE_SECRET_KEY);
+    $firma = hash_hmac('sha256', $payload, $secret_key);
 
     $token = $payload . '.' . $firma;
 
