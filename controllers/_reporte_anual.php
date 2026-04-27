@@ -511,34 +511,7 @@ class _reporte_anual{
         $fecha_fin = date("Y-m-t", strtotime($fecha_inicio));
         // t = último día real del mes (28,29,30,31)
 
-        $query = "SELECT
-                        COALESCE(operador.descripcion, 'NO ASIGNADO') AS operador,
-                        com_cliente.id AS numero_cliente,
-                        com_cliente.razon_social AS cliente,
-                        asesor.id AS numero_asesor,
-                        COALESCE(asesor.descripcion, 'NO ASIGNADO') AS asesor,
-                        periodo.descripcion AS periodo,
-                        (SELECT COUNT(*) FROM fc_row_layout WHERE fc_row_layout.fc_layout_nom_id = fc_layout_nom.id) AS numero_empleados,
-                        fc_factura.id AS numero_factura,
-                        fc_factura.fecha AS fecha_operacion,
-                        producto.descripcion AS producto,
-                        fc_factura.porcentaje_comision_cliente AS porcentaje_comision,
-                        fc_factura.total_traslados AS iva,
-                        fc_factura.sub_total,
-                        fc_factura.total AS total 
-                    FROM
-                        fc_factura
-                        LEFT JOIN com_agente AS operador ON fc_factura.agente_operacion_alta_id = operador.id
-                        LEFT JOIN com_sucursal ON fc_factura.com_sucursal_id = com_sucursal.id
-                        LEFT JOIN com_cliente ON com_sucursal.com_cliente_id = com_cliente.id
-                        LEFT JOIN com_agente AS asesor ON com_cliente.com_agente_asesor_id = asesor.id
-                        LEFT JOIN fc_layout_factura ON fc_factura.id = fc_layout_factura.fc_factura_id
-                        LEFT JOIN fc_layout_nom ON fc_layout_factura.fc_layout_nom_id = fc_layout_nom.id
-                        LEFT JOIN fc_layout_periodo AS periodo ON fc_layout_nom.fc_layout_periodo_id = periodo.id
-                        LEFT JOIN com_tipo_producto AS producto ON fc_factura.com_tipo_producto_id = producto.id 
-                    WHERE
-                    fc_factura.fecha BETWEEN :fecha_inicio
-                    AND :fecha_fin
+        $query = "{$this->base_query()}
                 ORDER BY
                     periodo.id,
                     operador.descripcion ASC";
