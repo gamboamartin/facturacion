@@ -315,7 +315,7 @@ if ($doc === 'pdf') {
     }
 
     $pdf_filename = basename($ruta_pdf);
-    $url_pdf = $base_url . 'archivos/' . $pdf_filename;
+    $url_pdf = $base_url . 'archivos/doc_documentos/' . $pdf_filename;
 }
 
 if ($doc === 'xml') {
