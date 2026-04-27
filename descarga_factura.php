@@ -2,8 +2,18 @@
 
 use base\conexion;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\controllers\_doctos;
+use gamboamartin\facturacion\models\fc_cfdi_sellado;
+use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
+use gamboamartin\facturacion\models\fc_factura_documento;
+use gamboamartin\facturacion\models\fc_factura_relacionada;
+use gamboamartin\facturacion\models\fc_partida;
+use gamboamartin\facturacion\models\fc_relacion;
+use gamboamartin\facturacion\models\fc_retenido;
+use gamboamartin\facturacion\models\fc_traslado;
+use gamboamartin\facturacion\models\fc_uuid_fc;
 use Yosymfony\Toml\Toml;
 
 header('Content-Type: application/json; charset=utf-8');
@@ -264,20 +274,38 @@ if ($doc === 'pdf') {
 
     $_GET['registro_id'] = $fc_factura_id;
 
-    ob_start();
 
-    $controlador = new controlador_fc_factura(
-        link: $link,
-        paths_conf: new stdClass()
-    );
+    $ruta_pdf = '';
 
+    $modelo_documento = (new fc_factura_documento(link: $link));
+    $modelo_entidad = $modelo;
+    $modelo_partida = (new fc_partida(link: $link));
+    $modelo_predial = (new fc_cuenta_predial(link: $link));
+    $modelo_relacion = (new fc_relacion(link: $link));
+    $modelo_relacionada = (new fc_factura_relacionada(link: $link));
+    $modelo_retencion = (new fc_retenido(link: $link));
+    $modelo_sello = (new fc_cfdi_sellado(link: $link));
+    $modelo_traslado = (new fc_traslado(link: $link));
+    $modelo_uuid_ext = (new fc_uuid_fc(link: $link));
 
-    $ruta_pdf = $controlador->genera_pdf(
-        header: false,
-        ws: true,
-        descarga: false,
-        guarda: true
-    );
+    $pdf = (new _doctos())->pdf(descarga: false, guarda: true, modelo_documento: $modelo_documento,
+        modelo_entidad:  $modelo_entidad, modelo_partida: $modelo_partida,
+        modelo_predial:  $modelo_predial, modelo_relacion: $modelo_relacion,
+        modelo_relacionada:  $modelo_relacionada, modelo_retencion:  $modelo_retencion,
+        modelo_sello:  $modelo_sello, modelo_traslado:  $modelo_traslado,
+        modelo_uuid_ext: $modelo_uuid_ext, row_entidad_id: $fc_factura_id);
+
+    if(errores::$error){
+        echo json_encode(array(
+            'STS' => 'error',
+            'MSG' => 'No fue posible generar el PDF de la factura',
+            'DEBUG' => $pdf
+        ), JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $ruta_pdf = $pdf->registro_obj->doc_documento_ruta_absoluta;
+
 
     $salida_pdf = ob_get_clean();
 
