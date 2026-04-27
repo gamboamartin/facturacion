@@ -3,6 +3,7 @@
 use base\conexion;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\fc_factura;
+use gamboamartin\facturacion\controllers\controlador_fc_factura;
 use Yosymfony\Toml\Toml;
 
 header('Content-Type: application/json; charset=utf-8');
@@ -247,9 +248,34 @@ $base_url = $protocolo . $host . $base_path;
 
 $url_pdf = '';
 $url_xml = '';
+$pdf_filename = '';
 
 if ($doc === 'pdf') {
-    $url_pdf = $base_url . 'index.php?seccion=fc_factura&accion=genera_pdf&registro_id=' . $fc_factura_id;
+
+    $_GET['registro_id'] = $fc_factura_id;
+
+    $controlador = new controlador_fc_factura(
+        link: $link,
+        paths_conf: new stdClass()
+    );
+
+    $ruta_pdf = $controlador->genera_pdf(
+        header: false,
+        ws: true,
+        descarga: false,
+        guarda: true
+    );
+
+    if (errores::$error || !is_string($ruta_pdf) || !file_exists($ruta_pdf)) {
+        echo json_encode(array(
+            'STS' => 'error',
+            'MSG' => 'No fue posible generar el PDF de la factura'
+        ), JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $pdf_filename = basename($ruta_pdf);
+    $url_pdf = $base_url . 'archivos/' . $pdf_filename;
 }
 
 if ($doc === 'xml') {
@@ -272,7 +298,8 @@ $respuesta = array(
     'PDF' => $pdf_disponible,
     'XML' => $xml_disponible,
     'URL_PDF' => $url_pdf,
-    'URL_XML' => $url_xml
+    'URL_XML' => $url_xml,
+    'PDF_FILENAME' => $pdf_filename
 );
 
 
