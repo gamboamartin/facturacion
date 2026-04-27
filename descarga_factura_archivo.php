@@ -1,7 +1,5 @@
 <?php
 
-header('Content-Type: text/plain; charset=utf-8');
-
 require "init.php";
 
 $token = $_GET['token'] ?? '';
@@ -53,6 +51,10 @@ if (!is_string($ruta_pdf) || !file_exists($ruta_pdf) || !is_file($ruta_pdf)) {
 }
 
 $nombre_archivo = basename($ruta_pdf);
+
+if (ob_get_length()) {
+    ob_clean();
+}
 
 header('Content-Type: application/pdf');
 header('Content-Disposition: inline; filename="' . $nombre_archivo . '"');
