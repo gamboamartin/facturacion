@@ -274,6 +274,7 @@ if ($doc === 'pdf') {
 
     $_GET['registro_id'] = $fc_factura_id;
 
+    ob_start();
 
     $ruta_pdf = '';
 
