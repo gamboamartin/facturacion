@@ -18,20 +18,11 @@ use Yosymfony\Toml\Toml;
 
 header('Content-Type: application/json; charset=utf-8');
 
+$_SESSION['usuario_id'] = 2;
+$_SESSION['grupo_id'] = 2;
+
 require "init.php";
 require 'vendor/autoload.php';
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (empty($_SESSION['session_id'])) {
-    $_SESSION['session_id'] = session_id();
-}
-
-if (empty($_SESSION['usuario_id'])) {
-    $_SESSION['usuario_id'] = 2;
-}
 
 $con = new conexion();
 $link = conexion::$link;
