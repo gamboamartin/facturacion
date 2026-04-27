@@ -16,6 +16,8 @@ use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\models\fc_uuid_fc;
 use Yosymfony\Toml\Toml;
 
+define('CACHE_SECRET_KEY', 'your_secure_secret_key_here'); // Replace with actual secure key from config
+
 header('Content-Type: application/json; charset=utf-8');
 
 $_SESSION['usuario_id'] = 2;
@@ -314,8 +316,21 @@ if ($doc === 'pdf') {
         exit;
     }
 
+    $exp = time() + 600; // 10 minutos
+
+    $payload = base64_encode(json_encode([
+        'fc_factura_id' => $fc_factura_id,
+        'ruta_pdf' => $ruta_pdf,
+        'exp' => $exp
+    ]));
+
+    $firma = hash_hmac('sha256', $payload, CACHE_SECRET_KEY);
+
+    $token = $payload . '.' . $firma;
+
+    $url_pdf = $base_url . 'descarga_factura_archivo.php?token=' . urlencode($token);
+
     $pdf_filename = basename($ruta_pdf);
-    $url_pdf = $base_url . 'archivos/doc_documento/' . $pdf_filename;
 }
 
 if ($doc === 'xml') {
