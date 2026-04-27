@@ -259,6 +259,8 @@ if ($doc === 'pdf') {
         paths_conf: new stdClass()
     );
 
+    ob_start();
+
     $ruta_pdf = $controlador->genera_pdf(
         header: false,
         ws: true,
@@ -266,10 +268,17 @@ if ($doc === 'pdf') {
         guarda: true
     );
 
+    $salida_pdf = ob_get_clean();
+
+    if ($salida_pdf !== '') {
+        // Evita que cualquier salida accidental rompa el JSON de n8n
+    }
+
     if (errores::$error || !is_string($ruta_pdf) || !file_exists($ruta_pdf)) {
         echo json_encode(array(
             'STS' => 'error',
-            'MSG' => 'No fue posible generar el PDF de la factura'
+            'MSG' => 'No fue posible generar el PDF de la factura',
+            'DEBUG' => $salida_pdf
         ), JSON_UNESCAPED_UNICODE);
         exit;
     }
