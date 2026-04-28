@@ -324,6 +324,7 @@ if ($doc === 'pdf') {
 
     $payload = base64_encode(json_encode([
         'fc_factura_id' => $fc_factura_id,
+        'folio' => $registro['fc_factura_folio'] ?? '',
         'ruta_pdf' => $ruta_pdf,
         'exp' => $exp
     ]));

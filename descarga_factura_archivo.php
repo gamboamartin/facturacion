@@ -56,17 +56,30 @@ if (!is_string($ruta_pdf) || !file_exists($ruta_pdf) || !is_file($ruta_pdf)) {
     exit('Archivo no encontrado');
 }
 
-$nombre_archivo = basename($ruta_pdf);
+
+$folio = $data['folio'] ?? 'factura';
+
+if ($folio === '') {
+    $folio = 'factura';
+}
+
+
+$folio = preg_replace('/[^A-Za-z0-9_\-]/', '_', $folio);
+
+$nombre_descarga = 'Factura_' . $folio . '.pdf';
+
 
 if (ob_get_length()) {
     ob_clean();
 }
 
+
 header('Content-Type: application/pdf');
-header('Content-Disposition: inline; filename="' . $nombre_archivo . '"');
+header('Content-Disposition: inline; filename="' . $nombre_descarga . '"');
 header('Content-Length: ' . filesize($ruta_pdf));
 header('Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate');
 header('Pragma: no-cache');
+
 
 readfile($ruta_pdf);
 exit;
