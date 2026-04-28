@@ -250,7 +250,7 @@ class _reporte_anual_v2{
                 )
             );
             $sheet->setCellValue("K{$fila}", $registro['numero_factura']);
-            $sheet->setCellValue("L{$fila}", $this->formatea_digitos((int)$registro['layout_id']));
+            $sheet->setCellValue("L{$fila}", $registro['layout_id']);
             $sheet->setCellValue("M{$fila}", $porcentaje_comision);
 
             $sheet->setCellValue("N{$fila}", $monto_dispersion); //MONTO DE DISPERSION
@@ -325,18 +325,18 @@ class _reporte_anual_v2{
             'D1' => 'AÑO',
             'E1' => 'BNI',
             'F1' => '',
-            'G1' => 'TOTAL FACTURADO ENERO',
-            'H1' => 'TOTAL FACTURADO FEBRERO',
-            'I1' => 'TOTAL FACTURADO MARZO',
-            'J1' => 'TOTAL FACTURADO ABRIL',
-            'K1' => 'TOTAL FACTURADO MAYO',
-            'L1' => 'TOTAL FACTURADO JUNIO',
-            'M1' => 'TOTAL FACTURADO JULIO',
-            'N1' => 'TOTAL FACTURADO AGOSTO',
-            'O1' => 'TOTAL FACTURADO SEPTIEMBRE',
-            'P1' => 'TOTAL FACTURADO OCTUBRE',
-            'Q1' => 'TOTAL FACTURADO NOVIEMBRE',
-            'R1' => 'TOTAL FACTURADO DICIEMBRE',
+            'G1' => 'TOTAL ENERO',
+            'H1' => 'TOTAL FEBRERO',
+            'I1' => 'TOTAL MARZO',
+            'J1' => 'TOTAL ABRIL',
+            'K1' => 'TOTAL MAYO',
+            'L1' => 'TOTAL JUNIO',
+            'M1' => 'TOTAL JULIO',
+            'N1' => 'TOTAL AGOSTO',
+            'O1' => 'TOTAL SEPTIEMBRE',
+            'P1' => 'TOTAL OCTUBRE',
+            'Q1' => 'TOTAL NOVIEMBRE',
+            'R1' => 'TOTAL DICIEMBRE',
         ];
     }
 
