@@ -1758,7 +1758,7 @@ class controlador_fc_layout_nom extends system{
             );
         }
 
-        $spreadsheet = (new _reporte_anual(year: $year, link: $this->link))->descarga_reporte();
+        $spreadsheet = (new _reporte_anual_v2(year: $year, link: $this->link))->descarga_reporte();
         if(errores::$error) {
             $error = (new errores())->error("Error crear spreadsheet", $spreadsheet);
             print_r($error);
