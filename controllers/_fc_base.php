@@ -135,7 +135,7 @@ class _fc_base{
 
         if($aplica_etapa) {
             $r_alta_factura_etapa = (new pr_proceso(link: $modelo_etapa->link))->inserta_etapa(
-                adm_accion: 'cancelado_sat', fecha: '', modelo: $modelo, modelo_etapa: $modelo_etapa,
+                adm_accion: 'cancela_bd', fecha: '', modelo: $modelo, modelo_etapa: $modelo_etapa,
                 registro_id: $registro_id, valida_existencia_etapa: $valida_existencia_etapa);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
