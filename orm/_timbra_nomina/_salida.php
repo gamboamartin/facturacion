@@ -3,6 +3,7 @@ namespace gamboamartin\facturacion\models\_timbra_nomina;
 
 
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\controllers\_http_client;
 use gamboamartin\modelo\modelo;
 use PDO;
 use stdClass;
@@ -20,9 +21,19 @@ class _salida{
     final public function code_error(string $codigo, stdClass $rs, string $nomina_json, PDO $link, int $fc_row_layout_id)
     {
         if($codigo !== '200'){
+            $codigos_error_datos_constancias = ['CFDI40147','CFDI40145','CFDI40999'];
             $con_error = true;
             $JSON = json_decode($nomina_json,false);
             $extra_data = '';
+
+//            if (in_array($codigo, $codigos_error_datos_constancias)) {
+//                $send_request = (new _http_client())->request_constancias(
+//                    fc_row_layout_id: $fc_row_layout_id,
+//                    rfc: 'RFX',
+//                    whatsapp: 2283371818
+//                );
+//            }
+
             if($codigo === 'CFDI40145'){
                 $extra_data ="RFC: {$JSON->Comprobante->Receptor->Rfc}";
                 $extra_data .=" Nombre: {$JSON->Comprobante->Receptor->Nombre}";

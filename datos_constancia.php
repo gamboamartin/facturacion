@@ -26,8 +26,8 @@ foreach ($elementos as $elemento) {
     }
 }
 
-$key_datos_constancia = generales::$key_datos_constancia;
-$llave = md5($_POST['RFC'].$key_datos_constancia.$_POST['FC_ROW_LAYOUT_ID']);
+$key_n8n = generales::$key_n8n;
+$llave = md5($_POST['RFC'].$key_n8n.$_POST['FC_ROW_LAYOUT_ID']);
 
 if ($llave !== (string)$_POST['KEY']) {
     $error = (new errores())->error("Error al validar key", []);

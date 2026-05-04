@@ -294,4 +294,9 @@ class fc_row_layout extends modelo{
 
     }
 
+    public function obtener_rfc_whatsapp(int $fc_row_layout_id): array
+    {
+
+    }
+
 }
