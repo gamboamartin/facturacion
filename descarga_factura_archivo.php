@@ -44,18 +44,24 @@ if (!isset($data['exp']) || time() > (int)$data['exp']) {
     exit('Token expirado');
 }
 
-if (!isset($data['ruta_pdf'])) {
+$tipo = '';
+$ruta_archivo = '';
+
+if (isset($data['ruta_pdf'])) {
+    $tipo = 'pdf';
+    $ruta_archivo = $data['ruta_pdf'];
+} elseif (isset($data['ruta_xml'])) {
+    $tipo = 'xml';
+    $ruta_archivo = $data['ruta_xml'];
+} else {
     http_response_code(403);
     exit('Ruta no valida');
 }
 
-$ruta_pdf = $data['ruta_pdf'];
-
-if (!is_string($ruta_pdf) || !file_exists($ruta_pdf) || !is_file($ruta_pdf)) {
+if (!is_string($ruta_archivo) || !file_exists($ruta_archivo) || !is_file($ruta_archivo)) {
     http_response_code(404);
     exit('Archivo no encontrado');
 }
-
 
 $folio = $data['folio'] ?? 'factura';
 
@@ -63,23 +69,27 @@ if ($folio === '') {
     $folio = 'factura';
 }
 
-
 $folio = preg_replace('/[^A-Za-z0-9_\-]/', '_', $folio);
 
-$nombre_descarga = 'Factura_' . $folio . '.pdf';
+if ($tipo === 'xml') {
+    $content_type = 'application/xml';
+    $extension = 'xml';
+} else {
+    $content_type = 'application/pdf';
+    $extension = 'pdf';
+}
 
+$nombre_descarga = 'Factura_' . $folio . '.' . $extension;
 
 if (ob_get_length()) {
     ob_clean();
 }
 
-
-header('Content-Type: application/pdf');
+header('Content-Type: ' . $content_type);
 header('Content-Disposition: inline; filename="' . $nombre_descarga . '"');
-header('Content-Length: ' . filesize($ruta_pdf));
+header('Content-Length: ' . filesize($ruta_archivo));
 header('Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate');
 header('Pragma: no-cache');
 
-
-readfile($ruta_pdf);
+readfile($ruta_archivo);
 exit;

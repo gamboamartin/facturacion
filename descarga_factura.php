@@ -3,11 +3,13 @@
 use base\conexion;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\_doctos;
+use config\pac;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
 use gamboamartin\facturacion\models\fc_factura;
 use gamboamartin\facturacion\controllers\controlador_fc_factura;
 use gamboamartin\facturacion\models\fc_factura_documento;
+use gamboamartin\facturacion\models\fc_factura_etapa;
 use gamboamartin\facturacion\models\fc_factura_relacionada;
 use gamboamartin\facturacion\models\fc_partida;
 use gamboamartin\facturacion\models\fc_relacion;
@@ -339,7 +341,48 @@ if ($doc === 'pdf') {
 }
 
 if ($doc === 'xml') {
-    $url_xml = $base_url . 'index.php?seccion=fc_factura&accion=descarga_xml&registro_id=' . $fc_factura_id;
+
+    $r_xml_doc = (new fc_factura_documento(link: $link))->filtro_and(filtro: [
+        'fc_factura.id' => $fc_factura_id,
+        'doc_tipo_documento.id' => 1
+    ]);
+
+    if (errores::$error || $r_xml_doc->n_registros === 0) {
+        echo json_encode([
+            'STS' => 'no_disponible',
+            'MSG' => 'La factura no tiene XML disponible',
+            'DEBUG' => $r_xml_doc
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $xml_doc = $r_xml_doc->registros[0];
+
+    $ruta_xml = $xml_doc['doc_documento_ruta_absoluta'] ?? '';
+
+    if (!is_string($ruta_xml) || !file_exists($ruta_xml)) {
+        echo json_encode([
+            'STS' => 'error',
+            'MSG' => 'El XML existe en BD pero no físicamente',
+            'DEBUG' => $xml_doc
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $exp = time() + 600;
+
+    $payload = base64_encode(json_encode([
+        'fc_factura_id' => $fc_factura_id,
+        'folio' => $registro['fc_factura_folio'] ?? '',
+        'ruta_xml' => $ruta_xml,
+        'exp' => $exp
+    ]));
+
+    $firma = hash_hmac('sha256', $payload, $secret_key);
+    $token = $payload . '.' . $firma;
+
+    $url_xml = $base_url . 'descarga_factura_archivo.php?token=' . urlencode($token);
+    $xml_filename = basename($ruta_xml);
 }
 
 $pdf_disponible = ($url_pdf !== '');
