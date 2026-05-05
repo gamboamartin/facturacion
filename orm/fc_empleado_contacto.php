@@ -108,9 +108,10 @@ class fc_empleado_contacto extends modelo{
         $url_validacion = (new generales())->url_base;
         $url_validacion .= "valida_telefono.php?telefono={$telefono}&token={$token}";
 
-        $rs = $this->modifica_bd(
-            registro: ['token_telefono' => $token, 'fecha_token_telefono' => $fecha_token_validacion],
-            id: $registro_id
+        $rs = $this->actualiza_info_token_telefono(
+            registro_id: $registro_id,
+            token: $token,
+            fecha_token: $fecha_token_validacion
         );
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al actualizar el token del  telefono', data: $rs);
@@ -415,6 +416,22 @@ class fc_empleado_contacto extends modelo{
     private function capitalizar($texto): array|false|string|null
     {
         return mb_convert_case($texto, MB_CASE_TITLE, "UTF-8");
+    }
+
+    private function actualiza_info_token_telefono(int $registro_id, string $token, string $fecha_token)
+    {
+
+        $consulta = "UPDATE fc_empleado_contacto SET ";
+        $consulta .= " fc_empleado_contacto.token_telefono = '{$token}'";
+        $consulta .= " AND fc_empleado_contacto.fecha_token_telefono = '{$fecha_token}'";
+        $consulta .= " WHERE fc_empleado_contacto.id = {$registro_id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error('Error al modificar fc_empleado_contacto', $rs);
+        }
+
+        return $rs;
+
     }
 
 
