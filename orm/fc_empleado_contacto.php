@@ -422,8 +422,8 @@ class fc_empleado_contacto extends modelo{
     {
 
         $consulta = "UPDATE fc_empleado_contacto SET ";
-        $consulta .= " fc_empleado_contacto.token_telefono = '{$token}'";
-        $consulta .= " AND fc_empleado_contacto.fecha_token_telefono = '{$fecha_token}'";
+        $consulta .= " fc_empleado_contacto.token_telefono = '{$token}' ,";
+        $consulta .= " fc_empleado_contacto.fecha_token_telefono = '{$fecha_token}'";
         $consulta .= " WHERE fc_empleado_contacto.id = {$registro_id}";
         $rs = $this->ejecuta_sql($consulta);
         if(errores::$error){
