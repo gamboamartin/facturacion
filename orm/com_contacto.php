@@ -157,6 +157,14 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
             );
         }
 
+        $telefono_whatsapp = $this->telefono_whatsapp(telefono: $telefono);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al normalizar telefono para WhatsApp',
+                data: $telefono_whatsapp
+            );
+        }
+
         $url = $this->genera_link_validacion_telefono(
             telefono: $telefono,
             registro_id: $registro_id,
@@ -172,7 +180,8 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
 
         return [
             'com_contacto_id' => $registro_id,
-            'telefono' => $telefono,
+            'telefono' => $telefono_whatsapp,
+            'telefono_original' => $telefono,
             'nombre' => $rs['com_contacto_descripcion'] ?? '',
             'url_validacion' => $url,
             'estatus_telefono' => $rs['com_contacto_estatus_telefono'] ?? '',
@@ -227,6 +236,41 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
         }
 
         return $rs;
+    }
+
+    private function telefono_whatsapp(string $telefono): string|array
+    {
+        $telefono = trim($telefono);
+
+        // Quita espacios, guiones, paréntesis y símbolo +
+        $telefono = preg_replace('/[^0-9]/', '', $telefono);
+
+        if ($telefono === '') {
+            return $this->error->error(
+                mensaje: 'Error telefono vacio para WhatsApp',
+                data: $telefono
+            );
+        }
+
+        // Si ya viene con código México moderno/internacional
+        // Ej: 5212283371818
+        if (str_starts_with($telefono, '521') && strlen($telefono) === 13) {
+            return $telefono;
+        }
+
+        // Si viene como México con 52 pero sin 1
+        // Ej: 522283371818
+        if (str_starts_with($telefono, '52') && strlen($telefono) === 12) {
+            return '521' . substr($telefono, 2);
+        }
+
+        // Si viene como número nacional mexicano de 10 dígitos
+        // Ej: 2283371818
+        if (strlen($telefono) === 10) {
+            return '521' . $telefono;
+        }
+
+        return $telefono;
     }
  
 
