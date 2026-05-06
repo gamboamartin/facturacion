@@ -6,6 +6,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_com_contacto;
 use gamboamartin\facturacion\controllers\controlador_fc_empleado_contacto;
 use gamboamartin\validacion\validacion;
+use Override;
 use stdClass;
 
 class com_contacto extends \gamboamartin\comercial\models\com_contacto {
@@ -103,5 +104,130 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
             }
         }
     }
+
+    public function genera_link_validacion_telefono(string $telefono, int $registro_id, 
+    array $data)
+    {
+        $token = $this->get_codigo_aleatorio(longitud: 16);
+        $fecha_token_validacion = date('Y-m-d H:i:s');
+        $url_validacion = (new generales())->url_base;
+        $url_validacion .= "valida_telefono_contacto.php?telefono={$telefono}&token={$token}";
+        
+
+        $rs = $this->actualiza_info_token_telefono(
+            registro_id: $registro_id,
+            token: $token,
+            fecha_token: $fecha_token_validacion
+        );
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al actualizar el token del  telefono', data: $rs);
+        }
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al actualizar el token del  telefono', data: $rs);
+        }
+
+        return $url_validacion;
+    }
+
+    public function valida_telefono(int $registro_id)
+    {
+        $this->registro_id = $registro_id;
+
+        $rs = $this->obten_data();
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error de obtener data',
+                data: $rs
+            );
+        }
+
+        if ($rs['com_contacto_estatus_telefono'] === controlador_com_contacto::STATUS_VALIDADO) {
+            return $this->error->error(
+                mensaje: 'El telefono ya fue validado',
+                data: []
+            );
+        }
+
+        $telefono = $rs['com_contacto_telefono'];
+
+        if ($telefono == '1000000000') {
+            return $this->error->error(
+                mensaje: 'Error telefono no valido 1000000000',
+                data: []
+            );
+        }
+
+        $url = $this->genera_link_validacion_telefono(
+            telefono: $telefono,
+            registro_id: $registro_id,
+            data: $rs
+        );
+
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error de obtener url',
+                data: $url
+            );
+        }
+
+        return [
+            'com_contacto_id' => $registro_id,
+            'telefono' => $telefono,
+            'nombre' => $rs['com_contacto_descripcion'] ?? '',
+            'url_validacion' => $url,
+            'estatus_telefono' => $rs['com_contacto_estatus_telefono'] ?? '',
+        ];
+    }
+
+  private function actualiza_info_token_telefono(int $registro_id, string $token, string $fecha_token)
+    {
+
+        $consulta = "UPDATE com_contacto SET ";
+        $consulta .= " com_contacto.token_telefono = '{$token}' ,";
+        $consulta .= " com_contacto.fecha_token_telefono = '{$fecha_token}'";
+        $consulta .= " WHERE com_contacto.id = {$registro_id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error('Error al modificar com_contacto', $rs);
+        }
+
+        return $rs;
+
+    }
+
+    public function valida_token_telefono(int $com_contacto_id)
+    {
+        $rs = $this->actualiza_telefono_validado(registro_id: $com_contacto_id);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al validar telefono del contacto',
+                data: $rs
+            );
+        }
+
+        return $rs;
+    }
+
+    private function actualiza_telefono_validado(int $registro_id)
+    {
+        $status_validado = controlador_com_contacto::STATUS_VALIDADO;
+
+        $consulta = "UPDATE com_contacto SET ";
+        $consulta .= " com_contacto.estatus_telefono = '{$status_validado}', ";
+        $consulta .= " com_contacto.token_telefono = '', ";
+        $consulta .= " com_contacto.fecha_token_telefono = NULL ";
+        $consulta .= " WHERE com_contacto.id = {$registro_id}";
+
+        $rs = $this->ejecuta_sql($consulta);
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: 'Error al modificar validacion de telefono en com_contacto',
+                data: $rs
+            );
+        }
+
+        return $rs;
+    }
+ 
 
 }

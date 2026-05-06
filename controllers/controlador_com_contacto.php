@@ -84,4 +84,89 @@ class controlador_com_contacto extends \gamboamartin\comercial\controllers\contr
         exit;
 
     }
+
+    public function valida_telefono(bool $header, bool $ws = false)
+    {
+        $registro_id = $this->registro_id;
+        $new_modelo_contacto = new com_contacto(link: $this->link);
+
+        $rs = $new_modelo_contacto->valida_telefono(registro_id: $registro_id);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al validar telefono',
+                data: $rs,
+                header: $header,
+                ws: $ws
+            );
+        }
+
+        $r_n8n = $this->envia_validacion_telefono_n8n(data: $rs);
+        if ($r_n8n['error']) {
+            return $this->retorno_error(
+                mensaje: 'Error al enviar link de validacion a n8n',
+                data: $r_n8n,
+                header: $header,
+                ws: $ws
+            );
+        }
+
+        $_SESSION['exito'][]['mensaje'] = 'link de validacion enviado exitosamente';
+        $link = "index.php?seccion=com_contacto&accion=lista&adm_menu_id=41";
+        $link .= "&session_id={$_GET['session_id']}";
+        header("Location: " . $link);
+        exit;
+    }
+
+    private function envia_validacion_telefono_n8n(array $data): array
+    {
+        $url_n8n = 'https://richito.ivitec.mx/webhook-test/validacion-telefono-contacto';
+
+        $payload = [
+            'evento' => 'validacion_telefono_contacto',
+            'com_contacto_id' => $data['com_contacto_id'] ?? '',
+            'telefono' => $data['telefono'] ?? '',
+            'nombre' => $data['nombre'] ?? '',
+            'url_validacion' => $data['url_validacion'] ?? ($data['url'] ?? ''),
+            'estatus_telefono' => $data['estatus_telefono'] ?? '',
+        ];
+
+        $ch = curl_init($url_n8n);
+
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json'
+        ]);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_error = curl_error($ch);
+
+        curl_close($ch);
+
+        if ($curl_error !== '') {
+            return [
+                'error' => true,
+                'mensaje' => 'Error CURL al conectar con n8n',
+                'data' => $curl_error
+            ];
+        }
+
+        if ($http_code < 200 || $http_code >= 300) {
+            return [
+                'error' => true,
+                'mensaje' => 'n8n respondio con error',
+                'http_code' => $http_code,
+                'response' => $response
+            ];
+        }
+
+        return [
+            'error' => false,
+            'http_code' => $http_code,
+            'response' => $response
+        ];
+    }
 }
