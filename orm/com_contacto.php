@@ -242,7 +242,7 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
     {
         $telefono = trim($telefono);
 
-        // Quita espacios, guiones, paréntesis y símbolo +
+       
         $telefono = preg_replace('/[^0-9]/', '', $telefono);
 
         if ($telefono === '') {
@@ -252,22 +252,19 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
             );
         }
 
-        // Si ya viene con código México moderno/internacional
-        // Ej: 5212283371818
-        if (str_starts_with($telefono, '521') && strlen($telefono) === 13) {
+      
+        if (strlen($telefono) === 10) {
+            return '52' . $telefono;
+        }
+
+       
+        if (str_starts_with($telefono, '52') && strlen($telefono) === 12) {
             return $telefono;
         }
 
-        // Si viene como México con 52 pero sin 1
-        // Ej: 522283371818
-        if (str_starts_with($telefono, '52') && strlen($telefono) === 12) {
-            return '521' . substr($telefono, 2);
-        }
-
-        // Si viene como número nacional mexicano de 10 dígitos
-        // Ej: 2283371818
-        if (strlen($telefono) === 10) {
-            return '521' . $telefono;
+       
+        if (str_starts_with($telefono, '521') && strlen($telefono) === 13) {
+            return '52' . substr($telefono, 3);
         }
 
         return $telefono;
