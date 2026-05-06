@@ -12,6 +12,7 @@ use gamboamartin\system\html_controler;
 use gamboamartin\system\links_menu;
 use gamboamartin\system\system;
 use gamboamartin\template_1\html;
+use gamboamartin\validacion\validacion;
 use PDO;
 use stdClass;
 
@@ -28,19 +29,19 @@ class controlador_fc_empleado_contacto extends system {
         $obj_link = new links_menu(link: $link, registro_id:  $this->registro_id);
 
         $columns["fc_empleado_nombre_completo"]["titulo"] = "Empleado";
-        $columns["com_tipo_contacto_descripcion"]["titulo"] = "Tipo contacto";
         $columns["fc_empleado_contacto_descripcion"]["titulo"] = "Contacto";
         $columns["fc_empleado_contacto_telefono"]["titulo"] = "Telefono";
         $columns["fc_empleado_contacto_correo"]["titulo"] = "Correo";
         $columns["fc_empleado_contacto_estatus_correo"]["titulo"] = "Validacion Correo";
+        $columns["fc_empleado_contacto_estatus_telefono"]["titulo"] = "Validacion Telefono";
 
         $filtro = [
             "fc_empleado.nombre_completo",
-            "com_tipo_contacto.descripcion",
             "fc_empleado_contacto.descripcion",
             "fc_empleado_contacto.telefono",
             "fc_empleado_contacto.correo",
             "fc_empleado_contacto.estatus_correo",
+            "fc_empleado_contacto.estatus_telefono",
         ];
 
         $datatables = new stdClass();
@@ -101,6 +102,66 @@ class controlador_fc_empleado_contacto extends system {
         }
 
         return $modifica;
+    }
+
+    public function modifica_telefono(bool $header, bool $ws = false): array|stdClass
+    {
+        $fc_empleado_contacto = $this->registro_id;
+
+        $fc_empleado_contacto_modelo = new fc_empleado_contacto($this->link);
+        $fc_empleado_contacto_modelo->registro_id = $fc_empleado_contacto;
+
+        $data = $fc_empleado_contacto_modelo->obten_data();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al obtener info de empleado_contacto',
+                data: $data, header: $header, ws: $ws);
+        }
+
+        $this->registro = $data;
+
+        $registro_stdClass = new stdClass();
+        $registro_stdClass->telefono = $data['fc_empleado_contacto_telefono'];
+
+        $this->inputs = new stdClass();
+
+        $input_telefono = $this->html->input_text_required(
+            cols: 6,disabled: false, name: 'telefono', place_holder: 'Telefono',
+            row_upd: $registro_stdClass,value_vacio: '', title: 'Telefono'
+        );
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar $input_telefono',
+                data: $input_telefono, header: $header, ws: $ws);
+        }
+        $this->inputs->telefono = $input_telefono;
+
+        return [];
+    }
+
+    public function modifica_telefono_bd(bool $header, bool $ws = false): array|stdClass
+    {
+
+        $codigo_pais = $_POST['codigo_pais'];
+        $telefono = $_POST['telefono'];
+        $fc_empleado_contacto_id = $_POST['fc_empleado_contacto_id'];
+
+        $link = "index.php?seccion=fc_empleado_contacto&accion=modifica_telefono&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}&registro_id={$fc_empleado_contacto_id}";
+
+        //ToDo = Validar el numero de telefono
+
+        $rs = (new fc_empleado_contacto($this->link))->modifica_telefono(
+            fc_empleado_contacto_id: $fc_empleado_contacto_id,
+            telefono: $telefono,
+            codigo_pais: $codigo_pais
+        );
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al modificar telefono',
+                data: $rs, header: $header, ws: $ws);
+        }
+
+        $_SESSION['exito'][]['mensaje'] = 'Telefono modificado correctamente';
+        header("Location: " . $link);
+        exit;
     }
 
     public function valida_correo(bool $header, bool $ws = false)

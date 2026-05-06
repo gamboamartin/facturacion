@@ -434,5 +434,24 @@ class fc_empleado_contacto extends modelo{
 
     }
 
+    public function modifica_telefono(int $fc_empleado_contacto_id, string $telefono, string $codigo_pais): array|stdClass
+    {
+
+        $consulta = "UPDATE fc_empleado_contacto SET ";
+        $consulta .= " fc_empleado_contacto.telefono = '{$telefono}' ,";
+        $consulta .= " fc_empleado_contacto.codigo_pais = '{$codigo_pais}' ,";
+        $consulta .= " fc_empleado_contacto.estatus_telefono = 'no validado' ,";
+        $consulta .= " fc_empleado_contacto.fecha_token_telefono = NULL ,";
+        $consulta .= " fc_empleado_contacto.token_telefono = NULL";
+        $consulta .= " WHERE fc_empleado_contacto.id = {$fc_empleado_contacto_id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error('Error al modificar telefono', $rs);
+        }
+
+        return $rs;
+
+    }
+
 
 }
