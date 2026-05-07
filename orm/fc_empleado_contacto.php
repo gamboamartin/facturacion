@@ -434,7 +434,7 @@ class fc_empleado_contacto extends modelo{
 
     }
 
-    public function modifica_telefono(int $fc_empleado_contacto_id, string $telefono, string $codigo_pais): array|stdClass
+    public function modifica_telefono_bd(int $fc_empleado_contacto_id, string $telefono, string $codigo_pais): array|stdClass
     {
 
         $consulta = "UPDATE fc_empleado_contacto SET ";
@@ -447,6 +447,24 @@ class fc_empleado_contacto extends modelo{
         $rs = $this->ejecuta_sql($consulta);
         if(errores::$error){
             return (new errores())->error('Error al modificar telefono', $rs);
+        }
+
+        return $rs;
+
+    }
+
+    public function modifica_correo_bd(int $fc_empleado_contacto_id, string $correo): array|stdClass
+    {
+
+        $consulta = "UPDATE fc_empleado_contacto SET ";
+        $consulta .= " fc_empleado_contacto.correo = '{$correo}' ,";
+        $consulta .= " fc_empleado_contacto.estatus_correo = 'no validado' ,";
+        $consulta .= " fc_empleado_contacto.fecha_token_validacion = NULL ,";
+        $consulta .= " fc_empleado_contacto.token_validacion = NULL";
+        $consulta .= " WHERE fc_empleado_contacto.id = {$fc_empleado_contacto_id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error('Error al modificar correo', $rs);
         }
 
         return $rs;

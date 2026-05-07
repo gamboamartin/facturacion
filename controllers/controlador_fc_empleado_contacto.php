@@ -104,7 +104,7 @@ class controlador_fc_empleado_contacto extends system {
         return $modifica;
     }
 
-    public function modifica_telefono(bool $header, bool $ws = false): array|stdClass
+    private function base_modifica_custom()
     {
         $fc_empleado_contacto = $this->registro_id;
 
@@ -112,15 +112,49 @@ class controlador_fc_empleado_contacto extends system {
         $fc_empleado_contacto_modelo->registro_id = $fc_empleado_contacto;
 
         $data = $fc_empleado_contacto_modelo->obten_data();
-        if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al obtener info de empleado_contacto',
-                data: $data, header: $header, ws: $ws);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al obtener info de empleado_contacto', data: $data);
         }
 
         $this->registro = $data;
+    }
+
+    public function modifica_correo(bool $header, bool $ws = false): array|stdClass
+    {
+        $rs = $this->base_modifica_custom();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al procesar empleado_contacto',
+                data: $rs, header: $header, ws: $ws);
+        }
 
         $registro_stdClass = new stdClass();
-        $registro_stdClass->telefono = $data['fc_empleado_contacto_telefono'];
+        $registro_stdClass->correo = $this->registro['fc_empleado_contacto_correo'];
+
+        $this->inputs = new stdClass();
+
+        $input_correo = $this->html->input_text_required(
+            cols: 6,disabled: false, name: 'correo', place_holder: 'Correo',
+            row_upd: $registro_stdClass, value_vacio: '', title: 'Correo'
+        );
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al generar $input_telefono',
+                data: $input_correo, header: $header, ws: $ws);
+        }
+        $this->inputs->correo = $input_correo;
+
+        return [];
+    }
+
+    public function modifica_telefono(bool $header, bool $ws = false): array|stdClass
+    {
+        $rs = $this->base_modifica_custom();
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al procesar empleado_contacto',
+                data: $rs, header: $header, ws: $ws);
+        }
+
+        $registro_stdClass = new stdClass();
+        $registro_stdClass->telefono = $this->registro['fc_empleado_contacto_telefono'];
 
         $this->inputs = new stdClass();
 
@@ -137,6 +171,32 @@ class controlador_fc_empleado_contacto extends system {
         return [];
     }
 
+    public function modifica_correo_bd(bool $header, bool $ws = false): array|stdClass
+    {
+
+
+        $correo = $_POST['correo'];
+        $fc_empleado_contacto_id = $_POST['fc_empleado_contacto_id'];
+
+        $link = "index.php?seccion=fc_empleado_contacto&accion=modifica_correo&adm_menu_id=75";
+        $link .= "&session_id={$_GET['session_id']}&registro_id={$fc_empleado_contacto_id}";
+
+        //ToDo = Validar el numero de correo
+
+        $rs = (new fc_empleado_contacto($this->link))->modifica_correo_bd(
+            fc_empleado_contacto_id: $fc_empleado_contacto_id,
+            correo: $correo,
+        );
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al modificar correo',
+                data: $rs, header: $header, ws: $ws);
+        }
+
+        $_SESSION['exito'][]['mensaje'] = 'Correo modificado correctamente';
+        header("Location: " . $link);
+        exit;
+    }
+
     public function modifica_telefono_bd(bool $header, bool $ws = false): array|stdClass
     {
 
@@ -149,7 +209,7 @@ class controlador_fc_empleado_contacto extends system {
 
         //ToDo = Validar el numero de telefono
 
-        $rs = (new fc_empleado_contacto($this->link))->modifica_telefono(
+        $rs = (new fc_empleado_contacto($this->link))->modifica_telefono_bd(
             fc_empleado_contacto_id: $fc_empleado_contacto_id,
             telefono: $telefono,
             codigo_pais: $codigo_pais
