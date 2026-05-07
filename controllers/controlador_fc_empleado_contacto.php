@@ -288,10 +288,6 @@ class controlador_fc_empleado_contacto extends system {
                 data: $rs, header: $header, ws: $ws);
         }
 
-        echo '<pre>';
-        print_r($rs);
-        echo '</pre>';exit;
-
         $_SESSION['exito'][]['mensaje'] = 'link de validacion enviado exitosamente';
         $link = "index.php?seccion=fc_empleado_contacto&accion=lista&adm_menu_id=75";
         $link .= "&session_id={$_GET['session_id']}";

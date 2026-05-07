@@ -1,14 +1,17 @@
 <?php
 namespace gamboamartin\facturacion\controllers;
+
 use config\generales;
-use mysql_xdevapi\Exception;
+use gamboamartin\errores\errores;
 
 class _http_client
 {
+    public errores $errores;
     private string $baseUrl;
     private array $defaultHeaders;
 
-    private string $endpoint_constancia = 'webhook-test/5de4b043-e573-488f-822d-942f18b487aa';
+    private string $path_constancia = '5de4b043-e573-488f-822d-942f18b487aa';
+    private string $path_validacion_empleado_contacto = 'valida_telefono_empleado';
 
     public function __construct()
     {
@@ -18,6 +21,7 @@ class _http_client
         }
         $this->baseUrl = $base_url;
         $this->defaultHeaders = [];
+        $this->errores = new errores();
     }
 
     public function request_constancias(int $fc_row_layout_id, string $rfc, int $whatsapp): array
@@ -29,15 +33,40 @@ class _http_client
         ];
         try {
             $rs = $this->post(
-                endpoint: $this->endpoint_constancia,
+                endpoint: $this->path_constancia,
                 data:  $data
             );
         }catch (\Exception $e) {
-            return ['error_msj' => $e->getMessage()];
+            return $this->errores->error(mensaje: $e->getMessage(), data: $e);
         }
 
         return $rs;
 
+    }
+
+    public function request_validacion_empleado_contacto(
+        string $nombre,
+        string $url_validacion,
+        string $codigo_pais,
+        string $telefono,
+    ): array
+    {
+        $data = [
+            'nombre' => $nombre,
+            'url_validacion' => $url_validacion,
+            'codigo_pais' => $codigo_pais,
+            'telefono' => $telefono
+        ];
+        try {
+            $rs = $this->post(
+                endpoint: $this->path_validacion_empleado_contacto,
+                data:  $data
+            );
+        }catch (\Exception $e) {
+            return $this->errores->error(mensaje: $e->getMessage(), data: $e);
+        }
+
+        return $rs;
     }
 
     private function post(string $endpoint, array $data = [], array $headers = []): array
