@@ -129,7 +129,7 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
         return $url_validacion;
     }
 
-    public function valida_telefono(int $registro_id)
+    public function valida_telefono(int $registro_id): array
     {
         $this->registro_id = $registro_id;
 
@@ -148,16 +148,24 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
             );
         }
 
-        $telefono = $rs['com_contacto_telefono'];
+        $telefono = $rs['com_contacto_telefono'] ?? '';
+        $codigo_pais = $rs['com_contacto_codigo_pais'] ?? '52';
 
-        if ($telefono == '1000000000') {
+        if ($telefono === '' || $telefono === '1000000000') {
             return $this->error->error(
-                mensaje: 'Error telefono no valido 1000000000',
-                data: []
+                mensaje: 'Error telefono no valido',
+                data: $telefono
             );
         }
 
-        $telefono_whatsapp = $this->telefono_whatsapp(telefono: $telefono);
+        if ($codigo_pais === '') {
+            $codigo_pais = '52';
+        }
+
+        $telefono_whatsapp = $this->telefono_whatsapp(
+            telefono: $telefono,
+            codigo_pais: $codigo_pais
+        );
         if (errores::$error) {
             return $this->error->error(
                 mensaje: 'Error al normalizar telefono para WhatsApp',
@@ -178,10 +186,12 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
             );
         }
 
-        return [
+            return [
             'com_contacto_id' => $registro_id,
+            'com_cliente_id' => $rs['com_contacto_com_cliente_id'] ?? $rs['com_cliente_id'] ?? 0,
             'telefono' => $telefono_whatsapp,
             'telefono_original' => $telefono,
+            'codigo_pais' => $codigo_pais,
             'nombre' => $rs['com_contacto_descripcion'] ?? '',
             'url_validacion' => $url,
             'estatus_telefono' => $rs['com_contacto_estatus_telefono'] ?? '',
@@ -238,37 +248,47 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
         return $rs;
     }
 
-    private function telefono_whatsapp(string $telefono): string|array
+    public function telefono_whatsapp(string $telefono, string $codigo_pais): string|array
     {
-        $telefono = trim($telefono);
-
-       
-        $telefono = preg_replace('/[^0-9]/', '', $telefono);
+        $telefono = preg_replace('/\D+/', '', $telefono);
+        $codigo_pais = preg_replace('/\D+/', '', $codigo_pais);
 
         if ($telefono === '') {
             return $this->error->error(
-                mensaje: 'Error telefono vacio para WhatsApp',
+                mensaje: 'Error telefono esta vacio',
                 data: $telefono
             );
         }
 
-      
-        if (strlen($telefono) === 10) {
-            return '52' . $telefono;
+        if ($codigo_pais === '') {
+            return $this->error->error(
+                mensaje: 'Error codigo_pais esta vacio',
+                data: $codigo_pais
+            );
         }
 
-       
-        if (str_starts_with($telefono, '52') && strlen($telefono) === 12) {
-            return $telefono;
-        }
-
-       
-        if (str_starts_with($telefono, '521') && strlen($telefono) === 13) {
-            return '52' . substr($telefono, 3);
-        }
-
-        return $telefono;
+        return $codigo_pais . $telefono;
     }
- 
+    
+    public function modifica_telefono(int $com_contacto_id, string $telefono, string $codigo_pais): array|stdClass
+    {
+        $telefono = preg_replace('/\D+/', '', $telefono);
+        $codigo_pais = preg_replace('/\D+/', '', $codigo_pais);
+
+        $consulta = "UPDATE com_contacto SET ";
+        $consulta .= " com_contacto.telefono = '{$telefono}' ,";
+        $consulta .= " com_contacto.codigo_pais = '{$codigo_pais}' ,";
+        $consulta .= " com_contacto.estatus_telefono = 'no validado' ,";
+        $consulta .= " com_contacto.fecha_token_telefono = NULL ,";
+        $consulta .= " com_contacto.token_telefono = NULL";
+        $consulta .= " WHERE com_contacto.id = {$com_contacto_id}";
+
+        $rs = $this->ejecuta_sql($consulta);
+        if (errores::$error) {
+            return (new errores())->error('Error al modificar telefono', $rs);
+        }
+
+        return $rs;
+    }
 
 }

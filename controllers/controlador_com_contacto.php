@@ -111,15 +111,63 @@ class controlador_com_contacto extends \gamboamartin\comercial\controllers\contr
         }
 
         $_SESSION['exito'][]['mensaje'] = 'link de validacion enviado exitosamente';
-        $link = "index.php?seccion=com_contacto&accion=lista&adm_menu_id=41";
-        $link .= "&session_id={$_GET['session_id']}";
+
+        $com_cliente_id = (int)($rs['com_cliente_id'] ?? $rs['com_contacto_com_cliente_id'] ?? 0);
+
+        if ($com_cliente_id <= 0) {
+            $filtro = array();
+            $filtro['com_contacto.id'] = $registro_id;
+
+            $r_contacto = $new_modelo_contacto->filtro_and(filtro: $filtro);
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al obtener contacto para redireccionar',
+                    data: $r_contacto,
+                    header: $header,
+                    ws: $ws
+                );
+            }
+
+            if ((int)$r_contacto->n_registros <= 0) {
+                return $this->retorno_error(
+                    mensaje: 'Error no existe contacto para redireccionar',
+                    data: $registro_id,
+                    header: $header,
+                    ws: $ws
+                );
+            }
+
+            $contacto = $r_contacto->registros[0];
+            $com_cliente_id = (int)($contacto['com_contacto_com_cliente_id'] ?? $contacto['com_cliente_id'] ?? 0);
+        }
+
+        if ($com_cliente_id <= 0) {
+            return $this->retorno_error(
+                mensaje: 'Error com_cliente_id no encontrado para redireccionar',
+                data: $rs,
+                header: $header,
+                ws: $ws
+            );
+        }
+
+        $link = "index.php?seccion=com_cliente&accion=asigna_contacto";
+        $link .= "&registro_id=" . $com_cliente_id;
+
+        if (isset($_GET['adm_menu_id'])) {
+            $link .= "&adm_menu_id=" . $_GET['adm_menu_id'];
+        }
+
+        if (isset($_GET['session_id'])) {
+            $link .= "&session_id=" . $_GET['session_id'];
+        }
+
         header("Location: " . $link);
         exit;
     }
 
     private function envia_validacion_telefono_n8n(array $data): array
     {
-        $url_n8n = 'https://richito.ivitec.mx/webhook-test/validacion-telefono-contacto';
+        $url_n8n = 'https://n8n-test.ivitec.mx/webhook-test/validacion-telefono-contacto';
 
         $payload = [
             'evento' => 'validacion_telefono_contacto',
