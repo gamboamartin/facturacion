@@ -167,32 +167,30 @@ class controlador_com_contacto extends \gamboamartin\comercial\controllers\contr
 
     private function envia_validacion_telefono_n8n(array $data): array
     {
-        $url_n8n = 'https://n8n-test.ivitec.mx/webhook-test/validacion-telefono-contacto';
+        $n8n = new _n8n_request();
 
-        $payload = [
-            'evento' => 'validacion_telefono_contacto',
-            'com_contacto_id' => $data['com_contacto_id'] ?? '',
-            'telefono' => $data['telefono'] ?? '',
-            'nombre' => $data['nombre'] ?? '',
-            'url_validacion' => $data['url_validacion'] ?? ($data['url'] ?? ''),
-            'estatus_telefono' => $data['estatus_telefono'] ?? '',
-        ];
+        $rs = $n8n->request_validacion_telefono_contacto(
+            com_contacto_id: (int)($data['com_contacto_id'] ?? 0),
+            com_cliente_id: (int)($data['com_cliente_id'] ?? 0),
+            nombre: (string)($data['nombre'] ?? ''),
+            url_validacion: (string)($data['url_validacion'] ?? ($data['url'] ?? '')),
+            codigo_pais: (string)($data['codigo_pais'] ?? '52'),
+            telefono: (string)($data['telefono'] ?? ''),
+            telefono_original: (string)($data['telefono_original'] ?? ''),
+            estatus_telefono: (string)($data['estatus_telefono'] ?? '')
+        );
 
-        $ch = curl_init($url_n8n);
+        if (errores::$error) {
+            return [
+                'error' => true,
+                'mensaje' => 'Error al enviar link de validacion a n8n',
+                'data' => $rs
+            ];
+        }
 
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json'
-        ]);
-
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch);
-
-        curl_close($ch);
+        $http_code = (int)($rs['status'] ?? 0);
+        $curl_error = (string)($rs['error'] ?? '');
+        $response = $rs['response'] ?? '';
 
         if ($curl_error !== '') {
             return [

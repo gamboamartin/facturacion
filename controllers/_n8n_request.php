@@ -12,6 +12,7 @@ class _n8n_request
 
     private string $path_constancia = '5de4b043-e573-488f-822d-942f18b487aa';
     private string $path_validacion_empleado_contacto = 'valida_telefono_empleado';
+    private string $path_validacion_telefono_contacto = 'validacion-telefono-contacto';
 
     public function __construct()
     {
@@ -64,6 +65,44 @@ class _n8n_request
             );
         }catch (\Exception $e) {
             return $this->errores->error(mensaje: $e->getMessage(), data: $e);
+        }
+
+        return $rs;
+    }
+
+    public function request_validacion_telefono_contacto(
+        int $com_contacto_id,
+        int $com_cliente_id,
+        string $nombre,
+        string $url_validacion,
+        string $codigo_pais,
+        string $telefono,
+        string $telefono_original = '',
+        string $estatus_telefono = ''
+    ): array
+    {
+        $data = [
+            'evento' => 'validacion_telefono_contacto',
+            'com_contacto_id' => $com_contacto_id,
+            'com_cliente_id' => $com_cliente_id,
+            'nombre' => $nombre,
+            'url_validacion' => $url_validacion,
+            'codigo_pais' => $codigo_pais,
+            'telefono' => $telefono,
+            'telefono_original' => $telefono_original,
+            'estatus_telefono' => $estatus_telefono
+        ];
+
+        try {
+            $rs = $this->post(
+                endpoint: $this->path_validacion_telefono_contacto,
+                data: $data
+            );
+        } catch (\Exception $e) {
+            return $this->errores->error(
+                mensaje: $e->getMessage(),
+                data: $e
+            );
         }
 
         return $rs;
