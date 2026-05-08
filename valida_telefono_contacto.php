@@ -62,5 +62,31 @@ if (errores::$error) {
     exit;
 }
 
+/*
+ * Mensaje de confirmación por n8n.
+ * Si falla n8n, no rompemos la validación ya realizada.
+ */
+$telefono_contacto = $registro['com_contacto_telefono'] ?? $telefono;
+$codigo_pais = $registro['com_contacto_codigo_pais'] ?? '52';
+$nombre = $registro['com_contacto_descripcion'] ?? '';
+
+$telefono_whatsapp = $modelo->telefono_whatsapp(
+    telefono: $telefono_contacto,
+    codigo_pais: $codigo_pais
+);
+
+if (!errores::$error) {
+    $n8n = new \gamboamartin\facturacion\controllers\_n8n_request();
+
+    $r_n8n = $n8n->request_telefono_confirmado_contacto(
+        com_contacto_id: $com_contacto_id,
+        nombre: $nombre,
+        codigo_pais: $codigo_pais,
+        telefono: $telefono_whatsapp,
+        servicios: 'Descarga de facturas XML y PDF, Timbrar Facturas, crear Productos, crear Clientes y crear Facturas.'
+    );
+
+}
+
 echo 'Telefono validado';
 exit;
