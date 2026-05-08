@@ -3,7 +3,7 @@ namespace gamboamartin\facturacion\models\_timbra_nomina;
 
 
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\controllers\_http_client;
+use gamboamartin\facturacion\controllers\_n8nrequest;
 use gamboamartin\modelo\modelo;
 use PDO;
 use stdClass;

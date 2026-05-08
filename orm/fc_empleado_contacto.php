@@ -4,7 +4,7 @@ use base\orm\modelo;
 use config\generales;
 use DateTime;
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\controllers\_http_client;
+use gamboamartin\facturacion\controllers\_n8n_request;
 use gamboamartin\facturacion\controllers\controlador_fc_empleado_contacto;
 use gamboamartin\validacion\validacion;
 use stdClass;
@@ -367,7 +367,7 @@ class fc_empleado_contacto extends modelo{
         $nombre = $rs['fc_empleado_contacto_descripcion'];
         $codigo_pais = $rs['fc_empleado_contacto_codigo_pais'];
 
-        $rs = (new _http_client())->request_validacion_empleado_contacto(
+        $rs = (new _n8n_request())->request_validacion_empleado_contacto(
             nombre: $nombre,
             url_validacion: $url,
             codigo_pais: $codigo_pais,

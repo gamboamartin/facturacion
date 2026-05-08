@@ -4,7 +4,7 @@ namespace gamboamartin\facturacion\controllers;
 use config\generales;
 use gamboamartin\errores\errores;
 
-class _http_client
+class _n8n_request
 {
     public errores $errores;
     private string $baseUrl;
