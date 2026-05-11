@@ -111,7 +111,7 @@ class com_contacto extends \gamboamartin\comercial\models\com_contacto {
         $token = $this->get_codigo_aleatorio(longitud: 16);
         $fecha_token_validacion = date('Y-m-d H:i:s');
         $url_validacion = (new generales())->url_base;
-        $url_validacion .= "valida_telefono_contacto.php?telefono={$telefono}&token={$token}";
+        $url_validacion .= "api/valida_telefono_contacto.php?telefono={$telefono}&token={$token}";
         
 
         $rs = $this->actualiza_info_token_telefono(
