@@ -1,5 +1,5 @@
 <?php
-
+chdir(__DIR__ . '/..');
 require "../init.php";
 require '../vendor/autoload.php';
 use config\generales;

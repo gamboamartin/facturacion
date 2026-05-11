@@ -5,7 +5,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\com_contacto;
 
 $_SESSION['usuario_id'] = 2;
-
+chdir(__DIR__ . '/..');
 require "../init.php";
 require '../vendor/autoload.php';
 $con = new conexion();
