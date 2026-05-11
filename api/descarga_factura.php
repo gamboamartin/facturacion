@@ -18,8 +18,8 @@ use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\models\fc_uuid_fc;
 use Yosymfony\Toml\Toml;
 chdir(__DIR__ . '/..');
-require "../init.php";
-require '../vendor/autoload.php';
+require "init.php";
+require 'vendor/autoload.php';
 
 use config\generales;
 
