@@ -68,5 +68,3 @@
     </div>
 </body>
 </html>
-HTML;
-exit;
