@@ -1,7 +1,7 @@
 <?php
 // Este archivo se incluye desde valida_telefono_contacto.php
 // Variables disponibles: $nombre, $whatsapp_url
-$numero_empresa = '521234567890'; // <- cambiar por número real
+$numero_empresa = '15556392133'; // <- cambiar por número real
 $whatsapp_url   = 'https://wa.me/' . $numero_empresa;
 ?>
 <!DOCTYPE html>
