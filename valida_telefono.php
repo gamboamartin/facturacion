@@ -61,5 +61,5 @@ if (errores::$error) {
     exit;
 }
 
-echo 'Telefono validado';
+include __DIR__ . '/api/mensaje_confirmacion.php';
 exit;
