@@ -3,6 +3,7 @@
 use base\conexion;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\_doctos;
+use gamboamartin\facturacion\controllers\SeguridadEndpoint;
 use config\pac;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
@@ -17,6 +18,7 @@ use gamboamartin\facturacion\models\fc_retenido;
 use gamboamartin\facturacion\models\fc_traslado;
 use gamboamartin\facturacion\models\fc_uuid_fc;
 use Yosymfony\Toml\Toml;
+
 chdir(__DIR__ . '/..');
 require "init.php";
 require 'vendor/autoload.php';
@@ -133,6 +135,7 @@ if (!in_array($doc, $documentos_permitidos, true)) {
 $folio = '';
 $uuid = '';
 $rfc = '';
+$telefono_whatsapp = '';
 
 if (isset($_GET['folio'])) {
     $folio = trim($_GET['folio']);
@@ -144,6 +147,14 @@ if (isset($_GET['uuid'])) {
 
 if (isset($_GET['rfc'])) {
     $rfc = trim($_GET['rfc']);
+}
+
+if (isset($_GET['telefono_whatsapp'])) {
+    $telefono_whatsapp = trim($_GET['telefono_whatsapp']);
+}
+
+if (isset($_GET['telefono'])) {
+    $telefono_whatsapp = trim($_GET['telefono']);
 }
 
 if ($folio === '' && $uuid === '') {
@@ -208,6 +219,48 @@ if ($rfc !== '') {
         ), JSON_UNESCAPED_UNICODE);
         exit;
     }
+}
+
+
+/*
+ * Seguridad WhatsApp:
+ * Valida que el teléfono que solicita la factura pertenezca
+ * al mismo cliente dueño de la factura.
+ */
+if ($telefono_whatsapp === '') {
+    echo json_encode(array(
+        'STS' => 'telefono_requerido',
+        'MSG' => 'Para descargar la factura es necesario enviar el telefono de WhatsApp validado'
+    ), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+$folio_seguridad = '';
+
+if (isset($registro['fc_factura_folio'])) {
+    $folio_seguridad = trim($registro['fc_factura_folio']);
+}
+
+$rfc_seguridad = $rfc;
+
+if ($rfc_seguridad === '' && isset($registro['com_cliente_rfc'])) {
+    $rfc_seguridad = trim($registro['com_cliente_rfc']);
+}
+
+$seguridad_endpoint = new SeguridadEndpoint($link);
+
+$r_seguridad = $seguridad_endpoint->valida_contacto_cliente_factura(
+    telefono_whatsapp: $telefono_whatsapp,
+    folio: $folio_seguridad,
+    rfc: $rfc_seguridad
+);
+
+if (!$r_seguridad['autorizado']) {
+    echo json_encode(array(
+        'STS' => 'no_autorizado',
+        'MSG' => $r_seguridad['mensaje']
+    ), JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 
