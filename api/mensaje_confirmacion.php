@@ -1,8 +1,4 @@
-$servicios_lista = nl2br("• Descargar facturas (PDF y XML)\n• Timbrar facturas\n• Crear facturas\n• Crear clientes\n• Crear productos");
-$numero_empresa = '521234567890'; // <-- tu número de WhatsApp Business aquí
-$whatsapp_url = 'https://wa.me/' . $numero_empresa;
-
-echo <<<HTML
+<HTML
 <!DOCTYPE html>
 <html lang="es">
 <head>
