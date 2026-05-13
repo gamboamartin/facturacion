@@ -391,7 +391,7 @@ if ($doc === 'pdf') {
 
     $token = $payload . '.' . $firma;
 
-    $url_pdf = $base_url . 'descarga_factura_archivo.php?token=' . urlencode($token);
+    $url_pdf = $base_url . 'api/descarga_factura_archivo.php?token=' . urlencode($token);
 
     $pdf_filename = basename($ruta_pdf);
 }
@@ -437,7 +437,7 @@ if ($doc === 'xml') {
     $firma = hash_hmac('sha256', $payload, $secret_key);
     $token = $payload . '.' . $firma;
 
-    $url_xml = $base_url . 'descarga_factura_archivo.php?token=' . urlencode($token);
+    $url_xml = $base_url . 'api/descarga_factura_archivo.php?token=' . urlencode($token);
     $xml_filename = basename($ruta_xml);
 }
 
