@@ -21,7 +21,7 @@ use Yosymfony\Toml\Toml;
 chdir(__DIR__ . '/..');
 require "init.php";
 require 'vendor/autoload.php';
-require_once __DIR__ . '/seguridad_endpoint.php';
+require_once __DIR__ . '/seguridad_edpoint.php';
 
 
 use config\generales;
