@@ -3,7 +3,6 @@
 use base\conexion;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\_doctos;
-use gamboamartin\facturacion\controllers\SeguridadEndpoint;
 use config\pac;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
@@ -22,7 +21,7 @@ use Yosymfony\Toml\Toml;
 chdir(__DIR__ . '/..');
 require "init.php";
 require 'vendor/autoload.php';
-require_once 'controllers/_seguridad_endpoint.php';
+require_once __DIR__ . '/seguridad_endpoint.php';
 
 
 use config\generales;

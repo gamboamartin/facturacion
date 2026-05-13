@@ -1,7 +1,5 @@
 <?php
 
-namespace gamboamartin\facturacion\controllers;
-
 use PDO;
 
 class SeguridadEndpoint
