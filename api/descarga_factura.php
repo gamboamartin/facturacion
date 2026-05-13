@@ -31,7 +31,7 @@ $secret_key = $generales->cache_secret_key;
 
 
 header('Content-Type: application/json; charset=utf-8');
-echo json_encode(['GET_recibido' => $_GET]); exit;
+
 
 $_SESSION['usuario_id'] = 2;
 $_SESSION['grupo_id'] = 2;
