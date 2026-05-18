@@ -162,10 +162,6 @@ class controlador_adm_usuario extends \gamboamartin\acl\controllers\controlador_
             $r_n8n = $this->envia_validacion_telefono_n8n(data: $rs);
             if ($r_n8n['error']) {
 
-            echo '<pre>';
-            print_r($r_n8n);
-            echo '</pre>';
-            exit;
                 return $this->retorno_error(
                     mensaje: 'Error al enviar link de validacion a n8n',
                     data: $r_n8n,
