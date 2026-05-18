@@ -143,32 +143,100 @@ class controlador_adm_usuario extends \gamboamartin\acl\controllers\controlador_
             exit;
         }
 
-        public function valida_admin_telefono(bool $header, bool $ws = false)
+        public function valida_telefono(bool $header, bool $ws = false)
         {
-            $telefono_whatsapp = (string)(
-                $_GET['telefono_whatsapp']
-                ?? $_POST['telefono_whatsapp']
-                ?? $_GET['telefono']
-                ?? $_POST['telefono']
-                ?? ''
-            );
+            $registro_id = $this->registro_id;
 
             $modelo_usuario = new adm_usuario(link: $this->link);
 
-            $rs = $modelo_usuario->valida_admin_telefono(
-                telefono_whatsapp: $telefono_whatsapp
-            );
-
+            $rs = $modelo_usuario->valida_telefono(registro_id: $registro_id);
             if (errores::$error) {
                 return $this->retorno_error(
-                    mensaje: 'Error al validar administrador por telefono',
+                    mensaje: 'Error al validar telefono',
                     data: $rs,
                     header: $header,
                     ws: $ws
                 );
             }
 
-            return $this->retorna_json_admin_telefono(data: $rs);
+            $r_n8n = $this->envia_validacion_telefono_n8n(data: $rs);
+            if ($r_n8n['error']) {
+                return $this->retorno_error(
+                    mensaje: 'Error al enviar link de validacion a n8n',
+                    data: $r_n8n,
+                    header: $header,
+                    ws: $ws
+                );
+            }
+
+            $_SESSION['exito'][]['mensaje'] = 'Link de validacion enviado exitosamente';
+
+            $link = "index.php?seccion=adm_usuario&accion=lista";
+
+            if (isset($_GET['adm_menu_id'])) {
+                $link .= "&adm_menu_id=" . $_GET['adm_menu_id'];
+            }
+
+            if (isset($_GET['session_id'])) {
+                $link .= "&session_id=" . $_GET['session_id'];
+            }
+
+            header("Location: " . $link);
+            exit;
+        }
+
+        private function envia_validacion_telefono_n8n(array $data): array
+        {
+            $n8n = new _n8n_request();
+
+            $rs = $n8n->request_validacion_telefono_adm_usuario(
+                adm_usuario_id: (int)($data['adm_usuario_id'] ?? 0),
+                nombre: (string)($data['nombre'] ?? ''),
+                url_validacion: (string)($data['url_validacion'] ?? ($data['url'] ?? '')),
+                codigo_pais: (string)($data['codigo_pais'] ?? '52'),
+                telefono: (string)($data['telefono'] ?? ''),
+                telefono_original: (string)($data['telefono_original'] ?? ''),
+                estatus_telefono: (string)($data['estatus_telefono'] ?? ''),
+                adm_grupo_id: (int)($data['adm_grupo_id'] ?? 0),
+                grupo_descripcion: (string)($data['grupo_descripcion'] ?? ''),
+                grupo_codigo: (string)($data['grupo_codigo'] ?? ''),
+                grupo_alias: (string)($data['grupo_alias'] ?? '')
+            );
+
+            if (errores::$error) {
+                return [
+                    'error' => true,
+                    'mensaje' => 'Error al enviar link de validacion a n8n',
+                    'data' => $rs
+                ];
+            }
+
+            $http_code = (int)($rs['status'] ?? 0);
+            $curl_error = (string)($rs['error'] ?? '');
+            $response = $rs['response'] ?? '';
+
+            if ($curl_error !== '') {
+                return [
+                    'error' => true,
+                    'mensaje' => 'Error CURL al conectar con n8n',
+                    'data' => $curl_error
+                ];
+            }
+
+            if ($http_code < 200 || $http_code >= 300) {
+                return [
+                    'error' => true,
+                    'mensaje' => 'n8n respondio con error',
+                    'http_code' => $http_code,
+                    'response' => $response
+                ];
+            }
+
+            return [
+                'error' => false,
+                'http_code' => $http_code,
+                'response' => $response
+            ];
         }
 
         private function retorna_json_admin_telefono(array $data): void

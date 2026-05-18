@@ -7,24 +7,12 @@ use stdClass;
 class adm_usuario extends \gamboamartin\administrador\models\adm_usuario
 {
    
-    public function valida_admin_telefono(string $telefono_whatsapp): array
+    public function valida_telefono(int $registro_id): array
     {
-        $telefono_limpio = $this->limpia_telefono(telefono: $telefono_whatsapp);
-
-        if ($telefono_limpio === '') {
-            return [
-                'error' => true,
-                'autorizado' => false,
-                'status' => 'telefono_requerido',
-                'mensaje' => 'El telefono es requerido',
-                'telefono_whatsapp' => $telefono_whatsapp
-            ];
-        }
-
-        $telefono_nacional = $this->telefono_nacional(telefono: $telefono_limpio);
+        $this->registro_id = $registro_id;
 
         $filtro = [
-            'adm_usuario.telefono' => $telefono_nacional,
+            'adm_usuario.id' => $registro_id,
             'adm_usuario.status' => 'activo',
             'adm_grupo.status' => 'activo',
             'adm_grupo.root' => 'activo',
@@ -37,6 +25,8 @@ class adm_usuario extends \gamboamartin\administrador\models\adm_usuario
             'adm_usuario_user',
             'adm_usuario_email',
             'adm_usuario_telefono',
+            'adm_usuario_codigo_pais',
+            'adm_usuario_estatus_telefono',
             'adm_usuario_nombre',
             'adm_usuario_ap',
             'adm_usuario_am',
@@ -57,48 +47,90 @@ class adm_usuario extends \gamboamartin\administrador\models\adm_usuario
 
         if (errores::$error) {
             return $this->error->error(
-                mensaje: 'Error al validar administrador por telefono',
+                mensaje: 'Error al obtener usuario administrador',
                 data: $rs
             );
         }
 
         if ((int)$rs->n_registros === 0) {
-            return [
-                'error' => false,
-                'autorizado' => false,
-                'status' => 'no_autorizado',
-                'mensaje' => 'El telefono no pertenece a un administrador activo del sistema',
-                'telefono_whatsapp' => $telefono_limpio,
-                'telefono_nacional' => $telefono_nacional
-            ];
+            return $this->error->error(
+                mensaje: 'El usuario no existe o no pertenece al grupo Administrador Sistema',
+                data: $registro_id
+            );
         }
 
         $usuario = $rs->registros[0];
 
+        if (($usuario['adm_usuario_estatus_telefono'] ?? '') === 'validado') {
+            return $this->error->error(
+                mensaje: 'El telefono ya fue validado',
+                data: []
+            );
+        }
+
+        $telefono = $usuario['adm_usuario_telefono'] ?? '';
+        $codigo_pais = $usuario['adm_usuario_codigo_pais'] ?? '52';
+
+        if ($telefono === '' || $telefono === '1000000000') {
+            return $this->error->error(
+                mensaje: 'Error telefono no valido',
+                data: $telefono
+            );
+        }
+
+        if ($codigo_pais === '') {
+            $codigo_pais = '52';
+        }
+
+        $telefono_whatsapp = $this->telefono_whatsapp(
+            telefono: $telefono,
+            codigo_pais: $codigo_pais
+        );
+
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al normalizar telefono para WhatsApp',
+                data: $telefono_whatsapp
+            );
+        }
+
+        $url = $this->genera_link_validacion_telefono(
+            telefono: $telefono,
+            registro_id: $registro_id,
+            data: $usuario
+        );
+
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obtener url',
+                data: $url
+            );
+        }
+
+        $nombre = trim(
+            ($usuario['adm_usuario_nombre'] ?? '') . ' ' .
+            ($usuario['adm_usuario_ap'] ?? '') . ' ' .
+            ($usuario['adm_usuario_am'] ?? '')
+        );
+
+        if ($nombre === '') {
+            $nombre = $usuario['adm_usuario_user'] ?? '';
+        }
+
         return [
-            'error' => false,
-            'autorizado' => true,
-            'status' => 'ok',
-            'mensaje' => 'Usuario administrador validado correctamente',
-            'telefono_whatsapp' => $telefono_limpio,
-            'telefono_nacional' => $telefono_nacional,
-            'usuario' => [
-                'adm_usuario_id' => (int)$usuario['adm_usuario_id'],
-                'user' => $usuario['adm_usuario_user'] ?? '',
-                'email' => $usuario['adm_usuario_email'] ?? '',
-                'telefono' => $usuario['adm_usuario_telefono'] ?? '',
-                'nombre' => $usuario['adm_usuario_nombre'] ?? '',
-                'ap' => $usuario['adm_usuario_ap'] ?? '',
-                'am' => $usuario['adm_usuario_am'] ?? '',
-                'adm_grupo_id' => (int)($usuario['adm_usuario_adm_grupo_id'] ?? 0),
-                'grupo_id' => (int)($usuario['adm_grupo_id'] ?? 0),
-                'grupo_descripcion' => $usuario['adm_grupo_descripcion'] ?? '',
-                'grupo_codigo' => $usuario['adm_grupo_codigo'] ?? '',
-                'grupo_codigo_bis' => $usuario['adm_grupo_codigo_bis'] ?? '',
-                'grupo_alias' => $usuario['adm_grupo_alias'] ?? '',
-                'grupo_root' => $usuario['adm_grupo_root'] ?? '',
-                'grupo_status' => $usuario['adm_grupo_status'] ?? ''
-            ]
+            'adm_usuario_id' => $registro_id,
+            'nombre' => $nombre,
+            'url_validacion' => $url,
+            'codigo_pais' => $codigo_pais,
+            'telefono' => $telefono_whatsapp,
+            'telefono_original' => $telefono,
+            'estatus_telefono' => $usuario['adm_usuario_estatus_telefono'] ?? '',
+            'adm_grupo_id' => (int)($usuario['adm_usuario_adm_grupo_id'] ?? 0),
+            'grupo_descripcion' => $usuario['adm_grupo_descripcion'] ?? '',
+            'grupo_codigo' => $usuario['adm_grupo_codigo'] ?? '',
+            'grupo_codigo_bis' => $usuario['adm_grupo_codigo_bis'] ?? '',
+            'grupo_alias' => $usuario['adm_grupo_alias'] ?? '',
+            'grupo_root' => $usuario['adm_grupo_root'] ?? '',
         ];
     }
 
