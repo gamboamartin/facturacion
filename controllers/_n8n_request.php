@@ -14,6 +14,8 @@ class _n8n_request
     private string $path_validacion_empleado_contacto = 'valida_telefono_empleado';
     private string $path_validacion_telefono_contacto = 'validacion-telefono-contacto';
     private string $path_telefono_confirmado_contacto = 'telefono-confirmado-contacto';
+    private string $path_validacion_telefono_adm_usuario = 'validacion-telefono-adm-usuario';
+    private string $path_telefono_confirmado_adm_usuario = 'telefono-confirmado-adm-usuario';
 
     public function __construct()
     {
@@ -129,6 +131,90 @@ class _n8n_request
         try {
             $rs = $this->post(
                 endpoint: $this->path_telefono_confirmado_contacto,
+                data: $data
+            );
+        } catch (\Exception $e) {
+            return $this->errores->error(
+                mensaje: $e->getMessage(),
+                data: $e
+            );
+        }
+
+        return $rs;
+    }
+
+        public function request_telefono_confirmado_adm_usuario(
+        int $adm_usuario_id,
+        string $nombre,
+        string $codigo_pais,
+        string $telefono,
+        string $servicios = 'Administración del sistema, descarga de facturas XML y PDF, timbrado de facturas, creación de productos, clientes y facturas.',
+        int $adm_grupo_id = 0,
+        string $grupo_descripcion = '',
+        string $grupo_codigo = '',
+        string $grupo_alias = ''
+    ): array
+    {
+        $data = [
+            'evento' => 'telefono_confirmado_adm_usuario',
+            'adm_usuario_id' => $adm_usuario_id,
+            'nombre' => $nombre,
+            'codigo_pais' => $codigo_pais,
+            'telefono' => $telefono,
+            'servicios' => $servicios,
+            'adm_grupo_id' => $adm_grupo_id,
+            'grupo_descripcion' => $grupo_descripcion,
+            'grupo_codigo' => $grupo_codigo,
+            'grupo_alias' => $grupo_alias
+        ];
+
+        try {
+            $rs = $this->post(
+                endpoint: $this->path_telefono_confirmado_adm_usuario,
+                data: $data
+            );
+        } catch (\Exception $e) {
+            return $this->errores->error(
+                mensaje: $e->getMessage(),
+                data: $e
+            );
+        }
+
+        return $rs;
+    }
+
+        public function request_validacion_telefono_adm_usuario(
+        int $adm_usuario_id,
+        string $nombre,
+        string $url_validacion,
+        string $codigo_pais,
+        string $telefono,
+        string $telefono_original = '',
+        string $estatus_telefono = '',
+        int $adm_grupo_id = 0,
+        string $grupo_descripcion = '',
+        string $grupo_codigo = '',
+        string $grupo_alias = ''
+    ): array
+    {
+        $data = [
+            'evento' => 'validacion_telefono_adm_usuario',
+            'adm_usuario_id' => $adm_usuario_id,
+            'nombre' => $nombre,
+            'url_validacion' => $url_validacion,
+            'codigo_pais' => $codigo_pais,
+            'telefono' => $telefono,
+            'telefono_original' => $telefono_original,
+            'estatus_telefono' => $estatus_telefono,
+            'adm_grupo_id' => $adm_grupo_id,
+            'grupo_descripcion' => $grupo_descripcion,
+            'grupo_codigo' => $grupo_codigo,
+            'grupo_alias' => $grupo_alias
+        ];
+
+        try {
+            $rs = $this->post(
+                endpoint: $this->path_validacion_telefono_adm_usuario,
                 data: $data
             );
         } catch (\Exception $e) {
