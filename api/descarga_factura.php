@@ -251,10 +251,13 @@ if ($rfc_seguridad === '' && isset($registro['com_cliente_rfc'])) {
 
 $seguridad_endpoint = new SeguridadEndpoint($link);
 
-$r_seguridad = $seguridad_endpoint->valida_contacto_cliente_factura(
+$adm_grupo_id_requerido = (int)($_GET['adm_grupo_id'] ?? 0);
+
+$r_seguridad = $seguridad_endpoint->valida_adm_usuario_factura(
     telefono_whatsapp: $telefono_whatsapp,
     folio: $folio_seguridad,
-    rfc: $rfc_seguridad
+    rfc: $rfc_seguridad,
+    adm_grupo_id_requerido: $adm_grupo_id_requerido
 );
 
 if (!$r_seguridad['autorizado']) {
