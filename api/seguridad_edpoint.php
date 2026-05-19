@@ -285,7 +285,6 @@ class SeguridadEndpoint
     ): array {
         $where_rfc = '';
         $params = [
-            ':folio' => $folio,
             ':estatus_telefono' => 'validado'
         ];
 
