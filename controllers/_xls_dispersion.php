@@ -773,7 +773,7 @@ class _xls_dispersion{
         $row->nombre = $nombre;
         $row->clabe = $clabe;
         $row->monto = $monto;
-        $row->concepto = 'PENSION POR RENTA VITALICIA';
+        $row->concepto = 'CUMPLIMIENTO DE CONVENIO DE MEDIACION';
 
         return $row;
 
