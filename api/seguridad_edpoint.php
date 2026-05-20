@@ -163,13 +163,12 @@ class SeguridadEndpoint
     // }
 
     // VALIDACION PARA USUARIOS DEL SISTEMA
-   
 
     public function valida_adm_usuario_factura(
         string $telefono_whatsapp,
         string $folio = '',
         string $rfc = '',
-        int $adm_grupo_id_requerido = 0
+        array $grupos_permitidos = []
     ): array {
         $telefono_whatsapp = preg_replace('/\D+/', '', $telefono_whatsapp);
         $folio = trim($folio);
@@ -203,9 +202,9 @@ class SeguridadEndpoint
             ];
         }
 
-        if ($adm_grupo_id_requerido > 0) {
+        if (!empty($grupos_permitidos)) {
             $grupo_usuario = (int)$r_usuario['adm_grupo_id'];
-            if ($grupo_usuario !== $adm_grupo_id_requerido) {
+            if (!in_array($grupo_usuario, $grupos_permitidos, true)) {
                 return [
                     'autorizado' => false,
                     'status' => 'sin_permiso',
