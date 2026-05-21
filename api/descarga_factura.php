@@ -34,7 +34,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 
 $_SESSION['usuario_id'] = 2;
-$_SESSION['grupo_id'] = 2;
+$_SESSION['grupo_id'] = 5;
 
 
 $con = new conexion();
