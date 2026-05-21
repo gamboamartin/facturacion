@@ -19,6 +19,8 @@ class _xls_dispersion{
     private const int ENCABEZADO_MAX_FILAS    = 200;
     private const array ENCABEZADOS_PERMITIDOS  = ['CLAVE EMPLEADO', 'CLAVEEMPLEADO','# EMPLEADO'];
 
+    private const string CONCEPTO_DISPERSION =  'PENSION POR RENTA VITALICIA';
+
     public function __construct()
     {
         $letras = array('A','B','D','E','F','G','H','I','J','K','L','M','N','O','P','Q',
@@ -773,7 +775,7 @@ class _xls_dispersion{
         $row->nombre = $nombre;
         $row->clabe = $clabe;
         $row->monto = $monto;
-        $row->concepto = 'CUMPLIMIENTO DE CONVENIO DE MEDIACION';
+        $row->concepto = self::CONCEPTO_DISPERSION;
 
         return $row;
 
