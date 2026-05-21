@@ -44,9 +44,6 @@ $filtro = [
     'adm_usuario.token_telefono' => $token,
     'adm_usuario.status' => 'activo',
     'adm_grupo.status' => 'activo',
-    'adm_grupo.root' => 'activo',
-    'adm_grupo.codigo' => 'PA',
-    'adm_grupo.alias' => 'SA',
 ];
 
 $rs = $modelo->filtro_and(filtro: $filtro);
@@ -56,7 +53,7 @@ if (errores::$error) {
 }
 
 if ((int)$rs->n_registros === 0) {
-    echo 'El token de validacion no existe o el usuario no es administrador del sistema';
+    echo 'El token de validacion no existe o el usuario no está activo';
     exit;
 }
 
@@ -97,7 +94,7 @@ if (!errores::$error) {
         nombre: $nombre,
         codigo_pais: $codigo_pais,
         telefono: $telefono_whatsapp,
-        servicios: 'Administración del sistema, descarga de facturas XML y PDF, timbrado de facturas, creación de productos, clientes y facturas.'
+        servicios: 'procesos automatizados del sistema, descarga de facturas XML y PDF, timbrado de facturas, creación de productos, clientes y facturas y mas.'
     );
 }
 
