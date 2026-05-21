@@ -15,9 +15,6 @@ class adm_usuario extends \gamboamartin\administrador\models\adm_usuario
             'adm_usuario.id' => $registro_id,
             'adm_usuario.status' => 'activo',
             'adm_grupo.status' => 'activo',
-            'adm_grupo.root' => 'activo',
-            'adm_grupo.codigo' => 'PA',
-            'adm_grupo.alias' => 'SA',
         ];
 
         $columnas = [
@@ -54,7 +51,7 @@ class adm_usuario extends \gamboamartin\administrador\models\adm_usuario
 
         if ((int)$rs->n_registros === 0) {
             return $this->error->error(
-                mensaje: 'El usuario no existe o no pertenece al grupo Administrador Sistema',
+                mensaje: 'El usuario no existe o no está activo en el sistema',
                 data: $registro_id
             );
         }
