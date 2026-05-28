@@ -28,6 +28,8 @@ use config\generales;
 $generales   = new generales();
 $secret_key  = $generales->cache_secret_key;
 
+$accion_id = generales::$accion_id_descarga_factura; 
+
 header('Content-Type: application/json; charset=utf-8');
 
 $con  = new conexion();
@@ -65,13 +67,14 @@ if ($telefono_whatsapp === '') {
 $seguridad_endpoint = new SeguridadEndpoint($link);
 
 
-$grupos_permitidos = [2];
+
 
 $r_seguridad = $seguridad_endpoint->valida_adm_usuario_factura(
     telefono_whatsapp: $telefono_whatsapp,
+    accion_id: $accion_id,
     folio: $folio !== '' ? $folio : $uuid,
     rfc: strtoupper(trim($rfc)),
-    grupos_permitidos: $grupos_permitidos
+    
 );
 
 if (!$r_seguridad['autorizado']) {

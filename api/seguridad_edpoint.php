@@ -1,5 +1,7 @@
 <?php
 
+use gamboamartin\acl\controllers\_accion_base;
+
 class SeguridadEndpoint
 {
     private PDO $link;
@@ -167,8 +169,9 @@ class SeguridadEndpoint
     public function valida_adm_usuario_factura(
         string $telefono_whatsapp,
         string $folio = '',
+        int $accion_id = 0,
         string $rfc = '',
-        array $grupos_permitidos = []
+        
     ): array {
         $telefono_whatsapp = preg_replace('/\D+/', '', $telefono_whatsapp);
         $folio = trim($folio);
@@ -202,13 +205,14 @@ class SeguridadEndpoint
             ];
         }
 
-        if (!empty($grupos_permitidos)) {
+      
+        if ($accion_id > 0) {
             $grupo_usuario = (int)$r_usuario['adm_grupo_id'];
-            if (!in_array($grupo_usuario, $grupos_permitidos, true)) {
+            if (!$this->valida_seccion_permiso($accion_id, $grupo_usuario)) {
                 return [
                     'autorizado' => false,
-                    'status' => 'sin_permiso',
-                    'mensaje' => 'No tienes acceso a esta opción'
+                    'status'     => 'sin_permiso',
+                    'mensaje'    => 'No tienes acceso a esta opción'
                 ];
             }
         }
@@ -227,6 +231,18 @@ class SeguridadEndpoint
             rfc: $rfc,
             adm_usuario: $r_usuario
         );
+    }
+
+    private function valida_seccion_permiso(int $accion_id, int $grupo_id): bool
+    {
+        $sql = "SELECT id FROM adm_accion_grupo 
+                WHERE adm_accion_id = :accion_id 
+                AND adm_grupo_id  = :grupo_id
+                AND status = 'activo'
+                LIMIT 1";
+        $stmt = $this->link->prepare($sql);
+        $stmt->execute([':accion_id' => $accion_id, ':grupo_id' => $grupo_id]);
+        return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     private function obten_adm_usuario_por_telefono(string $telefono_whatsapp): array
