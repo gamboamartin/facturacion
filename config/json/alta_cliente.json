@@ -1,0 +1,166 @@
+{
+  "modulo": "facturacion",
+  "escenario": "alta_cliente",
+  "version": "1.1",
+  "estructura": {
+    "input": ["RFC", "RS", "TEL", "CP", "CAL", "NEX", "NIN", "COL", "MUN"],
+    "output": ["CID", "COD", "RFC", "RS", "STS", "MSG"],
+    "predeterminados": ["TIP"]
+  },
+  "campos": {
+    "RFC": {
+      "nombre_sistema": "com_cliente_rfc",
+      "tipo": "string",
+      "origen": "request",
+      "uso": "entrada/salida",
+      "exponer": true,
+      "descripcion": "RFC del cliente. Usado como llave de verificación de duplicado y como dato fiscal del registro"
+    },
+    "RS": {
+      "nombre_sistema": "com_cliente_razon_social",
+      "tipo": "string",
+      "origen": "request",
+      "uso": "entrada/salida",
+      "exponer": true,
+      "descripcion": "Razón social del cliente. Se usa también para generar el campo descripcion internamente"
+    },
+    "TEL": {
+      "nombre_sistema": "com_cliente_telefono",
+      "tipo": "string",
+      "origen": "request",
+      "uso": "entrada",
+      "exponer": false,
+      "descripcion": "Teléfono del cliente. Se replica en com_sucursal como telefono_1, telefono_2 y telefono_3"
+    },
+    "CP": {
+      "nombre_sistema": "com_cliente_cp",
+      "tipo": "string",
+      "origen": "request",
+      "uso": "entrada",
+      "exponer": false,
+      "descripcion": "Código postal del cliente. Si llega como PREDETERMINADO o PRED el sistema lo normaliza a 99999"
+    },
+    "CAL": {
+      "nombre_sistema": "com_cliente_calle",
+      "tipo": "string",
+      "origen": "request",
+      "uso": "entrada",
+      "exponer": false,
+      "descripcion": "Calle del domicilio fiscal del cliente"
+    },
+    "NEX": {
+      "nombre_sistema": "com_cliente_numero_exterior",
+      "tipo": "string",
+      "origen": "request",
+      "uso": "entrada",
+      "exponer": false,
+      "descripcion": "Número exterior del domicilio fiscal"
+    },
+    "NIN": {
+      "nombre_sistema": "com_cliente_numero_interior",
+      "tipo": "string",
+      "origen": "request",
+      "uso": "entrada",
+      "exponer": false,
+      "requerido": false,
+      "descripcion": "Número interior del domicilio fiscal. Opcional, se inicializa vacío si no se manda"
+    },
+    "COL": {
+      "nombre_sistema": "com_cliente_colonia",
+      "tipo": "string",
+      "origen": "request",
+      "uso": "entrada",
+      "exponer": false,
+      "descripcion": "Colonia del domicilio fiscal. Requerida por el modelo y por com_sucursal"
+    },
+    "MUN": {
+      "nombre_sistema": "dp_municipio_descripcion",
+      "tipo": "string",
+      "origen": "request",
+      "uso": "entrada",
+      "exponer": false,
+      "descripcion": "Nombre del municipio en texto. El endpoint resuelve internamente el dp_municipio_id buscando por descripcion en dp_municipio"
+    },
+    "CID": {
+      "nombre_sistema": "com_cliente_id",
+      "tipo": "integer",
+      "origen": "db",
+      "uso": "salida",
+      "exponer": true,
+      "descripcion": "ID interno generado por el sistema al insertar el cliente"
+    },
+    "COD": {
+      "nombre_sistema": "com_cliente_codigo",
+      "tipo": "string",
+      "origen": "db",
+      "uso": "salida",
+      "exponer": true,
+      "descripcion": "Código del cliente generado por el sistema"
+    },
+    "STS": {
+      "nombre_sistema": "status_operacion",
+      "tipo": "string",
+      "origen": "response",
+      "uso": "salida",
+      "exponer": true,
+      "valores_permitidos": [
+        "ok",
+        "ya_existe",
+        "municipio_no_encontrado",
+        "datos_incompletos",
+        "error"
+      ],
+      "descripcion": "Resultado de la operación de alta"
+    },
+    "MSG": {
+      "nombre_sistema": "mensaje",
+      "tipo": "string",
+      "origen": "response",
+      "uso": "salida",
+      "exponer": true,
+      "descripcion": "Mensaje funcional para el agente o usuario final"
+    },
+    "TIP": {
+    "nombre_sistema": "cat_sat_tipo_persona_id",
+    "tipo": "integer",
+    "origen": "predeterminado",
+    "uso": "interno",
+    "exponer": false,
+    "valor_predeterminado": 6,
+    "descripcion": "Tipo de persona SAT. Se asigna como POR DEFINIR (6) al crear via WhatsApp. Se actualiza cuando el AI Agent procesa el CIF"
+    }
+  },
+  "reglas": {
+    "duplicado": {
+      "campo": "RFC",
+      "tabla": "com_cliente",
+      "columna": "rfc",
+      "accion_si_existe": "ya_existe"
+    },
+    "resolucion_municipio": {
+      "campo_entrada": "MUN",
+      "tabla": "dp_municipio",
+      "columna_busqueda": "descripcion",
+      "columna_resultado": "id",
+      "accion_si_no_encontrado": "municipio_no_encontrado"
+    },
+    "foraneas_sat": {
+      "resolucion": "predeterminado",
+      "descripcion": "cat_sat_moneda_id, cat_sat_regimen_fiscal_id, cat_sat_forma_pago_id, cat_sat_uso_cfdi_id, cat_sat_tipo_de_comprobante_id, cat_sat_metodo_pago_id, com_tipo_cliente_id se resuelven automáticamente por inicializa_foraneas() del vendor si no se mandan"
+    },
+    "resultado": {
+      "exito": "ok",
+      "duplicado": "ya_existe",
+      "municipio_no_encontrado": "municipio_no_encontrado",
+      "datos_incompletos": "datos_incompletos",
+      "error_sistema": "error"
+    },
+    "restricciones": {
+      "exponer_solo_campos_definidos": true,
+      "modo": "insercion",
+      "crea_sucursal_automatica": true,
+      "session_requerida": false,
+      "descripcion_session": "El endpoint inyecta $_SESSION con el usuario validado por telefono, igual que descarga_factura"
+    }
+  }
+}

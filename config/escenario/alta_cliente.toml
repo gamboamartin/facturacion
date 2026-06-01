@@ -1,0 +1,47 @@
+modulo = "facturacion"
+escenario = "alta_cliente"
+version = "1.1"
+
+[input]
+permitidos = ["RFC", "RS", "TEL", "CP", "CAL", "NEX", "NIN", "COL", "MUN"]
+principal = "RFC"
+obligatorios = ["RFC", "RS", "TEL", "CP", "CAL", "NEX", "COL", "MUN"]
+opcionales = ["NIN"]
+
+[output]
+permitidos = ["CID", "COD", "RFC", "RS", "STS", "MSG"]
+obligatorios = ["STS", "MSG"]
+
+[reglas]
+verificacion_duplicado = "RFC"
+status_validos = [
+  "ok",
+  "ya_existe",
+  "municipio_no_encontrado",
+  "datos_incompletos",
+  "error"
+]
+
+[comportamiento]
+verificar_duplicado = true
+filtrar_campos = true
+crea_sucursal = true
+foraneas_sat_predeterminadas = true
+
+[mapping]
+RFC = "com_cliente.rfc"
+RS  = "com_cliente.razon_social"
+TEL = "com_cliente.telefono"
+CP  = "com_cliente.cp"
+CAL = "com_cliente.calle"
+NEX = "com_cliente.numero_exterior"
+NIN = "com_cliente.numero_interior"
+COL = "com_cliente.colonia"
+MUN = "dp_municipio.descripcion"
+CID = "com_cliente.id"
+COD = "com_cliente.codigo"
+
+[predeterminados]
+# No se mandan en el request, el endpoint los asigna internamente
+# POR DEFINIR (6) — se actualiza cuando el AI Agent procesa el CIF
+cat_sat_tipo_persona_id = 6

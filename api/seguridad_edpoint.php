@@ -233,6 +233,54 @@ class SeguridadEndpoint
         );
     }
 
+    public function valida_adm_usuario(
+    string $telefono_whatsapp,
+    int    $accion_id = 0
+    ): array {
+        $telefono_whatsapp = preg_replace('/\D+/', '', $telefono_whatsapp);
+
+        if ($telefono_whatsapp === '') {
+            return [
+                'autorizado' => false,
+                'status'     => 'telefono_vacio',
+                'mensaje'    => 'El teléfono de WhatsApp es requerido'
+            ];
+        }
+
+        $r_usuario = $this->obten_adm_usuario_por_telefono(
+            telefono_whatsapp: $telefono_whatsapp
+        );
+
+        if (!$r_usuario['encontrado']) {
+            return [
+                'autorizado' => false,
+                'status'     => 'no_encontrado',
+                'mensaje'    => $r_usuario['mensaje']
+            ];
+        }
+
+        if ($accion_id > 0) {
+            $grupo_usuario = (int)$r_usuario['adm_grupo_id'];
+            if (!$this->valida_seccion_permiso($accion_id, $grupo_usuario)) {
+                return [
+                    'autorizado' => false,
+                    'status'     => 'sin_permiso',
+                    'mensaje'    => 'No tienes acceso a esta opción'
+                ];
+            }
+        }
+
+        return [
+            'autorizado'        => true,
+            'status'            => 'autorizado',
+            'mensaje'           => 'Usuario autorizado',
+            'adm_usuario_id'    => $r_usuario['adm_usuario_id'],
+            'adm_grupo_id'      => $r_usuario['adm_grupo_id'],
+            'adm_grupo_codigo'  => $r_usuario['adm_grupo_codigo'],
+            'adm_grupo_alias'   => $r_usuario['adm_grupo_alias']
+        ];
+    }
+
     private function valida_seccion_permiso(int $accion_id, int $grupo_id): bool
     {
         $sql = "SELECT id FROM adm_accion_grupo 
