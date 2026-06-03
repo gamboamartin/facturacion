@@ -32,6 +32,7 @@ $numero_exterior   = trim($_GET['NEX'] ?? '');
 $numero_interior   = trim($_GET['NIN'] ?? '');
 $colonia           = trim($_GET['COL'] ?? '');
 $municipio_texto   = trim($_GET['MUN'] ?? '');
+$tipo_persona_id   = (int)($_GET['TPI'] ?? 6);
 
 // paso 2. VALIDACION DE TELEFONO WHATSAPP 
 
@@ -198,16 +199,16 @@ if ($dp_municipio_id <= 0) {
 
 $modelo_alta = new com_cliente($link);
 
-$modelo_alta->registro['rfc']              = $rfc;
-$modelo_alta->registro['razon_social']     = $razon_social;
-$modelo_alta->registro['telefono']         = $telefono;
-$modelo_alta->registro['cp']               = $cp;
-$modelo_alta->registro['calle']            = $calle;
-$modelo_alta->registro['numero_exterior']  = $numero_exterior;
-$modelo_alta->registro['numero_interior']  = $numero_interior;
-$modelo_alta->registro['colonia']          = $colonia;
-$modelo_alta->registro['dp_municipio_id']  = $dp_municipio_id;
-$modelo_alta->registro['cat_sat_tipo_persona_id'] = 6;
+$modelo_alta->registro['rfc']                     = $rfc;
+$modelo_alta->registro['razon_social']             = $razon_social;
+$modelo_alta->registro['telefono']                 = $telefono;
+$modelo_alta->registro['cp']                       = $cp;
+$modelo_alta->registro['calle']                    = $calle;
+$modelo_alta->registro['numero_exterior']          = $numero_exterior;
+$modelo_alta->registro['numero_interior']          = $numero_interior;
+$modelo_alta->registro['colonia']                  = $colonia;
+$modelo_alta->registro['dp_municipio_id']          = $dp_municipio_id;
+$modelo_alta->registro['cat_sat_tipo_persona_id']  = $tipo_persona_id;
 
 if (!isset($_FILES['documento'])) {
     $_FILES['documento'] = ['name' => ''];
