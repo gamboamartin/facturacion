@@ -36,7 +36,7 @@ if ($_FILES['documento']['type'] !== 'application/pdf') {
 
 // paso 2. VALIDACION DE TELEFONO WHATSAPP
 
-$telefono_whatsapp = trim($_GET['telefono_whatsapp'] ?? $_GET['telefono'] ?? '');
+$telefono_whatsapp = trim($_POST['telefono_whatsapp'] ?? $_POST['from'] ?? '');
 
 if ($telefono_whatsapp === '') {
     echo json_encode([
