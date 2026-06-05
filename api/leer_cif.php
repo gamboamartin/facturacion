@@ -67,18 +67,14 @@ $_SESSION['usuario_id'] = $r_seguridad['adm_usuario_id'];
 $_SESSION['grupo_id']   = $r_seguridad['adm_grupo_id'];
 
 // paso 4. LEER CIF
-
-
 $_GET['registro_id'] = 'tmp_' . time();
-
 $modelo = new com_cliente($link);
-
 $resultado = $modelo->leer_codigo_qr();
-
 if (errores::$error) {
     echo json_encode([
         'STS' => 'error',
-        'MSG' => 'Error al leer el código QR del CIF'
+        'MSG' => 'Error al leer el código QR del CIF',
+        'detalle' => $resultado  
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
