@@ -18,13 +18,18 @@ class _xls_dispersion2{
 
     public PDO $link;
     private stdClass $fc_layout_nom;
+    private bool $imprime_nombre_banco;
     public static array $letras = array();
     private const string ENCABEZADO_COL          = 'A';
     private const int ENCABEZADO_MAX_FILAS    = 200;
     private const array ENCABEZADOS_PERMITIDOS  = ['CLAVE EMPLEADO', 'CLAVEEMPLEADO','# EMPLEADO'];
+    private const string NOMBRE_BANCO = 'Peibo';
+    private const string CONCEPTO_DISPERSION =  'PENSION POR RENTA VITALICIA';
 
-    public function __construct(PDO $link)
+    public function __construct(PDO $link, bool $imprime_nombre_banco = false)
     {
+        $this->imprime_nombre_banco = $imprime_nombre_banco;
+
         $this->link = $link;
         $letras = array('A','B','D','E','F','G','H','I','J','K','L','M','N','O','P','Q',
             'R','S','T','U','V','W','X','X','Z');
@@ -831,7 +836,7 @@ class _xls_dispersion2{
         $row->correo = $correo;
         $row->fecha_pago = "'".$fecha_pago;
         $row->fecha_emision = "'".$fecha_emision;
-        $row->concepto = 'PENSION POR RENTA VITALICIA';
+        $row->concepto = self::CONCEPTO_DISPERSION;
 
         return $row;
 
@@ -1199,7 +1204,13 @@ class _xls_dispersion2{
 
 
         $fecha = date('YmdHis');
-        return "$datos_ly->name_cliente.$datos_ly->periodo.$fecha.csv";
+
+        $nombre_banco = '';
+        if ($this->imprime_nombre_banco) {
+            $nombre_banco = self::NOMBRE_BANCO.'_';
+        }
+
+        return "{$nombre_banco}$datos_ly->name_cliente.$datos_ly->periodo.$fecha.csv";
 
     }
 

@@ -14,15 +14,19 @@ use Throwable;
 
 class _xls_dispersion{
 
+    private bool $imprime_nombre_banco;
     public static array $letras = array();
     private const string ENCABEZADO_COL          = 'A';
     private const int ENCABEZADO_MAX_FILAS    = 200;
     private const array ENCABEZADOS_PERMITIDOS  = ['CLAVE EMPLEADO', 'CLAVEEMPLEADO','# EMPLEADO'];
 
-    private const string CONCEPTO_DISPERSION =  'PENSION POR RENTA VITALICIA';
+    private const string NOMBRE_BANCO = 'Vaulte';
+    private const string CONCEPTO_DISPERSION = 'PENSION POR RENTA VITALICIA';
 
-    public function __construct()
+    public function __construct(bool $imprime_nombre_banco = false)
     {
+        $this->imprime_nombre_banco = $imprime_nombre_banco;
+
         $letras = array('A','B','D','E','F','G','H','I','J','K','L','M','N','O','P','Q',
             'R','S','T','U','V','W','X','X','Z');
 
@@ -1120,7 +1124,13 @@ class _xls_dispersion{
 
 
         $fecha = date('YmdHis');
-        return "$datos_ly->name_cliente.$datos_ly->periodo.$fecha.xlsx";
+
+        $nombre_banco = '';
+        if ($this->imprime_nombre_banco) {
+            $nombre_banco = self::NOMBRE_BANCO.'_';
+        }
+
+        return "{$nombre_banco}$datos_ly->name_cliente.$datos_ly->periodo.$fecha.xlsx";
 
     }
 
