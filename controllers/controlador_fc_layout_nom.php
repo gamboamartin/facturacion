@@ -1000,7 +1000,7 @@ class controlador_fc_layout_nom extends system{
 
     }
 
-    public function genera_dispersion_vaulte(bool $header, bool $ws = false)
+    public function genera_dispersion_vaulte(bool $header, bool $ws = false): void
     {
         $clase_dispersion = new _xls_dispersion(imprime_nombre_banco: true);
 
@@ -1012,7 +1012,7 @@ class controlador_fc_layout_nom extends system{
 
     }
 
-    public function genera_dispersion_peibo(bool $header, bool $ws = false)
+    public function genera_dispersion_peibo(bool $header, bool $ws = false): void
     {
 
         $clase_dispersion = new _xls_dispersion2(
