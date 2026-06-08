@@ -990,10 +990,39 @@ class controlador_fc_layout_nom extends system{
         if ($this->tipo_dispersion === 2) {
             $clase_dispersion = new _xls_dispersion2($this->link);
         }
+
+        $this->genera_dispersion_base(
+            clase_dispersion: $clase_dispersion,
+            header: $header,
+            ws: $ws
+        );
+
+
+    }
+
+    private function genera_dispersion_base(
+        _xls_dispersion|_xls_dispersion2 $clase_dispersion,
+        bool $header,
+        bool $ws = false
+    )
+    {
+        $layout_status_inicial = controlador_fc_layout_nom::ESTADO_LAYOUT_INICIAL;
+
         $fc_layout_nom = (new fc_layout_nom($this->link))->registro($this->registro_id,retorno_obj: true);
         if (errores::$error) {
             return $this->retorno_error(
                 mensaje: 'Error al obtener layout', data: $fc_layout_nom, header: $header, ws: $ws);
+        }
+
+        $layout_status_actual = $fc_layout_nom->fc_layout_nom_estado_layout;
+
+        if ($layout_status_actual != $layout_status_inicial) {
+            return $this->retorno_error(
+                mensaje: 'La dispersion ya fue generada previamente',
+                data: $fc_layout_nom,
+                header: $header,
+                ws: $ws
+            );
         }
 
         $verif_empleado = (new _xls_empleados())->carga_empleados($this->link,$this->registro_id);
@@ -1025,8 +1054,6 @@ class controlador_fc_layout_nom extends system{
         }
 
         exit;
-
-
     }
 
     public function layout_pagado(bool $header, bool $ws = false): array
