@@ -1000,6 +1000,34 @@ class controlador_fc_layout_nom extends system{
 
     }
 
+    public function genera_dispersion_vaulte(bool $header, bool $ws = false)
+    {
+        $clase_dispersion = new _xls_dispersion(imprime_nombre_banco: true);
+
+        $this->genera_dispersion_base(
+            clase_dispersion: $clase_dispersion,
+            header: $header,
+            ws: $ws
+        );
+
+    }
+
+    public function genera_dispersion_peibo(bool $header, bool $ws = false)
+    {
+
+        $clase_dispersion = new _xls_dispersion2(
+            link: $this->link,
+            imprime_nombre_banco: true
+        );
+
+        $this->genera_dispersion_base(
+            clase_dispersion: $clase_dispersion,
+            header: $header,
+            ws: $ws
+        );
+
+    }
+
     private function genera_dispersion_base(
         _xls_dispersion|_xls_dispersion2 $clase_dispersion,
         bool $header,
