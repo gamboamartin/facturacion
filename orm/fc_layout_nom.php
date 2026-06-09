@@ -5,6 +5,7 @@ use gamboamartin\comercial\models\com_sucursal;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\controlador_com_contacto;
+use gamboamartin\facturacion\controllers\controlador_fc_layout_nom;
 use PDO;
 use PDOException;
 use stdClass;
@@ -161,17 +162,53 @@ class fc_layout_nom extends modelo{
         return $r_elimina_bd;
     }
 
-    public function cambiar_status_layout(int $registro_id, string $status_layout)
+    public function cambiar_a_status_layout_intermedio(int $fc_layout_nom_id): array
     {
-        $r_modifica = $this->modifica_bd(
-            registro: ['estado_layout' => $status_layout],
-            id: $registro_id,
-        );
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al modificar estado_layout',data: $r_modifica);
+        $query = "UPDATE fc_layout_nom 
+                    SET fc_layout_nom.estado_layout = :estado_layout 
+                  WHERE fc_layout_nom.id = :id";
+        try {
+            $stmt = $this->link->prepare($query);
+            $stmt->execute([
+                ':estado_layout' => controlador_fc_layout_nom::ESTADO_LAYOUT_INTERMEDIO,
+                ':id' => $fc_layout_nom_id,
+            ]);
+            $rs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return (new errores())->error(
+                mensaje: $e->getMessage(),
+                data:  $e
+            );
         }
 
-        return $r_modifica;
+        return $rs;
+
+    }
+
+    public function guardar_nombre_banco_dispersion(
+        int $fc_layout_nom_id,
+        string $nombre_banco
+    ): array
+    {
+        $query = "UPDATE fc_layout_nom 
+                    SET fc_layout_nom.banco_dispersion = :nombre_banco 
+                  WHERE fc_layout_nom.id = :id";
+        try {
+            $stmt = $this->link->prepare($query);
+            $stmt->execute([
+                ':nombre_banco' => $nombre_banco,
+                ':id' => $fc_layout_nom_id,
+            ]);
+            $rs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return (new errores())->error(
+                mensaje: $e->getMessage(),
+                data:  $e
+            );
+        }
+
+        return $rs;
+
     }
 
     public function desactiva_bd(): array|stdClass

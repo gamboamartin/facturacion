@@ -33,6 +33,8 @@ use ZipArchive;
 
 class controlador_fc_layout_nom extends system{
 
+    public const string BANCO_PEIBO = 'Peibo';
+    public const string BANCO_VAULTE = 'Vaulte';
     public const string ESTADO_LAYOUT_INICIAL = 'Descarga Layout';
     public const string ESTADO_LAYOUT_INTERMEDIO = 'Descargado o Generado';
     public const string ESTADO_LAYOUT_PAGADO = 'Pagado';
@@ -987,8 +989,19 @@ class controlador_fc_layout_nom extends system{
     public function genera_dispersion(bool $header, bool $ws = false)
     {
         $clase_dispersion = new _xls_dispersion();
+        $nombre_banco = self::BANCO_VAULTE;
         if ($this->tipo_dispersion === 2) {
             $clase_dispersion = new _xls_dispersion2($this->link);
+            $nombre_banco = self::BANCO_PEIBO;
+        }
+
+        $rs = (new fc_layout_nom($this->link))->guardar_nombre_banco_dispersion(
+            fc_layout_nom_id: $this->registro_id,
+            nombre_banco: $nombre_banco
+        );
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al guardar_nombre_banco_dispersion', data: $rs,
+                header: $header, ws: $ws);
         }
 
         $this->genera_dispersion_base(
@@ -997,12 +1010,20 @@ class controlador_fc_layout_nom extends system{
             ws: $ws
         );
 
-
     }
 
-    public function genera_dispersion_vaulte(bool $header, bool $ws = false): void
+    public function genera_dispersion_vaulte(bool $header, bool $ws = false)
     {
         $clase_dispersion = new _xls_dispersion(imprime_nombre_banco: true);
+
+        $rs = (new fc_layout_nom($this->link))->guardar_nombre_banco_dispersion(
+            fc_layout_nom_id: $this->registro_id,
+            nombre_banco: self::BANCO_VAULTE
+        );
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al guardar_nombre_banco_dispersion', data: $rs,
+                header: $header, ws: $ws);
+        }
 
         $this->genera_dispersion_base(
             clase_dispersion: $clase_dispersion,
@@ -1012,13 +1033,22 @@ class controlador_fc_layout_nom extends system{
 
     }
 
-    public function genera_dispersion_peibo(bool $header, bool $ws = false): void
+    public function genera_dispersion_peibo(bool $header, bool $ws = false)
     {
 
         $clase_dispersion = new _xls_dispersion2(
             link: $this->link,
             imprime_nombre_banco: true
         );
+
+        $rs = (new fc_layout_nom($this->link))->guardar_nombre_banco_dispersion(
+            fc_layout_nom_id: $this->registro_id,
+            nombre_banco: self::BANCO_PEIBO
+        );
+        if(errores::$error){
+            return $this->retorno_error(mensaje: 'Error al guardar_nombre_banco_dispersion', data: $rs,
+                header: $header, ws: $ws);
+        }
 
         $this->genera_dispersion_base(
             clase_dispersion: $clase_dispersion,
@@ -1065,9 +1095,8 @@ class controlador_fc_layout_nom extends system{
                 header: $header, ws: $ws);
         }
 
-        $rs = (new fc_layout_nom($this->link))->cambiar_status_layout(
-            registro_id: $this->registro_id,
-            status_layout: controlador_fc_layout_nom::ESTADO_LAYOUT_INTERMEDIO,
+        $rs = (new fc_layout_nom($this->link))->cambiar_a_status_layout_intermedio(
+            fc_layout_nom_id: $this->registro_id
         );
         if(errores::$error){
             return $this->retorno_error(mensaje: 'Error al cambiar_status_layout', data: $rs,
