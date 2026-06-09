@@ -16,11 +16,16 @@ use Throwable;
 class _pdf
 {
     private errores $error;
-    private array $cfg = []; // nuevo 
+    private array $cfg = []; // nuevo
+    private bool $cambios_titulo_pdf = false;
 
 
     public function __construct()
     {
+        $generales_pdf = new generales();
+        if (isset($generales_pdf->cambios_titulo_pdf)) {
+            $this->cambios_titulo_pdf = $generales_pdf->cambios_titulo_pdf;
+        }
         $this->error = new errores();
     }
 
@@ -771,10 +776,23 @@ class _pdf
                 }
             }
 
+            // nuevo nombre del pdf de factura
             $key_serie = $modelo_entidad->tabla . '_serie';
             $key_folio = $modelo_entidad->tabla . '_folio';
-            $nombre_documento = $factura[$key_serie] . $factura[$key_folio];
 
+            $add_razon_total = '';
+            if ($this->cambios_titulo_pdf) {
+                $razon_social = preg_replace('/[^A-Za-z0-9_\-]/', '_', $factura['com_cliente_razon_social']);
+                $total = number_format(
+                    (float)$factura['fc_factura_sub_total']
+                    + (float)$factura['fc_factura_total_traslados']
+                    - (float)$factura['fc_factura_total_retenciones'],
+                    2, '.', ''
+                );
+                $add_razon_total = '_' . $razon_social . '_' . $total;
+            }
+
+            $nombre_documento = $factura[$key_serie] . $factura[$key_folio] . $add_razon_total;
 
             if ($descarga) {
                 $pdf->Output($nombre_documento . '.pdf', 'D');
