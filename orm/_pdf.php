@@ -771,20 +771,24 @@ class _pdf
                 }
             }
 
-            // nuevo nombre del pdf de factura 
-            $key_serie    = $modelo_entidad->tabla . '_serie';
-            $key_folio    = $modelo_entidad->tabla . '_folio';
+            // nuevo nombre del pdf de factura
+            $key_serie = $modelo_entidad->tabla . '_serie';
+            $key_folio = $modelo_entidad->tabla . '_folio';
 
-            $razon_social = preg_replace('/[^A-Za-z0-9_\-]/', '_', $factura['com_cliente_razon_social']);
-            $total        = number_format(
-                (float)$factura['fc_factura_sub_total']
-                + (float)$factura['fc_factura_total_traslados']
-                - (float)$factura['fc_factura_total_retenciones'],
-                2, '.', ''
-            );
-
-            $nombre_documento = $factura[$key_serie] . $factura[$key_folio] . '_' . $razon_social . '_' . $total;
-            // aqui culmina la nueva adaptacion  (revisar la funcion get_factura porque toma es el sub_total y no el total)
+            $generales_pdf = new generales();
+            if (!empty($generales_pdf->cambios_titulo_pdf)) {
+                $razon_social     = preg_replace('/[^A-Za-z0-9_\-]/', '_', $factura['com_cliente_razon_social']);
+                $total            = number_format(
+                    (float)$factura['fc_factura_sub_total']
+                    + (float)$factura['fc_factura_total_traslados']
+                    - (float)$factura['fc_factura_total_retenciones'],
+                    2, '.', ''
+                );
+                $nombre_documento = $factura[$key_serie] . $factura[$key_folio] . '_' . $razon_social . '_' . $total;
+            } else {
+                $nombre_documento = $factura[$key_serie] . $factura[$key_folio];
+            }
+            // aqui culmina la nueva adaptacion (revisar get_factura porque toma sub_total en lugar de total)
 
 
             if ($descarga) {
