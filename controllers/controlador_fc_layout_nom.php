@@ -1099,7 +1099,7 @@ class controlador_fc_layout_nom extends system{
             fc_layout_nom_id: $this->registro_id
         );
         if(errores::$error){
-            return $this->retorno_error(mensaje: 'Error al cambiar_status_layout', data: $rs,
+            return $this->retorno_error(mensaje: 'Error al cambiar_a_status_layout_intermedio', data: $rs,
                 header: $header, ws: $ws);
         }
 
@@ -1135,7 +1135,7 @@ class controlador_fc_layout_nom extends system{
         }
 
         $rs = $modelo_fc_layout_nom->cambiar_status_layout(
-            registro_id: $this->registro_id,
+            fc_layout_nom_id: $this->registro_id,
             status_layout: self::ESTADO_LAYOUT_PAGADO,
         );
         if (errores::$error) {

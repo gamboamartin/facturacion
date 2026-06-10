@@ -164,13 +164,28 @@ class fc_layout_nom extends modelo{
 
     public function cambiar_a_status_layout_intermedio(int $fc_layout_nom_id): array
     {
+
+        $rs = $this->cambiar_status_layout(
+            fc_layout_nom_id: $fc_layout_nom_id,
+            status_layout: controlador_fc_layout_nom::ESTADO_LAYOUT_INTERMEDIO
+        );
+        if(errores::$error){
+            return $this->error->error(mensaje: 'Error al cambiar_status_layout',data: $rs);
+        }
+
+        return $rs;
+
+    }
+
+    public function cambiar_status_layout(int $fc_layout_nom_id, string $status_layout): array
+    {
         $query = "UPDATE fc_layout_nom 
                     SET fc_layout_nom.estado_layout = :estado_layout 
                   WHERE fc_layout_nom.id = :id";
         try {
             $stmt = $this->link->prepare($query);
             $stmt->execute([
-                ':estado_layout' => controlador_fc_layout_nom::ESTADO_LAYOUT_INTERMEDIO,
+                ':estado_layout' => $status_layout,
                 ':id' => $fc_layout_nom_id,
             ]);
             $rs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
