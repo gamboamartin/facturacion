@@ -5,6 +5,7 @@ namespace gamboamartin\facturacion\controllers;
 use base\controller\controler;
 use base\orm\modelo;
 use config\pac;
+use config\generales;
 use gamboamartin\cat_sat\models\cat_sat_forma_pago;
 use gamboamartin\cat_sat\models\cat_sat_metodo_pago;
 use gamboamartin\cat_sat\models\cat_sat_moneda;
@@ -132,11 +133,17 @@ class _base_system_fc extends _base_system{
     public string $link_factura_timbra_xml = '';
     public string $link_adjunta_bd = '';
     public array $documentos = array();
+    private bool $cambios_titulo_xml = false;
 
 
     public function __construct(html_controler $html_, PDO $link, modelo $modelo, stdClass $paths_conf = new stdClass())
     {
         parent::__construct(html_: $html_,link:  $link,modelo:  $modelo,paths_conf:  $paths_conf);
+
+         $generales = new generales();
+        if (isset($generales->cambios_titulo_xml)) {
+            $this->cambios_titulo_xml = $generales->cambios_titulo_xml;
+        }
 
         $this->configuraciones_impuestos['601']['PM']['permitidos'] = array(1,3,999);
         $this->configuraciones_impuestos['601']['PM']['default'] = 1;
@@ -1316,10 +1323,22 @@ class _base_system_fc extends _base_system{
             return $this->retorno_error(mensaje: 'Error al obtener factura',data:  $fc_factura, header: $header,ws:$ws);
         }
 
-        $key_serie = $this->tabla.'_serie';
-        $key_folio = $this->tabla.'_folio';
+        $key_serie = $this->tabla . '_serie';
+        $key_folio = $this->tabla . '_folio';
 
-        $file_name = $fc_factura->$key_serie.$fc_factura->$key_folio.'.xml';
+        $add_razon_total = '';
+        if ($this->cambios_titulo_xml) {
+            $razon_social    = preg_replace('/[^A-Za-z0-9_\-]/', '_', $fc_factura->com_cliente_razon_social);
+            $total           = number_format(
+                (float)$fc_factura->fc_factura_sub_total
+                + (float)$fc_factura->fc_factura_total_traslados
+                - (float)$fc_factura->fc_factura_total_retenciones,
+                2, '.', ''
+            );
+            $add_razon_total = '_' . $razon_social . '_' . $total;
+        }
+
+        $file_name = $fc_factura->$key_serie . $fc_factura->$key_folio . $add_razon_total . '.xml';
 
         if(!empty($ruta_xml) && file_exists($ruta_xml)){
             // Define headers
