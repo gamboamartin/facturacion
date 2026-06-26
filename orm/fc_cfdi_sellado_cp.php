@@ -21,6 +21,7 @@ class fc_cfdi_sellado_cp extends _sellado
 
         $this->NAMESPACE = __NAMESPACE__;
         $this->etiqueta = 'CFDI Sellado';
+        $this->modelo_entidad = new fc_complemento_pago(link: $link);
     }
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
