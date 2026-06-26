@@ -186,6 +186,11 @@ class _sellado extends _modelo_parent{
 
         return $data;
     }
+// para que funciones los otro timbres a parte de factura 
 
+public function get_modelo_entidad(): _transacciones_fc
+{
+    return $this->modelo_entidad;
+}
 
 }

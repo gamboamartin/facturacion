@@ -1958,7 +1958,7 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error verificar transaccion', data: $permite_transaccion);
         }
         $tipo = (new pac())->tipo;
-        $timbrada = (new fc_cfdi_sellado($this->link))->existe(filtro: array('fc_factura.id' => $registro_id));
+        $timbrada = $modelo_sello->existe(filtro: array($modelo_sello->get_modelo_entidad()->key_id => $registro_id));
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al validar si la factura esta timbrado', data: $timbrada);
         }
