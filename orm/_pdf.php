@@ -783,12 +783,12 @@ class _pdf
             $add_razon_total = '';
             if ($this->cambios_titulo_pdf) {
                 $razon_social = preg_replace('/[^A-Za-z0-9_\-]/', '_', $factura['com_cliente_razon_social']);
-                $total = number_format(
-                    (float)$factura['fc_factura_sub_total']
-                    + (float)$factura['fc_factura_total_traslados']
-                    - (float)$factura['fc_factura_total_retenciones'],
-                    2, '.', ''
-                );
+              $total = number_format(
+                (float)($factura[$modelo_entidad->tabla . '_sub_total'] ?? 0)
+                + (float)($factura[$modelo_entidad->tabla . '_total_traslados'] ?? 0)
+                - (float)($factura[$modelo_entidad->tabla . '_total_retenciones'] ?? 0),
+                2, '.', ''
+            );
                 $add_razon_total = '_' . $razon_social . '_' . $total;
             }
 
