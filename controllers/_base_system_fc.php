@@ -1329,12 +1329,12 @@ class _base_system_fc extends _base_system{
         $add_razon_total = '';
         if ($this->cambios_titulo_xml) {
             $razon_social    = preg_replace('/[^A-Za-z0-9_\-]/', '_', $fc_factura->com_cliente_razon_social);
-            $total           = number_format(
-                (float)$fc_factura->fc_factura_sub_total
-                + (float)$fc_factura->fc_factura_total_traslados
-                - (float)$fc_factura->fc_factura_total_retenciones,
-                2, '.', ''
-            );
+            $total = number_format(
+            (float)($fc_factura->{$this->tabla . '_sub_total'} ?? 0)
+            + (float)($fc_factura->{$this->tabla . '_total_traslados'} ?? 0)
+            - (float)($fc_factura->{$this->tabla . '_total_retenciones'} ?? 0),
+            2, '.', ''
+        );
             $add_razon_total = '_' . $razon_social . '_' . $total;
         }
 
@@ -1515,18 +1515,18 @@ class _base_system_fc extends _base_system{
             return $this->retorno_error(mensaje: 'Error al obtener CFDI',data:  $fc_factura, header: $header,ws:$ws);
         }
 
-       $key_serie = $this->tabla . '_serie';
+        $key_serie = $this->tabla . '_serie';
         $key_folio = $this->tabla . '_folio';
 
         $add_razon_total = '';
         if ($this->cambios_titulo_xml) {
             $razon_social    = preg_replace('/[^A-Za-z0-9_\-]/', '_', $fc_factura->com_cliente_razon_social);
-            $total           = number_format(
-                (float)$fc_factura->fc_factura_sub_total
-                + (float)$fc_factura->fc_factura_total_traslados
-                - (float)$fc_factura->fc_factura_total_retenciones,
-                2, '.', ''
-            );
+            $total = number_format(
+            (float)($fc_factura->{$this->tabla . '_sub_total'} ?? 0)
+            + (float)($fc_factura->{$this->tabla . '_total_traslados'} ?? 0)
+            - (float)($fc_factura->{$this->tabla . '_total_retenciones'} ?? 0),
+            2, '.', ''
+        );
             $add_razon_total = '_' . $razon_social . '_' . $total;
         }
 
