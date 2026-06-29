@@ -309,31 +309,9 @@ if (errores::$error) {
 
 $fc_factura_id = (int)$r_alta->registro_id;
 
-// =========================================================
-// PASO 11. GUARDAR EN tmp_factura_pendiente
-// =========================================================
-
-try {
-    $stmt = $link->prepare("
-        INSERT INTO tmp_factura_pendiente (from_tel, fc_factura_id, fecha_alta)
-        VALUES (:from_tel, :fc_factura_id, NOW())
-        ON DUPLICATE KEY UPDATE fc_factura_id = :fc_factura_id2, fecha_alta = NOW()
-    ");
-    $stmt->execute([
-        ':from_tel'       => $telefono_whatsapp,
-        ':fc_factura_id'  => $fc_factura_id,
-        ':fc_factura_id2' => $fc_factura_id,
-    ]);
-} catch (Throwable $e) {
-    echo json_encode([
-        'STS' => 'error',
-        'MSG' => 'Factura creada pero no se pudo guardar el estado temporal: ' . $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
-}
 
 // =========================================================
-// PASO 12. RESPUESTA
+// PASO 11. RESPUESTA
 // =========================================================
 
 echo json_encode([
