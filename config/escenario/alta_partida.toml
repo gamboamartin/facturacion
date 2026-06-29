@@ -1,0 +1,8 @@
+[comportamiento]
+filtrar_campos = false
+
+[defaults]
+cat_sat_obj_imp_codigo = "02"  # 02 = Sí Objeto De Impuesto
+
+[output]
+permitidos = ["STS", "MSG", "PID", "FID"]

@@ -1,0 +1,65 @@
+{
+    "campos": {
+        "telefono_whatsapp": {
+            "descripcion": "Teléfono WhatsApp del operador autenticado",
+            "tipo": "string",
+            "obligatorio": true,
+            "exponer": false
+        },
+        "FID": {
+            "descripcion": "ID de la factura a la que pertenece la partida (fc_factura_id)",
+            "tipo": "int",
+            "obligatorio": true,
+            "exponer": true
+        },
+        "PRD": {
+            "descripcion": "Código del producto (com_producto.codigo)",
+            "tipo": "string",
+            "obligatorio": true,
+            "exponer": true
+        },
+        "DES": {
+            "descripcion": "Descripción de la partida",
+            "tipo": "string",
+            "obligatorio": true,
+            "exponer": true
+        },
+        "QTY": {
+            "descripcion": "Cantidad",
+            "tipo": "float",
+            "obligatorio": true,
+            "exponer": true
+        },
+        "VU": {
+            "descripcion": "Valor unitario",
+            "tipo": "float",
+            "obligatorio": true,
+            "exponer": true
+        },
+        "DESC": {
+            "descripcion": "Descuento (opcional, default 0)",
+            "tipo": "float",
+            "obligatorio": false,
+            "exponer": true
+        }
+    },
+    "resueltos_automaticamente": {
+        "fc_factura_id": "Enviado por n8n desde tmp_factura_pendiente en Postgres",
+        "codigo": "Generado por el ORM",
+        "codigo_bis": "Generado por el ORM",
+        "alias": "Generado por el ORM",
+        "descripcion_select": "Generado por el ORM",
+        "cat_sat_obj_imp_id": "Default: 02 Sí Objeto De Impuesto (configurable en TOML)",
+        "sub_total": "Calculado por el ORM",
+        "sub_total_base": "Calculado por el ORM",
+        "total": "Calculado por el ORM",
+        "total_traslados": "Calculado por el ORM",
+        "total_retenciones": "Calculado por el ORM"
+    },
+    "respuesta": {
+        "STS": "Estado de la operación (ok, error, datos_incompletos, no_autorizado, producto_no_encontrado, factura_no_encontrada)",
+        "MSG": "Mensaje descriptivo",
+        "PID": "ID de la partida creada (fc_partida_id)",
+        "FID": "ID de la factura asociada (fc_factura_id)"
+    }
+}
