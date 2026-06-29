@@ -1,0 +1,56 @@
+{
+    "campos": {
+        "telefono_whatsapp": {
+            "descripcion": "Teléfono WhatsApp del operador autenticado",
+            "tipo": "string",
+            "obligatorio": true,
+            "exponer": false
+        },
+        "RFC": {
+            "descripcion": "RFC del cliente receptor de la factura",
+            "tipo": "string",
+            "obligatorio": true,
+            "exponer": true
+        },
+        "FP": {
+            "descripcion": "Código SAT de forma de pago (ej: 03 = Transferencia)",
+            "tipo": "string",
+            "obligatorio": true,
+            "exponer": true
+        },
+        "MP": {
+            "descripcion": "Código SAT de método de pago (ej: PUE, PPD)",
+            "tipo": "string",
+            "obligatorio": true,
+            "exponer": true
+        },
+        "UC": {
+            "descripcion": "Código SAT de uso CFDI (ej: G03 = Gastos en general)",
+            "tipo": "string",
+            "obligatorio": true,
+            "exponer": true
+        },
+        "MON": {
+            "descripcion": "Código SAT de moneda (ej: MXN, USD)",
+            "tipo": "string",
+            "obligatorio": true,
+            "exponer": true
+        }
+    },
+    "resueltos_automaticamente": {
+        "org_sucursal_id": "Desde TOML del escenario",
+        "fc_csd_id": "CSD activo de la sucursal emisora",
+        "dp_calle_pertenece_id": "Domicilio emisor desde CSD",
+        "cat_sat_regimen_fiscal_id": "Régimen fiscal desde org_empresa",
+        "com_sucursal_id": "Sucursal del cliente por RFC",
+        "version": "Fijo 4.0",
+        "exportacion": "Fijo 01",
+        "aplica_saldo": "Fijo inactivo (lo fija el modelo)"
+    },
+    "respuesta": {
+        "STS": "Estado de la operación (ok, error, datos_incompletos, no_autorizado, cliente_no_encontrado, catalogo_no_encontrado)",
+        "MSG": "Mensaje descriptivo",
+        "FID": "ID de la factura creada (fc_factura_id)",
+        "RFC": "RFC del cliente receptor confirmado"
+    }
+}

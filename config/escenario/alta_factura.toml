@@ -1,0 +1,8 @@
+[emisor]
+org_sucursal_id = 19  # Cambia este valor según el cliente del sistema
+
+[comportamiento]
+verificar_duplicado = false
+
+[output]
+permitidos = ["STS", "MSG", "FID", "RFC"]
