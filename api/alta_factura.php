@@ -266,18 +266,31 @@ foreach ($catalogos as $label => $id) {
 // PASO 10. ALTA DE LA FACTURA
 // =========================================================
 
+$stmt_tc = $link->prepare("SELECT id FROM com_tipo_cambio WHERE cat_sat_moneda_id = :moneda_id ORDER BY fecha DESC LIMIT 1");
+$stmt_tc->execute([':moneda_id' => $cat_sat_moneda_id]);
+$row_tc = $stmt_tc->fetch(PDO::FETCH_ASSOC);
+
+if (!$row_tc) {
+    echo json_encode(['STS' => 'error', 'MSG' => 'No se encontró tipo de cambio para la moneda seleccionada'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+$com_tipo_cambio_id = (int)$row_tc['id'];
+
 $modelo_factura = new fc_factura($link);
 
-$modelo_factura->registro['version']                    = '4.0';
-$modelo_factura->registro['exportacion']                = '01';
-$modelo_factura->registro['com_sucursal_id']            = $com_sucursal_id;
-$modelo_factura->registro['fc_csd_id']                  = $fc_csd_id;
-$modelo_factura->registro['dp_calle_pertenece_id']      = $dp_calle_pertenece_id;
-$modelo_factura->registro['cat_sat_regimen_fiscal_id']  = $cat_sat_regimen_fiscal_id;
-$modelo_factura->registro['cat_sat_forma_pago_id']      = $cat_sat_forma_pago_id;
-$modelo_factura->registro['cat_sat_metodo_pago_id']     = $cat_sat_metodo_pago_id;
-$modelo_factura->registro['cat_sat_uso_cfdi_id']        = $cat_sat_uso_cfdi_id;
-$modelo_factura->registro['cat_sat_moneda_id']          = $cat_sat_moneda_id;
+$modelo_factura->registro['version']                        = '4.0';
+$modelo_factura->registro['exportacion']                    = '01';
+$modelo_factura->registro['com_sucursal_id']                = $com_sucursal_id;
+$modelo_factura->registro['fc_csd_id']                      = $fc_csd_id;
+$modelo_factura->registro['dp_calle_pertenece_id']          = $dp_calle_pertenece_id;
+$modelo_factura->registro['cat_sat_regimen_fiscal_id']      = $cat_sat_regimen_fiscal_id;
+$modelo_factura->registro['cat_sat_forma_pago_id']          = $cat_sat_forma_pago_id;
+$modelo_factura->registro['cat_sat_metodo_pago_id']         = $cat_sat_metodo_pago_id;
+$modelo_factura->registro['cat_sat_uso_cfdi_id']            = $cat_sat_uso_cfdi_id;
+$modelo_factura->registro['cat_sat_moneda_id']              = $cat_sat_moneda_id;
+$modelo_factura->registro['com_tipo_cambio_id']             = $com_tipo_cambio_id;
+$modelo_factura->registro['cat_sat_tipo_de_comprobante_id'] = 1;
 
 if (!isset($_FILES['documento'])) {
     $_FILES['documento'] = ['name' => ''];
