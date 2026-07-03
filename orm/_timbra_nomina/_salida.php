@@ -2,8 +2,12 @@
 namespace gamboamartin\facturacion\models\_timbra_nomina;
 
 
+use config\generales;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\controllers\_n8n_request;
 use gamboamartin\facturacion\controllers\_n8nrequest;
+use gamboamartin\facturacion\models\fc_empleado_contacto;
+use gamboamartin\facturacion\models\fc_row_layout;
 use gamboamartin\modelo\modelo;
 use PDO;
 use stdClass;
@@ -21,18 +25,61 @@ class _salida{
     final public function code_error(string $codigo, stdClass $rs, string $nomina_json, PDO $link, int $fc_row_layout_id)
     {
         if($codigo !== '200'){
-            $codigos_error_datos_constancias = ['CFDI40147','CFDI40145','CFDI40999'];
+            $codigos_error_datos_constancias = generales::$codigos_error_datos_constancias;
             $con_error = true;
             $JSON = json_decode($nomina_json,false);
             $extra_data = '';
 
-//            if (in_array($codigo, $codigos_error_datos_constancias)) {
-//                $send_request = (new _http_client())->request_constancias(
-//                    fc_row_layout_id: $fc_row_layout_id,
-//                    rfc: 'RFX',
-//                    whatsapp: 2283371818
-//                );
-//            }
+            if (in_array($codigo, $codigos_error_datos_constancias)) {
+                $fc_row_layout_modelo = new fc_row_layout(link: $link);
+                $fc_row_layout_modelo->registro_id = $fc_row_layout_id;
+                $rs_row_layout = $fc_row_layout_modelo->obten_data([
+                    'fc_row_layout_id','fc_row_layout_fc_empleado_id',
+                    'fc_row_layout_rfc','fc_row_layout_cp','fc_row_layout_nombre_completo'
+                ]);
+
+                if(!errores::$error){
+                    $rfc = $rs_row_layout['fc_row_layout_rfc'];
+                    $cp = $rs_row_layout['fc_row_layout_cp'];
+                    $nombre_completo = $rs_row_layout['fc_row_layout_nombre_completo'];
+                    $fc_empleado_id = $rs_row_layout['fc_row_layout_fc_empleado_id'];
+
+                    $rs_empleado = (new fc_empleado_contacto($link))->filtro_and(
+                        columnas: ['fc_empleado_contacto_estatus_telefono','fc_empleado_contacto_telefono'],
+                        filtro: ['fc_empleado_contacto.fc_empleado_id' => $fc_empleado_id]
+                    );
+
+                    if($rs_empleado->n_registros == 1) {
+                        $registro = $rs_empleado->registros[0];
+
+                        $whatsapp = $registro['fc_empleado_contacto_telefono'];
+                        $estatus_telefono = $registro['fc_empleado_contacto_estatus_telefono'];
+
+                        if ($estatus_telefono !== 'no validado') {
+                            $send_request = (new _n8n_request())->request_constancias(
+                                fc_row_layout_id: $fc_row_layout_id,
+                                rfc: $rfc,
+                                cp: $cp,
+                                nombre_completo: $nombre_completo,
+                                whatsapp: $whatsapp
+                            );
+
+                            $status_request = (int)$send_request['status'];
+
+                            $extra_data ="Empleado notificado";
+                            if($status_request !== 200){
+                                $extra_data ="Error al notificar al empleado";
+                            }
+
+                        }else{
+                            $extra_data ="whatsapp: $whatsapp";
+                            $extra_data .=" No validado";
+                        }
+                    }else{
+                        $extra_data ="El empleado no tiene whatsapp registrado";
+                    }
+                }
+            }
 
             if($codigo === 'CFDI40145'){
                 $extra_data ="RFC: {$JSON->Comprobante->Receptor->Rfc}";

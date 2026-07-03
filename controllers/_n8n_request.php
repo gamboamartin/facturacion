@@ -10,7 +10,7 @@ class _n8n_request
     private string $baseUrl;
     private array $defaultHeaders;
 
-    private string $path_constancia = '5de4b043-e573-488f-822d-942f18b487aa';
+    private string $path_constancia = 'solicita-constancia-contacto';
     private string $path_validacion_empleado_contacto = 'valida_telefono_empleado';
     private string $path_validacion_telefono_contacto = 'validacion-telefono-contacto';
     private string $path_telefono_confirmado_contacto = 'telefono-confirmado-contacto';
@@ -28,10 +28,18 @@ class _n8n_request
         $this->errores = new errores();
     }
 
-    public function request_constancias(int $fc_row_layout_id, string $rfc, int $whatsapp): array
+    public function request_constancias(
+        int $fc_row_layout_id,
+        string $rfc,
+        string $cp,
+        string $nombre_completo,
+        int $whatsapp
+    ): array
     {
         $data = [
             'rfc' => $rfc,
+            'cp' => $fc_row_layout_id,
+            'nombre_completo' => $fc_row_layout_id,
             'fc_row_layout_id' => $fc_row_layout_id,
             'whatsapp' => $whatsapp
         ];

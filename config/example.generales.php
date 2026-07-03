@@ -26,6 +26,7 @@ class generales{
     public static string $empresa_pagadora_reportes = 'RECURSOS Y RESULTADOS HARIMENI'; // especifico de konsulta
     public static string $key_n8n = 'VHn9JjiujaWPok5yNMb5sYj9';
     public static string $url_base_n8n = 'https://n8n-test.ivitec.mx/webhook-test';
+    public static array $codigos_error_datos_constancias = ['CFDI40143','CFDI40147','CFDI40145','CFDI40999'];
     public string $cache_secret_key = 'f9a8c7d6e5b4a360_super_secret_key_ivitec';
 
     public function __construct(){
