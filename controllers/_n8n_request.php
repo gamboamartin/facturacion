@@ -38,8 +38,8 @@ class _n8n_request
     {
         $data = [
             'rfc' => $rfc,
-            'cp' => $fc_row_layout_id,
-            'nombre_completo' => $fc_row_layout_id,
+            'cp' => $cp,
+            'nombre_completo' => $nombre_completo,
             'fc_row_layout_id' => $fc_row_layout_id,
             'whatsapp' => $whatsapp
         ];
