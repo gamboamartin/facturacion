@@ -12,6 +12,7 @@ chdir(__DIR__ . '/..');
 require "init.php";
 require 'vendor/autoload.php';
 require_once __DIR__ . '/seguridad_edpoint.php';
+require_once __DIR__ . '/catalogos_sat.php';
 
 use config\generales;
 
@@ -231,14 +232,6 @@ $com_sucursal_id = (int)$r_sucursal->registros[0]['com_sucursal_id'];
 // PASO 9. RESOLUCIÓN DE CATÁLOGOS SAT
 // =========================================================
 
-// Helper: busca ID en catálogo por código
-function resuelve_catalogo(PDO $link, string $tabla, string $codigo, string $campo_codigo = 'codigo'): int
-{
-    $stmt = $link->prepare("SELECT id FROM {$tabla} WHERE {$campo_codigo} = :codigo LIMIT 1");
-    $stmt->execute([':codigo' => $codigo]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $row ? (int)$row['id'] : 0;
-}
 
 $cat_sat_forma_pago_id  = resuelve_catalogo($link, 'cat_sat_forma_pago', $forma_pago);
 $cat_sat_metodo_pago_id = resuelve_catalogo($link, 'cat_sat_metodo_pago', $metodo_pago);
