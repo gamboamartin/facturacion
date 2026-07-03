@@ -179,12 +179,14 @@ if (errores::$error) {
 
     if (stripos($detalle_texto, 'no se permite') !== false) {
         $mensaje_usuario = 'Esta factura ya no se puede editar porque está timbrada o cancelada';
+    } elseif (stripos($detalle_texto, 'metodo o forma de pago incorrecto') !== false) {
+        $mensaje_usuario = 'La combinación de forma de pago y método de pago no es válida. '
+            . 'Si usas Método de pago PPD (parcialidades), la Forma de pago debe ser 99 = Por definir.';
     }
 
     echo json_encode([
         'STS' => 'error',
-        'MSG' => $mensaje_usuario,
-        'DEBUG' => $r_modifica
+        'MSG' => $mensaje_usuario
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
