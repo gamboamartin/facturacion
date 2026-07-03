@@ -17,7 +17,7 @@ $con  = new conexion();
 $link = conexion::$link;
 
 // TODO: crear generales::$accion_id_editar_factura cuando exista la acción
-$accion_id = 0;
+$accion_id = generales::$accion_id_editar_factura;
 
 // paso 1. PARAMETROS DE ENTRADA
 
