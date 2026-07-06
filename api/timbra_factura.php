@@ -152,7 +152,8 @@ if (errores::$error) {
 
     echo json_encode([
         'STS' => 'error',
-        'MSG' => $mensaje_usuario
+        'MSG' => $mensaje_usuario,
+        'DEBUG' => $detalle_texto
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
