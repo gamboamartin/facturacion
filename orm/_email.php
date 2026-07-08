@@ -485,7 +485,7 @@ class _email{
         if (isset(generales::$nombre_proyecto)) {
             $nombre_proyecto = generales::$nombre_proyecto;
             if ($name_entidad_modelo === 'fc_factura' && $nombre_proyecto === 'konsulta' ) {
-                $texto_final  = ' En caso de aclaración o corrección de la factura emitida,';
+                $texto_final  = ". \nEn caso de aclaración o corrección de la factura emitida,";
                 $texto_final .= ' tendrá sólo tres días a partir de la expedición de la misma, para solicitarlo;';
                 $texto_final .= ' de lo contrario no se podrá realizar modificación alguna.  Gracias.';
             }
