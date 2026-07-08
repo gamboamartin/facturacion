@@ -939,10 +939,11 @@ class _pdf
 
         $texto = mb_convert_encoding($texto, 'ISO-8859-1', 'UTF-8');
 
-        $pdf->SetFont('Arial', 'I', '7');
-        $pdf->SetTextColor(100, 100, 100);
-        $pdf->SetXY(7, 275);
+       $pdf->SetAutoPageBreak(false);
+        $pdf->SetFont('Arial', 'B', 8);            
+        $pdf->SetTextColor(0, 0, 0);               
+        $pdf->SetXY(7, 273);                      
         $pdf->MultiCell(196, 2.5, $texto, 0, 'C');
+        $pdf->SetAutoPageBreak(true);         
     }
-
 }
