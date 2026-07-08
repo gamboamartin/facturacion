@@ -1,6 +1,7 @@
 <?php
 namespace gamboamartin\facturacion\models;
 use base\orm\modelo;
+use config\generales;
 use gamboamartin\errores\errores;
 use gamboamartin\notificaciones\models\not_adjunto;
 use gamboamartin\notificaciones\models\not_emisor;
@@ -479,8 +480,17 @@ class _email{
      */
     private function mensaje(string $asunto, string $name_entidad_modelo, stdClass $row_entidad): string
     {
+        $texto_final = '';
         $key_total = $name_entidad_modelo.'_total';
-        return "Buen día se envia $asunto por un Total de: ".$row_entidad->$key_total;
+        if (isset(generales::$nombre_proyecto)) {
+            $nombre_proyecto = generales::$nombre_proyecto;
+            if ($name_entidad_modelo === 'fc_factura' && $nombre_proyecto === 'konsulta' ) {
+                $texto_final  = ". \nEn caso de aclaración o corrección de la factura emitida,";
+                $texto_final .= ' tendrá sólo tres días a partir de la expedición de la misma, para solicitarlo;';
+                $texto_final .= ' de lo contrario no se podrá realizar modificación alguna.  Gracias.';
+            }
+        }
+        return "Buen día se envia $asunto por un Total de: ".$row_entidad->$key_total.$texto_final;
     }
 
     private function not_emisor(PDO $link){
