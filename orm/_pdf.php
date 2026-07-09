@@ -18,6 +18,7 @@ class _pdf
     private errores $error;
     private array $cfg = []; // nuevo
     private bool $cambios_titulo_pdf = false;
+    private bool $leyenda_factura_pdf = false; 
 
 
     public function __construct()
@@ -25,6 +26,9 @@ class _pdf
         $generales_pdf = new generales();
         if (isset($generales_pdf->cambios_titulo_pdf)) {
             $this->cambios_titulo_pdf = $generales_pdf->cambios_titulo_pdf;
+        }
+        if (isset($generales_pdf->leyenda_factura_pdf)) {
+        $this->leyenda_factura_pdf = $generales_pdf->leyenda_factura_pdf;
         }
         $this->error = new errores();
     }
@@ -775,6 +779,7 @@ class _pdf
                     $this->base_pdf(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf, relacionadas: $relacionadas, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
                 }
             }
+            $this->leyenda(pdf: $pdf);
 
             // nuevo nombre del pdf de factura
             $key_serie = $modelo_entidad->tabla . '_serie';
@@ -921,5 +926,24 @@ class _pdf
         return trim((string)$val);
     }
 
+   private function leyenda(Fpdi $pdf): void
+    {
+        if (!$this->leyenda_factura_pdf) {
+            return;
+        }
 
+        $texto = "En caso de aclaración o corrección de la factura emitida, "
+            . "tendrá sólo tres días a partir de la expedición de la misma, "
+            . "para solicitarlo; de lo contrario no se podrá realizar "
+            . "modificación alguna. Gracias.";
+
+        $texto = mb_convert_encoding($texto, 'ISO-8859-1', 'UTF-8');
+
+       $pdf->SetAutoPageBreak(false);
+        $pdf->SetFont('Arial', 'B', 8);            
+        $pdf->SetTextColor(0, 0, 0);               
+        $pdf->SetXY(7, 273);                      
+        $pdf->MultiCell(196, 2.5, $texto, 0, 'C');
+        $pdf->SetAutoPageBreak(true);         
+    }
 }
