@@ -482,13 +482,9 @@ class _email{
     {
         $texto_final = '';
         $key_total = $name_entidad_modelo.'_total';
-        if (isset(generales::$nombre_proyecto)) {
-            $nombre_proyecto = generales::$nombre_proyecto;
-            if ($name_entidad_modelo === 'fc_factura' && $nombre_proyecto === 'konsulta' ) {
-                $texto_final  = ". \nEn caso de aclaración o corrección de la factura emitida,";
-                $texto_final .= ' tendrá sólo tres días a partir de la expedición de la misma, para solicitarlo;';
-                $texto_final .= ' de lo contrario no se podrá realizar modificación alguna.  Gracias.';
-            }
+        $key_leyenda = $name_entidad_modelo.'_leyenda_final_correo';
+        if (isset($row_entidad->$key_leyenda)) {
+            $texto_final = ". \n" . $row_entidad->$key_leyenda;
         }
         return "Buen día se envia $asunto por un Total de: ".$row_entidad->$key_total.$texto_final;
     }

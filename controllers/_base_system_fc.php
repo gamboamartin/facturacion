@@ -1281,6 +1281,7 @@ class _base_system_fc extends _base_system{
                 return $this->retorno_error(mensaje: 'Error al dar de alta registro', data: $r_fc_cancelacion,
                     header:  true, ws: $ws);
             }
+            $this->link->commit();
             header('Location:'.$retorno);
             exit;
         }

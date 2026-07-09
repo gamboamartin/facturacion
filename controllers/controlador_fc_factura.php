@@ -494,6 +494,7 @@ class controlador_fc_factura extends _base_system_fc
         }
 
         $this->link->commit();
+
         return $r_cancela_bd;
     }
 
