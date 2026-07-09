@@ -77,9 +77,7 @@ class _cancelacion extends modelo {
         $cancela = (new timbra())->cancela(motivo_cancelacion: $motivo_cancelacion,rfc_emisor:  $rfc_emisor,
             rfc_receptor:  $rfc_receptor,uuid:  $uuid,pass_csd: $data_csd->fc_csd_password,ruta_cer: $data_csd->ruta_cer,
             ruta_key: $data_csd->ruta_key,total: $fc_factura->$key_total,uuid_sustitucion: '');
-echo '<pre>';
-print_r($cancela);
-echo '</pre>';exit;
+
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al cancelar',data: $cancela);
         }
