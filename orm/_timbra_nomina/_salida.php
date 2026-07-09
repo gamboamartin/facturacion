@@ -25,7 +25,10 @@ class _salida{
     final public function code_error(string $codigo, stdClass $rs, string $nomina_json, PDO $link, int $fc_row_layout_id)
     {
         if($codigo !== '200'){
-            $codigos_error_datos_constancias = generales::$codigos_error_datos_constancias;
+            $codigos_error_datos_constancias = [];
+            if(isset(generales::$codigos_error_datos_constancias)){
+                $codigos_error_datos_constancias = generales::$codigos_error_datos_constancias;
+            }
             $con_error = true;
             $JSON = json_decode($nomina_json,false);
             $extra_data = '';
