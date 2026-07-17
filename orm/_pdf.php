@@ -590,7 +590,7 @@ class _pdf
 
     }
 
-    final public function pdf(bool              $descarga, bool $guarda, PDO $link, _doc $modelo_documento,
+   final public function pdf(bool              $descarga, bool $guarda, PDO $link, _doc $modelo_documento,
                               _transacciones_fc $modelo_entidad, _partida $modelo_partida,
                               _cuenta_predial   $modelo_predial, _relacion $modelo_relacion,
                               _relacionada      $modelo_relacionada, _data_impuestos $modelo_retencion,
@@ -606,7 +606,7 @@ class _pdf
             return $this->error->error(mensaje: 'Error al obtener factura', data: $factura);
         }
 
-        // nuevo 
+        // nuevo
         $cpEmisorId = (int)($factura['org_empresa_dp_cp_id'] ?? 0);
         $factura['org_empresa_cp_txt'] = $this->cp_txt($link, $cpEmisorId);
         //aca termina
@@ -661,7 +661,6 @@ class _pdf
             return $this->error->error(mensaje: 'Error al obtener regimen fiscal receptor', data: $rf_receptor);
         }
 
-
         $data = $this->data_factura(cfdi_sellado: $cfdi_sellado, name_entidad_sellado: $modelo_sellado->tabla);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al asignar datos', data: $data);
@@ -672,7 +671,6 @@ class _pdf
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al obtener relacionadas', data: $relacionadas);
         }
-
 
         $key_observaciones = $modelo_entidad->tabla . '_observaciones';
         if (!isset($factura[$key_observaciones])) {
@@ -696,9 +694,6 @@ class _pdf
             }
         }
 
-
-
-
         if (!$aplica_plantilla) {
             $pdf = new pdf();
             $pdf->header(cfdi: $factura['cat_sat_uso_cfdi_descripcion'], cod_postal: $factura['dp_cp_descripcion'],
@@ -715,9 +710,7 @@ class _pdf
                 return $this->error->error(mensaje: 'Error al maquetar header', data: $pdf);
             }
 
-
         } else {
-
 
             $tabla = $modelo_entidad->tabla;
             $tabla_partida = $modelo_partida->tabla;
@@ -725,61 +718,87 @@ class _pdf
             $fmt = new NumberFormatter('es_MX', NumberFormatter::CURRENCY);
             $pdf = new Fpdi();
 
+            $plantilla_tipo = $generales->plantilla_tipo ?? 'default';
+            $metodo_base = 'base_pdf_' . $plantilla_tipo;
 
-            $this->base_pdf(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf, relacionadas: $relacionadas,
-                ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
+            if ($plantilla_tipo !== 'default' && method_exists($this, $metodo_base)) {
 
-            $border = 0;
-            $h = 2.5;
-            $y = 96.5;
-            $partidas = 1;
-            foreach ($factura['partidas'] as $partida) {
-                $pdf->SetFont('Arial', '', '7');
-                $x = 7;
-                $pdf->SetXY($x, $y);
-                $pdf->MultiCell(10, $h, $partida[$tabla_partida.'_cantidad'], $border, 'C');
+                // ── FLUJO CUSTOM (cualquier plantilla registrada) ──
+                $this->$metodo_base(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf,
+                    relacionadas: $relacionadas, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
 
-                $x = 19;
-                $pdf->SetXY($x, $y);
-                $pdf->MultiCell(12, $h, $partida['cat_sat_unidad_codigo'], $border, 'C');
+                $this->render_partidas_custom(
+                    plantilla_tipo: $plantilla_tipo,
+                    tabla: $tabla,
+                    tabla_partida: $tabla_partida,
+                    factura: $factura,
+                    pdf: $pdf,
+                    fmt: $fmt,
+                    data: $data,
+                    relacionadas: $relacionadas,
+                    ruta_logo: $ruta_logo,
+                    ruta_qr: $ruta_qr
+                );
 
-                $x = 33;
-                $pdf->SetXY($x, $y);
-                $pdf->MultiCell(18, $h, $partida['com_producto_codigo_sat'], $border, 'C');
+            } else {
 
-                $x = 52;
-                $pdf->SetXY($x, $y);
-                $pdf->MultiCell(75, $h, mb_convert_encoding($partida[$tabla_partida.'_descripcion'], 'ISO-8859-1', 'UTF-8'), $border, 'L');
+                // ── FLUJO DEFAULT (original, intacto) ──
+                $this->base_pdf(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf, relacionadas: $relacionadas,
+                    ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
 
-                $x = 127;
-                $pdf->SetXY($x, $y);
-                $pdf->MultiCell(27, $h,
-                    mb_convert_encoding($partida['cat_sat_obj_imp_descripcion'], 'ISO-8859-1', 'UTF-8'), $border, 'C');
+                $border = 0;
+                $h = 2.5;
+                $y = 96.5;
+                $partidas = 1;
+                foreach ($factura['partidas'] as $partida) {
+                    $pdf->SetFont('Arial', '', '7');
+                    $x = 7;
+                    $pdf->SetXY($x, $y);
+                    $pdf->MultiCell(10, $h, $partida[$tabla_partida.'_cantidad'], $border, 'C');
 
-                $fc_partida_valor_unitario = round($partida[$tabla_partida.'_valor_unitario'], 2);
-                $fc_partida_valor_unitario = $fmt->formatCurrency($fc_partida_valor_unitario, "MXN");
+                    $x = 19;
+                    $pdf->SetXY($x, $y);
+                    $pdf->MultiCell(12, $h, $partida['cat_sat_unidad_codigo'], $border, 'C');
 
-                $x = 155;
-                $pdf->SetXY($x, $y);
-                $pdf->MultiCell(24, $h, $fc_partida_valor_unitario, $border, 'C');
+                    $x = 33;
+                    $pdf->SetXY($x, $y);
+                    $pdf->MultiCell(18, $h, $partida['com_producto_codigo_sat'], $border, 'C');
 
-                $fc_partida_sub_total = round($partida[$tabla_partida.'_sub_total'], 2);
-                $fc_partida_sub_total = $fmt->formatCurrency($fc_partida_sub_total, "MXN");
+                    $x = 52;
+                    $pdf->SetXY($x, $y);
+                    $pdf->MultiCell(75, $h, mb_convert_encoding($partida[$tabla_partida.'_descripcion'], 'ISO-8859-1', 'UTF-8'), $border, 'L');
 
-                $x = 182;
-                $pdf->SetXY($x, $y);
-                $pdf->MultiCell(24, $h, $fc_partida_sub_total, $border, 'C');
+                    $x = 127;
+                    $pdf->SetXY($x, $y);
+                    $pdf->MultiCell(27, $h,
+                        mb_convert_encoding($partida['cat_sat_obj_imp_descripcion'], 'ISO-8859-1', 'UTF-8'), $border, 'C');
 
-                $y = $y + $h;
+                    $fc_partida_valor_unitario = round($partida[$tabla_partida.'_valor_unitario'], 2);
+                    $fc_partida_valor_unitario = $fmt->formatCurrency($fc_partida_valor_unitario, "MXN");
 
-                $partidas++;
-                $mod = $partidas % 6;
-                if ($mod === 0) {
-                    $y = 96.5;
-                    $this->base_pdf(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf, relacionadas: $relacionadas, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
+                    $x = 155;
+                    $pdf->SetXY($x, $y);
+                    $pdf->MultiCell(24, $h, $fc_partida_valor_unitario, $border, 'C');
+
+                    $fc_partida_sub_total = round($partida[$tabla_partida.'_sub_total'], 2);
+                    $fc_partida_sub_total = $fmt->formatCurrency($fc_partida_sub_total, "MXN");
+
+                    $x = 182;
+                    $pdf->SetXY($x, $y);
+                    $pdf->MultiCell(24, $h, $fc_partida_sub_total, $border, 'C');
+
+                    $y = $y + $h;
+
+                    $partidas++;
+                    $mod = $partidas % 6;
+                    if ($mod === 0) {
+                        $y = 96.5;
+                        $this->base_pdf(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf, relacionadas: $relacionadas, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
+                    }
                 }
+                $this->leyenda(pdf: $pdf);
+
             }
-            $this->leyenda(pdf: $pdf);
 
             // nuevo nombre del pdf de factura
             $key_serie = $modelo_entidad->tabla . '_serie';
@@ -788,12 +807,12 @@ class _pdf
             $add_razon_total = '';
             if ($this->cambios_titulo_pdf) {
                 $razon_social = preg_replace('/[^A-Za-z0-9_\-]/', '_', $factura['com_cliente_razon_social']);
-              $total = number_format(
-                (float)($factura[$modelo_entidad->tabla . '_sub_total'] ?? 0)
-                + (float)($factura[$modelo_entidad->tabla . '_total_traslados'] ?? 0)
-                - (float)($factura[$modelo_entidad->tabla . '_total_retenciones'] ?? 0),
-                2, '.', ''
-            );
+                $total = number_format(
+                    (float)($factura[$modelo_entidad->tabla . '_sub_total'] ?? 0)
+                    + (float)($factura[$modelo_entidad->tabla . '_total_traslados'] ?? 0)
+                    - (float)($factura[$modelo_entidad->tabla . '_total_retenciones'] ?? 0),
+                    2, '.', ''
+                );
                 $add_razon_total = '_' . $razon_social . '_' . $total;
             }
 
@@ -811,7 +830,6 @@ class _pdf
                 }
                 $nombre_documento = $path_base_archivos . '/' . $nombre_documento . '.pdf';
 
-
                 $pdf->Output('F', $nombre_documento);
                 return $nombre_documento;
             }
@@ -819,7 +837,6 @@ class _pdf
             $pdf->Output();
 
         }
-
 
         $rs = $pdf->data_relacionados(name_entidad: $modelo_entidad->tabla, relacionadas: $relacionadas);
         if (errores::$error) {
@@ -832,7 +849,6 @@ class _pdf
                 return $this->error->error(mensaje: 'Error al maquetar conceptos', data: $rs);
             }
         }
-
 
         if ($modelo_entidad->tabla === 'fc_complemento_pago') {
 
@@ -854,14 +870,12 @@ class _pdf
             }
             $fc_doctos_relacionados = $r_fc_docto_relacionado->registros;
 
-
             $rs = $pdf->complemento_pago(fc_doctos_relacionados: $fc_doctos_relacionados, fc_pago_pagos: $fc_pago_pagos,
                 fc_pago_totales: $fc_pago_totales);
             if (errores::$error) {
                 return $this->error->error(mensaje: 'Error al maquetar conceptos', data: $rs);
             }
         }
-
 
         $key_sub_total_base = $modelo_entidad->tabla . '_sub_total_base';
         $key_total = $modelo_entidad->tabla . '_total';
@@ -945,5 +959,226 @@ class _pdf
         $pdf->SetXY(7, 273);                      
         $pdf->MultiCell(196, 2.5, $texto, 0, 'C');
         $pdf->SetAutoPageBreak(true);         
+    }
+  private function base_pdf_artistik(string $tabla, stdClass $data, array $factura, Fpdi $pdf,
+                                       array $relacionadas, string $ruta_logo, string $ruta_qr): void
+    {
+        $init = $this->init($pdf); // carga la plantilla (landscape 279.4 x 215.9)
+        if (errores::$error) {
+            return;
+        }
+
+        // Página horizontal de 215.9mm de alto: sin salto automático,
+        // todo se posiciona manualmente dentro de la página
+        $pdf->SetAutoPageBreak(false);
+
+        // El logo YA viene incluido en la plantilla — no se estampa nada encima
+
+        $this->header_artistik(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf);
+        $this->receptor_artistik(factura: $factura, pdf: $pdf);
+        $this->pago_artistik(factura: $factura, pdf: $pdf);
+        $this->montos_artistik(tabla: $tabla, factura: $factura, pdf: $pdf);
+    }
+
+
+    // ─────────────────────────────────────────────
+    // HEADER — Folio | Fecha de emisión | Lugar de expedición
+    // + Observaciones (caja inferior central)
+    // ─────────────────────────────────────────────
+    private function header_artistik(string $tabla, stdClass $data, array $factura, Fpdi $pdf): void
+    {
+        $pdf->SetFont('Arial', '', '9');
+        $pdf->SetTextColor(0, 0, 0);
+
+        // Fila de info: texto centrado verticalmente en y=65.3 → SetY = 65.3 - 5 (Write h=10)
+        $y_fila_info = 60.3;
+
+        // Folio (etiqueta termina en x=39.1)
+        $pdf->SetXY(43, $y_fila_info);
+        $pdf->Write(10, $factura[$tabla . '_folio']);
+
+        // Fecha de emisión (etiqueta termina en x=138.3)
+        $pdf->SetXY(141, $y_fila_info);
+        $pdf->Write(10, $factura[$tabla . '_fecha']);
+
+        // Lugar de expedición / CP emisor (etiqueta termina en x=222.1)
+        $cpEmisor = trim((string)($factura['org_empresa_cp_txt'] ?? ''));
+        $pdf->SetXY(225, $y_fila_info);
+        $pdf->Write(10, $cpEmisor);
+
+        // Observaciones (caja inferior central: x 104-186.7, y 173-203.4)
+        $key_observaciones = $tabla . '_observaciones';
+        $observaciones = trim((string)($factura[$key_observaciones] ?? ''));
+        if ($observaciones !== '') {
+            $observaciones = mb_convert_encoding($observaciones, 'ISO-8859-1', 'UTF-8');
+            $pdf->SetFont('Arial', '', '8');
+            $pdf->SetXY(109, 186);
+            $pdf->MultiCell(73, 3.5, $observaciones, 0, 'L');
+        }
+    }
+
+
+    // ─────────────────────────────────────────────
+    // RECEPTOR — Caja CLIENTE (x 16.6-137.8)
+    // Valores a la derecha de cada etiqueta, x=64
+    // ─────────────────────────────────────────────
+    private function receptor_artistik(array $factura, Fpdi $pdf): void
+    {
+        if (!isset($factura['com_sucursal_numero_interior'])) {
+            $factura['com_sucursal_numero_interior'] = '';
+        }
+
+        $pdf->SetFont('Arial', '', '8');
+        $pdf->SetTextColor(0, 0, 0);
+
+        $x = 64; // después de la etiqueta más larga ("Nombre / Razón social" termina en 61.3)
+
+        // Nombre / Razón social (etiqueta centrada en y=92.6 → SetY = 92.6 - 5)
+        $pdf->SetXY($x, 87.6);
+        $pdf->Write(10, mb_convert_encoding($factura['com_cliente_razon_social'], 'ISO-8859-1', 'UTF-8'));
+
+        // RFC (centrado en y=102.2)
+        $pdf->SetXY($x, 97.2);
+        $pdf->Write(10, $factura['com_cliente_rfc']);
+
+        // Domicilio (centrado en y=111.7) — MultiCell por si toma 2 líneas
+        $domicilio = trim($factura['com_sucursal_calle']);
+        $domicilio .= ' ' . trim($factura['com_sucursal_numero_exterior']);
+        $domicilio .= ' ' . trim($factura['com_sucursal_numero_interior']);
+        $domicilio .= ', ' . trim($factura['com_sucursal_municipio']);
+        $domicilio .= ', ' . trim($factura['com_sucursal_estado']);
+        $domicilio .= ' ' . $factura['com_sucursal_cp'];
+        $domicilio = mb_convert_encoding($domicilio, 'ISO-8859-1', 'UTF-8');
+
+        $pdf->SetXY($x, 108.5);
+        $pdf->MultiCell(71, 3.5, $domicilio, 0, 'L');
+    }
+
+
+    // ─────────────────────────────────────────────
+    // PAGO — Caja derecha (x 141.4-262.4)
+    // Valores después de las etiquetas, x=193
+    // ─────────────────────────────────────────────
+    private function pago_artistik(array $factura, Fpdi $pdf): void
+    {
+        $pdf->SetFont('Arial', '', '8');
+        $pdf->SetTextColor(0, 0, 0);
+
+        $x = 193; // la etiqueta más larga ("Uso o concepto del pago") termina en x=190
+
+        // Método de pago (etiqueta centrada en y=83.6)
+        $metodo = $factura['cat_sat_metodo_pago_codigo'] . ' ' . $factura['cat_sat_metodo_pago_descripcion'];
+        $pdf->SetXY($x, 78.6);
+        $pdf->Write(10, mb_convert_encoding($metodo, 'ISO-8859-1', 'UTF-8'));
+
+        // Forma de pago (y=92.9)
+        $forma = $factura['cat_sat_forma_pago_codigo'] . ' ' . $factura['cat_sat_forma_pago_descripcion'];
+        $pdf->SetXY($x, 87.9);
+        $pdf->Write(10, mb_convert_encoding($forma, 'ISO-8859-1', 'UTF-8'));
+
+        // Moneda (y=102.0)
+        $moneda = $factura['cat_sat_moneda_codigo'] . ' ' . $factura['cat_sat_moneda_descripcion'];
+        $pdf->SetXY($x, 97.0);
+        $pdf->Write(10, mb_convert_encoding($moneda, 'ISO-8859-1', 'UTF-8'));
+
+        // Uso o concepto del pago (y=111.3)
+        $uso = $factura['cat_sat_uso_cfdi_codigo'] . ' ' . $factura['cat_sat_uso_cfdi_descripcion'];
+        $pdf->SetXY($x, 106.3);
+        $pdf->Write(10, mb_convert_encoding($uso, 'ISO-8859-1', 'UTF-8'));
+    }
+
+
+    // ─────────────────────────────────────────────
+    // MONTOS — Total (caja $ x 216.2-262.2, y 160.7-170.7)
+    // + Importe con letra (caja x 16.6-100.6, y 173-203.4)
+    // ─────────────────────────────────────────────
+    private function montos_artistik(string $tabla, array $factura, Fpdi $pdf): void
+    {
+        // ── TOTAL: la plantilla YA imprime el "$" (en x≈230), solo va el número ──
+        $pdf->SetFont('Arial', 'B', '11');
+        $pdf->SetTextColor(0, 0, 0);
+
+        $fc_total = round($factura[$tabla . '_total'], 2);
+        $fc_total_fmt = number_format($fc_total, 2); // sin símbolo: el $ está en la plantilla
+
+        $pdf->SetXY(235, 160.9); // centro vertical de la caja (165.9) - 5
+        $pdf->Write(10, $fc_total_fmt);
+
+        // ── Importe con letra ──
+        $pdf->SetFont('Arial', '', '8');
+
+        $formatterES = new NumberFormatter("es-ES", NumberFormatter::SPELLOUT);
+        $izquierda = intval(floor($fc_total));
+        $derecha = intval(($fc_total - floor($fc_total)) * 100);
+        $letra = strtoupper($formatterES->format($izquierda)) . " PESOS ";
+        if ((float)$derecha === 0.0) {
+            $derecha = '00';
+        }
+        $letra .= $derecha . "/100 M.N.";
+        $letra = mb_convert_encoding($letra, 'ISO-8859-1', 'UTF-8');
+
+        $pdf->SetXY(22, 186); // debajo de la etiqueta "Importe con letra" (y≈180)
+        $pdf->MultiCell(75, 3.5, $letra, 0, 'L');
+    }
+
+    private function render_partidas_custom(string $plantilla_tipo, string $tabla, string $tabla_partida,
+                                            array $factura, Fpdi $pdf, NumberFormatter $fmt,
+                                            stdClass $data, array $relacionadas,
+                                            string $ruta_logo, string $ruta_qr): void
+    {
+        $metodo_cfg = 'cfg_partidas_' . $plantilla_tipo;
+        if (!method_exists($this, $metodo_cfg)) {
+            return;
+        }
+        $cfg = $this->$metodo_cfg();
+
+        $border = 0; // <-- 1 para debug, 0 para producción
+        $h = 3.5;
+        $y = $cfg['y_inicio'];
+        $count = 1;
+
+        foreach ($factura['partidas'] as $partida) {
+            $pdf->SetFont('Arial', '', '8');
+
+            foreach ($cfg['columnas'] as $col) {
+                $key = $tabla_partida . $col['key'];
+                $val = $partida[$key] ?? '';
+
+                if ($col['format'] === 'currency') {
+                    $val = $fmt->formatCurrency(round((float)$val, 2), "MXN");
+                } else {
+                    $val = mb_convert_encoding((string)$val, 'ISO-8859-1', 'UTF-8');
+                }
+
+                $pdf->SetXY($col['x'], $y);
+                $pdf->MultiCell($col['w'], $h, $val, $border, $col['align']);
+            }
+
+            $y += $cfg['row_h'];
+            $count++;
+
+            if ($count % $cfg['max_por_pagina'] === 0) {
+                $y = $cfg['y_inicio'];
+                $metodo_base = 'base_pdf_' . $plantilla_tipo;
+                $this->$metodo_base(tabla: $tabla, data: $data, factura: $factura,
+                    pdf: $pdf, relacionadas: $relacionadas, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
+            }
+        }
+    }
+
+
+    private function cfg_partidas_artistik(): array
+    {
+        return [
+            'y_inicio'       => 129.3,
+            'row_h'          => 6.9,
+            'max_por_pagina' => 4,
+            'columnas'       => [
+                ['key' => '_cantidad',       'x' => 17,  'w' => 32,  'align' => 'C', 'format' => 'text'],
+                ['key' => '_descripcion',    'x' => 51,  'w' => 123, 'align' => 'L', 'format' => 'text'],
+                ['key' => '_valor_unitario', 'x' => 176, 'w' => 43,  'align' => 'C', 'format' => 'currency'],
+                ['key' => '_sub_total',      'x' => 220, 'w' => 42,  'align' => 'C', 'format' => 'currency'],
+            ],
+        ];
     }
 }
