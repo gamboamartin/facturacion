@@ -102,7 +102,7 @@ if ($accion === 'resolver') {
         $datos['folio'] = $folio;
 
         // Si es descargar_factura -> avanzar a esperando_formato
-        if ($intent_activo === 'descargar_factura') {
+        if ($intent_activo === 'descarga_factura') {
             $sql_upd = "UPDATE tmp_conversacion_estado
                         SET paso_actual = 'esperando_formato',
                             datos_parciales = :datos,
@@ -269,9 +269,9 @@ if ($accion === 'registrar') {
     $datos_parciales = [];
 
     // descargar_factura sin folio -> esperando_folio
-    if ($intencion === 'descargar_factura' && $folio === '') {
+    if ($intencion === 'descarga_factura' && $folio === '') {
         $registrar = true;
-        $intent_activo = 'descargar_factura';
+        $intent_activo = 'descarga_factura';
         $paso_actual = 'esperando_folio';
         $datos_parciales = ['doc' => $doc];
     }
