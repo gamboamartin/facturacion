@@ -68,7 +68,7 @@ if ($accion === 'resolver') {
     $mensaje_lower  = strtolower(trim($mensaje));
 
     // Detectar si el usuario quiere cancelar/salir del flujo
-    $palabras_cancelar = ['cancelar', 'salir', 'no', 'dejalo', 'olvidalo', 'no quiero'];
+    $palabras_cancelar = ['cancelar', 'salir', 'dejalo', 'olvidalo', 'no quiero'];
     foreach ($palabras_cancelar as $palabra) {
         if (strpos($mensaje_lower, $palabra) !== false) {
             $sql_del = "DELETE FROM tmp_conversacion_estado WHERE telefono = :telefono";
@@ -249,39 +249,58 @@ if ($accion === 'resolver') {
     exit;
 }
 
-// ============================================================
+
 // ACCION: REGISTRAR
-// Crea un nuevo estado cuando el clasificador devuelve intent incompleto
-// ============================================================
+// Recibe el JSON del clasificador y decide automáticamente si
+// hay que guardar estado o no. Solo registra cuando el intent
+// necesita datos adicionales que vendrán en mensajes futuros.
 
 if ($accion === 'registrar') {
 
-    $intent_activo  = strtolower(trim($_GET['intent_activo'] ?? ''));
-    $paso_actual    = strtolower(trim($_GET['paso_actual'] ?? ''));
-    $datos_raw      = trim($_GET['datos_parciales'] ?? '{}');
+    $intencion = strtolower(trim($_GET['intencion'] ?? ''));
+    $folio     = trim($_GET['folio'] ?? '');
+    $rfc       = strtoupper(trim($_GET['rfc'] ?? ''));
+    $doc       = strtolower(trim($_GET['doc'] ?? 'pdf'));
 
-    if ($intent_activo === '' || $paso_actual === '') {
-        echo json_encode([
-            'STS' => 'error',
-            'MSG' => 'intent_activo y paso_actual son requeridos'
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
+    // Reglas de decisión: ¿necesita estado?
+    $registrar = false;
+    $intent_activo = '';
+    $paso_actual = '';
+    $datos_parciales = [];
+
+    // descargar_factura sin folio -> esperando_folio
+    if ($intencion === 'descargar_factura' && $folio === '') {
+        $registrar = true;
+        $intent_activo = 'descargar_factura';
+        $paso_actual = 'esperando_folio';
+        $datos_parciales = ['doc' => $doc];
     }
 
-    // Validar que datos_parciales sea JSON válido
-    $datos_parciales = json_decode($datos_raw, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        $datos_parciales = [];
+    // timbra_factura sin folio -> esperando_folio
+    if ($intencion === 'timbra_factura' && $folio === '') {
+        $registrar = true;
+        $intent_activo = 'timbra_factura';
+        $paso_actual = 'esperando_folio';
+    }
+
+    // No necesita estado: responder sin hacer nada
+    if (!$registrar) {
+        echo json_encode([
+            'STS'        => 'no_requerido',
+            'registrado' => false,
+            'MSG'        => 'Este intent no requiere estado'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 
     // UPSERT: si ya existe estado para este teléfono, lo reemplaza
     $sql = "INSERT INTO tmp_conversacion_estado (telefono, intent_activo, paso_actual, datos_parciales)
             VALUES (:telefono, :intent, :paso, :datos)
             ON DUPLICATE KEY UPDATE
-                intent_activo  = VALUES(intent_activo),
-                paso_actual    = VALUES(paso_actual),
+                intent_activo   = VALUES(intent_activo),
+                paso_actual     = VALUES(paso_actual),
                 datos_parciales = VALUES(datos_parciales),
-                updated_at     = NOW()";
+                updated_at      = NOW()";
 
     $stmt = $link->prepare($sql);
     $stmt->execute([
@@ -292,8 +311,11 @@ if ($accion === 'registrar') {
     ]);
 
     echo json_encode([
-        'STS' => 'ok',
-        'MSG' => 'Estado registrado'
+        'STS'        => 'ok',
+        'registrado' => true,
+        'MSG'        => 'Estado registrado',
+        'intent'     => $intent_activo,
+        'paso'       => $paso_actual
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
