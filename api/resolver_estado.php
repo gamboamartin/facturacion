@@ -283,6 +283,13 @@ if ($accion === 'registrar') {
         $paso_actual = 'esperando_folio';
     }
 
+    // confirmacion -> esperando_tel (flujo CIF -> alta_cliente)
+    if ($intencion === 'confirmacion') {
+        $registrar = true;
+        $intent_activo = 'alta_cliente';
+        $paso_actual = 'esperando_tel';
+    }
+
     // No necesita estado: responder sin hacer nada
     if (!$registrar) {
         echo json_encode([
