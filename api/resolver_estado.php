@@ -286,7 +286,7 @@ if ($accion === 'registrar') {
     // confirmacion -> esperando_tel (flujo CIF -> alta_cliente)
     if ($intencion === 'confirmacion') {
         $registrar = true;
-        $intent_activo = 'alta_cliente';
+        $intent_activo = 'recibir_tel';
         $paso_actual = 'esperando_tel';
     }
 
