@@ -84,6 +84,7 @@ if (errores::$error) {
 echo json_encode([
     'STS'  => 'ok',
     'MSG'  => 'CIF leído correctamente',
-    'data' => $resultado
+    'data' => $resultado,
+    'DEBUG' => $resultado
 ], JSON_UNESCAPED_UNICODE);
 exit;
