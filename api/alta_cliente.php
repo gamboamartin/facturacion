@@ -32,6 +32,7 @@ $numero_exterior   = trim($_GET['NEX'] ?? '');
 $numero_interior   = trim($_GET['NIN'] ?? '');
 $colonia           = trim($_GET['COL'] ?? '');
 $municipio_texto   = trim($_GET['MUN'] ?? '');
+$regimen_texto     = trim($_GET['REG'] ?? '');
 
 // paso 2. VALIDACION DE TELEFONO WHATSAPP 
 
@@ -80,7 +81,27 @@ $row_tipo = $stmt_tipo->fetch(PDO::FETCH_ASSOC);
 
 $tipo_persona_id = $row_tipo ? (int)$row_tipo['id'] : 6;
 
-// paso 5. SEGURIDAD 
+// paso 5. RESOLUCION DE REGIMEN FISCAL POR CIF
+
+$regimen_fiscal_id = 0;
+
+if ($regimen_texto !== '') {
+    $regimen_limpio = preg_replace('/^r[ée]gimen\s+de\s+/i', '', $regimen_texto);
+
+    $sql_reg = "SELECT id FROM cat_sat_regimen_fiscal 
+                WHERE descripcion LIKE :desc 
+                AND status = 'activo' 
+                LIMIT 1";
+    $stmt_reg = $link->prepare($sql_reg);
+    $stmt_reg->execute([':desc' => '%' . $regimen_limpio . '%']);
+    $row_reg = $stmt_reg->fetch(PDO::FETCH_ASSOC);
+
+    if ($row_reg) {
+        $regimen_fiscal_id = (int)$row_reg['id'];
+    }
+}
+
+// paso 6. SEGURIDAD 
 
 $seguridad_endpoint = new SeguridadEndpoint($link);
 
@@ -100,7 +121,7 @@ if (!$r_seguridad['autorizado']) {
 $_SESSION['usuario_id'] = $r_seguridad['adm_usuario_id'];
 $_SESSION['grupo_id']   = $r_seguridad['adm_grupo_id'];
 
-// paso 6. TOML 
+// paso 7. TOML 
 
 $toml_path = __DIR__ . '/../config/escenario/alta_cliente.toml';
 
@@ -122,7 +143,7 @@ try {
     exit;
 }
 
-// paso 7. DICCIONARIO 
+// paso 8. DICCIONARIO 
 
 $diccionario_path = __DIR__ . '/../config/json/alta_cliente.json';
 
@@ -159,7 +180,7 @@ $campos_salida_permitidos = $escenario['output']['permitidos'] ?? [];
 $filtrar_campos           = (bool)($escenario['comportamiento']['filtrar_campos'] ?? false);
 $verificar_duplicado      = (bool)($escenario['comportamiento']['verificar_duplicado'] ?? true);
 
-// paso 8. VERIFICACION DE DUPLICADO 
+// paso 9. VERIFICACION DE DUPLICADO 
 
 if ($verificar_duplicado) {
     $modelo_cliente = new com_cliente($link);
@@ -184,7 +205,7 @@ if ($verificar_duplicado) {
     }
 }
 
-// paso 9. RESOLUCION DE MUNICIPIO 
+// paso 10. RESOLUCION DE MUNICIPIO 
 
 $r_municipio = (new dp_municipio($link))->filtro_and(
     filtro: ['dp_municipio.descripcion' => strtoupper($municipio_texto)]
@@ -208,7 +229,7 @@ if ($dp_municipio_id <= 0) {
     exit;
 }
 
-// paso 10. ALTA DEL CLIENTE 
+// paso 11. ALTA DEL CLIENTE 
 
 $modelo_alta = new com_cliente($link);
 
@@ -227,18 +248,21 @@ if (!isset($_FILES['documento'])) {
     $_FILES['documento'] = ['name' => ''];
 }
 
+if ($regimen_fiscal_id > 0) {
+    $modelo_alta->registro['cat_sat_regimen_fiscal_id'] = $regimen_fiscal_id;
+}
+
 $r_alta = $modelo_alta->alta_bd();
 
 if (errores::$error) {
     echo json_encode([
         'STS'   => 'error',
-        'MSG'   => 'Error al insertar el cliente en el sistema',
-        'DEBUG' => $r_alta
+        'MSG'   => 'Error al insertar el cliente en el sistema'
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-// paso 11. RESPUESTA 
+// paso 12. RESPUESTA 
 
 $respuesta = [
     'STS' => 'ok',
