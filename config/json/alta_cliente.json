@@ -123,11 +123,12 @@
     "TIP": {
     "nombre_sistema": "cat_sat_tipo_persona_id",
     "tipo": "integer",
-    "origen": "predeterminado",
+    "origen": "auto",
     "uso": "interno",
     "exponer": false,
-    "valor_predeterminado": 6,
-    "descripcion": "Tipo de persona SAT. Se asigna como POR DEFINIR (6) al crear via WhatsApp. Se actualiza cuando el AI Agent procesa el CIF"
+    "resolucion": "RFC 12 chars = codigo PM (Persona Moral), RFC 13 chars = codigo PF (Persona Física)",
+    "fallback": 6,
+    "descripcion": "Tipo de persona SAT. Se resuelve automáticamente por longitud de RFC. Fallback a POR DEFINIR (6) si no se encuentra el código en cat_sat_tipo_persona"
     }
   },
   "reglas": {

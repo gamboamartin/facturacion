@@ -42,6 +42,7 @@ CID = "com_cliente.id"
 COD = "com_cliente.codigo"
 
 [predeterminados]
-# No se mandan en el request, el endpoint los asigna internamente
-# POR DEFINIR (6) — se actualiza cuando el AI Agent procesa el CIF
-cat_sat_tipo_persona_id = 6
+# El tipo de persona se resuelve automáticamente por longitud de RFC
+# RFC 12 chars = PM (Persona Moral), RFC 13 chars = PF (Persona Física)
+# Ya no se asigna un valor por defecto, el endpoint lo calcula
+cat_sat_tipo_persona_id = "auto:RFC"

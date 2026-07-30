@@ -32,7 +32,6 @@ $numero_exterior   = trim($_GET['NEX'] ?? '');
 $numero_interior   = trim($_GET['NIN'] ?? '');
 $colonia           = trim($_GET['COL'] ?? '');
 $municipio_texto   = trim($_GET['MUN'] ?? '');
-$tipo_persona_id   = (int)($_GET['TPI'] ?? 6);
 
 // paso 2. VALIDACION DE TELEFONO WHATSAPP 
 
@@ -67,7 +66,21 @@ foreach ($campos_obligatorios as $clave => $valor) {
     }
 }
 
-// paso 4. SEGURIDAD 
+// paso 4. RESOLUCION DE TIPO PERSONA POR RFC
+
+$codigo_tipo_persona = (strlen($rfc) === 12) ? 'PM' : 'PF';
+
+$sql_tipo = "SELECT id FROM cat_sat_tipo_persona 
+             WHERE codigo = :codigo 
+             AND status = 'activo' 
+             LIMIT 1";
+$stmt_tipo = $link->prepare($sql_tipo);
+$stmt_tipo->execute([':codigo' => $codigo_tipo_persona]);
+$row_tipo = $stmt_tipo->fetch(PDO::FETCH_ASSOC);
+
+$tipo_persona_id = $row_tipo ? (int)$row_tipo['id'] : 6;
+
+// paso 5. SEGURIDAD 
 
 $seguridad_endpoint = new SeguridadEndpoint($link);
 
@@ -87,7 +100,7 @@ if (!$r_seguridad['autorizado']) {
 $_SESSION['usuario_id'] = $r_seguridad['adm_usuario_id'];
 $_SESSION['grupo_id']   = $r_seguridad['adm_grupo_id'];
 
-// paso 5. TOML 
+// paso 6. TOML 
 
 $toml_path = __DIR__ . '/../config/escenario/alta_cliente.toml';
 
@@ -109,7 +122,7 @@ try {
     exit;
 }
 
-// paso 6. DICCIONARIO 
+// paso 7. DICCIONARIO 
 
 $diccionario_path = __DIR__ . '/../config/json/alta_cliente.json';
 
@@ -146,7 +159,7 @@ $campos_salida_permitidos = $escenario['output']['permitidos'] ?? [];
 $filtrar_campos           = (bool)($escenario['comportamiento']['filtrar_campos'] ?? false);
 $verificar_duplicado      = (bool)($escenario['comportamiento']['verificar_duplicado'] ?? true);
 
-// paso 7. VERIFICACION DE DUPLICADO 
+// paso 8. VERIFICACION DE DUPLICADO 
 
 if ($verificar_duplicado) {
     $modelo_cliente = new com_cliente($link);
@@ -171,7 +184,7 @@ if ($verificar_duplicado) {
     }
 }
 
-// paso 8. RESOLUCION DE MUNICIPIO 
+// paso 9. RESOLUCION DE MUNICIPIO 
 
 $r_municipio = (new dp_municipio($link))->filtro_and(
     filtro: ['dp_municipio.descripcion' => strtoupper($municipio_texto)]
@@ -195,7 +208,7 @@ if ($dp_municipio_id <= 0) {
     exit;
 }
 
-// paso 9. ALTA DEL CLIENTE 
+// paso 10. ALTA DEL CLIENTE 
 
 $modelo_alta = new com_cliente($link);
 
@@ -225,7 +238,7 @@ if (errores::$error) {
     exit;
 }
 
-// paso 10. RESPUESTA 
+// paso 11. RESPUESTA 
 
 $respuesta = [
     'STS' => 'ok',
