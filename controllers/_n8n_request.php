@@ -33,7 +33,8 @@ class _n8n_request
         string $rfc,
         string $cp,
         string $nombre_completo,
-        int $whatsapp
+        int $whatsapp,
+        int $codigo_pais
     ): array
     {
         $data = [
@@ -41,7 +42,8 @@ class _n8n_request
             'cp' => $cp,
             'nombre_completo' => $nombre_completo,
             'fc_row_layout_id' => $fc_row_layout_id,
-            'whatsapp' => $whatsapp
+            'whatsapp' => $whatsapp,
+            'codigo_pais' => $codigo_pais
         ];
         try {
             $rs = $this->post(

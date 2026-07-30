@@ -48,7 +48,11 @@ class _salida{
                     $fc_empleado_id = $rs_row_layout['fc_row_layout_fc_empleado_id'];
 
                     $rs_empleado = (new fc_empleado_contacto($link))->filtro_and(
-                        columnas: ['fc_empleado_contacto_estatus_telefono','fc_empleado_contacto_telefono'],
+                        columnas: [
+                            'fc_empleado_contacto_estatus_telefono',
+                            'fc_empleado_contacto_telefono',
+                            'fc_empleado_contacto_codigo_pais'
+                        ],
                         filtro: ['fc_empleado_contacto.fc_empleado_id' => $fc_empleado_id]
                     );
 
@@ -57,6 +61,7 @@ class _salida{
 
                         $whatsapp = $registro['fc_empleado_contacto_telefono'];
                         $estatus_telefono = $registro['fc_empleado_contacto_estatus_telefono'];
+                        $codigo_pais = $registro['fc_empleado_contacto_codigo_pais'];
 
                         if ($estatus_telefono !== 'no validado') {
                             $send_request = (new _n8n_request())->request_constancias(
@@ -64,7 +69,8 @@ class _salida{
                                 rfc: $rfc,
                                 cp: $cp,
                                 nombre_completo: $nombre_completo,
-                                whatsapp: $whatsapp
+                                whatsapp: $whatsapp,
+                                codigo_pais: $codigo_pais
                             );
 
                             $status_request = (int)$send_request['status'];
