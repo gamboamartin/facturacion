@@ -15,13 +15,18 @@ require 'vendor/autoload.php';
 $con = new conexion();
 $link = conexion::$link;
 
+header('Content-Type: application/json; charset=utf-8');
 
 $elementos = ['KEY','FC_ROW_LAYOUT_ID','CP','RFC','CURP','NOMBRE_COMPLETO'];
 
 
 foreach ($elementos as $elemento) {
     if (!isset($_POST[$elemento])) {
-        echo "$elemento no existe en POST";
+        echo json_encode([
+            'success' => false,
+            'message' => "$elemento no existe en POST",
+            'error' => $_POST
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         exit;
     }
 }
@@ -30,8 +35,11 @@ $key_n8n = generales::$key_n8n;
 $llave = md5($_POST['RFC'].$key_n8n.$_POST['FC_ROW_LAYOUT_ID']);
 
 if ($llave !== (string)$_POST['KEY']) {
-    $error = (new errores())->error("Error al validar key", []);
-    print_r($error);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Error al validar key',
+        'error' => $_POST['KEY']
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -48,19 +56,29 @@ $result = $modelo->modifica_bd(
 );
 
 if(errores::$error) {
-    $error = (new errores())->error("Error al actualizar info fc_row_layout", $result);
-    print_r($error);
-    exit;
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error al actualizar info fc_row_layout',
+            'error' => $result
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        exit;
 }
 
 $result = (new _timbra_nomina())->timbra_recibo(link: $link, fc_row_layout_id: $fc_row_layout_id);
 if(errores::$error) {
-    $error = (new errores())->error("Error al timbrar", $result);
-    print_r($error);
+    echo json_encode([
+        'success' => false,
+        'message' => "Error al timbrar",
+        'error' => $result
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit;
 }
+echo json_encode([
+    'success' => true,
+    'message' => "success",
+    'error' => []
+], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
-echo 'success';exit;
 
 
 
