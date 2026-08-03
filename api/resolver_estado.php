@@ -89,7 +89,7 @@ if ($accion === 'resolver') {
 
         $folio = strtoupper(trim($mensaje));
 
-        if ($folio === '') {
+        if ($folio === '' || !preg_match('/\d/', $folio)) {
             echo json_encode([
                 'STS'          => 'esperando',
                 'tiene_estado' => true,
