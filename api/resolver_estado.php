@@ -118,7 +118,7 @@ if ($accion === 'resolver') {
                 'STS'          => 'avanzado',
                 'tiene_estado' => true,
                 'accion'       => 'responder',
-                'respuesta'    => '¿Necesitas la factura ' . $folio . ' en PDF o XML?'
+                'respuesta'    => '¿Necesitas la factura ' . $folio . ' en PDF, XML o ambos?'
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
@@ -143,7 +143,20 @@ if ($accion === 'resolver') {
     if ($paso_actual === 'esperando_formato') {
 
         $doc = 'pdf'; // default
-        if (strpos($mensaje_lower, 'xml') !== false) {
+
+        // Detectar "ambos" antes de pdf/xml individual
+        $palabras_ambos = ['ambos', 'los dos', 'los 2', 'both'];
+        $es_ambos = false;
+        foreach ($palabras_ambos as $palabra) {
+            if (strpos($mensaje_lower, $palabra) !== false) {
+                $es_ambos = true;
+                break;
+            }
+        }
+
+        if ($es_ambos) {
+            $doc = 'ambos';
+        } elseif (strpos($mensaje_lower, 'xml') !== false) {
             $doc = 'xml';
         }
 
