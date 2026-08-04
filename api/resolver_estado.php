@@ -27,10 +27,10 @@ if ($telefono_whatsapp === '') {
     exit;
 }
 
-if (!in_array($accion, ['resolver', 'registrar'], true)) {
+if (!in_array($accion, ['resolver', 'registrar', 'guardar_mensaje', 'buscar_mensaje'], true)) {
     echo json_encode([
         'STS' => 'error',
-        'MSG' => 'Acción no válida. Usar: resolver o registrar'
+        'MSG' => 'Acción no válida. Usar: resolver, registrar, guardar_mensaje o buscar_mensaje'
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -263,10 +263,12 @@ if ($accion === 'resolver') {
 }
 
 
+// ============================================================
 // ACCION: REGISTRAR
 // Recibe el JSON del clasificador y decide automáticamente si
 // hay que guardar estado o no. Solo registra cuando el intent
 // necesita datos adicionales que vendrán en mensajes futuros.
+// ============================================================
 
 if ($accion === 'registrar') {
 
@@ -336,6 +338,100 @@ if ($accion === 'registrar') {
         'MSG'        => 'Estado registrado',
         'intent'     => $intent_activo,
         'paso'       => $paso_actual
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+
+// ============================================================
+// ACCION: GUARDAR_MENSAJE
+// Almacena cada mensaje (entrante o saliente) en
+// n8n_tmp_mensajes_whatsapp para resolver citas posteriores
+// ============================================================
+
+if ($accion === 'guardar_mensaje') {
+
+    $message_id = trim($_GET['message_id'] ?? '');
+    $direccion  = strtolower(trim($_GET['direccion'] ?? 'entrante'));
+    $contenido  = $mensaje; // ya viene de $_GET['mensaje']
+
+    if ($message_id === '') {
+        echo json_encode([
+            'STS' => 'error',
+            'MSG' => 'El message_id es requerido'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    if (!in_array($direccion, ['entrante', 'saliente'], true)) {
+        $direccion = 'entrante';
+    }
+
+    // INSERT IGNORE: si el message_id ya existe, no lo sobreescribe
+    $sql = "INSERT IGNORE INTO n8n_tmp_mensajes_whatsapp (message_id, telefono, contenido, direccion)
+            VALUES (:message_id, :telefono, :contenido, :direccion)";
+
+    $stmt = $link->prepare($sql);
+    $stmt->execute([
+        ':message_id' => $message_id,
+        ':telefono'   => $telefono_whatsapp,
+        ':contenido'  => $contenido,
+        ':direccion'  => $direccion
+    ]);
+
+    echo json_encode([
+        'STS'      => 'ok',
+        'guardado' => true,
+        'MSG'      => 'Mensaje almacenado'
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+
+// ============================================================
+// ACCION: BUSCAR_MENSAJE
+// Busca el contenido de un mensaje por su message_id
+// (para resolver el contenido de mensajes citados/respondidos)
+// ============================================================
+
+if ($accion === 'buscar_mensaje') {
+
+    $message_id = trim($_GET['message_id'] ?? '');
+
+    if ($message_id === '') {
+        echo json_encode([
+            'STS'        => 'error',
+            'encontrado' => false,
+            'MSG'        => 'El message_id es requerido'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $sql = "SELECT contenido, telefono, direccion, created_at
+            FROM n8n_tmp_mensajes_whatsapp
+            WHERE message_id = :message_id
+            LIMIT 1";
+
+    $stmt = $link->prepare($sql);
+    $stmt->execute([':message_id' => $message_id]);
+    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$resultado) {
+        echo json_encode([
+            'STS'        => 'no_encontrado',
+            'encontrado' => false,
+            'MSG'        => 'No se encontró el mensaje citado'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    echo json_encode([
+        'STS'        => 'ok',
+        'encontrado' => true,
+        'contenido'  => $resultado['contenido'],
+        'telefono'   => $resultado['telefono'],
+        'direccion'  => $resultado['direccion'],
+        'fecha'      => $resultado['created_at']
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
