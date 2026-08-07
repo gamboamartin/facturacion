@@ -11,13 +11,156 @@ header('Content-Type: application/json; charset=utf-8');
 $con  = new conexion();
 $link = conexion::$link;
 
+
+// ============================================================
+// FUNCIONES DE NORMALIZACIÓN
+// Convierte input de voz (transcripción STT) y texto coloquial
+// en texto estructurado que el sistema puede interpretar.
+// ============================================================
+
+/**
+ * Convierte números escritos como palabras a dígitos.
+ * Maneja: unidades, teens, twenties, decenas, compuestos ("treinta y uno").
+ * NO reemplaza "un"/"una" (demasiado ambiguo con artículos).
+ */
+function palabras_a_numeros(string $texto): string
+{
+    // --- Paso 1: compuestos "decena + y + unidad" (antes de reemplazar individuales) ---
+    $decenas_compuestas = [
+        'treinta'  => 30, 'cuarenta'  => 40, 'cincuenta' => 50,
+        'sesenta'  => 60, 'setenta'   => 70, 'ochenta'   => 80, 'noventa'   => 90,
+    ];
+    $unidades_compuestas = [
+        'uno' => 1, 'dos' => 2, 'tres' => 3, 'cuatro' => 4, 'cinco' => 5,
+        'seis' => 6, 'siete' => 7, 'ocho' => 8, 'nueve' => 9,
+    ];
+
+    foreach ($decenas_compuestas as $dec_palabra => $dec_valor) {
+        foreach ($unidades_compuestas as $uni_palabra => $uni_valor) {
+            $patron = '/\b' . $dec_palabra . '\s+y\s+' . $uni_palabra . '\b/ui';
+            $texto = preg_replace($patron, (string)($dec_valor + $uni_valor), $texto);
+        }
+    }
+
+    // --- Paso 2: números especiales (10-29) — ordenados por longitud desc para evitar parciales ---
+    $especiales = [
+        'veintinueve'  => '29', 'veintiocho'   => '28', 'veintisiete'  => '27',
+        'veintiséis'   => '26', 'veintiseis'   => '26', 'veinticinco'  => '25',
+        'veinticuatro' => '24', 'veintitrés'   => '23', 'veintitres'   => '23',
+        'veintidós'    => '22', 'veintidos'    => '22', 'veintiuno'    => '21',
+        'veintiún'     => '21', 'veintún'      => '21',
+        'diecinueve'   => '19', 'dieciocho'    => '18', 'diecisiete'   => '17',
+        'dieciséis'    => '16', 'dieciseis'    => '16',
+        'quince'       => '15', 'catorce'      => '14', 'trece'        => '13',
+        'doce'         => '12', 'once'         => '11', 'diez'         => '10',
+        'veinte'       => '20',
+    ];
+
+    foreach ($especiales as $palabra => $valor) {
+        $texto = preg_replace('/\b' . preg_quote($palabra, '/') . '\b/ui', $valor, $texto);
+    }
+
+    // --- Paso 3: decenas solas ---
+    foreach ($decenas_compuestas as $palabra => $valor) {
+        $texto = preg_replace('/\b' . preg_quote($palabra, '/') . '\b/ui', (string)$valor, $texto);
+    }
+
+    // --- Paso 4: unidades (0-9) ---
+    $unidades = [
+        'cero' => '0', 'uno' => '1', 'dos' => '2', 'tres' => '3',
+        'cuatro' => '4', 'cinco' => '5', 'seis' => '6', 'siete' => '7',
+        'ocho' => '8', 'nueve' => '9',
+    ];
+
+    foreach ($unidades as $palabra => $valor) {
+        $texto = preg_replace('/\b' . preg_quote($palabra, '/') . '\b/ui', $valor, $texto);
+    }
+
+    // --- Paso 5: "doble" seguido de algo → duplicar ---
+    // "doble u" → "W", "doble v" → "W", "doble cero" ya se convirtió a "doble 0"
+    $texto = preg_replace('/\bdoble\s+u\b/ui', 'W', $texto);
+    $texto = preg_replace('/\bdoble\s+v\b/ui', 'W', $texto);
+    // "doble" + dígito → duplicar el dígito: "doble 0" → "00"
+    $texto = preg_replace_callback('/\bdoble\s+(\d)\b/ui', function ($m) {
+        return $m[1] . $m[1];
+    }, $texto);
+
+    return $texto;
+}
+
+
+function limpiar_muletillas(string $texto): string
+{
+    $muletillas = [
+        // --- Muletillas conversacionales (seguras) ---
+        'este', 'pues', 'bueno', 'mira', 'oye', 'fíjate', 'fijate',
+        'eh', 'mmm', 'ajá', 'aja', 'entonces', 'a ver', 'haber',
+        'verdad', 'sabes', 'o sea', 'osea',
+        'básicamente', 'basicamente', 'la verdad', 'por favor',
+        'me puedes', 'me podrias', 'me podrías', 'quisiera',
+        'sería', 'seria',
+        // --- Jerga MX/LATAM (seguras — nunca son datos ni keywords) ---
+        'a chile', 'chido', 'no manches', 'no mames',
+    ];
+
+    foreach ($muletillas as $m) {
+        $texto = preg_replace('/\b' . preg_quote($m, '/') . '\b[,.]?\s*/ui', ' ', $texto);
+    }
+
+    // "wey" con cualquier cantidad de letras repetidas: wey, weyy, weyyy, etc.
+    $texto = preg_replace('/\bw+e+y+\b[,.]?\s*/ui', ' ', $texto);
+
+    return trim(preg_replace('/\s+/', ' ', $texto));
+}
+
+/**
+ * Intenta reconstruir un folio de factura a partir de texto normalizado.
+ * Entrada esperada (post normalización): "t 0 0 0 0 22" o "t-000022"
+ * Salida: "T-000022"
+ *
+ * Si no puede reconstruir un patrón válido, retorna el texto limpio.
+ */
+function reconstruir_folio(string $texto): string
+{
+    // Eliminar palabras de contexto que no son parte del folio
+    $texto = preg_replace('/\b(sí|si|es|la|el|del|factura|folio|número|numero|serie|guion|guión)\b/ui', '', $texto);
+    $texto = trim(preg_replace('/\s+/', ' ', $texto));
+    $texto = strtoupper($texto);
+
+    // Si ya tiene formato válido (T-000022), retornar limpio
+    $sin_espacios = preg_replace('/[\s\-]/', '', $texto);
+    if (preg_match('/^([A-Z]{1,3})(\d+)$/', $sin_espacios, $m)) {
+        $prefijo = $m[1];
+        $numero  = str_pad($m[2], 6, '0', STR_PAD_LEFT);
+        return $prefijo . '-' . $numero;
+    }
+
+    // Intentar extraer: letra(s) seguidas de dígitos separados por espacios
+    // "T 0 0 0 0 2 2" → prefijo "T", dígitos "000022"
+    if (preg_match('/^([A-Z]{1,3})\s+(.+)$/', $texto, $m)) {
+        $prefijo = $m[1];
+        $digitos = preg_replace('/\s/', '', $m[2]);
+        if (preg_match('/^\d+$/', $digitos)) {
+            return $prefijo . '-' . str_pad($digitos, 6, '0', STR_PAD_LEFT);
+        }
+    }
+
+    // No pudo reconstruir, retornar lo que hay
+    return $texto;
+}
+
+
+// ============================================================
 // paso 1. PARAMETROS DE ENTRADA
+// ============================================================
 
 $accion            = strtolower(trim($_GET['accion'] ?? ''));
 $telefono_whatsapp = preg_replace('/\D+/', '', trim($_GET['telefono_whatsapp'] ?? $_GET['telefono'] ?? ''));
 $mensaje           = trim($_GET['mensaje'] ?? '');
 
+// ============================================================
 // paso 2. VALIDACIONES BASICAS
+// ============================================================
 
 if ($telefono_whatsapp === '') {
     echo json_encode([
@@ -34,6 +177,7 @@ if (!in_array($accion, ['resolver', 'registrar', 'guardar_mensaje', 'buscar_mens
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
+
 
 // ============================================================
 // ACCION: RESOLVER
@@ -65,12 +209,20 @@ if ($accion === 'resolver') {
     $intent_activo  = $estado['intent_activo'];
     $paso_actual    = $estado['paso_actual'];
     $datos          = json_decode($estado['datos_parciales'] ?? '{}', true) ?: [];
-    $mensaje_lower  = strtolower(trim($mensaje));
 
-    // Detectar si el usuario quiere cancelar/salir del flujo
-    $palabras_cancelar = ['cancelar', 'salir', 'dejalo', 'olvidalo', 'no quiero'];
+    // Normalización del mensaje: limpio para comparaciones
+    $mensaje_lower      = strtolower(trim($mensaje));
+    $mensaje_normalizado = limpiar_muletillas(palabras_a_numeros($mensaje_lower));
+
+    // ---- Detectar cancelación (keywords expandidas) ----
+    $palabras_cancelar = [
+        'cancelar', 'salir', 'dejalo', 'déjalo', 'olvidalo', 'olvídalo',
+        'no quiero', 'ya no', 'no gracias', 'no, gracias', 'mejor no',
+        'dejemos asi', 'dejemos así', 'no importa', 'olvidemos', 'nada',
+        'ya no importa', 'no es necesario', 'no hace falta', 'no hace falta ya',
+    ];
     foreach ($palabras_cancelar as $palabra) {
-        if (strpos($mensaje_lower, $palabra) !== false) {
+        if (mb_strpos($mensaje_normalizado, $palabra) !== false) {
             $sql_del = "DELETE FROM tmp_conversacion_estado WHERE telefono = :telefono";
             $link->prepare($sql_del)->execute([':telefono' => $telefono_whatsapp]);
 
@@ -84,17 +236,22 @@ if ($accion === 'resolver') {
         }
     }
 
+
     // ---- PASO: esperando_folio ----
     if ($paso_actual === 'esperando_folio') {
 
-        $folio = strtoupper(trim($mensaje));
+        // Normalizar: "t cero cero cero cero veintidós" → "T-000022"
+        $folio_normalizado = reconstruir_folio(
+            palabras_a_numeros(limpiar_muletillas($mensaje))
+        );
+        $folio = strtoupper(trim($folio_normalizado));
 
         if ($folio === '' || !preg_match('/\d/', $folio)) {
             echo json_encode([
                 'STS'          => 'esperando',
                 'tiene_estado' => true,
                 'accion'       => 'responder',
-                'respuesta'    => 'No pude identificar el folio. Por favor envíame el folio de la factura (ej: T-000013).'
+                'respuesta'    => 'No pude identificar el folio. Por favor envíame el folio de la factura (ej: T-000013). Puedes escribirlo o dictarlo.'
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
@@ -139,25 +296,60 @@ if ($accion === 'resolver') {
         }
     }
 
+
     // ---- PASO: esperando_formato ----
     if ($paso_actual === 'esperando_formato') {
 
-        $doc = 'pdf'; // default
+        // Keywords expandidas para cada formato
+        $keywords_ambos = [
+            'ambos', 'los dos', 'los 2', 'las dos', 'las 2', 'both',
+            'todo', 'todos', 'completo', 'completos',
+            'pdf y xml', 'xml y pdf', 'pdf xml', 'xml pdf',
+            'los dos archivos', 'las dos cosas', 'mándame todo', 'mandame todo',
+            'dame todo', 'envíame todo', 'enviame todo', 'quiero los dos',
+            'necesito los dos', 'ambas', 'los 2 archivos',
+        ];
 
-        // Detectar "ambos" antes de pdf/xml individual
-        $palabras_ambos = ['ambos', 'los dos', 'los 2', 'both'];
-        $es_ambos = false;
-        foreach ($palabras_ambos as $palabra) {
-            if (strpos($mensaje_lower, $palabra) !== false) {
-                $es_ambos = true;
+        $keywords_xml = ['xml'];
+        $keywords_pdf = ['pdf'];
+
+        $doc = null; // SIN default — si no matchea, preguntamos
+
+        // Evaluar ambos PRIMERO (contiene "pdf" y "xml" que matchearían individual)
+        foreach ($keywords_ambos as $kw) {
+            if (mb_strpos($mensaje_normalizado, $kw) !== false) {
+                $doc = 'ambos';
                 break;
             }
         }
 
-        if ($es_ambos) {
-            $doc = 'ambos';
-        } elseif (strpos($mensaje_lower, 'xml') !== false) {
-            $doc = 'xml';
+        if ($doc === null) {
+            foreach ($keywords_xml as $kw) {
+                if (mb_strpos($mensaje_normalizado, $kw) !== false) {
+                    $doc = 'xml';
+                    break;
+                }
+            }
+        }
+
+        if ($doc === null) {
+            foreach ($keywords_pdf as $kw) {
+                if (mb_strpos($mensaje_normalizado, $kw) !== false) {
+                    $doc = 'pdf';
+                    break;
+                }
+            }
+        }
+
+        // Si no identificó formato: PREGUNTAR en vez de asumir
+        if ($doc === null) {
+            echo json_encode([
+                'STS'          => 'esperando',
+                'tiene_estado' => true,
+                'accion'       => 'responder',
+                'respuesta'    => 'No logré identificar el formato. ¿Necesitas el archivo en PDF, XML o ambos?'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
         }
 
         $datos['doc'] = $doc;
@@ -176,21 +368,51 @@ if ($accion === 'resolver') {
         exit;
     }
 
+
     // ---- PASO: esperando_confirmacion ----
     if ($paso_actual === 'esperando_confirmacion') {
 
-        $palabras_si = ['si', 'sí', 'correcto', 'confirmo', 'ok', 'dale', 'adelante', 'está bien', 'esta bien'];
+        // Keywords expandidas: confirmación
+        $palabras_si = [
+            'si', 'sí', 'correcto', 'confirmo', 'ok', 'dale', 'adelante',
+            'está bien', 'esta bien', 'afirmativo', 'así es', 'asi es',
+            'exacto', 'de acuerdo', 'va', 'sale', 'órale', 'orale',
+            'eso es', 'positivo', 'claro', 'por supuesto', 'simón',
+            'simon', 'arre', 'jalo', 'jalamos', 'perfecto', 'listo',
+            'zax', 'no pos si', 'neta', 'entendido', 'de una', 'de una vez',
+            'a webo', 'vale',
+        ];
+
+        // Keywords expandidas: negación explícita
+        $palabras_no = [
+            'no', 'nel', 'nop', 'negativo', 'nah', 'nope', 'para nada',
+            'incorrecto', 'mal', 'está mal', 'esta mal', 'no es',
+            'equivocado', 'error', 'falso', 'nel pastel',
+        ];
+
         $es_confirmacion = false;
+        $es_negacion     = false;
 
         foreach ($palabras_si as $palabra) {
-            if (strpos($mensaje_lower, $palabra) !== false) {
+            if (mb_strpos($mensaje_normalizado, $palabra) !== false) {
                 $es_confirmacion = true;
                 break;
             }
         }
 
+        // Solo evaluar negación si NO hubo confirmación
+        // (evita conflicto con "no, está bien" → confirmación gana)
         if (!$es_confirmacion) {
-            // No confirmó, cancelar
+            foreach ($palabras_no as $palabra) {
+                if (mb_strpos($mensaje_normalizado, $palabra) !== false) {
+                    $es_negacion = true;
+                    break;
+                }
+            }
+        }
+
+        // Negación explícita: cancelar
+        if ($es_negacion) {
             $sql_del = "DELETE FROM tmp_conversacion_estado WHERE telefono = :telefono";
             $link->prepare($sql_del)->execute([':telefono' => $telefono_whatsapp]);
 
@@ -199,6 +421,17 @@ if ($accion === 'resolver') {
                 'tiene_estado' => true,
                 'accion'       => 'responder',
                 'respuesta'    => 'Entendido, he cancelado el registro. Si necesitas algo más, dime.'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        // Ni confirmación ni negación: PREGUNTAR en vez de cancelar
+        if (!$es_confirmacion) {
+            echo json_encode([
+                'STS'          => 'esperando',
+                'tiene_estado' => true,
+                'accion'       => 'responder',
+                'respuesta'    => 'No entendí tu respuesta. ¿Los datos son correctos? Responde sí o no.'
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
@@ -219,17 +452,20 @@ if ($accion === 'resolver') {
         exit;
     }
 
+
     // ---- PASO: esperando_tel ----
     if ($paso_actual === 'esperando_tel') {
 
-        $tel = preg_replace('/\D+/', '', $mensaje);
+        // Normalizar: "cinco cinco uno dos tres..." → "5 5 1 2 3..."
+        $mensaje_tel = palabras_a_numeros(limpiar_muletillas($mensaje));
+        $tel = preg_replace('/\D+/', '', $mensaje_tel);
 
         if (strlen($tel) < 7) {
             echo json_encode([
                 'STS'          => 'esperando',
                 'tiene_estado' => true,
                 'accion'       => 'responder',
-                'respuesta'    => 'No pude identificar el número. Por favor envíame el teléfono del cliente (solo números).'
+                'respuesta'    => 'No pude identificar el número. Por favor envíame el teléfono del cliente (solo números). Puedes escribirlo o dictarlo.'
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
