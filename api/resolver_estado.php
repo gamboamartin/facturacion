@@ -486,6 +486,44 @@ if ($accion === 'resolver') {
         exit;
     }
 
+    // ---- PASO: esperando_rfc ----
+    if ($paso_actual === 'esperando_rfc') {
+
+        // Normalizar: mayúsculas, limpiar muletillas, números hablados
+        $rfc_normalizado = strtoupper(trim(
+            palabras_a_numeros(limpiar_muletillas($mensaje))
+        ));
+
+        // Eliminar espacios, guiones y caracteres no alfanuméricos
+        $rfc_normalizado = preg_replace('/[^A-Z0-9Ñ&]/', '', $rfc_normalizado);
+
+        // Validar formato RFC: 12 chars (persona moral) o 13 chars (persona física)
+        if (!preg_match('/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/', $rfc_normalizado)) {
+            echo json_encode([
+                'STS'          => 'esperando',
+                'tiene_estado' => true,
+                'accion'       => 'responder',
+                'respuesta'    => 'El RFC no tiene un formato válido. Debe ser de 12 o 13 caracteres (ej: DAO040125W7). ¿Podrías escribirlo de nuevo?'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $datos['rfc'] = $rfc_normalizado;
+
+        // Listo: borrar estado y devolver datos para ejecutar
+        $sql_del = "DELETE FROM tmp_conversacion_estado WHERE telefono = :telefono";
+        $link->prepare($sql_del)->execute([':telefono' => $telefono_whatsapp]);
+
+        echo json_encode([
+            'STS'            => 'listo',
+            'tiene_estado'   => true,
+            'accion'         => 'ejecutar',
+            'intent_activo'  => $intent_activo,
+            'datos'          => $datos
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     // ---- PASO NO RECONOCIDO: limpiar y mandar al flujo normal ----
     $sql_del = "DELETE FROM tmp_conversacion_estado WHERE telefono = :telefono";
     $link->prepare($sql_del)->execute([':telefono' => $telefono_whatsapp]);
@@ -539,6 +577,26 @@ if ($accion === 'registrar') {
         $registrar = true;
         $intent_activo = 'recibir_tel';
         $paso_actual = 'esperando_tel';
+    }
+
+    // alta_factura sin RFC pero con campos fiscales -> esperando_rfc
+    if ($intencion === 'alta_factura' && $rfc === '') {
+        $fp  = strtoupper(trim($_GET['FP'] ?? ''));
+        $mp  = strtoupper(trim($_GET['MP'] ?? ''));
+        $uc  = strtoupper(trim($_GET['UC'] ?? ''));
+        $mon = strtoupper(trim($_GET['MON'] ?? ''));
+
+        if ($fp !== '' || $mp !== '' || $uc !== '' || $mon !== '') {
+            $registrar = true;
+            $intent_activo = 'alta_factura';
+            $paso_actual = 'esperando_rfc';
+            $datos_parciales = [
+                'FP'  => $fp,
+                'MP'  => $mp,
+                'UC'  => $uc,
+                'MON' => $mon,
+            ];
+        }
     }
 
     // No necesita estado: responder sin hacer nada
