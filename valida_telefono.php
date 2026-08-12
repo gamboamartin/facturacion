@@ -61,5 +61,5 @@ if (errores::$error) {
     exit;
 }
 
-include __DIR__ . '/api/mensaje_confirmacion.php';
+include __DIR__ . '/mensaje_validacion_empleado.php';
 exit;
