@@ -14,6 +14,7 @@ use gamboamartin\facturacion\models\com_agente;
 use gamboamartin\facturacion\models\com_cliente;
 use gamboamartin\facturacion\models\com_contacto;
 use gamboamartin\facturacion\models\fc_layout_periodo;
+use gamboamartin\facturacion\models\datos_adicionales_com_cliente_artistik;
 use gamboamartin\template\html;
 use PDO;
 use stdClass;
@@ -496,5 +497,106 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
 
         header("Location: " . $link);
         exit;
+    }
+
+  public function alta(bool $header, bool $ws = false): array|string
+{
+    $r_alta = parent::alta(header: $header, ws: $ws);
+    if (errores::$error) {
+        return $this->retorno_error(
+            mensaje: 'Error al inicializar alta', data: $r_alta, header: $header, ws: $ws
+        );
+    }
+
+    if ((property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente)) {
+
+        $horario = $this->html->input_text(cols: 6, disabled: false, name: 'horario',
+            place_holder: 'Horario', row_upd: new stdClass(), value_vacio: false);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input', data: $horario, header: $header, ws: $ws);
+        }
+
+        $telefono_emergencia = $this->html->input_text(cols: 6, disabled: false, name: 'telefono_emergencia',
+            place_holder: 'Teléfono Emergencia', row_upd: new stdClass(), value_vacio: false);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input', data: $telefono_emergencia, header: $header, ws: $ws);
+        }
+
+        $nombre_emergencia = $this->html->input_text(cols: 6, disabled: false, name: 'nombre_emergencia',
+            place_holder: 'Nombre Emergencia', row_upd: new stdClass(), value_vacio: false);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input', data: $nombre_emergencia, header: $header, ws: $ws);
+        }
+
+        $curp = $this->html->input_text(cols: 6, disabled: false, name: 'curp',
+            place_holder: 'CURP', row_upd: new stdClass(), value_vacio: false);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input', data: $curp, header: $header, ws: $ws);
+        }
+
+       
+        $this->inputs->horario = $horario;
+        $this->inputs->telefono_emergencia = $telefono_emergencia;
+        $this->inputs->nombre_emergencia = $nombre_emergencia;
+        $this->inputs->curp = $curp;
+    }
+
+    $this->include_inputs_alta = (new generales())->path_base . 'templates/inputs/com_cliente/alta.php';
+
+
+    return $r_alta;
+}
+    public function alta_bd(bool $header, bool $ws = false): array|stdClass
+    {
+        $datos_adicionales = [];
+
+        if (property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente) {
+            $campos_extra = ['horario', 'telefono_emergencia', 'nombre_emergencia', 'curp'];
+            foreach ($campos_extra as $campo) {
+                $datos_adicionales[$campo] = $_POST[$campo] ?? null;
+                unset($_POST[$campo]);
+            }
+        }
+
+        $r_alta = parent::alta_bd(header: false, ws: false);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al dar de alta cliente', data: $r_alta, header: $header, ws: $ws
+            );
+        }
+
+        if (!empty($datos_adicionales) && isset($r_alta->registro_id)) {
+            $datos_adicionales['com_cliente_id'] = $r_alta->registro_id;
+            $datos_adicionales['codigo'] = 'DAC_' . $r_alta->registro_id;
+            $datos_adicionales['descripcion'] = 'Datos adicionales cliente ' . $r_alta->registro_id;
+            $datos_adicionales['descripcion_select'] = 'DAC_' . $r_alta->registro_id;
+            $datos_adicionales['alias'] = 'DAC_' . $r_alta->registro_id;
+            $datos_adicionales['codigo_bis'] = 'DAC_' . $r_alta->registro_id;
+            $modelo_adicional = new datos_adicionales_com_cliente_artistik(link: $this->link);
+            $modelo_adicional->registro = $datos_adicionales;
+            $r_adicional = $modelo_adicional->alta_bd();
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al dar de alta datos adicionales',
+                    data: $r_adicional, header: $header, ws: $ws
+                );
+            }
+        }
+
+        if ($header) {
+            $this->retorno_base(registro_id: $r_alta->registro_id, result: $r_alta,
+                siguiente_view: 'modifica', ws: $ws);
+        }
+        if ($ws) {
+            header('Content-Type: application/json');
+            echo json_encode($r_alta, JSON_THROW_ON_ERROR);
+            exit;
+        }
+
+        return $r_alta;
     }
 }
