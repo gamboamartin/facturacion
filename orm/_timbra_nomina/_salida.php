@@ -108,7 +108,7 @@ class _salida{
 
             if($con_error){
 
-                $upd = $this->upd_error($codigo, $rs, $link,$fc_row_layout_id);
+                $upd = $this->upd_error($codigo, $rs, $link,$fc_row_layout_id,$extra_data);
                 return (new errores())->error("Error al timbrar $rs->mensaje Code: $rs->codigo $extra_data", $upd);
             }
         }
