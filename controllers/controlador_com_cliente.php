@@ -371,12 +371,13 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         $columns["com_cliente_id"]["titulo"] = "Id";
         $columns["com_cliente_codigo"]["titulo"] = "Código";
         $columns["com_cliente_razon_social"]["titulo"] = "Razón Social";
-         if (property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente) {
+        if (property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente) {
         $columns["com_cliente_curp"]["titulo"] = "CURP";
+        $columns["com_cliente_telefono_emergencia"]["titulo"] = "Tel. Emergencia";
         } else {
             $columns["com_cliente_rfc"]["titulo"] = "RFC";
+            $columns["cat_sat_regimen_fiscal_descripcion"]["titulo"] = "Régimen Fiscal";
         }
-        $columns["cat_sat_regimen_fiscal_descripcion"]["titulo"] = "Régimen Fiscal";
         $columns["com_cliente_n_sucursales"]["titulo"] = "Sucursales";
         $columns["com_cliente_porcentaje_comision"]["titulo"] = "% Comision";
 

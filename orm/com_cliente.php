@@ -19,6 +19,10 @@ class com_cliente extends \gamboamartin\comercial\models\com_cliente {
                 "IFNULL((SELECT curp FROM datos_adicionales_com_cliente_artistik 
                 WHERE datos_adicionales_com_cliente_artistik.com_cliente_id = com_cliente.id), '')";
 
+            $this->columnas_extra['com_cliente_telefono_emergencia'] =
+                "IFNULL((SELECT telefono_emergencia FROM datos_adicionales_com_cliente_artistik 
+                WHERE datos_adicionales_com_cliente_artistik.com_cliente_id = com_cliente.id), '')";
+
             $this->columnas_extra['com_cliente_foto'] =
                 "IFNULL((SELECT CASE WHEN foto IS NOT NULL AND foto != '' 
                 THEN CONCAT('<img src=\"', foto, '\" style=\"width:50px;height:50px;object-fit:cover;border-radius:4px;\" />') 
