@@ -376,6 +376,11 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         $columns["com_cliente_n_sucursales"]["titulo"] = "Sucursales";
         $columns["com_cliente_porcentaje_comision"]["titulo"] = "% Comision";
 
+         if (property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente) {
+            $columns["com_cliente_nombre_emergencia"]["titulo"] = "Contacto Emergencia";
+            $columns["com_cliente_foto"]["titulo"] = "Foto";
+        }
+
         // Filtros aplicables en la búsqueda del DataTable
         $filtro = array(
             "com_cliente.id",
