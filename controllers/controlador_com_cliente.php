@@ -30,6 +30,7 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
     public int $com_contacto_id_modifica = 0;
     public string $codigo_pais_contacto = '52';
     public string $nombre_contacto_modifica = '';
+    public string $foto_actual = ''; 
 
     public function __construct(
         PDO $link,
@@ -644,5 +645,159 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         }
 
         return $r_alta;
+    }
+
+  public function modifica_datos_adicionales(bool $header, bool $ws = false): array|string
+    {
+
+        if (!property_exists(generales::class, 'datos_adicionales_com_cliente') || !generales::$datos_adicionales_com_cliente) {
+            return $this->retorno_error(
+                mensaje: 'Acción no disponible en este sistema',
+                data: [], header: $header, ws: $ws
+            );
+        }
+
+        $this->accion_titulo = 'Modificar Datos Adicionales';
+        $this->inputs = new stdClass();
+
+        // Cargar datos existentes
+        $modelo_adicional = new datos_adicionales_com_cliente_artistik(link: $this->link);
+        $filtro = array('datos_adicionales_com_cliente_artistik.com_cliente_id' => $this->registro_id);
+        $r_datos = $modelo_adicional->filtro_and(filtro: $filtro);
+
+        $row_datos = new stdClass();
+        $row_datos->horario = '';
+        $row_datos->telefono_emergencia = '';
+        $row_datos->nombre_emergencia = '';
+        $row_datos->curp = '';
+        $this->foto_actual = '';
+
+        if (!errores::$error && $r_datos->n_registros > 0) {
+            $datos = $r_datos->registros[0];
+            $row_datos->horario = $datos['datos_adicionales_com_cliente_artistik_horario'] ?? '';
+            $row_datos->telefono_emergencia = $datos['datos_adicionales_com_cliente_artistik_telefono_emergencia'] ?? '';
+            $row_datos->nombre_emergencia = $datos['datos_adicionales_com_cliente_artistik_nombre_emergencia'] ?? '';
+            $row_datos->curp = $datos['datos_adicionales_com_cliente_artistik_curp'] ?? '';
+            $this->foto_actual = $datos['datos_adicionales_com_cliente_artistik_foto'] ?? '';
+        }
+
+        $horario = $this->html->input_text(cols: 6, disabled: false, name: 'horario',
+            place_holder: 'Horario', row_upd: new stdClass(), value_vacio: false,
+            value: $row_datos->horario);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input', data: $horario, header: $header, ws: $ws);
+        }
+        $this->inputs->horario = $horario;
+
+        $telefono_emergencia = $this->html->input_text(cols: 6, disabled: false, name: 'telefono_emergencia',
+            place_holder: 'Teléfono Emergencia', row_upd: new stdClass(), value_vacio: false,
+            value: $row_datos->telefono_emergencia);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input', data: $telefono_emergencia, header: $header, ws: $ws);
+        }
+        $this->inputs->telefono_emergencia = $telefono_emergencia;
+
+        $nombre_emergencia = $this->html->input_text(cols: 6, disabled: false, name: 'nombre_emergencia',
+            place_holder: 'Nombre Emergencia', row_upd: new stdClass(), value_vacio: false,
+            value: $row_datos->nombre_emergencia);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input', data: $nombre_emergencia, header: $header, ws: $ws);
+        }
+        $this->inputs->nombre_emergencia = $nombre_emergencia;
+
+        $curp = $this->html->input_text(cols: 6, disabled: false, name: 'curp',
+            place_holder: 'CURP', row_upd: new stdClass(), value_vacio: false,
+            value: $row_datos->curp);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input', data: $curp, header: $header, ws: $ws);
+        }
+        $this->inputs->curp = $curp;
+
+        // Botón para volver a modifica
+        $button = $this->html->button_href(accion: 'modifica', etiqueta: 'Ir a Cliente',
+            registro_id: $this->registro_id, seccion: $this->tabla, style: 'warning', params: array());
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al generar link', data: $button);
+        }
+        $this->button_com_cliente_modifica = $button;
+
+        return [];
+    }
+
+    public function modifica_datos_adicionales_bd(bool $header, bool $ws = false): array|stdClass
+    {
+
+        if (!property_exists(generales::class, 'datos_adicionales_com_cliente') || !generales::$datos_adicionales_com_cliente) {
+            return $this->retorno_error(
+                mensaje: 'Acción no disponible en este sistema',
+                data: [], header: $header, ws: $ws
+            );
+        }
+
+        $campos_extra = ['horario', 'telefono_emergencia', 'nombre_emergencia', 'curp'];
+        $datos_adicionales = [];
+        foreach ($campos_extra as $campo) {
+            $datos_adicionales[$campo] = $_POST[$campo] ?? null;
+        }
+
+        $modelo_adicional = new datos_adicionales_com_cliente_artistik(link: $this->link);
+        $filtro = array('datos_adicionales_com_cliente_artistik.com_cliente_id' => $this->registro_id);
+        $r_datos = $modelo_adicional->filtro_and(filtro: $filtro);
+
+        // Manejo de foto
+        if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+            $extension = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+            $extensiones_validas = ['jpg', 'jpeg', 'png', 'webp'];
+            if (in_array($extension, $extensiones_validas)) {
+                $nombre_archivo = 'cliente_' . $this->registro_id . '_' . time() . '.' . $extension;
+                $ruta_destino = (new generales())->path_base . 'archivos/fotos_clientes/' . $nombre_archivo;
+                if (move_uploaded_file($_FILES['foto']['tmp_name'], $ruta_destino)) {
+                    $datos_adicionales['foto'] = 'archivos/fotos_clientes/' . $nombre_archivo;
+                }
+            }
+        } elseif (isset($_POST['eliminar_foto']) && $_POST['eliminar_foto'] === '1') {
+            $datos_adicionales['foto'] = '';
+        }
+
+        if (!errores::$error && $r_datos->n_registros > 0) {
+            $id_adicional = $r_datos->registros[0]['datos_adicionales_com_cliente_artistik_id'];
+            $r_mod = $modelo_adicional->modifica_bd(registro: $datos_adicionales, id: $id_adicional);
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al modificar datos adicionales',
+                    data: $r_mod, header: $header, ws: $ws
+                );
+            }
+        } else {
+            $datos_adicionales['com_cliente_id'] = $this->registro_id;
+            $datos_adicionales['codigo'] = 'DAC_' . $this->registro_id;
+            $datos_adicionales['descripcion'] = 'Datos adicionales cliente ' . $this->registro_id;
+            $datos_adicionales['descripcion_select'] = 'DAC_' . $this->registro_id;
+            $datos_adicionales['alias'] = 'DAC_' . $this->registro_id;
+            $datos_adicionales['codigo_bis'] = 'DAC_' . $this->registro_id;
+            $modelo_adicional->registro = $datos_adicionales;
+            $r_mod = $modelo_adicional->alta_bd();
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al crear datos adicionales',
+                    data: $r_mod, header: $header, ws: $ws
+                );
+            }
+        }
+
+        $_SESSION['exito'][]['mensaje'] = 'Datos adicionales modificados correctamente';
+
+        $link = "index.php?seccion=com_cliente&accion=modifica_datos_adicionales";
+        $link .= "&registro_id=" . $this->registro_id;
+        $link .= "&session_id=" . $_GET['session_id'];
+        if (isset($_GET['adm_menu_id'])) {
+            $link .= "&adm_menu_id=" . $_GET['adm_menu_id'];
+        }
+        header("Location: " . $link);
+        exit;
     }
 }
