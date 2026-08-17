@@ -84,6 +84,7 @@ $tipo_persona_id = $row_tipo ? (int)$row_tipo['id'] : 6;
 // paso 5. RESOLUCION DE REGIMEN FISCAL POR CIF
 
 $regimen_fiscal_id = 0;
+error_log("DEBUG REG: regimen_texto=[$regimen_texto]");
 
 if ($regimen_texto !== '') {
     $regimen_limpio = preg_replace('/^r[ée]gimen\s+de\s+/i', '', $regimen_texto);
