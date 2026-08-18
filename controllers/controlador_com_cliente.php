@@ -376,6 +376,7 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         $columns["com_cliente_curp"]["titulo"] = "CURP";
         $columns["com_cliente_telefono_emergencia"]["titulo"] = "Tel. Emergencia";
         $columns["com_cliente_horario"]["titulo"] = "Horario";
+        $columns["com_cliente_fecha_cumpleanos"]["titulo"] = "Cumpleaños";
         } else {
             $columns["com_cliente_rfc"]["titulo"] = "RFC";
             $columns["cat_sat_regimen_fiscal_descripcion"]["titulo"] = "Régimen Fiscal";

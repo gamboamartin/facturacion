@@ -33,6 +33,10 @@ class com_cliente extends \gamboamartin\comercial\models\com_cliente {
                 ELSE '' END 
                 FROM datos_adicionales_com_cliente_artistik 
                 WHERE datos_adicionales_com_cliente_artistik.com_cliente_id = com_cliente.id), '')";
+
+            $this->columnas_extra['com_cliente_fecha_cumpleanos'] =
+                "IFNULL((SELECT fecha_cumpleanos FROM datos_adicionales_com_cliente_artistik 
+                WHERE datos_adicionales_com_cliente_artistik.com_cliente_id = com_cliente.id), '')";
         }
     }
 
