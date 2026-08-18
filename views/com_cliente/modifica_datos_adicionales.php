@@ -21,6 +21,7 @@
                         <?php echo $controlador->inputs->telefono_emergencia; ?>
                         <?php echo $controlador->inputs->nombre_emergencia; ?>
                         <?php echo $controlador->inputs->curp; ?>
+                        <?php echo $controlador->inputs->fecha_cumpleanos; ?>
 
                         <?php
                             $style_remove = 'position:absolute;top:-8px;right:-8px;background:#dc3545;color:#fff;border:none;border-radius:50%;width:24px;height:24px;font-size:14px;line-height:24px;text-align:center;cursor:pointer;padding:0;';

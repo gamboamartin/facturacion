@@ -22,6 +22,7 @@
 <?php echo $controlador->inputs->cat_sat_forma_pago_id; ?>
 <?php echo $controlador->inputs->cat_sat_tipo_de_comprobante_id; ?>
 <?php echo $controlador->inputs->cat_sat_moneda_id; ?>
+<?php echo $controlador->inputs->fecha_cumpleanos ?? ''; ?>
 
 <?php if (property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente): ?>
     <?php echo $controlador->inputs->horario ?? ''; ?>

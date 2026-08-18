@@ -558,7 +558,16 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
             return $this->retorno_error(
                 mensaje: 'Error al obtener input', data: $foto, header: $header, ws: $ws);
         }
-       
+
+        $fecha_cumpleanos = $this->html->input_text(cols: 6, disabled: false, name: 'fecha_cumpleanos',
+            place_holder: 'Fecha de Cumpleaños', row_upd: new stdClass(), value_vacio: false);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input', data: $fecha_cumpleanos, header: $header, ws: $ws);
+        }
+
+
+        $this->inputs->fecha_cumpleanos = $fecha_cumpleanos;
         $this->inputs->foto = $foto;
         $this->inputs->horario = $horario;
         $this->inputs->telefono_emergencia = $telefono_emergencia;
@@ -576,7 +585,7 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         $datos_adicionales = [];
 
         if (property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente) {
-            $campos_extra = ['horario', 'telefono_emergencia', 'nombre_emergencia', 'curp'];
+            $campos_extra = ['horario', 'telefono_emergencia', 'nombre_emergencia', 'curp','fecha_cumpleanos'];
             foreach ($campos_extra as $campo) {
                 $datos_adicionales[$campo] = $_POST[$campo] ?? null;
                 unset($_POST[$campo]);
@@ -717,6 +726,20 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         }
         $this->inputs->curp = $curp;
 
+        $row_datos->fecha_cumpleanos = '';
+
+       
+        $row_datos->fecha_cumpleanos = $datos['datos_adicionales_com_cliente_artistik_fecha_cumpleanos'] ?? '';
+
+        $fecha_cumpleanos = $this->html->input_text(cols: 6, disabled: false, name: 'fecha_cumpleanos',
+            place_holder: 'Fecha de Cumpleaños', row_upd: new stdClass(), value_vacio: false,
+            value: $row_datos->fecha_cumpleanos);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener input', data: $fecha_cumpleanos, header: $header, ws: $ws);
+        }
+        $this->inputs->fecha_cumpleanos = $fecha_cumpleanos;
+
         // Botón para volver a modifica
         $button = $this->html->button_href(accion: 'modifica', etiqueta: 'Ir a Cliente',
             registro_id: $this->registro_id, seccion: $this->tabla, style: 'warning', params: array());
@@ -738,7 +761,7 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
             );
         }
 
-        $campos_extra = ['horario', 'telefono_emergencia', 'nombre_emergencia', 'curp'];
+        $campos_extra = ['horario', 'telefono_emergencia', 'nombre_emergencia', 'curp','fecha_cumpleanos'];
         $datos_adicionales = [];
         foreach ($campos_extra as $campo) {
             $datos_adicionales[$campo] = $_POST[$campo] ?? null;
