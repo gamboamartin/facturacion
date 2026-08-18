@@ -21,7 +21,15 @@
                         <?php echo $controlador->inputs->telefono_emergencia; ?>
                         <?php echo $controlador->inputs->nombre_emergencia; ?>
                         <?php echo $controlador->inputs->curp; ?>
-                        <?php echo $controlador->inputs->fecha_cumpleanos; ?>
+                        <div class="col-sm-6">
+                        <div class="control-group">
+                            <label class="control-label">Fecha de Cumpleaños</label>
+                            <div class="controls">
+                                <input type="date" name="fecha_cumpleanos" class="form-control"
+                                    value="<?php echo $controlador->inputs->fecha_cumpleanos_value ?? ''; ?>" />
+                            </div>
+                        </div>
+                    </div>
 
                         <?php
                             $style_remove = 'position:absolute;top:-8px;right:-8px;background:#dc3545;color:#fff;border:none;border-radius:50%;width:24px;height:24px;font-size:14px;line-height:24px;text-align:center;cursor:pointer;padding:0;';

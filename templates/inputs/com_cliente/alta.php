@@ -22,7 +22,15 @@
 <?php echo $controlador->inputs->cat_sat_forma_pago_id; ?>
 <?php echo $controlador->inputs->cat_sat_tipo_de_comprobante_id; ?>
 <?php echo $controlador->inputs->cat_sat_moneda_id; ?>
-<?php echo $controlador->inputs->fecha_cumpleanos ?? ''; ?>
+<div class="col-sm-6">
+    <div class="control-group">
+        <label class="control-label">Fecha de Cumpleaños</label>
+        <div class="controls">
+            <input type="date" name="fecha_cumpleanos" class="form-control"
+                   value="<?php echo $controlador->inputs->fecha_cumpleanos_value ?? ''; ?>" />
+        </div>
+    </div>
+</div>
 
 <?php if (property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente): ?>
     <?php echo $controlador->inputs->horario ?? ''; ?>
