@@ -16,6 +16,7 @@ class _n8n_request
     private string $path_telefono_confirmado_contacto = 'telefono-confirmado-contacto';
     private string $path_validacion_telefono_adm_usuario = 'validacion-telefono-adm-usuario';
     private string $path_telefono_confirmado_adm_usuario = 'telefono-confirmado-adm-usuario';
+    private string $path_cumpleanos_calendar = 'cumpleanos-calendar';
 
     public function __construct()
     {
@@ -270,5 +271,34 @@ class _n8n_request
             'response' => $response,
             'error' => $error,
         ];
+    }
+
+    public function request_cumpleanos_calendar(
+    int $com_cliente_id,
+    string $nombre,
+    string $fecha_cumpleanos,
+    string $accion,
+    string $calendar_event_id = ''
+    ): array
+    {
+        $data = [
+            'evento' => 'cumpleanos_calendar',
+            'com_cliente_id' => $com_cliente_id,
+            'nombre' => $nombre,
+            'fecha_cumpleanos' => $fecha_cumpleanos,
+            'accion' => $accion,
+            'calendar_event_id' => $calendar_event_id
+        ];
+
+        try {
+            $rs = $this->post(
+                endpoint: $this->path_cumpleanos_calendar,
+                data: $data
+            );
+        } catch (\Exception $e) {
+            return $this->errores->error(mensaje: $e->getMessage(), data: $e);
+        }
+
+        return $rs;
     }
 }

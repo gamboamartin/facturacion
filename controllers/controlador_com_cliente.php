@@ -515,92 +515,93 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
     }
 
   public function alta(bool $header, bool $ws = false): array|string
-{
-    $r_alta = parent::alta(header: $header, ws: $ws);
-    if (errores::$error) {
-        return $this->retorno_error(
-            mensaje: 'Error al inicializar alta', data: $r_alta, header: $header, ws: $ws
-        );
-    }
-
-    if ((property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente)) {
-
-        $horario = $this->html->input_text(cols: 6, disabled: false, name: 'horario',
-            place_holder: 'Horario', row_upd: new stdClass(), value_vacio: false);
-        if (errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al obtener input', data: $horario, header: $header, ws: $ws);
-        }
-
-        $telefono_emergencia = $this->html->input_text(cols: 6, disabled: false, name: 'telefono_emergencia',
-            place_holder: 'Teléfono Emergencia', row_upd: new stdClass(), value_vacio: false);
-        if (errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al obtener input', data: $telefono_emergencia, header: $header, ws: $ws);
-        }
-
-        $nombre_emergencia = $this->html->input_text(cols: 6, disabled: false, name: 'nombre_emergencia',
-            place_holder: 'Nombre Emergencia', row_upd: new stdClass(), value_vacio: false);
-        if (errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al obtener input', data: $nombre_emergencia, header: $header, ws: $ws);
-        }
-
-        $curp = $this->html->input_text(cols: 6, disabled: false, name: 'curp',
-            place_holder: 'CURP', row_upd: new stdClass(), value_vacio: false);
-        if (errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al obtener input', data: $curp, header: $header, ws: $ws);
-        }
-
-        $foto = $this->html->input_file(cols: 6, name: 'foto', row_upd: new stdClass(), 
-            value_vacio: false, place_holder: 'Foto del Estudiante', required: false);
-        if (errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al obtener input', data: $foto, header: $header, ws: $ws);
-        }
-
-        $fecha_cumpleanos = $this->html->input_text(cols: 6, disabled: false, name: 'fecha_cumpleanos',
-            place_holder: 'Fecha de Cumpleaños', row_upd: new stdClass(), value_vacio: false);
-        if (errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al obtener input', data: $fecha_cumpleanos, header: $header, ws: $ws);
-        }
-
-
-        $this->inputs->fecha_cumpleanos = $fecha_cumpleanos;
-        $this->inputs->foto = $foto;
-        $this->inputs->horario = $horario;
-        $this->inputs->telefono_emergencia = $telefono_emergencia;
-        $this->inputs->nombre_emergencia = $nombre_emergencia;
-        $this->inputs->curp = $curp;
-    }
-
-    $this->include_inputs_alta = (new generales())->path_base . 'templates/inputs/com_cliente/alta.php';
-
-
-    return $r_alta;
-}
-    public function alta_bd(bool $header, bool $ws = false): array|stdClass
     {
-        $datos_adicionales = [];
-
-        if (property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente) {
-            $campos_extra = ['horario', 'telefono_emergencia', 'nombre_emergencia', 'curp','fecha_cumpleanos'];
-            foreach ($campos_extra as $campo) {
-                $datos_adicionales[$campo] = $_POST[$campo] ?? null;
-                unset($_POST[$campo]);
-            }
-        }
-
-        $r_alta = parent::alta_bd(header: false, ws: false);
+        $r_alta = parent::alta(header: $header, ws: $ws);
         if (errores::$error) {
             return $this->retorno_error(
-                mensaje: 'Error al dar de alta cliente', data: $r_alta, header: $header, ws: $ws
+                mensaje: 'Error al inicializar alta', data: $r_alta, header: $header, ws: $ws
             );
         }
 
-       if (!empty($datos_adicionales) && isset($r_alta->registro_id)) {
+        if ((property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente)) {
+
+            $horario = $this->html->input_text(cols: 6, disabled: false, name: 'horario',
+                place_holder: 'Horario', row_upd: new stdClass(), value_vacio: false);
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al obtener input', data: $horario, header: $header, ws: $ws);
+            }
+
+            $telefono_emergencia = $this->html->input_text(cols: 6, disabled: false, name: 'telefono_emergencia',
+                place_holder: 'Teléfono Emergencia', row_upd: new stdClass(), value_vacio: false);
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al obtener input', data: $telefono_emergencia, header: $header, ws: $ws);
+            }
+
+            $nombre_emergencia = $this->html->input_text(cols: 6, disabled: false, name: 'nombre_emergencia',
+                place_holder: 'Nombre Emergencia', row_upd: new stdClass(), value_vacio: false);
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al obtener input', data: $nombre_emergencia, header: $header, ws: $ws);
+            }
+
+            $curp = $this->html->input_text(cols: 6, disabled: false, name: 'curp',
+                place_holder: 'CURP', row_upd: new stdClass(), value_vacio: false);
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al obtener input', data: $curp, header: $header, ws: $ws);
+            }
+
+            $foto = $this->html->input_file(cols: 6, name: 'foto', row_upd: new stdClass(), 
+                value_vacio: false, place_holder: 'Foto del Estudiante', required: false);
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al obtener input', data: $foto, header: $header, ws: $ws);
+            }
+
+            $fecha_cumpleanos = $this->html->input_text(cols: 6, disabled: false, name: 'fecha_cumpleanos',
+                place_holder: 'Fecha de Cumpleaños', row_upd: new stdClass(), value_vacio: false);
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al obtener input', data: $fecha_cumpleanos, header: $header, ws: $ws);
+            }
+
+
+            $this->inputs->fecha_cumpleanos = $fecha_cumpleanos;
+            $this->inputs->foto = $foto;
+            $this->inputs->horario = $horario;
+            $this->inputs->telefono_emergencia = $telefono_emergencia;
+            $this->inputs->nombre_emergencia = $nombre_emergencia;
+            $this->inputs->curp = $curp;
+        }
+
+        $this->include_inputs_alta = (new generales())->path_base . 'templates/inputs/com_cliente/alta.php';
+
+
+        return $r_alta;
+    }
+   public function alta_bd(bool $header, bool $ws = false): array|stdClass
+{
+    $datos_adicionales = [];
+    $nombre_cliente = $_POST['razon_social'] ?? '';
+
+    if (property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente) {
+        $campos_extra = ['horario', 'telefono_emergencia', 'nombre_emergencia', 'curp', 'fecha_cumpleanos'];
+        foreach ($campos_extra as $campo) {
+            $datos_adicionales[$campo] = $_POST[$campo] ?? null;
+            unset($_POST[$campo]);
+        }
+    }
+
+    $r_alta = parent::alta_bd(header: false, ws: false);
+    if (errores::$error) {
+        return $this->retorno_error(
+            mensaje: 'Error al dar de alta cliente', data: $r_alta, header: $header, ws: $ws
+        );
+    }
+
+    if (!empty($datos_adicionales) && isset($r_alta->registro_id)) {
         $datos_adicionales['com_cliente_id'] = $r_alta->registro_id;
         $datos_adicionales['codigo'] = 'DAC_' . $r_alta->registro_id;
         $datos_adicionales['descripcion'] = 'Datos adicionales cliente ' . $r_alta->registro_id;
@@ -642,20 +643,30 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
                 data: $r_adicional, header: $header, ws: $ws
             );
         }
+
+        $fecha_cumpleanos = $datos_adicionales['fecha_cumpleanos'] ?? '';
+        if (!empty($fecha_cumpleanos)) {
+            $this->notifica_cumpleanos_calendar(
+                com_cliente_id: $r_alta->registro_id,
+                nombre: $nombre_cliente,
+                fecha_cumpleanos: $fecha_cumpleanos,
+                accion: 'alta'
+            );
+        }
     }
 
-        if ($header) {
-            $this->retorno_base(registro_id: $r_alta->registro_id, result: $r_alta,
-                siguiente_view: 'modifica', ws: $ws);
-        }
-        if ($ws) {
-            header('Content-Type: application/json');
-            echo json_encode($r_alta, JSON_THROW_ON_ERROR);
-            exit;
-        }
-
-        return $r_alta;
+    if ($header) {
+        $this->retorno_base(registro_id: $r_alta->registro_id, result: $r_alta,
+            siguiente_view: 'modifica', ws: $ws);
     }
+    if ($ws) {
+        header('Content-Type: application/json');
+        echo json_encode($r_alta, JSON_THROW_ON_ERROR);
+        exit;
+    }
+
+    return $r_alta;
+}
 
   public function modifica_datos_adicionales(bool $header, bool $ws = false): array|string
     {
@@ -752,9 +763,8 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         return [];
     }
 
-    public function modifica_datos_adicionales_bd(bool $header, bool $ws = false): array|stdClass
+  public function modifica_datos_adicionales_bd(bool $header, bool $ws = false): array|stdClass
     {
-
         if (!property_exists(generales::class, 'datos_adicionales_com_cliente') || !generales::$datos_adicionales_com_cliente) {
             return $this->retorno_error(
                 mensaje: 'Acción no disponible en este sistema',
@@ -762,7 +772,7 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
             );
         }
 
-        $campos_extra = ['horario', 'telefono_emergencia', 'nombre_emergencia', 'curp','fecha_cumpleanos'];
+        $campos_extra = ['horario', 'telefono_emergencia', 'nombre_emergencia', 'curp', 'fecha_cumpleanos'];
         $datos_adicionales = [];
         foreach ($campos_extra as $campo) {
             $datos_adicionales[$campo] = $_POST[$campo] ?? null;
@@ -771,6 +781,14 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         $modelo_adicional = new datos_adicionales_com_cliente_artistik(link: $this->link);
         $filtro = array('datos_adicionales_com_cliente_artistik.com_cliente_id' => $this->registro_id);
         $r_datos = $modelo_adicional->filtro_and(filtro: $filtro);
+
+        // Capturar estado anterior del cumpleaños ANTES de modificar
+        $fecha_anterior = '';
+        $tiene_event_id = false;
+        if (!errores::$error && $r_datos->n_registros > 0) {
+            $fecha_anterior = $r_datos->registros[0]['datos_adicionales_com_cliente_artistik_fecha_cumpleanos'] ?? '';
+            $tiene_event_id = !empty($r_datos->registros[0]['datos_adicionales_com_cliente_artistik_calendar_event_id'] ?? '');
+        }
 
         // Manejo de foto
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
@@ -813,6 +831,37 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
             }
         }
 
+        // Notificación a Google Calendar si cambió la fecha de cumpleaños
+        $fecha_nueva = $datos_adicionales['fecha_cumpleanos'] ?? '';
+        if ($fecha_nueva !== $fecha_anterior) {
+            $nombre = '';
+            $com_cliente_modelo = new com_cliente($this->link);
+            $com_cliente_modelo->registro_id = $this->registro_id;
+            $data_cliente = $com_cliente_modelo->obten_data();
+            if (!errores::$error) {
+                $nombre = $data_cliente['com_cliente_razon_social'] ?? '';
+            }
+
+            if (!empty($fecha_nueva) && !$tiene_event_id) {
+                $accion_calendar = 'alta';
+            } elseif (!empty($fecha_nueva) && $tiene_event_id) {
+                $accion_calendar = 'modifica';
+            } elseif (empty($fecha_nueva) && $tiene_event_id) {
+                $accion_calendar = 'elimina';
+            } else {
+                $accion_calendar = '';
+            }
+
+            if (!empty($accion_calendar)) {
+                $this->notifica_cumpleanos_calendar(
+                    com_cliente_id: $this->registro_id,
+                    nombre: $nombre,
+                    fecha_cumpleanos: $fecha_nueva,
+                    accion: $accion_calendar
+                );
+            }
+        }
+
         $_SESSION['exito'][]['mensaje'] = 'Datos adicionales modificados correctamente';
 
         $link = "index.php?seccion=com_cliente&accion=modifica_datos_adicionales";
@@ -823,5 +872,109 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         }
         header("Location: " . $link);
         exit;
+    }
+
+    //recordatorio de notificaciones para artiski 
+
+    public function notifica_cumpleanos_calendar(
+    int $com_cliente_id,
+    string $nombre,
+    string $fecha_cumpleanos,
+    string $accion
+    ): array|bool
+    {
+        // Validar acción permitida
+        $acciones_validas = ['alta', 'modifica', 'elimina'];
+        if (!in_array($accion, $acciones_validas, true)) {
+            return $this->errores->error(
+                mensaje: "Acción no válida para calendar: $accion",
+                data: compact('accion')
+            );
+        }
+
+        // Obtener calendar_event_id existente (para modifica/elimina)
+        $calendar_event_id = '';
+        if ($accion !== 'alta') {
+            $datos_adicionales = (new datos_adicionales_com_cliente_artistik($this->link))
+                ->filtro_and(filtro: ['datos_adicionales_com_cliente_artistik.com_cliente_id' => $com_cliente_id]);
+
+            if (errores::$error) {
+                return $this->errores->error(
+                    mensaje: 'Error al obtener datos adicionales',
+                    data: $datos_adicionales
+                );
+            }
+
+            $calendar_event_id = $datos_adicionales->registros[0]['datos_adicionales_com_cliente_artistik_calendar_event_id'] ?? '';
+
+            if (empty($calendar_event_id)) {
+                // No hay evento en Calendar, nada que modificar/eliminar
+                return true;
+            }
+        }
+
+        // Disparar webhook a n8n
+        $n8n = new _n8n_request();
+        $rs = $n8n->request_cumpleanos_calendar(
+            com_cliente_id: $com_cliente_id,
+            nombre: $nombre,
+            fecha_cumpleanos: $fecha_cumpleanos,
+            accion: $accion,
+            calendar_event_id: $calendar_event_id
+        );
+
+        if (errores::$error) {
+            return $this->errores->error(
+                mensaje: 'Error al notificar a n8n calendar',
+                data: $rs
+            );
+        }
+
+        // En alta: guardar el event_id que devuelve n8n/Google Calendar
+        if ($accion === 'alta') {
+            $response = json_decode($rs['response'], true);
+            $event_id = $response['calendar_event_id'] ?? '';
+
+            if (!empty($event_id)) {
+                $datos_model = new datos_adicionales_com_cliente_artistik($this->link);
+                $datos = $datos_model->filtro_and(
+                    filtro: ['datos_adicionales_com_cliente_artistik.com_cliente_id' => $com_cliente_id]
+                );
+
+                if (errores::$error) {
+                    return $this->errores->error(mensaje: 'Error al buscar datos adicionales', data: $datos);
+                }
+
+                $registro_id = $datos->registros[0]['datos_adicionales_com_cliente_artistik_id'] ?? 0;
+                if ($registro_id > 0) {
+                    $upd = $datos_model->modifica_bd(
+                        registro: ['calendar_event_id' => $event_id],
+                        id: $registro_id
+                    );
+
+                    if (errores::$error) {
+                        return $this->errores->error(mensaje: 'Error al guardar calendar_event_id', data: $upd);
+                    }
+                }
+            }
+        }
+
+        // En elimina: limpiar el event_id de la BD
+        if ($accion === 'elimina') {
+            $datos_model = new datos_adicionales_com_cliente_artistik($this->link);
+            $datos = $datos_model->filtro_and(
+                filtro: ['datos_adicionales_com_cliente_artistik.com_cliente_id' => $com_cliente_id]
+            );
+
+            if (!errores::$error && isset($datos->registros[0])) {
+                $registro_id = $datos->registros[0]['datos_adicionales_com_cliente_artistik_id'];
+                $datos_model->modifica_bd(
+                    registro: ['calendar_event_id' => ''],
+                    id: $registro_id
+                );
+            }
+        }
+
+        return $rs;
     }
 }
