@@ -278,7 +278,7 @@ class _n8n_request
     string $nombre,
     string $fecha_cumpleanos,
     string $accion,
-    string $calendar_event_id = ''
+    string $calendar_event_ref = ''
     ): array
     {
         $data = [
@@ -287,7 +287,7 @@ class _n8n_request
             'nombre' => $nombre,
             'fecha_cumpleanos' => $fecha_cumpleanos,
             'accion' => $accion,
-            'calendar_event_id' => $calendar_event_id
+            'calendar_event_ref' => $calendar_event_ref
         ];
 
         try {

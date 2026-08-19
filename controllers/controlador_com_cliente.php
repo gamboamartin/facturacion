@@ -787,7 +787,7 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         $tiene_event_id = false;
         if (!errores::$error && $r_datos->n_registros > 0) {
             $fecha_anterior = $r_datos->registros[0]['datos_adicionales_com_cliente_artistik_fecha_cumpleanos'] ?? '';
-            $tiene_event_id = !empty($r_datos->registros[0]['datos_adicionales_com_cliente_artistik_calendar_event_id'] ?? '');
+            $tiene_event_id = !empty($r_datos->registros[0]['datos_adicionales_com_cliente_artistik_calendar_event_ref'] ?? '');
         }
 
         // Manejo de foto
@@ -892,8 +892,8 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
             );
         }
 
-        // Obtener calendar_event_id existente (para modifica/elimina)
-        $calendar_event_id = '';
+        // Obtener calendar_event_ref existente (para modifica/elimina)
+        $calendar_event_ref = '';
         if ($accion !== 'alta') {
             $datos_adicionales = (new datos_adicionales_com_cliente_artistik($this->link))
                 ->filtro_and(filtro: ['datos_adicionales_com_cliente_artistik.com_cliente_id' => $com_cliente_id]);
@@ -905,9 +905,9 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
                 );
             }
 
-            $calendar_event_id = $datos_adicionales->registros[0]['datos_adicionales_com_cliente_artistik_calendar_event_id'] ?? '';
+            $calendar_event_ref = $datos_adicionales->registros[0]['datos_adicionales_com_cliente_artistik_calendar_event_ref'] ?? '';
 
-            if (empty($calendar_event_id)) {
+            if (empty($calendar_event_ref)) {
                 // No hay evento en Calendar, nada que modificar/eliminar
                 return true;
             }
@@ -920,7 +920,7 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
             nombre: $nombre,
             fecha_cumpleanos: $fecha_cumpleanos,
             accion: $accion,
-            calendar_event_id: $calendar_event_id
+            calendar_event_ref: $calendar_event_ref
         );
 
         if (errores::$error) {
@@ -933,7 +933,7 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         // En alta: guardar el event_id que devuelve n8n/Google Calendar
         if ($accion === 'alta') {
             $response = json_decode($rs['response'], true);
-            $event_id = $response['calendar_event_id'] ?? '';
+            $event_id = $response['calendar_event_ref'] ?? '';
 
             if (!empty($event_id)) {
                 $datos_model = new datos_adicionales_com_cliente_artistik($this->link);
@@ -948,12 +948,12 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
                 $registro_id = $datos->registros[0]['datos_adicionales_com_cliente_artistik_id'] ?? 0;
                 if ($registro_id > 0) {
                     $upd = $datos_model->modifica_bd(
-                        registro: ['calendar_event_id' => $event_id],
+                        registro: ['calendar_event_ref' => $event_id],
                         id: $registro_id
                     );
 
                     if (errores::$error) {
-                        return $this->errores->error(mensaje: 'Error al guardar calendar_event_id', data: $upd);
+                        return $this->errores->error(mensaje: 'Error al guardar calendar_event_ref', data: $upd);
                     }
                 }
             }
@@ -969,7 +969,7 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
             if (!errores::$error && isset($datos->registros[0])) {
                 $registro_id = $datos->registros[0]['datos_adicionales_com_cliente_artistik_id'];
                 $datos_model->modifica_bd(
-                    registro: ['calendar_event_id' => ''],
+                    registro: ['calendar_event_ref' => ''],
                     id: $registro_id
                 );
             }
