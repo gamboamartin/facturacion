@@ -644,15 +644,15 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
             );
         }
 
-        // $fecha_cumpleanos = $datos_adicionales['fecha_cumpleanos'] ?? '';
-        // if (!empty($fecha_cumpleanos)) {
-        //     $this->notifica_cumpleanos_calendar(
-        //         com_cliente_id: $r_alta->registro_id,
-        //         nombre: $nombre_cliente,
-        //         fecha_cumpleanos: $fecha_cumpleanos,
-        //         accion: 'alta'
-        //     );
-        // }
+        $fecha_cumpleanos = $datos_adicionales['fecha_cumpleanos'] ?? '';
+        if (!empty($fecha_cumpleanos)) {
+            $this->notifica_cumpleanos_calendar(
+                com_cliente_id: $r_alta->registro_id,
+                nombre: $nombre_cliente,
+                fecha_cumpleanos: $fecha_cumpleanos,
+                accion: 'alta'
+            );
+        }
     }
 
     if ($header) {
