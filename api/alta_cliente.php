@@ -265,6 +265,8 @@ if (errores::$error) {
 
 // paso 11.5 CORREGIR REGIMEN FISCAL POST-ALTA
 
+error_log("DEBUG REGIMEN: regimen_fiscal_id=$regimen_fiscal_id, registro_id=" . ($r_alta->registro_id ?? 'NULL'));
+
 if ($regimen_fiscal_id > 0 && isset($r_alta->registro_id)) {
     $sql_update = "UPDATE com_cliente 
                    SET cat_sat_regimen_fiscal_id = :reg 
@@ -274,8 +276,8 @@ if ($regimen_fiscal_id > 0 && isset($r_alta->registro_id)) {
         ':reg' => $regimen_fiscal_id,
         ':id'  => $r_alta->registro_id
     ]);
+    error_log("DEBUG REGIMEN: UPDATE ejecutado");
 }
-
 
 
 // paso 12. RESPUESTA 
