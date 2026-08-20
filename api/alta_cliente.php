@@ -263,6 +263,21 @@ if (errores::$error) {
     exit;
 }
 
+// paso 11.5 CORREGIR REGIMEN FISCAL POST-ALTA
+
+if ($regimen_fiscal_id > 0 && isset($r_alta->registro_id)) {
+    $sql_update = "UPDATE com_cliente 
+                   SET cat_sat_regimen_fiscal_id = :reg 
+                   WHERE id = :id";
+    $stmt_update = $link->prepare($sql_update);
+    $stmt_update->execute([
+        ':reg' => $regimen_fiscal_id,
+        ':id'  => $r_alta->registro_id
+    ]);
+}
+
+
+
 // paso 12. RESPUESTA 
 
 $respuesta = [
