@@ -87,8 +87,7 @@ $regimen_fiscal_id = 0;
 error_log("DEBUG REG: regimen_texto=[$regimen_texto]");
 
 if ($regimen_texto !== '') {
-    $regimen_limpio = preg_replace('/^r[ée]gimen\s+de\s+/i', '', $regimen_texto);
-
+   $regimen_limpio = preg_replace('/^r[ée]gimen\s+de\s+/iu', '', $regimen_texto);
     $sql_reg = "SELECT id FROM cat_sat_regimen_fiscal 
                 WHERE descripcion LIKE :desc 
                 AND status = 'activo' 
@@ -265,7 +264,6 @@ if (errores::$error) {
 
 // paso 11.5 CORREGIR REGIMEN FISCAL POST-ALTA
 
-error_log("DEBUG REGIMEN: regimen_fiscal_id=$regimen_fiscal_id, registro_id=" . ($r_alta->registro_id ?? 'NULL'));
 
 if ($regimen_fiscal_id > 0 && isset($r_alta->registro_id)) {
     $sql_update = "UPDATE com_cliente 
@@ -276,7 +274,6 @@ if ($regimen_fiscal_id > 0 && isset($r_alta->registro_id)) {
         ':reg' => $regimen_fiscal_id,
         ':id'  => $r_alta->registro_id
     ]);
-    error_log("DEBUG REGIMEN: UPDATE ejecutado");
 }
 
 
