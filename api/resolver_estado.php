@@ -188,7 +188,7 @@ if ($accion === 'resolver') {
 
     // Consultar estado
     $sql = "SELECT intent_activo, paso_actual, datos_parciales
-            FROM tmp_conversacion_estado
+            FROM n8n_estado_conversacion
             WHERE telefono = :telefono
             LIMIT 1";
 
@@ -223,7 +223,7 @@ if ($accion === 'resolver') {
     ];
     foreach ($palabras_cancelar as $palabra) {
         if (mb_strpos($mensaje_normalizado, $palabra) !== false) {
-            $sql_del = "DELETE FROM tmp_conversacion_estado WHERE telefono = :telefono";
+            $sql_del = "DELETE FROM n8n_estado_conversacion WHERE telefono = :telefono";
             $link->prepare($sql_del)->execute([':telefono' => $telefono_whatsapp]);
 
             echo json_encode([
@@ -260,7 +260,7 @@ if ($accion === 'resolver') {
 
         // Si es descargar_factura -> avanzar a esperando_formato
         if ($intent_activo === 'descarga_factura') {
-            $sql_upd = "UPDATE tmp_conversacion_estado
+            $sql_upd = "UPDATE n8n_estado_conversacion
                         SET paso_actual = 'esperando_formato',
                             datos_parciales = :datos,
                             updated_at = NOW()
@@ -282,7 +282,7 @@ if ($accion === 'resolver') {
 
         // Si es timbra_factura -> listo, ejecutar directo
         if ($intent_activo === 'timbra_factura') {
-            $sql_del = "DELETE FROM tmp_conversacion_estado WHERE telefono = :telefono";
+            $sql_del = "DELETE FROM n8n_estado_conversacion WHERE telefono = :telefono";
             $link->prepare($sql_del)->execute([':telefono' => $telefono_whatsapp]);
 
             echo json_encode([
@@ -355,7 +355,7 @@ if ($accion === 'resolver') {
         $datos['doc'] = $doc;
 
         // Listo: borrar estado y devolver datos para ejecutar
-        $sql_del = "DELETE FROM tmp_conversacion_estado WHERE telefono = :telefono";
+        $sql_del = "DELETE FROM n8n_estado_conversacion WHERE telefono = :telefono";
         $link->prepare($sql_del)->execute([':telefono' => $telefono_whatsapp]);
 
         echo json_encode([
@@ -413,7 +413,7 @@ if ($accion === 'resolver') {
 
         // Negación explícita: cancelar
         if ($es_negacion) {
-            $sql_del = "DELETE FROM tmp_conversacion_estado WHERE telefono = :telefono";
+            $sql_del = "DELETE FROM n8n_estado_conversacion WHERE telefono = :telefono";
             $link->prepare($sql_del)->execute([':telefono' => $telefono_whatsapp]);
 
             echo json_encode([
@@ -437,7 +437,7 @@ if ($accion === 'resolver') {
         }
 
         // Confirmó: avanzar a esperando_tel
-        $sql_upd = "UPDATE tmp_conversacion_estado
+        $sql_upd = "UPDATE n8n_estado_conversacion
                     SET paso_actual = 'esperando_tel',
                         updated_at = NOW()
                     WHERE telefono = :telefono";
@@ -473,7 +473,7 @@ if ($accion === 'resolver') {
         $datos['tel'] = $tel;
 
         // Listo: borrar estado y devolver datos para ejecutar
-        $sql_del = "DELETE FROM tmp_conversacion_estado WHERE telefono = :telefono";
+        $sql_del = "DELETE FROM n8n_estado_conversacion WHERE telefono = :telefono";
         $link->prepare($sql_del)->execute([':telefono' => $telefono_whatsapp]);
 
         echo json_encode([
@@ -511,7 +511,7 @@ if ($accion === 'resolver') {
         $datos['rfc'] = $rfc_normalizado;
 
         // Listo: borrar estado y devolver datos para ejecutar
-        $sql_del = "DELETE FROM tmp_conversacion_estado WHERE telefono = :telefono";
+        $sql_del = "DELETE FROM n8n_estado_conversacion WHERE telefono = :telefono";
         $link->prepare($sql_del)->execute([':telefono' => $telefono_whatsapp]);
 
         echo json_encode([
@@ -525,7 +525,7 @@ if ($accion === 'resolver') {
     }
 
     // ---- PASO NO RECONOCIDO: limpiar y mandar al flujo normal ----
-    $sql_del = "DELETE FROM tmp_conversacion_estado WHERE telefono = :telefono";
+    $sql_del = "DELETE FROM n8n_estado_conversacion WHERE telefono = :telefono";
     $link->prepare($sql_del)->execute([':telefono' => $telefono_whatsapp]);
 
     echo json_encode([
@@ -610,7 +610,7 @@ if ($accion === 'registrar') {
     }
 
     // UPSERT: si ya existe estado para este teléfono, lo reemplaza
-    $sql = "INSERT INTO tmp_conversacion_estado (telefono, intent_activo, paso_actual, datos_parciales)
+    $sql = "INSERT INTO n8n_estado_conversacion (telefono, intent_activo, paso_actual, datos_parciales)
             VALUES (:telefono, :intent, :paso, :datos)
             ON DUPLICATE KEY UPDATE
                 intent_activo   = VALUES(intent_activo),
