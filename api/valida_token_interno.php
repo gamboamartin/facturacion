@@ -2,7 +2,7 @@
 
 function valida_token_interno(): void
 {
-    $token_esperado = 'EL_MISMO_TOKEN_LARGO';
+    $token_esperado = 'token_n8n_ivitec';
     $token_recibido = $_SERVER['HTTP_X_API_TOKEN'] ?? '';
 
     if (!hash_equals($token_esperado, $token_recibido)) {
