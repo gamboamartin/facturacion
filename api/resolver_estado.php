@@ -158,9 +158,9 @@ function reconstruir_folio(string $texto): string
 
 $input = json_decode(file_get_contents('php://input'), true) ?: [];
 
-$accion            = strtolower(trim($input['accion'] ?? ''));
-$telefono_whatsapp = preg_replace('/\D+/', '', trim($input['telefono_whatsapp'] ?? ''));
-$mensaje           = trim($input['mensaje'] ?? '');
+$accion            = strtolower(trim($input['accion'] ?? $_GET['accion'] ?? ''));
+$telefono_whatsapp = preg_replace('/\D+/', '', trim($input['telefono_whatsapp'] ?? $_GET['telefono_whatsapp'] ?? $_GET['telefono'] ?? ''));
+$mensaje           = trim($input['mensaje'] ?? $_GET['mensaje'] ?? '');
 
 // ============================================================
 // paso 2. VALIDACIONES BASICAS
