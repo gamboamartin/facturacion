@@ -13,6 +13,8 @@ require "init.php";
 require 'vendor/autoload.php';
 require_once __DIR__ . '/seguridad_edpoint.php';
 require_once __DIR__ . '/catalogos_sat.php';
+require_once __DIR__ . '/valida_token_interno.php';
+valida_token_interno();
 
 use config\generales;
 

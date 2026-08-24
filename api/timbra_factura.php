@@ -18,6 +18,8 @@ chdir(__DIR__ . '/..');
 require "init.php";
 require 'vendor/autoload.php';
 require_once __DIR__ . '/seguridad_edpoint.php';
+require_once __DIR__ . '/valida_token_interno.php';
+valida_token_interno();
 
 use config\generales;
 
@@ -26,7 +28,6 @@ header('Content-Type: application/json; charset=utf-8');
 $con  = new conexion();
 $link = conexion::$link;
 
-// TODO: crear generales::$accion_id_timbrar_factura cuando exista la acción
 $accion_id = generales::$accion_id_timbrar_factura;
 
 // ── paso 1. PARAMETROS DE ENTRADA ──

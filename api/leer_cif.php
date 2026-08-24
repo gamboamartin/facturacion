@@ -8,6 +8,8 @@ chdir(__DIR__ . '/..');
 require "init.php";
 require 'vendor/autoload.php';
 require_once __DIR__ . '/seguridad_edpoint.php';
+require_once __DIR__ . '/valida_token_interno.php';
+valida_token_interno();
 
 use config\generales;
 
@@ -26,7 +28,11 @@ if (!isset($_FILES['documento']) || $_FILES['documento']['error'] !== UPLOAD_ERR
     exit;
 }
 
-if ($_FILES['documento']['type'] !== 'application/pdf') {
+$finfo = finfo_open(FILEINFO_MIME_TYPE);
+$mime_real = finfo_file($finfo, $_FILES['documento']['tmp_name']);
+finfo_close($finfo);
+
+if ($mime_real !== 'application/pdf') {
     echo json_encode([
         'STS' => 'error',
         'MSG' => 'El archivo debe ser un PDF'

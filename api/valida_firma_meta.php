@@ -1,4 +1,3 @@
-// valida_firma_meta.php
 <?php
 header('Content-Type: application/json');
 

@@ -5,6 +5,8 @@ use base\conexion;
 chdir(__DIR__ . '/..');
 require "init.php";
 require 'vendor/autoload.php';
+require_once __DIR__ . '/valida_token_interno.php';
+valida_token_interno();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -154,9 +156,11 @@ function reconstruir_folio(string $texto): string
 // paso 1. PARAMETROS DE ENTRADA
 // ============================================================
 
-$accion            = strtolower(trim($_GET['accion'] ?? ''));
-$telefono_whatsapp = preg_replace('/\D+/', '', trim($_GET['telefono_whatsapp'] ?? $_GET['telefono'] ?? ''));
-$mensaje           = trim($_GET['mensaje'] ?? '');
+$input = json_decode(file_get_contents('php://input'), true) ?: [];
+
+$accion            = strtolower(trim($input['accion'] ?? ''));
+$telefono_whatsapp = preg_replace('/\D+/', '', trim($input['telefono_whatsapp'] ?? ''));
+$mensaje           = trim($input['mensaje'] ?? '');
 
 // ============================================================
 // paso 2. VALIDACIONES BASICAS
@@ -704,10 +708,14 @@ if ($accion === 'buscar_mensaje') {
     $sql = "SELECT contenido, telefono, direccion, created_at
             FROM n8n_tmp_mensajes_whatsapp
             WHERE message_id = :message_id
+            AND telefono = :telefono
             LIMIT 1";
 
     $stmt = $link->prepare($sql);
-    $stmt->execute([':message_id' => $message_id]);
+    $stmt->execute([
+            ':message_id' => $message_id,
+            ':telefono'   => $telefono_whatsapp
+        ]);
     $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$resultado) {

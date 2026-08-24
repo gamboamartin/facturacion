@@ -11,167 +11,36 @@ class SeguridadEndpoint
         $this->link = $link;
     }
 
-    // esto es para los clientes de los clientes
+   
+    private function registra_log(
+        string $telefono,
+        string $accion,
+        string $resultado
+    ): void {
+        try {
+            $sql = "INSERT INTO n8n_log_auth (telefono, accion, resultado, ip)
+                    VALUES (:tel, :accion, :resultado, :ip)";
+            $this->link->prepare($sql)->execute([
+                ':tel'       => $telefono,
+                ':accion'    => $accion,
+                ':resultado' => $resultado,
+                ':ip'        => $_SERVER['REMOTE_ADDR'] ?? ''
+            ]);
+        } catch (\Throwable $e) {
+            // No hacemos nada si falla el registro del log, para no interrumpir el flujo
+        }
+    }
 
-    // public function valida_contacto_cliente_factura(
-    //     string $telefono_whatsapp,
-    //     string $folio = '',
-    //     string $rfc = ''
-    // ): array {
-    //     $telefono_whatsapp = preg_replace('/\D+/', '', $telefono_whatsapp);
-    //     $folio = trim($folio);
-    //     $rfc = strtoupper(trim($rfc));
 
-    //     if ($telefono_whatsapp === '') {
-    //         return [
-    //             'autorizado' => false,
-    //             'status' => 'telefono_vacio',
-    //             'mensaje' => 'El teléfono de WhatsApp es requerido'
-    //         ];
-    //     }
-
-    //     if ($folio === '' && $rfc === '') {
-    //         return [
-    //             'autorizado' => false,
-    //             'status' => 'datos_insuficientes',
-    //             'mensaje' => 'Debes indicar folio o RFC para validar la solicitud'
-    //         ];
-    //     }
-
-    //     if ($folio !== '') {
-    //         return $this->valida_por_folio(
-    //             telefono_whatsapp: $telefono_whatsapp,
-    //             folio: $folio,
-    //             rfc: $rfc
-    //         );
-    //     }
-
-    //     return $this->valida_por_rfc(
-    //         telefono_whatsapp: $telefono_whatsapp,
-    //         rfc: $rfc
-    //     );
-    // }
-
-    // private function valida_por_folio(
-    //     string $telefono_whatsapp,
-    //     string $folio,
-    //     string $rfc = ''
-    // ): array {
-    //     $where_rfc = '';
-    //     $params = [
-    //         ':telefono_whatsapp' => $telefono_whatsapp,
-    //         ':folio' => $folio,
-    //         ':estatus_telefono' => 'validado'
-    //     ];
-
-    //     if ($rfc !== '') {
-    //         $where_rfc = ' AND com_cliente.rfc = :rfc ';
-    //         $params[':rfc'] = $rfc;
-    //     }
-
-    //     $sql = "
-    //         SELECT
-    //             fc_factura.id AS fc_factura_id,
-    //             fc_factura.folio AS fc_factura_folio,
-    //             com_cliente.id AS com_cliente_id,
-    //             com_cliente.rfc AS com_cliente_rfc,
-    //             com_contacto.id AS com_contacto_id
-    //         FROM fc_factura
-    //         INNER JOIN com_sucursal
-    //             ON com_sucursal.id = fc_factura.com_sucursal_id
-    //         INNER JOIN com_cliente
-    //             ON com_cliente.id = com_sucursal.com_cliente_id
-    //         INNER JOIN com_contacto
-    //             ON com_contacto.com_cliente_id = com_cliente.id
-    //         WHERE fc_factura.folio = :folio
-    //           AND CONCAT(com_contacto.codigo_pais, com_contacto.telefono) = :telefono_whatsapp
-    //           AND com_contacto.estatus_telefono = :estatus_telefono
-    //           $where_rfc
-    //         LIMIT 1
-    //     ";
-
-    //     $stmt = $this->link->prepare($sql);
-    //     $stmt->execute($params);
-    //     $registro = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    //     if (!$registro) {
-    //         return [
-    //             'autorizado' => false,
-    //             'status' => 'no_autorizado',
-    //             'mensaje' => 'Tu número no está asociado al cliente de la factura solicitada'
-    //         ];
-    //     }
-
-    //     return [
-    //         'autorizado' => true,
-    //         'status' => 'autorizado',
-    //         'tipo_validacion' => 'folio',
-    //         'mensaje' => 'Solicitud autorizada por folio',
-    //         'fc_factura_id' => (int)$registro['fc_factura_id'],
-    //         'fc_factura_folio' => $registro['fc_factura_folio'],
-    //         'com_cliente_id' => (int)$registro['com_cliente_id'],
-    //         'com_cliente_rfc' => $registro['com_cliente_rfc'],
-    //         'com_contacto_id' => (int)$registro['com_contacto_id']
-    //     ];
-    // }
-
-    // private function valida_por_rfc(
-    //     string $telefono_whatsapp,
-    //     string $rfc
-    // ): array {
-    //     $params = [
-    //         ':telefono_whatsapp' => $telefono_whatsapp,
-    //         ':rfc' => $rfc,
-    //         ':estatus_telefono' => 'validado'
-    //     ];
-
-    //     $sql = "
-    //         SELECT
-    //             com_cliente.id AS com_cliente_id,
-    //             com_cliente.rfc AS com_cliente_rfc,
-    //             com_contacto.id AS com_contacto_id
-    //         FROM com_cliente
-    //         INNER JOIN com_contacto
-    //             ON com_contacto.com_cliente_id = com_cliente.id
-    //         WHERE com_cliente.rfc = :rfc
-    //           AND CONCAT(com_contacto.codigo_pais, com_contacto.telefono) = :telefono_whatsapp
-    //           AND com_contacto.estatus_telefono = :estatus_telefono
-    //         LIMIT 1
-    //     ";
-
-    //     $stmt = $this->link->prepare($sql);
-    //     $stmt->execute($params);
-    //     $registro = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    //     if (!$registro) {
-    //         return [
-    //             'autorizado' => false,
-    //             'status' => 'no_autorizado',
-    //             'mensaje' => 'Tu número no está asociado al cliente solicitado'
-    //         ];
-    //     }
-
-    //     return [
-    //         'autorizado' => true,
-    //         'status' => 'autorizado',
-    //         'tipo_validacion' => 'rfc',
-    //         'mensaje' => 'Solicitud autorizada por RFC',
-    //         'fc_factura_id' => 0,
-    //         'fc_factura_folio' => '',
-    //         'com_cliente_id' => (int)$registro['com_cliente_id'],
-    //         'com_cliente_rfc' => $registro['com_cliente_rfc'],
-    //         'com_contacto_id' => (int)$registro['com_contacto_id']
-    //     ];
-    // }
-
-    // VALIDACION PARA USUARIOS DEL SISTEMA
+    // ================================================================
+    // VALIDACION PARA USUARIOS DEL SISTEMA CON FACTURA (folio o RFC)
+    // ================================================================
 
     public function valida_adm_usuario_factura(
         string $telefono_whatsapp,
         string $folio = '',
         int $accion_id = 0,
         string $rfc = '',
-        
     ): array {
         $telefono_whatsapp = preg_replace('/\D+/', '', $telefono_whatsapp);
         $folio = trim($folio);
@@ -186,6 +55,7 @@ class SeguridadEndpoint
         }
 
         if ($folio === '' && $rfc === '') {
+            $this->registra_log($telefono_whatsapp, 'valida_adm_usuario_factura', 'datos_insuficientes');
             return [
                 'autorizado' => false,
                 'status' => 'datos_insuficientes',
@@ -198,6 +68,7 @@ class SeguridadEndpoint
         );
 
         if (!$r_usuario['encontrado']) {
+            $this->registra_log($telefono_whatsapp, 'valida_adm_usuario_factura', 'no_encontrado');
             return [
                 'autorizado' => false,
                 'status' => 'no_encontrado',
@@ -205,10 +76,10 @@ class SeguridadEndpoint
             ];
         }
 
-      
         if ($accion_id > 0) {
             $grupo_usuario = (int)$r_usuario['adm_grupo_id'];
             if (!$this->valida_seccion_permiso($accion_id, $grupo_usuario)) {
+                $this->registra_log($telefono_whatsapp, 'valida_adm_usuario_factura', 'sin_permiso');
                 return [
                     'autorizado' => false,
                     'status'     => 'sin_permiso',
@@ -218,24 +89,33 @@ class SeguridadEndpoint
         }
 
         if ($folio !== '') {
-            return $this->valida_adm_usuario_por_folio(
+            $resultado = $this->valida_adm_usuario_por_folio(
                 telefono_whatsapp: $telefono_whatsapp,
                 folio: $folio,
                 rfc: $rfc,
                 adm_usuario: $r_usuario
             );
+            $this->registra_log($telefono_whatsapp, 'valida_adm_usuario_factura', $resultado['status']);
+            return $resultado;
         }
 
-        return $this->valida_adm_usuario_por_rfc(
+        $resultado = $this->valida_adm_usuario_por_rfc(
             telefono_whatsapp: $telefono_whatsapp,
             rfc: $rfc,
             adm_usuario: $r_usuario
         );
+        $this->registra_log($telefono_whatsapp, 'valida_adm_usuario_factura', $resultado['status']);
+        return $resultado;
     }
 
+
+    // ================================================================
+    // VALIDACION PARA USUARIOS DEL SISTEMA (sin factura)
+    // ================================================================
+
     public function valida_adm_usuario(
-    string $telefono_whatsapp,
-    int    $accion_id = 0
+        string $telefono_whatsapp,
+        int    $accion_id = 0
     ): array {
         $telefono_whatsapp = preg_replace('/\D+/', '', $telefono_whatsapp);
 
@@ -252,6 +132,7 @@ class SeguridadEndpoint
         );
 
         if (!$r_usuario['encontrado']) {
+            $this->registra_log($telefono_whatsapp, 'valida_adm_usuario', 'no_encontrado');
             return [
                 'autorizado' => false,
                 'status'     => 'no_encontrado',
@@ -262,6 +143,7 @@ class SeguridadEndpoint
         if ($accion_id > 0) {
             $grupo_usuario = (int)$r_usuario['adm_grupo_id'];
             if (!$this->valida_seccion_permiso($accion_id, $grupo_usuario)) {
+                $this->registra_log($telefono_whatsapp, 'valida_adm_usuario', 'sin_permiso');
                 return [
                     'autorizado' => false,
                     'status'     => 'sin_permiso',
@@ -270,6 +152,7 @@ class SeguridadEndpoint
             }
         }
 
+        $this->registra_log($telefono_whatsapp, 'valida_adm_usuario', 'autorizado');
         return [
             'autorizado'        => true,
             'status'            => 'autorizado',
@@ -281,10 +164,15 @@ class SeguridadEndpoint
         ];
     }
 
+
+    // ================================================================
+    // METODOS PRIVADOS
+    // ================================================================
+
     private function valida_seccion_permiso(int $accion_id, int $grupo_id): bool
     {
-        $sql = "SELECT id FROM adm_accion_grupo 
-                WHERE adm_accion_id = :accion_id 
+        $sql = "SELECT id FROM adm_accion_grupo
+                WHERE adm_accion_id = :accion_id
                 AND adm_grupo_id  = :grupo_id
                 AND status = 'activo'
                 LIMIT 1";
