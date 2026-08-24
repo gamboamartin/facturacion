@@ -550,10 +550,10 @@ if ($accion === 'resolver') {
 
 if ($accion === 'registrar') {
 
-    $intencion = strtolower(trim($_GET['intencion'] ?? ''));
-    $folio     = trim($_GET['folio'] ?? '');
-    $rfc       = strtoupper(trim($_GET['rfc'] ?? ''));
-    $doc       = strtolower(trim($_GET['doc'] ?? 'pdf'));
+    $intencion = strtolower(trim($input['intencion'] ?? $_GET['intencion'] ?? ''));
+    $folio     = trim($input['folio'] ?? $_GET['folio'] ?? '');
+    $rfc       = strtoupper(trim($input['rfc'] ?? $_GET['rfc'] ?? ''));
+    $doc       = strtolower(trim($input['doc'] ?? $_GET['doc'] ?? 'pdf'));
 
     // Reglas de decisión: ¿necesita estado?
     $registrar = false;
@@ -585,10 +585,10 @@ if ($accion === 'registrar') {
 
     // alta_factura sin RFC pero con campos fiscales -> esperando_rfc
     if ($intencion === 'alta_factura' && $rfc === '') {
-        $fp  = strtoupper(trim($_GET['FP'] ?? ''));
-        $mp  = strtoupper(trim($_GET['MP'] ?? ''));
-        $uc  = strtoupper(trim($_GET['UC'] ?? ''));
-        $mon = strtoupper(trim($_GET['MON'] ?? ''));
+        $fp  = strtoupper(trim($input['FP'] ?? $_GET['FP'] ?? ''));
+        $mp  = strtoupper(trim($input['MP'] ?? $_GET['MP'] ?? ''));
+        $uc  = strtoupper(trim($input['UC'] ?? $_GET['UC'] ?? ''));
+        $mon = strtoupper(trim($input['MON'] ?? $_GET['MON'] ?? ''));
 
         if ($fp !== '' || $mp !== '' || $uc !== '' || $mon !== '') {
             $registrar = true;
@@ -649,8 +649,8 @@ if ($accion === 'registrar') {
 
 if ($accion === 'guardar_mensaje') {
 
-    $message_id = trim($_GET['message_id'] ?? '');
-    $direccion  = strtolower(trim($_GET['direccion'] ?? 'entrante'));
+    $message_id = trim($input['message_id'] ?? $_GET['message_id'] ?? '');
+    $direccion  = strtolower(trim($input['direccion'] ?? $_GET['direccion'] ?? 'entrante'));
     $contenido  = $mensaje; // ya viene de $_GET['mensaje']
 
     if ($message_id === '') {
@@ -694,7 +694,7 @@ if ($accion === 'guardar_mensaje') {
 
 if ($accion === 'buscar_mensaje') {
 
-    $message_id = trim($_GET['message_id'] ?? '');
+   $message_id = trim($input['message_id'] ?? $_GET['message_id'] ?? '');
 
     if ($message_id === '') {
         echo json_encode([
