@@ -586,7 +586,7 @@ if ($accion === 'registrar') {
     // leer_cif exitoso -> esperando_confirmacion
     if ($intencion === 'leer_cif') {
         $registrar = true;
-        $intent_activo = 'alta_cliente';
+        $intent_activo = 'recibir_tel';
         $paso_actual = 'esperando_confirmacion';
     }
 
