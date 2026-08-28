@@ -583,6 +583,13 @@ if ($accion === 'registrar') {
         $paso_actual = 'esperando_tel';
     }
 
+    // leer_cif exitoso -> esperando_confirmacion
+    if ($intencion === 'leer_cif') {
+        $registrar = true;
+        $intent_activo = 'alta_cliente';
+        $paso_actual = 'esperando_confirmacion';
+    }
+
     // alta_factura sin RFC pero con campos fiscales -> esperando_rfc
     if ($intencion === 'alta_factura' && $rfc === '') {
         $fp  = strtoupper(trim($input['FP'] ?? $_GET['FP'] ?? ''));
