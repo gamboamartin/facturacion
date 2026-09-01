@@ -1181,4 +1181,325 @@ class _pdf
             ],
         ];
     }
+
+  private function base_pdf_ivitec(
+        string $tabla,
+        stdClass $data,
+        array $factura,
+        Fpdi $pdf,
+        array $relacionadas,
+        string $ruta_logo,
+        string $ruta_qr
+    ): void {
+        $init = $this->init($pdf);
+        if (errores::$error) {
+            return;
+        }
+
+        $pdf->SetAutoPageBreak(false);
+
+        $this->header_ivitec(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf);
+        $this->receptor_ivitec(factura: $factura, pdf: $pdf);
+        $this->comprobante_ivitec(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf);
+        $this->pago_ivitec(factura: $factura, pdf: $pdf);
+        $this->montos_ivitec(tabla: $tabla, factura: $factura, pdf: $pdf);
+        $this->fiscales_ivitec(data: $data, pdf: $pdf);
+        $this->sellos_ivitec(data: $data, pdf: $pdf);
+
+        if ($ruta_qr !== '' && file_exists($ruta_qr)) {
+            $pdf->Image($ruta_qr, 16, 193, 21, 21, 'png');
+        }
+
+        // IMPORTANTE:
+        // La plantilla PDF suministrada NO contiene la leyenda genérica que actualmente
+        // aparece debajo del footer. Se desactiva para que IVITEC conserve su diseño.
+        // Si IVITEC necesita esa leyenda, conviene crear leyenda_ivitec() con coordenadas propias.
+        // $this->leyenda(pdf: $pdf);
+    }
+
+
+   
+    private function header_ivitec(string $tabla, stdClass $data, array $factura, Fpdi $pdf): void
+    {
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetFont('Arial', 'B', 8);
+        $pdf->SetXY(170.75, 19.0);
+        $pdf->MultiCell(33.85, 3, (string)$factura[$tabla . '_folio'], 0, 'C');
+
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetXY(48.7, 43.8);
+        $pdf->MultiCell(
+            57.0,
+            3,
+            mb_convert_encoding((string)$factura['org_empresa_razon_social'], 'ISO-8859-1', 'UTF-8'),
+            0,
+            'L'
+        );
+
+        $pdf->SetXY(27.2, 49.1);
+        $pdf->MultiCell(78.5, 3, (string)$factura['org_empresa_rfc'], 0, 'L');
+
+        $regimen = $this->regimen(factura: $factura);
+        if (!errores::$error) {
+            $pdf->SetXY(39.9, 54.4);
+            $pdf->MultiCell(65.8, 3, $regimen, 0, 'L');
+        }
+        $cpEmisor = trim((string)($factura['org_empresa_cp_txt'] ?? ''));
+        $pdf->SetXY(46.6, 59.7);
+        $pdf->MultiCell(59.1, 3, $cpEmisor, 0, 'L');
+    }
+
+    private function comprobante_ivitec(string $tabla, stdClass $data, array $factura, Fpdi $pdf): void
+    {
+        $pdf->SetTextColor(0, 0, 0);
+        $fecha = (string)($data->fecha_timbrado ?? $factura[$tabla . '_fecha']);
+        $pdf->SetFont('Arial', '', 6);
+        $pdf->SetXY(141.0, 44.0);
+        $pdf->MultiCell(23.0, 2.4, $fecha, 0, 'L');
+
+        $pdf->SetFont('Arial', '', 8);
+        $tipo = $factura['cat_sat_tipo_de_comprobante_codigo'] . ' ' .
+            $factura['cat_sat_tipo_de_comprobante_descripcion'];
+        $pdf->SetXY(176.0, 43.8);
+        $pdf->MultiCell(
+            24.3,
+            3,
+            mb_convert_encoding($tipo, 'ISO-8859-1', 'UTF-8'),
+            0,
+            'L'
+        );
+
+        $moneda = $factura['cat_sat_moneda_codigo'] . ' ' . $factura['cat_sat_moneda_descripcion'];
+        $pdf->SetXY(132.9, 49.1);
+        $pdf->MultiCell(
+            31.1,
+            3,
+            mb_convert_encoding($moneda, 'ISO-8859-1', 'UTF-8'),
+            0,
+            'L'
+        );
+
+        $exportacion = (string)($factura[$tabla . '_exportacion'] ?? '');
+        $pdf->SetXY(187.0, 49.1);
+        $pdf->MultiCell(
+            13.3,
+            3,
+            mb_convert_encoding($exportacion, 'ISO-8859-1', 'UTF-8'),
+            0,
+            'L'
+        );
+
+        $forma = $factura['cat_sat_forma_pago_codigo'] . ' ' . $factura['cat_sat_forma_pago_descripcion'];
+        $pdf->SetXY(142.8, 54.4);
+        $pdf->MultiCell(
+            57.5,
+            3,
+            mb_convert_encoding($forma, 'ISO-8859-1', 'UTF-8'),
+            0,
+            'L'
+        );
+
+        $metodo = $factura['cat_sat_metodo_pago_codigo'] . ' ' . $factura['cat_sat_metodo_pago_descripcion'];
+        $pdf->SetXY(144.9, 59.7);
+        $pdf->MultiCell(
+            55.4,
+            3,
+            mb_convert_encoding($metodo, 'ISO-8859-1', 'UTF-8'),
+            0,
+            'L'
+        );
+    }
+
+
+    private function receptor_ivitec(array $factura, Fpdi $pdf): void
+    {
+        if (!isset($factura['com_sucursal_numero_interior'])) {
+            $factura['com_sucursal_numero_interior'] = '';
+        }
+
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetTextColor(0, 0, 0);
+
+       
+        $pdf->SetXY(27.5, 81.5);
+        $pdf->MultiCell(38.4, 3, (string)$factura['com_cliente_rfc'], 0, 'L');
+
+        $pdf->SetXY(79.0, 81.5);
+        $pdf->MultiCell(20.8, 3, (string)$factura['com_sucursal_cp'], 0, 'L');
+
+        $reg = $factura['cat_sat_regimen_fiscal_cliente_codigo'] . ' ' .
+            $factura['cat_sat_regimen_fiscal_cliente_descripcion'];
+        $reg = mb_convert_encoding($reg, 'ISO-8859-1', 'UTF-8');
+        $pdf->SetXY(121.7, 81.5);
+        $pdf->MultiCell(77.2, 3, $reg, 0, 'L');
+
+      
+        $pdf->SetXY(49.4, 87.9);
+        $pdf->MultiCell(
+            97.0,
+            3,
+            mb_convert_encoding((string)$factura['com_cliente_razon_social'], 'ISO-8859-1', 'UTF-8'),
+            0,
+            'L'
+        );
+
+        $uso = $factura['cat_sat_uso_cfdi_codigo'] . ' ' . $factura['cat_sat_uso_cfdi_descripcion'];
+        $pdf->SetXY(167.2, 87.9);
+        $pdf->MultiCell(
+            31.7,
+            3,
+            mb_convert_encoding($uso, 'ISO-8859-1', 'UTF-8'),
+            0,
+            'L'
+        );
+    }
+
+
+    private function pago_ivitec(array $factura, Fpdi $pdf): void
+    {
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetTextColor(0, 0, 0);
+
+        $moneda = $factura['cat_sat_moneda_codigo'] . ' ' . $factura['cat_sat_moneda_descripcion'];
+        $pdf->SetXY(34.9, 156.3);
+        $pdf->MultiCell(
+            80.4,
+            3,
+            mb_convert_encoding($moneda, 'ISO-8859-1', 'UTF-8'),
+            0,
+            'L'
+        );
+
+        $forma = $factura['cat_sat_forma_pago_codigo'] . ' ' . $factura['cat_sat_forma_pago_descripcion'];
+        $pdf->SetXY(41.6, 162.3);
+        $pdf->MultiCell(
+            73.7,
+            3,
+            mb_convert_encoding($forma, 'ISO-8859-1', 'UTF-8'),
+            0,
+            'L'
+        );
+
+        $metodo = $factura['cat_sat_metodo_pago_codigo'] . ' ' . $factura['cat_sat_metodo_pago_descripcion'];
+        $pdf->SetXY(43.7, 168.3);
+        $pdf->MultiCell(
+            71.6,
+            3,
+            mb_convert_encoding($metodo, 'ISO-8859-1', 'UTF-8'),
+            0,
+            'L'
+        );
+    }
+
+
+    private function montos_ivitec(string $tabla, array $factura, Fpdi $pdf): void
+    {
+        $fmt = new NumberFormatter('es_MX', NumberFormatter::CURRENCY);
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetTextColor(0, 0, 0);
+
+       
+        $x = 159.45;
+        $w = 40.90;
+
+        $subtotal = $fmt->formatCurrency(round($factura[$tabla . '_sub_total'], 2), 'MXN');
+        $pdf->SetXY($x, 149.0);
+        $pdf->MultiCell($w, 3, $subtotal, 0, 'R');
+
+        $descuento = $fmt->formatCurrency(round($factura[$tabla . '_descuento'], 2), 'MXN');
+        $pdf->SetXY($x, 154.0);
+        $pdf->MultiCell($w, 3, $descuento, 0, 'R');
+
+        $traslados = $fmt->formatCurrency(round($factura[$tabla . '_total_traslados'], 2), 'MXN');
+        $pdf->SetXY($x, 159.0);
+        $pdf->MultiCell($w, 3, $traslados, 0, 'R');
+
+        $retenidos = $fmt->formatCurrency(round($factura[$tabla . '_total_retenciones'], 2), 'MXN');
+        $pdf->SetXY($x, 164.0);
+        $pdf->MultiCell($w, 3, $retenidos, 0, 'R');
+
+        $pdf->SetFont('Arial', 'B', 9);
+        $total_num = round($factura[$tabla . '_total'], 2);
+        $total_fmt = $fmt->formatCurrency($total_num, 'MXN');
+        $pdf->SetXY(144.64, 169.0);
+        $pdf->MultiCell(55.74, 3, $total_fmt, 0, 'R');
+
+        $pdf->SetFont('Arial', '', 7);
+        $formatterES = new NumberFormatter('es-ES', NumberFormatter::SPELLOUT);
+        $izquierda = (int)floor($total_num);
+        $derecha = (int)round(($total_num - floor($total_num)) * 100);
+        $letra = strtoupper($formatterES->format($izquierda)) . ' PESOS ';
+        $letra .= ($derecha === 0 ? '00' : str_pad((string)$derecha, 2, '0', STR_PAD_LEFT)) . '/100 M.N.';
+        $letra = mb_convert_encoding($letra, 'ISO-8859-1', 'UTF-8');
+
+        $pdf->SetXY(15.0, 174.7);
+        $pdf->MultiCell(185.4, 2.5, $letra, 0, 'C');
+    }
+
+
+    private function fiscales_ivitec(stdClass $data, Fpdi $pdf): void
+    {
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->SetTextColor(0, 0, 0);
+
+        $folio_fiscal = (string)($data->folio_fiscal ?? '-----');
+        $pdf->SetXY(66.0, 193.4);
+        $pdf->MultiCell(88.5, 2.7, $folio_fiscal, 0, 'L');
+
+        $rfc_prov = (string)($data->rfc_proveedor ?? '-----');
+        $pdf->SetXY(174.6, 193.4);
+        $pdf->MultiCell(24.3, 2.7, $rfc_prov, 0, 'L');
+
+        $fecha_timbrado = (string)($data->fecha_timbrado ?? '');
+        $pdf->SetXY(74.8, 199.7);
+        $pdf->MultiCell(40.9, 2.7, $fecha_timbrado, 0, 'L');
+
+        $no_cert_sat = (string)($data->no_certificado_sat ?? '');
+        $pdf->SetXY(146.05, 199.7);
+        $pdf->MultiCell(52.9, 2.7, $no_cert_sat, 0, 'L');
+
+    
+        $no_cert = (string)($data->no_certificado ?? '-----');
+        $pdf->SetXY(71.3, 206.0);
+        $pdf->MultiCell(44.4, 2.7, $no_cert, 0, 'L');
+
+    }
+
+
+  
+    private function sellos_ivitec(stdClass $data, Fpdi $pdf): void
+    {
+       
+        $pdf->SetFont('Arial', '', 4.5);
+        $pdf->SetTextColor(0, 0, 0);
+
+        $x = 16.0;
+        $w = 184.0;
+        $h = 1.70;
+
+       
+        $pdf->SetXY($x, 229.15);
+        $pdf->MultiCell($w, $h, (string)($data->complento ?? ''), 0, 'L');
+        $pdf->SetXY($x, 238.0);
+        $pdf->MultiCell($w, $h, (string)($data->sello_cfdi ?? ''), 0, 'L');
+        $pdf->SetXY($x, 246.8);
+        $pdf->MultiCell($w, $h, (string)($data->sello_sat ?? ''), 0, 'L');
+    }
+
+
+    private function cfg_partidas_ivitec(): array
+    {
+        return [
+           
+            'y_inicio'       => 115.4,
+            'row_h'          => 6,
+            'max_por_pagina' => 4,
+            'columnas'       => [
+                ['key' => '_cantidad',       'x' => 11.3,  'w' => 12.3, 'align' => 'C', 'format' => 'text'],
+                ['key' => '_descripcion',    'x' => 87.15, 'w' => 67.7, 'align' => 'L', 'format' => 'text'],
+                ['key' => '_valor_unitario', 'x' => 154.9, 'w' => 23.2, 'align' => 'R', 'format' => 'currency'],
+                ['key' => '_sub_total',      'x' => 178.2, 'w' => 26.4, 'align' => 'R', 'format' => 'currency'],
+            ],
+        ];
+    }
 }
