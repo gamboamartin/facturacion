@@ -718,27 +718,63 @@ class _pdf
             $fmt = new NumberFormatter('es_MX', NumberFormatter::CURRENCY);
             $pdf = new Fpdi();
 
-            $plantilla_tipo = $generales->plantilla_tipo ?? 'default';
-            $metodo_base = 'base_pdf_' . $plantilla_tipo;
+            // ── PLANTILLA CUSTOM OPCIONAL ──
+            // Si generales NO tiene plantilla_tipo, está vacío, vale "default"
+            // o no existe el método base correspondiente, se conserva el flujo
+            // original de esta función sin exigir nuevas variables a otros sistemas.
+            $plantilla_tipo = null;
+            $metodo_base = null;
+            $usa_plantilla_custom = false;
 
-            if ($plantilla_tipo !== 'default' && method_exists($this, $metodo_base)) {
+            if (isset($generales->plantilla_tipo)) {
+                $plantilla_tipo = trim((string)$generales->plantilla_tipo);
 
-                // ── FLUJO CUSTOM (cualquier plantilla registrada) ──
-                $this->$metodo_base(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf,
-                    relacionadas: $relacionadas, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
+                if ($plantilla_tipo !== '' && $plantilla_tipo !== 'default') {
+                    $metodo_base = 'base_pdf_' . $plantilla_tipo;
+                    $usa_plantilla_custom = method_exists($this, $metodo_base);
+                }
+            }
 
-                $this->render_partidas_custom(
-                    plantilla_tipo: $plantilla_tipo,
-                    tabla: $tabla,
-                    tabla_partida: $tabla_partida,
-                    factura: $factura,
-                    pdf: $pdf,
-                    fmt: $fmt,
-                    data: $data,
-                    relacionadas: $relacionadas,
-                    ruta_logo: $ruta_logo,
-                    ruta_qr: $ruta_qr
-                );
+            if ($usa_plantilla_custom) {
+
+                // Renderer completo opcional por plantilla:
+                // render_documento_ivitec(), render_documento_artistik(), etc.
+                // Si no existe, la plantilla mantiene el flujo custom anterior.
+                $metodo_render_documento = 'render_documento_' . $plantilla_tipo;
+
+                if (method_exists($this, $metodo_render_documento)) {
+
+                    $this->$metodo_render_documento(
+                        tabla: $tabla,
+                        tabla_partida: $tabla_partida,
+                        factura: $factura,
+                        pdf: $pdf,
+                        fmt: $fmt,
+                        data: $data,
+                        relacionadas: $relacionadas,
+                        ruta_logo: $ruta_logo,
+                        ruta_qr: $ruta_qr
+                    );
+
+                } else {
+
+                    // ── FLUJO CUSTOM EXISTENTE (sin cambios) ──
+                    $this->$metodo_base(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf,
+                        relacionadas: $relacionadas, ruta_logo: $ruta_logo, ruta_qr: $ruta_qr);
+
+                    $this->render_partidas_custom(
+                        plantilla_tipo: $plantilla_tipo,
+                        tabla: $tabla,
+                        tabla_partida: $tabla_partida,
+                        factura: $factura,
+                        pdf: $pdf,
+                        fmt: $fmt,
+                        data: $data,
+                        relacionadas: $relacionadas,
+                        ruta_logo: $ruta_logo,
+                        ruta_qr: $ruta_qr
+                    );
+                }
 
             } else {
 
@@ -1501,5 +1537,206 @@ class _pdf
                 ['key' => '_sub_total',      'x' => 178.2, 'w' => 26.4, 'align' => 'R', 'format' => 'currency'],
             ],
         ];
+    }
+
+        private function render_documento_ivitec(
+        string $tabla,
+        string $tabla_partida,
+        array $factura,
+        Fpdi $pdf,
+        NumberFormatter $fmt,
+        stdClass $data,
+        array $relacionadas,
+        string $ruta_logo,
+        string $ruta_qr
+    ): void {
+        $cfg = $this->cfg_partidas_ivitec();
+
+        $maxPorPagina = max(
+            1,
+            (int)($cfg['max_por_pagina'] ?? 4)
+        );
+
+        $partidas = array_values(
+            $factura['partidas'] ?? []
+        );
+
+        $paginas = array_chunk(
+            $partidas,
+            $maxPorPagina
+        );
+
+      
+        if (count($paginas) === 0) {
+            $paginas = [[]];
+        }
+
+        $ultimaPagina = count($paginas) - 1;
+
+        foreach ($paginas as $pagina => $partidasPagina) {
+
+            $esUltima = ($pagina === $ultimaPagina);
+
+            if ($esUltima) {
+
+                
+                $this->base_pdf_ivitec(
+                    tabla: $tabla,
+                    data: $data,
+                    factura: $factura,
+                    pdf: $pdf,
+                    relacionadas: $relacionadas,
+                    ruta_logo: $ruta_logo,
+                    ruta_qr: $ruta_qr
+                );
+
+            } else {
+
+               
+                $this->base_pdf_ivitec_continuacion(
+                    tabla: $tabla,
+                    data: $data,
+                    factura: $factura,
+                    pdf: $pdf
+                );
+            }
+
+            $this->render_partidas_ivitec_pagina(
+                partidas: $partidasPagina,
+                tabla_partida: $tabla_partida,
+                pdf: $pdf,
+                fmt: $fmt,
+                cfg: $cfg
+            );
+        }
+    }
+
+
+   
+    private function base_pdf_ivitec_continuacion(
+        string $tabla,
+        stdClass $data,
+        array $factura,
+        Fpdi $pdf
+    ): void {
+
+        $init = $this->init($pdf);
+
+        if (errores::$error) {
+            return;
+        }
+
+        $pdf->SetAutoPageBreak(false);
+
+        $this->header_ivitec(
+            tabla: $tabla,
+            data: $data,
+            factura: $factura,
+            pdf: $pdf
+        );
+
+        $this->receptor_ivitec(
+            factura: $factura,
+            pdf: $pdf
+        );
+
+        $this->comprobante_ivitec(
+            tabla: $tabla,
+            data: $data,
+            factura: $factura,
+            pdf: $pdf
+        );
+
+      
+        $inicioMascara = 142.0;
+
+        $pdf->SetFillColor(
+            255,
+            255,
+            255
+        );
+
+        $pdf->Rect(
+            0,
+            $inicioMascara,
+            $pdf->GetPageWidth(),
+            $pdf->GetPageHeight() - $inicioMascara,
+            'F'
+        );
+    }
+
+
+   
+    private function render_partidas_ivitec_pagina(
+        array $partidas,
+        string $tabla_partida,
+        Fpdi $pdf,
+        NumberFormatter $fmt,
+        array $cfg
+    ): void {
+
+        $border = 0;
+        $lineH = 3.0;
+
+        $y = (float)$cfg['y_inicio'];
+
+        foreach ($partidas as $partida) {
+
+            $pdf->SetFont(
+                'Arial',
+                '',
+                8
+            );
+
+            $pdf->SetTextColor(
+                0,
+                0,
+                0
+            );
+
+            foreach ($cfg['columnas'] as $col) {
+
+                $key =
+                    $tabla_partida .
+                    $col['key'];
+
+                $val =
+                    $partida[$key] ?? '';
+
+                if ($col['format'] === 'currency') {
+
+                    $val = $fmt->formatCurrency(
+                        round(
+                            (float)$val,
+                            2
+                        ),
+                        'MXN'
+                    );
+
+                } else {
+
+                    $val = mb_convert_encoding(
+                        (string)$val,
+                        'ISO-8859-1',
+                        'UTF-8'
+                    );
+                }
+
+                $pdf->SetXY(
+                    (float)$col['x'],
+                    $y
+                );
+
+                $pdf->MultiCell(
+                    (float)$col['w'],
+                    $lineH,
+                    $val,
+                    $border,
+                    (string)$col['align']
+                );
+            }
+
+            $y += (float)$cfg['row_h'];
+        }
     }
 }
