@@ -36,7 +36,7 @@ $descuento         = (float)($_GET['DESC'] ?? 0);
 // Resolver folio → fc_factura_id si no viene FID directo
 $folio = trim($_GET['folio'] ?? '');
 
-if ($fc_factura_id === 0 && $folio !== '') {
+if ($folio !== '') {
     $stmt_folio = $link->prepare("SELECT id FROM fc_factura WHERE folio = :folio ORDER BY id DESC LIMIT 1");
     $stmt_folio->execute([':folio' => $folio]);
     $row_folio = $stmt_folio->fetch(PDO::FETCH_ASSOC);
