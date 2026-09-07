@@ -33,6 +33,17 @@ $cantidad          = (float)($_GET['QTY'] ?? 0);
 $valor_unitario    = (float)($_GET['VU']  ?? 0);
 $descuento         = (float)($_GET['DESC'] ?? 0);
 
+// Resolver folio → fc_factura_id si no viene FID directo
+$folio = trim($_GET['folio'] ?? '');
+
+if ($fc_factura_id === 0 && $folio !== '') {
+    $stmt_folio = $link->prepare("SELECT id FROM fc_factura WHERE folio = :folio ORDER BY id DESC LIMIT 1");
+    $stmt_folio->execute([':folio' => $folio]);
+    $row_folio = $stmt_folio->fetch(PDO::FETCH_ASSOC);
+    if ($row_folio) {
+        $fc_factura_id = (int)$row_folio['id'];
+    }
+}
 // =========================================================
 // PASO 2. VALIDACIÓN DE TELÉFONO WHATSAPP
 // =========================================================
