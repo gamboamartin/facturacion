@@ -763,7 +763,7 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         return [];
     }
 
-  public function modifica_datos_adicionales_bd(bool $header, bool $ws = false): array|stdClass
+    public function modifica_datos_adicionales_bd(bool $header, bool $ws = false): array|stdClass
     {
         if (!property_exists(generales::class, 'datos_adicionales_com_cliente') || !generales::$datos_adicionales_com_cliente) {
             return $this->retorno_error(
@@ -831,9 +831,10 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
             }
         }
 
-        // Notificación a Google Calendar si cambió la fecha de cumpleaños
+       
         $fecha_nueva = $datos_adicionales['fecha_cumpleanos'] ?? '';
-        if ($fecha_nueva !== $fecha_anterior) {
+
+        if ((!empty($fecha_nueva) && !$tiene_event_id) || $fecha_nueva !== $fecha_anterior) {
             $nombre = '';
             $com_cliente_modelo = new com_cliente($this->link);
             $com_cliente_modelo->registro_id = $this->registro_id;
