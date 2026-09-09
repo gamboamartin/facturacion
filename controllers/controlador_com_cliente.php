@@ -547,14 +547,14 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
             }
 
             $curp = $this->html->input_text(cols: 6, disabled: false, name: 'curp',
-                place_holder: 'CURP', row_upd: new stdClass(), value_vacio: false);
+                place_holder: 'CURP', row_upd: new stdClass(), value_vacio: true);
             if (errores::$error) {
                 return $this->retorno_error(
                     mensaje: 'Error al obtener input', data: $curp, header: $header, ws: $ws);
             }
 
             $foto = $this->html->input_file(cols: 6, name: 'foto', row_upd: new stdClass(), 
-                value_vacio: false, place_holder: 'Foto del Estudiante', required: false);
+                value_vacio: true, place_holder: 'Foto del Estudiante', required: false);
             if (errores::$error) {
                 return $this->retorno_error(
                     mensaje: 'Error al obtener input', data: $foto, header: $header, ws: $ws);
@@ -582,91 +582,91 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         return $r_alta;
     }
    public function alta_bd(bool $header, bool $ws = false): array|stdClass
-{
-    $datos_adicionales = [];
-    $nombre_cliente = $_POST['razon_social'] ?? '';
+    {
+        $datos_adicionales = [];
+        $nombre_cliente = $_POST['razon_social'] ?? '';
 
-    if (property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente) {
-        $campos_extra = ['horario', 'telefono_emergencia', 'nombre_emergencia', 'curp', 'fecha_cumpleanos'];
-        foreach ($campos_extra as $campo) {
-            $datos_adicionales[$campo] = $_POST[$campo] ?? null;
-            unset($_POST[$campo]);
-        }
-    }
-
-    $r_alta = parent::alta_bd(header: false, ws: false);
-    if (errores::$error) {
-        return $this->retorno_error(
-            mensaje: 'Error al dar de alta cliente', data: $r_alta, header: $header, ws: $ws
-        );
-    }
-
-    if (!empty($datos_adicionales) && isset($r_alta->registro_id)) {
-        $datos_adicionales['com_cliente_id'] = $r_alta->registro_id;
-        $datos_adicionales['codigo'] = 'DAC_' . $r_alta->registro_id;
-        $datos_adicionales['descripcion'] = 'Datos adicionales cliente ' . $r_alta->registro_id;
-        $datos_adicionales['descripcion_select'] = 'DAC_' . $r_alta->registro_id;
-        $datos_adicionales['alias'] = 'DAC_' . $r_alta->registro_id;
-        $datos_adicionales['codigo_bis'] = 'DAC_' . $r_alta->registro_id;
-
-        // Manejo de foto
-        if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
-            $extension = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
-            $extensiones_validas = ['jpg', 'jpeg', 'png', 'webp'];
-
-            if (!in_array($extension, $extensiones_validas)) {
-                return $this->retorno_error(
-                    mensaje: 'Error: formato de foto no válido. Use JPG, PNG o WEBP',
-                    data: $_FILES['foto'], header: $header, ws: $ws
-                );
+        if (property_exists(generales::class, 'datos_adicionales_com_cliente') && generales::$datos_adicionales_com_cliente) {
+            $campos_extra = ['horario', 'telefono_emergencia', 'nombre_emergencia', 'curp', 'fecha_cumpleanos'];
+            foreach ($campos_extra as $campo) {
+                $datos_adicionales[$campo] = $_POST[$campo] ?? null;
+                unset($_POST[$campo]);
             }
-
-            $nombre_archivo = 'cliente_' . $r_alta->registro_id . '_' . time() . '.' . $extension;
-            $ruta_destino = (new generales())->path_base . 'archivos/fotos_clientes/' . $nombre_archivo;
-
-            if (!move_uploaded_file($_FILES['foto']['tmp_name'], $ruta_destino)) {
-                return $this->retorno_error(
-                    mensaje: 'Error al guardar foto',
-                    data: $ruta_destino, header: $header, ws: $ws
-                );
-            }
-
-            $datos_adicionales['foto'] = 'archivos/fotos_clientes/' . $nombre_archivo;
         }
 
-        $modelo_adicional = new datos_adicionales_com_cliente_artistik(link: $this->link);
-        $modelo_adicional->registro = $datos_adicionales;
-        $r_adicional = $modelo_adicional->alta_bd();
+        $r_alta = parent::alta_bd(header: false, ws: false);
         if (errores::$error) {
             return $this->retorno_error(
-                mensaje: 'Error al dar de alta datos adicionales',
-                data: $r_adicional, header: $header, ws: $ws
+                mensaje: 'Error al dar de alta cliente', data: $r_alta, header: $header, ws: $ws
             );
         }
 
-        $fecha_cumpleanos = $datos_adicionales['fecha_cumpleanos'] ?? '';
-        if (!empty($fecha_cumpleanos)) {
-            $this->notifica_cumpleanos_calendar(
-                com_cliente_id: $r_alta->registro_id,
-                nombre: $nombre_cliente,
-                fecha_cumpleanos: $fecha_cumpleanos,
-                accion: 'alta'
-            );
+        if (!empty($datos_adicionales) && isset($r_alta->registro_id)) {
+            $datos_adicionales['com_cliente_id'] = $r_alta->registro_id;
+            $datos_adicionales['codigo'] = 'DAC_' . $r_alta->registro_id;
+            $datos_adicionales['descripcion'] = 'Datos adicionales cliente ' . $r_alta->registro_id;
+            $datos_adicionales['descripcion_select'] = 'DAC_' . $r_alta->registro_id;
+            $datos_adicionales['alias'] = 'DAC_' . $r_alta->registro_id;
+            $datos_adicionales['codigo_bis'] = 'DAC_' . $r_alta->registro_id;
+
+            // Manejo de foto
+            if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+                $extension = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+                $extensiones_validas = ['jpg', 'jpeg', 'png', 'webp'];
+
+                if (!in_array($extension, $extensiones_validas)) {
+                    return $this->retorno_error(
+                        mensaje: 'Error: formato de foto no válido. Use JPG, PNG o WEBP',
+                        data: $_FILES['foto'], header: $header, ws: $ws
+                    );
+                }
+
+                $nombre_archivo = 'cliente_' . $r_alta->registro_id . '_' . time() . '.' . $extension;
+                $ruta_destino = (new generales())->path_base . 'archivos/fotos_clientes/' . $nombre_archivo;
+
+                if (!move_uploaded_file($_FILES['foto']['tmp_name'], $ruta_destino)) {
+                    return $this->retorno_error(
+                        mensaje: 'Error al guardar foto',
+                        data: $ruta_destino, header: $header, ws: $ws
+                    );
+                }
+
+                $datos_adicionales['foto'] = 'archivos/fotos_clientes/' . $nombre_archivo;
+            }
+
+            $modelo_adicional = new datos_adicionales_com_cliente_artistik(link: $this->link);
+            $modelo_adicional->registro = $datos_adicionales;
+            $r_adicional = $modelo_adicional->alta_bd();
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al dar de alta datos adicionales',
+                    data: $r_adicional, header: $header, ws: $ws
+                );
+            }
+
+            $fecha_cumpleanos = $datos_adicionales['fecha_cumpleanos'] ?? '';
+            if (!empty($fecha_cumpleanos)) {
+                $this->notifica_cumpleanos_calendar(
+                    com_cliente_id: $r_alta->registro_id,
+                    nombre: $nombre_cliente,
+                    fecha_cumpleanos: $fecha_cumpleanos,
+                    accion: 'alta'
+                );
+            }
         }
-    }
 
-    if ($header) {
-        $this->retorno_base(registro_id: $r_alta->registro_id, result: $r_alta,
-            siguiente_view: 'modifica', ws: $ws);
-    }
-    if ($ws) {
-        header('Content-Type: application/json');
-        echo json_encode($r_alta, JSON_THROW_ON_ERROR);
-        exit;
-    }
+        if ($header) {
+            $this->retorno_base(registro_id: $r_alta->registro_id, result: $r_alta,
+                siguiente_view: 'modifica', ws: $ws);
+        }
+        if ($ws) {
+            header('Content-Type: application/json');
+            echo json_encode($r_alta, JSON_THROW_ON_ERROR);
+            exit;
+        }
 
-    return $r_alta;
-}
+        return $r_alta;
+    }
 
   public function modifica_datos_adicionales(bool $header, bool $ws = false): array|string
     {
