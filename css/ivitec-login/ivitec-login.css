@@ -1,0 +1,746 @@
+:root {
+    --iv-purple: #7b35ce;
+    --iv-purple-dark: #6420ae;
+    --iv-purple-soft: #f3ebfc;
+    --iv-black: #17131d;
+    --iv-gray-900: #2c2532;
+    --iv-gray-700: #625b69;
+    --iv-gray-500: #8c8592;
+    --iv-gray-300: #ded9e4;
+    --iv-gray-200: #ece9ee;
+    --iv-gray-100: #f7f7f9;
+    --iv-white: #ffffff;
+    --iv-danger: #b42318;
+    --iv-danger-bg: #fff2f0;
+    --iv-radius: 14px;
+    --iv-shadow: 0 35px 90px rgba(47, 29, 58, .11), 0 5px 18px rgba(30, 20, 37, .04);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    min-width: 320px;
+    background: var(--iv-gray-100);
+}
+
+body {
+    margin: 0;
+    background: var(--iv-gray-100);
+    color: var(--iv-black);
+    font-family: "Segoe UI", Aptos, Arial, sans-serif;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.iv-login {
+    position: relative;
+    isolation: isolate;
+    min-height: 100svh;
+    padding: 27px clamp(20px, 3vw, 52px) 20px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 22px;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 14% 8%, rgba(128, 51, 209, .09), transparent 385px),
+        radial-gradient(circle at 92% 88%, rgba(128, 51, 209, .05), transparent 355px),
+        var(--iv-gray-100);
+}
+
+.iv-login__pattern {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: .22;
+    background-image: radial-gradient(#756e7d .7px, transparent .7px);
+    background-size: 25px 25px;
+    mask-image: linear-gradient(115deg, #000, transparent 35%, transparent 68%, #000);
+}
+
+.iv-login__topbar,
+.iv-login__stage,
+.iv-login__footer {
+    width: min(100%, 1248px);
+    margin-inline: auto;
+}
+
+.iv-login__topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.iv-login__brand-logo {
+    display: block;
+    width: clamp(142px, 13vw, 180px);
+    height: auto;
+    mix-blend-mode: multiply;
+}
+
+.iv-login__system-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    color: #5f5768;
+    background: rgba(255, 255, 255, .8);
+    border: 1px solid rgba(43, 32, 52, .08);
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(42, 21, 58, .04);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.iv-login svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.iv-login__system-name svg {
+    width: 17px;
+    height: 17px;
+    color: var(--iv-purple);
+}
+
+.iv-login__stage {
+    position: relative;
+    align-self: center;
+    min-height: min(680px, calc(100svh - 145px));
+    max-height: 740px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.06fr) minmax(432px, .94fr);
+    background: var(--iv-white);
+    border: 1px solid rgba(42, 31, 50, .08);
+    border-radius: 32px;
+    box-shadow: var(--iv-shadow);
+    overflow: hidden;
+}
+
+.iv-login__stage::before {
+    content: "";
+    position: absolute;
+    z-index: 5;
+    left: 0;
+    top: 64px;
+    width: 6px;
+    height: 112px;
+    background: linear-gradient(#9d59e9, var(--iv-purple-dark));
+    border-radius: 0 16px 16px 0;
+    box-shadow: 0 0 22px rgba(125, 48, 207, .34);
+}
+
+.iv-login__visual {
+    position: relative;
+    min-height: 590px;
+    padding: clamp(40px, 5vw, 75px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    background: linear-gradient(155deg, rgba(255, 255, 255, .98), rgba(248, 247, 250, .94));
+    border-right: 1px solid #efecf1;
+}
+
+.iv-login__visual-copy {
+    position: relative;
+    z-index: 3;
+    max-width: 545px;
+}
+
+.iv-login__badge {
+    display: inline-flex;
+    padding: 7px 11px;
+    color: #6827b0;
+    background: var(--iv-purple-soft);
+    border: 1px solid #e4d4f6;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.iv-login__visual-copy h1 {
+    margin: 18px 0 14px;
+    color: #16111b;
+    font-size: clamp(45px, 4.3vw, 77px);
+    font-weight: 760;
+    line-height: .98;
+    letter-spacing: -.055em;
+}
+
+.iv-login__visual-copy h1 em {
+    color: var(--iv-purple);
+    font-style: normal;
+}
+
+.iv-login__visual-copy p {
+    max-width: 480px;
+    margin: 0;
+    color: #6d6674;
+    font-size: 16px;
+    line-height: 1.65;
+}
+
+.iv-login__art {
+    position: absolute;
+    inset: 31% -5% -5% 5%;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+}
+
+.iv-login__art img {
+    position: relative;
+    z-index: 2;
+    width: min(100%, 785px);
+    height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
+    opacity: .46;
+    filter: contrast(1.06);
+    mix-blend-mode: multiply;
+}
+
+.iv-login__orbit {
+    position: absolute;
+    left: 50%;
+    top: 59%;
+    border: 1px solid rgba(124, 52, 207, .14);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.iv-login__orbit--one {
+    width: 465px;
+    height: 465px;
+    box-shadow: 0 0 70px rgba(125, 51, 209, .07) inset;
+}
+
+.iv-login__orbit--two {
+    width: 575px;
+    height: 575px;
+    border-style: dashed;
+    opacity: .56;
+    animation: iv-orbit 24s linear infinite;
+}
+
+.iv-login__secure-caption {
+    position: relative;
+    z-index: 3;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 11px 14px;
+    color: #5f5866;
+    background: rgba(255, 255, 255, .88);
+    border: 1px solid rgba(46, 35, 54, .09);
+    border-radius: 14px;
+    box-shadow: 0 10px 28px rgba(45, 29, 56, .07);
+    backdrop-filter: blur(10px);
+}
+
+.iv-login__secure-caption > svg {
+    flex: 0 0 auto;
+    color: #7732c7;
+}
+
+.iv-login__secure-caption span,
+.iv-login__secure-caption strong {
+    display: block;
+}
+
+.iv-login__secure-caption span {
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.iv-login__secure-caption strong {
+    margin-bottom: 2px;
+    color: #302838;
+    font-size: 13px;
+}
+
+.iv-login__form-panel {
+    position: relative;
+    z-index: 3;
+    padding: clamp(37px, 5vw, 69px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--iv-white);
+}
+
+.iv-login__client {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 80px;
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--iv-gray-200);
+}
+
+.iv-login__client-logo,
+.iv-login__client-logo > img,
+.iv-login__client-placeholder {
+    width: 77px;
+    height: 77px;
+}
+
+.iv-login__client-logo {
+    flex: 0 0 77px;
+}
+
+.iv-login__client-logo > img {
+    display: block;
+    padding: 7px;
+    object-fit: contain;
+    background: var(--iv-white);
+    border: 1px solid #e7e2eb;
+    border-radius: 18px;
+    box-shadow: 0 9px 24px rgba(38, 25, 46, .07);
+}
+
+.iv-login__client-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: var(--iv-white);
+    background: linear-gradient(145deg, #9149df, var(--iv-purple-dark));
+    border-radius: 18px;
+    box-shadow: 0 12px 26px rgba(107, 36, 181, .22);
+}
+
+.iv-login__client-placeholder svg {
+    width: 28px;
+    height: 28px;
+}
+
+.iv-login__client-placeholder span {
+    font-size: 9px;
+    font-weight: 850;
+    letter-spacing: .12em;
+}
+
+.iv-login__client-caption,
+.iv-login__client strong {
+    display: block;
+}
+
+.iv-login__client-caption {
+    margin-bottom: 4px;
+    color: #8a828f;
+    font-size: 12px;
+    font-weight: 750;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.iv-login__client strong {
+    max-width: 290px;
+    overflow: hidden;
+    color: #241b2b;
+    font-size: 19px;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.iv-login__welcome {
+    margin: clamp(32px, 4vh, 48px) 0 27px;
+}
+
+.iv-login__welcome > span {
+    display: block;
+    margin-bottom: 9px;
+    color: #7a35ca;
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: .16em;
+}
+
+.iv-login__welcome h2 {
+    margin: 0;
+    color: #18121e;
+    font-size: clamp(32px, 3vw, 42px);
+    font-weight: 760;
+    line-height: 1.05;
+    letter-spacing: -.045em;
+}
+
+.iv-login__welcome p {
+    margin: 10px 0 0;
+    color: #756d7b;
+    font-size: 15px;
+}
+
+.iv-login__alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: -8px 0 20px;
+    padding: 12px 14px;
+    color: var(--iv-danger);
+    background: var(--iv-danger-bg);
+    border: 1px solid #f2c7c2;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.iv-login__alert svg {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+}
+
+.iv-login__field + .iv-login__field {
+    margin-top: 20px;
+}
+
+.iv-login__field label {
+    display: block;
+    margin-bottom: 9px;
+    color: #403746;
+    font-size: 14px;
+    font-weight: 730;
+}
+
+.iv-login__label-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.iv-login__label-row a {
+    color: #6f2cbd;
+    font-size: 13px;
+    font-weight: 680;
+    text-decoration: none;
+}
+
+.iv-login__label-row a:hover,
+.iv-login__label-row a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.iv-login__input {
+    position: relative;
+}
+
+.iv-login__input > svg:first-child {
+    position: absolute;
+    z-index: 2;
+    left: 16px;
+    top: 50%;
+    color: #908797;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.iv-login__input input {
+    width: 100%;
+    height: 57px;
+    padding: 0 48px;
+    color: #251e2a;
+    background: #faf9fb;
+    border: 1px solid #e1dce5;
+    border-radius: var(--iv-radius);
+    outline: none;
+    font-size: 15px;
+    transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.iv-login__input input::placeholder {
+    color: #a19aa6;
+}
+
+.iv-login__input input:focus {
+    background: var(--iv-white);
+    border-color: #8a3ddd;
+    box-shadow: 0 0 0 4px rgba(138, 61, 221, .11);
+}
+
+.iv-login__password-toggle {
+    position: absolute;
+    z-index: 3;
+    right: 10px;
+    top: 50%;
+    width: 39px;
+    height: 39px;
+    display: grid;
+    place-items: center;
+    color: #827888;
+    background: transparent;
+    border: 0;
+    border-radius: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.iv-login__password-toggle:hover,
+.iv-login__password-toggle:focus-visible {
+    color: #6e29bb;
+    background: #f2ebfa;
+    outline: none;
+}
+
+.iv-login__remember {
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 18px 0 24px;
+    color: #665e6d;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.iv-login__remember input {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: var(--iv-purple);
+}
+
+.iv-login__submit {
+    width: 100%;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--iv-white);
+    background: linear-gradient(100deg, #8c41db, var(--iv-purple-dark));
+    border: 0;
+    border-radius: var(--iv-radius);
+    box-shadow: 0 14px 28px rgba(104, 31, 177, .24);
+    font-size: 15px;
+    font-weight: 780;
+    cursor: pointer;
+    transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+.iv-login__submit svg {
+    width: 19px;
+    height: 19px;
+}
+
+.iv-login__submit:hover:not(:disabled) {
+    background: linear-gradient(100deg, #964be2, #6c27b6);
+    box-shadow: 0 17px 34px rgba(104, 31, 177, .3);
+    transform: translateY(-1px);
+}
+
+.iv-login__submit:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.iv-login__submit:disabled {
+    cursor: wait;
+    opacity: .82;
+}
+
+.iv-login__submit.is-loading svg {
+    animation: iv-arrow-pulse .8s ease-in-out infinite alternate;
+}
+
+.iv-login__powered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-top: clamp(29px, 4vh, 43px);
+    padding-top: 22px;
+    color: #89818f;
+    border-top: 1px solid #efecf1;
+    font-size: 12px;
+}
+
+.iv-login__powered svg {
+    width: 17px;
+    height: 17px;
+    color: #7831c7;
+}
+
+.iv-login__powered strong {
+    color: #2c2233;
+    letter-spacing: .04em;
+}
+
+.iv-login__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    color: #8d8692;
+    font-size: 11px;
+    letter-spacing: .04em;
+}
+
+@keyframes iv-orbit {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes iv-arrow-pulse {
+    to { transform: translateX(3px); }
+}
+
+@media (max-width: 1020px) {
+    .iv-login {
+        overflow: visible;
+    }
+
+    .iv-login__stage {
+        max-height: none;
+        grid-template-columns: 1fr;
+    }
+
+    .iv-login__visual {
+        min-height: 500px;
+        padding: 48px;
+        border-right: 0;
+        border-bottom: 1px solid #efecf1;
+    }
+
+    .iv-login__art {
+        inset: 23% -7% -8% 40%;
+    }
+
+    .iv-login__secure-caption {
+        margin-top: 190px;
+    }
+
+    .iv-login__form-panel {
+        padding: 48px;
+    }
+}
+
+@media (max-width: 620px) {
+    .iv-login {
+        padding: 18px 14px;
+        gap: 16px;
+    }
+
+    .iv-login__system-name {
+        width: 40px;
+        height: 40px;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .iv-login__system-name span {
+        display: none;
+    }
+
+    .iv-login__stage {
+        border-radius: 23px;
+    }
+
+    .iv-login__stage::before {
+        top: 40px;
+        height: 80px;
+    }
+
+    .iv-login__visual {
+        min-height: 450px;
+        padding: 35px 27px;
+    }
+
+    .iv-login__visual-copy h1 {
+        font-size: 44px;
+    }
+
+    .iv-login__visual-copy p {
+        max-width: 335px;
+        font-size: 15px;
+    }
+
+    .iv-login__art {
+        inset: 42% -13% -7% 8%;
+    }
+
+    .iv-login__orbit--one {
+        width: 330px;
+        height: 330px;
+    }
+
+    .iv-login__orbit--two {
+        width: 410px;
+        height: 410px;
+    }
+
+    .iv-login__secure-caption {
+        margin-top: 175px;
+    }
+
+    .iv-login__form-panel {
+        padding: 32px 23px 26px;
+    }
+
+    .iv-login__client-logo,
+    .iv-login__client-logo > img,
+    .iv-login__client-placeholder {
+        width: 68px;
+        height: 68px;
+    }
+
+    .iv-login__client-logo {
+        flex-basis: 68px;
+    }
+
+    .iv-login__client strong {
+        max-width: 200px;
+    }
+
+    .iv-login__label-row {
+        display: block;
+    }
+
+    .iv-login__label-row a {
+        display: inline-block;
+        margin: -2px 0 9px;
+    }
+
+    .iv-login__footer {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .iv-login__footer span:first-child {
+        display: none;
+    }
+}
+
+body:has(.iv-login) .footer {
+    display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+    }
+}

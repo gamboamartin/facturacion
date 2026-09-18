@@ -119,3 +119,51 @@ if (!function_exists('logo_empresa_url_framework')) {
         }
     }
 }
+
+if (!function_exists('nombre_empresa_framework')) {
+    function nombre_empresa_framework($link): ?string
+    {
+        static $cache = null;
+        static $ya = false;
+
+        if ($ya) {
+            return $cache;
+        }
+        $ya = true;
+
+        if (!$link) {
+            return null;
+        }
+
+        try {
+            $org_empresa_id = (int)($_GET['org_empresa_id'] ?? 0);
+
+            $filtro = $org_empresa_id > 0
+                ? ['org_empresa.id' => $org_empresa_id]
+                : ['org_empresa.status' => 'activo'];
+
+            $modelo_empresa = new org_empresa($link);
+            $r_emp = $modelo_empresa->filtro_and(
+                aplica_seguridad: false,
+                columnas: ['org_empresa_id', 'org_empresa_nombre_comercial'],
+                filtro: $filtro,
+                limit: 1,
+                order: ['org_empresa.id' => 'ASC']
+            );
+            if (errores::$error) {
+                return null;
+            }
+
+            $nombre = (string)($r_emp->registros[0]['org_empresa_nombre_comercial'] ?? '');
+            if ($nombre === '') {
+                return null;
+            }
+
+            $cache = $nombre;
+            return $cache;
+
+        } catch (Throwable $e) {
+            return null;
+        }
+    }
+}
