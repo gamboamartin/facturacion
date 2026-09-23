@@ -54,12 +54,6 @@
                         <div class="control-group col-6">
                             <?php echo $controlador->inputs->password; ?>
                         </div>
-                        <div class="control-group col-6">
-                            <?php echo $controlador->inputs->telefono; ?>
-                        </div>
-                        <div class="control-group col-6">
-                            <?php echo $controlador->inputs->email; ?>
-                        </div>
 
 
                         <div class="control-group btn-alta">
