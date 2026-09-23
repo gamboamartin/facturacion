@@ -54,4 +54,16 @@ class com_cliente extends \gamboamartin\comercial\models\com_cliente {
         }
         return $del;
     }
+
+    public function asigna_agente_al_cliente(int $cliente_id, int $agente_asesor_id): array|stdClass
+    {
+        $consulta = "UPDATE {$this->tabla} SET {$this->tabla}.com_agente_asesor_id = {$agente_asesor_id} 
+                        WHERE {$this->tabla}.id = {$cliente_id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error("Error al asignar agente asesor en {$this->tabla}", $rs);
+        }
+
+        return [];
+    }
 }

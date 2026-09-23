@@ -1,6 +1,11 @@
 <?php /** @var \gamboamartin\facturacion\controllers\controlador_com_cliente $controlador */ ?>
 <?php use config\generales; ?>
 <?php use config\views; ?>
+<?php
+    if ($controlador->aplica_relacion_agentes) {
+        echo $controlador->inputs->input_select_agente_asesor;
+    }
+?>
 <?php echo $controlador->inputs->documento; ?>
 <?php echo $controlador->inputs->com_tipo_cliente_id; ?>
 <?php echo $controlador->inputs->codigo; ?>

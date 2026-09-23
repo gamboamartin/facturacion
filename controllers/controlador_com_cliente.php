@@ -13,6 +13,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\com_agente;
 use gamboamartin\facturacion\models\com_cliente;
 use gamboamartin\facturacion\models\com_contacto;
+use gamboamartin\facturacion\models\fc_layout_nom;
 use gamboamartin\facturacion\models\fc_layout_periodo;
 use gamboamartin\facturacion\models\datos_adicionales_com_cliente_artistik;
 use gamboamartin\template\html;
@@ -30,7 +31,9 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
     public int $com_contacto_id_modifica = 0;
     public string $codigo_pais_contacto = '52';
     public string $nombre_contacto_modifica = '';
-    public string $foto_actual = ''; 
+    public string $foto_actual = '';
+
+    public bool $aplica_relacion_agentes = false;
 
     public function __construct(
         PDO $link,
@@ -38,6 +41,11 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
         stdClass $paths_conf = new stdClass()
     ) {
         parent::__construct(link: $link, html: $html, paths_conf: $paths_conf);
+
+        $config_general = new generales();
+        if (isset($config_general->aplica_relacion_agentes)) {
+            $this->aplica_relacion_agentes = $config_general->aplica_relacion_agentes;
+        }
 
         $this->modelo = new com_cliente(link: $this->link);
 
@@ -576,6 +584,31 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
             $this->inputs->curp = $curp;
         }
 
+        if ($this->aplica_relacion_agentes) {
+            $modelo_com_agente = new com_agente(link: $this->link);
+            $filtro_input_select_agente_asesor = [
+                'com_agente.com_tipo_agente_id' => 2,
+            ];
+            $columnas_input_select_agente_asesor = [
+                'com_agente_id','com_agente_descripcion_select',
+            ];
+
+            $input_select_agente_asesor = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
+                modelo: $modelo_com_agente, columns_ds: $columnas_input_select_agente_asesor,
+                disabled: false, filtro: $filtro_input_select_agente_asesor, label: 'Asesor',
+                name: 'com_agente_id',
+            );
+            if(errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al generar input_select_agente_asesor',
+                    data: $input_select_agente_asesor,
+                    header: $header, ws: $ws
+                );
+            }
+
+            $this->inputs->input_select_agente_asesor = $input_select_agente_asesor;
+        }
+
         $this->include_inputs_alta = (new generales())->path_base . 'templates/inputs/com_cliente/alta.php';
 
 
@@ -594,11 +627,34 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
             }
         }
 
+        if (isset($_POST['com_agente_id'])){
+            $temporal_id = (int)$_POST['com_agente_id'];
+            if ($temporal_id !== -1 && $temporal_id !== 0) {
+                $com_agente_id = $_POST['com_agente_id'];
+            }
+            unset($_POST['com_agente_id']);
+        }
+
         $r_alta = parent::alta_bd(header: false, ws: false);
         if (errores::$error) {
             return $this->retorno_error(
                 mensaje: 'Error al dar de alta cliente', data: $r_alta, header: $header, ws: $ws
             );
+        }
+
+        $com_cliente_id = $r_alta->registro_id;
+
+        if (isset($com_agente_id)) {
+            $rs = (new com_cliente($this->link))->asigna_agente_al_cliente(
+                cliente_id: $com_cliente_id,
+                agente_asesor_id: $com_agente_id,
+            );
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al relacionar al cliente con agente',
+                    data: $rs, header: $header, ws: $ws
+                );
+            }
         }
 
         if (!empty($datos_adicionales) && isset($r_alta->registro_id)) {
