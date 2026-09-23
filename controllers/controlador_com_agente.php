@@ -8,7 +8,9 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
+use config\generales;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\adm_usuario;
 use gamboamartin\template\html;
 use PDO;
 use stdClass;
@@ -18,11 +20,18 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
     public string $url_submit = '#';
     private array $ids_grupo_validos = [4,5];
 
+    public bool $aplica_relacion_agentes = false;
+
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(), stdClass $paths_conf = new stdClass())
     {
         parent::__construct(link: $link,html:  $html,paths_conf:  $paths_conf);
 
         $this->childrens_data['com_agente']['title'] = 'Agente';
+
+        $config_general = new generales();
+        if (isset($config_general->aplica_relacion_agentes)) {
+            $this->aplica_relacion_agentes = $config_general->aplica_relacion_agentes;
+        }
     }
 
     public function alta(bool $header, bool $ws = false): array|string
@@ -41,13 +50,30 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
 
     public function alta_bd(bool $header, bool $ws = false): array|stdClass
     {
+        if ($this->aplica_relacion_agentes) {
 
-        if (!in_array($_POST['adm_grupo_id'], $this->ids_grupo_validos) ){
+            if (!in_array($_POST['adm_grupo_id'], $this->ids_grupo_validos) ){
 
-            return $this->retorno_error(
-                mensaje: 'Error estas intentando asignar un grupo de usuarios no valido', data: $_POST, header: $header, ws: $ws
+                return $this->retorno_error(
+                    mensaje: 'Error estas intentando asignar un grupo de usuarios no valido', data: $_POST, header: $header, ws: $ws
+                );
+            } // end if (!in_array($_POST['adm_grupo_id'], $this->ids_grupo_validos) ){
+
+            $admin_user = (string)$_POST['user'];
+
+            $resultado_validacion = $this->validad_admin_user(
+                admin_user: $admin_user,
+                header: $header,
+                ws: $ws
             );
-        }
+
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al validar user único', data: $resultado_validacion, header: $header, ws: $ws);
+            }
+        } // end if ($this->aplica_relacion_agentes) {
+
+
 
         $result = parent::alta_bd($header, $ws);
         if (errores::$error) {
@@ -82,5 +108,26 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
         $link .= "&session_id={$_GET['session_id']}";
         header("Location: " . $link);
         exit;
+    }
+
+    private function validad_admin_user(string $admin_user, bool $header, bool $ws)
+    {
+        $modelo_adm_usuario = new adm_usuario($this->link);
+
+        $filtro = ['adm_usuario.user' => $admin_user];
+
+        $result = $modelo_adm_usuario->filtro_and(filtro: $filtro);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al buscar el user para su validacion', data: $result, header: $header, ws: $ws);
+        }
+
+        $numero_registros = (int)$result->n_registros;
+
+        if ($numero_registros !== 0) {
+            return $this->retorno_error(
+                mensaje: "Error el user:{$admin_user} ya fue registrado previamente.", data: $result, header: $header, ws: $ws);
+        }
+        return [];
     }
 }
