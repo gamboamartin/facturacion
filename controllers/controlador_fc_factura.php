@@ -297,7 +297,12 @@ class controlador_fc_factura extends _base_system_fc
                 );
             }
 
-            $this->inputs->input_select_agente_asesor = $input_select_agente_asesor;
+            $ids = $this->conf_generales->grupo_ids_puede_select_asesores;
+            $grupo_id = (int) $_SESSION['grupo_id'];
+
+            if (in_array($grupo_id, $ids)) {
+                $this->inputs->input_select_agente_asesor = $input_select_agente_asesor;
+            }
 
             $this->inputs->input_select_agente_operador = $input_select_agente_operador;
 

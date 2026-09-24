@@ -11,6 +11,7 @@ use stdClass;
 
 class fc_factura extends _transacciones_fc
 {
+    private bool $aplica_relacion_agentes = false;
 
     public function __construct(PDO $link, bool $valida_atributos_criticos = true)
     {
@@ -27,6 +28,11 @@ class fc_factura extends _transacciones_fc
 
         $this->etiqueta = 'Factura';
         $this->key_fc_id = 'fc_factura_id';
+
+        $conf_generales = new generales();
+        if (isset($conf_generales->aplica_relacion_agentes)) {
+            $this->aplica_relacion_agentes =$conf_generales->aplica_relacion_agentes;
+        }
 
     }
 
@@ -64,6 +70,16 @@ class fc_factura extends _transacciones_fc
                 mensaje: 'Error al actualiza_agente_operacion_alta en la factura',
                 data:  $rs
             );
+        }
+
+        if ($this->aplica_relacion_agentes) {
+            $rs = $this->actualiza_agente_asesor_en_fc_factura(fc_factura_id: $fc_factura_id);
+            if(errores::$error){
+                return $this->error->error(
+                    mensaje: 'Error al actualiza_agente_asesor_en_fc_factura en la factura',
+                    data:  $rs
+                );
+            }
         }
 
 
@@ -319,6 +335,36 @@ class fc_factura extends _transacciones_fc
         }
 
         return $rs->registros;
+    }
+
+    public function actualiza_agente_asesor_en_fc_factura(
+        int $fc_factura_id
+    ):array {
+        $modelo_fc_factura = new fc_factura($this->link);
+        $modelo_fc_factura->registro_id = $fc_factura_id;
+        $data = $modelo_fc_factura->obten_data(columnas: ['com_cliente_com_agente_asesor_id']);
+
+        if(errores::$error){
+            return (new errores())->error(
+                mensaje: "Error al fc_factura data",
+                data: $data
+            );
+        }
+
+        $agente_asesor_id = $data['com_cliente_com_agente_asesor_id'];
+
+        $consulta = "UPDATE fc_factura SET ";
+        $consulta .= " fc_factura.agente_asesor_id = {$agente_asesor_id}";
+        $consulta .= " WHERE fc_factura.id = {$fc_factura_id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error(
+                mensaje: "Error al modificar agente_asesor_id en fc_factura",
+                data: $rs
+            );
+        }
+
+        return [];
     }
 
     public function actualiza_agente_operacion_en_fc_factura(
