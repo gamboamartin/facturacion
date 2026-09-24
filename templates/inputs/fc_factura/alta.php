@@ -14,6 +14,13 @@
 <?php echo $controlador->inputs->com_tipo_cambio_id; ?>
 <?php echo $controlador->inputs->cat_sat_uso_cfdi_id; ?>
 <?php echo $controlador->inputs->observaciones; ?>
+<?php if (isset($controlador->inputs->input_select_agente_operador)): ?>
+    <?php echo $controlador->inputs->input_select_agente_operador; ?>
+<?php endif; ?>
+
+<?php if (isset($controlador->inputs->input_select_agente_asesor)): ?>
+    <?php echo $controlador->inputs->input_select_agente_asesor; ?>
+<?php endif; ?>
 <?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>
 
 <!-- Modal -->
