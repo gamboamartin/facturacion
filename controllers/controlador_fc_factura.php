@@ -15,6 +15,8 @@ use gamboamartin\controllers\_controlador_adm_reporte\_filtros;
 use gamboamartin\controllers\_controlador_adm_reporte\_table;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_factura_html;
+use gamboamartin\facturacion\models\com_agente;
+use gamboamartin\facturacion\models\com_cliente;
 use gamboamartin\facturacion\models\fc_cancelacion;
 use gamboamartin\facturacion\models\fc_cfdi_sellado;
 use gamboamartin\facturacion\models\fc_cuenta_predial;
@@ -66,6 +68,7 @@ class controlador_fc_factura extends _base_system_fc
     public int $fc_partida_id = -1;
 
     public bool $aplica_relacion_layout_factura;
+    public bool $aplica_relacion_agentes = false;
 
     public array $facturas_cliente = array();
     public array $info_relaciones = array();
@@ -135,6 +138,10 @@ class controlador_fc_factura extends _base_system_fc
         $this->aplica_relacion_layout_factura = false;
         if (isset($this->conf_generales->aplica_relacion_layout_factura)) {
             $this->aplica_relacion_layout_factura = $this->conf_generales->aplica_relacion_layout_factura;
+        }
+
+        if (isset($this->conf_generales->aplica_relacion_agentes)) {
+            $this->aplica_relacion_agentes =$this->conf_generales->aplica_relacion_agentes;
         }
     }
 
@@ -252,17 +259,77 @@ class controlador_fc_factura extends _base_system_fc
             $this->inputs->input_select_com_tipo_producto = $input_select_com_tipo_producto;
         }
 
+        if ($this->aplica_relacion_agentes) {
+            $modelo_com_agente = new com_agente(link: $this->link);
+            $filtro_input_select_agente_asesor = [
+                'com_agente.com_tipo_agente_id' => 2,
+            ];
+            $filtro_input_select_agente_operador = [
+                'com_agente.com_tipo_agente_id' => 1,
+            ];
+            $columnas_input_select_agente_asesor = [
+                'com_agente_id','com_agente_descripcion_select',
+            ];
+
+            $input_select_agente_asesor = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
+                modelo: $modelo_com_agente, columns_ds: $columnas_input_select_agente_asesor,
+                disabled: false, filtro: $filtro_input_select_agente_asesor, label: 'Asesor',
+                name: 'com_agente_asesor_id',
+            );
+            if(errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al generar input_select_agente_asesor',
+                    data: $input_select_agente_asesor,
+                    header: $header, ws: $ws
+                );
+            }
+
+            $input_select_agente_operador = $this->html->select_catalogo(cols: 12, con_registros: true, id_selected: -1,
+                modelo: $modelo_com_agente, columns_ds: $columnas_input_select_agente_asesor,
+                disabled: false, filtro: $filtro_input_select_agente_operador, label: 'Operador',
+                name: 'com_agente_operador_id',
+            );
+            if(errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al generar input_select_agente_operador',
+                    data: $input_select_agente_operador,
+                    header: $header, ws: $ws
+                );
+            }
+
+            $this->inputs->input_select_agente_asesor = $input_select_agente_asesor;
+
+            $this->inputs->input_select_agente_operador = $input_select_agente_operador;
+
+        }
+
         return $r_alta;
     }
 
     public function alta_bd(bool $header, bool $ws = false): array|stdClass
     {
         if (isset($_POST['fc_layout_nom_id'])){
-            $v = (int)$_POST['fc_layout_nom_id'];
-            if ($v !== -1 && $v !== 0) {
-                $fc_layout_nom_id = $_POST['fc_layout_nom_id'];
+            $temporal_id = (int)$_POST['fc_layout_nom_id'];
+            if ($temporal_id !== -1 && $temporal_id !== 0) {
+                $fc_layout_nom_id = $temporal_id;
             }
             unset($_POST['fc_layout_nom_id']);
+        }
+
+        if (isset($_POST['com_agente_operador_id'])){
+            $temporal_id = (int)$_POST['com_agente_operador_id'];
+            if ($temporal_id !== -1 && $temporal_id !== 0) {
+                $com_agente_operador_id = $temporal_id;
+            }
+            unset($_POST['com_agente_operador_id']);
+        }
+
+        if (isset($_POST['com_agente_asesor_id'])){
+            $temporal_id = (int)$_POST['com_agente_asesor_id'];
+            if ($temporal_id !== -1 && $temporal_id !== 0) {
+                $com_agente_asesor_id = $temporal_id;
+            }
+            unset($_POST['com_agente_asesor_id']);
         }
 
         $r_alta = parent::alta_bd(header: false, ws: $ws);
