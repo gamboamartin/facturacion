@@ -60,7 +60,7 @@ class app_screens
                         array(
                             'type' => 'Text',
                             'id' => 'title-1',
-                            'content' => 'Bienvenido',
+                            'content' => '¡Prueba en vivo desde el backend!',
                             'style' => array('fontSize' => 20, 'fontWeight' => 'bold'),
                         ),
                         array(
@@ -74,7 +74,7 @@ class app_screens
                             'id' => 'btn-1',
                             'label' => 'Continuar',
                             'style' => array(
-                                'backgroundColor' => '#0B5FA5',
+                                'backgroundColor' => '#22A45D',
                                 'color' => '#FFFFFF',
                                 'padding' => 10,
                                 'borderRadius' => 6,
