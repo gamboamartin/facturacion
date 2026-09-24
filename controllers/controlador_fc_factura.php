@@ -340,6 +340,32 @@ class controlador_fc_factura extends _base_system_fc
 
         $fc_factura_id = $r_alta->registro_id;
 
+        if (isset($com_agente_operador_id)) {
+            $rs = (new com_agente($this->link))->asigna_agente_operador_a_factura(
+                agente_operador_id: $com_agente_operador_id,
+                factura_id: $fc_factura_id,
+            );
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al asignar operador a la factura',
+                    data: $rs, header: $header, ws: $ws
+                );
+            }
+        }
+
+        if (isset($com_agente_asesor_id)) {
+            $rs = (new com_agente($this->link))->asigna_agente_asesor_a_factura(
+                agente_asesor_id: $com_agente_asesor_id,
+                factura_id: $fc_factura_id,
+            );
+            if (errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al asignar asesor a la factura',
+                    data: $rs, header: $header, ws: $ws
+                );
+            }
+        }
+
         if (isset($fc_layout_nom_id)) {
             $rs = (new fc_layout_factura($this->link))->relaciona_factura_con_layout(
                 fc_factura_id: $fc_factura_id,

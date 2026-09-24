@@ -3,6 +3,7 @@ namespace gamboamartin\facturacion\models;
 
 use config\generales;
 use gamboamartin\errores\errores;
+use stdClass;
 
 class com_agente extends \gamboamartin\comercial\models\com_agente {
     public function obtener_agente_operador_id(): int
@@ -31,7 +32,7 @@ class com_agente extends \gamboamartin\comercial\models\com_agente {
 
     public function asigna_agente_asesor_a_factura(int $agente_asesor_id, int $factura_id): array|stdClass
     {
-        $consulta = "UPDATE fc_factura SET fc_factura.agente_operacion_alta_id = {$agente_asesor_id}
+        $consulta = "UPDATE fc_factura SET fc_factura.agente_asesor_id = {$agente_asesor_id}
                         WHERE fc_factura.id = {$factura_id}";
         $rs = $this->ejecuta_sql($consulta);
         if(errores::$error){
