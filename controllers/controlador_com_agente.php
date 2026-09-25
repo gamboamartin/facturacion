@@ -11,6 +11,7 @@ namespace gamboamartin\facturacion\controllers;
 use config\generales;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\adm_usuario;
+use gamboamartin\facturacion\models\com_agente;
 use gamboamartin\template\html;
 use PDO;
 use stdClass;
@@ -25,6 +26,7 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(), stdClass $paths_conf = new stdClass())
     {
         parent::__construct(link: $link,html:  $html,paths_conf:  $paths_conf);
+        $this->modelo = new com_agente($link);
 
         $this->childrens_data['com_agente']['title'] = 'Agente';
 
