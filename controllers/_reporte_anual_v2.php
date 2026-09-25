@@ -608,6 +608,6 @@ class _reporte_anual_v2{
                     WHERE
                     fc_layout_nom.fecha_pago BETWEEN :fecha_inicio
                     AND :fecha_fin";
-    }
+    } // Todo : LEFT JOIN com_agente AS asesor ON fc_factura.com_agente_asesor_id = asesor.id
 
 }

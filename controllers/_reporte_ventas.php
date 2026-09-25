@@ -72,6 +72,7 @@ class _reporte_ventas{
             }
 
             $com_agente_asesor_id = $registro['com_cliente_com_agente_asesor_id'];
+            // ToDo : $registro['fc_factura_com_agente_asesor_id'];
             $com_cliente_id = $registro['com_cliente_id'];
 
             $porcentaje_comision = $registro['fc_factura_porcentaje_comision_cliente'] / 100;
