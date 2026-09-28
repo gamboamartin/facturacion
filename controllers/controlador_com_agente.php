@@ -37,6 +37,7 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
         if (isset($config_general->aplica_relacion_agentes)) {
             $this->aplica_relacion_agentes = $config_general->aplica_relacion_agentes;
         }
+        $this->tipo_agente_asesor_id = $this->conf_generales::$tipo_agente_asesor;
     }
 
     public function alta(bool $header, bool $ws = false): array|string
@@ -56,9 +57,6 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
         }
 
         $this->numero_asesor = $data['com_agente_num_asesor'] ?? '0';
-        $this->com_tipo_agente_id = $data['com_tipo_agente_id'] ?? -1;
-        $this->tipo_agente_asesor_id = $this->conf_generales::$tipo_agente_asesor ?? 0;
-
 
         $link = "index.php?seccion=com_agente&accion=modifica_bd&registro_id={$this->registro_id}&session_id={$_GET['session_id']}";
         $this->url_submit = $link;
@@ -69,12 +67,13 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
     {
         if ($this->aplica_relacion_agentes) {
 
-            if (!in_array($_POST['adm_grupo_id'], $this->ids_grupo_validos) ){
+            $adm_grupo_id = $this->conf_generales::$grupo_id_asesor;
 
-                return $this->retorno_error(
-                    mensaje: 'Error estas intentando asignar un grupo de usuarios no valido', data: $_POST, header: $header, ws: $ws
-                );
-            } // end if (!in_array($_POST['adm_grupo_id'], $this->ids_grupo_validos) ){
+            if ((int)$_POST['com_tipo_agente_id']  === $this->conf_generales::$tipo_agente_operador) {
+                $adm_grupo_id = $this->conf_generales::$grupo_id_operadores;
+            }
+
+            $_POST['adm_grupo_id'] = $adm_grupo_id;
 
             $admin_user = (string)$_POST['user'];
 
