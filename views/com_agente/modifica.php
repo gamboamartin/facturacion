@@ -12,31 +12,28 @@
 
                 <div class="widget  widget-box box-container form-main widget-form-cart" id="form" >
                     <?php include (new views())->ruta_templates . "head/subtitulo.php"; ?>
-
+                    <input id="tipo_agente_asesor_id" value="<?php echo $controlador->tipo_agente_asesor_id ?>" type="hidden">
                     <form method="post" action="<?php echo $controlador->url_submit; ?>" class="form-additional">
-
+                        
                         <div class="control-group col-6">
                             <?php echo $controlador->inputs->com_tipo_agente_id; ?>
                         </div>
-                        <div class="control-group col-6">
-                            <div class="control-group col-sm-12">
-                                <label class="control-label" for="adm_grupo_id">
-                                    Grupo de Permisos
-                                </label>
+                        <div id="num_asesor_container" class="control-group col-sm-12">
+                            <label class="control-label" for="num_asesor">
+                                No.Asesor
+                            </label>
 
-                                <div class="controls">
-                                    <select
-                                        class="form-control selectpicker color-secondary adm_grupo_id"
-                                        data-live-search="true"
-                                        id="adm_grupo_id"
-                                        name="adm_grupo_id"
-                                        required
-                                    >
-                                        <option value="">Selecciona una opcion</option>
-                                        <option value="4">Operadores</option>
-                                        <option value="5">Asesores</option>
-                                    </select>
-                                </div>
+                            <div class="controls">
+                                <input
+                                        type="text"
+                                        value="<?php echo $controlador->numero_asesor ?>"
+                                        class="form-control"
+                                        id="num_asesor"
+                                        name="num_asesor"
+                                        inputmode="numeric"
+                                        pattern="[0-9]+"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                >
                             </div>
                         </div>
                         <div class="control-group col-6">
