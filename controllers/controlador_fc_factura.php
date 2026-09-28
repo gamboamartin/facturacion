@@ -259,7 +259,8 @@ class controlador_fc_factura extends _base_system_fc
             $this->inputs->input_select_com_tipo_producto = $input_select_com_tipo_producto;
         }
 
-        if ($this->aplica_relacion_agentes) {
+//        if ($this->aplica_relacion_agentes) {
+        if (false) {
             $modelo_com_agente = new com_agente(link: $this->link);
             $filtro_input_select_agente_asesor = [
                 'com_agente.com_tipo_agente_id' => 2,
