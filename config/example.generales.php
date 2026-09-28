@@ -21,8 +21,14 @@ class generales{
 
     public string $ruta_factura_pdf = "/var/www/html/facturacion/plantillas/factura_base.pdf"; // aqui va la ruta del pdf que se usara como plantilla para generar las facturas, se recomienda que sea un pdf con campos editables para facilitar la generacion de las facturas
     public bool $aplica_relacion_layout_factura = false; // especifico de konsulta
+
+    public bool $aplica_relacion_agentes = true; //se requiere siempre que se aplique la relacion de agentes
+    public static int $grupo_id_operadores = 4; //se requiere siempre que se aplique la relacion de agentes
+    public static int $grupo_id_asesor = 5; //se requiere siempre que se aplique la relacion de agentes
     public static int $tipo_agente_operador = 1; // especifico de konsulta
+    //se requiere siempre que se aplique la relacion de agentes
     public static int $tipo_agente_asesor = 2; // especifico de konsulta
+    //se requiere siempre que se aplique la relacion de agentes
     public static string $empresa_pagadora_reportes = 'RECURSOS Y RESULTADOS HARIMENI'; // especifico de konsulta
     public static string $key_n8n = 'VHn9JjiujaWPok5yNMb5sYj9';
     public static string $url_base_n8n = 'https://n8n-test.ivitec.mx/webhook-test';
