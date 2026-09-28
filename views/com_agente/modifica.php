@@ -33,6 +33,7 @@
                                         inputmode="numeric"
                                         pattern="[0-9]+"
                                         oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                        required
                                 >
                             </div>
                         </div>
