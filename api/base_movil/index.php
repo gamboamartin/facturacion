@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once '../../vendor/autoload.php';
 require_once __DIR__ . '/src/app_screens.php';
 
-if (!isset($_GET['method']) || trim($_GET['method']) === '') {
+if (!isset($_GET['method']) || !is_string($_GET['method']) || trim($_GET['method']) === '') {
     echo json_encode(array('error' => 1, 'mensaje' => 'Error $_GET[method] debe existir.'), JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -37,22 +37,20 @@ if (!isset($_GET['method']) || trim($_GET['method']) === '') {
 $method = trim($_GET['method']);
 $app = new app_screens();
 
-if (!method_exists($app, $method)) {
-    echo json_encode(array('error' => 1, 'mensaje' => 'Error el metodo invocado no existe.'), JSON_UNESCAPED_UNICODE);
+$metodos_habilitados = array('obten_pantalla', 'guarda_registro');
+
+
+if (!in_array($method, $metodos_habilitados, true) || !method_exists($app, $method)) {
+    echo json_encode(array('error' => 1, 'mensaje' => 'Error metodo no habilitado en el router.'), JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-if ($method === 'obten_pantalla') {
-    $resultado = $app->obten_pantalla();
+$resultado = $app->$method();
 
-    if (isset($resultado['error'])) {
-        $mensaje = $resultado['mensaje_limpio'] ?? 'Error al obtener la pantalla';
-        echo json_encode(array('error' => 1, 'mensaje' => $mensaje), JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
-    echo json_encode($resultado, JSON_UNESCAPED_UNICODE);
+if (isset($resultado['error'])) {
+    $mensaje = $resultado['mensaje_limpio'] ?? 'Error al procesar la solicitud';
+    echo json_encode(array('error' => 1, 'mensaje' => $mensaje), JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-echo json_encode(array('error' => 1, 'mensaje' => 'Error metodo no habilitado en el router.'), JSON_UNESCAPED_UNICODE);
+echo json_encode($resultado, JSON_UNESCAPED_UNICODE);
