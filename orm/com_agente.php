@@ -3,20 +3,93 @@ namespace gamboamartin\facturacion\models;
 
 use config\generales;
 use gamboamartin\errores\errores;
+use gamboamartin\proceso\models\pr_entidad;
 use stdClass;
 
 class com_agente extends \gamboamartin\comercial\models\com_agente {
+
+    public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
+    {
+        if (isset($_POST['num_asesor'])){
+            $temporal_num = (int)$_POST['num_asesor'];
+            if ($temporal_num !== -1 && $temporal_num !== 0) {
+                $num_asesor = $temporal_num;
+            }
+            unset($_POST['num_asesor']);
+        }
+
+        $rs = parent::alta_bd($keys_integra_ds);
+        if (errores::$error) {
+            return $this->error->error( mensaje: 'Error en alta_bd de com_agente', data: $rs );
+        }
+
+        if (isset($num_asesor)) {
+            $com_agente_id = $rs->registro_id;
+
+            $result = $this->actualiza_num_asesor(
+                com_agente_asesor_id: $com_agente_id,
+                num_asesor: $num_asesor
+            );
+
+            if (errores::$error) {
+                return $this->error->error( mensaje: 'Error al actualizar el num_asesor', data: $result );
+            }
+        }
+
+        return $rs;
+
+    }
+
+    public function modifica_bd(array $registro, int $id, bool $reactiva = false, array $keys_integra_ds = array('descripcion')): array|stdClass
+    {
+        if (isset($_POST['num_asesor'])){
+            $temporal_num = (int)$_POST['num_asesor'];
+            if ($temporal_num !== -1 && $temporal_num !== 0) {
+                $num_asesor = $temporal_num;
+            }
+            unset($_POST['num_asesor']);
+        }
+
+        $rs = parent::modifica_bd($registro, $id, $reactiva, $keys_integra_ds);
+        if (errores::$error) {
+            return $this->error->error( mensaje: 'Error en modifica_bd de com_agente', data: $rs );
+        }
+
+        if (isset($num_asesor)) {
+
+            $result = $this->actualiza_num_asesor(
+                com_agente_asesor_id: $id,
+                num_asesor: $num_asesor
+            );
+
+            if (errores::$error) {
+                return $this->error->error( mensaje: 'Error al actualizar el num_asesor', data: $result );
+            }
+        }
+
+        return $rs;
+
+    }
+
     public function obtener_agente_operador_id(): int
      {
          $tipo_agente_id = generales::$tipo_agente_operador ?? 0;
-         return $this->obtener_agente_id( tipo_agente_id: $tipo_agente_id );
-     }
 
-    public function obtener_agente_asesor_id(): int
-    {
-        $tipo_agente_id = generales::$tipo_agente_asesor ?? 0;
-        return $this->obtener_agente_id( tipo_agente_id: $tipo_agente_id );
-    }
+         $user_id = (int) $_SESSION['usuario_id'];
+         $filtro = [ 'com_agente.adm_usuario_id' => $user_id, 'com_tipo_agente.id' => $tipo_agente_id, ];
+
+         $rs_filtro_and = $this->filtro_and( columnas: ['com_agente_id'], filtro: $filtro );
+
+         if (errores::$error) {
+             return $this->error->error( mensaje: 'Error al buscar usuario en com_agente', data: $rs_filtro_and );
+         }
+
+         if ($rs_filtro_and->n_registros === 0) {
+             return -1;
+         }
+
+         return (int) $rs_filtro_and->registros[0]['com_agente_id'];
+     }
 
     public function asigna_agente_operador_a_factura(int $agente_operador_id, int $factura_id): array|stdClass
     {
@@ -94,21 +167,16 @@ class com_agente extends \gamboamartin\comercial\models\com_agente {
 
      }
 
-    private function obtener_agente_id(int $tipo_agente_id): int
-    {
-         $user_id = (int) $_SESSION['usuario_id'];
-         $filtro = [ 'com_agente.adm_usuario_id' => $user_id, 'com_tipo_agente.id' => $tipo_agente_id, ];
-
-         $rs_filtro_and = $this->filtro_and( columnas: ['com_agente_id'], filtro: $filtro );
-
-         if (errores::$error) {
-             return $this->error->error( mensaje: 'Error al buscar usuario en com_agente', data: $rs_filtro_and );
+     private function actualiza_num_asesor(int $com_agente_asesor_id, int $num_asesor)
+     {
+         $consulta = "UPDATE com_agente SET com_agente.num_asesor = {$num_asesor}
+                        WHERE com_agente.id = {$com_agente_asesor_id}";
+         $rs = $this->ejecuta_sql($consulta);
+         if(errores::$error){
+             return (new errores())->error("Error al actualizar el num_asesor en com_agente", $rs);
          }
 
-         if ($rs_filtro_and->n_registros === 0) {
-             return -1;
-         }
-
-         return (int) $rs_filtro_and->registros[0]['com_agente_id'];
+         return [];
      }
+
 }

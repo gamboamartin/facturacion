@@ -33,10 +33,28 @@
                                         required
                                     >
                                         <option value="">Selecciona una opcion</option>
-                                        <option value="4" selected>Operadores</option>
+                                        <option value="4">Operadores</option>
                                         <option selected value="5">Asesores</option>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="control-group col-sm-12">
+                            <label class="control-label" for="num_asesor">
+                                No.Asesor
+                            </label>
+
+                            <div class="controls">
+                                <input
+                                        type="text"
+                                        class="form-control"
+                                        id="num_asesor"
+                                        name="num_asesor"
+                                        inputmode="numeric"
+                                        pattern="[0-9]+"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                        required
+                                >
                             </div>
                         </div>
                         <div class="control-group col-6">
