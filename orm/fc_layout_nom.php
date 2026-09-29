@@ -83,6 +83,40 @@ class fc_layout_nom extends modelo{
         $_POST['fecha_emision'] = $_POST['fecha_pago'].'T'.date('H:i:s');
         $_POST['porcentaje_comision_cliente'] = $porcentaje_comision_cliente;
 
+        $agente_operacion_id = (new com_agente(link: $this->link))->obtener_agente_operador_id();
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: "Error al obtener_agente_operador_id",
+                data: $agente_operacion_id
+            );
+        }
+
+        $agente_operador_id = (int)($_POST['agente_operador_id'] ?? 0);
+
+        if ($agente_operador_id === 0 || $agente_operador_id === -1) {
+            $agente_operador_id = $agente_operacion_id;
+        }
+
+        $_POST['agente_operador_id'] = $agente_operador_id;
+
+        $agente_asesor_id = (new com_agente(link: $this->link))->obtener_agente_asesor_id_con_sucursal_id(
+            com_sucursal_id: $_POST['com_sucursal_id'],
+        );
+        if (errores::$error) {
+            return (new errores())->error(
+                mensaje: "Error al obtener_agente_operador_id",
+                data: $agente_operacion_id
+            );
+        }
+
+        $agente_asesor_seleccionado_id = (int)($_POST['agente_asesor_id'] ?? 0);
+
+        if ($agente_asesor_seleccionado_id === 0 || $agente_asesor_seleccionado_id === -1) {
+            $agente_asesor_seleccionado_id = $agente_asesor_id;
+        }
+
+        $_POST['agente_asesor_id'] = $agente_asesor_seleccionado_id;
+
         $r_alta = parent::alta_bd();
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al dar de alta registro',data: $r_alta);

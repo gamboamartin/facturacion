@@ -91,6 +91,32 @@ class com_agente extends \gamboamartin\comercial\models\com_agente {
          return (int) $rs_filtro_and->registros[0]['com_agente_id'];
      }
 
+    public function obtener_agente_asesor_id_con_cliente_id(int $com_cliente_id): int
+    {
+
+        $modelo_cliente = new com_cliente($this->link);
+        $modelo_cliente->registro_id = $com_cliente_id;
+        $data = $modelo_cliente->obten_data(columnas: ['com_cliente_com_agente_asesor_id']);
+        if(errores::$error){
+            return -1;
+        }
+
+        return (int) $data['com_cliente_com_agente_asesor_id'];
+    }
+
+    public function obtener_agente_asesor_id_con_sucursal_id(int $com_sucursal_id): int
+    {
+
+        $modelo_sucursal = new com_sucursal($this->link);
+        $modelo_sucursal->registro_id = $com_sucursal_id;
+        $data = $modelo_sucursal->obten_data(columnas: ['com_cliente_com_agente_asesor_id']);
+        if(errores::$error){
+            return -1;
+        }
+
+        return (int) $data['com_cliente_com_agente_asesor_id'];
+    }
+
     public function asigna_agente_operador_a_factura(int $agente_operador_id, int $factura_id): array|stdClass
     {
         $consulta = "UPDATE fc_factura SET fc_factura.agente_operacion_alta_id = {$agente_operador_id}
