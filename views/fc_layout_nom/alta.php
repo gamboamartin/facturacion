@@ -21,6 +21,14 @@
 
             <?php echo $controlador->inputs->documento; ?>
 
+            <?php if (isset($controlador->inputs->input_select_agente_operador)): ?>
+                <?php echo $controlador->inputs->input_select_agente_operador; ?>
+            <?php endif; ?>
+
+            <?php if (isset($controlador->inputs->input_select_agente_asesor)): ?>
+                <?php echo $controlador->inputs->input_select_agente_asesor; ?>
+            <?php endif; ?>
+
             <?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>
         </form>
     </div>
