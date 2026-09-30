@@ -199,54 +199,54 @@ class controlador_fc_layout_nom extends system{
 
         $this->inputs->input_select_periodo = $input_select_periodo;
 
-        if (true) {
-        $modelo_com_agente = new com_agente(link: $this->link);
-        $filtro_input_select_agente_asesor = [
-            'com_agente.com_tipo_agente_id' => 2,
-        ];
-        $filtro_input_select_agente_operador = [
-            'com_agente.com_tipo_agente_id' => 1,
-        ];
-        $columnas_input_select_agente_asesor = [
-            'com_agente_id','com_agente_descripcion_select',
-        ];
+        if (false) {
+            $modelo_com_agente = new com_agente(link: $this->link);
+            $filtro_input_select_agente_asesor = [
+                'com_agente.com_tipo_agente_id' => 2,
+            ];
+            $filtro_input_select_agente_operador = [
+                'com_agente.com_tipo_agente_id' => 1,
+            ];
+            $columnas_input_select_agente_asesor = [
+                'com_agente_id','com_agente_descripcion_select',
+            ];
 
-        $input_select_agente_asesor = $this->html->select_catalogo(cols: 6, con_registros: true, id_selected: -1,
-            modelo: $modelo_com_agente, columns_ds: $columnas_input_select_agente_asesor,
-            disabled: false, filtro: $filtro_input_select_agente_asesor, label: 'Asesor',
-            name: 'agente_asesor_id',
-        );
-        if(errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al generar input_select_agente_asesor',
-                data: $input_select_agente_asesor,
-                header: $header, ws: $ws
+            $input_select_agente_asesor = $this->html->select_catalogo(cols: 6, con_registros: true, id_selected: -1,
+                modelo: $modelo_com_agente, columns_ds: $columnas_input_select_agente_asesor,
+                disabled: false, filtro: $filtro_input_select_agente_asesor, label: 'Asesor',
+                name: 'agente_asesor_id',
             );
-        }
+            if(errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al generar input_select_agente_asesor',
+                    data: $input_select_agente_asesor,
+                    header: $header, ws: $ws
+                );
+            }
 
-        $input_select_agente_operador = $this->html->select_catalogo(cols: 6, con_registros: true, id_selected: -1,
-            modelo: $modelo_com_agente, columns_ds: $columnas_input_select_agente_asesor,
-            disabled: false, filtro: $filtro_input_select_agente_operador, label: 'Operador',
-            name: 'agente_operador_id',
-        );
-        if(errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al generar input_select_agente_operador',
-                data: $input_select_agente_operador,
-                header: $header, ws: $ws
+            $input_select_agente_operador = $this->html->select_catalogo(cols: 6, con_registros: true, id_selected: -1,
+                modelo: $modelo_com_agente, columns_ds: $columnas_input_select_agente_asesor,
+                disabled: false, filtro: $filtro_input_select_agente_operador, label: 'Operador',
+                name: 'agente_operador_id',
             );
-        }
+            if(errores::$error) {
+                return $this->retorno_error(
+                    mensaje: 'Error al generar input_select_agente_operador',
+                    data: $input_select_agente_operador,
+                    header: $header, ws: $ws
+                );
+            }
 
-        $ids = $this->conf_generales->grupo_ids_puede_select_asesores;
-        $grupo_id = (int) $_SESSION['grupo_id'];
+            $ids = $this->conf_generales->grupo_ids_puede_select_asesores;
+            $grupo_id = (int) $_SESSION['grupo_id'];
 
-        if (in_array($grupo_id, $ids)) {
-            $this->inputs->input_select_agente_asesor = $input_select_agente_asesor;
-        }
+            if (in_array($grupo_id, $ids)) {
+                $this->inputs->input_select_agente_asesor = $input_select_agente_asesor;
+            }
 
-        $this->inputs->input_select_agente_operador = $input_select_agente_operador;
+            $this->inputs->input_select_agente_operador = $input_select_agente_operador;
 
-    } // end if true:false
+        } // end if true:false
 
 
         return $alta;
