@@ -184,6 +184,15 @@ class app_screens
                                     'label' => 'Contraseña',
                                     'required' => true,
                                 ),
+                                array(
+                                    'type' => 'Input',
+                                    'id' => 'in-correo',
+                                    'name' => 'correo',
+                                    'inputType' => 'text',
+                                    'label' => 'Correo electrónico',
+                                    'required' => true,
+                                    'placeholder' => 'Tu correo electrónico',
+                                ),
                             ),
                         ),
                         array(

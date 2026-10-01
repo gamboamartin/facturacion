@@ -12,6 +12,7 @@ use config\generales;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\adm_usuario;
 use gamboamartin\facturacion\models\com_agente;
+use gamboamartin\comercial\models\com_tipo_agente;
 use gamboamartin\template\html;
 use PDO;
 use stdClass;
@@ -26,6 +27,7 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
     public int $info_total_agentes;
     public int $info_agentes_activos;
     public int $info_asesores;
+    public array $tipos_agente = [];
 
     public bool $aplica_relacion_agentes = false;
 
@@ -41,6 +43,12 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
             $this->aplica_relacion_agentes = $config_general->aplica_relacion_agentes;
         }
         $this->tipo_agente_asesor_id = $this->conf_generales::$tipo_agente_asesor;
+
+        $tipos_agente = (new com_tipo_agente($link))->filtro_and(
+            columnas: ['com_tipo_agente_id', 'com_tipo_agente_descripcion']
+        );
+        $this->tipos_agente = $tipos_agente->registros ?? [];
+        
     }
 
     public function alta(bool $header, bool $ws = false): array|string
@@ -161,6 +169,92 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
                 mensaje: "Error el user:{$admin_user} ya fue registrado previamente.", data: $result, header: $header, ws: $ws);
         }
         return [];
+    }
+
+    public function get_data(bool $header, bool $ws = false, array $not_actions = array())
+    {
+        $usa_diseno_nuevo = false;
+        if (property_exists(generales::class, 'com_agente_v2')) {
+            $usa_diseno_nuevo = (bool)generales::$com_agente_v2;
+        }
+
+        if (!$usa_diseno_nuevo) {
+            return parent::get_data($header, $ws, $not_actions);
+        }
+
+        $params = (new \gamboamartin\system\datatables())->params(datatable: $this->datatable);
+
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener params', data: $params, header: $header, ws: $ws);
+        }
+
+        $filtro = $params->filtro;
+        if (isset($_POST['filtros_select_propios']) && is_array($_POST['filtros_select_propios'])) {
+            foreach ($_POST['filtros_select_propios'] as $campo => $valor) {
+                $valor = trim((string)$valor);
+                if ($valor !== '') {
+                    $filtro[$campo] = $valor;
+                }
+            }
+        }
+
+        $data_result = $this->modelo->get_data_lista(filtro: $filtro, filtro_especial: $params->filtro_especial,
+        filtro_extra: $params->filtro_extra, filtro_rango: $params->filtro_rango,
+        n_rows_for_page: $params->n_rows_for_page, pagina: $params->pagina, in: $params->in, order: $params->order);
+
+        $acciones_permitidas = (new \gamboamartin\system\datatables())->acciones_permitidas(
+            link: $this->link, seccion: $this->tabla, not_actions: $not_actions);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener data result', data: $acciones_permitidas, header: $header, ws: $ws);
+        }
+
+        $data_result = (new \gamboamartin\system\datatables())->ajusta_data_result(acciones_permitidas: $acciones_permitidas,
+            data_result: $data_result, html_base: $this->html_base, seccion: $this->seccion);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al integrar data_result', data: $data_result, header: $header, ws: $ws);
+        }
+
+        $data_result = $this->enriquece_badges_agente(data_result: $data_result);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al enriquecer badges', data: $data_result, header: $header, ws: $ws);
+        }
+
+        $out = (new \gamboamartin\system\datatables())->out_result(data_result: $data_result, params: $params, ws: $ws);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al integrar out', data: $out, header: $header, ws: $ws);
+        }
+
+        return $out;
+    }
+
+    private function enriquece_badges_agente(array $data_result): array
+    {
+        $mapa_tipo = [
+            'asesor' => 'type-asesor',
+            'supervisor' => 'type-supervisor',
+            'agente' => 'type-agente',
+        ];
+
+        foreach ($data_result['registros'] as $key => $row) {
+            if (isset($row['com_tipo_agente_descripcion'])) {
+                $valor = trim((string)$row['com_tipo_agente_descripcion']);
+                $clave = strtolower($valor);
+                $clase = $mapa_tipo[$clave] ?? 'type-agente';
+                $data_result['registros'][$key]['com_tipo_agente_descripcion'] =
+                    '<span class="type-badge ' . $clase . '">' . htmlspecialchars($valor) . '</span>';
+            }
+
+            if (isset($row['com_agente_status'])) {
+                $valor = trim((string)$row['com_agente_status']);
+                $es_activo = strtolower($valor) === 'activo';
+                $clase = $es_activo ? 'active' : 'inactive';
+                $data_result['registros'][$key]['com_agente_status'] =
+                    '<span class="status-badge ' . $clase . '"><span class="status-dot"></span>' .
+                    htmlspecialchars($valor) . '</span>';
+            }
+        }
+
+        return $data_result;
     }
 
     private function setear_info_lista(bool $header, bool $ws): void
