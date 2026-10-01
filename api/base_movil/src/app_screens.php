@@ -146,6 +146,13 @@ class app_screens
                             'style' => $this->estilo_boton_primario(),
                             'action' => array('type' => 'NAVIGATE', 'screenId' => 'registro'),
                         ),
+                        array(
+                            'type' => 'Button',
+                            'id' => 'btn-prueba',
+                            'label' => 'Función de prueba',
+                            'style' => $this->estilo_boton_primario(),
+                            'action' => array('type' => 'CALL', 'function' => 'funcion_prueba'),
+                        ),
                     ),
                 ),
             ),
