@@ -197,6 +197,9 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
                 }
             }
         }
+        var_dump($filtro);
+        var_dump($_POST);
+        exit;
 
         $data_result = $this->modelo->get_data_lista(filtro: $filtro, filtro_especial: $params->filtro_especial,
         filtro_extra: $params->filtro_extra, filtro_rango: $params->filtro_rango,
