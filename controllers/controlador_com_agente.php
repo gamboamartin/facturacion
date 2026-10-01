@@ -150,6 +150,70 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
         exit;
     }
 
+    public function status(bool $header, bool $ws): array|stdClass
+    {
+        $com_agente_id = $this->registro_id;
+
+        $this->link->beginTransaction();
+
+        $modelo_com_agente = new com_agente($this->link);
+        $modelo_com_agente->registro_id = $com_agente_id;
+        $data = $modelo_com_agente->obten_data(['com_agente_status','adm_usuario_id']);
+        if (errores::$error) {
+            $this->link->rollBack();
+            return $this->retorno_error(
+                mensaje: 'Error al data del com_agente', data: $data, header: $header, ws: $ws);
+        }
+
+        $status_actual = $data['com_agente_status'];
+
+        $status_nuevos = 'activo';
+        if ($status_actual === 'activo') {
+            $status_nuevos = 'inactivo';
+        }
+
+        $mensaje = "Se ajusto el estatus a '$status_nuevos' de el registro con el id ";
+
+        $rs1 = $modelo_com_agente->actualiza_status_com_agente(
+            com_agente_id: $com_agente_id,
+            status: $status_nuevos
+        );
+        if (errores::$error) {
+            $this->link->rollBack();
+            return $this->retorno_error(
+                mensaje: 'Error al cambiar el estatus del com_agente', data: $rs1, header: $header, ws: $ws);
+        }
+
+
+        if (errores::$error) {
+            $this->link->rollBack();
+            return $this->retorno_error(
+                mensaje: 'Error al cambiar el estatus del agente', data: $result, header: $header, ws: $ws);
+        }
+
+        $adm_usuario_id = $data['adm_usuario_id'];
+        $status = $status_nuevos;
+
+        $rs2= $modelo_com_agente->actualiza_status_adm_usuario(
+            adm_usuario_id: $adm_usuario_id,
+            status: $status
+        );
+        if (errores::$error) {
+            $this->link->rollBack();
+            return $this->retorno_error(
+                mensaje: 'Error al cambiar el estatus del admin_user', data: $rs2, header: $header, ws: $ws);
+        }
+
+        $link = "index.php?seccion=com_agente&accion=lista&adm_menu_id=41";
+        $link .= "&session_id={$_GET['session_id']}";
+
+        $_SESSION['exito'][]['mensaje'] = $mensaje . $this->registro_id;
+        $this->link->commit();
+
+        header("Location: " . $link);
+        exit;
+    }
+
     private function validad_admin_user(string $admin_user, bool $header, bool $ws)
     {
         $modelo_adm_usuario = new adm_usuario($this->link);

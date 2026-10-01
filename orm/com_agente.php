@@ -193,6 +193,30 @@ class com_agente extends \gamboamartin\comercial\models\com_agente {
 
      }
 
+    public function actualiza_status_com_agente(int $com_agente_id, string $status): array
+    {
+        $consulta = "UPDATE com_agente SET com_agente.status = '{$status}'
+                        WHERE com_agente.id = {$com_agente_id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error("Error al actualizar el status adm_usuario", $rs);
+        }
+
+        return [];
+    }
+
+    public function actualiza_status_adm_usuario(int $adm_usuario_id, string $status): array
+    {
+        $consulta = "UPDATE adm_usuario SET adm_usuario.status = '{$status}'
+                        WHERE adm_usuario.id = {$adm_usuario_id}";
+        $rs = $this->ejecuta_sql($consulta);
+        if(errores::$error){
+            return (new errores())->error("Error al actualizar el status com_agente", $rs);
+        }
+
+        return [];
+    }
+
      private function actualiza_num_asesor(int $com_agente_asesor_id, int $num_asesor)
      {
          $consulta = "UPDATE com_agente SET com_agente.num_asesor = {$num_asesor}
