@@ -1343,6 +1343,22 @@
     display: none;
 }
 
+.agentes-header-actions .btn {
+    min-height: 43px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    color: #fff;
+    background: linear-gradient(135deg, #8248ee, #6526d8);
+    box-shadow: 0 5px 13px rgba(113,56,226,.22);
+}
+
 /* ACCIONES — apuntando a las clases reales de Bootstrap, no a las inventadas del mockup */
     .agents-table-card .btn-warning,
     .agents-table-card .btn-danger,
