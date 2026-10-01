@@ -4,13 +4,13 @@ $(document).ready(function () {
 
     $('#limpiar').prop('disabled', true);
 
-    function valores_select_propios() {
+    function valores_filtros_propios() {
         var filtros = {};
 
-        $('.filtros-avanzados select').each(function () {
-            var $select = $(this);
-            var valor = $select.val();
-            var campo = $select.data('filtro_campo');
+        $('.filtros-avanzados input, .filtros-avanzados select').each(function () {
+            var $el = $(this);
+            var valor = $el.val();
+            var campo = $el.data('filtro_campo');
 
             if (campo && valor) {
                 filtros[campo] = valor;
@@ -38,7 +38,7 @@ $(document).ready(function () {
     });
 
     table_com_agente.on('preXhr.dt', function (e, settings, data) {
-        data.filtros_select_propios = valores_select_propios();
+        data.filtros_select_propios = valores_filtros_propios();
     });
 
     $('#filtrar').on('click', function () {
