@@ -188,18 +188,15 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
             return $this->retorno_error(mensaje: 'Error al obtener params', data: $params, header: $header, ws: $ws);
         }
 
-        $filtro = $params->filtro;
-        if (isset($_POST['filtros_select_propios']) && is_array($_POST['filtros_select_propios'])) {
-            foreach ($_POST['filtros_select_propios'] as $campo => $valor) {
+       $filtro = $params->filtro;
+        if (isset($_GET['filtros_select_propios']) && is_array($_GET['filtros_select_propios'])) {
+            foreach ($_GET['filtros_select_propios'] as $campo => $valor) {
                 $valor = trim((string)$valor);
                 if ($valor !== '') {
                     $filtro[$campo] = $valor;
                 }
             }
         }
-        var_dump($filtro);
-        var_dump($_POST);
-        exit;
 
         $data_result = $this->modelo->get_data_lista(filtro: $filtro, filtro_especial: $params->filtro_especial,
         filtro_extra: $params->filtro_extra, filtro_rango: $params->filtro_rango,
