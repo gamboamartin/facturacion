@@ -205,4 +205,38 @@ class com_agente extends \gamboamartin\comercial\models\com_agente {
          return [];
      }
 
+    public function obtener_info_lista()
+    {
+        $response = new stdClass();
+
+        $rs = $this->filtro_and(columnas: ['com_agente_status','com_agente_com_tipo_agente_id']);
+        if(errores::$error){
+            return $this->error->error(
+                mensaje: 'Error al obtener informacion de la tabla de agentes',
+                data:  $rs
+            );
+        }
+
+        $total_agentes = 0;
+        $agentes_activos = 0;
+        $agentes_asesores = 0;
+
+        foreach ($rs->registros as  $registro_agente) {
+            $total_agentes++;
+            if ($registro_agente['com_agente_status'] === 'activo') {
+                $agentes_activos++;
+            }
+            if ((int)$registro_agente['com_agente_com_tipo_agente_id'] === generales::$tipo_agente_asesor) {
+                $agentes_asesores++;
+            }
+        }
+
+        $response->total_agentes = $total_agentes;
+        $response->agentes_activos = $agentes_activos;
+        $response->agentes_asesores = $agentes_asesores;
+
+        return $response;
+
+    }
+
 }
