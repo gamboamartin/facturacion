@@ -34,6 +34,19 @@ class generales{
     public static string $url_base_n8n = 'https://n8n-test.ivitec.mx/webhook-test';
     public static array $codigos_error_datos_constancias = ['CFDI40143','CFDI40147','CFDI40145','CFDI40999'];
     public string $cache_secret_key = 'f9a8c7d6e5b4a360_super_secret_key_ivitec';
+       public static int $accion_id_descarga_factura = 10063;
+    public static int $accion_id_alta_cliente = 10064;
+    public static int $accion_id_alta_factura = 10060;
+    public static int $accion_id_alta_partida = 10061;
+    public static int $accion_id_editar_cliente = 10062;
+    public static int $accion_id_editar_factura = 10065;
+    public static int $accion_id_timbrar_factura = 10066;
+    public bool $cambios_titulo_pdf = true;
+    public bool $leyenda_factura_pdf =true;
+    public static bool $datos_adicionales_com_cliente = true; 
+    // public static bool $login_ivitec_v2 = false;
+    // public static bool $com_agente_v2 = false;
+    // public static string $tipo_menu = 'horizontal'; // 'horizontal' | 'vertical'
 
     public function __construct(){
         $this->path_base = '/var/www/html/facturacion/'; // aqui va la ruta base del sistema, se usa para generar rutas absolutas en los templates y en el sistema en general

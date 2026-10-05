@@ -1,13 +1,31 @@
 <?php /** @var stdClass $data */
 /** @var base\controller\ $controlador */
 use config\views;
+use config\generales;
 use gamboamartin\system\links_menu;
 
+$es_login = $controlador->seccion === 'adm_session' && $controlador->accion === 'login';
+
+$login_nuevo = false;
+if(property_exists(generales::class, 'login_ivitec_v2')){
+    $login_nuevo = (bool)generales::$login_ivitec_v2;
+}
+
+if($es_login && $login_nuevo){
+    include($data->include_action);
+    return;
+}
 
 $path_base_template = (new views())->ruta_templates;
 $links_menu = (new links_menu(link:$controlador->link, registro_id: -1))->links;
 
-
+$tipo_menu = 'horizontal';
+if(property_exists(generales::class, 'tipo_menu')){
+    $tipo_menu = generales::$tipo_menu;
+}
+if($es_login){
+    $tipo_menu = 'horizontal';
+}
 
 ?>
 <!DOCTYPE html>
@@ -29,11 +47,23 @@ $links_menu = (new links_menu(link:$controlador->link, registro_id: -1))->links;
        <?php include (new \config\views())->template_path('nav/_head.php'); ?>
     </header><!-- /.header-->
 
-    <main class="main section-color-primary">
-        <div style="display: flex; flex-direction: column; justify-content: center; padding: 15px 35px;">
-            <?php  include($data->include_action); ?>
+       <?php if($tipo_menu === 'vertical'){ ?>
+        <div class="clientes-layout">
+            <?php include (new \config\views())->template_path('nav/_sidebar.php'); ?>
+            <main class="main section-color-primary" style="flex: 1; min-width: 0;">
+                <div style="display: flex; flex-direction: column; justify-content: center; padding: 15px 35px;">
+                    <?php include($data->include_action); ?>
+                </div>
+            </main>
         </div>
-    </main><!-- /.main-part-->
+    <?php } ?>
+    <?php if($tipo_menu !== 'vertical'){ ?>
+        <main class="main section-color-primary">
+            <div style="display: flex; flex-direction: column; justify-content: center; padding: 15px 35px;">
+                <?php include($data->include_action); ?>
+            </div>
+        </main>
+    <?php } ?><!-- /.main-part-->
 
     <footer class="footer">
         <?php include $path_base_template.'footer/_footer.php' ?>

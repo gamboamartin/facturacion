@@ -247,29 +247,50 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
         }
 
         $params = (new \gamboamartin\system\datatables())->params(datatable: $this->datatable);
-
         if (errores::$error) {
             return $this->retorno_error(mensaje: 'Error al obtener params', data: $params, header: $header, ws: $ws);
         }
 
-       $filtro = $params->filtro;
+        $filtro = $params->filtro;
+        $campos_permitidos = ['com_agente.descripcion', 'com_tipo_agente.id', 'com_agente.status'];
+
         if (isset($_GET['filtros_select_propios']) && is_array($_GET['filtros_select_propios'])) {
             foreach ($_GET['filtros_select_propios'] as $campo => $valor) {
-                $valor = trim((string)$valor);
-                if ($valor !== '') {
-                    $filtro[$campo] = $valor;
+                if (!in_array($campo, $campos_permitidos, true) || !is_string($valor)) {
+                    continue;
                 }
+                $valor = trim($valor);
+                if ($valor === '') {
+                    continue;
+                }
+                if ($campo === 'com_tipo_agente.id') {
+                    $valor = (string)(int)$valor;
+                }
+                if ($campo === 'com_agente.status' && !in_array($valor, ['activo', 'inactivo'], true)) {
+                    continue;
+                }
+               if ($campo === 'com_agente.descripcion') {
+                    $valor = preg_replace('/[^\p{L}\p{N}\s@._-]/u', '', $valor);
+                    $valor = trim((string)$valor);
+                    if ($valor === '') {
+                        continue;
+                    }
+                }
+                $filtro[$campo] = $valor;
             }
         }
 
         $data_result = $this->modelo->get_data_lista(filtro: $filtro, filtro_especial: $params->filtro_especial,
-        filtro_extra: $params->filtro_extra, filtro_rango: $params->filtro_rango,
-        n_rows_for_page: $params->n_rows_for_page, pagina: $params->pagina, in: $params->in, order: $params->order);
+            filtro_extra: $params->filtro_extra, filtro_rango: $params->filtro_rango,
+            n_rows_for_page: $params->n_rows_for_page, pagina: $params->pagina, in: $params->in, order: $params->order);
+        if (errores::$error) {
+            return $this->retorno_error(mensaje: 'Error al obtener data result', data: $data_result, header: $header, ws: $ws);
+        }
 
         $acciones_permitidas = (new \gamboamartin\system\datatables())->acciones_permitidas(
             link: $this->link, seccion: $this->tabla, not_actions: $not_actions);
         if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error al obtener data result', data: $acciones_permitidas, header: $header, ws: $ws);
+            return $this->retorno_error(mensaje: 'Error al obtener acciones permitidas', data: $acciones_permitidas, header: $header, ws: $ws);
         }
 
         $data_result = (new \gamboamartin\system\datatables())->ajusta_data_result(acciones_permitidas: $acciones_permitidas,
