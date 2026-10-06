@@ -50,6 +50,10 @@ config/database.php
 config/generales.php
 config/views.php
 config/pac.php
+config/escenario/*
+!config/escenario/example.*
+config/json/*
+!config/json/example.*
 vendor/
 archivos
 .idea
