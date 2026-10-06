@@ -113,3 +113,201 @@ body .border-color-secondary{
     border-radius: 0 4px 4px 0;
     background: #ffffff;
 }
+
+/*LISTAS GLOBALES (views/vista_base/lista.php) */
+
+:root {
+    --iv-purple: #7138e2;
+    --iv-purple-dark: #5825bf;
+    --iv-purple-light: #f0e9ff;
+    --iv-text-soft: #6e7388;
+    --iv-border: #e8eaf2;
+    --iv-green: #0ba75b;
+    --iv-green-bg: #dcf8e8;
+    --iv-red: #e53b48;
+    --iv-red-bg: #ffe5e7;
+}
+
+.agentes-page {
+    flex: 1;
+    min-width: 0;
+    padding: 22px;
+    background:
+        radial-gradient(circle at 62% 4%, rgba(113,56,226,.07), transparent 23%),
+        #f7f8fc;
+}
+
+.agentes-header {
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.agentes-header-info { display: flex; align-items: center; gap: 16px; }
+
+.page-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 14px;
+    color: var(--iv-purple);
+    background: linear-gradient(135deg, #ede5ff, #f7f4ff);
+    font-size: 30px;
+}
+
+.agentes-header h1 {
+    margin: 0;
+    color: #171b32;
+    font-size: 31px;
+    font-weight: 780;
+    letter-spacing: -.6px;
+}
+
+.agentes-header-actions { display: flex; gap: 10px; }
+
+.agentes-header-actions .btn {
+    min-height: 43px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    color: #fff;
+    background: linear-gradient(135deg, #8248ee, #6526d8);
+    box-shadow: 0 5px 13px rgba(113,56,226,.22);
+}
+
+.agents-table-card {
+    padding: 15px;
+    border: 1px solid var(--iv-border);
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: 0 5px 15px rgba(25,30,60,.035);
+}
+
+.table-scroll { width: 100%; overflow-x: auto; }
+
+.agents-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    white-space: nowrap;
+    font-size: 11px;
+}
+
+.agents-table thead th {
+    padding: 11px 12px;
+    color: #34394e;
+    border-bottom: 1px solid #e2e3ec;
+    background: linear-gradient(180deg, #f3edff, #faf8ff);
+    font-weight: 700;
+    text-align: left;
+}
+
+.agents-table tbody td {
+    height: 49px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eef0f4;
+    color: #53576b;
+}
+
+.agents-table tbody tr:hover { background: #faf8ff; }
+
+/* Botones de acción dentro de la tarjeta */
+   .agents-table-card .btn-warning,
+   .agents-table-card .btn-danger,
+   .agents-table-card .btn-info,
+   .agents-table-card .btn-success {
+       min-width: 31px;
+       height: 29px;
+       padding: 0 8px !important;
+       display: inline-flex;
+       align-items: center;
+       justify-content: center;
+       gap: 4px;
+       border-radius: 7px;
+       text-decoration: none;
+       transition: all .16s ease;
+       margin: 0 4px 0 0 !important;
+       font-size: 13px;
+       line-height: 1;
+       white-space: nowrap;
+   }
+
+.agents-table-card .btn-warning { color: #1682ed; border: 1px solid #dceeff; background: #eff7ff; }
+.agents-table-card .btn-danger  { color: #e43644; border: 1px solid #ffdee1; background: #fff0f1; }
+.agents-table-card .btn-info    { color: var(--iv-purple); border: 1px solid #e0d6ff; background: #f5f1ff; }
+.agents-table-card .btn-success { color: var(--iv-green); border: 1px solid #c8f0dc; background: var(--iv-green-bg); }
+
+.agents-table-card .btn-warning:hover,
+.agents-table-card .btn-danger:hover,
+.agents-table-card .btn-info:hover,
+.agents-table-card .btn-success:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(20,25,50,.09);
+    color: inherit;
+}
+
+
+/* Botones globales */
+.iv-btn {
+    min-height: 40px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: .2s ease;
+}
+.iv-btn-primary {
+    color: #fff;
+    border-color: var(--iv-purple);
+    background: linear-gradient(135deg, #8248ee, #6526d8);
+    box-shadow: 0 5px 13px rgba(113,56,226,.22);
+}
+.iv-btn-primary:hover { color: #fff; transform: translateY(-1px); }
+.iv-btn-secondary { color: var(--iv-purple); border-color: #dde0ea; background: #fff; }
+.iv-btn-secondary:hover { border-color: #cfc4ef; background: #faf8ff; }
+.iv-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+/* Barra de filtros de listas de facturación */
+.filtros-lista {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    margin-bottom: 16px;
+    background: #fff;
+    border: 1px solid var(--iv-border);
+    border-radius: 13px;
+}
+.filtros-lista .filtro-grupo { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.filtros-lista label { margin: 0; font-size: 12px; font-weight: 650; color: #30354b; }
+.filtros-lista input {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #dfe1ea;
+    border-radius: 8px;
+    outline: none;
+    font-size: 13px;
+    color: #34384d;
+    background: #fff;
+}
+.filtros-lista input:focus { border-color: var(--iv-purple); box-shadow: 0 0 0 3px rgba(113,56,226,.08); }
+.filtros-lista form { margin: 0; }
