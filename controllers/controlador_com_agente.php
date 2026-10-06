@@ -252,6 +252,7 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
         }
 
         $filtro = $params->filtro;
+        $filtro_especial = $params->filtro_especial;
         $campos_permitidos = ['com_agente.descripcion', 'com_tipo_agente.id', 'com_agente.status'];
 
         if (isset($_GET['filtros_select_propios']) && is_array($_GET['filtros_select_propios'])) {
@@ -269,18 +270,26 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
                 if ($campo === 'com_agente.status' && !in_array($valor, ['activo', 'inactivo'], true)) {
                     continue;
                 }
-               if ($campo === 'com_agente.descripcion') {
+                if ($campo === 'com_agente.descripcion') {
                     $valor = preg_replace('/[^\p{L}\p{N}\s@._-]/u', '', $valor);
                     $valor = trim((string)$valor);
                     if ($valor === '') {
                         continue;
                     }
+                    $filtro_especial[] = [
+                        'com_agente.descripcion' => [
+                            'operador' => 'LIKE',
+                            'valor' => '%' . $valor . '%',
+                            'comparacion' => 'AND',
+                        ],
+                    ];
+                    continue;
                 }
                 $filtro[$campo] = $valor;
             }
         }
 
-        $data_result = $this->modelo->get_data_lista(filtro: $filtro, filtro_especial: $params->filtro_especial,
+        $data_result = $this->modelo->get_data_lista(filtro: $filtro, filtro_especial: $filtro_especial,
             filtro_extra: $params->filtro_extra, filtro_rango: $params->filtro_rango,
             n_rows_for_page: $params->n_rows_for_page, pagina: $params->pagina, in: $params->in, order: $params->order);
         if (errores::$error) {
