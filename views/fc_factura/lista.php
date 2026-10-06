@@ -2,158 +2,59 @@
 <?php use config\views; ?>
 <?php include "init.php"; ?>
 
-<?php
-echo "<style>
-.filtros-avanzados {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    margin-bottom: 15px;
-}
+<div class="agentes-page">
 
-.filtro-grupo {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-}
-
-.filtro-grupo label {
-    font-weight: bold;
-    margin-right: 5px;
-}
-
-.filtro-grupo input {
-    padding: 6px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-#filtrar {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s;
-}
-
-#filtrar:hover {
-    background: #0056b3;
-}
-#limpiar {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s;
-}
-
-#limpiar:hover {
-    background: #a71d2a;
-}
-
-#limpiar:disabled {
-    background: #cccccc;
-    color: #666666;
-    cursor: not-allowed;
-    border: none;
-}
-
-#descargar_excel {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s;
-    margin-left: 10px;
-}
-
-#descargar_excel:hover {
-    background: #218838;
-}
-
-</style>";
-?>
-
-<div class="col-md-12">
-    <?php if ($controlador->include_breadcrumb !== '') {
-        include $controlador->include_breadcrumb;
-    } ?>
     <?php include (new views())->ruta_templates . "mensajes.php"; ?>
-    <div class="widget widget-box box-container widget-mylistings">
-        <?php include (new views())->ruta_templates . 'etiquetas/_titulo_lista.php'; ?>
 
-        <div class="filtros-avanzados">
-            <div class="filtro-grupo">
-                <label for="fecha_inicio">Fecha Inicio</label>
-                <input type="date" id="fecha_inicio" data-ajax="rango-fechas" data-filtro_campo="fc_factura.fecha"
-                       data-filtro_key="campo1">
+    <div class="agentes-header">
+        <div class="agentes-header-info">
+            <span class="page-icon"><i class="bi bi-receipt"></i></span>
+            <h1><?php echo htmlspecialchars((string)$controlador->seccion_titulo, ENT_QUOTES, 'UTF-8'); ?></h1>
+        </div>
+        <div class="agentes-header-actions">
+            <?php foreach ($controlador->acciones_visibles_permitidas as $accion_visible): ?>
+                <?php echo $accion_visible->boton; ?>
+            <?php endforeach; ?>
+        </div>
+    </div>
 
-                <label for="fecha_fin">Fecha Fin</label>
-                <input type="date" id="fecha_fin" data-ajax="rango-fechas" data-filtro_campo="fc_factura.fecha"
-                       data-filtro_key="campo2">
-            </div>
+    <div class="filtros-avanzados filtros-lista">
+        <div class="filtro-grupo">
+            <label for="fecha_inicio">Fecha Inicio</label>
+            <input type="date" id="fecha_inicio" data-ajax="rango-fechas" data-filtro_campo="fc_factura.fecha"
+                   data-filtro_key="campo1">
 
-            <div class="filtro-grupo">
-                <label for="folio">Folio</label>
-                <input type="text" id="folio" data-ajax="filtro" data-filtro_campo="fc_factura.folio"
-                       placeholder="Ej: A-000107">
-
-                <label for="cantidad-monto">Total</label>
-                <input type="text" id="cantidad-monto" data-ajax="filtro" data-filtro_campo="fc_factura.total"
-                       placeholder="Ej: 5000">
-
-                <label for="rfc">RFC</label>
-                <input type="text" id="rfc" data-ajax="filtro" data-filtro_campo="com_cliente.rfc"
-                       placeholder="Ej: ABCD123456XYZ">
-            </div>
-
-            <button id="filtrar">Filtrar</button>
-            <button id="limpiar">Limpiar</button>
-            <form method="post" action="<?php echo $controlador->link_exportar_xls; ?>" enctype="multipart/form-data">
-                <button id="descargar_excel">Descargar Excel</button>
-            </form>
-
+            <label for="fecha_fin">Fecha Fin</label>
+            <input type="date" id="fecha_fin" data-ajax="rango-fechas" data-filtro_campo="fc_factura.fecha"
+                   data-filtro_key="campo2">
         </div>
 
-        <table class="datatable table table-striped"></table>
-    </div><!-- /. widget-table-->
-</div><!-- /.center-content -->
+        <div class="filtro-grupo">
+            <label for="folio">Folio</label>
+            <input type="text" id="folio" data-ajax="filtro" data-filtro_campo="fc_factura.folio"
+                   placeholder="Ej: A-000107">
 
+            <label for="cantidad-monto">Total</label>
+            <input type="text" id="cantidad-monto" data-ajax="filtro" data-filtro_campo="fc_factura.total"
+                   placeholder="Ej: 5000">
 
+            <label for="rfc">RFC</label>
+            <input type="text" id="rfc" data-ajax="filtro" data-filtro_campo="com_cliente.rfc"
+                   placeholder="Ej: ABCD123456XYZ">
+        </div>
 
+        <button type="button" id="filtrar" class="iv-btn iv-btn-primary">Filtrar</button>
+        <button type="button" id="limpiar" class="iv-btn iv-btn-secondary">Limpiar</button>
 
+        <form method="post" action="<?php echo $controlador->link_exportar_xls; ?>" enctype="multipart/form-data">
+            <button id="descargar_excel" class="iv-btn iv-btn-secondary">Descargar Excel</button>
+        </form>
+    </div>
 
+    <div class="agents-table-card">
+        <div class="table-scroll">
+            <table class="datatable table table-striped agents-table"></table>
+        </div>
+    </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+</div>
