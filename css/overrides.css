@@ -528,3 +528,326 @@ body .border-color-secondary{
         display: none;
     }
 }
+
+
+/* ===== Inicio IVITEC (generales::$inicio_v2) =====
+ * Pegar al final de css/overrides.css. Todo scoped a .iv-home. */
+
+.iv-home {
+    --iv-home-purple: #6d28d9;
+    --iv-home-ink: #20203e;
+    --iv-home-muted: #656782;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 28px clamp(20px,4vw,76px) 32px;
+    background: linear-gradient(120deg,#faf9fd,#f5f2fc);
+    color: var(--iv-home-ink);
+    font-family: system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+}
+
+.iv-home * {
+    box-sizing: border-box;
+}
+
+.iv-home__container {
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+.iv-home__icon {
+    display: block;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.iv-home__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--iv-home-muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+}
+
+.iv-home__breadcrumb .iv-home__icon {
+    width: 16px;
+    height: 16px;
+    color: var(--iv-home-purple);
+}
+
+.iv-home__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.iv-home h1 {
+    font-size: clamp(26px,2.35vw,40px);
+    line-height: 1.15;
+    letter-spacing: -.025em;
+    font-weight: 750;
+    margin: 0 0 10px;
+    color: var(--iv-home-ink);
+}
+
+.iv-home__heading p {
+    margin: 0;
+    color: var(--iv-home-muted);
+    font-size: 17px;
+    line-height: 1.5;
+}
+
+.iv-home h2 {
+    font-size: 25px;
+    line-height: 1.3;
+    margin: 0 0 18px;
+    letter-spacing: -.02em;
+    color: var(--iv-home-ink);
+}
+
+.iv-home__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.iv-home__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 13px 22px;
+    border: 1px solid var(--iv-home-purple);
+    border-radius: 11px;
+    color: var(--iv-home-purple);
+    background: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.iv-home__button--primary {
+    background: var(--iv-home-purple);
+    color: #fff;
+    box-shadow: 0 4px 12px rgb(109 40 217 / 12%);
+}
+
+.iv-home__button:hover {
+    background: #f0e8ff;
+    color: var(--iv-home-purple);
+    text-decoration: none;
+}
+
+.iv-home__button--primary:hover {
+    background: #5720b0;
+    color: #fff;
+}
+
+.iv-home__grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 18px;
+}
+
+.iv-home__card {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    min-height: 106px;
+    padding: 22px;
+    border: 1px solid #ece6f7;
+    border-radius: 14px;
+    background: #fff;
+    color: var(--iv-home-ink);
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgb(46 30 88 / 4%);
+    transition: border-color .15s,box-shadow .15s;
+}
+
+.iv-home__card:hover {
+    border-color: #c8adef;
+    box-shadow: 0 6px 18px rgb(109 40 217 / 9%);
+    text-decoration: none;
+    color: var(--iv-home-ink);
+}
+
+.iv-home__tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: #f3edff;
+    color: var(--iv-home-purple);
+}
+
+.iv-home__tile .iv-home__icon {
+    width: 32px;
+    height: 32px;
+}
+
+.iv-home__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.iv-home__copy strong {
+    font-size: 18px;
+    font-weight: 650;
+    line-height: 1.3;
+}
+
+.iv-home__copy>span {
+    color: var(--iv-home-muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.iv-home__arrow {
+    margin-left: auto;
+    color: var(--iv-home-purple);
+}
+
+.iv-home__arrow .iv-home__icon {
+    width: 18px;
+    height: 18px;
+}
+
+.iv-home__config {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 22px;
+    margin-top: 20px;
+    background: #fff;
+    border: 1px solid #ece6f7;
+    border-radius: 14px;
+}
+
+.iv-home__config .iv-home__tile {
+    width: 54px;
+    height: 54px;
+}
+
+.iv-home__config-links {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px 22px;
+    margin-left: auto;
+}
+
+.iv-home__config-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    color: var(--iv-home-purple);
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.iv-home__config-links a+a {
+    border-left: 1px solid #ded3ef;
+    padding-left: 22px;
+}
+
+.iv-home__config-links a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.iv-home a:focus-visible {
+    outline: 3px solid var(--iv-home-purple);
+    outline-offset: 4px;
+}
+
+.iv-home__empty {
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ece6f7;
+    border-radius: 12px;
+    color: var(--iv-home-muted);
+}
+
+@media (max-width: 1200px) {
+    .iv-home__heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .iv-home__config {
+        flex-wrap: wrap;
+    }
+    .iv-home__config-links {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 650px) {
+    .iv-home {
+        padding: 22px 18px;
+    }
+    .iv-home__grid {
+        grid-template-columns: 1fr;
+    }
+    .iv-home__card {
+        padding: 18px;
+        gap: 14px;
+    }
+    .iv-home__tile {
+        width: 50px;
+        height: 50px;
+    }
+    .iv-home__tile .iv-home__icon {
+        width: 28px;
+        height: 28px;
+    }
+    .iv-home__copy strong {
+        font-size: 16px;
+    }
+    .iv-home__actions {
+        width: 100%;
+    }
+    .iv-home__button {
+        flex: 1;
+        padding: 12px;
+        font-size: 13px;
+    }
+    .iv-home__config {
+        gap: 14px;
+        padding: 18px;
+    }
+    .iv-home__config-links {
+        gap: 4px 18px;
+    }
+    .iv-home__config-links a+a {
+        border: 0;
+        padding-left: 0;
+    }
+    .iv-home__config>.iv-home__copy {
+        flex: 1;
+    }
+    .iv-home__heading p {
+        font-size: 15px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .iv-home__card {
+        transition: none;
+    }
+}
