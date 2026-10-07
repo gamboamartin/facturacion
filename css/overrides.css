@@ -311,3 +311,11 @@ body .border-color-secondary{
 }
 .filtros-lista input:focus { border-color: var(--iv-purple); box-shadow: 0 0 0 3px rgba(113,56,226,.08); }
 .filtros-lista form { margin: 0; }
+
+.clientes-sidebar-nav,
+.clientes-sidebar-nav ul,
+.clientes-sidebar-nav li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
