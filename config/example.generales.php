@@ -47,6 +47,7 @@ class generales{
     // public static bool $login_ivitec_v2 = false;
     // public static bool $com_agente_v2 = false;
     // public static string $tipo_menu = 'horizontal'; // 'horizontal' | 'vertical'
+    //public static bool $menu_superior_v2 = false;
 
     public function __construct(){
         $this->path_base = '/var/www/html/facturacion/'; // aqui va la ruta base del sistema, se usa para generar rutas absolutas en los templates y en el sistema en general

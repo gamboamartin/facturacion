@@ -79,9 +79,18 @@ if($es_login){
         echo $data->js_view;
     }
     ?>
-    <?php if (isset($controlador->datatables)):?>
+        <?php if (isset($controlador->datatables)):?>
         <?php foreach ($controlador->datatables as $datatable) {
-            $objeto = json_encode($datatable);
+            $dt = json_decode(json_encode($datatable));
+            if (is_array($dt->columnDefs ?? null)) {
+                foreach ($dt->columnDefs as $def) {
+                    if (in_array($def->type ?? '', ['button', 'menu'], true)) {
+                        // Responsive oculta primero lo demás; Acciones nunca se esconde
+                        $def->responsivePriority = 1;
+                    }
+                }
+            }
+            $objeto = json_encode($dt);
             print_r("<script> datatable($objeto.identificador, $objeto.columns, $objeto.columnDefs, $objeto.data,$objeto.in) </script>");
         } ?>
     <?php endif;?>
