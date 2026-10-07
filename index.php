@@ -5,7 +5,7 @@ require 'vendor/autoload.php';
 use base\controller\init;
 use config\generales;
 use gamboamartin\errores\errores;
-
+$inicio = microtime(true); // inicia la medicion del tiempo de carga
 
 $data_session_get = (new init())->asigna_session_get();
 if(errores::$error){
@@ -31,3 +31,10 @@ $conf_generales = $data->conf_generales;
 if($conf_generales->muestra_index) {
     include "principal.php";
 }
+
+//finaliza la medición esto no afecta en nada el funcionamiento
+$fin = microtime(true);
+$tiempo = microtime(true) - $inicio;
+echo '<script>
+    console.log("tiempo total: ' . number_format($tiempo, 4) . ' segundos");
+</script>';
