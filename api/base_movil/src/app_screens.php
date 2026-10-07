@@ -50,8 +50,8 @@ class app_screens
 
     /**
      * Recibe el SUBMIT del formulario de registro.
-     * Prototipo #2: sin base de datos, no se guarda nada. Solo se valida
-     * lo obligatorio (el cliente no es la fuente de verdad) y se responde
+     * Prototipo #2: sin base de datos, no se guarda nada. Se valida con las
+     * MISMAS reglas que definen la pantalla (required y options) y se responde
      * con la siguiente acción: el servidor decide a dónde ir.
      */
     public function guarda_registro(): array
@@ -65,30 +65,90 @@ class app_screens
             );
         }
 
-        $values = $body['values'];
+        $pantalla = $this->pantalla_registro();
+        $validacion = $this->valida_valores($pantalla['components'], $body['values']);
 
-        foreach (array('usuario', 'password') as $campo) {
-            if (!isset($values[$campo]) || !is_string($values[$campo]) || trim($values[$campo]) === '') {
-                // No se incluye $values en data: trae la contraseña.
-                return $this->errores->error(
-                    mensaje: "Error el campo $campo es obligatorio",
-                    data: array('campo' => $campo)
-                );
-            }
-        }
-
-        $zonas_validas = array_column($this->opciones_zona(), 'value');
-
-        if (!isset($values['zona']) || !in_array($values['zona'], $zonas_validas, true)) {
-            return $this->errores->error(
-                mensaje: 'Error el campo zona no es válido',
-                data: array('campo' => 'zona')
-            );
+        if (isset($validacion['error'])) {
+            return $validacion;
         }
 
         return array(
             'action' => array('type' => 'NAVIGATE', 'screenId' => 'confirmacion'),
         );
+    }
+
+    /**
+     * Valida los valores recibidos contra las reglas de los campos de una
+     * pantalla. Devuelve array vacío si todo es válido, o el error.
+     * Reutilizable para cualquier formulario futuro.
+     */
+    private function valida_valores(array $componentes, array $values): array
+    {
+        $reglas = $this->reglas_campos($componentes);
+
+        foreach ($reglas as $campo => $regla) {
+            $valor = $values[$campo] ?? '';
+
+            if (!is_string($valor)) {
+                return $this->errores->error(
+                    mensaje: "Error el campo $campo debe ser texto",
+                    data: array('campo' => $campo)
+                );
+            }
+
+            if ($regla['required'] && trim($valor) === '') {
+                // No se incluye $values en data: puede traer la contraseña.
+                return $this->errores->error(
+                    mensaje: "Error el campo $campo es obligatorio",
+                    data: array('campo' => $campo)
+                );
+            }
+
+            if ($regla['options'] !== null && $valor !== '' && !in_array($valor, $regla['options'], true)) {
+                return $this->errores->error(
+                    mensaje: "Error el campo $campo no es válido",
+                    data: array('campo' => $campo)
+                );
+            }
+        }
+
+        return array();
+    }
+
+    /**
+     * Recorre la definición de una pantalla y junta las reglas de cada campo
+     * (Input y Select), sin importar qué tan anidados estén (FormGroup, Container).
+     * Resultado: array('usuario' => array('required' => true, 'options' => null), ...)
+     */
+    private function reglas_campos(array $componentes): array
+    {
+        $reglas = array();
+
+        foreach ($componentes as $componente) {
+            $tipo = $componente['type'] ?? '';
+
+            if ($tipo === 'Input') {
+                $reglas[$componente['name']] = array(
+                    'required' => ($componente['required'] ?? false) === true,
+                    'options' => null,
+                );
+                continue;
+            }
+
+            if ($tipo === 'Select') {
+                $reglas[$componente['name']] = array(
+                    'required' => ($componente['required'] ?? false) === true,
+                    'options' => array_column($componente['options'], 'value'),
+                );
+                continue;
+            }
+
+            if (isset($componente['children']) && is_array($componente['children'])) {
+                $reglas = array_merge($reglas, $this->reglas_campos($componente['children']));
+            }
+        }
+
+        return $reglas;
     }
 
     /** Fuente única de las zonas: la usan la pantalla y la validación del SUBMIT. */
