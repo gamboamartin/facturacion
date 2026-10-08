@@ -1147,3 +1147,41 @@ body .border-color-secondary{
         grid-row: 1;
     }
 }
+
+/* ===== Menú superior móvil: animación del panel =====
+ * Cerrado por defecto; .is-open (que alterna el botón) lo despliega. */
+@media (max-width: 900px) {
+
+    .iv-nav .iv-nav__navigation {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-8px);
+        transition:
+            max-height .35s ease,
+            opacity .25s ease,
+            transform .3s ease,
+            visibility 0s linear .35s;
+    }
+
+    .iv-nav.is-open .iv-nav__navigation {
+        max-height: calc(100dvh - 90px);
+        overflow-y: auto;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        transition:
+            max-height .35s ease,
+            opacity .25s ease,
+            transform .3s ease,
+            visibility 0s linear 0s;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .iv-nav .iv-nav__navigation,
+    .iv-nav.is-open .iv-nav__navigation {
+        transition: none;
+    }
+}
