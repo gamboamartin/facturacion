@@ -39,6 +39,8 @@ $iv_secciones_lista = [
     'factura'  => 'fc_factura',
     'cliente'  => 'com_cliente',
     'producto' => 'com_producto',
+    'pago'     => 'fc_complemento_pago',
+
 ];
 
 /* Link a la lista de la sección, conservando adm_menu_id para que el menú
