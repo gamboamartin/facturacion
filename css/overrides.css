@@ -851,3 +851,180 @@ body .border-color-secondary{
         transition: none;
     }
 }
+
+
+/* =====================================================================
+ * RESPONSIVE del diseño nuevo (sidebar, listas, filtros, padding)
+ * Va al final para ganar por orden sobre las reglas de arriba.
+ * Requiere que principal.php use class="iv-main-pad" en el contenedor
+ * del contenido (antes tenía el padding inline).
+ * ===================================================================== */
+
+.iv-main-pad {
+    padding: 15px 35px;
+}
+
+.main {
+    min-width: 0;
+}
+
+/* ---------- Tablet y menor ---------- */
+@media (max-width: 900px) {
+
+    .iv-main-pad {
+        padding: 12px 16px;
+    }
+
+    /* Sidebar vertical: se apila arriba del contenido */
+    .clientes-layout {
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .clientes-sidebar {
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        max-height: none;
+        position: static;
+        align-self: stretch;
+        padding: 10px;
+        border-right: 0;
+        border-bottom: 1px solid #e5e7ef;
+        overflow-y: visible;
+    }
+
+    .clientes-sidebar-title {
+        height: 44px;
+    }
+
+    /* Opciones en una fila con scroll horizontal, como pestañas */
+    .clientes-sidebar-nav {
+        flex-direction: row;
+        gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+    }
+
+    .clientes-sidebar-nav a {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .clientes-sidebar-nav a.active::before {
+        display: none;
+    }
+
+    /* Listas */
+    .agentes-page {
+        padding: 14px;
+    }
+
+    .agentes-header {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .agentes-header h1 {
+        font-size: 24px;
+    }
+
+    .page-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+    }
+
+    .agentes-header-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 600px) {
+
+    .iv-main-pad {
+        padding: 10px;
+    }
+
+    .agentes-page {
+        padding: 10px;
+    }
+
+    .agentes-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .agentes-header-info {
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .agentes-header h1 {
+        min-width: 0;
+        font-size: 20px;
+        line-height: 1.25;
+        word-break: break-word;
+    }
+
+    .page-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    /* Alta / Lista: se reparten el ancho */
+    .agentes-header-actions {
+        width: 100%;
+    }
+
+    .agentes-header-actions .btn {
+        flex: 1 1 calc(50% - 8px);
+        padding: 0 12px;
+    }
+
+    /* Filtros: cada grupo y cada control a ancho completo */
+    .filtros-lista {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .filtros-lista .filtro-grupo {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .filtros-lista form {
+        width: 100%;
+    }
+
+    .filtros-lista input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .filtros-lista .iv-btn,
+    .filtros-lista button {
+        width: 100%;
+    }
+
+    .agents-table-card {
+        padding: 10px;
+    }
+}
+
+/* ---------- Celular chico ---------- */
+@media (max-width: 400px) {
+
+    .agentes-header-actions .btn {
+        flex: 1 1 100%;
+    }
+}

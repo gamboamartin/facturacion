@@ -56,7 +56,7 @@ if($es_login){
         <div class="clientes-layout">
             <?php include (new \config\views())->template_path('nav/_sidebar.php'); ?>
             <main class="main section-color-primary" style="flex: 1; min-width: 0;">
-                <div style="display: flex; flex-direction: column; justify-content: center; padding: 15px 35px;">
+                <div class="iv-main-pad" style="display: flex; flex-direction: column; justify-content: center;">
                     <?php include($data->include_action); ?>
                 </div>
             </main>
@@ -64,7 +64,7 @@ if($es_login){
     <?php } ?>
     <?php if($tipo_menu !== 'vertical'){ ?>
         <main class="main section-color-primary">
-            <div style="display: flex; flex-direction: column; justify-content: center; padding: 15px 35px;">
+            <div class="iv-main-pad" style="display: flex; flex-direction: column; justify-content: center;">
                 <?php include($data->include_action); ?>
             </div>
         </main>
