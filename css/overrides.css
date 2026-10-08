@@ -1028,3 +1028,122 @@ body .border-color-secondary{
         flex: 1 1 100%;
     }
 }
+
+/* ===== Menú superior: toggle y animación en escritorio =====
+ * En escritorio arranca recogido; .is-open lo despliega.
+ * Orden: [☰] [logo] ........ [Inicio] [Salir] */
+@media (min-width: 901px) {
+
+    .iv-nav__top {
+        grid-template-columns: 40px 100px minmax(0, 1fr) 174px;
+    }
+
+    .iv-nav__toggle {
+        display: inline-flex;
+        grid-column: 1;
+        grid-row: 1;
+        align-self: center;
+        justify-self: start;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+    }
+
+    .iv-nav__toggle span {
+        display: none;
+    }
+
+    .iv-nav__brand {
+        grid-column: 2;
+        justify-content: flex-start;
+    }
+
+    .iv-nav__primary {
+        grid-column: 3;
+    }
+
+    .iv-nav__actions {
+        grid-column: 4;
+    }
+
+    /* Recogido por defecto */
+    .iv-nav .iv-nav__primary,
+    .iv-nav .iv-nav__secondary {
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+            max-height .35s ease,
+            padding .35s ease,
+            opacity .25s ease,
+            visibility 0s linear .35s;
+    }
+
+    .iv-nav .iv-nav__secondary {
+        border-top-width: 0;
+    }
+
+    /* Desplegado */
+    .iv-nav.is-open .iv-nav__primary,
+    .iv-nav.is-open .iv-nav__secondary {
+        max-height: 220px;
+        opacity: 1;
+        visibility: visible;
+        transition:
+            max-height .35s ease,
+            padding .35s ease,
+            opacity .25s ease,
+            visibility 0s linear 0s;
+    }
+
+    .iv-nav.is-open .iv-nav__primary {
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+
+    .iv-nav.is-open .iv-nav__secondary {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        border-top-width: 1px;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1500px) {
+    .iv-nav__top {
+        grid-template-columns: 40px 96px minmax(0, 1fr) 160px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .iv-nav .iv-nav__primary,
+    .iv-nav .iv-nav__secondary {
+        transition: none;
+    }
+}
+
+/* ===== Menú superior móvil: [☰] [logo] ........ [Inicio] [Salir] ===== */
+@media (max-width: 900px) {
+
+    .iv-nav__top {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .iv-nav__toggle {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .iv-nav__brand {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .iv-nav__actions {
+        grid-column: 3;
+        grid-row: 1;
+    }
+}

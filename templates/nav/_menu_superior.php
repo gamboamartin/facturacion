@@ -26,7 +26,7 @@ $iv_mapa_iconos = [
     'region' => 'pin',
     'divisa' => 'coin', 'pago' => 'coin',
     'producto' => 'box',
-    'config' => 'settings', 'proceso' => 'settings',
+    'config' => 'settings', 'proceso' => 'process',
     'notificacion' => 'bell',
     'egreso' => 'card', 'banco' => 'card',
     'etapa' => 'layers',
@@ -43,7 +43,8 @@ $iv_svg = [
     'coin'     => '<circle cx="12" cy="12" r="9"/><path d="M15 8h-4a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4H9M12 6v12"/>',
     'box'      => '<path d="m12 3 9 5v9l-9 5-9-5V8zM3 8l9 5 9-5M12 13v9M7 6l10 5"/>',
     'settings' => '<circle cx="12" cy="12" r="3"/><path d="m9 3-1 3-3 1-2 3 2 2-1 3 3 2 2-1 3 2 3-2 2 1 3-2-1-3 2-2-2-3-3-1-1-3z"/>',
-    'bell'     => '<path d="M5 17h14l-2-3V9a5 5 0 0 0-10 0v5zM10 21h4M12 2v2"/>',
+    'process'  => '<path d="M20 11a8 8 0 0 0-14-4M4 4v4h4M4 13a8 8 0 0 0 14 4M20 20v-4h-4"/>',
+    'bell'     =>'<path d="M5 17h14l-2-3V9a5 5 0 0 0-10 0v5zM10 21h4M12 2v2"/>',
     'card'     => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/>',
     'layers'   => '<path d="m12 3 10 5-10 5L2 8zM2 12l10 5 10-5M2 16l10 5 10-5"/>',
     'chart'    => '<path d="M4 21V12M9 21V6M14 21V9M19 21V3"/>',
@@ -105,7 +106,7 @@ $iv_sesion_activa = isset($_SESSION['activa']) && (int)$_SESSION['activa'] === 1
             <?php } ?>
         </a>
 
-        <button class="iv-nav__toggle" type="button" aria-controls="iv-navigation" aria-expanded="true">
+        <button class="iv-nav__toggle" type="button" aria-label="Menú" aria-controls="iv-navigation" aria-expanded="true">
             <svg class="iv-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
             <span>Menú</span>
         </button>
@@ -135,25 +136,39 @@ $iv_sesion_activa = isset($_SESSION['activa']) && (int)$_SESSION['activa'] === 1
     var header = document.querySelector('[data-iv-nav]');
     if (!header) { return; }
     var button = header.querySelector('.iv-nav__toggle');
-    var panel = header.querySelector('.iv-nav__navigation');
     var mobile = window.matchMedia('(max-width: 900px)');
+    var storageKey = 'iv_nav_escritorio_abierto';
+
+    /* Móvil y escritorio: recogido por defecto; .is-open lo despliega. */
+    function setOpen(open) {
+        header.classList.toggle('is-open', open);
+        button.setAttribute('aria-expanded', String(open));
+    }
+    function readOpen() {
+        try { return window.localStorage.getItem(storageKey) === '1'; } catch (e) { return false; }
+    }
+    function saveOpen(open) {
+        try { window.localStorage.setItem(storageKey, open ? '1' : '0'); } catch (e) {}
+    }
     function sync() {
-        panel.hidden = mobile.matches;
-        button.setAttribute('aria-expanded', String(!panel.hidden));
+        setOpen(mobile.matches ? false : readOpen());
     }
     button.addEventListener('click', function () {
-        panel.hidden = !panel.hidden;
-        button.setAttribute('aria-expanded', String(!panel.hidden));
+        var open = !header.classList.contains('is-open');
+        setOpen(open);
+        if (!mobile.matches) { saveOpen(open); }
     });
     header.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && mobile.matches && !panel.hidden) {
-            panel.hidden = true;
-            button.setAttribute('aria-expanded', 'false');
+        if (event.key === 'Escape' && mobile.matches && header.classList.contains('is-open')) {
+            setOpen(false);
             button.focus();
         }
     });
-    if (mobile.addEventListener) { mobile.addEventListener('change', sync); }
-    else { mobile.addListener(sync); }
     sync();
+    if (mobile.addEventListener) {
+        mobile.addEventListener('change', sync);
+        return;
+    }
+    mobile.addListener(sync);
 })();
 </script>
