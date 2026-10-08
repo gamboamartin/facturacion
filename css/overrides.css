@@ -864,7 +864,8 @@ body .border-color-secondary{
     padding: 15px 35px;
 }
 
-.main {
+
+.clientes-layout > .main {
     min-width: 0;
 }
 

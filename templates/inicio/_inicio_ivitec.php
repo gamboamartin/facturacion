@@ -33,6 +33,28 @@ $iv_href = function (array $menu) use ($controlador): string {
     return "index.php?seccion=adm_session&accion=inicio&session_id=$controlador->session_id&adm_menu_id=$id";
 };
 
+/* Prefijo del módulo => sección cuya lista es el destino de la tarjeta.
+ * Verifica cada nombre en la URL de la lista (seccion=...). */
+$iv_secciones_lista = [
+    'factura'  => 'fc_factura',
+    'cliente'  => 'com_cliente',
+    'producto' => 'com_producto',
+];
+
+/* Link a la lista de la sección, conservando adm_menu_id para que el menú
+ * quede marcado. Si no hay link de lista, cae al href del módulo. */
+$iv_href_lista = function (array $menu, string $seccion) use ($iv_href, $links_menu): string {
+    $lista = $links_menu->{$seccion}->lista ?? null;
+    if (empty($lista)) {
+        return $iv_href($menu);
+    }
+    /* Quita cualquier adm_menu_id que ya traiga el link (p. ej. -1) y pone el del módulo */
+    $lista = preg_replace('/([?&])adm_menu_id=[^&#]*&?/', '$1', $lista);
+    $lista = rtrim($lista, '?&');
+    $separador = strpos($lista, '?') === false ? '?' : '&';
+    return $lista . $separador . 'adm_menu_id=' . (int)$menu['adm_menu_id'];
+};
+
 $iv_svg = [
     'factura'   => '<path d="M6 3h8l4 4v14H6zM14 3v5h4M9 12h6M9 16h6"/>',
     'clientes'  => '<circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M17 4a3 3 0 0 1 0 6M21 21v-3a6 6 0 0 0-4-5"/>',
@@ -63,7 +85,14 @@ $iv_tarjetas = [];
 foreach ($iv_definicion_tarjetas as $prefijo => $def) {
     $modulo = $iv_modulo($prefijo);
     if ($modulo !== null) {
-        $iv_tarjetas[] = ['titulo' => $modulo['adm_menu_titulo'], 'texto' => $def[0], 'icono' => $def[1], 'href' => $iv_href($modulo)];
+        $iv_tarjetas[] = [
+            'titulo' => $modulo['adm_menu_titulo'],
+            'texto'  => $def[0],
+            'icono'  => $def[1],
+            'href'   => isset($iv_secciones_lista[$prefijo])
+                ? $iv_href_lista($modulo, $iv_secciones_lista[$prefijo])
+                : $iv_href($modulo),
+        ];
     }
 }
 
