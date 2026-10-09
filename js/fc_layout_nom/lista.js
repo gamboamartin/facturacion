@@ -43,10 +43,10 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     const TONOS_LAYOUT = {
-        'Descarga Layout': 'neutral',
-        'Descargado o Generado': 'warning',
-        'Pagado': 'info',
-        'Enviado al Cliente': 'success'
+    'Descarga Layout': 'neutral',
+    'Descargado o Generado': 'warning',
+    'Pagado': 'success',
+    'Enviado al Cliente': 'info'
     };
 
     const CLAVES_MAPEADAS = GRUPOS.reduce(function (acumulado, grupo) {

@@ -1343,35 +1343,52 @@ body .border-color-secondary{
 
 /* Badges de estado */
 .iv-badge {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 13px;
+    border-radius: 999px;
+    font-size: 12px;
     font-weight: 600;
+    line-height: 1.3;
     white-space: nowrap;
 }
 
+.iv-badge::before {
+    content: "";
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--iv-badge-dot, currentColor);
+}
+
 .iv-badge--warning {
+    --iv-badge-dot: #f29b1d;
     background: #fff1d3;
-    color: #946117;
+    color: #8a5a12;
 }
 
 .iv-badge--success {
-    background: #e5f7ec;
-    color: #247346;
+    --iv-badge-dot: #1fa65a;
+    background: #e3f6ea;
+    color: #1d7a45;
 }
 
 .iv-badge--info {
+    --iv-badge-dot: #4a86e8;
     background: #e9f2ff;
     color: #345b92;
 }
 
 .iv-badge--danger {
+    --iv-badge-dot: #d63a55;
     background: #fff0f3;
     color: #a52f45;
 }
 
 .iv-badge--neutral {
+    --iv-badge-dot: #8a94ad;
     background: #f0f2f7;
     color: #64708c;
 }
