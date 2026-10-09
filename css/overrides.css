@@ -1186,3 +1186,98 @@ body .border-color-secondary{
         transition: none;
     }
 }
+
+/* ===== Indicadores de la lista de facturas ===== */
+.iv-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.iv-kpi {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+    padding: 18px;
+    overflow: hidden;
+    border: 1px solid var(--iv-border);
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: 0 5px 15px rgba(25, 30, 60, .035);
+}
+
+.iv-kpi::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 46px;
+    height: 3px;
+    background: var(--iv-purple);
+}
+
+.iv-kpi__label {
+    margin: 0 0 8px;
+    color: var(--iv-text-soft);
+    font-size: 13px;
+}
+
+.iv-kpi__value {
+    display: block;
+    color: #171b32;
+    font-size: clamp(20px, 2vw, 28px);
+    font-weight: 750;
+    line-height: 1.2;
+    letter-spacing: -.025em;
+    overflow-wrap: anywhere;
+}
+
+.iv-kpi__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    color: var(--iv-purple);
+    background: var(--iv-purple-light);
+}
+
+.iv-kpi__icon svg {
+    width: 21px;
+    height: 21px;
+}
+
+@media (max-width: 1200px) {
+    .iv-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .iv-kpis {
+        gap: 10px;
+    }
+
+    .iv-kpi {
+        padding: 14px;
+    }
+
+    .iv-kpi__icon {
+        display: none;
+    }
+
+    .iv-kpi__value {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 400px) {
+    .iv-kpis {
+        grid-template-columns: 1fr;
+    }
+}

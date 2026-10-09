@@ -17,7 +17,7 @@
             <?php endforeach; ?>
         </div>
     </div>
-
+   <?php include (new views())->template_path('indicadores/_indicadores_facturas.php'); ?>
     <div class="filtros-avanzados filtros-lista">
         <div class="filtro-grupo">
             <label for="fecha_inicio">Fecha Inicio</label>

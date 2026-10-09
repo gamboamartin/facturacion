@@ -517,5 +517,55 @@ class fc_factura extends _transacciones_fc
         return $response;
     }
 
+     /**
+     * Resumen para el dashboard de la lista de facturas (solo facturas TIMBRADAS).
+     */
+    public function obtener_indicadores_listado(): array
+    {
+        $filtro = ['fc_factura.etapa' => 'TIMBRADO'];
+
+        $columnas = [
+            'fc_factura_id',
+            'fc_factura_folio',
+            'fc_factura_total',
+            'fc_factura_fecha',
+            'com_cliente_id'
+        ];
+
+        $rs = $this->filtro_and(columnas: $columnas, filtro: $filtro);
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obtener indicadores del listado',
+                data: $rs
+            );
+        }
+
+        $total_facturas = 0;
+        $importe = 0.0;
+        $clientes = [];
+        $ultima = null;
+
+        foreach ($rs->registros as $registro) {
+            $total_facturas++;
+            $importe += (float)$registro['fc_factura_total'];
+            $clientes[$registro['com_cliente_id']] = true;
+
+            $es_mas_reciente = $ultima === null
+                || $registro['fc_factura_fecha'] > $ultima['fc_factura_fecha']
+                || ($registro['fc_factura_fecha'] === $ultima['fc_factura_fecha']
+                    && (int)$registro['fc_factura_id'] > (int)$ultima['fc_factura_id']);
+
+            if ($es_mas_reciente) {
+                $ultima = $registro;
+            }
+        }
+
+        return [
+            'facturas' => $total_facturas,
+            'importe'  => round($importe, 2),
+            'clientes' => count($clientes),
+            'ultima'   => $ultima === null ? '' : (string)$ultima['fc_factura_folio'],
+        ];
+    }
 
 }
