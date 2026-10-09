@@ -498,4 +498,46 @@ class fc_layout_nom extends modelo{
 
         return $response;
     }
+
+     /**
+     * Indicadores de la lista de layouts de nómina.
+     * Cuenta sobre todos los layouts; no sigue los filtros de la tabla.
+     */
+    public function obtener_indicadores_listado(): array
+    {
+        $r_layouts = $this->filtro_and(columnas: [
+            'fc_layout_nom_id',
+            'fc_layout_nom_estado_timbrado',
+            'fc_layout_nom_estado_layout',
+        ]);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener layouts para indicadores', data: $r_layouts);
+        }
+
+        $registrados = 0;
+        $sin_timbrar = 0;
+        $timbrados = 0;
+        $pagados = 0;
+
+        foreach ($r_layouts->registros as $registro) {
+            $registrados++;
+
+            if ($registro['fc_layout_nom_estado_timbrado'] === controlador_fc_layout_nom::ESTADO_SIN_TIMBRAR) {
+                $sin_timbrar++;
+            }
+            if ($registro['fc_layout_nom_estado_timbrado'] === controlador_fc_layout_nom::ESTADO_TIMBRADO) {
+                $timbrados++;
+            }
+            if ($registro['fc_layout_nom_estado_layout'] === controlador_fc_layout_nom::ESTADO_LAYOUT_PAGADO) {
+                $pagados++;
+            }
+        }
+
+        return [
+            'registrados' => $registrados,
+            'sin_timbrar' => $sin_timbrar,
+            'timbrados' => $timbrados,
+            'pagados' => $pagados,
+        ];
+    }
 }
