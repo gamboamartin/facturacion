@@ -56,5 +56,3 @@ foreach ($controlador->acciones_visibles_permitidas as $accion_visible) {
     </div>
 
 </div>
-
-<script src="js/fc_layout_nom/lista.js"></script>
