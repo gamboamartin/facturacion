@@ -36,7 +36,7 @@ foreach ($controlador->acciones_visibles_permitidas as $accion_visible) {
 
             <?php if (count($iv_acciones_reportes) > 0): ?>
                 <details class="iv-dropdown">
-                    <summary class="btn btn-warning">Reportes <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+                   <summary class="btn btn-warning item-br">Reportes <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
                     <div class="iv-dropdown__menu">
                         <?php foreach ($iv_acciones_reportes as $accion_visible): ?>
                             <?php echo $accion_visible->boton; ?>

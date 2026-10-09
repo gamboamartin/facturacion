@@ -1285,12 +1285,20 @@ body .border-color-secondary{
 
 /* ===== Lista de layouts de nómina ===== */
 
-/* Desplegable de reportes en la cabecera */
 .agentes-header-actions .iv-dropdown {
     position: relative;
+    display: block;
+    align-self: center;
+    margin: 0 0 2px 2px;
 }
 
 .agentes-header-actions .iv-dropdown > summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 43px;
+    margin: 0;
     list-style: none;
     cursor: pointer;
 }
