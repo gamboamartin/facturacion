@@ -522,50 +522,40 @@ class fc_factura extends _transacciones_fc
      */
     public function obtener_indicadores_listado(): array
     {
-        $filtro = ['fc_factura.etapa' => 'TIMBRADO'];
-
-        $columnas = [
-            'fc_factura_id',
-            'fc_factura_folio',
-            'fc_factura_total',
-            'fc_factura_fecha',
-            'com_cliente_id'
-        ];
-
-        $rs = $this->filtro_and(columnas: $columnas, filtro: $filtro);
+        $r_facturas = $this->filtro_and(
+            columnas: ['fc_factura_id', 'fc_factura_folio', 'fc_factura_total', 'com_cliente_id'],
+            filtro: ['fc_factura.etapa' => 'TIMBRADO']
+        );
         if (errores::$error) {
             return $this->error->error(
-                mensaje: 'Error al obtener indicadores del listado',
-                data: $rs
+                mensaje: 'Error al obtener facturas timbradas para indicadores',
+                data: $r_facturas
             );
         }
 
-        $total_facturas = 0;
+        $facturas = 0;
         $importe = 0.0;
         $clientes = [];
-        $ultima = null;
+        $ultima_id = 0;
+        $ultima_folio = '';
 
-        foreach ($rs->registros as $registro) {
-            $total_facturas++;
+        foreach ($r_facturas->registros as $registro) {
+            $facturas++;
             $importe += (float)$registro['fc_factura_total'];
             $clientes[$registro['com_cliente_id']] = true;
 
-            $es_mas_reciente = $ultima === null
-                || $registro['fc_factura_fecha'] > $ultima['fc_factura_fecha']
-                || ($registro['fc_factura_fecha'] === $ultima['fc_factura_fecha']
-                    && (int)$registro['fc_factura_id'] > (int)$ultima['fc_factura_id']);
-
-            if ($es_mas_reciente) {
-                $ultima = $registro;
+            $id = (int)$registro['fc_factura_id'];
+            if ($id > $ultima_id) {
+                $ultima_id = $id;
+                $ultima_folio = (string)$registro['fc_factura_folio'];
             }
         }
 
         return [
-            'facturas' => $total_facturas,
-            'importe'  => round($importe, 2),
+            'facturas' => $facturas,
+            'importe' => round($importe, 2),
             'clientes' => count($clientes),
-            'ultima'   => $ultima === null ? '' : (string)$ultima['fc_factura_folio'],
+            'ultima' => $ultima_folio,
         ];
     }
-
 }

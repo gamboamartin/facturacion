@@ -44,10 +44,13 @@ class generales{
     public bool $cambios_titulo_pdf = true;
     public bool $leyenda_factura_pdf =true;
     public static bool $datos_adicionales_com_cliente = true; 
-    // public static bool $login_ivitec_v2 = false;
-    // public static bool $com_agente_v2 = false;
-    // public static string $tipo_menu = 'horizontal'; // 'horizontal' | 'vertical'
-    //public static bool $menu_superior_v2 = false;
+    // public static bool $login_ivitec_v2 = false; //quitarle el // a la variables el los archivos que tengas una configuracion personalizada
+    // public static bool $com_agente_v2 = false; //quitarle el // a la variables el los archivos que tengas una configuracion personalizada
+    // public static string $tipo_menu = 'horizontal'; // 'horizontal' | 'vertical'  //quitarle el // a la variables el los archivos que tengas una configuracion personalizada
+    //public static bool $menu_superior_v2 = false; //quitarle el // a la variables el los archivos que tengas una configuracion personalizada
+    //public static bool $footer_v2 = true; //quitarle el // a la variables el los archivos que tengas una configuracion personalizada
+    // public static bool $inicio_v2 = true; //quitarle el // a la variables el los archivos que tengas una configuracion personalizada
+    // public static bool $inicio_color_konsulta2 = false; //quitarle el // a la variables el los archivos que tengas una configuracion personalizada
 
     public function __construct(){
         $this->path_base = '/var/www/html/facturacion/'; // aqui va la ruta base del sistema, se usa para generar rutas absolutas en los templates y en el sistema en general

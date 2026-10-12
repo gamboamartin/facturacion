@@ -91,6 +91,7 @@ foreach ($iv_definicion_tarjetas as $prefijo => $def) {
             'titulo' => $modulo['adm_menu_titulo'],
             'texto'  => $def[0],
             'icono'  => $def[1],
+            'tono'   => $prefijo,
             'href'   => isset($iv_secciones_lista[$prefijo])
                 ? $iv_href_lista($modulo, $iv_secciones_lista[$prefijo])
                 : $iv_href($modulo),
@@ -145,7 +146,7 @@ if ($iv_modulo('factura') !== null) {
         <?php if (count($iv_tarjetas) > 0) { ?>
             <div class="iv-home__grid">
                 <?php foreach ($iv_tarjetas as $tarjeta) { ?>
-                    <a class="iv-home__card" href="<?= $iv_e($tarjeta['href']) ?>">
+                    <a class="iv-home__card iv-home__card--<?= $iv_e($tarjeta['tono']) ?>" href="<?= $iv_e($tarjeta['href']) ?>">
                         <span class="iv-home__tile"><?= $iv_icono($tarjeta['icono']) ?></span>
                         <span class="iv-home__copy">
                             <strong><?= $iv_e($tarjeta['titulo']) ?></strong>

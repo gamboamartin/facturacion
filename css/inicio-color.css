@@ -1,0 +1,195 @@
+
+/* ===== Inicio en color + menú morado IVITEC (generales::$inicio_color_konsulta2) =====
+ * Archivo aparte: solo se enlaza cuando el flag está en true (ver templates/css.php).
+ * Debe cargarse DESPUÉS de css/overrides.css. Sin el flag, nada de esto se aplica.
+ */
+
+/* ---------- Menú superior morado ---------- */
+
+    .iv-nav {
+        background: #6520df;
+        border-bottom-color: rgba(255, 255, 255, .16);
+        color: #fff;
+    }
+
+    .iv-nav__brand {
+        align-self: center;
+        margin: 5px 0;
+        min-height: 46px;
+        padding: 4px 8px;
+        border-radius: 10px;
+        background: #fff;
+    }
+
+    .iv-nav__brand img {
+        width: 84px;
+        height: 38px;
+    }
+
+    .iv-nav a.iv-nav__link {
+        position: relative;
+        color: #fff;
+    }
+
+    .iv-nav a.iv-nav__link:hover {
+        background: rgba(255, 255, 255, .12);
+        color: #fff;
+    }
+
+    .iv-nav a.iv-nav__link.is-active {
+        background: rgba(255, 255, 255, .2);
+        color: #fff;
+    }
+
+    .iv-nav .iv-nav__primary a.iv-nav__link.is-active::after {
+        content: "";
+        position: absolute;
+        bottom: 3px;
+        left: 25%;
+        right: 25%;
+        height: 3px;
+        border-radius: 3px;
+        background: #fff;
+    }
+
+    .iv-nav a.iv-nav__link:focus-visible,
+    .iv-nav__toggle:focus-visible {
+        outline-color: #fff;
+    }
+
+    .iv-nav__secondary {
+        background: #5015b6;
+        border-top-color: rgba(255, 255, 255, .12);
+    }
+
+    .iv-nav .iv-nav__secondary a.iv-nav__link:hover {
+        background: transparent;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+    }
+
+    .iv-nav .iv-nav__secondary a.iv-nav__link.is-active {
+        background: transparent;
+        font-weight: 700;
+        text-decoration: underline;
+        text-underline-offset: 5px;
+    }
+
+    .iv-nav .iv-nav__actions a.iv-nav__link {
+        border-color: rgba(255, 255, 255, .6);
+    }
+
+    .iv-nav .iv-nav__actions a.iv-nav__link:hover {
+        background: rgba(255, 255, 255, .12);
+    }
+
+    .iv-nav__toggle {
+        border: 1px solid rgba(255, 255, 255, .35);
+        background: rgba(255, 255, 255, .18);
+        color: #fff;
+    }
+
+    /* ---------- Inicio: tarjetas de colores ---------- */
+
+    .iv-home {
+        background: #faf8ff;
+    }
+
+    .iv-home__card {
+        --card-color: #6520df;
+        --card-bg: #f0e8ff;
+        --card-border: #ddccff;
+        border: 1px solid var(--card-border);
+        border-left: 9px solid var(--card-color);
+        border-radius: 14px;
+        background: var(--card-bg);
+    }
+
+    .iv-home__card--cliente {
+        --card-color: #075ac5;
+        --card-bg: #e8f3ff;
+        --card-border: #c6ddff;
+    }
+
+    .iv-home__card--producto {
+        --card-color: #a74800;
+        --card-bg: #fff0e3;
+        --card-border: #ffdbbc;
+    }
+
+    .iv-home__card--pago {
+        --card-color: #177a3a;
+        --card-bg: #e8f8ef;
+        --card-border: #bde9d0;
+    }
+
+    .iv-home__card:hover {
+        border-color: var(--card-border);
+        border-left-color: var(--card-color);
+        box-shadow: 0 5px 16px rgba(38, 22, 65, .08);
+    }
+
+    .iv-home__card .iv-home__tile {
+        width: 72px;
+        height: 72px;
+        border-radius: 13px;
+        background: var(--card-color);
+        color: #fff;
+    }
+
+    .iv-home__card .iv-home__copy strong {
+        color: var(--card-color);
+    }
+
+    .iv-home__card .iv-home__arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: #fff;
+        color: var(--card-color);
+    }
+
+    /* ---------- Inicio: franja de configuración ---------- */
+
+    .iv-home__config {
+        border-color: #dccdff;
+        box-shadow: 0 4px 14px rgba(46, 30, 88, .05);
+    }
+
+    .iv-home__config-links a {
+        padding: 0 18px;
+        border: 1px solid #ddd2f3;
+        border-radius: 10px;
+        background: #faf7ff;
+    }
+
+    .iv-home__config-links a + a {
+        padding-left: 18px;
+        border-left: 1px solid #ddd2f3;
+    }
+
+    .iv-home__config-links a:hover {
+        background: #f0e8ff;
+        text-decoration: none;
+    }
+
+    @media (max-width: 650px) {
+        .iv-home__card .iv-home__tile {
+            width: 54px;
+            height: 54px;
+        }
+
+        .iv-home__card .iv-home__arrow {
+            width: 34px;
+            height: 34px;
+        }
+
+        .iv-home__config-links a + a {
+            padding-left: 18px;
+            border-left: 1px solid #ddd2f3;
+        }
+    }
