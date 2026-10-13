@@ -4,11 +4,22 @@
  * @var links_menu $links_menu
  */
 require_once __DIR__ . '/../logo_service.php';
+use config\generales;
 use gamboamartin\system\links_menu;
 
 $seccion = $_GET['seccion'] ?? '';
 $accion  = $_GET['accion'] ?? '';
 $es_login = ($seccion === 'adm_session' && in_array($accion, ['login'], true));
+
+$menu_superior_nuevo = false;
+if (property_exists(generales::class, 'menu_superior_v2')) {
+    $menu_superior_nuevo = (bool)generales::$menu_superior_v2;
+}
+
+if (!$es_login && $menu_superior_nuevo) {
+    include __DIR__ . '/_menu_superior.php';
+    return;
+}
 ?>
 <?php if (!$es_login): ?>
 <!-- <link rel="stylesheet" href="/css/overrides.css?v=1"> -->
@@ -23,7 +34,7 @@ $es_login = ($seccion === 'adm_session' && in_array($accion, ['login'], true));
     }
 
     // Link del logo (inicio)
-    // $href_logo = $links_menu->adm_session->inicio ?? '/facturacion/';
+    $href_logo = $links_menu->adm_session->inicio;
     ?>
 
       <?php if (!empty($logo_url)): ?>

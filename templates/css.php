@@ -38,6 +38,9 @@ use config\views;
 <!-- Start custom template style  -->
 <link rel="stylesheet" href="<?php echo (new views())->url_assets; ?>css/custom_template_style.css" />
 <link rel="stylesheet" href="<?php echo (new views())->url; ?>css/overrides.css?v=<?= time() ?>" />
+<?php if (property_exists(\config\generales::class, 'inicio_color_konsulta2') && \config\generales::$inicio_color_konsulta2) { ?>
+    <link rel="stylesheet" href="css/inicio-color.css?v=<?= (int)@filemtime(__DIR__ . '/../css/inicio-color.css') ?>">
+<?php } ?>
 
 <!-- End custom template style   -->
 <link rel="stylesheet" href="<?php echo (new views())->url_assets; ?>libraries/footable-jquery/css/footable.bootstrap.min.css" />

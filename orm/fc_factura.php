@@ -517,5 +517,45 @@ class fc_factura extends _transacciones_fc
         return $response;
     }
 
+     /**
+     * Resumen para el dashboard de la lista de facturas (solo facturas TIMBRADAS).
+     */
+    public function obtener_indicadores_listado(): array
+    {
+        $r_facturas = $this->filtro_and(
+            columnas: ['fc_factura_id', 'fc_factura_folio', 'fc_factura_total', 'com_cliente_id'],
+            filtro: ['fc_factura.etapa' => 'TIMBRADO']
+        );
+        if (errores::$error) {
+            return $this->error->error(
+                mensaje: 'Error al obtener facturas timbradas para indicadores',
+                data: $r_facturas
+            );
+        }
 
+        $facturas = 0;
+        $importe = 0.0;
+        $clientes = [];
+        $ultima_id = 0;
+        $ultima_folio = '';
+
+        foreach ($r_facturas->registros as $registro) {
+            $facturas++;
+            $importe += (float)$registro['fc_factura_total'];
+            $clientes[$registro['com_cliente_id']] = true;
+
+            $id = (int)$registro['fc_factura_id'];
+            if ($id > $ultima_id) {
+                $ultima_id = $id;
+                $ultima_folio = (string)$registro['fc_factura_folio'];
+            }
+        }
+
+        return [
+            'facturas' => $facturas,
+            'importe' => round($importe, 2),
+            'clientes' => count($clientes),
+            'ultima' => $ultima_folio,
+        ];
+    }
 }

@@ -200,9 +200,11 @@ body .border-color-secondary{
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    white-space: nowrap;
     font-size: 11px;
 }
+
+/* Solo la lista de Agentes mantiene las filas en una sola línea */
+.agentes-page .agents-table { white-space: nowrap; }
 
 .agents-table thead th {
     padding: 11px 12px;
@@ -318,4 +320,1223 @@ body .border-color-secondary{
     list-style: none;
     margin: 0;
     padding: 0;
+}
+
+/* ===== Menú superior IVITEC (generales::$menu_superior_v2) =====
+ * Pegar al final de css/overrides.css. Todo scoped a .iv-nav.
+ * Sin position:sticky propio: el sticky lo maneja .top-box (data-toggle="sticky-onscroll"). */
+.iv-nav{--iv-purple:#7028ed;--iv-ink:#242440;--iv-muted:#535570;--iv-pale:#f2ecff;--iv-pad:24px;position:relative;z-index:1000;background:#fff;border-bottom:1px solid #e8e2f4;box-shadow:0 3px 12px rgb(36 24 70 / 5%);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--iv-ink)}
+.iv-nav *{box-sizing:border-box}
+.iv-nav__top{display:grid;grid-template-columns:140px minmax(0,1fr) 174px;align-items:start;padding:0 var(--iv-pad);gap:12px}
+.iv-nav__brand{display:flex;align-items:center;justify-content:center;min-height:56px}
+.iv-nav__brand img{display:block;width:88px;height:44px;object-fit:contain}
+.iv-nav__navigation{min-width:0}
+.iv-nav__primary{display:flex;justify-content:space-between;gap:3px;padding:3px 0}
+.iv-nav a.iv-nav__link{display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 12px;border-radius:12px;text-decoration:none;color:var(--iv-muted);font-size:13px;font-weight:500;line-height:1.25;transition:background .15s,color .15s;white-space:nowrap}
+.iv-nav .iv-nav__primary a.iv-nav__link{flex-direction:column;gap:3px;padding:4px 6px;min-height:46px;font-size:12px;line-height:1.1}
+.iv-nav__icon{display:block;width:18px;height:18px;flex-shrink:0}
+.iv-nav a.iv-nav__link:hover{background:#f7f3ff;color:var(--iv-purple);text-decoration:none}
+.iv-nav a.iv-nav__link.is-active{background:var(--iv-pale);color:var(--iv-purple);font-weight:650}
+.iv-nav__link:focus-visible,.iv-nav__toggle:focus-visible{outline:3px solid var(--iv-purple);outline-offset:3px}
+.iv-nav__secondary{position:relative;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:4px 0;background:#f7f3ff;border-top:1px solid #f0eafa}
+.iv-nav .iv-nav__secondary a.iv-nav__link{font-size:12px;min-height:28px;padding:4px 10px}
+.iv-nav__secondary .iv-nav__icon{width:15px;height:15px}
+.iv-nav__actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding-top:8px}
+.iv-nav .iv-nav__actions a.iv-nav__link{padding:6px 10px;min-height:36px;border:1px solid #eee8f7;border-radius:10px}
+.iv-nav__toggle{display:none;font:inherit;background:#f2ecff;color:var(--iv-purple);border:0;border-radius:10px;padding:10px 12px;cursor:pointer;align-items:center;gap:8px}
+/* Escritorio: la fila lavanda ocupa todo el ancho de la barra, de borde a borde. */
+@media(min-width:901px){.iv-nav__navigation{display:contents}.iv-nav__brand{grid-column:1;grid-row:1}.iv-nav__primary{grid-column:2;grid-row:1}.iv-nav__actions{grid-column:3;grid-row:1}.iv-nav__secondary{grid-column:1/-1;grid-row:2;margin:0 calc(var(--iv-pad) * -1);padding:3px var(--iv-pad)}}
+@media(max-width:1500px){.iv-nav{--iv-pad:16px}.iv-nav__top{grid-template-columns:120px minmax(0,1fr) 160px;gap:8px}.iv-nav__primary{flex-wrap:wrap;justify-content:center}.iv-nav .iv-nav__primary a.iv-nav__link{flex-direction:row;min-height:34px;padding:6px 10px}.iv-nav__primary .iv-nav__icon{width:18px;height:18px}.iv-nav__secondary{gap:2px}.iv-nav .iv-nav__secondary a.iv-nav__link{padding:5px 9px}}
+@media(max-width:900px){.iv-nav__top{grid-template-columns:1fr auto auto;align-items:center;padding:10px 16px;gap:10px}.iv-nav__brand{justify-content:flex-start;min-height:54px}.iv-nav__brand img{width:96px;height:54px}.iv-nav__toggle{display:inline-flex}.iv-nav__actions{padding:0}.iv-nav .iv-nav__actions a.iv-nav__link{font-size:12px;padding:10px}.iv-nav__actions .iv-nav__icon{width:18px;height:18px}.iv-nav__navigation{grid-column:1/-1;grid-row:2;width:100%;max-height:calc(100dvh - 90px);overflow:auto}.iv-nav__navigation[hidden]{display:none}.iv-nav__primary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.iv-nav .iv-nav__primary a.iv-nav__link{justify-content:flex-start;white-space:normal}.iv-nav__secondary{justify-content:flex-start;border-radius:12px;padding:8px}.iv-nav .iv-nav__secondary a.iv-nav__link{white-space:normal}}
+@media(max-width:480px){.iv-nav__top{gap:6px;padding:8px 10px}.iv-nav__toggle{padding:10px}.iv-nav__toggle span{display:none}.iv-nav__actions{gap:4px}.iv-nav .iv-nav__actions a.iv-nav__link{gap:4px;padding:9px 7px}.iv-nav__primary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.iv-nav__link{transition:none}}
+
+
+
+.iv-system-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+.iv-system-page > main,
+.iv-system-page > .clientes-layout {
+    flex: 1 0 auto;
+    min-width: 0;
+}
+
+.iv-footer {
+    box-sizing: border-box;
+    flex-shrink: 0;
+    margin-top: auto;
+    width: 100%;
+    padding: 22px clamp(20px, 3.2vw, 60px) 18px;
+    border-top: 2px solid #e7d7ff;
+    background: #fff;
+    color: #535570;
+    font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+.iv-footer * {
+    box-sizing: border-box;
+}
+
+.iv-footer__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+.iv-footer__brand {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-width: 0;
+}
+
+.iv-footer__logo {
+    display: block;
+    width: 112px;
+    height: 54px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.iv-footer__description {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-left: 22px;
+    border-left: 1px solid #d7c9ed;
+}
+
+.iv-footer__description strong {
+    font-size: 17px;
+    line-height: 1.3;
+    font-weight: 650;
+    color: #4c4e6c;
+}
+
+.iv-footer__description span {
+    font-size: 14px;
+    line-height: 1.4;
+    color: #74768f;
+}
+
+.iv-footer__links {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px 32px;
+}
+
+.iv-footer .iv-footer__links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 6px 0;
+    color: #535570;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.iv-footer__links svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: #7750be;
+}
+
+.iv-footer .iv-footer__links a:hover {
+    color: #6d28d9;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.iv-footer .iv-footer__links a:focus-visible {
+    outline: 2px solid #6d28d9;
+    outline-offset: 5px;
+    border-radius: 4px;
+}
+
+.iv-footer__copyright {
+    margin: 12px 0 0;
+    text-align: center;
+    color: #74768f;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+    .iv-footer__row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .iv-footer__links {
+        justify-content: flex-start;
+        gap: 8px 24px;
+    }
+    .iv-footer__copyright {
+        text-align: left;
+        margin-top: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .iv-footer {
+        padding: 18px 18px 16px;
+    }
+    .iv-footer__brand {
+        gap: 14px;
+    }
+    .iv-footer__logo {
+        width: 86px;
+        height: 44px;
+    }
+    .iv-footer__description {
+        padding-left: 14px;
+    }
+    .iv-footer__description strong {
+        font-size: 15px;
+    }
+    .iv-footer__description span {
+        font-size: 12px;
+    }
+    .iv-footer__links {
+        gap: 4px 18px;
+    }
+    .iv-footer .iv-footer__links a {
+        font-size: 13px;
+    }
+    .iv-footer__links svg {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@media print {
+    .iv-footer__links {
+        display: none;
+    }
+}
+
+
+/* ===== Inicio IVITEC (generales::$inicio_v2) =====
+ * Pegar al final de css/overrides.css. Todo scoped a .iv-home. */
+
+.iv-home {
+    --iv-home-purple: #6d28d9;
+    --iv-home-ink: #20203e;
+    --iv-home-muted: #656782;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 28px clamp(20px,4vw,76px) 32px;
+    background: linear-gradient(120deg,#faf9fd,#f5f2fc);
+    color: var(--iv-home-ink);
+    font-family: system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+}
+
+.iv-home * {
+    box-sizing: border-box;
+}
+
+.iv-home__container {
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+.iv-home__icon {
+    display: block;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.iv-home__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--iv-home-muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+}
+
+.iv-home__breadcrumb .iv-home__icon {
+    width: 16px;
+    height: 16px;
+    color: var(--iv-home-purple);
+}
+
+.iv-home__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.iv-home h1 {
+    font-size: clamp(26px,2.35vw,40px);
+    line-height: 1.15;
+    letter-spacing: -.025em;
+    font-weight: 750;
+    margin: 0 0 10px;
+    color: var(--iv-home-ink);
+}
+
+.iv-home__heading p {
+    margin: 0;
+    color: var(--iv-home-muted);
+    font-size: 17px;
+    line-height: 1.5;
+}
+
+.iv-home h2 {
+    font-size: 25px;
+    line-height: 1.3;
+    margin: 0 0 18px;
+    letter-spacing: -.02em;
+    color: var(--iv-home-ink);
+}
+
+.iv-home__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.iv-home__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 13px 22px;
+    border: 1px solid var(--iv-home-purple);
+    border-radius: 11px;
+    color: var(--iv-home-purple);
+    background: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.iv-home__button--primary {
+    background: var(--iv-home-purple);
+    color: #fff;
+    box-shadow: 0 4px 12px rgb(109 40 217 / 12%);
+}
+
+.iv-home__button:hover {
+    background: #f0e8ff;
+    color: var(--iv-home-purple);
+    text-decoration: none;
+}
+
+.iv-home__button--primary:hover {
+    background: #5720b0;
+    color: #fff;
+}
+
+.iv-home__grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 18px;
+}
+
+.iv-home__card {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    min-height: 106px;
+    padding: 22px;
+    border: 1px solid #ece6f7;
+    border-radius: 14px;
+    background: #fff;
+    color: var(--iv-home-ink);
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgb(46 30 88 / 4%);
+    transition: border-color .15s,box-shadow .15s;
+}
+
+.iv-home__card:hover {
+    border-color: #c8adef;
+    box-shadow: 0 6px 18px rgb(109 40 217 / 9%);
+    text-decoration: none;
+    color: var(--iv-home-ink);
+}
+
+.iv-home__tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: #f3edff;
+    color: var(--iv-home-purple);
+}
+
+.iv-home__tile .iv-home__icon {
+    width: 32px;
+    height: 32px;
+}
+
+.iv-home__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.iv-home__copy strong {
+    font-size: 18px;
+    font-weight: 650;
+    line-height: 1.3;
+}
+
+.iv-home__copy>span {
+    color: var(--iv-home-muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.iv-home__arrow {
+    margin-left: auto;
+    color: var(--iv-home-purple);
+}
+
+.iv-home__arrow .iv-home__icon {
+    width: 18px;
+    height: 18px;
+}
+
+.iv-home__config {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 22px;
+    margin-top: 20px;
+    background: #fff;
+    border: 1px solid #ece6f7;
+    border-radius: 14px;
+}
+
+.iv-home__config .iv-home__tile {
+    width: 54px;
+    height: 54px;
+}
+
+.iv-home__config-links {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px 22px;
+    margin-left: auto;
+}
+
+.iv-home__config-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    color: var(--iv-home-purple);
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.iv-home__config-links a+a {
+    border-left: 1px solid #ded3ef;
+    padding-left: 22px;
+}
+
+.iv-home__config-links a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.iv-home a:focus-visible {
+    outline: 3px solid var(--iv-home-purple);
+    outline-offset: 4px;
+}
+
+.iv-home__empty {
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ece6f7;
+    border-radius: 12px;
+    color: var(--iv-home-muted);
+}
+
+@media (max-width: 1200px) {
+    .iv-home__heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .iv-home__config {
+        flex-wrap: wrap;
+    }
+    .iv-home__config-links {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 650px) {
+    .iv-home {
+        padding: 22px 18px;
+    }
+    .iv-home__grid {
+        grid-template-columns: 1fr;
+    }
+    .iv-home__card {
+        padding: 18px;
+        gap: 14px;
+    }
+    .iv-home__tile {
+        width: 50px;
+        height: 50px;
+    }
+    .iv-home__tile .iv-home__icon {
+        width: 28px;
+        height: 28px;
+    }
+    .iv-home__copy strong {
+        font-size: 16px;
+    }
+    .iv-home__actions {
+        width: 100%;
+    }
+    .iv-home__button {
+        flex: 1;
+        padding: 12px;
+        font-size: 13px;
+    }
+    .iv-home__config {
+        gap: 14px;
+        padding: 18px;
+    }
+    .iv-home__config-links {
+        gap: 4px 18px;
+    }
+    .iv-home__config-links a+a {
+        border: 0;
+        padding-left: 0;
+    }
+    .iv-home__config>.iv-home__copy {
+        flex: 1;
+    }
+    .iv-home__heading p {
+        font-size: 15px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .iv-home__card {
+        transition: none;
+    }
+}
+
+
+/* =====================================================================
+ * RESPONSIVE del diseño nuevo (sidebar, listas, filtros, padding)
+ * Va al final para ganar por orden sobre las reglas de arriba.
+ * Requiere que principal.php use class="iv-main-pad" en el contenedor
+ * del contenido (antes tenía el padding inline).
+ * ===================================================================== */
+
+.iv-main-pad {
+    padding: 15px 35px;
+}
+
+
+.clientes-layout > .main {
+    min-width: 0;
+}
+
+/* ---------- Tablet y menor ---------- */
+@media (max-width: 900px) {
+
+    .iv-main-pad {
+        padding: 12px 16px;
+    }
+
+    /* Sidebar vertical: se apila arriba del contenido */
+    .clientes-layout {
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .clientes-sidebar {
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        max-height: none;
+        position: static;
+        align-self: stretch;
+        padding: 10px;
+        border-right: 0;
+        border-bottom: 1px solid #e5e7ef;
+        overflow-y: visible;
+    }
+
+    .clientes-sidebar-title {
+        height: 44px;
+    }
+
+    /* Opciones en una fila con scroll horizontal, como pestañas */
+    .clientes-sidebar-nav {
+        flex-direction: row;
+        gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+    }
+
+    .clientes-sidebar-nav a {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .clientes-sidebar-nav a.active::before {
+        display: none;
+    }
+
+    /* Listas */
+    .agentes-page {
+        padding: 14px;
+    }
+
+    .agentes-header {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .agentes-header h1 {
+        font-size: 24px;
+    }
+
+    .page-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+    }
+
+    .agentes-header-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 600px) {
+
+    .iv-main-pad {
+        padding: 10px;
+    }
+
+    .agentes-page {
+        padding: 10px;
+    }
+
+    .agentes-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .agentes-header-info {
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .agentes-header h1 {
+        min-width: 0;
+        font-size: 20px;
+        line-height: 1.25;
+        word-break: break-word;
+    }
+
+    .page-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    /* Alta / Lista: se reparten el ancho */
+    .agentes-header-actions {
+        width: 100%;
+    }
+
+    .agentes-header-actions .btn {
+        flex: 1 1 calc(50% - 8px);
+        padding: 0 12px;
+    }
+
+    /* Filtros: cada grupo y cada control a ancho completo */
+    .filtros-lista {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .filtros-lista .filtro-grupo {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .filtros-lista form {
+        width: 100%;
+    }
+
+    .filtros-lista input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .filtros-lista .iv-btn,
+    .filtros-lista button {
+        width: 100%;
+    }
+
+    .agents-table-card {
+        padding: 10px;
+    }
+}
+
+/* ---------- Celular chico ---------- */
+@media (max-width: 400px) {
+
+    .agentes-header-actions .btn {
+        flex: 1 1 100%;
+    }
+}
+
+/* ===== Menú superior: toggle y animación en escritorio =====
+ * En escritorio arranca recogido; .is-open lo despliega.
+ * Orden: [☰] [logo] ........ [Inicio] [Salir] */
+@media (min-width: 901px) {
+
+    .iv-nav__top {
+        grid-template-columns: 40px 100px minmax(0, 1fr) 174px;
+    }
+
+    .iv-nav__toggle {
+        display: inline-flex;
+        grid-column: 1;
+        grid-row: 1;
+        align-self: center;
+        justify-self: start;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+    }
+
+    .iv-nav__toggle span {
+        display: none;
+    }
+
+    .iv-nav__brand {
+        grid-column: 2;
+        justify-content: flex-start;
+    }
+
+    .iv-nav__primary {
+        grid-column: 3;
+    }
+
+    .iv-nav__actions {
+        grid-column: 4;
+    }
+
+    /* Recogido por defecto */
+    .iv-nav .iv-nav__primary,
+    .iv-nav .iv-nav__secondary {
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+            max-height .35s ease,
+            padding .35s ease,
+            opacity .25s ease,
+            visibility 0s linear .35s;
+    }
+
+    .iv-nav .iv-nav__secondary {
+        border-top-width: 0;
+    }
+
+    /* Desplegado */
+    .iv-nav.is-open .iv-nav__primary,
+    .iv-nav.is-open .iv-nav__secondary {
+        max-height: 220px;
+        opacity: 1;
+        visibility: visible;
+        transition:
+            max-height .35s ease,
+            padding .35s ease,
+            opacity .25s ease,
+            visibility 0s linear 0s;
+    }
+
+    .iv-nav.is-open .iv-nav__primary {
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+
+    .iv-nav.is-open .iv-nav__secondary {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        border-top-width: 1px;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1500px) {
+    .iv-nav__top {
+        grid-template-columns: 40px 96px minmax(0, 1fr) 160px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .iv-nav .iv-nav__primary,
+    .iv-nav .iv-nav__secondary {
+        transition: none;
+    }
+}
+
+/* ===== Menú superior móvil: [☰] [logo] ........ [Inicio] [Salir] ===== */
+@media (max-width: 900px) {
+
+    .iv-nav__top {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .iv-nav__toggle {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .iv-nav__brand {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .iv-nav__actions {
+        grid-column: 3;
+        grid-row: 1;
+    }
+}
+
+/* ===== Menú superior móvil: animación del panel =====
+ * Cerrado por defecto; .is-open (que alterna el botón) lo despliega. */
+@media (max-width: 900px) {
+
+    .iv-nav .iv-nav__navigation {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-8px);
+        transition:
+            max-height .35s ease,
+            opacity .25s ease,
+            transform .3s ease,
+            visibility 0s linear .35s;
+    }
+
+    .iv-nav.is-open .iv-nav__navigation {
+        max-height: calc(100dvh - 90px);
+        overflow-y: auto;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        transition:
+            max-height .35s ease,
+            opacity .25s ease,
+            transform .3s ease,
+            visibility 0s linear 0s;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .iv-nav .iv-nav__navigation,
+    .iv-nav.is-open .iv-nav__navigation {
+        transition: none;
+    }
+}
+
+/* ===== Indicadores de la lista de facturas ===== */
+.iv-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.iv-kpi {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+    padding: 18px;
+    overflow: hidden;
+    border: 1px solid var(--iv-border);
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: 0 5px 15px rgba(25, 30, 60, .035);
+}
+
+.iv-kpi::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 46px;
+    height: 3px;
+    background: var(--iv-purple);
+}
+
+.iv-kpi__label {
+    margin: 0 0 8px;
+    color: var(--iv-text-soft);
+    font-size: 13px;
+}
+
+.iv-kpi__value {
+    display: block;
+    color: #171b32;
+    font-size: clamp(20px, 2vw, 28px);
+    font-weight: 750;
+    line-height: 1.2;
+    letter-spacing: -.025em;
+    overflow-wrap: anywhere;
+}
+
+.iv-kpi__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    color: var(--iv-purple);
+    background: var(--iv-purple-light);
+}
+
+.iv-kpi__icon svg {
+    width: 21px;
+    height: 21px;
+}
+
+@media (max-width: 1200px) {
+    .iv-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .iv-kpis {
+        gap: 10px;
+    }
+
+    .iv-kpi {
+        padding: 14px;
+    }
+
+    .iv-kpi__icon {
+        display: none;
+    }
+
+    .iv-kpi__value {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 400px) {
+    .iv-kpis {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ===== Lista de layouts de nómina ===== */
+
+.agentes-header-actions .iv-dropdown {
+    position: relative;
+    display: block;
+    align-self: center;
+    margin: 0 0 2px 2px;
+}
+
+.agentes-header-actions .iv-dropdown > summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 43px;
+    margin: 0;
+    list-style: none;
+    cursor: pointer;
+}
+
+.agentes-header-actions .iv-dropdown > summary::-webkit-details-marker {
+    display: none;
+}
+
+.agentes-header-actions .iv-dropdown__menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    min-width: 260px;
+    padding: 8px;
+    border: 1px solid var(--iv-border);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(25, 30, 60, .12);
+}
+
+.agentes-header-actions .iv-dropdown__menu a.btn {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    background-image: none;
+    box-shadow: none;
+    color: #1d254d;
+    font-weight: 500;
+    text-align: left;
+}
+
+.agentes-header-actions .iv-dropdown__menu a.btn:hover {
+    background: var(--iv-purple-light);
+}
+
+/* Badges de estado */
+.iv-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 13px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.iv-badge::before {
+    content: "";
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--iv-badge-dot, currentColor);
+}
+
+.iv-badge--warning {
+    --iv-badge-dot: #f29b1d;
+    background: #fff1d3;
+    color: #8a5a12;
+}
+
+.iv-badge--success {
+    --iv-badge-dot: #1fa65a;
+    background: #e3f6ea;
+    color: #1d7a45;
+}
+
+.iv-badge--info {
+    --iv-badge-dot: #4a86e8;
+    background: #e9f2ff;
+    color: #345b92;
+}
+
+.iv-badge--danger {
+    --iv-badge-dot: #d63a55;
+    background: #fff0f3;
+    color: #a52f45;
+}
+
+.iv-badge--neutral {
+    --iv-badge-dot: #8a94ad;
+    background: #f0f2f7;
+    color: #64708c;
+}
+
+/* Botón de acciones por fila */
+.iv-acciones-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border: 1px solid #ded4f6;
+    border-radius: 7px;
+    background: #fff;
+    color: var(--iv-purple);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.iv-acciones-toggle:hover,
+.iv-acciones-toggle[aria-expanded="true"] {
+    background: var(--iv-purple-light);
+}
+
+/* Panel expandible de la fila */
+tr.iv-panel-row > td.iv-panel-cell {
+    padding: 6px 8px 14px;
+    background: #fff;
+}
+
+.iv-panel {
+    border: 1px solid #e6ddf8;
+    border-radius: 10px;
+    background: #faf8ff;
+}
+
+.iv-panel__title {
+    margin: 0;
+    padding: 14px 18px 4px;
+    color: #1d254d;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.iv-panel__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    padding: 10px 18px 18px;
+}
+
+.iv-panel__group {
+    min-width: 0;
+}
+
+.iv-panel__group + .iv-panel__group {
+    padding-left: 20px;
+    border-left: 1px solid #e1d9f3;
+}
+
+.iv-panel__group-title {
+    margin: 0 0 10px;
+    color: #596583;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.iv-panel__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.iv-act {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: 1px solid #ded4f6;
+    border-radius: 7px;
+    background: #fff;
+    color: var(--iv-purple);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: none;
+}
+
+.iv-act:hover {
+    background: var(--iv-purple-light);
+}
+
+.iv-act--danger {
+    border-color: #efccd3;
+    color: #c32942;
+}
+
+.iv-act--danger:hover {
+    background: #fff1f4;
+}
+
+.iv-mas {
+    margin-top: 6px;
+}
+
+.iv-mas > summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border: 1px solid #ded4f6;
+    border-radius: 7px;
+    background: #fff;
+    color: var(--iv-purple);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.iv-mas > summary::-webkit-details-marker {
+    display: none;
+}
+
+.iv-mas__menu {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 8px;
+    border: 1px solid var(--iv-border);
+    border-radius: 8px;
+    background: #fff;
+}
+
+@media (max-width: 900px) {
+    .iv-panel__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .iv-panel__group + .iv-panel__group {
+        padding-left: 0;
+        padding-top: 14px;
+        border-left: 0;
+        border-top: 1px solid #e1d9f3;
+    }
+
+    .agentes-header-actions .iv-dropdown__menu {
+        right: auto;
+        left: 0;
+    }
 }

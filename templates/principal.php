@@ -11,6 +11,11 @@ if(property_exists(generales::class, 'login_ivitec_v2')){
     $login_nuevo = (bool)generales::$login_ivitec_v2;
 }
 
+$footer_nuevo = false;
+if(property_exists(generales::class, 'footer_v2')){
+    $footer_nuevo = (bool)generales::$footer_v2;
+}
+
 if($es_login && $login_nuevo){
     include($data->include_action);
     return;
@@ -42,7 +47,7 @@ if($es_login){
 
 <body class="">
 <div id="fb-root"></div>
-<div class="container container-wrapper">
+<div class="container container-wrapper<?php echo $footer_nuevo ? ' iv-system-page' : ''; ?>">
     <header class="header">
        <?php include (new \config\views())->template_path('nav/_head.php'); ?>
     </header><!-- /.header-->
@@ -51,7 +56,7 @@ if($es_login){
         <div class="clientes-layout">
             <?php include (new \config\views())->template_path('nav/_sidebar.php'); ?>
             <main class="main section-color-primary" style="flex: 1; min-width: 0;">
-                <div style="display: flex; flex-direction: column; justify-content: center; padding: 15px 35px;">
+                <div class="iv-main-pad" style="display: flex; flex-direction: column; justify-content: center;">
                     <?php include($data->include_action); ?>
                 </div>
             </main>
@@ -59,15 +64,20 @@ if($es_login){
     <?php } ?>
     <?php if($tipo_menu !== 'vertical'){ ?>
         <main class="main section-color-primary">
-            <div style="display: flex; flex-direction: column; justify-content: center; padding: 15px 35px;">
+            <div class="iv-main-pad" style="display: flex; flex-direction: column; justify-content: center;">
                 <?php include($data->include_action); ?>
             </div>
         </main>
     <?php } ?><!-- /.main-part-->
 
-    <footer class="footer">
-        <?php include $path_base_template.'footer/_footer.php' ?>
-    </footer>
+    <?php if($footer_nuevo){ ?>
+        <?php include (new \config\views())->template_path('footer/_footer_ivitec.php'); ?>
+    <?php } ?>
+    <?php if(!$footer_nuevo){ ?>
+        <footer class="footer">
+            <?php include $path_base_template.'footer/_footer.php' ?>
+        </footer>
+    <?php } ?>
     <a class="btn btn-scoll-up color-secondary" id="btn-scroll-up"></a>
 
     <?php include $path_base_template.'java.php'; ?>
@@ -79,9 +89,18 @@ if($es_login){
         echo $data->js_view;
     }
     ?>
-    <?php if (isset($controlador->datatables)):?>
+        <?php if (isset($controlador->datatables)):?>
         <?php foreach ($controlador->datatables as $datatable) {
-            $objeto = json_encode($datatable);
+            $dt = json_decode(json_encode($datatable));
+            if (is_array($dt->columnDefs ?? null)) {
+                foreach ($dt->columnDefs as $def) {
+                    if (in_array($def->type ?? '', ['button', 'menu'], true)) {
+                        // Responsive oculta primero lo demás; Acciones nunca se esconde
+                        $def->responsivePriority = 1;
+                    }
+                }
+            }
+            $objeto = json_encode($dt);
             print_r("<script> datatable($objeto.identificador, $objeto.columns, $objeto.columnDefs, $objeto.data,$objeto.in) </script>");
         } ?>
     <?php endif;?>
