@@ -199,7 +199,7 @@ class controlador_fc_layout_nom extends system{
 
         $this->inputs->input_select_periodo = $input_select_periodo;
 
-        if (false) {
+//        if (false) {
             $modelo_com_agente = new com_agente(link: $this->link);
             $filtro_input_select_agente_asesor = [
                 'com_agente.com_tipo_agente_id' => 2,
@@ -246,7 +246,7 @@ class controlador_fc_layout_nom extends system{
 
             $this->inputs->input_select_agente_operador = $input_select_agente_operador;
 
-        } // end if true:false
+//        } // end if true:false
 
 
         return $alta;
