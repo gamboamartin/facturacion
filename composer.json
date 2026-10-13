@@ -71,7 +71,8 @@
     "ext-mysqli": "*",
     "ext-libxml": "*",
     "endroid/qr-code": "^5.1",
-    "yosymfony/toml": "^1.0"
+    "yosymfony/toml": "^1.0",
+    "firebase/php-jwt": "^7.2"
   },
   "config": {
     "allow-plugins": {
