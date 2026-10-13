@@ -2,19 +2,29 @@
 namespace base_movil\v1\src;
 
 use gamboamartin\errores\errores;
+use PDO;
 
 /**
  * Sigue la misma convención que app_cobranza.php de em3: los métodos
  * públicos devuelven arrays (nunca hacen echo directo), y es el
  * enrutador (index.php) quien decide cómo mostrar la respuesta.
+ *
+ * Prototipo #3: todas las pantallas requieren sesión excepto las de
+ * PANTALLAS_PUBLICAS. Sin sesión válida, el servidor responde con la
+ * pantalla de login en lugar de la pedida (la app no decide nada).
  */
 class app_screens
 {
     private errores $errores;
+    private app_sesion $sesion;
 
-    public function __construct()
+    /** Pantallas que se pueden ver sin sesión. */
+    private const PANTALLAS_PUBLICAS = array('login');
+
+    public function __construct(PDO $link)
     {
         $this->errores = new errores();
+        $this->sesion = new app_sesion($link);
     }
 
     public function obten_pantalla(): array
@@ -35,6 +45,7 @@ class app_screens
             'registro' => 'pantalla_registro',
             'detalle' => 'pantalla_detalle',
             'confirmacion' => 'pantalla_confirmacion',
+            'login' => 'pantalla_login',
         );
 
         if (!isset($pantallas[$screenId])) {
@@ -42,6 +53,10 @@ class app_screens
                 mensaje: "No existe la pantalla '$screenId'",
                 data: array('screenId' => $screenId)
             );
+        }
+
+        if (!in_array($screenId, self::PANTALLAS_PUBLICAS, true) && !$this->sesion->tiene_sesion()) {
+            return $this->pantalla_login();
         }
 
         $metodo = $pantallas[$screenId];
@@ -56,6 +71,10 @@ class app_screens
      */
     public function guarda_registro(): array
     {
+        if (!$this->sesion->tiene_sesion()) {
+            return array('action' => array('type' => 'NAVIGATE', 'screenId' => 'login', 'reset' => true));
+        }
+
         $body = json_decode(file_get_contents('php://input'), true);
 
         if (!is_array($body) || !isset($body['values']) || !is_array($body['values'])) {
@@ -213,6 +232,12 @@ class app_screens
                             'style' => $this->estilo_boton_primario(),
                             'action' => array('type' => 'CALL', 'function' => 'funcion_prueba'),
                         ),
+                        array(
+                            'type' => 'Button',
+                            'id' => 'btn-logout',
+                            'label' => 'Cerrar sesión',
+                            'action' => array('type' => 'LOGOUT'),
+                        ),
                     ),
                 ),
             ),
@@ -329,6 +354,46 @@ class app_screens
                     'label' => 'Volver al inicio',
                     'style' => $this->estilo_boton_primario(),
                     'action' => array('type' => 'NAVIGATE', 'screenId' => 'home'),
+                ),
+            ),
+        );
+    }
+
+    private function pantalla_login(): array
+    {
+        return array(
+            'screenId' => 'login',
+            'title' => 'Iniciar sesión',
+            'components' => array(
+                array(
+                    'type' => 'Form',
+                    'id' => 'form-login',
+                    'children' => array(
+                        array(
+                            'type' => 'Input',
+                            'id' => 'in-login-usuario',
+                            'name' => 'usuario',
+                            'inputType' => 'text',
+                            'label' => 'Usuario',
+                            'required' => true,
+                            'placeholder' => 'Tu usuario',
+                        ),
+                        array(
+                            'type' => 'Input',
+                            'id' => 'in-login-password',
+                            'name' => 'password',
+                            'inputType' => 'password',
+                            'label' => 'Contraseña',
+                            'required' => true,
+                        ),
+                        array(
+                            'type' => 'Button',
+                            'id' => 'btn-login',
+                            'label' => 'Iniciar sesión',
+                            'style' => $this->estilo_boton_primario(),
+                            'action' => array('type' => 'SUBMIT', 'method' => 'login'),
+                        ),
+                    ),
                 ),
             ),
         );
