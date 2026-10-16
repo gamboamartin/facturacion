@@ -258,6 +258,7 @@ class app_sesion
         $modelo->registro = array(
             'jti' => $jti,
             'expira' => date('Y-m-d H:i:s', $exp),
+            'adm_usuario_id' => $usuario_id,
         );
         $r_alta = $modelo->alta_bd();
         if (errores::$error) {
