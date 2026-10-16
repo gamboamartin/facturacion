@@ -238,6 +238,20 @@ class app_screens
                             'label' => 'Cerrar sesión',
                             'action' => array('type' => 'LOGOUT'),
                         ),
+
+                                                array(
+                            'type' => 'Text',
+                            'id' => 'txt-desde-backend',
+                            'content' => 'Este mensaje se agregó desde el backend sin generar un APK nuevo.',
+                            'style' => array('fontSize' => 16, 'fontWeight' => 'bold', 'color' => '#22A45D'),
+                        ),
+                        array(
+                            'type' => 'Button',
+                            'id' => 'btn-ver-detalle',
+                            'label' => 'Ver detalle',
+                            'style' => $this->estilo_boton_primario(),
+                            'action' => array('type' => 'NAVIGATE', 'screenId' => 'detalle'),
+                        ),
                     ),
                 ),
             ),
