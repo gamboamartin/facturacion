@@ -233,7 +233,7 @@ class app_screens
                             'action' => array('type' => 'LOGOUT'),
                         ),
 
-                                                array(
+                        array(
                             'type' => 'Text',
                             'id' => 'txt-desde-backend',
                             'content' => 'Este mensaje se agregó desde el backend sin generar un APK nuevo.',
@@ -407,14 +407,14 @@ class app_screens
         );
     }
 
- /**
- * Error del framework + código HTTP para el router.
- * La clase clasifica el error; el router decide la salida.
- */
-private function error_http(int $http_code, string $mensaje, array $data = array()): array
-{
-    $error = $this->errores->error(mensaje: $mensaje, data: $data);
-    $error['http_code'] = $http_code;
-    return $error;
-}
+    /**
+     * Error del framework + código HTTP para el router.
+     * La clase clasifica el error; el router decide la salida.
+     */
+    private function error_http(int $http_code, string $mensaje, array $data = array()): array
+    {
+        $error = $this->errores->error(mensaje: $mensaje, data: $data);
+        $error['http_code'] = $http_code;
+        return $error;
+    }
 }
