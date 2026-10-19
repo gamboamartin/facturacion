@@ -9,11 +9,12 @@ use PDO;
  * públicos devuelven arrays (nunca hacen echo directo), y es el
  * enrutador (index.php) quien decide cómo mostrar la respuesta.
  *
-* Prototipo #3: todas las pantallas requieren sesión excepto las de
+ * Prototipo #3: todas las pantallas requieren sesión excepto las de
  * PANTALLAS_PUBLICAS.
  * Prototipo #4: sin sesión válida se responde 401; la app borra el token
  * y navega a login. Cada error lleva su http_code (error_http) y el router
- * decide la salida.
+ * decide la salida. Cada pantalla define su `ttl` (segundos que la app
+ * puede servirla desde caché; 0 = no se cachea).
  */
 class app_screens
 {
@@ -31,7 +32,7 @@ class app_screens
 
     public function obten_pantalla(): array
     {
-       if (!isset($_GET['screenId']) || !is_string($_GET['screenId']) || trim($_GET['screenId']) === '') {
+        if (!isset($_GET['screenId']) || !is_string($_GET['screenId']) || trim($_GET['screenId']) === '') {
             return $this->error_http(400, 'Error $_GET[screenId] debe existir', $_GET);
         }
 
@@ -47,11 +48,11 @@ class app_screens
             'login' => 'pantalla_login',
         );
 
-       if (!isset($pantallas[$screenId])) {
+        if (!isset($pantallas[$screenId])) {
             return $this->error_http(404, "No existe la pantalla '$screenId'", array('screenId' => $screenId));
         }
 
-       if (!in_array($screenId, self::PANTALLAS_PUBLICAS, true) && !$this->sesion->tiene_sesion()) {
+        if (!in_array($screenId, self::PANTALLAS_PUBLICAS, true) && !$this->sesion->tiene_sesion()) {
             return $this->error_http(401, 'Sesión no válida o expirada');
         }
 
@@ -90,6 +91,7 @@ class app_screens
             'action' => array('type' => 'NAVIGATE', 'screenId' => 'confirmacion'),
         );
     }
+
     /**
      * Valida los valores recibidos contra las reglas de los campos de una
      * pantalla. Devuelve array vacío si todo es válido, o el error.
@@ -189,6 +191,7 @@ class app_screens
         return array(
             'screenId' => 'home',
             'title' => 'Pantalla de prueba',
+            'ttl' => 60, // corto: un cambio del backend se ve en máximo 1 minuto
             'components' => array(
                 array(
                     'type' => 'Container',
@@ -232,7 +235,6 @@ class app_screens
                             'label' => 'Cerrar sesión',
                             'action' => array('type' => 'LOGOUT'),
                         ),
-
                         array(
                             'type' => 'Text',
                             'id' => 'txt-desde-backend',
@@ -257,6 +259,7 @@ class app_screens
         return array(
             'screenId' => 'registro',
             'title' => 'Registro',
+            'ttl' => 300, // formulario estable: 5 minutos
             'components' => array(
                 array(
                     'type' => 'Form',
@@ -328,6 +331,7 @@ class app_screens
         return array(
             'screenId' => 'detalle',
             'title' => 'Detalle',
+            'ttl' => 30, // corto a propósito: permite probar el vencimiento del caché
             'components' => array(
                 array(
                     'type' => 'Text',
@@ -350,6 +354,7 @@ class app_screens
         return array(
             'screenId' => 'confirmacion',
             'title' => 'Registro enviado',
+            'ttl' => 0, // es un resultado: no se cachea
             'components' => array(
                 array(
                     'type' => 'Text',
@@ -372,6 +377,7 @@ class app_screens
         return array(
             'screenId' => 'login',
             'title' => 'Iniciar sesión',
+            'ttl' => 86400, // casi nunca cambia: 1 día
             'components' => array(
                 array(
                     'type' => 'Form',
