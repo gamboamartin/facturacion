@@ -9,9 +9,11 @@ use PDO;
  * públicos devuelven arrays (nunca hacen echo directo), y es el
  * enrutador (index.php) quien decide cómo mostrar la respuesta.
  *
- * Prototipo #3: todas las pantallas requieren sesión excepto las de
- * PANTALLAS_PUBLICAS. Sin sesión válida, el servidor responde con la
- * pantalla de login en lugar de la pedida (la app no decide nada).
+* Prototipo #3: todas las pantallas requieren sesión excepto las de
+ * PANTALLAS_PUBLICAS.
+ * Prototipo #4: sin sesión válida se responde 401; la app borra el token
+ * y navega a login. Cada error lleva su http_code (error_http) y el router
+ * decide la salida.
  */
 class app_screens
 {
@@ -29,11 +31,8 @@ class app_screens
 
     public function obten_pantalla(): array
     {
-        if (!isset($_GET['screenId']) || !is_string($_GET['screenId']) || trim($_GET['screenId']) === '') {
-            return $this->errores->error(
-                mensaje: 'Error $_GET[screenId] debe existir',
-                data: $_GET
-            );
+       if (!isset($_GET['screenId']) || !is_string($_GET['screenId']) || trim($_GET['screenId']) === '') {
+            return $this->error_http(400, 'Error $_GET[screenId] debe existir', $_GET);
         }
 
         $screenId = trim($_GET['screenId']);
@@ -48,15 +47,12 @@ class app_screens
             'login' => 'pantalla_login',
         );
 
-        if (!isset($pantallas[$screenId])) {
-            return $this->errores->error(
-                mensaje: "No existe la pantalla '$screenId'",
-                data: array('screenId' => $screenId)
-            );
+       if (!isset($pantallas[$screenId])) {
+            return $this->error_http(404, "No existe la pantalla '$screenId'", array('screenId' => $screenId));
         }
 
-        if (!in_array($screenId, self::PANTALLAS_PUBLICAS, true) && !$this->sesion->tiene_sesion()) {
-            return $this->pantalla_login();
+       if (!in_array($screenId, self::PANTALLAS_PUBLICAS, true) && !$this->sesion->tiene_sesion()) {
+            return $this->error_http(401, 'Sesión no válida o expirada');
         }
 
         $metodo = $pantallas[$screenId];
@@ -72,22 +68,21 @@ class app_screens
     public function guarda_registro(): array
     {
         if (!$this->sesion->tiene_sesion()) {
-            return array('action' => array('type' => 'NAVIGATE', 'screenId' => 'login', 'reset' => true));
+            return $this->error_http(401, 'Sesión no válida o expirada');
         }
 
         $body = json_decode(file_get_contents('php://input'), true);
 
         if (!is_array($body) || !isset($body['values']) || !is_array($body['values'])) {
-            return $this->errores->error(
-                mensaje: 'Error el body debe traer "values"',
-                data: array()
-            );
+            return $this->error_http(400, 'Error el body debe traer "values"');
         }
 
         $pantalla = $this->pantalla_registro();
         $validacion = $this->valida_valores($pantalla['components'], $body['values']);
 
         if (isset($validacion['error'])) {
+            // Datos inválidos del usuario: 400, no 500.
+            $validacion['http_code'] = 400;
             return $validacion;
         }
 
@@ -95,7 +90,6 @@ class app_screens
             'action' => array('type' => 'NAVIGATE', 'screenId' => 'confirmacion'),
         );
     }
-
     /**
      * Valida los valores recibidos contra las reglas de los campos de una
      * pantalla. Devuelve array vacío si todo es válido, o el error.
@@ -412,4 +406,15 @@ class app_screens
             ),
         );
     }
+
+ /**
+ * Error del framework + código HTTP para el router.
+ * La clase clasifica el error; el router decide la salida.
+ */
+private function error_http(int $http_code, string $mensaje, array $data = array()): array
+{
+    $error = $this->errores->error(mensaje: $mensaje, data: $data);
+    $error['http_code'] = $http_code;
+    return $error;
+}
 }
