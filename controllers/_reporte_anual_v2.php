@@ -601,13 +601,13 @@ class _reporte_anual_v2{
                         LEFT JOIN com_agente AS operador ON fc_factura.agente_operacion_alta_id = operador.id
                         LEFT JOIN com_sucursal ON fc_factura.com_sucursal_id = com_sucursal.id
                         LEFT JOIN com_cliente ON com_sucursal.com_cliente_id = com_cliente.id
-                        LEFT JOIN com_agente AS asesor ON com_cliente.com_agente_asesor_id = asesor.id
+                        LEFT JOIN com_agente AS asesor ON fc_factura.agente_asesor_id = asesor.id
                         LEFT JOIN fc_layout_nom ON fc_layout_factura.fc_layout_nom_id = fc_layout_nom.id
                         LEFT JOIN fc_layout_periodo AS periodo ON fc_layout_nom.fc_layout_periodo_id = periodo.id
                         LEFT JOIN com_tipo_producto AS producto ON fc_factura.com_tipo_producto_id = producto.id  
                     WHERE
                     fc_layout_nom.fecha_pago BETWEEN :fecha_inicio
                     AND :fecha_fin";
-    } // Todo : LEFT JOIN com_agente AS asesor ON fc_factura.com_agente_asesor_id = asesor.id
+    }
 
 }

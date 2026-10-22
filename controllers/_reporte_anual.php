@@ -584,7 +584,7 @@ class _reporte_anual{
                         LEFT JOIN com_agente AS operador ON fc_factura.agente_operacion_alta_id = operador.id
                         LEFT JOIN com_sucursal ON fc_factura.com_sucursal_id = com_sucursal.id
                         LEFT JOIN com_cliente ON com_sucursal.com_cliente_id = com_cliente.id
-                        LEFT JOIN com_agente AS asesor ON com_cliente.com_agente_asesor_id = asesor.id
+                        LEFT JOIN com_agente AS asesor ON fc_factura.agente_asesor_id = asesor.id
                         LEFT JOIN fc_layout_factura ON fc_factura.id = fc_layout_factura.fc_factura_id
                         LEFT JOIN fc_layout_nom ON fc_layout_factura.fc_layout_nom_id = fc_layout_nom.id
                         LEFT JOIN fc_layout_periodo AS periodo ON fc_layout_nom.fc_layout_periodo_id = periodo.id
