@@ -2,28 +2,38 @@
 namespace base_movil\v1\src;
 
 use gamboamartin\errores\errores;
+use PDO;
 
 /**
  * Sigue la misma convención que app_cobranza.php de em3: los métodos
  * públicos devuelven arrays (nunca hacen echo directo), y es el
  * enrutador (index.php) quien decide cómo mostrar la respuesta.
+ *
+ * Prototipo #3: todas las pantallas requieren sesión excepto las de
+ * PANTALLAS_PUBLICAS.
+ * Prototipo #4: sin sesión válida se responde 401; la app borra el token
+ * y navega a login. Cada error lleva su http_code (error_http) y el router
+ * decide la salida. Cada pantalla define su `ttl` (segundos que la app
+ * puede servirla desde caché; 0 = no se cachea).
  */
 class app_screens
 {
     private errores $errores;
+    private app_sesion $sesion;
 
-    public function __construct()
+    /** Pantallas que se pueden ver sin sesión. */
+    private const PANTALLAS_PUBLICAS = array('login');
+
+    public function __construct(PDO $link)
     {
         $this->errores = new errores();
+        $this->sesion = new app_sesion($link);
     }
 
     public function obten_pantalla(): array
     {
         if (!isset($_GET['screenId']) || !is_string($_GET['screenId']) || trim($_GET['screenId']) === '') {
-            return $this->errores->error(
-                mensaje: 'Error $_GET[screenId] debe existir',
-                data: $_GET
-            );
+            return $this->error_http(400, 'Error $_GET[screenId] debe existir', $_GET);
         }
 
         $screenId = trim($_GET['screenId']);
@@ -35,13 +45,15 @@ class app_screens
             'registro' => 'pantalla_registro',
             'detalle' => 'pantalla_detalle',
             'confirmacion' => 'pantalla_confirmacion',
+            'login' => 'pantalla_login',
         );
 
         if (!isset($pantallas[$screenId])) {
-            return $this->errores->error(
-                mensaje: "No existe la pantalla '$screenId'",
-                data: array('screenId' => $screenId)
-            );
+            return $this->error_http(404, "No existe la pantalla '$screenId'", array('screenId' => $screenId));
+        }
+
+        if (!in_array($screenId, self::PANTALLAS_PUBLICAS, true) && !$this->sesion->tiene_sesion()) {
+            return $this->error_http(401, 'Sesión no válida o expirada');
         }
 
         $metodo = $pantallas[$screenId];
@@ -56,19 +68,22 @@ class app_screens
      */
     public function guarda_registro(): array
     {
+        if (!$this->sesion->tiene_sesion()) {
+            return $this->error_http(401, 'Sesión no válida o expirada');
+        }
+
         $body = json_decode(file_get_contents('php://input'), true);
 
         if (!is_array($body) || !isset($body['values']) || !is_array($body['values'])) {
-            return $this->errores->error(
-                mensaje: 'Error el body debe traer "values"',
-                data: array()
-            );
+            return $this->error_http(400, 'Error el body debe traer "values"');
         }
 
         $pantalla = $this->pantalla_registro();
         $validacion = $this->valida_valores($pantalla['components'], $body['values']);
 
         if (isset($validacion['error'])) {
+            // Datos inválidos del usuario: 400, no 500.
+            $validacion['http_code'] = 400;
             return $validacion;
         }
 
@@ -176,6 +191,7 @@ class app_screens
         return array(
             'screenId' => 'home',
             'title' => 'Pantalla de prueba',
+            'ttl' => 60, // corto: un cambio del backend se ve en máximo 1 minuto
             'components' => array(
                 array(
                     'type' => 'Container',
@@ -213,6 +229,25 @@ class app_screens
                             'style' => $this->estilo_boton_primario(),
                             'action' => array('type' => 'CALL', 'function' => 'funcion_prueba'),
                         ),
+                        array(
+                            'type' => 'Button',
+                            'id' => 'btn-logout',
+                            'label' => 'Cerrar sesión',
+                            'action' => array('type' => 'LOGOUT'),
+                        ),
+                        array(
+                            'type' => 'Text',
+                            'id' => 'txt-desde-backend',
+                            'content' => 'Este mensaje se agregó desde el backend sin generar un APK nuevo.',
+                            'style' => array('fontSize' => 16, 'fontWeight' => 'bold', 'color' => '#22A45D'),
+                        ),
+                        array(
+                            'type' => 'Button',
+                            'id' => 'btn-ver-detalle',
+                            'label' => 'Ver detalle',
+                            'style' => $this->estilo_boton_primario(),
+                            'action' => array('type' => 'NAVIGATE', 'screenId' => 'detalle'),
+                        ),
                     ),
                 ),
             ),
@@ -224,6 +259,7 @@ class app_screens
         return array(
             'screenId' => 'registro',
             'title' => 'Registro',
+            'ttl' => 300, // formulario estable: 5 minutos
             'components' => array(
                 array(
                     'type' => 'Form',
@@ -295,6 +331,7 @@ class app_screens
         return array(
             'screenId' => 'detalle',
             'title' => 'Detalle',
+            'ttl' => 30, // corto a propósito: permite probar el vencimiento del caché
             'components' => array(
                 array(
                     'type' => 'Text',
@@ -317,6 +354,7 @@ class app_screens
         return array(
             'screenId' => 'confirmacion',
             'title' => 'Registro enviado',
+            'ttl' => 0, // es un resultado: no se cachea
             'components' => array(
                 array(
                     'type' => 'Text',
@@ -332,5 +370,57 @@ class app_screens
                 ),
             ),
         );
+    }
+
+    private function pantalla_login(): array
+    {
+        return array(
+            'screenId' => 'login',
+            'title' => 'Iniciar sesión',
+            'ttl' => 86400, // casi nunca cambia: 1 día
+            'components' => array(
+                array(
+                    'type' => 'Form',
+                    'id' => 'form-login',
+                    'children' => array(
+                        array(
+                            'type' => 'Input',
+                            'id' => 'in-login-usuario',
+                            'name' => 'usuario',
+                            'inputType' => 'text',
+                            'label' => 'Usuario',
+                            'required' => true,
+                            'placeholder' => 'Tu usuario',
+                        ),
+                        array(
+                            'type' => 'Input',
+                            'id' => 'in-login-password',
+                            'name' => 'password',
+                            'inputType' => 'password',
+                            'label' => 'Contraseña',
+                            'required' => true,
+                        ),
+                        array(
+                            'type' => 'Button',
+                            'id' => 'btn-login',
+                            'label' => 'Iniciar sesión',
+                            'style' => $this->estilo_boton_primario(),
+                            'action' => array('type' => 'SUBMIT', 'method' => 'login'),
+                        ),
+                    ),
+                ),
+            ),
+        );
+    }
+
+    /**
+     * Error del framework + código HTTP para el router.
+     * La clase clasifica el error; el router decide la salida.
+     */
+    private function error_http(int $http_code, string $mensaje, array $data = array()): array
+    {
+        $error = $this->errores->error(mensaje: $mensaje, data: $data);
+        $error['http_code'] = $http_code;
+        return $error;
     }
 }

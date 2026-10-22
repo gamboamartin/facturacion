@@ -1,56 +1,76 @@
 <?php
 namespace base_movil\v1;
 
+use base\conexion;
 use base_movil\v1\src\app_screens;
-
-/**
- * Enrutador por ?method=X, igual que index.php de em3/cobranza:
- *   - valida method_exists antes de llamar
- *   - la clase devuelve arrays, aquí se decide el JSON de salida
- *
- * El array de error que devuelve gamboamartin\errores\errores trae
- * 'mensaje' con HTML (<b><span style="color:red">...) pensado para
- * pantallas web — para la respuesta JSON de la app se usa
- * 'mensaje_limpio' (texto plano), igual que em3 hace strip_tags()
- * sobre el mensaje antes de mandarlo a la app móvil.
- *
- */
+use base_movil\v1\src\app_sesion;
+use Throwable;
 
 header('Content-Type: application/json; charset=utf-8');
-
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Accept');
+header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
-require_once '../../vendor/autoload.php';
+
+/**
+ * Única salida de error del API: código HTTP real + cuerpo {error, mensaje}.
+ * Prototipo #4: el cliente decide qué mostrar según el código.
+ */
+function responde_error(int $codigo, string $mensaje): void
+{
+    http_response_code($codigo);
+    echo json_encode(array('error' => 1, 'mensaje' => $mensaje), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+chdir(__DIR__ . '/../..');
+require 'init.php';
+require 'vendor/autoload.php';
 require_once __DIR__ . '/src/app_screens.php';
+require_once __DIR__ . '/src/app_sesion.php';
 
 if (!isset($_GET['method']) || !is_string($_GET['method']) || trim($_GET['method']) === '') {
-    echo json_encode(array('error' => 1, 'mensaje' => 'Error $_GET[method] debe existir.'), JSON_UNESCAPED_UNICODE);
-    exit;
+    responde_error(400, 'Error $_GET[method] debe existir.');
 }
 
 $method = trim($_GET['method']);
-$app = new app_screens();
 
-$metodos_habilitados = array('obten_pantalla', 'guarda_registro');
+$rutas = array(
+    'obten_pantalla' => app_screens::class,
+    'guarda_registro' => app_screens::class,
+    'login' => app_sesion::class,
+    'logout' => app_sesion::class,
+);
 
-
-if (!in_array($method, $metodos_habilitados, true) || !method_exists($app, $method)) {
-    echo json_encode(array('error' => 1, 'mensaje' => 'Error metodo no habilitado en el router.'), JSON_UNESCAPED_UNICODE);
-    exit;
+if (!isset($rutas[$method])) {
+    responde_error(404, 'Error metodo no habilitado en el router.');
 }
 
-$resultado = $app->$method();
+try {
+    $con = new conexion();
+    $link = conexion::$link;
+
+    $clase = $rutas[$method];
+    $app = new $clase($link);
+
+    if (!method_exists($app, $method)) {
+        responde_error(500, 'Error el metodo no existe en la clase.');
+    }
+
+    $resultado = $app->$method();
+} catch (Throwable $e) {
+    // El detalle de la excepción nunca sale al cliente.
+    responde_error(500, 'Error interno del servidor.');
+}
 
 if (isset($resultado['error'])) {
+    $codigo = (int)($resultado['http_code'] ?? 500);
     $mensaje = $resultado['mensaje_limpio'] ?? 'Error al procesar la solicitud';
-    echo json_encode(array('error' => 1, 'mensaje' => $mensaje), JSON_UNESCAPED_UNICODE);
-    exit;
+    responde_error($codigo, $mensaje);
 }
 
 echo json_encode($resultado, JSON_UNESCAPED_UNICODE);
