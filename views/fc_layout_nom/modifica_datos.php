@@ -27,10 +27,13 @@ if ($controlador->disabled){
                         <?php echo $controlador->inputs->banco; ?>
                         <?php echo $controlador->inputs->cuenta; ?>
                         <?php echo $controlador->inputs->clabe; ?>
+
+                        <?php $col = 12 ?>
                         <?php if (isset($controlador->inputs->neto_depositar)): ?>
                             <?php echo $controlador->inputs->neto_depositar; ?>
+                            <?php $col = 6 ?>
                         <?php endif; ?>
-                        <div class="control-group col-sm-6">
+                        <div class="control-group col-sm-<?php echo $col; ?>">
                             <label class="control-label" for="fecha_emision">FECHA EMISION</label>
                             <div class="controls">
                                 <input type="datetime-local" value="<?php echo $controlador->fecha_emision ?>" <?php echo $disabled ?> name="fecha_emision" class="form-control nombre_completo" required="" id="fecha_emision" title="Fecha Emision">

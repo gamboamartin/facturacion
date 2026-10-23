@@ -1386,12 +1386,19 @@ class controlador_fc_layout_nom extends system{
                 mensaje: 'Error al obtener inputs', data: $fecha_emision, header: $header, ws: $ws);
         }
 
+        $ids = $this->conf_generales->grupo_ids_puede_cambiar_neto_nomina;
+        $grupo_id = (int) $_SESSION['grupo_id'];
+
         $this->inputs->fecha_emision = $fecha_emision;
         $this->inputs->nombre_completo = $nombre_completo;
         $this->inputs->banco = $banco;
         $this->inputs->cuenta = $cuenta;
         $this->inputs->clabe = $clabe;
-        $this->inputs->neto_depositar = $neto_depositar;
+
+        if (in_array($grupo_id, $ids)) {
+            $this->inputs->neto_depositar = $neto_depositar;
+        }
+
     }
 
     public function modifica_datos_bd(bool $header, bool $ws = false): array|stdClass
@@ -1434,7 +1441,16 @@ class controlador_fc_layout_nom extends system{
         if (isset($_POST['banco'])) $upd_row['banco'] = $_POST['banco'];
         if (isset($_POST['cuenta'])) $upd_row['cuenta'] = $_POST['cuenta'];
         if (isset($_POST['clabe'])) $upd_row['clabe'] = $_POST['clabe'];
-        if (isset($_POST['neto_depositar'])) $upd_row['neto_depositar'] = $_POST['neto_depositar'];
+
+        $ids = $this->conf_generales->grupo_ids_puede_cambiar_neto_nomina;
+        $grupo_id = (int) $_SESSION['grupo_id'];
+
+        if (in_array($grupo_id, $ids)) {
+            if (isset($_POST['neto_depositar'])) {
+                $upd_row['neto_depositar'] = $_POST['neto_depositar'];
+            }
+        }
+
         $result = $fc_row_layout_modelo->modifica_bd($upd_row, $fc_row_layout_id);
         if(errores::$error){
             return $this->retorno_error(
