@@ -1374,11 +1374,11 @@ class controlador_fc_layout_nom extends system{
 
         $fecha_emision = $this->html->input_fecha(
             cols: 6,
+            row_upd: new stdClass(),
+            value_vacio: false,
             disabled: $this->disabled,
             name: 'fecha_emision',
             place_holder: 'Fecha de Emisión',
-            row_upd: new stdClass(),
-            value_vacio: false,
             value: $fc_row_layout->fc_row_layout_fecha_emision,
         );
         if (errores::$error) {
