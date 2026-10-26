@@ -46,6 +46,7 @@ class app_screens
             'detalle' => 'pantalla_detalle',
             'confirmacion' => 'pantalla_confirmacion',
             'login' => 'pantalla_login',
+            'mapa' => 'pantalla_mapa',
         );
 
         if (!isset($pantallas[$screenId])) {
@@ -248,6 +249,13 @@ class app_screens
                             'style' => $this->estilo_boton_primario(),
                             'action' => array('type' => 'NAVIGATE', 'screenId' => 'detalle'),
                         ),
+                        array(
+                            'type' => 'Button',
+                            'id' => 'btn-ver-mapa',
+                            'label' => 'Ver mapa',
+                            'style' => $this->estilo_boton_primario(),
+                            'action' => array('type' => 'NAVIGATE', 'screenId' => 'mapa'),
+                        ),
                     ),
                 ),
             ),
@@ -422,5 +430,50 @@ class app_screens
         $error = $this->errores->error(mensaje: $mensaje, data: $data);
         $error['http_code'] = $http_code;
         return $error;
+    }
+
+    /**
+     * Prototipo #5: componente Map. Los marcadores van como lista de datos
+     * (no como componentes sueltos) para que la app los dibuje como una sola
+     * capa y escale a muchos puntos.
+     */
+    private function pantalla_mapa(): array
+    {
+        return array(
+            'screenId' => 'mapa',
+            'title' => 'Mapa',
+            'ttl' => 300,
+            'components' => array(
+                array(
+                    'type' => 'Text',
+                    'id' => 'txt-mapa',
+                    'content' => 'Las ubicaciones de este mapa vienen del backend.',
+                ),
+                array(
+                    'type' => 'Map',
+                    'id' => 'mapa-principal',
+                    'height' => 320,
+                    'region' => array('latitude' => 20.6736, 'longitude' => -103.3440, 'zoom' => 13),
+                    'markers' => $this->marcadores_demo(),
+                ),
+                array(
+                    'type' => 'Button',
+                    'id' => 'btn-mapa-inicio',
+                    'label' => 'Volver al inicio',
+                    'style' => $this->estilo_boton_primario(),
+                    'action' => array('type' => 'NAVIGATE', 'screenId' => 'home'),
+                ),
+            ),
+        );
+    }
+
+    /** Marcadores de prueba. Con un cliente real saldrán de la base de datos. */
+    private function marcadores_demo(): array
+    {
+        return array(
+            array('id' => 'm1', 'latitude' => 20.6767, 'longitude' => -103.3475, 'title' => 'Punto 1', 'description' => 'Centro'),
+            array('id' => 'm2', 'latitude' => 20.6720, 'longitude' => -103.3390, 'title' => 'Punto 2', 'description' => 'Zona oriente'),
+            array('id' => 'm3', 'latitude' => 20.6690, 'longitude' => -103.3510, 'title' => 'Punto 3'),
+        );
     }
 }
