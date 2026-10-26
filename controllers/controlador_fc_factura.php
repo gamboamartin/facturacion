@@ -298,7 +298,11 @@ class controlador_fc_factura extends _base_system_fc
                 );
             }
 
-            $ids = $this->conf_generales->grupo_ids_puede_select_asesores;
+            $ids = [];
+            if (isset($this->conf_generales->grupo_ids_puede_select_asesores)) {
+                $ids  = $this->conf_generales->grupo_ids_puede_select_asesores;
+            }
+
             $grupo_id = (int) $_SESSION['grupo_id'];
 
             if (in_array($grupo_id, $ids)) {

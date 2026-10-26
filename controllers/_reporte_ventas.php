@@ -71,7 +71,7 @@ class _reporte_ventas{
                 continue;
             }
 
-            $com_agente_asesor_id = $registro['com_cliente_com_agente_asesor_id'];
+            $com_agente_asesor_id = $registro['fc_factura_agente_asesor_id'];
             // ToDo : $registro['fc_factura_com_agente_asesor_id'];
             $com_cliente_id = $registro['com_cliente_id'];
 

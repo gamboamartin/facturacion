@@ -22,6 +22,9 @@ class generales{
     public string $ruta_factura_pdf = "/var/www/html/facturacion/plantillas/factura_base.pdf"; // aqui va la ruta del pdf que se usara como plantilla para generar las facturas, se recomienda que sea un pdf con campos editables para facilitar la generacion de las facturas
     public bool $aplica_relacion_layout_factura = false; // especifico de konsulta
 
+    public array $grupo_ids_puede_select_asesores = [2,3];
+    public array $grupo_ids_puede_cambiar_neto_nomina = [2,3];
+
     public bool $aplica_relacion_agentes = true; //se requiere siempre que se aplique la relacion de agentes
     public static int $grupo_id_operadores = 4; //se requiere siempre que se aplique la relacion de agentes
     public static int $grupo_id_asesor = 5; //se requiere siempre que se aplique la relacion de agentes
