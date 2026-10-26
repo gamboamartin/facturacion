@@ -237,7 +237,11 @@ class controlador_fc_layout_nom extends system{
                 );
             }
 
-            $ids = $this->conf_generales->grupo_ids_puede_select_asesores;
+            $ids = [];
+            if (isset($this->conf_generales->grupo_ids_puede_select_asesores)) {
+                $ids  = $this->conf_generales->grupo_ids_puede_select_asesores;
+            }
+
             $grupo_id = (int) $_SESSION['grupo_id'];
 
             if (in_array($grupo_id, $ids)) {
@@ -1386,7 +1390,11 @@ class controlador_fc_layout_nom extends system{
                 mensaje: 'Error al obtener inputs', data: $fecha_emision, header: $header, ws: $ws);
         }
 
-        $ids = $this->conf_generales->grupo_ids_puede_cambiar_neto_nomina;
+        $ids = [];
+        if (isset($this->conf_generales->grupo_ids_puede_cambiar_neto_nomina)) {
+            $ids  = $this->conf_generales->grupo_ids_puede_cambiar_neto_nomina;
+        }
+
         $grupo_id = (int) $_SESSION['grupo_id'];
 
         $this->inputs->fecha_emision = $fecha_emision;
@@ -1442,7 +1450,10 @@ class controlador_fc_layout_nom extends system{
         if (isset($_POST['cuenta'])) $upd_row['cuenta'] = $_POST['cuenta'];
         if (isset($_POST['clabe'])) $upd_row['clabe'] = $_POST['clabe'];
 
-        $ids = $this->conf_generales->grupo_ids_puede_cambiar_neto_nomina;
+        $ids = [];
+        if (isset($this->conf_generales->grupo_ids_puede_cambiar_neto_nomina)) {
+            $ids  = $this->conf_generales->grupo_ids_puede_cambiar_neto_nomina;
+        }
         $grupo_id = (int) $_SESSION['grupo_id'];
 
         if (in_array($grupo_id, $ids)) {
