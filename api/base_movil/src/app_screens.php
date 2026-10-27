@@ -47,6 +47,7 @@ class app_screens
             'confirmacion' => 'pantalla_confirmacion',
             'login' => 'pantalla_login',
             'mapa' => 'pantalla_mapa',
+            'estilos' => 'pantalla_estilos',
         );
 
         if (!isset($pantallas[$screenId])) {
@@ -255,6 +256,13 @@ class app_screens
                             'label' => 'Ver mapa',
                             'style' => $this->estilo_boton_primario(),
                             'action' => array('type' => 'NAVIGATE', 'screenId' => 'mapa'),
+                        ),
+                        array(
+                            'type' => 'Button',
+                            'id' => 'btn-ver-estilos',
+                            'label' => 'Ver estilos',
+                            'style' => $this->estilo_boton_primario(),
+                            'action' => array('type' => 'NAVIGATE', 'screenId' => 'estilos'),
                         ),
                     ),
                 ),
