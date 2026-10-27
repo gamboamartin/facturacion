@@ -500,7 +500,7 @@ class app_screens
                     'type' => 'Text',
                     'id' => 'txt-titulo',
                     'content' => 'Estilos definidos por el backend',
-                    'style' => array('fontSize' => 22, 'fontWeight' => 'bold', 'textAlign' => 'center', 'color' => '#22A45D', 'marginBottom' => 8)
+                    'style' => array('fontSize' => 'grande', 'fontWeight' => 'bold', 'textAlign' => 'center', 'color' => '#D32F2F', 'marginBottom' => 8)
                 ),
                 array(
                     'type' => 'Text',
