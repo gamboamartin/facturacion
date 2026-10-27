@@ -15,6 +15,9 @@ use PDO;
  * y navega a login. Cada error lleva su http_code (error_http) y el router
  * decide la salida. Cada pantalla define su `ttl` (segundos que la app
  * puede servirla desde caché; 0 = no se cachea).
+ * Prototipo #5: componente Map y estilos completos. Un `style` puede traer
+ * un bloque `dark` con lo que cambia en modo oscuro; si un componente fija
+ * un fondo claro o un texto oscuro, debe mandar su `dark`.
  */
 class app_screens
 {
@@ -203,6 +206,7 @@ class app_screens
                         'backgroundColor' => '#F5F5F5',
                         'borderRadius' => 8,
                         'gap' => 8,
+                        'dark' => array('backgroundColor' => '#1E1E1E'),
                     ),
                     'children' => array(
                         array(
@@ -215,7 +219,7 @@ class app_screens
                             'type' => 'Text',
                             'id' => 'subtitle-1',
                             'content' => 'Este texto y este botón vienen del JSON del backend, no están hardcodeados en la app.',
-                            'style' => array('fontSize' => 14, 'color' => '#555555'),
+                            'style' => array('fontSize' => 14, 'color' => '#555555', 'dark' => array('color' => '#B3B3B3')),
                         ),
                         array(
                             'type' => 'Button',
@@ -500,13 +504,13 @@ class app_screens
                     'type' => 'Text',
                     'id' => 'txt-titulo',
                     'content' => 'Estilos definidos por el backend',
-                    'style' => array('fontSize' => 33, 'fontWeight' => 'bold', 'textAlign' => 'center', 'color' => '#D32F2F', 'marginBottom' => 8)
+                    'style' => array('fontSize' => 22, 'fontWeight' => 'bold', 'textAlign' => 'center', 'color' => '#22A45D', 'marginBottom' => 8, 'dark' => array('color' => '#4CD38A'))
                 ),
                 array(
                     'type' => 'Text',
                     'id' => 'txt-cursiva',
                     'content' => 'Texto en cursiva, subrayado y con una propiedad desconocida que se ignora',
-                    'style' => array('fontStyle' => 'italic', 'textDecorationLine' => 'underline', 'color' => '#555555', 'shadowBlur' => 3)
+                    'style' => array('fontStyle' => 'italic', 'textDecorationLine' => 'underline', 'color' => '#555555', 'shadowBlur' => 3, 'dark' => array('color' => '#B3B3B3'))
                 ),
                 array(
                     'type' => 'Container',
@@ -517,13 +521,13 @@ class app_screens
                             'type' => 'Text',
                             'id' => 'txt-caja-1',
                             'content' => 'Caja 1',
-                            'style' => array('flex' => 1, 'backgroundColor' => '#E8F5E9', 'borderWidth' => 1, 'borderColor' => '#22A45D', 'borderRadius' => 8, 'padding' => 12, 'textAlign' => 'center')
+                            'style' => array('flex' => 1, 'backgroundColor' => '#E8F5E9', 'borderWidth' => 1, 'borderColor' => '#22A45D', 'borderRadius' => 8, 'padding' => 12, 'textAlign' => 'center', 'dark' => array('backgroundColor' => '#1E3A28'))
                         ),
                         array(
                             'type' => 'Text',
                             'id' => 'txt-caja-2',
                             'content' => 'Caja 2',
-                            'style' => array('flex' => 1, 'backgroundColor' => '#FFF3E0', 'borderWidth' => 1, 'borderColor' => '#FB8C00', 'borderRadius' => 8, 'padding' => 12, 'textAlign' => 'center')
+                            'style' => array('flex' => 1, 'backgroundColor' => '#FFF3E0', 'borderWidth' => 1, 'borderColor' => '#FB8C00', 'borderRadius' => 8, 'padding' => 12, 'textAlign' => 'center', 'dark' => array('backgroundColor' => '#3A2A14'))
                         )
                     )
                 ),
@@ -545,7 +549,7 @@ class app_screens
                                     'inputType' => 'text',
                                     'label' => 'Input',
                                     'placeholder' => 'Escribe algo',
-                                    'style' => array('backgroundColor' => '#F5F5F5', 'borderColor' => '#22A45D', 'borderRadius' => 12, 'fontSize' => 16)
+                                    'style' => array('backgroundColor' => '#F5F5F5', 'borderColor' => '#22A45D', 'borderRadius' => 12, 'fontSize' => 16, 'dark' => array('backgroundColor' => '#2A2A2A'))
                                 ),
                                 array(
                                     'type' => 'Select',
@@ -556,7 +560,7 @@ class app_screens
                                         array('value' => 'a', 'label' => 'Opción A'),
                                         array('value' => 'b', 'label' => 'Opción B')
                                     ),
-                                    'style' => array('backgroundColor' => '#F5F5F5', 'borderColor' => '#FB8C00', 'color' => '#FB8C00', 'fontWeight' => 'bold')
+                                    'style' => array('backgroundColor' => '#F5F5F5', 'borderColor' => '#FB8C00', 'color' => '#FB8C00', 'fontWeight' => 'bold', 'dark' => array('backgroundColor' => '#2A2A2A'))
                                 )
                             )
                         )
