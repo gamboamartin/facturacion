@@ -476,4 +476,92 @@ class app_screens
             array('id' => 'm3', 'latitude' => 20.6690, 'longitude' => -103.3510, 'title' => 'Punto 3'),
         );
     }
+
+    /**
+     * Pantalla de prueba del #5: estilos desde la API en todos los componentes.
+     * ttl 0 para que cada cambio en el PHP se vea al instante.
+     */
+    private function pantalla_estilos(): array
+    {
+        return array(
+            'screenId' => 'estilos',
+            'title' => 'Estilos desde la API',
+            'ttl' => 0,
+            'components' => array(
+                array(
+                    'type' => 'Text',
+                    'id' => 'txt-titulo',
+                    'content' => 'Estilos definidos por el backend',
+                    'style' => array('fontSize' => 22, 'fontWeight' => 'bold', 'textAlign' => 'center', 'color' => '#22A45D', 'marginBottom' => 8)
+                ),
+                array(
+                    'type' => 'Text',
+                    'id' => 'txt-cursiva',
+                    'content' => 'Texto en cursiva, subrayado y con una propiedad desconocida que se ignora',
+                    'style' => array('fontStyle' => 'italic', 'textDecorationLine' => 'underline', 'color' => '#555555', 'shadowBlur' => 3)
+                ),
+                array(
+                    'type' => 'Container',
+                    'id' => 'cnt-fila',
+                    'style' => array('flexDirection' => 'row', 'gap' => 8, 'marginVertical' => 12),
+                    'children' => array(
+                        array(
+                            'type' => 'Text',
+                            'id' => 'txt-caja-1',
+                            'content' => 'Caja 1',
+                            'style' => array('flex' => 1, 'backgroundColor' => '#E8F5E9', 'borderWidth' => 1, 'borderColor' => '#22A45D', 'borderRadius' => 8, 'padding' => 12, 'textAlign' => 'center')
+                        ),
+                        array(
+                            'type' => 'Text',
+                            'id' => 'txt-caja-2',
+                            'content' => 'Caja 2',
+                            'style' => array('flex' => 1, 'backgroundColor' => '#FFF3E0', 'borderWidth' => 1, 'borderColor' => '#FB8C00', 'borderRadius' => 8, 'padding' => 12, 'textAlign' => 'center')
+                        )
+                    )
+                ),
+                array(
+                    'type' => 'Form',
+                    'id' => 'frm-estilos',
+                    'style' => array('padding' => 12, 'borderWidth' => 1, 'borderColor' => '#CCCCCC', 'borderRadius' => 8),
+                    'children' => array(
+                        array(
+                            'type' => 'FormGroup',
+                            'id' => 'grp-estilos',
+                            'label' => 'Campos con estilo',
+                            'style' => array('gap' => 12),
+                            'children' => array(
+                                array(
+                                    'type' => 'Input',
+                                    'id' => 'inp-estilo',
+                                    'name' => 'nombre',
+                                    'inputType' => 'text',
+                                    'label' => 'Input',
+                                    'placeholder' => 'Escribe algo',
+                                    'style' => array('backgroundColor' => '#F5F5F5', 'borderColor' => '#22A45D', 'borderRadius' => 12, 'fontSize' => 16)
+                                ),
+                                array(
+                                    'type' => 'Select',
+                                    'id' => 'sel-estilo',
+                                    'name' => 'opcion',
+                                    'label' => 'Select',
+                                    'options' => array(
+                                        array('value' => 'a', 'label' => 'Opción A'),
+                                        array('value' => 'b', 'label' => 'Opción B')
+                                    ),
+                                    'style' => array('backgroundColor' => '#F5F5F5', 'borderColor' => '#FB8C00', 'color' => '#FB8C00', 'fontWeight' => 'bold')
+                                )
+                            )
+                        )
+                    )
+                ),
+                array(
+                    'type' => 'Button',
+                    'id' => 'btn-volver-estilos',
+                    'label' => 'Volver al inicio',
+                    'action' => array('type' => 'NAVIGATE', 'screenId' => 'home'),
+                    'style' => array('backgroundColor' => '#22A45D', 'padding' => 14, 'borderRadius' => 8, 'marginTop' => 16, 'color' => '#FFFFFF', 'fontWeight' => 'bold', 'textAlign' => 'center')
+                )
+            )
+        );
+    }
 }
