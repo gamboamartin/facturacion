@@ -44,6 +44,7 @@ $rutas = array(
     'guarda_registro' => app_screens::class,
     'login' => app_sesion::class,
     'logout' => app_sesion::class,
+    'pantallas_offline' => app_screens::class,
 );
 
 if (!isset($rutas[$method])) {

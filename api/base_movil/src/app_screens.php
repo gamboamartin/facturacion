@@ -18,6 +18,8 @@ use PDO;
  * Prototipo #5: componente Map y estilos completos. Un `style` puede traer
  * un bloque `dark` con lo que cambia en modo oscuro; si un componente fija
  * un fondo claro o un texto oscuro, debe mandar su `dark`.
+ * Modo sin conexión: pantallas_offline devuelve de una vez las pantallas
+ * de PANTALLAS_OFFLINE para que la app las guarde después del login.
  */
 class app_screens
 {
@@ -26,6 +28,27 @@ class app_screens
 
     /** Pantallas que se pueden ver sin sesión. */
     private const PANTALLAS_PUBLICAS = array('login');
+
+    /**
+     * Pantallas disponibles: screenId => método que la construye.
+     * Agregar una pantalla = agregar una línea aquí + su método.
+     */
+    private const PANTALLAS = array(
+        'home' => 'pantalla_home',
+        'registro' => 'pantalla_registro',
+        'detalle' => 'pantalla_detalle',
+        'confirmacion' => 'pantalla_confirmacion',
+        'login' => 'pantalla_login',
+        'mapa' => 'pantalla_mapa',
+        'estilos' => 'pantalla_estilos',
+    );
+
+    /**
+     * Pantallas que la app precarga después del login para usarlas sin
+     * conexión. Solo las que el usuario necesita en campo; las de ttl 0
+     * (resultados como confirmacion) no van porque no se guardan.
+     */
+    private const PANTALLAS_OFFLINE = array('home', 'registro', 'detalle', 'mapa');
 
     public function __construct(PDO $link)
     {
@@ -41,19 +64,7 @@ class app_screens
 
         $screenId = trim($_GET['screenId']);
 
-        // Pantallas disponibles: screenId => método que la construye.
-        // Agregar una pantalla = agregar una línea aquí + su método.
-        $pantallas = array(
-            'home' => 'pantalla_home',
-            'registro' => 'pantalla_registro',
-            'detalle' => 'pantalla_detalle',
-            'confirmacion' => 'pantalla_confirmacion',
-            'login' => 'pantalla_login',
-            'mapa' => 'pantalla_mapa',
-            'estilos' => 'pantalla_estilos',
-        );
-
-        if (!isset($pantallas[$screenId])) {
+        if (!isset(self::PANTALLAS[$screenId])) {
             return $this->error_http(404, "No existe la pantalla '$screenId'", array('screenId' => $screenId));
         }
 
@@ -61,8 +72,37 @@ class app_screens
             return $this->error_http(401, 'Sesión no válida o expirada');
         }
 
-        $metodo = $pantallas[$screenId];
+        $metodo = self::PANTALLAS[$screenId];
         return $this->$metodo();
+    }
+
+    /**
+     * Modo sin conexión: devuelve en una sola respuesta las pantallas de
+     * PANTALLAS_OFFLINE para que la app las guarde en su caché después del
+     * login. Requiere sesión, igual que las pantallas protegidas.
+     * Una pantalla con ttl 0 se omite aunque esté en la lista: la app no la
+     * guardaría.
+     */
+    public function pantallas_offline(): array
+    {
+        if (!$this->sesion->tiene_sesion()) {
+            return $this->error_http(401, 'Sesión no válida o expirada');
+        }
+
+        $screens = array();
+        foreach (self::PANTALLAS_OFFLINE as $screenId) {
+            if (!isset(self::PANTALLAS[$screenId])) {
+                continue;
+            }
+            $metodo = self::PANTALLAS[$screenId];
+            $pantalla = $this->$metodo();
+            if (($pantalla['ttl'] ?? 0) <= 0) {
+                continue;
+            }
+            $screens[] = $pantalla;
+        }
+
+        return array('screens' => $screens);
     }
 
     /**
