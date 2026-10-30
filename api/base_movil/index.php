@@ -2,6 +2,7 @@
 namespace base_movil\v1;
 
 use base\conexion;
+use base_movil\v1\src\app_config;
 use base_movil\v1\src\app_screens;
 use base_movil\v1\src\app_sesion;
 use Throwable;
@@ -29,7 +30,15 @@ function responde_error(int $codigo, string $mensaje): void
 
 chdir(__DIR__ . '/../..');
 require 'init.php';
+
+// init.php (compartido) enciende display_errors. En el API un warning
+// impreso rompe el JSON y puede mostrar rutas del servidor: aquí los
+// errores van solo al log.
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 require 'vendor/autoload.php';
+require_once __DIR__ . '/src/app_config.php';
 require_once __DIR__ . '/src/app_screens.php';
 require_once __DIR__ . '/src/app_sesion.php';
 
@@ -45,6 +54,7 @@ $rutas = array(
     'login' => app_sesion::class,
     'logout' => app_sesion::class,
     'pantallas_offline' => app_screens::class,
+    'configuracion_app' => app_config::class,
 );
 
 if (!isset($rutas[$method])) {

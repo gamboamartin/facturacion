@@ -27,7 +27,9 @@ use Throwable;
 class app_sesion
 {
     private const ALGORITMO = 'HS256';
-    private const DURACION_SEGUNDOS = 8 * 60 * 60; // una jornada
+
+    /** Duración por defecto: una jornada. Se puede cambiar con jwt_duracion en generales. */
+    private const DURACION_SEGUNDOS = 8 * 60 * 60;
 
     private errores $errores;
     private PDO $link;
@@ -80,6 +82,9 @@ class app_sesion
             // Credenciales inválidas. Mensaje genérico a propósito: no revela
             // si el usuario existe. Se limpia el flag global de errores porque
             // esto es un resultado esperado, no una falla del sistema.
+            // Si fue una falla de la consulta, queda en el log del servidor.
+            // Solo el mensaje: el detalle del error puede traer el SQL con la contraseña.
+            error_log('base_movil login: ' . ($registro['mensaje'] ?? 'sin mensaje'));
             errores::$error = false;
             return array('errors' => array('password' => 'Usuario o contraseña incorrectos'));
         }
@@ -88,7 +93,7 @@ class app_sesion
         $claims = array(
             'sub' => (string)$registro['adm_usuario_id'],
             'iat' => $ahora,
-            'exp' => $ahora + self::DURACION_SEGUNDOS,
+            'exp' => $ahora + $this->duracion_sesion(),
             'jti' => bin2hex(random_bytes(16)),
         );
 
@@ -96,7 +101,7 @@ class app_sesion
 
         return array(
             'session' => array('token' => $token),
-            'action' => array('type' => 'NAVIGATE', 'screenId' => 'home', 'reset' => true),
+            'action' => array('type' => 'NAVIGATE', 'screenId' => app_config::PANTALLA_INICIAL, 'reset' => true),
         );
     }
 
@@ -194,6 +199,23 @@ class app_sesion
         return array('valor' => $encriptado);
     }
 
+    /**
+     * Segundos de vigencia del token. Si config/generales define
+     * jwt_duracion (entero > 0) se usa ese valor; si no, una jornada.
+     * Sirve para probar el vencimiento en local sin esperar 8 horas.
+     */
+    private function duracion_sesion(): int
+    {
+        if (!property_exists($this->generales, 'jwt_duracion')) {
+            return self::DURACION_SEGUNDOS;
+        }
+        $duracion = $this->generales->jwt_duracion;
+        if (!is_int($duracion) || $duracion <= 0) {
+            return self::DURACION_SEGUNDOS;
+        }
+        return $duracion;
+    }
+
     private function secreto(): array
     {
         $secreto = $this->generales->jwt_secret_key ?? '';
@@ -226,7 +248,7 @@ class app_sesion
         return trim(substr($cabecera, 7));
     }
 
-        private function esta_revocado(string $jti): array
+    private function esta_revocado(string $jti): array
     {
         $modelo = new base_movil_token_revocado($this->link);
         $r = $modelo->filtro_and(filtro: array('base_movil_token_revocado.jti' => $jti));
