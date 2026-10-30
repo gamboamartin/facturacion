@@ -47,6 +47,7 @@ Thumbs.db
 
 config/database.php
 config/generales.php
+config/generales.php.*
 config/views.php
 config/pac.php
 config/escenario/*
