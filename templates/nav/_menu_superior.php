@@ -31,6 +31,7 @@ $iv_mapa_iconos = [
     'egreso' => 'card', 'banco' => 'card',
     'etapa' => 'layers',
     'reporte' => 'chart',
+    'control' => 'meter',
     'sat' => 'document', 'factura' => 'document', 'nota' => 'document', 'documento' => 'document',
 ];
 
@@ -50,6 +51,7 @@ $iv_svg = [
     'chart'    => '<path d="M4 21V12M9 21V6M14 21V9M19 21V3"/>',
     'home'     => '<path d="m3 10 9-8 9 8M5 8v13h14V8M9 21v-8h6v8"/>',
     'logout'   => '<path d="M10 3H4v18h6M9 12h12m-4-4 4 4-4 4"/>',
+    'meter'    => '<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 10v4l3 2"/><path d="M7 18h0M12 18h0M17 18h0"/><path d="M12 3v2"/>',
     'grid'     => '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>',
 ];
 
