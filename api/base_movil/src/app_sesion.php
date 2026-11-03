@@ -5,21 +5,23 @@ use config\generales;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use gamboamartin\administrador\models\adm_usuario;
-use gamboamartin\facturacion\models\base_movil_token_revocado;
+use gamboamartin\facturacion\models\base_movil_sesion;
 use gamboamartin\encripta\encriptador;
 use gamboamartin\errores\errores;
 use PDO;
 use Throwable;
 
 /**
- * Autenticación de la app (Prototipo #3): login, logout y validación de JWT.
+ * Autenticación de la app: login, logout y validación de JWT.
  *
  * - El login reutiliza el flujo del sistema web (controlador_adm_session::loguea):
  *   mismo flag encripta_md5 de generales y mismo adm_usuario::valida_usuario_password,
  *   así entran los mismos usuarios con su contraseña de siempre.
- * - La sesión es el JWT (no se usa $_SESSION).
- * - El logout invalida el token de verdad: su jti se guarda en
- *   base_movil_token_revocado hasta que expira.
+ * - #6: cada token tiene su fila en base_movil_sesion desde que nace. Un token
+ *   vale solo si su firma es correcta, no expiró Y su sesión está activa. Así
+ *   se puede cortar una sesión (o todas las de un usuario o dispositivo) al
+ *   momento, sin esperar a que el token venza.
+ * - La sesión del servidor es el JWT + su fila (no se usa $_SESSION).
  *
  * Igual que app_screens: los métodos públicos devuelven arrays y el
  * enrutador (index.php) decide cómo responder.
@@ -30,6 +32,15 @@ class app_sesion
 
     /** Duración por defecto: una jornada. Se puede cambiar con jwt_duracion en generales. */
     private const DURACION_SEGUNDOS = 8 * 60 * 60;
+
+    /** ultimo_uso se actualiza como máximo una vez cada 5 minutos por sesión. */
+    private const INTERVALO_ULTIMO_USO = 5 * 60;
+
+    /** Días que se guardan las sesiones como bitácora antes de borrarlas. */
+    private const DIAS_HISTORIAL = 90;
+
+    /** Probabilidad (1 de N logins) de correr la limpieza del historial. */
+    private const LIMPIEZA_UNO_DE = 100;
 
     private errores $errores;
     private PDO $link;
@@ -44,7 +55,7 @@ class app_sesion
 
     /**
      * Recibe { values: { usuario, password } }.
-     * Correcto:   { session: { token }, action: NAVIGATE home (reset) }
+     * Correcto:   { session: { token }, action: NAVIGATE pantalla inicial (reset) }
      * Incorrecto: { errors: { password: '...' } } → la app lo pinta en el Form.
      */
     public function login(): array
@@ -89,13 +100,28 @@ class app_sesion
             return array('errors' => array('password' => 'Usuario o contraseña incorrectos'));
         }
 
+        $usuario_id = (int)$registro['adm_usuario_id'];
         $ahora = time();
         $claims = array(
-            'sub' => (string)$registro['adm_usuario_id'],
+            'sub' => (string)$usuario_id,
             'iat' => $ahora,
             'exp' => $ahora + $this->duracion_sesion(),
             'jti' => bin2hex(random_bytes(16)),
         );
+
+        // Sin su fila de sesión el token no serviría: si no se puede guardar,
+        // el login falla en lugar de entregar un token inútil.
+        $sesion = $this->registra_sesion(
+            jti: $claims['jti'],
+            usuario_id: $usuario_id,
+            iat: $claims['iat'],
+            exp: $claims['exp']
+        );
+        if (isset($sesion['error'])) {
+            return $sesion;
+        }
+
+        $this->limpia_historial_a_veces();
 
         $token = JWT::encode($claims, $secreto['valor'], self::ALGORITMO);
 
@@ -106,7 +132,7 @@ class app_sesion
     }
 
     /**
-     * Revoca el token actual (si es válido) y manda al login.
+     * Cierra la sesión del token actual (si es válido) y manda al login.
      * Si el token ya no era válido, igual se responde lo mismo: la app
      * borra el token local de todas formas.
      */
@@ -122,21 +148,21 @@ class app_sesion
             return $respuesta;
         }
 
-        $revoca = $this->revoca_token(
+        $cierre = $this->cierra_sesion(
             jti: (string)$claims['jti'],
-            exp: (int)$claims['exp'],
-            usuario_id: (int)$claims['sub']
+            usuario_id: (int)$claims['sub'],
+            motivo: 'logout'
         );
-        if (isset($revoca['error'])) {
-            return $revoca;
+        if (isset($cierre['error'])) {
+            return $cierre;
         }
 
         return $respuesta;
     }
 
     /**
-     * Valida el JWT de la cabecera Authorization: firma, expiración y que
-     * no esté revocado. Devuelve los claims o un error.
+     * Valida el JWT de la cabecera Authorization: firma, expiración y que su
+     * sesión siga activa. Devuelve los claims o un error.
      */
     public function valida_token(): array
     {
@@ -163,13 +189,12 @@ class app_sesion
             return $this->errores->error(mensaje: 'Error token incompleto', data: array());
         }
 
-        $revocado = $this->esta_revocado(jti: (string)$claims['jti']);
-        if (isset($revocado['error'])) {
-            return $revocado;
+        $sesion = $this->sesion_activa(jti: (string)$claims['jti'], usuario_id: (int)$claims['sub']);
+        if (isset($sesion['error'])) {
+            return $sesion;
         }
-        if ($revocado['valor']) {
-            return $this->errores->error(mensaje: 'Error token revocado', data: array());
-        }
+
+        $this->marca_ultimo_uso($sesion);
 
         return $claims;
     }
@@ -248,45 +273,140 @@ class app_sesion
         return trim(substr($cabecera, 7));
     }
 
-    private function esta_revocado(string $jti): array
+    /** IP desde la que llega la petición. Con la VPN será la IP del túnel del dispositivo. */
+    private function ip_cliente(): string
     {
-        $modelo = new base_movil_token_revocado($this->link);
-        $r = $modelo->filtro_and(filtro: array('base_movil_token_revocado.jti' => $jti));
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al consultar tokens revocados', data: $r);
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        if (!is_string($ip)) {
+            return '';
         }
-        return array('valor' => (int)$r->n_registros > 0);
+        return substr($ip, 0, 45);
     }
 
     /**
-     * Guarda el jti del token cerrado. Igual que el login web (alta_session)
-     * y el endpoint de n8n: el modelo toma el usuario de $_SESSION para
-     * llenar usuario_alta_id / usuario_update_id, así que se asigna con el
-     * usuario dueño del token (quien cerró sesión).
+     * Crea la fila de la sesión del token recién emitido.
+     * Igual que el login web (alta_session) y el endpoint de n8n: el modelo
+     * toma el usuario de $_SESSION para llenar usuario_alta_id /
+     * usuario_update_id, así que se asigna con el usuario que inicia sesión.
      */
-    private function revoca_token(string $jti, int $exp, int $usuario_id): array
+    private function registra_sesion(string $jti, int $usuario_id, int $iat, int $exp): array
     {
-        $revocado = $this->esta_revocado(jti: $jti);
-        if (isset($revocado['error'])) {
-            return $revocado;
-        }
-        if ($revocado['valor']) {
-            return array('valor' => true);
-        }
-
         $_SESSION['usuario_id'] = $usuario_id;
 
-        $modelo = new base_movil_token_revocado($this->link);
+        $modelo = new base_movil_sesion($this->link);
         $modelo->registro = array(
             'jti' => $jti,
-            'expira' => date('Y-m-d H:i:s', $exp),
             'adm_usuario_id' => $usuario_id,
+            'ip' => $this->ip_cliente(),
+            'expira' => date('Y-m-d H:i:s', $exp),
+            'ultimo_uso' => date('Y-m-d H:i:s', $iat),
         );
         $r_alta = $modelo->alta_bd();
         if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al revocar el token', data: $r_alta);
+            return $this->errores->error(mensaje: 'Error al registrar la sesión', data: $r_alta);
         }
 
         return array('valor' => true);
+    }
+
+    /**
+     * Busca la sesión del token. Es válida solo si existe, está activa y
+     * pertenece al mismo usuario que dice el token.
+     * Devuelve array('id' => ..., 'ultimo_uso' => ...) o un error.
+     */
+    private function sesion_activa(string $jti, int $usuario_id): array
+    {
+        $modelo = new base_movil_sesion($this->link);
+        $r = $modelo->filtro_and(filtro: array('base_movil_sesion.jti' => $jti));
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al consultar la sesión', data: $r);
+        }
+
+        if ((int)$r->n_registros !== 1) {
+            return $this->errores->error(mensaje: 'Error sesión inexistente', data: array());
+        }
+
+        $fila = $r->registros[0];
+
+        if (($fila['base_movil_sesion_status'] ?? '') !== 'activo') {
+            return $this->errores->error(mensaje: 'Error sesión cerrada', data: array());
+        }
+
+        if ((int)($fila['base_movil_sesion_adm_usuario_id'] ?? 0) !== $usuario_id) {
+            return $this->errores->error(mensaje: 'Error la sesión no corresponde al usuario', data: array());
+        }
+
+        return array(
+            'id' => (int)$fila['base_movil_sesion_id'],
+            'ultimo_uso' => (string)($fila['base_movil_sesion_ultimo_uso'] ?? ''),
+        );
+    }
+
+    /**
+     * Actualiza ultimo_uso como máximo una vez cada INTERVALO_ULTIMO_USO, para
+     * no escribir en la base en cada petición. Es de mejor esfuerzo: si falla,
+     * la petición sigue (solo se pierde la precisión de la última conexión).
+     * Consulta preparada: los valores nunca se pegan dentro del SQL.
+     */
+    private function marca_ultimo_uso(array $sesion): void
+    {
+        $ultimo = strtotime($sesion['ultimo_uso']);
+        if ($ultimo !== false && time() - $ultimo < self::INTERVALO_ULTIMO_USO) {
+            return;
+        }
+
+        try {
+            $sql = 'UPDATE base_movil_sesion SET ultimo_uso = :ahora WHERE id = :id';
+            $stmt = $this->link->prepare($sql);
+            $stmt->execute(array(':ahora' => date('Y-m-d H:i:s'), ':id' => $sesion['id']));
+        } catch (Throwable $e) {
+            error_log('base_movil ultimo_uso: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Cierra la sesión de un token: queda inactiva, con la fecha y el motivo.
+     * Solo cierra sesiones activas, así cerrar dos veces no cambia nada.
+     * Consulta preparada: los valores nunca se pegan dentro del SQL.
+     */
+    private function cierra_sesion(string $jti, int $usuario_id, string $motivo): array
+    {
+        try {
+            $sql = "UPDATE base_movil_sesion
+                       SET status = 'inactivo', cerrada_en = :ahora, motivo_cierre = :motivo,
+                           usuario_update_id = :usuario_id
+                     WHERE jti = :jti AND status = 'activo'";
+            $stmt = $this->link->prepare($sql);
+            $stmt->execute(array(
+                ':ahora' => date('Y-m-d H:i:s'),
+                ':motivo' => $motivo,
+                ':usuario_id' => $usuario_id,
+                ':jti' => $jti,
+            ));
+        } catch (Throwable $e) {
+            return $this->errores->error(mensaje: 'Error al cerrar la sesión', data: array());
+        }
+
+        return array('valor' => true);
+    }
+
+    /**
+     * Borra las sesiones de más de DIAS_HISTORIAL días (por su vencimiento),
+     * estén cerradas o hayan vencido solas. Corre en 1 de cada LIMPIEZA_UNO_DE
+     * logins para no necesitar una tarea programada. Si falla, no afecta al login.
+     */
+    private function limpia_historial_a_veces(): void
+    {
+        if (random_int(1, self::LIMPIEZA_UNO_DE) !== 1) {
+            return;
+        }
+
+        try {
+            $limite = date('Y-m-d H:i:s', time() - self::DIAS_HISTORIAL * 86400);
+            $stmt = $this->link->prepare('DELETE FROM base_movil_sesion WHERE expira < :limite');
+            $stmt->execute(array(':limite' => $limite));
+        } catch (Throwable $e) {
+            error_log('base_movil limpieza de sesiones: ' . $e->getMessage());
+        }
     }
 }
