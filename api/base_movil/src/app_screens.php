@@ -20,6 +20,8 @@ use PDO;
  * un fondo claro o un texto oscuro, debe mandar su `dark`.
  * Modo sin conexión: pantallas_offline devuelve de una vez las pantallas
  * de PANTALLAS_OFFLINE para que la app las guarde después del login.
+ * Prototipo #7: componente DeviceStatus (el backend elige qué datos del
+ * teléfono mostrar y en qué orden) y ubicación del usuario en el mapa.
  */
 class app_screens
 {
@@ -41,6 +43,7 @@ class app_screens
         'login' => 'pantalla_login',
         'mapa' => 'pantalla_mapa',
         'estilos' => 'pantalla_estilos',
+        'estado' => 'pantalla_estado',
     );
 
     /**
@@ -48,7 +51,7 @@ class app_screens
      * conexión. Solo las que el usuario necesita en campo; las de ttl 0
      * (resultados como confirmacion) no van porque no se guardan.
      */
-    private const PANTALLAS_OFFLINE = array('home', 'registro', 'detalle', 'mapa');
+    private const PANTALLAS_OFFLINE = array('home', 'registro', 'detalle', 'mapa', 'estado');
 
     public function __construct(PDO $link)
     {
@@ -308,6 +311,13 @@ class app_screens
                             'style' => $this->estilo_boton_primario(),
                             'action' => array('type' => 'NAVIGATE', 'screenId' => 'estilos'),
                         ),
+                        array(
+                            'type' => 'Button',
+                            'id' => 'btn-ver-estado',
+                            'label' => 'Estado del dispositivo',
+                            'style' => $this->estilo_boton_primario(),
+                            'action' => array('type' => 'NAVIGATE', 'screenId' => 'estado'),
+                        ),
                     ),
                 ),
             ),
@@ -507,6 +517,7 @@ class app_screens
                     'height' => 320,
                     'region' => array('latitude' => 20.6736, 'longitude' => -103.3440, 'zoom' => 13),
                     'markers' => $this->marcadores_demo(),
+                    'showUserLocation' => true,
                 ),
                 array(
                     'type' => 'Button',
@@ -514,6 +525,53 @@ class app_screens
                     'label' => 'Volver al inicio',
                     'style' => $this->estilo_boton_primario(),
                     'action' => array('type' => 'NAVIGATE', 'screenId' => 'home'),
+                ),
+            ),
+        );
+    }
+
+    /**
+     * Prototipo #7: estado del teléfono. El backend decide qué datos se ven y
+     * en qué orden (items) y si van en lista o en una línea (layout).
+     * cellular (chip, operador y señal en una frase) y airplaneMode los lee
+     * el módulo nativo de la parte 2, sin permisos.
+     */
+    private function pantalla_estado(): array
+    {
+        return array(
+            'screenId' => 'estado',
+            'title' => 'Estado del dispositivo',
+            'ttl' => 300,
+            'components' => array(
+                array(
+                    'type' => 'Text',
+                    'id' => 'txt-estado',
+                    'content' => 'Estos datos los lee el teléfono; el backend solo decide cuáles mostrar.',
+                ),
+                array(
+                    'type' => 'DeviceStatus',
+                    'id' => 'estado-lista',
+                    'items' => array('network', 'wifi', 'cellular', 'airplaneMode', 'gps', 'location'),
+                    'layout' => 'list',
+                ),
+                array(
+                    'type' => 'Text',
+                    'id' => 'txt-estado-compacto',
+                    'content' => 'Versión compacta:',
+                    'style' => array('marginTop' => 12),
+                ),
+                array(
+                    'type' => 'DeviceStatus',
+                    'id' => 'estado-compacto',
+                    'items' => array('network', 'gps'),
+                    'layout' => 'compact',
+                ),
+                array(
+                    'type' => 'Button',
+                    'id' => 'btn-estado-inicio',
+                    'label' => 'Volver al inicio',
+                    'style' => $this->estilo_boton_primario(),
+                    'action' => array('type' => 'NAVIGATE', 'screenId' => app_config::PANTALLA_INICIAL),
                 ),
             ),
         );

@@ -3,6 +3,7 @@ namespace base_movil\v1;
 
 use base\conexion;
 use base_movil\v1\src\app_config;
+use base_movil\v1\src\app_push;
 use base_movil\v1\src\app_screens;
 use base_movil\v1\src\app_sesion;
 use Throwable;
@@ -41,6 +42,8 @@ require 'vendor/autoload.php';
 require_once __DIR__ . '/src/app_config.php';
 require_once __DIR__ . '/src/app_screens.php';
 require_once __DIR__ . '/src/app_sesion.php';
+require_once __DIR__ . '/src/fcm_envio.php';
+require_once __DIR__ . '/src/app_push.php';
 
 if (!isset($_GET['method']) || !is_string($_GET['method']) || trim($_GET['method']) === '') {
     responde_error(400, 'Error $_GET[method] debe existir.');
@@ -55,6 +58,8 @@ $rutas = array(
     'logout' => app_sesion::class,
     'pantallas_offline' => app_screens::class,
     'configuracion_app' => app_config::class,
+    'registra_push_token' => app_push::class,
+    'envia_notificacion_prueba' => app_push::class,
 );
 
 if (!isset($rutas[$method])) {
@@ -74,7 +79,8 @@ try {
 
     $resultado = $app->$method();
 } catch (Throwable $e) {
-    // El detalle de la excepción nunca sale al cliente.
+    // El detalle nunca sale al cliente: queda en el log del servidor.
+    error_log('base_movil ' . $method . ': ' . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
     responde_error(500, 'Error interno del servidor.');
 }
 

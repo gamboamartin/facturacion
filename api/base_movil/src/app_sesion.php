@@ -5,6 +5,7 @@ use config\generales;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use gamboamartin\administrador\models\adm_usuario;
+use gamboamartin\facturacion\models\base_movil_push_token;
 use gamboamartin\facturacion\models\base_movil_sesion;
 use gamboamartin\encripta\encriptador;
 use gamboamartin\errores\errores;
@@ -21,7 +22,11 @@ use Throwable;
  *   vale solo si su firma es correcta, no expiró Y su sesión está activa. Así
  *   se puede cortar una sesión (o todas las de un usuario o dispositivo) al
  *   momento, sin esperar a que el token venza.
- * - La sesión del servidor es el JWT + su fila (no se usa $_SESSION).
+ * - La sesión del servidor es el JWT + su fila (no se usa sesión PHP).
+ * - Todas las consultas van por los modelos del framework (filtro_and,
+ *   alta_bd, modifica_bd, elimina_bd). Los modelos toman el usuario de
+ *   $_SESSION['usuario_id'] para la auditoría: usuario_para_modelos() lo
+ *   asigna antes de crearlos.
  *
  * Igual que app_screens: los métodos públicos devuelven arrays y el
  * enrutador (index.php) decide cómo responder.
@@ -41,6 +46,9 @@ class app_sesion
 
     /** Probabilidad (1 de N logins) de correr la limpieza del historial. */
     private const LIMPIEZA_UNO_DE = 100;
+
+    /** Sesiones que borra cada limpieza como máximo: el login no debe tardar. */
+    private const LIMPIEZA_MAXIMO = 200;
 
     private errores $errores;
     private PDO $link;
@@ -149,7 +157,7 @@ class app_sesion
         }
 
         $cierre = $this->cierra_sesion(
-            jti: (string)$claims['jti'],
+            sesion_id: (int)$claims['sesion_id'],
             usuario_id: (int)$claims['sub'],
             motivo: 'logout'
         );
@@ -162,7 +170,8 @@ class app_sesion
 
     /**
      * Valida el JWT de la cabecera Authorization: firma, expiración y que su
-     * sesión siga activa. Devuelve los claims o un error.
+     * sesión siga activa. Devuelve los claims (más sesion_id, el id de su
+     * fila en base_movil_sesion) o un error.
      */
     public function valida_token(): array
     {
@@ -194,7 +203,10 @@ class app_sesion
             return $sesion;
         }
 
-        $this->marca_ultimo_uso($sesion);
+        $this->marca_ultimo_uso(sesion: $sesion, usuario_id: (int)$claims['sub']);
+
+        // #7: id de la sesión, para ligarle el token de notificaciones.
+        $claims['sesion_id'] = $sesion['id'];
 
         return $claims;
     }
@@ -208,6 +220,21 @@ class app_sesion
             return false;
         }
         return true;
+    }
+
+    /**
+     * Los modelos del framework toman el usuario de $_SESSION['usuario_id']
+     * al construirse (usuario_alta_id, usuario_update_id) y sin él no
+     * escriben. El API no usa sesión PHP, así que se asigna con el usuario
+     * del token ANTES de crear el modelo. Si ya hay un usuario (el sistema
+     * web llamando a este código), no se toca.
+     */
+    public function usuario_para_modelos(int $usuario_id): void
+    {
+        if (isset($_SESSION['usuario_id']) && (int)$_SESSION['usuario_id'] > 0) {
+            return;
+        }
+        $_SESSION['usuario_id'] = $usuario_id;
     }
 
     /** Aplica la misma regla que el login web: encripta_md5 de generales. */
@@ -285,13 +312,11 @@ class app_sesion
 
     /**
      * Crea la fila de la sesión del token recién emitido.
-     * Igual que el login web (alta_session) y el endpoint de n8n: el modelo
-     * toma el usuario de $_SESSION para llenar usuario_alta_id /
-     * usuario_update_id, así que se asigna con el usuario que inicia sesión.
+     * El usuario de la auditoría es el que inicia sesión.
      */
     private function registra_sesion(string $jti, int $usuario_id, int $iat, int $exp): array
     {
-        $_SESSION['usuario_id'] = $usuario_id;
+        $this->usuario_para_modelos($usuario_id);
 
         $modelo = new base_movil_sesion($this->link);
         $modelo->registro = array(
@@ -346,54 +371,87 @@ class app_sesion
      * Actualiza ultimo_uso como máximo una vez cada INTERVALO_ULTIMO_USO, para
      * no escribir en la base en cada petición. Es de mejor esfuerzo: si falla,
      * la petición sigue (solo se pierde la precisión de la última conexión).
-     * Consulta preparada: los valores nunca se pegan dentro del SQL.
      */
-    private function marca_ultimo_uso(array $sesion): void
+    private function marca_ultimo_uso(array $sesion, int $usuario_id): void
     {
         $ultimo = strtotime($sesion['ultimo_uso']);
         if ($ultimo !== false && time() - $ultimo < self::INTERVALO_ULTIMO_USO) {
             return;
         }
 
-        try {
-            $sql = 'UPDATE base_movil_sesion SET ultimo_uso = :ahora WHERE id = :id';
-            $stmt = $this->link->prepare($sql);
-            $stmt->execute(array(':ahora' => date('Y-m-d H:i:s'), ':id' => $sesion['id']));
-        } catch (Throwable $e) {
-            error_log('base_movil ultimo_uso: ' . $e->getMessage());
+        $this->usuario_para_modelos($usuario_id);
+        $r = (new base_movil_sesion($this->link))->modifica_bd(
+            registro: array('ultimo_uso' => date('Y-m-d H:i:s')),
+            id: $sesion['id']
+        );
+        if (errores::$error) {
+            error_log('base_movil ultimo_uso: ' . ($r['mensaje'] ?? 'sin mensaje'));
+            // Error manejado: se limpia el flag global para no contaminar lo que sigue.
+            errores::$error = false;
         }
     }
 
     /**
-     * Cierra la sesión de un token: queda inactiva, con la fecha y el motivo.
-     * Solo cierra sesiones activas, así cerrar dos veces no cambia nada.
-     * Consulta preparada: los valores nunca se pegan dentro del SQL.
+     * Cierra la sesión: queda inactiva, con la fecha y el motivo. La recibe ya
+     * validada (activa y del usuario), así que se modifica por su id.
      */
-    private function cierra_sesion(string $jti, int $usuario_id, string $motivo): array
+    private function cierra_sesion(int $sesion_id, int $usuario_id, string $motivo): array
     {
-        try {
-            $sql = "UPDATE base_movil_sesion
-                       SET status = 'inactivo', cerrada_en = :ahora, motivo_cierre = :motivo,
-                           usuario_update_id = :usuario_id
-                     WHERE jti = :jti AND status = 'activo'";
-            $stmt = $this->link->prepare($sql);
-            $stmt->execute(array(
-                ':ahora' => date('Y-m-d H:i:s'),
-                ':motivo' => $motivo,
-                ':usuario_id' => $usuario_id,
-                ':jti' => $jti,
-            ));
-        } catch (Throwable $e) {
-            return $this->errores->error(mensaje: 'Error al cerrar la sesión', data: array());
+        $this->usuario_para_modelos($usuario_id);
+        $r = (new base_movil_sesion($this->link))->modifica_bd(
+            registro: array(
+                'status' => 'inactivo',
+                'cerrada_en' => date('Y-m-d H:i:s'),
+                'motivo_cierre' => $motivo,
+            ),
+            id: $sesion_id
+        );
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al cerrar la sesión', data: $r);
         }
+
+        $this->baja_push_de_sesion(sesion_id: $sesion_id, motivo: $motivo);
 
         return array('valor' => true);
     }
 
     /**
+     * #7: los tokens de notificaciones registrados con esa sesión dejan de
+     * recibir. De mejor esfuerzo: si falla, el envío igual descarta los
+     * tokens cuya sesión ya no está activa (app_push::tokens_activos).
+     */
+    private function baja_push_de_sesion(int $sesion_id, string $motivo): void
+    {
+        $modelo = new base_movil_push_token($this->link);
+        $r = $modelo->filtro_and(filtro: array(
+            'base_movil_push_token.base_movil_sesion_id' => $sesion_id,
+            'base_movil_push_token.status' => 'activo',
+        ));
+        if (errores::$error) {
+            error_log('base_movil baja push: ' . ($r['mensaje'] ?? 'sin mensaje'));
+            errores::$error = false;
+            return;
+        }
+
+        foreach ($r->registros as $fila) {
+            $upd = $modelo->modifica_bd(
+                registro: array('status' => 'inactivo', 'motivo_baja' => $motivo),
+                id: (int)$fila['base_movil_push_token_id']
+            );
+            if (errores::$error) {
+                error_log('base_movil baja push ' . $fila['base_movil_push_token_id'] . ': ' . ($upd['mensaje'] ?? 'sin mensaje'));
+                errores::$error = false;
+            }
+        }
+    }
+
+    /**
      * Borra las sesiones de más de DIAS_HISTORIAL días (por su vencimiento),
      * estén cerradas o hayan vencido solas. Corre en 1 de cada LIMPIEZA_UNO_DE
-     * logins para no necesitar una tarea programada. Si falla, no afecta al login.
+     * logins para no necesitar una tarea programada, y borra como máximo
+     * LIMPIEZA_MAXIMO por vez. Si falla, no afecta al login.
+     * El rango de fechas lo arma el servidor: ningún dato del cliente entra
+     * en filtro_rango.
      */
     private function limpia_historial_a_veces(): void
     {
@@ -401,12 +459,24 @@ class app_sesion
             return;
         }
 
-        try {
-            $limite = date('Y-m-d H:i:s', time() - self::DIAS_HISTORIAL * 86400);
-            $stmt = $this->link->prepare('DELETE FROM base_movil_sesion WHERE expira < :limite');
-            $stmt->execute(array(':limite' => $limite));
-        } catch (Throwable $e) {
-            error_log('base_movil limpieza de sesiones: ' . $e->getMessage());
+        $limite = date('Y-m-d H:i:s', time() - self::DIAS_HISTORIAL * 86400);
+        $modelo = new base_movil_sesion($this->link);
+        $r = $modelo->filtro_and(
+            filtro_rango: array('base_movil_sesion.expira' => array('valor1' => '1970-01-01 00:00:00', 'valor2' => $limite)),
+            limit: self::LIMPIEZA_MAXIMO
+        );
+        if (errores::$error) {
+            error_log('base_movil limpieza de sesiones: ' . ($r['mensaje'] ?? 'sin mensaje'));
+            errores::$error = false;
+            return;
+        }
+
+        foreach ($r->registros as $fila) {
+            $del = $modelo->elimina_bd(id: (int)$fila['base_movil_sesion_id']);
+            if (errores::$error) {
+                error_log('base_movil limpieza sesion ' . $fila['base_movil_sesion_id'] . ': ' . ($del['mensaje'] ?? 'sin mensaje'));
+                errores::$error = false;
+            }
         }
     }
 }
