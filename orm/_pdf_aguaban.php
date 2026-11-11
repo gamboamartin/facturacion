@@ -244,27 +244,6 @@ class _pdf_aguaban
 
 
 
-    private function pago(Fpdi $pdf): void
-    {
-        $factura = $this->factura;
-        $x = 38;
-        $pdf->SetXY($x, 138.8);
-        $pdf->Write(10, mb_convert_encoding($factura['cat_sat_forma_pago_codigo'] . ' ' . $factura['cat_sat_forma_pago_descripcion'], 'ISO-8859-1', 'UTF-8'));
-
-        $pdf->SetXY($x, 142);
-        $pdf->Write(10, mb_convert_encoding($factura['cat_sat_metodo_pago_codigo'] . ' ' . $factura['cat_sat_metodo_pago_descripcion'], 'ISO-8859-1', 'UTF-8'));
-
-        $pdf->SetXY($x, 146);
-        $pdf->Write(10, mb_convert_encoding($factura['cat_sat_tipo_de_comprobante_codigo'] . ' ' . $factura['cat_sat_tipo_de_comprobante_descripcion'], 'ISO-8859-1', 'UTF-8'));
-
-        $pdf->SetXY($x, 149);
-        $pdf->Write(10, mb_convert_encoding($factura['cat_sat_metodo_pago_descripcion'], 'ISO-8859-1', 'UTF-8'));
-
-        $pdf->SetXY($x, 153);
-        $pdf->Write(10, mb_convert_encoding($factura['cat_sat_moneda_codigo'] . ' ' . $factura['cat_sat_moneda_descripcion'], 'ISO-8859-1', 'UTF-8'));
-
-    }
-
     private function set_partidas(Fpdi $pdf, $tabla_partida): void
     {
         $border = 0;
@@ -575,13 +554,41 @@ class _pdf_aguaban
         }
     }
 
-    private function set_qrcode(Fpdi $pdf): void
+    private function set_pago(Fpdi $pdf): void
     {
-        if ($this->ruta_qr !== '') {
-            if (file_exists($this->ruta_qr)) {
-                $pdf->Image($this->ruta_qr, 159.5, 243, 29.5, 29.5, 'png');
-            }
+        $factura = $this->factura;
+
+        $exportacion = "EXPORTACIÓN 01 - No aplica";
+        if ((int)$factura['fc_factura_exportacion'] !== 1) {
+            $exportacion = "EXPORTACIÓN 00 - Aplica";
         }
+        $exportacion = mb_convert_encoding($exportacion, 'ISO-8859-1', 'UTF-8');
+
+        $forma_pago = mb_convert_encoding($factura['cat_sat_forma_pago_codigo'] . ' - ' . $factura['cat_sat_forma_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
+        $metodo_pago = mb_convert_encoding($factura['cat_sat_metodo_pago_codigo'] . ' - ' . $factura['cat_sat_metodo_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
+        $moneda = mb_convert_encoding($factura['cat_sat_moneda_codigo'] . ' - ' . $factura['cat_sat_moneda_descripcion'], 'ISO-8859-1', 'UTF-8');
+
+        $pdf->SetFont('Arial', '', '8');
+        $pdf->SetTextColor(90, 128, 192);
+
+        $y = 62;
+        $border = 0;
+        $pdf->SetXY(15, $y);
+        $pdf->cell(90,5, "FORMA DE PAGO ".$forma_pago, $border, 0, 'L');
+
+        $pdf->SetXY(105, $y);
+        $pdf->cell(90,5, "METODO DE PAGO ".$metodo_pago, $border, 0, 'L');
+
+        $y = 67;
+        $pdf->SetXY(15, $y);
+        $pdf->cell(90,5, $exportacion, $border, 'L');
+
+        $pdf->SetXY(105, $y);
+        $pdf->cell(90,5, "MONEDA ".$moneda, $border, 0, 'L');
+
+
+
+
     }
 
     private function set_montos(Fpdi $pdf): void
@@ -709,6 +716,15 @@ class _pdf_aguaban
         $pdf->MultiCell(140, 2.6, $data->complento);
         $pdf->SetAutoPageBreak(true);
 
+    }
+
+    private function set_qrcode(Fpdi $pdf): void
+    {
+        if ($this->ruta_qr !== '') {
+            if (file_exists($this->ruta_qr)) {
+                $pdf->Image($this->ruta_qr, 159.5, 243, 29.5, 29.5, 'png');
+            }
+        }
     }
 
 }
