@@ -22,6 +22,11 @@ use PDO;
  * de PANTALLAS_OFFLINE para que la app las guarde después del login.
  * Prototipo #7: componente DeviceStatus (el backend elige qué datos del
  * teléfono mostrar y en qué orden) y ubicación del usuario en el mapa.
+ * Login de Aguaban (base): Image (solo la clave de una imagen del APK),
+ * Input con revealable y estilos letterSpacing y fontWeight '100'…'900'.
+ * Ojo: un APK anterior rechaza fontWeight '800' (valor inválido) y muestra
+ * el aviso de "no disponible" en lugar de Image. Por eso solo se usan en
+ * la pantalla de prueba `estilos` hasta que el APK nuevo esté instalado.
  */
 class app_screens
 {
@@ -469,6 +474,8 @@ class app_screens
                             'inputType' => 'password',
                             'label' => 'Contraseña',
                             'required' => true,
+                            // Botón Mostrar/Ocultar. Un APK anterior ignora la clave.
+                            'revealable' => true,
                         ),
                         array(
                             'type' => 'Button',
@@ -598,6 +605,22 @@ class app_screens
             'title' => 'Estilos desde la API',
             'ttl' => 0,
             'components' => array(
+                // Imagen del registro del proyecto (src/project/images.ts): solo la clave.
+                array(
+                    'type' => 'Image',
+                    'id' => 'img-logo',
+                    'source' => 'logo',
+                    'height' => 72,
+                    'width' => 72,
+                    'accessibilityLabel' => 'Logo de la app',
+                    'style' => array('alignSelf' => 'center', 'marginBottom' => 8),
+                ),
+                array(
+                    'type' => 'Text',
+                    'id' => 'txt-espaciado',
+                    'content' => 'APLICACIÓN MÓVIL · LETTERSPACING Y PESO 800',
+                    'style' => array('fontSize' => 11, 'letterSpacing' => 1.5, 'fontWeight' => '800', 'textAlign' => 'center', 'color' => '#708391', 'marginBottom' => 8),
+                ),
                 array(
                     'type' => 'Text',
                     'id' => 'txt-titulo',
