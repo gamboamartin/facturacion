@@ -17,14 +17,11 @@ use Throwable;
 class _pdf_aguaban
 {
     private errores $error;
-
     private generales $config_generales;
-    private array $cfg = []; // nuevo
     private string $tabla;
     private stdClass $cfdi_sellado;
     private stdClass $data;
     private array $factura;
-    private Fpdi $pdf;
     private array $relacionadas;
     private string $ruta_logo;
     private string $ruta_qr;
@@ -36,213 +33,6 @@ class _pdf_aguaban
         $this->error = new errores();
         $this->fmt = new NumberFormatter('es_MX', NumberFormatter::CURRENCY);
     }
-
-
-
-    private function fecha_hora_emision(stdClass $data, Fpdi $pdf, int $x): true
-    {
-        $fecha_hora_emision = '';
-        if (isset($data->fecha_timbrado)) {
-            $fecha_hora_emision = $data->fecha_timbrado;
-        }
-
-        $pdf->SetXY($x, 22);
-        $pdf->Write(10, $fecha_hora_emision);
-
-        return true;
-
-    }
-
-    private function folio(string $tabla, array $factura, Fpdi $pdf, float $x): true
-    {
-        $pdf->SetFont('Arial', 'B', '10');
-        $pdf->SetTextColor(255, 255, 255);
-        $pdf->SetXY($x, 0);
-        $pdf->Write(10, $factura[$tabla . "_folio"]);
-
-        return true;
-
-    }
-
-    private function init(Fpdi $pdf): true|array
-    {
-
-        try {
-            $pdf->addPage();
-            $pdf->setSourceFile($this->config_generales->path_base.'/plantillas/factura_aguaban.pdf');
-            $tplIdx = $pdf->importPage(1);
-            $pdf->useTemplate($tplIdx, 0, 0, null, null, true);
-        } catch (Throwable $e) {
-            return (new errores())->error(mensaje: 'Error al cargar template', data: $e);
-        }
-        return true;
-    }
-
-    // nuevo 
-    private function buildCfg(array $factura): array
-    {
-        $cfg = [
-            'regimen_w' => 65,
-            'dom_txt'   => ':',
-        ];
-
-        // si tienes un "layout" o "plantilla" en BD, usa eso aquí
-        if (($factura['layout'] ?? '') === 'telj') {
-            $cfg['regimen_w'] = 90;
-        }
-
-
-        return $cfg;
-    }
-    // aca termina
-
-    private function header(string $tabla, stdClass $data, array $factura, Fpdi $pdf)
-    {
-        $x = 179;
-
-        $folio = $this->folio(tabla: $tabla, factura: $factura, pdf: $pdf, x: $x);
-
-
-
-        $x = 68;
-        $pdf->SetXY($x, 10.3);
-        if ($factura['org_empresa_rfc'] === "TELJ470913GY5") {
-            $x = 35;
-            $pdf->SetXY($x, 8.5);
-        }
-
-        $pdf->Write(10, $factura['org_empresa_razon_social']);
-
-        $pdf->SetXY($x, 15);
-        if ($factura['org_empresa_rfc'] === "TELJ470913GY5") {
-            $pdf->SetXY($x, 14.5);
-        }
-        $pdf->Write(10, $factura['org_empresa_nombre_comercial']);
-
-        $pdf->SetXY($x, 19);
-        if ($factura['org_empresa_rfc'] === "TELJ470913GY5") {
-            $pdf->SetXY($x, 18);
-        }
-        $pdf->Write(10, $factura['org_empresa_rfc']);
-
-        $pdf->SetXY($x, 27);
-        if ($factura['org_empresa_rfc'] === "TELJ470913GY5") {
-            $pdf->SetXY($x, 25.5);
-        }
-
-        $regimen = $this->regimen(factura: $factura);
-        if (errores::$error) {
-            return (new errores())->error(mensaje: 'Error al obtener $regimen', data: $regimen);
-        }
-        $this->cfg = $this->buildCfg($factura);
-        $regimenW = (float)($this->cfg['regimen_w'] ?? 65);
-        $pdf->MultiCell($regimenW, 2.5, $regimen, 0, 'L');
-        $pdf->SetXY($x, 31.5);
-
-        $cpEmisor = trim((string)($factura['org_empresa_cp_txt'] ?? ''));
-        $domTxt   = (string)($this->cfg['dom_txt'] ?? ':');
-
-        $dom = mb_convert_encoding(trim($domTxt . ' ' . $cpEmisor), 'ISO-8859-1', 'UTF-8');
-        $pdf->MultiCell(60, 3, $dom, 0, 'L');
-
-        if ($factura['org_empresa_rfc'] === "FIN171207CKA") {
-            $pdf->SetXY($x, 31.5);
-            $dom = "Av. Vallarta 6503 - Int. C2, Col. Ciudad Granja,";
-            $dom .= "45010, Zapopan, Jalisco";
-
-            $dom = mb_convert_encoding($dom, 'ISO-8859-1', 'UTF-8');
-
-            $pdf->MultiCell(60, 3, $dom, 0);
-
-            $pdf->SetXY($x, 40.5);
-            $tel = "+52 3338523986";
-            $pdf->MultiCell(60, 3, $tel, 0);
-
-        }
-        if ($factura['org_empresa_rfc'] === "TELJ470913GY5") {
-            $pdf->SetXY($x, 31.5);
-            $dom = "Calle: Carlos Villaseñor 885 Jardines Alcalde";
-            $dom .= "44290, Guadalajara, Jalisco";
-            $dom = mb_convert_encoding($dom, 'ISO-8859-1', 'UTF-8');
-            $pdf->MultiCell(80, 3, $dom, 0, 'L');
-
-            $pdf->SetXY($x, 39.5);
-            $tel = "+52 3338523986";
-            $pdf->MultiCell(60, 3, $tel, 0);
-
-        }
-
-        $x = 140;
-
-        $pdf->SetXY($x, 14);
-        $pdf->Write(10, $factura[$tabla . '_fecha']);
-
-        $fecha_hora_emision = $this->fecha_hora_emision(data: $data, pdf: $pdf, x: $x);
-        if (errores::$error) {
-            return (new errores())->error(mensaje: 'Error al escribir $fecha_hora_emision', data: $fecha_hora_emision);
-        }
-
-        $key_observaciones = $tabla . '_observaciones';
-        $observaciones = trim((string)($factura[$key_observaciones] ?? ''));
-        $observaciones = mb_convert_encoding($observaciones, 'ISO-8859-1', 'UTF-8');
-
-        $pdf->SetFont('Arial', 'B', '8');
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY($x, 34);
-        $pdf->MultiCell(50, 3.5, 'Observaciones:', 0, 'L');
-
-        $pdf->SetFont('Arial', '', '8');
-        $pdf->SetXY($x, 38);
-        $pdf->MultiCell(50, 3.5, $observaciones, 0, 'L');
-    }
-
-    private function receptor(array $factura, Fpdi $pdf): void
-    {
-
-        if (!isset($factura['com_sucursal_numero_interior'])) {
-            $factura['com_sucursal_numero_interior'] = '';
-        }
-
-        $uso_cfdi = trim($factura['cat_sat_uso_cfdi_codigo']) . ' ' . trim($factura['cat_sat_uso_cfdi_descripcion']);
-        $uso_cfdi = trim($uso_cfdi);
-        $uso_cfdi = mb_convert_encoding($uso_cfdi, 'ISO-8859-1', 'UTF-8');
-
-        $x = 33;
-
-
-        $pdf->SetXY($x, 52.3);
-        $pdf->Write(10, mb_convert_encoding($factura['com_cliente_razon_social'], 'ISO-8859-1', 'UTF-8'));
-
-
-        $pdf->SetXY($x, 57.8);
-        $pdf->Write(10, $factura['com_cliente_rfc']);
-
-        $pdf->SetXY($x, 62);
-        $pdf->Write(10, $uso_cfdi);
-
-        $pdf->SetXY($x, 68.5);
-        $domicilio_receptor = trim($factura['com_sucursal_calle']);
-        $domicilio_receptor = trim($domicilio_receptor) . ' ' . trim($factura['com_sucursal_numero_exterior']);
-        $domicilio_receptor = trim($domicilio_receptor) . ' ' . trim($factura['com_sucursal_numero_interior']);
-        $domicilio_receptor = trim($domicilio_receptor) . ' ' . trim($factura['com_sucursal_municipio']);
-        $domicilio_receptor = trim($domicilio_receptor) . ' ' . trim($factura['com_sucursal_estado']);
-        $domicilio_receptor = trim($domicilio_receptor) . ' ' . $factura['com_sucursal_cp'];
-        $domicilio_receptor = mb_convert_encoding($domicilio_receptor, 'ISO-8859-1', 'UTF-8');
-        $pdf->MultiCell(72, 5, $domicilio_receptor, 0, 'L');
-
-        $reg = mb_convert_encoding($factura['cat_sat_regimen_fiscal_cliente_codigo'] . ' ' . $factura['cat_sat_regimen_fiscal_cliente_descripcion'], 'ISO-8859-1', 'UTF-8');
-        $reg = trim($reg);
-        $pdf->SetXY($x, 82);
-        $pdf->MultiCell(70, 2.7, $reg);
-
-    }
-
-    private function regimen(array $factura): array|false|string|null
-    {
-        return mb_convert_encoding(trim($factura['cat_sat_regimen_fiscal_codigo'] . ' ' . $factura['cat_sat_regimen_fiscal_descripcion']), 'ISO-8859-1', 'UTF-8');
-    }
-
-
 
     private function set_partidas(Fpdi $pdf, $tabla_partida): void
     {
@@ -331,20 +121,22 @@ class _pdf_aguaban
         }
     }
 
-    private function base_pdf(Fpdi $pdf)
+    private function base_pdf(Fpdi $pdf): void
     {
 
         $init = $this->init($pdf);
         if (errores::$error) {
-            return (new errores())->error(mensaje: 'Error al cargar template', data: $init);
+            (new errores())->error(mensaje: 'Error al cargar template', data: $init);
+            return;
         }
-
-//        $this->header(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf);
-//        $this->receptor(factura: $factura, pdf: $pdf);
-        $this->pago(pdf: $pdf);
+        $this->set_folio(pdf: $pdf);
+        $this->set_fecha_hora_emision(pdf: $pdf);
+        $this->set_receptor(pdf: $pdf);
+        $this->set_emisor(pdf: $pdf);
 
         $this->set_relacionadas(pdf: $pdf);
 
+        $this->set_pago(pdf: $pdf);
         $this->set_montos(pdf: $pdf);
         $this->set_datos_fiscales(pdf: $pdf);
         $this->set_sellos(pdf: $pdf);
@@ -544,6 +336,44 @@ class _pdf_aguaban
 
     }
 
+    private function init(Fpdi $pdf): true|array
+    {
+
+        try {
+            $pdf->addPage();
+            $pdf->setSourceFile($this->config_generales->path_base.'/plantillas/factura_aguaban.pdf');
+            $tplIdx = $pdf->importPage(1);
+            $pdf->useTemplate($tplIdx, 0, 0, null, null, true);
+        } catch (Throwable $e) {
+            return (new errores())->error(mensaje: 'Error al cargar template', data: $e);
+        }
+        return true;
+    }
+
+    private function set_fecha_hora_emision(Fpdi $pdf): void
+    {
+        $fecha_hora_emision = '';
+        if (isset($this->data->fecha_timbrado)) {
+            $fecha_hora_emision = $this->data->fecha_timbrado;
+            $fecha_hora_emision = DateTime::createFromFormat('Y-m-d\TH:i:s', $fecha_hora_emision);
+            $fecha_hora_emision = $fecha_hora_emision->format('d/m/Y H:i:s');
+        }
+
+        $pdf->SetFont('Arial', '', '6');
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY(166, 25);
+        $pdf->cell(30,5, $fecha_hora_emision,0, 0, 'R');
+    }
+
+    private function set_folio(Fpdi $pdf): void
+    {
+        $pdf->SetFont('Arial', 'B', '10');
+        $pdf->SetTextColor(18, 61, 112);
+        $pdf->SetXY(166, 20);
+        $pdf->cell(30,5, $this->factura[$this->tabla . "_folio"], 0, 0, 'R');
+
+    }
+
     private function set_logo(Fpdi $pdf)
     {
         if ($this->ruta_logo !== '') {
@@ -552,6 +382,91 @@ class _pdf_aguaban
                 $pdf->Image($this->ruta_logo, null, null, 35, 0, 'png');
             }
         }
+    }
+
+    private function set_receptor(Fpdi $pdf): void
+    {
+        $factura = $this->factura;
+
+        if (!isset($factura['com_sucursal_numero_interior'])) {
+            $factura['com_sucursal_numero_interior'] = '';
+        }
+
+
+        $razon_social = mb_convert_encoding($factura['com_cliente_razon_social'], 'ISO-8859-1', 'UTF-8');
+        $cliente_rfc = $factura['com_cliente_rfc'];
+
+        $reg = mb_convert_encoding($factura['cat_sat_regimen_fiscal_cliente_codigo'] . ' ' . $factura['cat_sat_regimen_fiscal_cliente_descripcion'], 'ISO-8859-1', 'UTF-8');
+        $regimen = trim($reg);
+
+        $uso_cfdi = trim($factura['cat_sat_uso_cfdi_codigo']) . ' - ' . trim($factura['cat_sat_uso_cfdi_descripcion']);
+        $uso_cfdi = trim($uso_cfdi);
+        $uso_cfdi = mb_convert_encoding($uso_cfdi, 'ISO-8859-1', 'UTF-8');
+
+        $border = 0;
+        $x = 138;
+        $h = 3.5;
+        $y = 39;
+
+        $pdf->SetFont('Arial', 'B', '8');
+        $pdf->SetTextColor(18, 61, 112);
+        $pdf->SetXY($x, $y);
+        $pdf->cell(60,$h, $razon_social,$border, 0, 'L');
+        $y += $h;
+
+        $pdf->SetFont('Arial', '', '8');
+        $pdf->SetTextColor(18, 61, 112);
+        $pdf->SetXY($x, $y);
+        $pdf->cell(60,$h, 'RFC ' . $cliente_rfc,$border, 0, 'L');
+        $y += $h;
+
+        $pdf->SetFont('Arial', '', '7');
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY($x, $y);
+        $pdf->cell(60,$h, 'Regimen Fiscal '.$regimen,$border, 0, 'L');
+        $y += $h;
+
+        $pdf->SetFont('Arial', '', '7');
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY($x, $y);
+        $pdf->cell(60,$h, 'Uso CFDI '.$uso_cfdi,$border, 0, 'L');
+
+    }
+    private function set_emisor(Fpdi $pdf): void
+    {
+        $tipo_de_comprobante = $this->factura['cat_sat_tipo_de_comprobante_codigo_bis']." - ";
+        $tipo_de_comprobante .= $this->factura['cat_sat_tipo_de_comprobante_descripcion'];
+        $tipo_de_comprobante = mb_convert_encoding($tipo_de_comprobante, 'ISO-8859-1', 'UTF-8');
+
+        $border = 0;
+        $x = 15;
+        $h = 3.5;
+        $y = 39;
+
+        $pdf->SetFont('Arial', 'B', '8');
+        $pdf->SetTextColor(18, 61, 112);
+        $pdf->SetXY($x, $y);
+        $pdf->cell(60,$h, mb_convert_encoding("AGUABAN · RFC AGU000614BI8", 'ISO-8859-1', 'UTF-8'),$border, 0, 'L');
+        $y += $h;
+
+        $pdf->SetFont('Arial', '', '8');
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY($x, $y);
+        $pdf->cell(60,$h, mb_convert_encoding("Régimen fiscal 601 - General de Ley Personas Morales", 'ISO-8859-1', 'UTF-8'),$border, 0, 'L');
+        $y += $h;
+
+        $pdf->SetFont('Arial', '', '7');
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY($x, $y);
+        $pdf->cell(60,$h, mb_convert_encoding("Lugar de expedición: CP 63734", 'ISO-8859-1', 'UTF-8'),$border, 0, 'L');
+        $y += $h;
+
+        $pdf->SetFont('Arial', '', '7');
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY($x, $y);
+        $pdf->cell(60,$h, "CFDI 4.0 " . $tipo_de_comprobante, $border, 0, 'L');
+
+
     }
 
     private function set_pago(Fpdi $pdf): void
@@ -585,9 +500,6 @@ class _pdf_aguaban
 
         $pdf->SetXY(105, $y);
         $pdf->cell(90,5, "MONEDA ".$moneda, $border, 0, 'L');
-
-
-
 
     }
 
