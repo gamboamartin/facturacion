@@ -38,158 +38,6 @@ class _pdf_aguaban
     }
 
 
-    private function numero_a_letras(float $numero, string $moneda = 'pesos', string $centavos = 'centavos'): string
-    {
-        $unidades = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
-        $decenas = ['', 'diez', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
-        $especiales = [11 => 'once', 12 => 'doce', 13 => 'trece', 14 => 'catorce', 15 => 'quince',
-            16 => 'dieciséis', 17 => 'diecisiete', 18 => 'dieciocho', 19 => 'diecinueve'];
-        $centenas = ['', 'cien', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos',
-            'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
-
-        if ($numero < 0) {
-            return 'menos ' . $this->numero_a_letras(abs($numero), $moneda, $centavos);
-        }
-
-        $parte_entera = (int)$numero;
-        $parte_decimal = round(($numero - $parte_entera) * 100);
-
-        $texto = $this->convertir_mayores($parte_entera, $unidades, $decenas, $especiales, $centenas);
-
-        if ($texto == '') {
-            $texto = 'cero';
-        }
-
-        $resultado = ucfirst($texto) . " $moneda";
-
-        if ($parte_decimal > 0) {
-            $resultado .= " con " . $this->convertir_mayores($parte_decimal, $unidades, $decenas, $especiales, $centenas) . " $centavos";
-        }
-
-        return $resultado;
-    }
-
-    private function convertir_mayores($numero, $unidades, $decenas, $especiales, $centenas)
-    {
-        if ($numero == 0) return '';
-
-        if ($numero < 1000) {
-            return $this->convertir_cientos($numero, $unidades, $decenas, $especiales, $centenas);
-        }
-
-        if ($numero < 1000000) {
-            $miles = (int)($numero / 1000);
-            $resto = $numero % 1000;
-            $texto_miles = ($miles == 1) ? 'mil' : $this->convertir_cientos($miles, $unidades, $decenas, $especiales, $centenas) . ' mil';
-            return trim($texto_miles . ' ' . $this->convertir_cientos($resto, $unidades, $decenas, $especiales, $centenas));
-        }
-
-        if ($numero < 1000000000) {
-            $millones = (int)($numero / 1000000);
-            $resto = $numero % 1000000;
-            $texto_millones = ($millones == 1) ? 'un millón' : $this->convertir_cientos($millones, $unidades, $decenas, $especiales, $centenas) . ' millones';
-            return trim($texto_millones . ' ' . $this->convertir_mayores($resto, $unidades, $decenas, $especiales, $centenas));
-        }
-
-        return 'Número demasiado grande';
-    }
-
-    function convertir_cientos($numero, $unidades, $decenas, $especiales, $centenas)
-    {
-        if ($numero == 0) return '';
-
-        if ($numero < 10) {
-            return $unidades[$numero];
-        }
-
-        if ($numero < 20) {
-            return $especiales[$numero] ?? '';
-        }
-
-        if ($numero < 100) {
-            $unidad = $numero % 10;
-            return $decenas[(int)($numero / 10)] . ($unidad ? ' y ' . $unidades[$unidad] : '');
-        }
-
-        if ($numero < 1000) {
-            $centena = (int)($numero / 100);
-            $resto = $numero % 100;
-            return ($numero == 100) ? 'cien' : $centenas[$centena] . ($resto ? ' ' . $this->convertir_cientos($resto, $unidades, $decenas, $especiales, $centenas) : '');
-        }
-
-        return '';
-    }
-
-    public function data_factura(string $name_entidad_sellado): array|stdClass
-    {
-        $cfdi_sellado = $this->cfdi_sellado;
-
-        $data = $this->data_init_limpio();
-        if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al asignar datos', data: $data);
-        }
-
-        if ($cfdi_sellado->n_registros > 0) {
-
-            $data = $this->data_init(name_entidad_sellado: $name_entidad_sellado);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al asignar datos', data: $data);
-            }
-
-        }
-        return $data;
-    }
-
-    private function data_init(string $name_entidad_sellado): stdClass
-    {
-        $cfdi_sellado = $this->cfdi_sellado;
-
-        $folio_fiscal = $cfdi_sellado->registros[0][$name_entidad_sellado . '_uuid'];
-        $sello_cfdi = $cfdi_sellado->registros[0][$name_entidad_sellado . '_complemento_tfd_sello_cfd'];
-        $sello_sat = $cfdi_sellado->registros[0][$name_entidad_sellado . '_complemento_tfd_sello_sat'];
-        $complento = $cfdi_sellado->registros[0][$name_entidad_sellado . '_cadena_complemento_sat'];
-        $rfc_proveedor = $cfdi_sellado->registros[0][$name_entidad_sellado . '_complemento_tfd_rfc_prov_certif'];
-        $fecha_timbrado = $cfdi_sellado->registros[0][$name_entidad_sellado . '_complemento_tfd_fecha_timbrado'];
-        $no_certificado = $cfdi_sellado->registros[0][$name_entidad_sellado . '_comprobante_no_certificado'];
-        $no_certificado_sat = $cfdi_sellado->registros[0][$name_entidad_sellado . '_complemento_tfd_no_certificado_sat'];
-
-        $data = new stdClass();
-        $data->folio_fiscal = $folio_fiscal;
-        $data->sello_cfdi = $sello_cfdi;
-        $data->sello_sat = $sello_sat;
-        $data->complento = $complento;
-        $data->rfc_proveedor = $rfc_proveedor;
-        $data->fecha_timbrado = $fecha_timbrado;
-        $data->no_certificado = $no_certificado;
-        $data->no_certificado_sat = $no_certificado_sat;
-
-        return $data;
-
-    }
-
-    private function data_init_limpio(): stdClass
-    {
-        $folio_fiscal = "-----";
-        $sello_cfdi = "";
-        $sello_sat = "";
-        $complento = "---";
-        $rfc_proveedor = "-----";
-        $fecha_timbrado = "xxxx-xx-xx 00:00:00";
-        $no_certificado = "-----";
-
-        $data = new stdClass();
-        $data->folio_fiscal = $folio_fiscal;
-        $data->sello_cfdi = $sello_cfdi;
-        $data->sello_sat = $sello_sat;
-        $data->complento = $complento;
-        $data->rfc_proveedor = $rfc_proveedor;
-        $data->fecha_timbrado = $fecha_timbrado;
-        $data->no_certificado = $no_certificado;
-        $data->no_certificado_sat = '';
-
-        return $data;
-
-    }
 
     private function fecha_hora_emision(stdClass $data, Fpdi $pdf, int $x): true
     {
@@ -396,8 +244,9 @@ class _pdf_aguaban
 
 
 
-    private function pago(array $factura, Fpdi $pdf): void
+    private function pago(Fpdi $pdf): void
     {
+        $factura = $this->factura;
         $x = 38;
         $pdf->SetXY($x, 138.8);
         $pdf->Write(10, mb_convert_encoding($factura['cat_sat_forma_pago_codigo'] . ' ' . $factura['cat_sat_forma_pago_descripcion'], 'ISO-8859-1', 'UTF-8'));
@@ -470,33 +319,15 @@ class _pdf_aguaban
         }
     }
 
-    private function base_pdf(Fpdi $pdf)
+    private function set_relacionadas(Fpdi $pdf)
     {
-        $tabla = $this->tabla;
-        $data = $this->data;
-        $factura = $this->factura;
-        $relacionadas = $this->relacionadas;
-
-        $init = $this->init($pdf);
-        if (errores::$error) {
-            return (new errores())->error(mensaje: 'Error al cargar template', data: $init);
-        }
-
-        //$this->set_logo(pdf: $pdf);
-        $this->set_qrcode(pdf: $pdf);
-
-//        $this->header(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf);
-//        $this->receptor(factura: $factura, pdf: $pdf);
-//        $this->pago(factura: $factura, pdf: $pdf);
-
-
-        if (count($relacionadas) > 0) {
+        if (count($this->relacionadas) > 0) {
             $y = 165;
             $pdf->SetXY(7, $y);
             $pdf->SetFont('Arial', 'B', '9');
             $pdf->SetTextColor(0, 0, 0);
             $pdf->MultiCell(90, 3, 'Relaciones:', 0);
-            foreach ($relacionadas as $relacionada) {
+            foreach ($this->relacionadas as $relacionada) {
                 $pdf->SetFont('Arial', 'B', '8');
                 $cat_sat_tipo_relacion_codigo = trim($relacionada['cat_sat_tipo_relacion_codigo']);
                 $cat_sat_tipo_relacion_descripcion = trim($relacionada['cat_sat_tipo_relacion_descripcion']);
@@ -515,17 +346,31 @@ class _pdf_aguaban
                     $pdf->SetXY(9.5, $y);
                     $pdf->SetFont('Arial', '', '7');
                     $pdf->MultiCell(90, 3.5, $folio_rel['fc_factura_uuid'], 0);
-
                 }
-
 
             }
         }
+    }
 
+    private function base_pdf(Fpdi $pdf)
+    {
+
+        $init = $this->init($pdf);
+        if (errores::$error) {
+            return (new errores())->error(mensaje: 'Error al cargar template', data: $init);
+        }
+
+//        $this->header(tabla: $tabla, data: $data, factura: $factura, pdf: $pdf);
+//        $this->receptor(factura: $factura, pdf: $pdf);
+        $this->pago(pdf: $pdf);
+
+        $this->set_relacionadas(pdf: $pdf);
 
         $this->set_montos(pdf: $pdf);
         $this->set_datos_fiscales(pdf: $pdf);
         $this->set_sellos(pdf: $pdf);
+        $this->set_qrcode(pdf: $pdf);
+        //$this->set_logo(pdf: $pdf);
 
     }
 
@@ -597,6 +442,40 @@ class _pdf_aguaban
         $pdf->Output();
         return $nombre_documento;
 
+    }
+
+    public function data_factura(string $name_entidad_sellado): array|stdClass
+    {
+        $data = new stdClass();
+
+        // Valores por defecto
+        $data->folio_fiscal = '-----';
+        $data->sello_cfdi = '';
+        $data->sello_sat = '';
+        $data->complento = '---';
+        $data->rfc_proveedor = '-----';
+        $data->fecha_timbrado = 'xxxx-xx-xx 00:00:00';
+        $data->no_certificado = '-----';
+        $data->no_certificado_sat = '';
+
+        $cfdi_sellado = $this->cfdi_sellado;
+
+        if ($cfdi_sellado->n_registros > 0) {
+
+            $registro = $cfdi_sellado->registros[0];
+
+            $data->folio_fiscal = $registro[$name_entidad_sellado . '_uuid'];
+            $data->sello_cfdi = $registro[$name_entidad_sellado . '_complemento_tfd_sello_cfd'];
+            $data->sello_sat = $registro[$name_entidad_sellado . '_complemento_tfd_sello_sat'];
+            $data->complento = $registro[$name_entidad_sellado . '_cadena_complemento_sat'];
+            $data->rfc_proveedor = $registro[$name_entidad_sellado . '_complemento_tfd_rfc_prov_certif'];
+            $data->fecha_timbrado = $registro[$name_entidad_sellado . '_complemento_tfd_fecha_timbrado'];
+            $data->no_certificado = $registro[$name_entidad_sellado . '_comprobante_no_certificado'];
+            $data->no_certificado_sat = $registro[$name_entidad_sellado . '_complemento_tfd_no_certificado_sat'];
+
+        }
+
+        return $data;
     }
 
     private function configuracion(
