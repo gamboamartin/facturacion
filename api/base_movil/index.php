@@ -44,6 +44,7 @@ require_once __DIR__ . '/src/app_screens.php';
 require_once __DIR__ . '/src/app_sesion.php';
 require_once __DIR__ . '/src/fcm_envio.php';
 require_once __DIR__ . '/src/app_push.php';
+require_once __DIR__ . '/src/proyecto.php';
 
 if (!isset($_GET['method']) || !is_string($_GET['method']) || trim($_GET['method']) === '') {
     responde_error(400, 'Error $_GET[method] debe existir.');

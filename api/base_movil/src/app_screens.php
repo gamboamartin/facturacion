@@ -1,109 +1,91 @@
 <?php
 namespace base_movil\v1\src;
 
+use config\generales;
 use gamboamartin\errores\errores;
 use PDO;
 
 /**
- * Sigue la misma convención que app_cobranza.php de em3: los métodos
- * públicos devuelven arrays (nunca hacen echo directo), y es el
- * enrutador (index.php) quien decide cómo mostrar la respuesta.
+ * Sirve las pantallas de la app. Sigue la convención de app_cobranza.php de
+ * em3: los métodos públicos devuelven arrays y el enrutador (index.php)
+ * decide cómo responder.
  *
- * Prototipo #3: todas las pantallas requieren sesión excepto las de
- * PANTALLAS_PUBLICAS.
- * Prototipo #4: sin sesión válida se responde 401; la app borra el token
- * y navega a login. Cada error lleva su http_code (error_http) y el router
- * decide la salida. Cada pantalla define su `ttl` (segundos que la app
- * puede servirla desde caché; 0 = no se cachea).
- * Prototipo #5: componente Map y estilos completos. Un `style` puede traer
- * un bloque `dark` con lo que cambia en modo oscuro; si un componente fija
- * un fondo claro o un texto oscuro, debe mandar su `dark`.
- * Modo sin conexión: pantallas_offline devuelve de una vez las pantallas
- * de PANTALLAS_OFFLINE para que la app las guarde después del login.
- * Prototipo #7: componente DeviceStatus (el backend elige qué datos del
- * teléfono mostrar y en qué orden) y ubicación del usuario en el mapa.
- * Login de Aguaban (base): Image (solo la clave de una imagen del APK),
- * Input con revealable y estilos letterSpacing y fontWeight '100'…'900'.
- * Ojo: un APK anterior rechaza fontWeight '800' (valor inválido) y muestra
- * el aviso de "no disponible" en lugar de Image. Por eso solo se usan en
- * la pantalla de prueba `estilos` hasta que el APK nuevo esté instalado.
+ * Las pantallas NO viven aquí: son del proyecto de este servidor
+ * (base_movil_proyecto en config/generales.php → proyectos/<proyecto>/).
+ * Esta clase es la misma para todos los clientes: sesión, caché sin
+ * conexión y validación del SUBMIT. Ver src/proyecto.php y proyectos/README.md.
+ *
+ * - Prototipo #3/#4: sin sesión válida se responde 401 (salvo las pantallas
+ *   públicas del proyecto); la app borra el token y navega a login.
+ * - Cada pantalla define su `ttl` (segundos en caché; 0 = no se cachea).
+ * - Modo sin conexión: pantallas_offline devuelve de una vez las pantallas
+ *   que el proyecto marca para precargar.
+ * - Compatibilidad con APKs ya instalados: una propiedad o un componente
+ *   nuevos se ignoran o salen como "no disponible", pero un valor nuevo en
+ *   una propiedad que ya existía (fontWeight '800') rompe la pantalla.
  */
 class app_screens
 {
     private errores $errores;
     private app_sesion $sesion;
 
-    /** Pantallas que se pueden ver sin sesión. */
-    private const PANTALLAS_PUBLICAS = array('login');
-
-    /**
-     * Pantallas disponibles: screenId => método que la construye.
-     * Agregar una pantalla = agregar una línea aquí + su método.
-     */
-    private const PANTALLAS = array(
-        'home' => 'pantalla_home',
-        'registro' => 'pantalla_registro',
-        'detalle' => 'pantalla_detalle',
-        'confirmacion' => 'pantalla_confirmacion',
-        'login' => 'pantalla_login',
-        'mapa' => 'pantalla_mapa',
-        'estilos' => 'pantalla_estilos',
-        'estado' => 'pantalla_estado',
-    );
-
-    /**
-     * Pantallas que la app precarga después del login para usarlas sin
-     * conexión. Solo las que el usuario necesita en campo; las de ttl 0
-     * (resultados como confirmacion) no van porque no se guardan.
-     */
-    private const PANTALLAS_OFFLINE = array('home', 'registro', 'detalle', 'mapa', 'estado');
+    /** El proyecto de este servidor, o lo que le falta (para el log). */
+    private proyecto|string $proyecto;
 
     public function __construct(PDO $link)
     {
         $this->errores = new errores();
         $this->sesion = new app_sesion($link);
+        $this->proyecto = proyecto::activo(new generales());
     }
 
     public function obten_pantalla(): array
     {
+        $proyecto = $this->proyecto();
+        if (is_array($proyecto)) {
+            return $proyecto;
+        }
+
         if (!isset($_GET['screenId']) || !is_string($_GET['screenId']) || trim($_GET['screenId']) === '') {
             return $this->error_http(400, 'Error $_GET[screenId] debe existir', $_GET);
         }
 
         $screenId = trim($_GET['screenId']);
 
-        if (!isset(self::PANTALLAS[$screenId])) {
+        if (!isset($proyecto->pantallas()[$screenId])) {
             return $this->error_http(404, "No existe la pantalla '$screenId'", array('screenId' => $screenId));
         }
 
-        if (!in_array($screenId, self::PANTALLAS_PUBLICAS, true) && !$this->sesion->tiene_sesion()) {
+        if (!in_array($screenId, $proyecto->pantallas_publicas(), true) && !$this->sesion->tiene_sesion()) {
             return $this->error_http(401, 'Sesión no válida o expirada');
         }
 
-        $metodo = self::PANTALLAS[$screenId];
-        return $this->$metodo();
+        return $this->construye($proyecto, $screenId);
     }
 
     /**
-     * Modo sin conexión: devuelve en una sola respuesta las pantallas de
-     * PANTALLAS_OFFLINE para que la app las guarde en su caché después del
-     * login. Requiere sesión, igual que las pantallas protegidas.
+     * Modo sin conexión: devuelve en una sola respuesta las pantallas que el
+     * proyecto precarga, para que la app las guarde después del login.
      * Una pantalla con ttl 0 se omite aunque esté en la lista: la app no la
      * guardaría.
      */
     public function pantallas_offline(): array
     {
+        $proyecto = $this->proyecto();
+        if (is_array($proyecto)) {
+            return $proyecto;
+        }
+
         if (!$this->sesion->tiene_sesion()) {
             return $this->error_http(401, 'Sesión no válida o expirada');
         }
 
         $screens = array();
-        foreach (self::PANTALLAS_OFFLINE as $screenId) {
-            if (!isset(self::PANTALLAS[$screenId])) {
-                continue;
+        foreach ($proyecto->pantallas_offline() as $screenId) {
+            $pantalla = $this->construye($proyecto, $screenId);
+            if (isset($pantalla['error'])) {
+                return $pantalla;
             }
-            $metodo = self::PANTALLAS[$screenId];
-            $pantalla = $this->$metodo();
             if (($pantalla['ttl'] ?? 0) <= 0) {
                 continue;
             }
@@ -114,15 +96,23 @@ class app_screens
     }
 
     /**
-     * Recibe el SUBMIT del formulario de registro.
-     * Prototipo #2: sin base de datos, no se guarda nada. Se valida con las
-     * MISMAS reglas que definen la pantalla (required y options) y se responde
-     * con la siguiente acción: el servidor decide a dónde ir.
+     * Recibe el SUBMIT del formulario de registro (pantalla de demostración
+     * del proyecto base). Se valida con las MISMAS reglas que definen la
+     * pantalla (required y options) y se responde con la siguiente acción.
      */
     public function guarda_registro(): array
     {
+        $proyecto = $this->proyecto();
+        if (is_array($proyecto)) {
+            return $proyecto;
+        }
+
         if (!$this->sesion->tiene_sesion()) {
             return $this->error_http(401, 'Sesión no válida o expirada');
+        }
+
+        if (!isset($proyecto->pantallas()['registro'])) {
+            return $this->error_http(404, 'Error metodo no habilitado');
         }
 
         $body = json_decode(file_get_contents('php://input'), true);
@@ -131,7 +121,10 @@ class app_screens
             return $this->error_http(400, 'Error el body debe traer "values"');
         }
 
-        $pantalla = $this->pantalla_registro();
+        $pantalla = $this->construye($proyecto, 'registro');
+        if (isset($pantalla['error'])) {
+            return $pantalla;
+        }
         $validacion = $this->valida_valores($pantalla['components'], $body['values']);
 
         if (isset($validacion['error'])) {
@@ -143,6 +136,30 @@ class app_screens
         return array(
             'action' => array('type' => 'NAVIGATE', 'screenId' => 'confirmacion'),
         );
+    }
+
+    /**
+     * El proyecto ya cargado, o el error listo para el router. El detalle de
+     * lo que falta va al log (es para el programador); a la app le llega un
+     * mensaje genérico porque estos métodos son públicos.
+     */
+    private function proyecto(): proyecto|array
+    {
+        if ($this->proyecto instanceof proyecto) {
+            return $this->proyecto;
+        }
+        error_log('base_movil CONFIGURACION: ' . $this->proyecto);
+        return $this->error_http(500, proyecto::MENSAJE_PUBLICO);
+    }
+
+    private function construye(proyecto $proyecto, string $screenId): array
+    {
+        $pantalla = $proyecto->construye($screenId);
+        if (isset($pantalla['error']) && is_string($pantalla['error'])) {
+            error_log("base_movil CONFIGURACION: pantalla '$screenId': " . $pantalla['error']);
+            return $this->error_http(500, proyecto::MENSAJE_PUBLICO);
+        }
+        return $pantalla;
     }
 
     /**
@@ -219,277 +236,6 @@ class app_screens
         return $reglas;
     }
 
-    /** Fuente única de las zonas: la usan la pantalla y la validación del SUBMIT. */
-    private function opciones_zona(): array
-    {
-        return array(
-            array('value' => '1', 'label' => 'Norte'),
-            array('value' => '2', 'label' => 'Sur'),
-        );
-    }
-
-    /** Fuente única del estilo del botón principal: lo usan todas las pantallas. */
-    private function estilo_boton_primario(): array
-    {
-        return array(
-            'backgroundColor' => '#22A45D',
-            'color' => '#FFFFFF',
-            'padding' => 10,
-            'borderRadius' => 6,
-        );
-    }
-
-    private function pantalla_home(): array
-    {
-        return array(
-            'screenId' => 'home',
-            'title' => 'Pantalla de prueba',
-            'ttl' => 60, // corto: un cambio del backend se ve en máximo 1 minuto
-            'components' => array(
-                array(
-                    'type' => 'Container',
-                    'id' => 'card-1',
-                    'style' => array(
-                        'padding' => 16,
-                        'backgroundColor' => '#F5F5F5',
-                        'borderRadius' => 8,
-                        'gap' => 8,
-                        'dark' => array('backgroundColor' => '#1E1E1E'),
-                    ),
-                    'children' => array(
-                        array(
-                            'type' => 'Text',
-                            'id' => 'title-1',
-                            'content' => 'Proceso 2 prototipo 2 y 1 incluido',
-                            'style' => array('fontSize' => 20, 'fontWeight' => 'bold'),
-                        ),
-                        array(
-                            'type' => 'Text',
-                            'id' => 'subtitle-1',
-                            'content' => 'Este texto y este botón vienen del JSON del backend, no están hardcodeados en la app.',
-                            'style' => array('fontSize' => 14, 'color' => '#555555', 'dark' => array('color' => '#B3B3B3')),
-                        ),
-                        array(
-                            'type' => 'Button',
-                            'id' => 'btn-1',
-                            'label' => 'Continuar',
-                            'style' => $this->estilo_boton_primario(),
-                            'action' => array('type' => 'NAVIGATE', 'screenId' => 'registro'),
-                        ),
-                        array(
-                            'type' => 'Button',
-                            'id' => 'btn-prueba',
-                            'label' => 'Función de prueba',
-                            'style' => $this->estilo_boton_primario(),
-                            'action' => array('type' => 'CALL', 'function' => 'funcion_prueba'),
-                        ),
-                        array(
-                            'type' => 'Button',
-                            'id' => 'btn-logout',
-                            'label' => 'Cerrar sesión',
-                            'action' => array('type' => 'LOGOUT'),
-                        ),
-                        array(
-                            'type' => 'Text',
-                            'id' => 'txt-desde-backend',
-                            'content' => 'Este mensaje se agregó desde el backend sin generar un APK nuevo.',
-                            'style' => array('fontSize' => 16, 'fontWeight' => 'bold', 'color' => '#22A45D'),
-                        ),
-                        array(
-                            'type' => 'Button',
-                            'id' => 'btn-ver-detalle',
-                            'label' => 'Ver detalle',
-                            'style' => $this->estilo_boton_primario(),
-                            'action' => array('type' => 'NAVIGATE', 'screenId' => 'detalle'),
-                        ),
-                        array(
-                            'type' => 'Button',
-                            'id' => 'btn-ver-mapa',
-                            'label' => 'Ver mapa',
-                            'style' => $this->estilo_boton_primario(),
-                            'action' => array('type' => 'NAVIGATE', 'screenId' => 'mapa'),
-                        ),
-                        array(
-                            'type' => 'Button',
-                            'id' => 'btn-ver-estilos',
-                            'label' => 'Ver estilos',
-                            'style' => $this->estilo_boton_primario(),
-                            'action' => array('type' => 'NAVIGATE', 'screenId' => 'estilos'),
-                        ),
-                        array(
-                            'type' => 'Button',
-                            'id' => 'btn-ver-estado',
-                            'label' => 'Estado del dispositivo',
-                            'style' => $this->estilo_boton_primario(),
-                            'action' => array('type' => 'NAVIGATE', 'screenId' => 'estado'),
-                        ),
-                    ),
-                ),
-            ),
-        );
-    }
-
-    private function pantalla_registro(): array
-    {
-        return array(
-            'screenId' => 'registro',
-            'title' => 'Registro',
-            'ttl' => 300, // formulario estable: 5 minutos
-            'components' => array(
-                array(
-                    'type' => 'Form',
-                    'id' => 'form-registro',
-                    'children' => array(
-                        array(
-                            'type' => 'FormGroup',
-                            'id' => 'grp-acceso',
-                            'label' => 'Datos de acceso',
-                            'children' => array(
-                                array(
-                                    'type' => 'Input',
-                                    'id' => 'in-usuario',
-                                    'name' => 'usuario',
-                                    'inputType' => 'text',
-                                    'label' => 'Usuario',
-                                    'required' => true,
-                                    'placeholder' => 'Tu usuario',
-                                ),
-                                array(
-                                    'type' => 'Input',
-                                    'id' => 'in-password',
-                                    'name' => 'password',
-                                    'inputType' => 'password',
-                                    'label' => 'Contraseña',
-                                    'required' => true,
-                                ),
-                                array(
-                                    'type' => 'Input',
-                                    'id' => 'in-correo',
-                                    'name' => 'correo',
-                                    'inputType' => 'text',
-                                    'label' => 'Correo electrónico',
-                                    'required' => true,
-                                    'placeholder' => 'Tu correo electrónico',
-                                ),
-                            ),
-                        ),
-                        array(
-                            'type' => 'Select',
-                            'id' => 'sel-zona',
-                            'name' => 'zona',
-                            'label' => 'Zona',
-                            'required' => true,
-                            'placeholder' => 'Selecciona tu zona',
-                            'options' => $this->opciones_zona(),
-                        ),
-                        array(
-                            'type' => 'Button',
-                            'id' => 'btn-enviar',
-                            'label' => 'Enviar',
-                            'style' => $this->estilo_boton_primario(),
-                            'action' => array('type' => 'SUBMIT', 'method' => 'guarda_registro'),
-                        ),
-                    ),
-                ),
-                array(
-                    'type' => 'Button',
-                    'id' => 'btn-detalle',
-                    'label' => 'Ver detalle',
-                    'action' => array('type' => 'NAVIGATE', 'screenId' => 'detalle'),
-                ),
-            ),
-        );
-    }
-
-    private function pantalla_detalle(): array
-    {
-        return array(
-            'screenId' => 'detalle',
-            'title' => 'Detalle',
-            'ttl' => 30, // corto a propósito: permite probar el vencimiento del caché
-            'components' => array(
-                array(
-                    'type' => 'Text',
-                    'id' => 'txt-detalle',
-                    'content' => 'Llegaste aquí con una acción NAVIGATE definida en el backend.',
-                ),
-                array(
-                    'type' => 'Button',
-                    'id' => 'btn-volver-registro',
-                    'label' => 'Ir a registro',
-                    'style' => $this->estilo_boton_primario(),
-                    'action' => array('type' => 'NAVIGATE', 'screenId' => 'registro'),
-                ),
-            ),
-        );
-    }
-
-    private function pantalla_confirmacion(): array
-    {
-        return array(
-            'screenId' => 'confirmacion',
-            'title' => 'Registro enviado',
-            'ttl' => 0, // es un resultado: no se cachea
-            'components' => array(
-                array(
-                    'type' => 'Text',
-                    'id' => 'txt-confirmacion',
-                    'content' => 'El formulario se envió y el backend respondió con esta pantalla.',
-                ),
-                array(
-                    'type' => 'Button',
-                    'id' => 'btn-inicio',
-                    'label' => 'Volver al inicio',
-                    'style' => $this->estilo_boton_primario(),
-                    'action' => array('type' => 'NAVIGATE', 'screenId' => 'home'),
-                ),
-            ),
-        );
-    }
-
-    private function pantalla_login(): array
-    {
-        return array(
-            'screenId' => 'login',
-            'title' => 'Iniciar sesión',
-            'ttl' => 86400, // casi nunca cambia: 1 día
-            'components' => array(
-                array(
-                    'type' => 'Form',
-                    'id' => 'form-login',
-                    'children' => array(
-                        array(
-                            'type' => 'Input',
-                            'id' => 'in-login-usuario',
-                            'name' => 'usuario',
-                            'inputType' => 'text',
-                            'label' => 'Usuario',
-                            'required' => true,
-                            'placeholder' => 'Tu usuario',
-                        ),
-                        array(
-                            'type' => 'Input',
-                            'id' => 'in-login-password',
-                            'name' => 'password',
-                            'inputType' => 'password',
-                            'label' => 'Contraseña',
-                            'required' => true,
-                            // Botón Mostrar/Ocultar. Un APK anterior ignora la clave.
-                            'revealable' => true,
-                        ),
-                        array(
-                            'type' => 'Button',
-                            'id' => 'btn-login',
-                            'label' => 'Iniciar sesión',
-                            'style' => $this->estilo_boton_primario(),
-                            'action' => array('type' => 'SUBMIT', 'method' => 'login'),
-                        ),
-                    ),
-                ),
-            ),
-        );
-    }
-
     /**
      * Error del framework + código HTTP para el router.
      * La clase clasifica el error; el router decide la salida.
@@ -499,202 +245,5 @@ class app_screens
         $error = $this->errores->error(mensaje: $mensaje, data: $data);
         $error['http_code'] = $http_code;
         return $error;
-    }
-
-    /**
-     * Prototipo #5: componente Map. Los marcadores van como lista de datos
-     * (no como componentes sueltos) para que la app los dibuje como una sola
-     * capa y escale a muchos puntos.
-     */
-    private function pantalla_mapa(): array
-    {
-        return array(
-            'screenId' => 'mapa',
-            'title' => 'Mapa',
-            'ttl' => 300,
-            'components' => array(
-                array(
-                    'type' => 'Text',
-                    'id' => 'txt-mapa',
-                    'content' => 'Las ubicaciones de este mapa vienen del backend.',
-                ),
-                array(
-                    'type' => 'Map',
-                    'id' => 'mapa-principal',
-                    'height' => 320,
-                    'region' => array('latitude' => 20.6736, 'longitude' => -103.3440, 'zoom' => 13),
-                    'markers' => $this->marcadores_demo(),
-                    'showUserLocation' => true,
-                ),
-                array(
-                    'type' => 'Button',
-                    'id' => 'btn-mapa-inicio',
-                    'label' => 'Volver al inicio',
-                    'style' => $this->estilo_boton_primario(),
-                    'action' => array('type' => 'NAVIGATE', 'screenId' => 'home'),
-                ),
-            ),
-        );
-    }
-
-    /**
-     * Prototipo #7: estado del teléfono. El backend decide qué datos se ven y
-     * en qué orden (items) y si van en lista o en una línea (layout).
-     * cellular (chip, operador y señal en una frase) y airplaneMode los lee
-     * el módulo nativo de la parte 2, sin permisos.
-     */
-    private function pantalla_estado(): array
-    {
-        return array(
-            'screenId' => 'estado',
-            'title' => 'Estado del dispositivo',
-            'ttl' => 300,
-            'components' => array(
-                array(
-                    'type' => 'Text',
-                    'id' => 'txt-estado',
-                    'content' => 'Estos datos los lee el teléfono; el backend solo decide cuáles mostrar.',
-                ),
-                array(
-                    'type' => 'DeviceStatus',
-                    'id' => 'estado-lista',
-                    'items' => array('network', 'wifi', 'cellular', 'airplaneMode', 'gps', 'location'),
-                    'layout' => 'list',
-                ),
-                array(
-                    'type' => 'Text',
-                    'id' => 'txt-estado-compacto',
-                    'content' => 'Versión compacta:',
-                    'style' => array('marginTop' => 12),
-                ),
-                array(
-                    'type' => 'DeviceStatus',
-                    'id' => 'estado-compacto',
-                    'items' => array('network', 'gps'),
-                    'layout' => 'compact',
-                ),
-                array(
-                    'type' => 'Button',
-                    'id' => 'btn-estado-inicio',
-                    'label' => 'Volver al inicio',
-                    'style' => $this->estilo_boton_primario(),
-                    'action' => array('type' => 'NAVIGATE', 'screenId' => app_config::PANTALLA_INICIAL),
-                ),
-            ),
-        );
-    }
-
-    /** Marcadores de prueba. Con un cliente real saldrán de la base de datos. */
-    private function marcadores_demo(): array
-    {
-        return array(
-            array('id' => 'm1', 'latitude' => 20.6767, 'longitude' => -103.3475, 'title' => 'Punto 1', 'description' => 'Centro'),
-            array('id' => 'm2', 'latitude' => 20.6720, 'longitude' => -103.3390, 'title' => 'Punto 2', 'description' => 'Zona oriente'),
-            array('id' => 'm3', 'latitude' => 20.6690, 'longitude' => -103.3510, 'title' => 'Punto 3'),
-        );
-    }
-
-    /**
-     * Pantalla de prueba del #5: estilos desde la API en todos los componentes.
-     * ttl 0 para que cada cambio en el PHP se vea al instante.
-     */
-    private function pantalla_estilos(): array
-    {
-        return array(
-            'screenId' => 'estilos',
-            'title' => 'Estilos desde la API',
-            'ttl' => 0,
-            'components' => array(
-                // Imagen del registro del proyecto (src/project/images.ts): solo la clave.
-                array(
-                    'type' => 'Image',
-                    'id' => 'img-logo',
-                    'source' => 'logo',
-                    'height' => 72,
-                    'width' => 72,
-                    'accessibilityLabel' => 'Logo de la app',
-                    'style' => array('alignSelf' => 'center', 'marginBottom' => 8),
-                ),
-                array(
-                    'type' => 'Text',
-                    'id' => 'txt-espaciado',
-                    'content' => 'APLICACIÓN MÓVIL · LETTERSPACING Y PESO 800',
-                    'style' => array('fontSize' => 11, 'letterSpacing' => 1.5, 'fontWeight' => '800', 'textAlign' => 'center', 'color' => '#708391', 'marginBottom' => 8),
-                ),
-                array(
-                    'type' => 'Text',
-                    'id' => 'txt-titulo',
-                    'content' => 'Estilos definidos por el backend',
-                    'style' => array('fontSize' => 22, 'fontWeight' => 'bold', 'textAlign' => 'center', 'color' => '#22A45D', 'marginBottom' => 8, 'dark' => array('color' => '#4CD38A'))
-                ),
-                array(
-                    'type' => 'Text',
-                    'id' => 'txt-cursiva',
-                    'content' => 'Texto en cursiva, subrayado y con una propiedad desconocida que se ignora',
-                    'style' => array('fontStyle' => 'italic', 'textDecorationLine' => 'underline', 'color' => '#555555', 'shadowBlur' => 3, 'dark' => array('color' => '#B3B3B3'))
-                ),
-                array(
-                    'type' => 'Container',
-                    'id' => 'cnt-fila',
-                    'style' => array('flexDirection' => 'row', 'gap' => 8, 'marginVertical' => 12),
-                    'children' => array(
-                        array(
-                            'type' => 'Text',
-                            'id' => 'txt-caja-1',
-                            'content' => 'Caja 1',
-                            'style' => array('flex' => 1, 'backgroundColor' => '#E8F5E9', 'borderWidth' => 1, 'borderColor' => '#22A45D', 'borderRadius' => 8, 'padding' => 12, 'textAlign' => 'center', 'dark' => array('backgroundColor' => '#1E3A28'))
-                        ),
-                        array(
-                            'type' => 'Text',
-                            'id' => 'txt-caja-2',
-                            'content' => 'Caja 2',
-                            'style' => array('flex' => 1, 'backgroundColor' => '#FFF3E0', 'borderWidth' => 1, 'borderColor' => '#FB8C00', 'borderRadius' => 8, 'padding' => 12, 'textAlign' => 'center', 'dark' => array('backgroundColor' => '#3A2A14'))
-                        )
-                    )
-                ),
-                array(
-                    'type' => 'Form',
-                    'id' => 'frm-estilos',
-                    'style' => array('padding' => 12, 'borderWidth' => 1, 'borderColor' => '#CCCCCC', 'borderRadius' => 8),
-                    'children' => array(
-                        array(
-                            'type' => 'FormGroup',
-                            'id' => 'grp-estilos',
-                            'label' => 'Campos con estilo',
-                            'style' => array('gap' => 12),
-                            'children' => array(
-                                array(
-                                    'type' => 'Input',
-                                    'id' => 'inp-estilo',
-                                    'name' => 'nombre',
-                                    'inputType' => 'text',
-                                    'label' => 'Input',
-                                    'placeholder' => 'Escribe algo',
-                                    'style' => array('backgroundColor' => '#F5F5F5', 'borderColor' => '#22A45D', 'borderRadius' => 12, 'fontSize' => 16, 'dark' => array('backgroundColor' => '#2A2A2A'))
-                                ),
-                                array(
-                                    'type' => 'Select',
-                                    'id' => 'sel-estilo',
-                                    'name' => 'opcion',
-                                    'label' => 'Select',
-                                    'options' => array(
-                                        array('value' => 'a', 'label' => 'Opción A'),
-                                        array('value' => 'b', 'label' => 'Opción B')
-                                    ),
-                                    'style' => array('backgroundColor' => '#F5F5F5', 'borderColor' => '#FB8C00', 'color' => '#FB8C00', 'fontWeight' => 'bold', 'dark' => array('backgroundColor' => '#2A2A2A'))
-                                )
-                            )
-                        )
-                    )
-                ),
-                array(
-                    'type' => 'Button',
-                    'id' => 'btn-volver-estilos',
-                    'label' => 'Volver al inicio',
-                    'action' => array('type' => 'NAVIGATE', 'screenId' => 'home'),
-                    'style' => array('backgroundColor' => '#22A45D', 'padding' => 14, 'borderRadius' => 8, 'marginTop' => 16, 'color' => '#FFFFFF', 'fontWeight' => 'bold', 'textAlign' => 'center')
-                )
-            )
-        );
     }
 }
