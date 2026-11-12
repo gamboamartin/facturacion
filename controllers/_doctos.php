@@ -8,6 +8,7 @@ use gamboamartin\facturacion\models\_data_impuestos;
 use gamboamartin\facturacion\models\_doc;
 use gamboamartin\facturacion\models\_partida;
 use gamboamartin\facturacion\models\_pdf;
+use gamboamartin\facturacion\models\_pdf_aguaban;
 use gamboamartin\facturacion\models\_relacion;
 use gamboamartin\facturacion\models\_relacionada;
 use gamboamartin\facturacion\models\_sellado;

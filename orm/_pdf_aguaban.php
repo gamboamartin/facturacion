@@ -335,7 +335,7 @@ class _pdf_aguaban
         }
     }
 
-    private function set_receptor(Fpdi $pdf): void
+    private function set_receptor(__CUSTOM_FPDI $pdf): void
     {
         $factura = $this->factura;
 
@@ -345,6 +345,7 @@ class _pdf_aguaban
 
 
         $razon_social = mb_convert_encoding($factura['com_cliente_razon_social'], 'ISO-8859-1', 'UTF-8');
+
         $cliente_rfc = $factura['com_cliente_rfc'];
 
         $reg = mb_convert_encoding($factura['cat_sat_regimen_fiscal_cliente_codigo'] . ' ' . $factura['cat_sat_regimen_fiscal_cliente_descripcion'], 'ISO-8859-1', 'UTF-8');
@@ -362,8 +363,9 @@ class _pdf_aguaban
         $pdf->SetFont('DejaVuSans', 'B', '8');
         $pdf->SetTextColor(18, 61, 112);
         $pdf->SetXY($x, $y);
-        $pdf->cell(60,$h, $razon_social,$border, 0, 'L');
-        $y += $h;
+        $pdf->multicell(60,$h, $razon_social,$border, 'L');
+        $lineas_razon_social = $pdf->NbLines(60, $razon_social);
+        $y += $h * $lineas_razon_social;
 
         $pdf->SetFont('DejaVuSans', '', '8');
         $pdf->SetTextColor(18, 61, 112);
