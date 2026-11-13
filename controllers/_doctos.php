@@ -1,6 +1,7 @@
 <?php
 namespace gamboamartin\facturacion\controllers;
 
+use config\generales;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\_cuenta_predial;
@@ -147,7 +148,15 @@ class _doctos{
                               _sellado $modelo_sello, _data_impuestos $modelo_traslado, _uuid_ext $modelo_uuid_ext,
                               int $row_entidad_id){
 
-        $pdf = (new _pdf())->pdf(descarga: $descarga, guarda: $guarda, link: $modelo_entidad->link,
+        $class_pdf = new _pdf();
+        $general = new generales();
+
+        $class_pdf_name = (string)($general->name_custom_pdf ?? '');
+        if ($class_pdf_name === 'aguaban') {
+            $class_pdf = new _pdf_aguaban();
+        }
+
+        $pdf = $class_pdf->pdf(descarga: $descarga, guarda: $guarda, link: $modelo_entidad->link,
             modelo_documento: $modelo_documento, modelo_entidad: $modelo_entidad, modelo_partida: $modelo_partida,
             modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
             modelo_retencion: $modelo_retencion, modelo_sellado: $modelo_sello, modelo_traslado: $modelo_traslado,

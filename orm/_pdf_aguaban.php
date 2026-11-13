@@ -34,40 +34,9 @@ class _pdf_aguaban
         $this->fmt = new NumberFormatter('es_MX', NumberFormatter::CURRENCY);
     }
 
-    private function set_relacionadas(Fpdi $pdf)
-    {
-        if (count($this->relacionadas) > 0) {
-            $y = 165;
-            $pdf->SetXY(7, $y);
-            $pdf->SetFont('DejaVuSans', 'B', '9');
-            $pdf->SetTextColor(0, 0, 0);
-            $pdf->MultiCell(90, 3, 'Relaciones:', 0);
-            foreach ($this->relacionadas as $relacionada) {
-                $pdf->SetFont('DejaVuSans', 'B', '8');
-                $cat_sat_tipo_relacion_codigo = trim($relacionada['cat_sat_tipo_relacion_codigo']);
-                $cat_sat_tipo_relacion_descripcion = trim($relacionada['cat_sat_tipo_relacion_descripcion']);
 
-                $tipo_relacion = "$cat_sat_tipo_relacion_codigo $cat_sat_tipo_relacion_descripcion";
-                $tipo_relacion = mb_convert_encoding($tipo_relacion, 'ISO-8859-1', 'UTF-8');
-                $y = $y + 4;
-                $pdf->SetFont('DejaVuSans', 'B', '8');
-                $pdf->SetXY(8.5, $y);
-                $pdf->MultiCell(90, 3.5, $tipo_relacion, 0);
 
-                $folios_rel = $relacionada['fc_facturas_relacionadas'];
-
-                foreach ($folios_rel as $folio_rel) {
-                    $y = $y + 4;
-                    $pdf->SetXY(9.5, $y);
-                    $pdf->SetFont('DejaVuSans', '', '7');
-                    $pdf->MultiCell(90, 3.5, $folio_rel['fc_factura_uuid'], 0);
-                }
-
-            }
-        }
-    }
-
-    private function base_pdf(Fpdi $pdf): void
+    private function base_pdf(__CUSTOM_FPDI $pdf): void
     {
 
         $init = $this->init($pdf);
@@ -79,6 +48,7 @@ class _pdf_aguaban
         //$this->set_logo(pdf: $pdf);
         $this->set_folio(pdf: $pdf);
         $this->set_fecha_hora_emision(pdf: $pdf);
+        $this->set_pago(pdf: $pdf);
         $this->set_receptor(pdf: $pdf);
         $this->set_emisor(pdf: $pdf);
 
@@ -131,9 +101,8 @@ class _pdf_aguaban
 
         $this->set_partidas(pdf: $pdf, tabla_partida: $tabla_partida);
 
-        $this->set_pago(pdf: $pdf);
-        $this->set_relacionadas(pdf: $pdf);
         $this->set_montos(pdf: $pdf);
+        $this->set_relacionadas(pdf: $pdf);
         $this->set_datos_fiscales(pdf: $pdf);
         $this->set_sellos(pdf: $pdf);
         $this->set_qrcode(pdf: $pdf);
@@ -144,7 +113,7 @@ class _pdf_aguaban
         $nombre_documento = $this->factura[$key_serie] . $this->factura[$key_folio];
 
         if ($descarga) {
-            $pdf->Output($nombre_documento . '.pdf', 'I');
+            $pdf->Output($nombre_documento . '.pdf', 'D');
             return $nombre_documento;
         }
         if ($guarda) {
@@ -452,8 +421,8 @@ class _pdf_aguaban
             // 2. CALCULAR ALTURA DE LA PARTIDA
             // ==========================================
 
-            $w_descripcion = 50;
-            $w_unidad = 12;
+            $w_descripcion = 52;
+            $w_unidad = 13;
 
             $lineas_descripcion = $pdf->NbLines($w_descripcion, $partida_descripcion);
 
@@ -471,6 +440,7 @@ class _pdf_aguaban
             $espacio_separador = $hay_partida_en_pagina ? 2 : 0;
 
             if (($y + $espacio_separador + $altoFila) > $limite_y) {
+                $pdf->ocultar_area(10,$limite_y+2,185,120);
                 $this->base_pdf(pdf: $pdf); // Crear nueva página
                 $y = $y_base; // Reiniciar posición vertical
                 $hay_partida_en_pagina = false; // Reiniciar control de partidas
@@ -505,15 +475,15 @@ class _pdf_aguaban
             $pdf->MultiCell($w, $h, $unidad, $border, 'C');
 
             $x += $w; // Clave SAT
-            $w = 14;
+            $w = 12;
             $pdf->SetXY($x, $y);
             $pdf->Cell($w, $altoFila, $partida['cat_sat_unidad_codigo'], $border, 0, 'C');
 
 
-            $x += $w + 7; // Clave producto/servicio
-            $w = 12;
+            $x += $w; // Clave producto/servicio
+            $w = 18;
             $pdf->SetXY($x, $y);
-            $pdf->Cell($w, $altoFila, '', $border, 0, 'C');
+            $pdf->Cell($w, $altoFila, $partida['com_producto_codigo'], $border, 0, 'C');
 
 
             $x += $w; // Concepto / Descripción
@@ -629,6 +599,39 @@ class _pdf_aguaban
         $pdf->SetXY(15, 190);
         $pdf->MultiCell(144, 5, $letra, 0, 'L');
 
+    }
+
+    private function set_relacionadas(Fpdi $pdf): void
+    {
+
+        if (count($this->relacionadas) > 0) {
+            $relacionada = $this->relacionadas[0];
+
+            $cat_sat_tipo_relacion_codigo = trim($relacionada['cat_sat_tipo_relacion_codigo']);
+            $cat_sat_tipo_relacion_descripcion = trim($relacionada['cat_sat_tipo_relacion_descripcion']);
+            $tipo_relacion = "$cat_sat_tipo_relacion_codigo - $cat_sat_tipo_relacion_descripcion";
+            $tipo_relacion = mb_convert_encoding($tipo_relacion, 'ISO-8859-1', 'UTF-8');
+
+            $y = 202.5;
+
+            $pdf->SetFont('DejaVuSans', '', '7');
+            $pdf->SetTextColor(12, 53, 107);
+            $pdf->SetXY(x:16.8, y: $y);
+            $pdf->cell(85, 3.5, $tipo_relacion);
+
+
+            $folio_rel = '';
+
+            if (isset($relacionada['fc_facturas_relacionadas'][0]['fc_factura_uuid'])) {
+                $folio_rel = $relacionada['fc_facturas_relacionadas'][0]['fc_factura_uuid'];
+            }
+
+            $folio_rel = strtoupper($folio_rel);
+
+            $pdf->SetXY(x: 101.8, y: $y);
+            $pdf->cell(90, 3.5, $folio_rel, 0, 0, 'R');
+
+        }
     }
 
     private function set_datos_fiscales(Fpdi $pdf): void

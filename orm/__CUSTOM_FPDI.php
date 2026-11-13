@@ -89,4 +89,32 @@ class __CUSTOM_FPDI extends Fpdi
 
         return $nl;
     }
+
+    /**
+     * Oculta un área específica del documento PDF mediante un rectángulo de color blanco.
+     *
+     * Permite cubrir textos, líneas, imágenes u otros elementos existentes en una
+     * plantilla PDF importada con FPDI, simulando su eliminación sin modificar
+     * el archivo PDF original.
+     *
+     * El área cubierta puede utilizarse posteriormente para dibujar nuevos
+     * elementos encima de la plantilla.
+     *
+     * @param float $x      Coordenada horizontal donde comienza el área (mm).
+     * @param float $y      Coordenada vertical donde comienza el área (mm).
+     * @param float $ancho  Ancho del área que se desea ocultar (mm).
+     * @param float $alto   Alto del área que se desea ocultar (mm).
+     *
+     * @return void
+     */
+    public function ocultar_area(
+        float $x,
+        float $y,
+        float $ancho,
+        float $alto
+    ): void {
+        $this->SetFillColor(255, 255, 255);
+        $this->SetDrawColor(255, 255, 255);
+        $this->Rect($x, $y, $ancho, $alto, 'F');
+    }
 }
