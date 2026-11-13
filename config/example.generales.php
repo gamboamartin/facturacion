@@ -20,6 +20,7 @@ class generales{
     public int $tipo_dispersion = 1; // especifico de konsulta
 
     public string $ruta_factura_pdf = "/var/www/html/facturacion/plantillas/factura_base.pdf"; // aqui va la ruta del pdf que se usara como plantilla para generar las facturas, se recomienda que sea un pdf con campos editables para facilitar la generacion de las facturas
+    public string $proyecto_custom_pdf = ""; // nombre de proyecto para crear el pdf de la factura personalizado
     public bool $aplica_relacion_layout_factura = false; // especifico de konsulta
 
     public array $grupo_ids_puede_select_asesores = [2,3];

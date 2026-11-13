@@ -151,8 +151,8 @@ class _doctos{
         $class_pdf = new _pdf();
         $general = new generales();
 
-        $class_pdf_name = (string)($general->name_custom_pdf ?? '');
-        if ($class_pdf_name === 'aguaban') {
+        $proyecto_name = (string)($general->proyecto_custom_pdf ?? '');
+        if ($proyecto_name === 'aguaban') {
             $class_pdf = new _pdf_aguaban();
         }
 
