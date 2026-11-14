@@ -1,0 +1,14 @@
+{
+  "name": "lab/facturacion-decimal-oracle",
+  "type": "project",
+  "require": {
+    "php": "^8.2",
+    "brick/math": "1.0.0"
+  },
+  "config": {
+    "allow-plugins": false,
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
