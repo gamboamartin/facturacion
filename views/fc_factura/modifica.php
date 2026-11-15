@@ -1,6 +1,8 @@
 <?php /** @var  gamboamartin\facturacion\controllers\controlador_fc_factura $controlador controlador en ejecucion */ ?>
 <?php use config\views; ?>
 
+<link rel="stylesheet" href="css/fc_factura/form-responsive.css?v=1">
+<div class="fc-modifica fc-invoice-form">
 <?php echo $controlador->inputs->registro_id; ?>
 
 <div class="col-lg-12">
@@ -180,6 +182,8 @@
             <?php echo $button; ?>
         </div>
     <?php } ?>
+</div>
+
 </div>
 
 <script src="<?php echo (new \config\generales())->url_base . "js/_facturacion.js" ?>"></script>
