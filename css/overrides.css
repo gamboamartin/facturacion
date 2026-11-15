@@ -1540,3 +1540,13 @@ tr.iv-panel-row > td.iv-panel-cell {
         left: 0;
     }
 }
+/* Optional environment theme. No effect unless the validated enum is enabled. */
+.iv-nav[data-iv-theme="amarillo-pastel"] { background: #FFF6D8; border-bottom-color: #EADDAF; }
+.iv-nav[data-iv-theme="amarillo-pastel"] .iv-nav__secondary { background: #FFF0BF; border-top-color: #EADDAF; }
+.iv-nav[data-iv-theme="amarillo-pastel"] a.iv-nav__link { background: transparent; color: var(--iv-ink); }
+.iv-nav[data-iv-theme="amarillo-pastel"] .iv-nav__actions a.iv-nav__link,
+.iv-nav[data-iv-theme="amarillo-pastel"] .iv-nav__toggle { background: #fff; color: var(--iv-ink); }
+.iv-nav[data-iv-theme="amarillo-pastel"] .iv-nav__actions a.iv-nav__link { border-color: #EADDAF; }
+.iv-nav[data-iv-theme="amarillo-pastel"] a.iv-nav__link:hover,
+.iv-nav[data-iv-theme="amarillo-pastel"] .iv-nav__toggle:hover { background: #f7f3ff; color: var(--iv-purple); }
+.iv-nav[data-iv-theme="amarillo-pastel"] a.iv-nav__link.is-active { background: var(--iv-pale); color: var(--iv-purple); }

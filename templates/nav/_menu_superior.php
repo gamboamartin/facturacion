@@ -13,6 +13,18 @@
 require_once __DIR__ . '/../logo_service.php';
 use gamboamartin\system\links_menu;
 
+// Theme enum: no configuration value is emitted as CSS or arbitrary HTML.
+$iv_tema = 'original';
+if (property_exists(\config\generales::class, 'menu_superior_tema')) {
+    $iv_tema_propiedad = new \ReflectionProperty(\config\generales::class, 'menu_superior_tema');
+    if ($iv_tema_propiedad->isPublic() && $iv_tema_propiedad->isStatic() &&
+        isset(\config\generales::$menu_superior_tema) &&
+        \config\generales::$menu_superior_tema === 'amarillo-pastel') {
+        $iv_tema = 'amarillo-pastel';
+    }
+}
+// End theme enum.
+
 $iv_menus = is_array($controlador->menu_permitido ?? null) ? $controlador->menu_permitido : [];
 
 /* Cuántos módulos van en la fila principal; el resto va en la fila lavanda. */
@@ -100,7 +112,7 @@ if (empty($iv_logo)) {
 $iv_href_inicio = $links_menu->adm_session->inicio;
 $iv_sesion_activa = isset($_SESSION['activa']) && (int)$_SESSION['activa'] === 1;
 ?>
-<div class="iv-nav" data-iv-nav>
+<div class="iv-nav" data-iv-nav data-iv-theme="<?= $iv_tema ?>">
     <div class="iv-nav__top">
         <a class="iv-nav__brand" href="<?= $iv_e($iv_href_inicio) ?>" aria-label="Inicio">
             <?php if (!empty($iv_logo)) { ?>
