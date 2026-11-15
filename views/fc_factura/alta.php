@@ -29,13 +29,6 @@ use config\views; ?>
     </form>
 </div>
 
-<div class="col-md-12 buttons-form fc-alta-related">
-    <?php
-    foreach ($controlador->buttons_parents_alta as $button){ ?>
-        <div class="col-md-4">
-            <?php echo $button; ?>
-        </div>
-    <?php } ?>
-</div>
+
 
 </div>
