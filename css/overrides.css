@@ -1543,10 +1543,27 @@ tr.iv-panel-row > td.iv-panel-cell {
 /* Optional environment theme. No effect unless the validated enum is enabled. */
 .iv-nav[data-iv-theme="amarillo-pastel"] { background: #FFF6D8; border-bottom-color: #EADDAF; }
 .iv-nav[data-iv-theme="amarillo-pastel"] .iv-nav__secondary { background: #FFF0BF; border-top-color: #EADDAF; }
+.iv-nav[data-iv-theme="personalizado"] a.iv-nav__link,
 .iv-nav[data-iv-theme="amarillo-pastel"] a.iv-nav__link { background: transparent; color: var(--iv-ink); }
+.iv-nav[data-iv-theme="personalizado"] .iv-nav__actions a.iv-nav__link,
 .iv-nav[data-iv-theme="amarillo-pastel"] .iv-nav__actions a.iv-nav__link,
+.iv-nav[data-iv-theme="personalizado"] .iv-nav__toggle,
 .iv-nav[data-iv-theme="amarillo-pastel"] .iv-nav__toggle { background: #fff; color: var(--iv-ink); }
+.iv-nav[data-iv-theme="personalizado"] .iv-nav__actions a.iv-nav__link,
 .iv-nav[data-iv-theme="amarillo-pastel"] .iv-nav__actions a.iv-nav__link { border-color: #EADDAF; }
+.iv-nav[data-iv-theme="personalizado"] a.iv-nav__link:hover,
 .iv-nav[data-iv-theme="amarillo-pastel"] a.iv-nav__link:hover,
+.iv-nav[data-iv-theme="personalizado"] .iv-nav__toggle:hover,
 .iv-nav[data-iv-theme="amarillo-pastel"] .iv-nav__toggle:hover { background: #f7f3ff; color: var(--iv-purple); }
+.iv-nav[data-iv-theme="personalizado"] a.iv-nav__link.is-active,
 .iv-nav[data-iv-theme="amarillo-pastel"] a.iv-nav__link.is-active { background: var(--iv-pale); color: var(--iv-purple); }
+.iv-nav[data-iv-theme="personalizado"] { background: var(--iv-env-bg); color: var(--iv-env-ink); border-bottom-color: rgba(127,127,127,.25); }
+.iv-nav[data-iv-theme="personalizado"] .iv-nav__secondary { background: var(--iv-env-bg); border-top-color: rgba(127,127,127,.25); }
+.iv-nav[data-iv-theme="personalizado"] a.iv-nav__link { color: var(--iv-env-ink); }
+.iv-nav[data-iv-theme="personalizado"] .iv-nav__actions a.iv-nav__link,
+.iv-nav[data-iv-theme="personalizado"] .iv-nav__toggle { color: #242440; }
+.iv-nav[data-iv-theme="personalizado"] a.iv-nav__link:hover,
+.iv-nav[data-iv-theme="personalizado"] .iv-nav__toggle:hover,
+.iv-nav[data-iv-theme="personalizado"] a.iv-nav__link.is-active { color: var(--iv-purple); }
+.iv-nav[data-iv-theme="personalizado"] .iv-nav__link:focus-visible,
+.iv-nav[data-iv-theme="personalizado"] .iv-nav__toggle:focus-visible { outline-color: var(--iv-env-ink); }
