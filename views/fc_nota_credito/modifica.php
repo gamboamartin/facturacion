@@ -1,5 +1,25 @@
 <?php /** @var  \gamboamartin\facturacion\controllers\controlador_fc_factura $controlador  controlador en ejecucion */ ?>
 <?php use config\views; ?>
+<?php
+// This view runs before templates/principal.php emits js_view. Version the
+// existing NC script only; a second script tag would bind handlers twice.
+if (isset($data->js_view) && is_string($data->js_view) &&
+    isset($data->js_view_aplica_include) && !$data->js_view_aplica_include) {
+    $nc_script_path = __DIR__ . '/../../js/fc_nota_credito/modifica.js';
+    if (is_file($nc_script_path) && is_readable($nc_script_path)) {
+        $nc_script_version = substr(hash_file('sha256', $nc_script_path), 0, 12);
+        $data->js_view = str_replace(
+            array('src="./js/fc_nota_credito/modifica.js"', "src='./js/fc_nota_credito/modifica.js'",
+                'src="js/fc_nota_credito/modifica.js"', "src='js/fc_nota_credito/modifica.js'"),
+            array('src="./js/fc_nota_credito/modifica.js?v=' . $nc_script_version . '"',
+                "src='./js/fc_nota_credito/modifica.js?v=" . $nc_script_version . "'",
+                'src="js/fc_nota_credito/modifica.js?v=' . $nc_script_version . '"',
+                "src='js/fc_nota_credito/modifica.js?v=" . $nc_script_version . "'"),
+            $data->js_view
+        );
+    }
+}
+?>
 
 <?php echo $controlador->inputs->registro_id; ?>
 <main class="main section-color-primary">
