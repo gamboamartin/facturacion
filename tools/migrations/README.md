@@ -22,10 +22,14 @@ El validador comprueba archivo regular, ruta acotada, ausencia de symlinks en el
 
 ## Aplicación y recuperación
 
-No existe comando `apply`, conexión, ledger ni estado `applied`. La aplicación futura necesita diseño separado: identidad inequívoca del destino, autorización, respaldo con restauración probada, revisión de dependencias/compatibilidad, estrategia de concurrencia y resultados verificables. No asumir rollback transaccional de DDL MySQL. No crear usuarios, permisos, configuración o datos como efecto implícito de este inventario.
+El inventario `inventory.py` no tiene comando `apply`, conexión, ledger ni estado `applied`. La aplicación futura necesita diseño separado: identidad inequívoca del destino, autorización, respaldo con restauración probada, revisión de dependencias/compatibilidad, estrategia de concurrencia y resultados verificables. No asumir rollback transaccional de DDL MySQL. No crear usuarios, permisos, configuración o datos como efecto implícito de este inventario.
 
 Este directorio es independiente del arranque de la aplicación y de Composer. Los tests usan exclusivamente directorios temporales y artefactos ficticios; nunca bases reales.
 
 Las fichas separadas en `requirements/` distinguen columnas observadas en código y definición SQL desconocida para cada tabla. Su estado bloqueado no cambia porque un archivo SQL cualquiera esté presente: el manifest no tiene un mecanismo para aprobar esas fichas ni inferir cobertura.
 
-Un futuro aplicador tendría que implementar y probar un bloqueo exclusivo de migración, detección de cambios locales/drift, registro durable de inicio/fallo/completado, recuperación de estado interrumpido y tratamiento explícito de commits implícitos/autocommit de DDL MySQL/MariaDB. **Nada de ello está implementado aquí**. Hasta entonces, no usar el código de salida 0 para automatizar un despliegue o autorizar SQL.
+Un futuro aplicador tendría que implementar y probar un bloqueo exclusivo de migración, detección de cambios locales/drift, registro durable de inicio/fallo/completado, recuperación de estado interrumpido y tratamiento explícito de commits implícitos/autocommit de DDL MySQL/MariaDB. El inventario no implementa esas operaciones. Hasta entonces, no usar el código de salida 0 para automatizar un despliegue o autorizar SQL.
+
+## Aplicador separado de diseño nuevo
+
+`applier/` contiene un CLI explícito y un paquete nuevo de cuatro tablas, probado aisladamente. No es recuperación de DDL histórico ni marca estas tablas como aplicadas. El manifest offline y sus fichas se mantienen intactos. Leer [applier/README.md](applier/README.md) y sus contratos antes de considerar cualquier ejecución; el comportamiento predeterminado es plan offline.

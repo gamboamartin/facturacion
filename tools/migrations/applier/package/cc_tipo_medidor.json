@@ -1,0 +1,127 @@
+{
+  "checks": [],
+  "collation": "utf8mb4_unicode_ci",
+  "columns": [
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "auto_increment",
+      "generation": "",
+      "name": "id",
+      "nullable": false,
+      "type": "int"
+    },
+    {
+      "charset": "utf8mb4",
+      "collation": "utf8mb4_unicode_ci",
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "codigo",
+      "nullable": false,
+      "type": "varchar(255)"
+    },
+    {
+      "charset": "utf8mb4",
+      "collation": "utf8mb4_unicode_ci",
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "descripcion",
+      "nullable": false,
+      "type": "varchar(255)"
+    },
+    {
+      "charset": "utf8mb4",
+      "collation": "utf8mb4_unicode_ci",
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "codigo_bis",
+      "nullable": false,
+      "type": "varchar(255)"
+    },
+    {
+      "charset": "utf8mb4",
+      "collation": "utf8mb4_unicode_ci",
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "descripcion_select",
+      "nullable": false,
+      "type": "varchar(1024)"
+    },
+    {
+      "charset": "utf8mb4",
+      "collation": "utf8mb4_unicode_ci",
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "alias",
+      "nullable": false,
+      "type": "varchar(255)"
+    },
+    {
+      "charset": "utf8mb4",
+      "collation": "utf8mb4_unicode_ci",
+      "comment": "",
+      "default": "activo",
+      "extra": "",
+      "generation": "",
+      "name": "status",
+      "nullable": false,
+      "type": "varchar(8)"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "usuario_alta_id",
+      "nullable": false,
+      "type": "bigint"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "usuario_update_id",
+      "nullable": false,
+      "type": "bigint"
+    }
+  ],
+  "comment": "",
+  "create_options": "",
+  "engine": "InnoDB",
+  "foreign_keys": [],
+  "indexes": [
+    {
+      "columns": [
+        {
+          "name": "id",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true
+    }
+  ],
+  "row_format": "Dynamic",
+  "triggers": []
+}

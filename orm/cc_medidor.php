@@ -34,45 +34,21 @@ class cc_medidor extends _modelo_parent
 
     public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
-        $query = "INSERT INTO cc_medidor (
-                    tipo_medidor_id,
-                    descripcion,
-                    codigo
-              ) VALUES (
-                    :cc_tipo_medidor_id,
-                    :descripcion,
-                    :codigo
-              )";
-
-        try {
-            $stmt = $this->link->prepare($query);
-
-            $rs = $stmt->execute([
-                ':cc_tipo_medidor_id' => (int)$_POST['cc_tipo_medidor_id'],
-                ':descripcion' => $_POST['descripcion'],
-                ':codigo' => $this->get_codigo_aleatorio()
-            ]);
-
-            if (!$rs) {
-                return (new errores())->error(
-                    mensaje: 'No se pudo registrar el tipo de medidor',
-                    data: []
-                );
-            }
-
-            $rs = new stdClass();
-            $rs->registro_id = $this->link->lastInsertId();
-            $rs->cc_tipo_medidor_id = $_POST['cc_tipo_medidor_id'];
-            $rs->descripcion = $_POST['descripcion'];
-
-        } catch (PDOException $e) {
-            return (new errores())->error(
-                mensaje: $e->getMessage(),
-                data: $e
-            );
+        // Candidate: use the controller-populated registro, never global POST.
+        $tipo = $this->registro['cc_tipo_medidor_id'] ?? null;
+        if ((!is_int($tipo) && !is_string($tipo)) ||
+            !preg_match('/^[1-9][0-9]*$/D', (string)$tipo) ||
+            strlen((string)$tipo) > 10 ||
+            (strlen((string)$tipo) === 10 && strcmp((string)$tipo, '2147483647') > 0)) {
+            return (new errores())->error(mensaje: 'Tipo de medidor invalido', data: []);
         }
-
-        return $rs;
+        $this->registro['cc_tipo_medidor_id'] = (int)$tipo;
+        // Retain automatic code generation, while letting ORM build base/audit fields.
+        if (!isset($this->registro['codigo'])) {
+            $this->registro['codigo'] = $this->get_codigo_aleatorio();
+        }
+        // ORM owns legitimate actor checks, validation, insert and its standard result.
+        return parent::alta_bd(keys_integra_ds: $keys_integra_ds);
     }
 
 }
