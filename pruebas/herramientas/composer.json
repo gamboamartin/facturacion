@@ -1,0 +1,1 @@
+{"name":"ivitec/herramientas-regresion","description":"Herramientas aisladas de pruebas de regresión","require-dev":{"phpunit/phpunit":"^10.0"},"config":{"allow-plugins":false},"scripts":{"regresion":"phpunit -c ../../phpunit.xml"}}

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="pruebas/regresion/bootstrap.php" cacheResult="false" failOnWarning="true" failOnRisky="true" colors="true" processIsolation="true">
+  <testsuites>
+    <testsuite name="Regresión unitaria Facturación">
+      <directory suffix="Test.php">pruebas/regresion</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>

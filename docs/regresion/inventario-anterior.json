@@ -1,0 +1,473 @@
+{
+  "fuente": "14e8dbaf6e3ad70797315fdc28240228e7f1acdc",
+  "archivos": [
+    {
+      "ruta": ".phpunit.result.cache",
+      "bytes": 3692,
+      "sha256": "4aa5bcaf4830d5f37cf546b13608fc20860bd098772ca9fb496c0949fe15e4fa",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/base_test.php",
+      "bytes": 126192,
+      "sha256": "a4b71656afe4360ae947b7f046674d87bd1e02ae1cbae39998a7a191061dfa12",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_automaticosTest.php",
+      "bytes": 2176,
+      "sha256": "5169dba7f4fda3649897a245ffa884f9d7bdc68d056de7ef0626f856910f5885",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_base_system_fcTest.php",
+      "bytes": 7098,
+      "sha256": "cdf56fff7a9a70d54c000d99887ecfba0df6088a0e016c30d98b5eb4d10de7c2",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_fc_baseTest.php",
+      "bytes": 1678,
+      "sha256": "b13ed7814d9293dbbf100ab78daf58745ba9bdc7c32049d9d463a954780d543a",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_html_facturaTest.php",
+      "bytes": 10598,
+      "sha256": "35dfb9c7a2395306ecff69bf147f4103eed575b0e1a415b6025aed8aa960cc21",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_partidas_htmlTest.php",
+      "bytes": 15373,
+      "sha256": "81e4a51de412d9a559585080d96caf2699ab4f6061b76b216bdfcaef77a7979b",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_tmpsTest.php",
+      "bytes": 1771,
+      "sha256": "e042a9a37ea0664d67b544f9ccbb7c39351e43b9a784d743b94137a81c30a62e",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/buscar_primera_coincidenciaTest.php",
+      "bytes": 2283,
+      "sha256": "d79b9f3e548a820d2dec50ae9b749740a60cbbaa1806a42ab78dac0a9f70a5ea",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/celda_tiene_valorTest.php",
+      "bytes": 2607,
+      "sha256": "7cb4bf5b50acd25388f3847709a6554629dd2699caaffc4de5076a554a163a62",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/columnas_a_escanearTest.php",
+      "bytes": 1122,
+      "sha256": "be1335726732bb0eba443068d4061e8f0f9a09da48d8ce0335bd378dee8530ef",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/es_columna_validaTest.php",
+      "bytes": 1600,
+      "sha256": "54a13cd3e4db0a6921b3ec0f5352c2cc53595db985364674b59f4c1f8051637f",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/es_fila_inicial_validaTest.php",
+      "bytes": 1229,
+      "sha256": "b262bf2904a806de0d441f5f27b0309028ef3de372cac6def26c7066692c0d45",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/es_fila_validaTest.php",
+      "bytes": 1308,
+      "sha256": "bf1bed09cfb980b266c22908c94fb011036e328a2ab89b7512cb93e751e206c4",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/es_hoja_validaTest.php",
+      "bytes": 1531,
+      "sha256": "c5eda77e5e24b01dda2b9acf2f68e74e902c0d238c866896c015cdda4371fefb",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/es_validoTest.php",
+      "bytes": 2064,
+      "sha256": "a23b7dbf051cfb534562fd19341480d8fc8d975fcb02fd6d8e98a24638f0312e",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/fila_inicialTest.php",
+      "bytes": 2425,
+      "sha256": "d9e1d6a473d00fd0987e202ec056648a7ffb657cf2fffa3b66d7d9dc846fcae1",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/file_encabezadoTest.php",
+      "bytes": 2466,
+      "sha256": "dc7fadc9c7f3baa9637d5a8f641ecef429b3e827a197a3800c1e4c652a54396c",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/init_valueTest.php",
+      "bytes": 1796,
+      "sha256": "00793562da1e0cbb9f01906ff05cc7511d508fd0b3a4cbfbb57f6d4069440e3e",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/leer_valor_celdaTest.php",
+      "bytes": 1762,
+      "sha256": "86425b5b8538d22c28fd7e4cb2bb082ccb7818972c49e6c41fa6c2c3b07446f8",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/normaliza_textoTest.php",
+      "bytes": 1578,
+      "sha256": "08b28d566cb2e4186d9266f6d0d131414a2f1b57a15c52d615133236976153b6",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/tiene_contenido_no_vacioTest.php",
+      "bytes": 1918,
+      "sha256": "21222f0f0661fe65e35fa59de5b37cfcd83d8f4613ae48f46ae7b902c727f23d",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/valida_columnasTest.php",
+      "bytes": 1923,
+      "sha256": "38d02e7538819079fc9843270009628ea4e5eb853b41190957b71507d3275b04",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/_xml_dispersion/valor_celda_normalizadoTest.php",
+      "bytes": 2448,
+      "sha256": "753a5f5e5a59fc60c777d194790572734c8b69036f17c48a253b4d7330e3e065",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/controlador_adm_reporteTest.php",
+      "bytes": 807,
+      "sha256": "77fa06685cdfc15f71bfbe731b9bea60f2e5806684121c6c7bb3115e05a550a7",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/controlador_fc_csdTest.php",
+      "bytes": 1547,
+      "sha256": "1792d8ca4e31c3e88d8db641171642ca1e861d3ae30374cc11eb6a37298841c4",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/controlador_fc_facturaTest.php",
+      "bytes": 3873,
+      "sha256": "6ae24820698e9eaf0dcc768a9089c7c5eeac42942f6a7b9b8c0fd5029e151bb9",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/controlador_fc_factura_documentoTest.php",
+      "bytes": 2762,
+      "sha256": "96cd2602f1aa9d5f003517177de9a7afae7d8efc7efbcb91f6de200bdd3cbfe2",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/controlador_org_empresaTest.php",
+      "bytes": 2008,
+      "sha256": "755cf10324512f3fc719cb60e70fe71b569f61a61052a406863d0ab85836b8ef",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/controllers/pdfTest.php",
+      "bytes": 4234,
+      "sha256": "a4ee2c8cedfcc3fced00c6adff5a65279ccc0ff719fef9fbdbd9659cd72fefac",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/instalacion/instalacionTest.php",
+      "bytes": 5115,
+      "sha256": "d19d4c9adede2f544115691e2a3d79d074bc9e65afbe55dc1e217968185bd86b",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_baseTest.php",
+      "bytes": 1470,
+      "sha256": "26fde64cd04fd93fc67883a78c21b434c9f102be2bb23d3843a4276f312a2213",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_calculo_impsTest.php",
+      "bytes": 9828,
+      "sha256": "f9ab3fdc500f1d6146034b55723e616dfb548b7f2d35e0bb8739e03c9b549c52",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_certTest.php",
+      "bytes": 3001,
+      "sha256": "30a0ff5cc80bbd737458dd056cbebd8852dae6cf25f285412727ff1d646d429d",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_comprobanteTest.php",
+      "bytes": 6509,
+      "sha256": "e308116ad461c4d832b40583473cf0ccad25e23cf693d59d56713f3333c9e9af",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_conceptosTest.php",
+      "bytes": 39660,
+      "sha256": "db35352b46d76a066fd9c41aad8405ca77fa2e2f1a9995c923ef75d8e321562a",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_data_impuestosTest.php",
+      "bytes": 6297,
+      "sha256": "8efcd33f88a2d694a5ec00e6276dc29e1a554c509a1b82105d1a7f1ac9987427",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_docTest.php",
+      "bytes": 2209,
+      "sha256": "3e1342b1beaef2ace8cc539baf5ac3da307800f4aa4b39e22a1708f18192b101",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_dr_partTest.php",
+      "bytes": 9060,
+      "sha256": "d2bec06ff8bb56e9b103e722abc9ea1616458aee789d8ec31c0742879d25583e",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_duplicaTest.php",
+      "bytes": 2020,
+      "sha256": "939e0a5eccc928bfba2c3be4cdabc7417580c9ca71ef0c22795d0e7a7a4de379",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_emailTest.php",
+      "bytes": 2605,
+      "sha256": "9c16dd083d3cddc77b8a5bb9f36289199832da221ef2f3980e3a85864c430e26",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_facturacionTest.php",
+      "bytes": 5245,
+      "sha256": "2526f1238b78e5dce9822555b5f96da8f575db15b790c8d99e43849b57396c73",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_impuestosTest.php",
+      "bytes": 17537,
+      "sha256": "5d466a65b986ba15827615e47ccdb8187b4926a2bd35b0b959f98851f7fc5a01",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_partidaTest.php",
+      "bytes": 23487,
+      "sha256": "d618a4c948dfff5a4104f7d5a0fb1a069a763d92bc15ebffac0addb59b126072",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_plantillaTest.php",
+      "bytes": 22747,
+      "sha256": "59e15751fe88d519d5c8ee819ad941e99b54ed270dabad016825e491aeb5ed03",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_relacionTest.php",
+      "bytes": 10074,
+      "sha256": "a0239c91c1e806283ed34f03297ad32ac6c39df5a8b1495d6e253222104e15a2",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_saldos_fcTest.php",
+      "bytes": 4975,
+      "sha256": "e74d600b49854fbc294ed13a537cf45d35e516eeb0ce4173156e0f26b8d6b5e0",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_selladoTest.php",
+      "bytes": 3833,
+      "sha256": "0c308f35f80242af0c5c9b9115818daa5d00682a34e09813b750ec8eacb59e53",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_transacciones_fcTest.php",
+      "bytes": 13883,
+      "sha256": "d9af90f06553e7692472469a5d4fdf05d22818ab3c73fafdd76eed4dd58b5cc3",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/_trasladoTest.php",
+      "bytes": 2995,
+      "sha256": "bb049266afd55af4bf8f2883028a96d3d9aecfaa85596d6c9a8760ab0ad0a55a",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/fc_complemento_pagoTest.php",
+      "bytes": 8236,
+      "sha256": "9001c223587c357fbf6a4243f728bbd54fe30fc58242ee0de2bf089be2635889",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/fc_conf_retenidoTest.php",
+      "bytes": 2086,
+      "sha256": "12a2fe826b8878f3bc08c6361bfab27a8376fe4800b6d7827a47963d76505a5b",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/fc_docto_relacionadoTest.php",
+      "bytes": 10971,
+      "sha256": "761600590ba2dd40e762e12b152f5863647687acaa67e8b85550286a8d6ae3e0",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/fc_ejecucion_aut_plantillaTest.php",
+      "bytes": 2103,
+      "sha256": "d6117601b12d840d093a69383be58ba76856fb80148f2afb06606879713165c5",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/fc_facturaTest.php",
+      "bytes": 27200,
+      "sha256": "80d0cf41f0c333f7e59babfe22b74285574d4139751188e921f7955d38bab6d3",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/fc_impuesto_pTest.php",
+      "bytes": 2091,
+      "sha256": "602aa069114a78d9bc266e08e62f0344f252d91e4d3140d89852a26c4c9f0223",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/fc_pagoTest.php",
+      "bytes": 2166,
+      "sha256": "29cba4e0acb60136028e347e9e0170f5a1466c47faac0d34ea809b8b8dcb57b7",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/fc_pago_pagoTest.php",
+      "bytes": 3676,
+      "sha256": "e59e8dfa88194438ef18a10f07f11e52f6039416da3d923a00de5a784dd0b18f",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/fc_partidaTest.php",
+      "bytes": 8479,
+      "sha256": "0334abe3eeef17229e6b8bb08a94f59799defea36bb64b102efada55a54bf397",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/fc_relacionTest.php",
+      "bytes": 4168,
+      "sha256": "8e36b205bbb665ccb216d52b193ddc638c078428c2d5991f8d80be5ba0d40a20",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/orm/fc_trasladoTest.php",
+      "bytes": 2114,
+      "sha256": "bf67045cdeddd332f07f391baf45a4dba264efbedcc14722e11ba1635caf8815",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/regression/cp_alta_presentacion.php",
+      "bytes": 2901,
+      "sha256": "84d382b55a0c7c7c09948b144577e82ecc87bd336310cbefb569c475ab9a9ecb",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/regression/cp_zero_totals.php",
+      "bytes": 3813,
+      "sha256": "8ae9bf32a1f16a913ad84777518cf14538d5afa17774cfda0529c55740db1d6b",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/regression/menu_theme.php",
+      "bytes": 5160,
+      "sha256": "eb5ef2f3ceb0f14c6e8fb326b2cdd8621d639a3d09c82bba275e326cb95d878e",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/regression/modifica_presentacion.php",
+      "bytes": 2908,
+      "sha256": "6b835fee271748681fa0d6eed5b2112fef86a878ae7926cb8872e40f80c30ca7",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/regression/nc_modifica_model_bindings.php",
+      "bytes": 4044,
+      "sha256": "9234b6be47bc5a80003a882f49a780bdcf537d08b238cd0b93e0bd226d8051e8",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/regression/nc_modifica_projection.js",
+      "bytes": 4908,
+      "sha256": "f99b6c1f7b9ee2cccc90635bd9a49154ae619bff64bb73b4ae0ba5c4a6b2c0af",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/regression/nc_shared_script_version.php",
+      "bytes": 1061,
+      "sha256": "df44f9cd5b25f4e14d42933960da3032786c2c546830bbe2df46012e7daa1b52",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/regression/nc_totals_projection.js",
+      "bytes": 3726,
+      "sha256": "47a1dc918448cda9df86770368386973bb33116f48fc7f3337647ae47a517192",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/templates/directivas/_base_fc_htmlTest.php",
+      "bytes": 1491,
+      "sha256": "635979cb7fb2032c0b86ad2f0da9de0f3aec10d28038e5d3e5c0a35cac98a004",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/templates/directivas/fc_csd_htmlTest.php",
+      "bytes": 1648,
+      "sha256": "63d2f87efe1482a4ac157dd28ddf925b8dbd5a08e237dc1edb75d6091121a5b8",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/templates/directivas/fc_factura_htmlTest.php",
+      "bytes": 2184,
+      "sha256": "c6b449ea854b343f66686a755624dbe8f0518890d269d3335d66befc73e70756",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tests/txt.txt",
+      "bytes": 4,
+      "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "accion": "retirar_del_conjunto_activo"
+    },
+    {
+      "ruta": "tools/migrations/applier/test_medidor.php",
+      "bytes": 1918,
+      "sha256": "26c2bca819446e5ab575e8f38957b3aa7edd430cf5bbf6ce9851184da9dd94ee",
+      "accion": "conservar_pendiente_revision_herramientas"
+    },
+    {
+      "ruta": "tools/migrations/applier/test_offline.py",
+      "bytes": 2763,
+      "sha256": "68bb1c9460c13802520c674808a534559effe8ecc39f10ac1cf9b48919fade7b",
+      "accion": "conservar_pendiente_revision_herramientas"
+    },
+    {
+      "ruta": "tools/migrations/applier/test_policy.php",
+      "bytes": 6406,
+      "sha256": "1e977defa7e538fbe167925d81485a8ff7f4c0d6856ecc7dd32f09fef47f914b",
+      "accion": "conservar_pendiente_revision_herramientas"
+    },
+    {
+      "ruta": "tools/migrations/applier/test_session_mode.php",
+      "bytes": 813,
+      "sha256": "60d23eea497ea4494b927e6f934f37649ae0a47d61d844e9c1e0528fe8e0914c",
+      "accion": "conservar_pendiente_revision_herramientas"
+    },
+    {
+      "ruta": "tools/migrations/test_inventory.py",
+      "bytes": 4631,
+      "sha256": "2b9bdd18cd17ff4c92f199392c6d3bd52c1931499b463faa5f0395d90407579f",
+      "accion": "conservar_pendiente_revision_herramientas"
+    }
+  ]
+}
