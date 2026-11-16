@@ -242,6 +242,10 @@ function modifica_partida_bd(contenedores, data, entidad_factura){
         type : 'POST',
 
         success : function(json) {
+            // NC has a different row markup and refreshed-header response contract.
+            if (entidad_factura === 'fc_nota_credito') {
+                return nc_aplica_modificacion(contenedores, json);
+            }
             console.log(json);
             alert(json.mensaje);
 

@@ -1,7 +1,7 @@
 <?php
 /** Read-only preservation check; no application bootstrap, DB or configuration. */
 $expected = json_decode(<<<'JSON'
-{"fc_factura": ["ffa98506e8aeb93e6fa3c7559b7742cda6b82325365be082e669f87de38d63bf", "08fcb7ef864f14d0ca7bd8da3a9b6f4e5c02de6ab10845f6885211e06af7b789"], "fc_nota_credito": ["039cb5bd9c1ef5cb74983bbcf95531600a9ddb5650b7fbd3cea798e023efba82", "c8460a036b7ebc5933c4668b170cfe398f1928e5fe1c2c3d9c9d3e69a51b3bc4"]}
+{"fc_factura": ["ffa98506e8aeb93e6fa3c7559b7742cda6b82325365be082e669f87de38d63bf", "08fcb7ef864f14d0ca7bd8da3a9b6f4e5c02de6ab10845f6885211e06af7b789"], "fc_nota_credito": ["039cb5bd9c1ef5cb74983bbcf95531600a9ddb5650b7fbd3cea798e023efba82", "f3b8a51dacee4dbe04b4adfd105a16513980bb13449fcf194e4598cd476a9182"]}
 JSON, true);
 foreach ($expected as $entity => [$phpHash, $tagHash]) {
     $source = file_get_contents(__DIR__ . '/../../views/' . $entity . '/modifica.php');

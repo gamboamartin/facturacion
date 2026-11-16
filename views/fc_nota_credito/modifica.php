@@ -207,7 +207,7 @@ if (isset($data->js_view) && is_string($data->js_view) &&
 
 
 </div>
-<script src="<?php echo (new \config\generales())->url_base."js/_facturacion.js" ?>"></script>
+<script src="<?php echo (new \config\generales())->url_base."js/_facturacion.js" ?>?v=405ec9a8ad26"></script>
 
 
 

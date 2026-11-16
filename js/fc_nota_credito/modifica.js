@@ -19,6 +19,58 @@ function nc_totales_respuesta(json) {
     return totales;
 }
 
+// Modification returns the refreshed joined row in registro_actualizado, not registro_obj.
+function nc_modificacion_respuesta(json) {
+    if (!json || (json.error && json.error !== '0') || !json.registro_puro || !json.registro_actualizado) return null;
+    const id = String(json.registro_id);
+    if (!/^[1-9][0-9]*$/.test(id) || String(json.registro_puro.id) !== id) return null;
+    const cabecera = nc_totales_respuesta({registro_obj: json.registro_actualizado, registro_puro: json.registro_puro});
+    if (!cabecera) return null;
+    const partida = {};
+    for (const campo of ['cantidad', 'valor_unitario', 'descuento', 'sub_total_base', 'sub_total', 'total_traslados', 'total_retenciones', 'total']) {
+        const valor = json.registro_puro[campo];
+        if (!((typeof valor === 'number' || (typeof valor === 'string' && valor.trim() !== '')) && Number.isFinite(Number(valor)))) return null;
+        partida[campo] = String(valor);
+    }
+    return {id: id, cabecera: cabecera, partida: partida};
+}
+function nc_aplica_modificacion(contenedores, json) {
+    if (json && json.error && json.error !== '0') {
+        alert(typeof json.mensaje === 'string' ? json.mensaje : 'El servidor rechazó la modificación.');
+        return false;
+    }
+    const datos = nc_modificacion_respuesta(json);
+    const fallo = function () { alert('No fue posible actualizar los importes en pantalla. Recarga la nota antes de volver a modificarla.'); return false; };
+    if (!datos) return fallo();
+    const fila = contenedores.cte_formulario;
+    const entrada = fila.children('.tr_data_partida');
+    const resumen = entrada.next('tr').children('td');
+    const importe = entrada.children('td').eq(2).children('input[disabled]');
+    const cabecera = $('.form-main form.form-additional').first();
+    const controles = {};
+    const campos = ['cantidad', 'valor_unitario', 'descuento'];
+    if (fila.length !== 1 || entrada.length !== 1 || resumen.length !== 4 || importe.length !== 1 ||
+        String(contenedores.td_fc_partida_descripcion.data('fc_partida_factura_id')) !== datos.id) return fallo();
+    for (const campo of campos) {
+        controles[campo] = entrada.find('input.fc_partida_' + campo);
+        if (controles[campo].length !== 1) return fallo();
+    }
+    const totales = {};
+    for (const campo of Object.keys(datos.cabecera)) {
+        totales[campo] = cabecera.find('[id="' + campo + '"]');
+        if (totales[campo].length !== 1) return fallo();
+    }
+    // All response values and targets were checked before the first DOM mutation.
+    campos.forEach(function (campo) { controles[campo].val(datos.partida[campo]); });
+    importe.val(datos.partida.sub_total_base);
+    const etiquetas = ['Sub Total: ', 'Traslados: ', 'Retenciones: ', 'Total: '];
+    ['sub_total', 'total_traslados', 'total_retenciones', 'total'].forEach(function (campo, indice) {
+        resumen.eq(indice).empty().append($('<b>').text(etiquetas[indice])).append(document.createTextNode(Number(datos.partida[campo]).toFixed(2)));
+    });
+    Object.keys(totales).forEach(function (campo) { totales[campo].val(datos.cabecera[campo]); });
+    return true;
+}
+
 let session_id = getParameterByName('session_id');
 let adm_menu_id = getParameterByName('adm_menu_id');
 
