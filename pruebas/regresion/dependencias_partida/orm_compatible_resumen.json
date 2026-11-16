@@ -1,0 +1,164 @@
+{
+  "probe": {
+    "success": true,
+    "scope": "real_actions_links_and_ORM_synthetic_catalogue_SELECT_only",
+    "initial_menu": {
+      "elapsed_ms": 617.27,
+      "queries": 61,
+      "sql_ms": 38.32
+    },
+    "cases": [
+      {
+        "rows": 1,
+        "actions": 2,
+        "sections": 74,
+        "elapsed_ms": 135.03,
+        "queries": 2,
+        "sql_ms": 5.38,
+        "query_kinds": {
+          "SELECT": 2
+        },
+        "result_rows": 1
+      },
+      {
+        "rows": 10,
+        "actions": 2,
+        "sections": 74,
+        "elapsed_ms": 1324.46,
+        "queries": 20,
+        "sql_ms": 54.5,
+        "query_kinds": {
+          "SELECT": 20
+        },
+        "result_rows": 10
+      }
+    ],
+    "existing_point_link_API_comparison": {
+      "rows": 10,
+      "links": 20,
+      "normalized_urls_equal": true,
+      "elapsed_ms": 1.34,
+      "queries": 0,
+      "sql_ms": 0
+    },
+    "point_link_denied_empty": true,
+    "compatibility": {
+      "standard_menu_context_equal": true,
+      "group_switch_denied": true,
+      "missing_user_denied": true,
+      "custom_alias_preserved_by_original": "alta",
+      "generic_wrong_action": "nueva_sucursal",
+      "custom_generic_equivalence": false,
+      "root_fix_requires_custom_fallback": true
+    },
+    "request_scoped_contract_prototype": {
+      "standard_urls_equal": 20,
+      "custom_alias_equal": true,
+      "revocation_denied": true,
+      "custom_denied": true,
+      "invalid_id_rejected": true,
+      "cross_user_reuse_rejected": true,
+      "new_group_denied": true,
+      "queries": 0,
+      "elapsed_ms": 2.82,
+      "scope": "two_standard_actions_and_one_explicit_custom_resolver_only_not_full_app_migration"
+    },
+    "real_partida_page": {
+      "rows": 10,
+      "total": 85,
+      "first_id": "75",
+      "queries": 9,
+      "elapsed_ms": 33.3
+    },
+    "real_acl": {
+      "allowed_group_actions": 2,
+      "denied_group_actions": 0,
+      "column_count": 10
+    },
+    "real_lista_shell": {
+      "elapsed_ms": 0.04,
+      "queries": 0
+    },
+    "real_get_data": {
+      "elapsed_ms": 17.61,
+      "queries": 3,
+      "keys": [
+        "draw",
+        "recordsTotal",
+        "recordsFiltered",
+        "data"
+      ],
+      "row_count": 10
+    },
+    "real_regressions": {
+      "allowed_buttons_present": true,
+      "not_actions_excluded": true,
+      "denied_group_no_buttons": true,
+      "exact_filter_42": true,
+      "search_P85": true,
+      "json_column_count": 10,
+      "scope": "real ORM/datatables/ACL/render methods; system controller constructed by Reflection with synthetic state, not full controller constructor or HTTP"
+    },
+    "prior_framework_defects": {
+      "requested_asc_actual": {
+        "fc_partida_id": "ASC"
+      },
+      "length_zero_division": true
+    },
+    "full_constructor_started": true,
+    "full_constructor_completed": true,
+    "full_constructor_ms": 1250.07,
+    "full_constructor_lista_ajax": {
+      "queries": 0,
+      "elapsed_ms": 0.02,
+      "original_default_columns": 10
+    },
+    "full_configuration": {
+      "slots": 1,
+      "columns": 10,
+      "source": "candidate_constructor_without_manual_reconfiguration"
+    },
+    "full_invoice_A": {
+      "filtered": 40,
+      "rows": 10,
+      "queries": 10,
+      "elapsed_ms": 39.68,
+      "amounts_preserved": true
+    },
+    "full_invoice_B": {
+      "filtered": 45,
+      "rows": 10,
+      "isolation_preserved": true
+    },
+    "nested_factura_context": {
+      "section": "fc_factura",
+      "columns": 6,
+      "legacy_flag_preserved": true,
+      "get_preserved": true
+    },
+    "candidate_order_sql": {
+      "asc": {
+        "first_id": 1,
+        "rows": 10
+      },
+      "desc": {
+        "first_id": 85,
+        "rows": 10
+      }
+    },
+    "action_order_rejected": true,
+    "last_data_without_actions": {
+      "fc_partida_n_retenidos": "ASC"
+    },
+    "sentinel": "PARTIDA_READ_PROFILE_COMPLETE",
+    "diagnostic": ""
+  },
+  "primary_success": true,
+  "admin_result": {
+    "success": true,
+    "baseline_unchanged": true,
+    "shutdown_identity_verified": true,
+    "shutdown_sent": true
+  },
+  "server_stopped": true
+}

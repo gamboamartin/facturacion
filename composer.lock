@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0aefc97a238f15db18a1f4e0f5cec33d",
+    "content-hash": "174c6bc51688602d8b5e87202b93658b",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -777,16 +777,16 @@
         },
         {
             "name": "gamboa.martin/administrador",
-            "version": "v22.44.0",
+            "version": "v22.44.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gamboamartin/administrador.git",
-                "reference": "88d245026ace6cfa8821a360e954b9db64356f57"
+                "reference": "21fb890eb42f2dd81c629ff4799d834db56ce9ca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gamboamartin/administrador/zipball/88d245026ace6cfa8821a360e954b9db64356f57",
-                "reference": "88d245026ace6cfa8821a360e954b9db64356f57",
+                "url": "https://api.github.com/repos/gamboamartin/administrador/zipball/21fb890eb42f2dd81c629ff4799d834db56ce9ca",
+                "reference": "21fb890eb42f2dd81c629ff4799d834db56ce9ca",
                 "shasum": ""
             },
             "require": {
@@ -849,9 +849,9 @@
             "description": "Frontend",
             "support": {
                 "issues": "https://github.com/gamboamartin/administrador/issues",
-                "source": "https://github.com/gamboamartin/administrador/tree/v22.44.0"
+                "source": "https://github.com/gamboamartin/administrador/tree/v22.44.1"
             },
-            "time": "2025-09-01T16:51:19+00:00"
+            "time": "2026-11-16T21:31:50+00:00"
         },
         {
             "name": "gamboa.martin/banco",
@@ -2031,16 +2031,16 @@
         },
         {
             "name": "gamboa.martin/system",
-            "version": "v24.21.0",
+            "version": "v24.21.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gamboamartin/system.git",
-                "reference": "345cfb1d61353deb4c7892bf000a70233fb08653"
+                "reference": "b586863f6ed7360c1a96e608b29006e3612900a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gamboamartin/system/zipball/345cfb1d61353deb4c7892bf000a70233fb08653",
-                "reference": "345cfb1d61353deb4c7892bf000a70233fb08653",
+                "url": "https://api.github.com/repos/gamboamartin/system/zipball/b586863f6ed7360c1a96e608b29006e3612900a7",
+                "reference": "b586863f6ed7360c1a96e608b29006e3612900a7",
                 "shasum": ""
             },
             "require": {
@@ -2080,9 +2080,9 @@
             "description": "Base controlador para templates",
             "support": {
                 "issues": "https://github.com/gamboamartin/system/issues",
-                "source": "https://github.com/gamboamartin/system/tree/v24.21.0"
+                "source": "https://github.com/gamboamartin/system/tree/v24.21.1"
             },
-            "time": "2025-03-22T01:55:45+00:00"
+            "time": "2026-11-16T21:30:26+00:00"
         },
         {
             "name": "gamboa.martin/template",
@@ -6485,5 +6485,5 @@
         "ext-libxml": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.6.0"
 }

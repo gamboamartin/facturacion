@@ -10,6 +10,21 @@ class _ctl_partida extends _base{
     protected string $name_entidad_factura = '';
     public function alta(bool $header, bool $ws = false): array|string
     {
+        $preparacion = $this->prepara_alta(header: $header, ws: $ws);
+        if (errores::$error) {
+            return $preparacion;
+        }
+        $inputs = $this->inputs(keys_selects: $preparacion->keys_selects);
+        if (errores::$error) {
+            return $this->retorno_error(
+                mensaje: 'Error al obtener inputs', data: $inputs, header: $header, ws: $ws);
+        }
+        return $preparacion->template;
+    }
+
+    /** Prepara estado y selects sin construir HTML que el contexto descartaría. */
+    public function prepara_alta(bool $header, bool $ws = false): array|stdClass|string
+    {
         $r_alta = $this->init_alta();
         if (errores::$error) {
             return $this->retorno_error(mensaje: 'Error al inicializar alta', data: $r_alta, header: $header, ws: $ws);
@@ -27,13 +42,7 @@ class _ctl_partida extends _base{
         $this->row_upd->subtotal = 0;
         $this->row_upd->total = 0;
 
-        $inputs = $this->inputs(keys_selects: $keys_selects);
-        if (errores::$error) {
-            return $this->retorno_error(
-                mensaje: 'Error al obtener inputs', data: $inputs, header: $header, ws: $ws);
-        }
-
-        return $r_alta;
+        return (object)['template' => $r_alta, 'keys_selects' => $keys_selects];
     }
 
     public function alta_bd(bool $header, bool $ws = false): array|stdClass
@@ -89,7 +98,7 @@ class _ctl_partida extends _base{
         return $this;
     }
 
-    private function init_datatable(): stdClass
+    protected function configuracion_listado_partida(): stdClass
     {
         $columns["fc_partida_id"]["titulo"] = "Id";
         $columns["com_producto_codigo"]["titulo"] = "Cod Producto";

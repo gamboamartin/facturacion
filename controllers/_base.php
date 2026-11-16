@@ -11,14 +11,15 @@ use PDO;
 use stdClass;
 
 class _base extends _ctl_base {
-    public function __construct(html_controler $html_,PDO $link, modelo $modelo, stdClass $paths_conf = new stdClass())
+    public function __construct(html_controler $html_,PDO $link, modelo $modelo, stdClass $paths_conf = new stdClass(),
+                                ?stdClass $config_datatable = null)
     {
 
 
 
         $obj_link = new links_menu(link: $link, registro_id: $this->registro_id);
 
-        $datatables = $this->init_datatable();
+        $datatables = $config_datatable ?? $this->init_datatable();
         if (errores::$error) {
             $error = $this->errores->error(mensaje: 'Error al inicializar datatable', data: $datatables);
             print_r($error);

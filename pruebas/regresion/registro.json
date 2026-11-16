@@ -111,6 +111,122 @@
         "testErrorVistaConHeaderSinWs",
         "testErrorVistaSinHeaderConWs"
       ]
+    },
+    {
+      "id": "fc_partida_listado",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 9,
+      "fuentes": {
+        "controllers/_base.php": "ffeeb86f267e788de0e02ca91140e6469f036e8eb862a666371791d62ed87452",
+        "controllers/_ctl_partida.php": "533ef33f8c33dd50ce0d85d7fe2e8c26e5bfab4ad593b9066b356852c4499a99",
+        "controllers/controlador_fc_partida.php": "dc6a89d55e041d2042cd86da7b6181d4c54ebfa1788384b5ba192a0cf4523d1f",
+        "controllers/controlador_fc_partida_nc.php": "2b9ec7049f1fa532d480305ab74cfc30cb6087d554590b6814bdfc392b75f58b",
+        "controllers/controlador_fc_partida_cp.php": "6c4c3ab7f05e16a7f531b0830116c9b6b36c7deebf6bdd1ff0f015b4104d52c7"
+      },
+      "limites": "Constructores reales de aplicación con framework y modelos dobles sin red; no sustituye integración SQL/ACL/frontend. No operaciones fiscales.",
+      "clase_phpunit": "fc_partida/PartidaListadoTest.php",
+      "casos": [
+        "testFacturaConfiguraUnaSolaTabla",
+        "testFacturaConservaFiltrosDeRelacion",
+        "testNotaCreditoConservaConstructorAnterior",
+        "testComplementoConservaConstructorAnterior",
+        "testBaseSinParametroMantieneDefault",
+        "testBaseRecibeConfiguracionSinMutarla",
+        "testFacturaConservaConexionRutasYGenerador",
+        "testContextoFacturaNoActivaTablaDePartida",
+        "testContextoDirectoPartidaActivaTabla"
+      ]
+    },
+    {
+      "id": "catalogo_partida",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 23,
+      "fuentes": {
+        "orm/com_producto.php": "056aaa44351dd06e4062b3ce684e694a92bf00c8cf59a8c6eda008a66605cce3",
+        "controllers/_base_system_fc.php": "b833992e29d4bbfe3e49feb0eed1e8764c2386ad7b3682a43f6637d2985a75b7"
+      },
+      "limites": "Método real local con ORM doble, SELECT ficticio; no snapshot concurrente ni frontend. Errores preservan causa y mensaje público, no trace literal.",
+      "clase_phpunit": "catalogo_partida/CatalogoPartidaTest.php",
+      "casos": [
+        "testVacioNoConsultaClienteInvalido",
+        "testPrecioClienteSobreTipoYBase",
+        "testFiscalSoloOverrideCliente",
+        "testOrdenIndicesYCamposSinMutarEntrada",
+        "testRedondeoFronteras",
+        "testOverridesInactivosNoSeDescartan",
+        "testClientesAlternadosSinCache",
+        "testFiltrosConservanTipoYCliente",
+        "testConsultasNoCrecenPorProducto",
+        "testDuplicadoPrimeroDetieneAntesPrecioClienteSinReleer",
+        "testDuplicadoClienteConservaFilasObservadas",
+        "testDuplicadosFueraCatalogoSeIgnoran",
+        "testFalloClienteConservaCausaYDetiene",
+        "testFalloTipoConservaCausaYDetiene",
+        "testFalloPrecioConservaCausaSinReintentar",
+        "testDuplicadoDesapareceDespuesLecturaSinReconsulta",
+        "testPrecioCambiaDespuesLecturaConservaFilasObservadas",
+        "testAlcanceSoloFacturaYPartidaExactas",
+        "testBaseNoNumericaSeRechazaInclusoConOverride",
+        "testPrecioTipoNoNumericoNoSeConvierteEnCero",
+        "testPrecioClienteNoNumericoNoSeConvierteEnCero",
+        "testAcotaAmbasConsultasPorIdsSinStatus",
+        "testMilesDeOverridesAjenosNoAfectanResultado"
+      ]
+    },
+    {
+      "id": "render_partida",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 7,
+      "fuentes": {
+        "controllers/_ctl_partida.php": "533ef33f8c33dd50ce0d85d7fe2e8c26e5bfab4ad593b9066b356852c4499a99",
+        "controllers/_base_system_fc.php": "b833992e29d4bbfe3e49feb0eed1e8764c2386ad7b3682a43f6637d2985a75b7"
+      },
+      "limites": "Preparación/alta reales con colaboradores dobles; integración HTML separada, no navegador ni transacciones.",
+      "clase_phpunit": "render_partida/RenderPartidaTest.php",
+      "casos": [
+        "testAltaConservaTemplateYRenderUnico",
+        "testPreparacionNoRenderiza",
+        "testDefaultsYCamposPreviosConservados",
+        "testFalloInitDetieneYConservaFlags",
+        "testFalloSelectsNoRenderiza",
+        "testFalloInputsConservaContrato",
+        "testAltaRepetidaReinicializaSinDuplicarRender"
+      ]
+    },
+    {
+      "id": "dependencias_partida",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 4,
+      "fuentes": {
+        "pruebas/regresion/dependencias_partida/init_corregido.php": "a98ce7d2db9b9419f733d591887f9864f9bd63298d55b6f032f93863e80c1afb",
+        "pruebas/regresion/dependencias_partida/adm_seccion_corregido.php": "8c1eb87c0106a5a94528d9e6f65b8e03f089e5eb1f2a39b6236b8435a05f9a60",
+        "pruebas/regresion/dependencias_partida/init_compatible.php": "cc365694398fac99de6c299b2b4166befdd8a73013010c6cda0ff6c0083cc2e1"
+      },
+      "limites": "Propuestas aisladas: 23 casos system y 8 administrador. No instala dependencias ni certifica consumidores CSS externos. ORM ACL separado documentado.",
+      "clase_phpunit": "dependencias_partida/DependenciasPartidaTest.php",
+      "casos": [
+        "testSystemDoceCasosBase",
+        "testSystemOncePrecedenciasSinCambiarEsperado",
+        "testAdministradorOchoCasosEquivalentes",
+        "testFallbackContratoDesconocidoConservaSalidaGetErrores"
+      ]
+    },
+    {
+      "id": "transicion_partida",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 4,
+      "fuentes": {
+        "controllers/controlador_fc_partida.php": "dc6a89d55e041d2042cd86da7b6181d4c54ebfa1788384b5ba192a0cf4523d1f",
+        "controllers/_base_system_fc.php": "b833992e29d4bbfe3e49feb0eed1e8764c2386ad7b3682a43f6637d2985a75b7"
+      },
+      "limites": "Compatibilidad constructor con padres anteriores; 32 combinaciones ORM y FPM/OPcache aparte. No frontend ni transacciones reales.",
+      "clase_phpunit": "transicion_partida/TransicionPartidaTest.php",
+      "casos": [
+        "testBaseAnteriorNoRecibeParametroDesconocido",
+        "testPadreAnteriorNoInvocaMetodoAusente",
+        "testAmbosPadresAnterioresConservanRuta",
+        "testContextoFacturaConPadresAnteriores"
+      ]
     }
   ]
 }

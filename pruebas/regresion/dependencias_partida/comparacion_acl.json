@@ -1,0 +1,122 @@
+{
+  "sections_contract": {
+    "original": {
+      "result": {
+        "2": {
+          "adm_seccion_id": 1,
+          "keep": "A"
+        },
+        "15": {
+          "adm_seccion_id": 4,
+          "keep": "D"
+        },
+        "18": {
+          "adm_seccion_id": 4,
+          "keep": "E"
+        }
+      },
+      "queries": 6,
+      "empty": []
+    },
+    "corregido": {
+      "result": {
+        "2": {
+          "adm_seccion_id": 1,
+          "keep": "A"
+        },
+        "15": {
+          "adm_seccion_id": 4,
+          "keep": "D"
+        },
+        "18": {
+          "adm_seccion_id": 4,
+          "keep": "E"
+        }
+      },
+      "queries": 1,
+      "empty": []
+    }
+  },
+  "group_menu_contract": {
+    "original": {
+      "1": [
+        1
+      ],
+      "2": [
+        4
+      ]
+    },
+    "corregido": {
+      "1": [
+        1
+      ],
+      "2": [
+        4
+      ]
+    }
+  },
+  "acl_extendido": {
+    "original": {
+      "0:1:1": [],
+      "1:2:1": [
+        1
+      ],
+      "2:1:1": [
+        4
+      ],
+      "1:1:-1": [],
+      "1:1:999": []
+    },
+    "corregido": {
+      "0:1:1": [],
+      "1:2:1": [
+        1
+      ],
+      "2:1:1": [
+        4
+      ],
+      "1:1:-1": [],
+      "1:1:999": []
+    }
+  },
+  "ids_no_canonicos": {
+    "original": {
+      "01": [
+        {
+          "adm_seccion_id": "01"
+        }
+      ],
+      "1.0": [
+        {
+          "adm_seccion_id": "1.0"
+        }
+      ]
+    },
+    "corregido": {
+      "01": [
+        {
+          "adm_seccion_id": "01"
+        }
+      ],
+      "1.0": [
+        {
+          "adm_seccion_id": "1.0"
+        }
+      ]
+    }
+  },
+  "action_error_contract": {
+    "original": {
+      "error_flag": true,
+      "top_message": "Error al obtener acciones",
+      "injected": 1
+    },
+    "corregido": {
+      "error_flag": true,
+      "top_message": "Error al obtener acciones",
+      "injected": 1
+    }
+  },
+  "equivalencia_sin_conteo": true,
+  "secciones_resultado_igual": true
+}
