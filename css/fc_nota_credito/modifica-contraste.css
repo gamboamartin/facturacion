@@ -1,0 +1,27 @@
+/* Modifica de nota de crédito: opciones legibles sin modificar otros formularios. */
+#vista_fc_nota_credito_modifica .bootstrap-select .dropdown-menu {
+    background: #fff;
+}
+#vista_fc_nota_credito_modifica .bootstrap-select .dropdown-menu li > a {
+    color: #302246;
+    background: #fff;
+}
+#vista_fc_nota_credito_modifica .bootstrap-select .dropdown-menu li > a span.text {
+    color: inherit;
+}
+#vista_fc_nota_credito_modifica .bootstrap-select .dropdown-menu li > a:hover,
+#vista_fc_nota_credito_modifica .bootstrap-select .dropdown-menu li > a:focus {
+    color: #302246;
+    background: #f0e9ff;
+}
+#vista_fc_nota_credito_modifica .bootstrap-select .dropdown-menu li.selected > a,
+#vista_fc_nota_credito_modifica .bootstrap-select .dropdown-menu li.active > a {
+    color: #fff;
+    background: #7138e2;
+}
+#vista_fc_nota_credito_modifica .bootstrap-select .dropdown-menu li.disabled > a,
+#vista_fc_nota_credito_modifica .bootstrap-select .dropdown-menu li.disabled > a:hover,
+#vista_fc_nota_credito_modifica .bootstrap-select .dropdown-menu li.disabled > a:focus {
+    color: #6d6579;
+    background: #fff;
+}
