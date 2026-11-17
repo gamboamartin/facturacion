@@ -227,6 +227,22 @@
         "testAmbosPadresAnterioresConservanRuta",
         "testContextoFacturaConPadresAnteriores"
       ]
+    },
+    {
+      "id": "com_sucursal",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 4,
+      "fuentes": {
+        "controllers/controlador_com_sucursal.php": "945139b894463ca314825d95de8a3a2e7d3c4d3c4bc4461c22381ecda94a3ad5"
+      },
+      "limites": "Contrato de override con padre doble sin DB. No mide SQL ni certifica render o tiempo real.",
+      "clase_phpunit": "com_sucursal/SucursalListadoTest.php",
+      "casos": [
+        "testOmitePrecargaDescartada",
+        "testRepetirListaNoPrecarga",
+        "testGetDataConservaHerencia",
+        "testNoSobrescribeOperaciones"
+      ]
     }
   ]
 }
