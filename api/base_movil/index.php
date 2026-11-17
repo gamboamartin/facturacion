@@ -3,6 +3,7 @@ namespace base_movil\v1;
 
 use base\conexion;
 use base_movil\v1\src\app_config;
+use base_movil\v1\src\app_dispositivo;
 use base_movil\v1\src\app_push;
 use base_movil\v1\src\app_screens;
 use base_movil\v1\src\app_sesion;
@@ -40,6 +41,7 @@ ini_set('log_errors', '1');
 
 require 'vendor/autoload.php';
 require_once __DIR__ . '/src/app_config.php';
+require_once __DIR__ . '/src/app_dispositivo.php';
 require_once __DIR__ . '/src/app_screens.php';
 require_once __DIR__ . '/src/app_sesion.php';
 require_once __DIR__ . '/src/fcm_envio.php';
@@ -61,6 +63,7 @@ $rutas = array(
     'configuracion_app' => app_config::class,
     'registra_push_token' => app_push::class,
     'envia_notificacion_prueba' => app_push::class,
+    'valida_dispositivo' => app_dispositivo::class,
 );
 
 if (!isset($rutas[$method])) {

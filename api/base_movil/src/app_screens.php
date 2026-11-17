@@ -139,6 +139,67 @@ class app_screens
     }
 
     /**
+     * Construye la pantalla de validación de hardware delegando al proyecto activo.
+     * Es de acceso público previo al login y no requiere sesión PHP ni JWT.
+     */
+    public function obten_pantalla_dispositivo_bloqueado(string $uuid, string $ip_tunel, string $mensaje): array
+    {
+        $proyecto = $this->proyecto();
+        if (is_array($proyecto)) {
+            return $proyecto;
+        }
+
+        // Si el proyecto activo implementa pantalla personalizada de dispositivo bloqueado
+        if (method_exists($proyecto, 'construye_dispositivo_bloqueado')) {
+            $pantalla = $proyecto->construye_dispositivo_bloqueado($uuid, $ip_tunel, $mensaje);
+            if (isset($pantalla['error'])) {
+                return $pantalla;
+            }
+            return $pantalla;
+        }
+
+        // Fallback institucional en caso de que el proyecto no la sobreescriba
+        return array(
+            'id' => 'dispositivo_bloqueado',
+            'title' => 'Validación de Hardware',
+            'ttl' => 0,
+            'components' => array(
+                array(
+                    'type' => 'Alert',
+                    'props' => array(
+                        'variant' => 'warning',
+                        'text' => $mensaje,
+                    ),
+                ),
+                array(
+                    'type' => 'Input',
+                    'name' => 'uuid',
+                    'label' => 'UUID del Dispositivo',
+                    'value' => $uuid,
+                    'readOnly' => true,
+                    'copyable' => true,
+                ),
+                array(
+                    'type' => 'Input',
+                    'name' => 'ip_tunel',
+                    'label' => 'IP de WireGuard',
+                    'value' => $ip_tunel,
+                    'readOnly' => true,
+                    'copyable' => true,
+                ),
+                array(
+                    'type' => 'Button',
+                    'text' => 'Comprobar Autorización',
+                    'action' => array(
+                        'type' => 'SUBMIT',
+                        'endpoint' => '/api/base_movil/dispositivo/valida_dispositivo',
+                    ),
+                ),
+            ),
+        );
+    }
+
+    /**
      * El proyecto ya cargado, o el error listo para el router. El detalle de
      * lo que falta va al log (es para el programador); a la app le llega un
      * mensaje genérico porque estos métodos son públicos.

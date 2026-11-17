@@ -7,24 +7,17 @@ use base_movil\v1\src\proyecto;
  * Proyecto `aguaban`. Se activa en el servidor de Aguaban con
  * base_movil_proyecto = 'aguaban' en config/generales.php.
  *
- * Login con el diseño de la propuesta (AGUABAN_React_Native_Activacion_IVITEC):
- * logo, título, descripción, tarjeta con el formulario y pie. La barra de
- * pasos, "Dispositivo activado" y el usuario de solo lectura son de la
- * fase 2 (activación de dispositivos).
- *
- * Colores: todo lo que fija un color trae su bloque `dark`. Los botones usan
- * los de marca (#14527F con blanco en claro, #5AAEC8 con #0A3156 en oscuro),
- * los mismos de src/project/brand.ts en la app.
- *
- * fontWeight solo 'bold' a propósito: un APK anterior al 10/11 rechaza '800'
- * y rompería el login. Con 'bold' ese APK lo sigue mostrando (sin logo ni
- * letterSpacing, que ignora).
+ * Flujo de entrada:
+ * 1. dispositivo_bloqueado: Validación de hardware (UUID / WireGuard) previa al login.
+ * 2. login: Formulario con el diseño de la propuesta (logo, tarjeta, estilos de marca).
+ * 3. home: Inicio provisional con telemetría.
  */
 class pantallas extends proyecto
 {
     public function pantallas(): array
     {
         return array(
+            'dispositivo_bloqueado' => 'pantalla_dispositivo_bloqueado',
             'login' => 'pantalla_login',
             'home' => 'pantalla_home',
         );
@@ -33,6 +26,169 @@ class pantallas extends proyecto
     public function pantallas_offline(): array
     {
         return array('home');
+    }
+
+    /**
+     * Pantallas accesibles sin token JWT / sesión activa en el sistema.
+     * Permite la aduana de hardware previa y el formulario de login.
+     */
+    public function pantallas_publicas(): array
+    {
+        return array('dispositivo_bloqueado', 'login');
+    }
+
+    /**
+     * Retorna la UI Server-Driven para dispositivos no autorizados o en espera.
+     * Muestra el UUID generado y la IP asignada del túnel WireGuard.
+     */
+    public function construye_dispositivo_bloqueado(string $uuid = '', string $ip_tunel = '', string $mensaje = ''): array
+    {
+        return $this->pantalla_dispositivo_bloqueado($uuid, $ip_tunel, $mensaje);
+    }
+
+    protected function pantalla_dispositivo_bloqueado(string $uuid = '', string $ip_tunel = '', string $mensaje = ''): array
+    {
+        $alerta = $mensaje !== '' ? $mensaje : 'Este equipo requiere autorización del supervisor en sistema central para operar.';
+
+        return array(
+            'screenId' => 'dispositivo_bloqueado',
+            'title' => '',
+            'ttl' => 0,
+            'components' => array(
+                array(
+                    'type' => 'Image',
+                    'id' => 'img-bloqueo-logo',
+                    'source' => 'logo',
+                    'height' => 64,
+                    'width' => 84,
+                    'accessibilityLabel' => 'Logotipo de Aguaban',
+                    'style' => array('alignSelf' => 'center', 'marginTop' => 20, 'marginBottom' => 16),
+                ),
+                array(
+                    'type' => 'Text',
+                    'id' => 'txt-bloqueo-eyebrow',
+                    'content' => 'SEGURIDAD DE ACCESO',
+                    'style' => array(
+                        'fontSize' => 10,
+                        'fontWeight' => 'bold',
+                        'letterSpacing' => 2,
+                        'textAlign' => 'center',
+                        'color' => '#1679B8',
+                        'dark' => array('color' => '#5AAEC8'),
+                    ),
+                ),
+                array(
+                    'type' => 'Text',
+                    'id' => 'txt-bloqueo-titulo',
+                    'content' => 'Equipo no autorizado',
+                    'style' => array(
+                        'fontSize' => 24,
+                        'fontWeight' => 'bold',
+                        'letterSpacing' => -0.8,
+                        'textAlign' => 'center',
+                        'color' => '#0A3156',
+                        'marginTop' => 8,
+                        'dark' => array('color' => '#F5F5F5'),
+                    ),
+                ),
+                array(
+                    'type' => 'Text',
+                    'id' => 'txt-bloqueo-descripcion',
+                    'content' => $alerta,
+                    'style' => array(
+                        'fontSize' => 13,
+                        'lineHeight' => 20,
+                        'textAlign' => 'center',
+                        'color' => '#708391',
+                        'marginTop' => 8,
+                        'marginBottom' => 20,
+                        'dark' => array('color' => '#B3B3B3'),
+                    ),
+                ),
+                array(
+                    'type' => 'Container',
+                    'id' => 'cnt-bloqueo-tarjeta',
+                    'style' => array(
+                        'backgroundColor' => '#FFFFFF',
+                        'borderWidth' => 1,
+                        'borderColor' => '#E0E9EE',
+                        'borderRadius' => 16,
+                        'padding' => 16,
+                        'gap' => 12,
+                        'dark' => array('backgroundColor' => '#1E1E1E', 'borderColor' => '#2E3A44'),
+                    ),
+                    'children' => array(
+                        array(
+                            'type' => 'DeviceStatus',
+                            'id' => 'estado-hardware-bloqueo',
+                            'items' => array('network', 'gps'),
+                            'layout' => 'list',
+                        ),
+                        // Aquí envolvemos los inputs y el botón dentro de un Form
+                        array(
+                            'type' => 'Form',
+                            'id' => 'form-bloqueo',
+                            'style' => array('gap' => 12),
+                            'children' => array(
+                               array(
+                                'type' => 'Input',
+                                'id' => 'in-bloqueo-uuid',
+                                'name' => 'uuid',
+                                'inputType' => 'text',
+                                'label' => 'UUID del Dispositivo',
+                                'value' => (string)$uuid,
+                                'readOnly' => true,
+                                'disabled' => true,
+                                'editable' => false,
+                                'copyable' => true,
+                                'style' => $this->estilo_campo(),
+                            ),
+                            array(
+                                'type' => 'Input',
+                                'id' => 'in-bloqueo-ip',
+                                'name' => 'ip_tunel',
+                                'inputType' => 'text',
+                                'label' => 'IP WireGuard',
+                                'value' => (string)$ip_tunel,
+                                'readOnly' => true,
+                                'disabled' => true,
+                                'editable' => false,
+                                'copyable' => true,
+                                'style' => $this->estilo_campo(),
+                            ),
+                            array(
+                                'type' => 'Button',
+                                'id' => 'btn-reintentar-bloqueo',
+                                'label' => 'Comprobar Autorización',
+                                'style' => $this->estilo_boton(),
+                                'action' => array(
+                                    'type' => 'SUBMIT',
+                                    'method' => 'valida_dispositivo',
+                                    'values' => array(
+                                        'uuid' => (string)$uuid,
+                                        'ip_tunel' => (string)$ip_tunel,
+                                    )
+                                ),
+                            ),
+                            ),
+                        ),
+                    ),
+                ),
+                array(
+                    'type' => 'Text',
+                    'id' => 'txt-bloqueo-pie',
+                    'content' => 'PROPORCIONA ESTOS DATOS A TU SUPERVISOR',
+                    'style' => array(
+                        'fontSize' => 9,
+                        'letterSpacing' => 1.1,
+                        'textAlign' => 'center',
+                        'color' => '#A2B2BB',
+                        'marginTop' => 24,
+                        'dark' => array('color' => '#6B7A84'),
+                    ),
+                ),
+            ),
+        );
     }
 
     protected function pantalla_login(): array
@@ -158,10 +314,6 @@ class pantallas extends proyecto
         );
     }
 
-    /**
-     * Inicio provisional: el login necesita a dónde mandar. Se reemplaza
-     * cuando estén definidas las pantallas de Aguaban (lecturas, checador).
-     */
     protected function pantalla_home(): array
     {
         return array(
@@ -192,11 +344,6 @@ class pantallas extends proyecto
         );
     }
 
-    /**
-     * Botón principal con los colores de marca de Aguaban (los mismos de
-     * src/project/brand.ts en la app). Un Button sin backgroundColor queda
-     * transparente: el color tiene que venir aquí.
-     */
     private function estilo_boton(): array
     {
         return array(
