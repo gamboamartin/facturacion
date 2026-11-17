@@ -25,6 +25,7 @@ class _pdf_aguaban
     private array $relacionadas;
     private string $ruta_logo;
     private string $ruta_qr;
+    private string $tipo_documento = 'factura';
     private NumberFormatter $fmt;
 
     public function __construct()
@@ -47,7 +48,9 @@ class _pdf_aguaban
 
         //$this->set_logo(pdf: $pdf);
         $this->set_folio(pdf: $pdf);
-        $this->set_fecha_hora_emision(pdf: $pdf);
+        if ($this->tipo_documento === 'factura') {
+            $this->set_fecha_hora_emision(pdf: $pdf);
+        }
         $this->set_pago(pdf: $pdf);
         $this->set_receptor(pdf: $pdf);
         $this->set_emisor(pdf: $pdf);
@@ -90,6 +93,10 @@ class _pdf_aguaban
         $this->tabla = $modelo_entidad->tabla;
         $tabla_partida = $modelo_partida->tabla;
 
+        if ($this->tabla === 'fc_nota_credito') {
+            $this->tipo_documento = 'nota_credito';
+        }
+
         $pdf = new __CUSTOM_FPDI();
 
         $pdf->AddFont('DejaVuSans', '', 'DejaVuSans.php');
@@ -113,7 +120,7 @@ class _pdf_aguaban
         $nombre_documento = $this->factura[$key_serie] . $this->factura[$key_folio];
 
         if ($descarga) {
-            $pdf->Output($nombre_documento . '.pdf', 'D');
+            $pdf->Output($nombre_documento . '.pdf', 'I');
             return $nombre_documento;
         }
         if ($guarda) {
@@ -256,10 +263,14 @@ class _pdf_aguaban
 
     private function init(Fpdi $pdf): true|array
     {
+        $plantilla = 'factura_aguaban.pdf';
+        if ($this->tipo_documento === 'nota_credito') {
+            $plantilla = 'nota_credito_aguaban.pdf';
+        }
 
         try {
             $pdf->addPage();
-            $pdf->setSourceFile($this->config_generales->path_base.'/plantillas/factura_aguaban.pdf');
+            $pdf->setSourceFile($this->config_generales->path_base . '/plantillas/' . $plantilla);
             $tplIdx = $pdf->importPage(1);
             $pdf->useTemplate($tplIdx, 0, 0, null, null, true);
         } catch (Throwable $e) {
@@ -528,7 +539,7 @@ class _pdf_aguaban
         $factura = $this->factura;
 
         $exportacion = "EXPORTACIÓN 01 - No aplica";
-        if ((int)$factura['fc_factura_exportacion'] !== 1) {
+        if ((int)$factura[$this->tabla.'_exportacion'] !== 1) {
             $exportacion = "EXPORTACIÓN 00 - Aplica";
         }
         $exportacion = mb_convert_encoding($exportacion, 'ISO-8859-1', 'UTF-8');
@@ -562,43 +573,36 @@ class _pdf_aguaban
         $tabla = $this->tabla;
         $factura = $this->factura;
 
-        $pdf->SetFont('DejaVuSans', 'B', '9');
+        $pdf->SetFont('DejaVuSans', 'B', 9);
         $pdf->SetTextColor(0, 128, 192);
+
+        // Subtotal
         $fc_factura_sub_total = $this->mx_currency($factura[$tabla.'_sub_total']);
         $pdf->SetXY(165, 160.7);
-        $pdf->cell(30,9, $fc_factura_sub_total,0, 0, 'R');
+        $pdf->Cell(30, 9, $fc_factura_sub_total, 0, 0, 'R');
 
-
-        $pdf->SetFont('DejaVuSans', 'B', '9');
-        $pdf->SetTextColor(0, 128, 192);
+        // Total de traslados
         $fc_factura_total_traslados = $this->mx_currency($factura[$tabla.'_total_traslados']);
         $pdf->SetXY(165, 170.7);
-        $pdf->cell(30,9, $fc_factura_total_traslados,0, 0, 'R');
+        $pdf->Cell(30, 9, $fc_factura_total_traslados, 0, 0, 'R');
 
+        // Total
+        $total = (float)$factura[$tabla.'_total'];
 
-        $pdf->SetFont('DejaVuSans', 'B', '9');
-        $pdf->SetTextColor(0, 128, 192);
-        $fc_factura_total = $this->mx_currency($factura[$tabla.'_total']);
+        $fc_factura_total = $this->mx_currency($total);
         $pdf->SetXY(165, 181.7);
-        $pdf->cell(30,9, $fc_factura_total,0, 0, 'R');
+        $pdf->Cell(30, 9, $fc_factura_total, 0, 0, 'R');
 
+        // Total en letras
+        $letra = $this->monto_a_letras($total);
 
-        $formatterES = new NumberFormatter("es-ES", NumberFormatter::SPELLOUT);
-        $izquierda = intval(floor($factura[$tabla.'_total']));
-        $derecha = intval(($factura[$tabla.'_total'] - floor($factura[$tabla.'_total'])) * 100);
-        $letra = $formatterES->format($izquierda) . " pesos ";
-        if ((float)$derecha === 0.0) {
-            $derecha = '00';
-        }
-        $letra .= $derecha . "/100 M.N.";
-
-        $pdf->SetFont('DejaVuSans', '', '7');
+        $pdf->SetFont('DejaVuSans', '', 7);
         $pdf->SetTextColor(0, 0, 0);
-        $letra = strtoupper($letra);
+
         $letra = mb_convert_encoding($letra, 'ISO-8859-1', 'UTF-8');
+
         $pdf->SetXY(15, 190);
         $pdf->MultiCell(144, 5, $letra, 0, 'L');
-
     }
 
     private function set_relacionadas(Fpdi $pdf): void
@@ -725,14 +729,50 @@ class _pdf_aguaban
         }
     }
 
-    private function mx_currency($cantidad): string
+    private function monto_a_letras(float $monto): string
     {
-        $cantidad = round((int)$cantidad, 2);
-        $cantidad = $this->fmt->formatCurrency($cantidad, "MXN");
-        if ($cantidad) {
-            return $cantidad;
+        $monto = round($monto, 2);
+
+        $izquierda = (int) floor($monto);
+        $derecha = (int) round(($monto - $izquierda) * 100);
+
+        if ($derecha === 100) {
+            $izquierda++;
+            $derecha = 0;
         }
-        return '';
+
+        $formatterES = new NumberFormatter(
+            "es-ES",
+            NumberFormatter::SPELLOUT
+        );
+
+        $letra = $formatterES->format($izquierda) . " pesos ";
+
+        $letra .= str_pad(
+                (string)$derecha,
+                2,
+                '0',
+                STR_PAD_LEFT
+            ) . "/100 M.N.";
+
+        return mb_strtoupper($letra, 'UTF-8');
+    }
+
+    private function mx_currency(float|int|string|null $cantidad): string
+    {
+        if ($cantidad === null || !is_numeric($cantidad)) {
+            return '';
+        }
+
+        $cantidad = round((float)$cantidad, 2);
+
+        $resultado = $this->fmt->formatCurrency($cantidad, 'MXN');
+
+        if ($resultado === false) {
+            return '';
+        }
+
+        return $resultado;
     }
 
 }
