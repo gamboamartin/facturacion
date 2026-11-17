@@ -77,5 +77,15 @@
       "phpdocumentor/shim": false
     },
     "process-timeout": 1200
-  }
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://paquetes.ivitec.mx",
+      "canonical": true,
+      "only": [
+        "gamboa.martin/configuraciones"
+      ]
+    }
+  ]
 }

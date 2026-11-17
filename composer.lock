@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f0d2e3a408bab8acd01d1e855232696c",
+    "content-hash": "15dac224e3eb34872c500c29b8e96ccb",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1248,16 +1248,11 @@
         {
             "name": "gamboa.martin/configuraciones",
             "version": "v1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/gamboamartin/configuraciones.git",
-                "reference": "de12fb9a9e8fc01ce4e2c50d529bc2e2e925fa87"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gamboamartin/configuraciones/zipball/de12fb9a9e8fc01ce4e2c50d529bc2e2e925fa87",
+                "url": "https://paquetes.ivitec.mx/dist/gamboa-martin/configuraciones/gamboa-martin-configuraciones-de12fb9a9e8fc01ce4e2c50d529bc2e2e925fa87-zip-62d90f.zip",
                 "reference": "de12fb9a9e8fc01ce4e2c50d529bc2e2e925fa87",
-                "shasum": ""
+                "shasum": "1f6fa9b042609a9068e16689841167e173d9af18"
             },
             "type": "library",
             "notification-url": "https://packagist.org/downloads/",
