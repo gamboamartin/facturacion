@@ -2,6 +2,7 @@
 <?php use config\views; ?>
 <link rel="stylesheet" href="css/fc_factura/alta.css?v=2">
 <link rel="stylesheet" href="css/fc_factura/form-responsive.css?v=1">
+<link rel="stylesheet" href="css/fc_complemento_pago/alta-contraste.css?v=1">
 <div class="fc-alta fc-invoice-form">
 <div class="fc-alta-heading">
     <span class="fc-alta-eyebrow">FACTURACIÓN</span>
