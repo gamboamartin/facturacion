@@ -2,8 +2,8 @@
 <?php use config\views; ?>
 
 <link rel="stylesheet" href="css/fc_factura/form-responsive.css?v=1">
-<link rel="stylesheet" href="css/fc_factura/modifica.css?v=2">
-<div class="fc-modifica fc-invoice-form fc-edit">
+<link rel="stylesheet" href="css/fc_factura/modifica.css?v=3">
+<div id="vista_fc_factura_modifica" class="fc-modifica fc-invoice-form fc-edit">
 <header class="fc-edit-heading"><span>FACTURACIÓN</span><h1>Modificar factura</h1><p>Revisa el comprobante, sus partidas y los correos asociados.</p></header>
 <?php echo $controlador->inputs->registro_id; ?>
 
