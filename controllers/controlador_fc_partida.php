@@ -21,13 +21,30 @@ class controlador_fc_partida extends _ctl_partida {
     public controlador_fc_traslado $controlador_fc_traslado;
     public string $link_fc_traslado_alta_bd = '';
 
+
     public function __construct(PDO      $link, html $html = new \gamboamartin\template_1\html(),
                                 stdClass $paths_conf = new stdClass())
     {
         $modelo = new fc_partida(link: $link);
         $html_ = new fc_partida_html(html: $html);
 
-        parent::__construct(html_: $html_,link:  $link,modelo:  $modelo, paths_conf: $paths_conf);
+        // Compatibilidad durante carga concurrente de versiones: no invocar APIs aún ausentes.
+        $acepta_config_datatable = false;
+        foreach ((new \ReflectionMethod(_base::class, '__construct'))->getParameters() as $parametro) {
+            if ($parametro->getName() === 'config_datatable') $acepta_config_datatable = true;
+        }
+        $config_datatable = null;
+        if ($acepta_config_datatable && method_exists($this, 'configuracion_listado_partida')) {
+            if (!isset($_GET['seccion']) || $_GET['seccion'] === 'fc_partida') {
+                $config_datatable = $this->configuracion_listado_partida();
+                $this->lista_get_data = true;
+            }
+            parent::__construct(html_: $html_, link: $link, modelo: $modelo, paths_conf: $paths_conf,
+                config_datatable: $config_datatable);
+        } else {
+            // Ruta histórica completa mientras el proveedor cargado sea anterior.
+            parent::__construct(html_: $html_, link: $link, modelo: $modelo, paths_conf: $paths_conf);
+        }
 
         $init_controladores = $this->init_controladores(paths_conf: $paths_conf);
         if (errores::$error) {

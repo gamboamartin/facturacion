@@ -1,0 +1,307 @@
+{
+  "checks": [],
+  "collation": "utf8mb4_unicode_ci",
+  "columns": [
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "auto_increment",
+      "generation": "",
+      "name": "id",
+      "nullable": false,
+      "type": "bigint"
+    },
+    {
+      "charset": "ascii",
+      "collation": "ascii_bin",
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "token",
+      "nullable": false,
+      "type": "varchar(512)"
+    },
+    {
+      "charset": "ascii",
+      "collation": "ascii_bin",
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "proveedor",
+      "nullable": false,
+      "type": "varchar(16)"
+    },
+    {
+      "charset": "ascii",
+      "collation": "ascii_bin",
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "plataforma",
+      "nullable": false,
+      "type": "varchar(16)"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "adm_usuario_id",
+      "nullable": false,
+      "type": "bigint"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "base_movil_sesion_id",
+      "nullable": false,
+      "type": "bigint"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "ultimo_registro",
+      "nullable": false,
+      "type": "datetime"
+    },
+    {
+      "charset": "utf8mb4",
+      "collation": "utf8mb4_unicode_ci",
+      "comment": "",
+      "default": "",
+      "extra": "",
+      "generation": "",
+      "name": "motivo_baja",
+      "nullable": false,
+      "type": "varchar(255)"
+    },
+    {
+      "charset": "utf8mb4",
+      "collation": "utf8mb4_unicode_ci",
+      "comment": "",
+      "default": "activo",
+      "extra": "",
+      "generation": "",
+      "name": "status",
+      "nullable": false,
+      "type": "enum('activo','inactivo')"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "usuario_alta_id",
+      "nullable": false,
+      "type": "bigint"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "usuario_update_id",
+      "nullable": false,
+      "type": "bigint"
+    }
+  ],
+  "comment": "",
+  "create_options": "",
+  "engine": "InnoDB",
+  "foreign_keys": [
+    {
+      "columns": [
+        "usuario_alta_id"
+      ],
+      "delete": "RESTRICT",
+      "match": "NONE",
+      "name": "fk_bmpt_alta",
+      "parent": "adm_usuario",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_index": "PRIMARY",
+      "update": "RESTRICT"
+    },
+    {
+      "columns": [
+        "base_movil_sesion_id",
+        "adm_usuario_id"
+      ],
+      "delete": "RESTRICT",
+      "match": "NONE",
+      "name": "fk_bmpt_sesion_usuario",
+      "parent": "base_movil_sesion",
+      "parent_columns": [
+        "id",
+        "adm_usuario_id"
+      ],
+      "parent_index": "uq_bms_id_usuario",
+      "update": "RESTRICT"
+    },
+    {
+      "columns": [
+        "usuario_update_id"
+      ],
+      "delete": "RESTRICT",
+      "match": "NONE",
+      "name": "fk_bmpt_update",
+      "parent": "adm_usuario",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_index": "PRIMARY",
+      "update": "RESTRICT"
+    },
+    {
+      "columns": [
+        "adm_usuario_id"
+      ],
+      "delete": "RESTRICT",
+      "match": "NONE",
+      "name": "fk_bmpt_usuario",
+      "parent": "adm_usuario",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_index": "PRIMARY",
+      "update": "RESTRICT"
+    }
+  ],
+  "indexes": [
+    {
+      "columns": [
+        {
+          "name": "id",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true
+    },
+    {
+      "columns": [
+        {
+          "name": "usuario_alta_id",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "ix_bmpt_alta",
+      "type": "BTREE",
+      "unique": false
+    },
+    {
+      "columns": [
+        {
+          "name": "base_movil_sesion_id",
+          "order": "A",
+          "prefix": null
+        },
+        {
+          "name": "status",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "ix_bmpt_sesion_status",
+      "type": "BTREE",
+      "unique": false
+    },
+    {
+      "columns": [
+        {
+          "name": "base_movil_sesion_id",
+          "order": "A",
+          "prefix": null
+        },
+        {
+          "name": "adm_usuario_id",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "ix_bmpt_sesion_usuario",
+      "type": "BTREE",
+      "unique": false
+    },
+    {
+      "columns": [
+        {
+          "name": "usuario_update_id",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "ix_bmpt_update",
+      "type": "BTREE",
+      "unique": false
+    },
+    {
+      "columns": [
+        {
+          "name": "adm_usuario_id",
+          "order": "A",
+          "prefix": null
+        },
+        {
+          "name": "status",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "ix_bmpt_usuario_status",
+      "type": "BTREE",
+      "unique": false
+    },
+    {
+      "columns": [
+        {
+          "name": "token",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "uq_bmpt_token",
+      "type": "BTREE",
+      "unique": true
+    }
+  ],
+  "row_format": "Dynamic",
+  "triggers": []
+}

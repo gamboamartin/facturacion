@@ -1,0 +1,8 @@
+<?php
+namespace gamboamartin\errores {class errores {}}
+namespace {
+require __DIR__.'/init_candidato.php';require __DIR__.'/init_compatible.php';
+$cols=[(object)['data'=>'id'],(object)['data'=>'total'],(object)['data'=>'modifica']];
+$cases=[['boton_negativo',[['targets'=>-1,'type'=>'button']],2,[],null],['menu_negativo',[['targets'=>-1,'type'=>'menu']],2,[],null],['checkbox_real',[['targets'=>0,'type'=>'check','orderable'=>false]],0,[],null],['targets_array',[['targets'=>[0,2],'orderable'=>false]],2,[],null],['all',[['targets'=>'_all','orderable'=>false]],1,[],null],['ultima_sin_acciones',[],2,['modifica'=>'ASC'],null],['def_objeto',[(object)['targets'=>1,'orderable'=>false]],1,[],null],['precedencia_primero',[['targets'=>1,'orderable'=>true],['targets'=>'_all','orderable'=>false]],1,['total'=>'ASC'],null],['columns_true_vs_defs_false',[['targets'=>1,'orderable'=>false]],1,['total'=>'ASC'],true],['columns_false_vs_defs_true',[['targets'=>1,'orderable'=>true]],1,[],false],['primero_false_vs_segundo_true',[['targets'=>1,'orderable'=>false],['targets'=>1,'orderable'=>true]],1,[],null]];
+$pass=true;foreach($cases as [$name,$defs,$idx,$expected,$orderable]){$columns=unserialize(serialize($cols));if($orderable!==null)$columns[$idx]->orderable=$orderable;$_GET=['order'=>[['column'=>$idx,'dir'=>'asc']]];$dt=['columns'=>$columns,'columnDefs'=>$defs];$before=$_GET;$old=(new \Pruebas\OrdenCandidato\init)->order($dt);$new=(new \Pruebas\OrdenCompatible\init)->order($dt);$ok=$new===$expected&&$_GET===$before;$pass=$pass&&$ok;echo json_encode(['caso'=>$name,'propuesta_anterior'=>$old,'corregido'=>$new,'esperado'=>$expected,'pasa'=>$ok]),"\n";}exit($pass?0:1);
+}

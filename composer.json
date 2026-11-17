@@ -13,17 +13,15 @@
     "psr-4": {
       "gamboamartin\\facturacion\\controllers\\": "controllers",
       "gamboamartin\\facturacion\\models\\": "orm",
-      "gamboamartin\\facturacion\\instalacion\\": "instalacion",
       "gamboamartin\\facturacion\\pac\\": "pac",
       "config\\": "config/",
-      "gamboamartin\\facturacion\\tests\\": "tests",
       "links\\": "links/",
       "gamboamartin\\facturacion\\html\\": "templates/directivas"
     }
   },
   "require": {
     "php": "^8.3",
-    "dompdf/dompdf": "v3.1.0",
+    "dompdf/dompdf": "v3.1.6",
     "ext-imagick": "*",
     "ext-pdo": "*",
     "ext-dom": "*",
@@ -42,7 +40,7 @@
     "ext-fileinfo": "*",
     "tomsgu/pdf-merger": "^0.5.0",
     "spatie/dropbox-api": "^1.19",
-    "gamboa.martin/administrador": "^22.43.0",
+    "gamboa.martin/administrador": "^22.44.1",
     "gamboa.martin/base_modelos": "^5.0.0",
     "gamboa.martin/calculo": "^5.0.0",
     "gamboa.martin/errores": "^6.0.0",
@@ -54,9 +52,9 @@
     "gamboa.martin/documento": "^24.0.0",
     "gamboa.martin/js_base": "^5.0.0",
     "gamboa.martin/cat_sat": "^25.0.0",
-    "gamboa.martin/organigrama": "^28.0.0",
+    "gamboa.martin/organigrama": "^28.0.1",
     "gamboa.martin/direccion_postal": "^27.0.0",
-    "gamboa.martin/system": "^24.0.0",
+    "gamboa.martin/system": "^24.21.1",
     "gamboa.martin/template_1": "^25.0.0",
     "gamboa.martin/template": "^22.0.0",
     "gamboa.martin/comercial": "^37.21.2",
@@ -79,5 +77,15 @@
       "phpdocumentor/shim": false
     },
     "process-timeout": 1200
-  }
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://paquetes.ivitec.mx",
+      "canonical": true,
+      "only": [
+        "gamboa.martin/configuraciones"
+      ]
+    }
+  ]
 }

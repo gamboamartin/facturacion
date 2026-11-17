@@ -1,0 +1,23 @@
+CREATE TABLE `base_movil_sesion` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `jti` CHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `adm_usuario_id` BIGINT NOT NULL,
+  `ip` VARCHAR(45) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `expira` DATETIME NOT NULL,
+  `ultimo_uso` DATETIME NOT NULL,
+  `cerrada_en` DATETIME NULL DEFAULT NULL,
+  `motivo_cierre` VARCHAR(255) NOT NULL DEFAULT '',
+  `status` ENUM('activo','inactivo') NOT NULL DEFAULT 'activo',
+  `usuario_alta_id` BIGINT NOT NULL,
+  `usuario_update_id` BIGINT NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_bms_jti` (`jti`),
+  UNIQUE KEY `uq_bms_id_usuario` (`id`,`adm_usuario_id`),
+  KEY `ix_bms_expira` (`expira`),
+  KEY `ix_bms_usuario` (`adm_usuario_id`),
+  KEY `ix_bms_alta` (`usuario_alta_id`),
+  KEY `ix_bms_update` (`usuario_update_id`),
+  CONSTRAINT `fk_bms_usuario` FOREIGN KEY (`adm_usuario_id`) REFERENCES `adm_usuario` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_bms_alta` FOREIGN KEY (`usuario_alta_id`) REFERENCES `adm_usuario` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_bms_update` FOREIGN KEY (`usuario_update_id`) REFERENCES `adm_usuario` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

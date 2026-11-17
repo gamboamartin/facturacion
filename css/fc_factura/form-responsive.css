@@ -1,0 +1,33 @@
+/* Only invoice Alta/Modifica. Contain intrinsic widths, never hide page overflow. */
+.fc-invoice-form {
+    width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;
+    display: flow-root;
+}
+.fc-alta.fc-invoice-form { max-width: 1280px; }
+.fc-invoice-form *, .fc-invoice-form *::before, .fc-invoice-form *::after { box-sizing: border-box; }
+.fc-invoice-form > *, .fc-invoice-form .widget, .fc-invoice-form form,
+.fc-invoice-form .control-group, .fc-invoice-form .controls { min-width: 0; max-width: 100%; }
+.fc-invoice-form .bootstrap-select.form-control { width: 100% !important; min-width: 0; max-width: 100%; }
+.fc-invoice-form .bootstrap-select > .dropdown-toggle { width: 100%; max-width: 100%; }
+.fc-invoice-form .bootstrap-select .dropdown-menu { min-width: 100% !important; max-width: 100%; box-sizing: border-box; }
+.fc-invoice-form .bootstrap-select .dropdown-menu li a,
+.fc-invoice-form .bootstrap-select .dropdown-menu li a span.text { white-space: normal; overflow-wrap: anywhere; }
+.fc-invoice-form .table-responsive { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.fc-invoice-form .btn { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 767px) {
+    .fc-invoice-form > [class*="col-"], .fc-invoice-form .partidas > [class*="col-"] { width: 100%; float: none; padding-left: 0; padding-right: 0; }
+    .fc-invoice-form .form-additional .control-group { display: block; width: 100%; float: none; min-width: 0; }
+    .fc-invoice-form .form-additional .control-label { display: block; float: none; width: 100%; text-align: left; padding: 0 0 6px; }
+    .fc-invoice-form .form-additional .controls { width: 100%; margin-left: 0; }
+    .fc-invoice-form .form-additional .controls > [class*="col-"] { width: 100%; float: none; padding-left: 0; padding-right: 0; }
+    .fc-invoice-form .form-control { width: 100%; max-width: 100%; min-width: 0; font-size: 16px; }
+    .fc-invoice-form .bootstrap-select > .dropdown-toggle { font-size: 16px; min-height: 44px; }
+    .fc-invoice-form .bootstrap-select .dropdown-menu li a { min-height: 44px; }
+    .fc-invoice-form .widget { padding-left: 12px; padding-right: 12px; }
+    .fc-invoice-form textarea { resize: vertical; }
+    .fc-invoice-form .buttons-form > [class*="col-"] { width: 100%; float: none; padding: 0; }
+    .fc-invoice-form .btn { min-height: 44px; }
+    /* Keep four editable amounts readable, scrolling only inside this panel. */
+    .fc-modifica #row-partida .data-partida { min-width: 560px; }
+    .fc-modifica #row-partida .data-partida input { min-width: 96px; }
+}

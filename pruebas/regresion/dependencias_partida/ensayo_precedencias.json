@@ -1,0 +1,11 @@
+{"caso":"boton_negativo","propuesta_anterior":[],"corregido":[],"esperado":[],"pasa":true}
+{"caso":"menu_negativo","propuesta_anterior":[],"corregido":[],"esperado":[],"pasa":true}
+{"caso":"checkbox_real","propuesta_anterior":[],"corregido":[],"esperado":[],"pasa":true}
+{"caso":"targets_array","propuesta_anterior":[],"corregido":[],"esperado":[],"pasa":true}
+{"caso":"all","propuesta_anterior":[],"corregido":[],"esperado":[],"pasa":true}
+{"caso":"ultima_sin_acciones","propuesta_anterior":{"modifica":"ASC"},"corregido":{"modifica":"ASC"},"esperado":{"modifica":"ASC"},"pasa":true}
+{"caso":"def_objeto","propuesta_anterior":[],"corregido":[],"esperado":[],"pasa":true}
+{"caso":"precedencia_primero","propuesta_anterior":[],"corregido":{"total":"ASC"},"esperado":{"total":"ASC"},"pasa":true}
+{"caso":"columns_true_vs_defs_false","propuesta_anterior":[],"corregido":{"total":"ASC"},"esperado":{"total":"ASC"},"pasa":true}
+{"caso":"columns_false_vs_defs_true","propuesta_anterior":[],"corregido":[],"esperado":[],"pasa":true}
+{"caso":"primero_false_vs_segundo_true","propuesta_anterior":[],"corregido":[],"esperado":[],"pasa":true}

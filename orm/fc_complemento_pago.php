@@ -603,6 +603,8 @@ class fc_complemento_pago extends _transacciones_fc
         $fc_partida_cp_ins['descripcion'] = 'Pago';
         $fc_partida_cp_ins['valor_unitario'] = 0;
         $fc_partida_cp_ins['descuento'] = 0;
+        $fc_partida_cp_ins['total'] = 0;
+        $fc_partida_cp_ins['total_retenciones'] = 0;
         $fc_partida_cp_ins['cat_sat_unidad_id'] = $cat_sat_unidad_id;
         $fc_partida_cp_ins['fc_complemento_pago_id'] = $fc_complemento_pago_id;
         $fc_partida_cp_ins['cat_sat_conf_imps_id'] = 999;

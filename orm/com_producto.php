@@ -6,6 +6,82 @@ use stdClass;
 
 class com_producto extends \gamboamartin\comercial\models\com_producto {
 
+
+    /**
+     * Enriquece exclusivamente el catálogo activo ya leído para el alta de Partida.
+     * No sustituye precio(id), no persiste datos ni mantiene caché entre clientes.
+     * Las lecturas agrupadas, como las anteriores, no garantizan snapshot concurrente.
+     */
+    final public function precios_para_alta(array $productos, int $com_cliente_id): array
+    {
+        if (count($productos) === 0) {
+            return [];
+        }
+        $cliente = (new \gamboamartin\comercial\models\com_cliente(link: $this->link))->registro(
+            registro_id: $com_cliente_id, columnas_en_bruto: true, retorno_obj: true);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener cliente', data: $cliente);
+        }
+        $primero = reset($productos);
+        $this->precio_base_catalogo($primero['com_producto_precio']);
+        $ids_catalogo = array_values(array_unique(array_map('intval', array_column($productos, 'com_producto_id'))));
+        $in_catalogo = ['llave' => 'com_producto.id', 'values' => $ids_catalogo];
+        $tipos = (new \gamboamartin\comercial\models\com_conf_precio(link: $this->link))->filtro_and(
+            filtro: ['com_tipo_cliente.id' => $cliente->com_tipo_cliente_id], in: $in_catalogo);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener precio', data: $tipos);
+        }
+        $por_tipo = [];
+        foreach ($tipos->registros as $row) {
+            $por_tipo[(int)$row['com_producto_id']][] = $row;
+        }
+        if (count($por_tipo[(int)$primero['com_producto_id']] ?? []) > 1) {
+            return $this->error_precio_duplicado($por_tipo[(int)$primero['com_producto_id']]);
+        }
+        $clientes = (new \gamboamartin\comercial\models\com_precio_cliente(link: $this->link))->filtro_and(
+            filtro: ['com_cliente.id' => $com_cliente_id], in: $in_catalogo);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al obtener precio', data: $clientes);
+        }
+        $por_cliente = [];
+        foreach ($clientes->registros as $row) {
+            $por_cliente[(int)$row['com_producto_id']][] = $row;
+        }
+        foreach ($productos as $indice => $producto) {
+            $id = (int)$producto['com_producto_id'];
+            $precio = $this->precio_base_catalogo($producto['com_producto_precio']);
+            if (count($por_tipo[$id] ?? []) > 1) {
+                return $this->error_precio_duplicado($por_tipo[$id]);
+            }
+            if (count($por_cliente[$id] ?? []) > 1) {
+                return $this->error_precio_duplicado($por_cliente[$id]);
+            }
+            if (isset($por_tipo[$id])) {
+                $precio = round($por_tipo[$id][0]['com_conf_precio_precio'], 2);
+            }
+            if (isset($por_cliente[$id])) {
+                $precio = round($por_cliente[$id][0]['com_precio_cliente_precio'], 2);
+                $productos[$indice]['cat_sat_conf_imps_id'] = $por_cliente[$id][0]['cat_sat_conf_imps_id'];
+            }
+            $productos[$indice]['com_producto_precio'] = round($precio, 2);
+        }
+        return $productos;
+    }
+
+    /** Conserva la coerción float del método original, sin convertir texto inválido en cero. */
+    private function precio_base_catalogo(float $precio): float
+    {
+        return $precio;
+    }
+
+    /** Rechaza las filas ambiguas observadas, sin releer ni mezclar versiones. */
+    private function error_precio_duplicado(array $registros): array
+    {
+        $datos = (object)['n_registros' => count($registros), 'registros' => $registros];
+        $error = $this->error->error(mensaje: 'Error existe mas de un precio', data: $datos);
+        return $this->error->error(mensaje: 'Error al obtener precio', data: $error);
+    }
+
     final public function alta_bd(array $keys_integra_ds = array('codigo', 'descripcion')): array|stdClass
     {
 

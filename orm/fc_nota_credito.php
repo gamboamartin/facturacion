@@ -26,6 +26,12 @@ class fc_nota_credito extends _transacciones_fc
         parent::__construct(link: $link, tabla: $tabla, columnas_extra: $columnas_extra,
             valida_atributos_criticos: $valida_atributos_criticos);
 
+        // Conservar la relación solo en instalaciones cuya cabecera NC la define.
+        // Los campos ya fueron obtenidos por el constructor del ORM.
+        if (!in_array('com_tipo_producto_id', $this->campos_tabla, true)) {
+            unset($this->columnas['com_tipo_producto']);
+        }
+
         $this->NAMESPACE = __NAMESPACE__;
 
         $this->etiqueta = 'Notas de crédito';

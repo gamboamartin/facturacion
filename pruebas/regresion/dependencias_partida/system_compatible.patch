@@ -1,0 +1,61 @@
+--- a/src/datatables/init.php
++++ b/src/datatables/init.php
+@@ -154,7 +154,7 @@
+     }
+ 
+ 
+-    final public function order(array $datatable): array
++    private function order_historico(array $datatable): array
+     {
+         if(!isset($_GET['order'][0]['dir'])){
+             $_GET['order'][0]['dir'] = "ASC";
+@@ -178,6 +178,49 @@
+         return $order;
+     }
+ 
++    final public function order(array $datatable): array
++    {
++        // Contrato desconocido: conservar exactamente comportamiento público histórico.
++        foreach ($datatable['columnDefs'] ?? [] as $definition) {
++            $definition = (array)$definition;
++            $targets = $definition['targets'] ?? [];
++            foreach (is_array($targets) ? $targets : [$targets] as $target) {
++                if (!is_int($target) && $target !== '_all') return $this->order_historico($datatable);
++            }
++        }
++        $request = $_GET['order'][0] ?? [];
++        if (!is_array($request)) return [];
++        $index = $request['column'] ?? 0;
++        if (!(is_int($index) || (is_string($index) && preg_match('/^[0-9]+$/D', $index)))) return [];
++        $index = (int)$index;
++        if ($index < 0 || !isset($datatable['columns'][$index])) return [];
++        $direction = $request['dir'] ?? 'DESC'; // Preserve historical fallback, explicit ASC is fixed.
++        if (!is_string($direction)) return [];
++        $direction = strtoupper($direction);
++        if (!in_array($direction, ['ASC','DESC'], true)) return [];
++        $column = (array)$datatable['columns'][$index];
++        if (($column['orderable'] ?? true) === false) return [];
++        $ordenable = $column['orderable'] ?? null;
++        $tipo = $column['type'] ?? null;
++        foreach ($datatable['columnDefs'] ?? [] as $definition) {
++            $definition = (array)$definition;
++            $targets = $definition['targets'] ?? [];
++            $targets = is_array($targets) ? $targets : [$targets];
++            foreach ($targets as $target) {
++                $matches = $target === '_all' || $target === $index
++                    || (is_int($target) && $target < 0 && count($datatable['columns']) + $target === $index);
++                if ($matches) {
++                    if ($ordenable === null && array_key_exists('orderable', $definition)) $ordenable = $definition['orderable'];
++                    if ($tipo === null && array_key_exists('type', $definition)) $tipo = $definition['type'];
++                }
++            }
++        }
++        if ($ordenable === false || in_array($tipo, ['button','menu'], true)) return [];
++        $field = $column['data'] ?? null;
++        if (!is_string($field) || !preg_match('/^[A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)?$/D', $field)) return [];
++        return [$field => $direction];
++    }
++
+     /**
+      * Integra el numero de registros por pagina en el get data
+      * @return int

@@ -1,0 +1,79 @@
+/* Alta factura only: keep shared controls and Bootstrap select behaviour intact. */
+.fc-alta { --fc-accent: #7138e2; --fc-ink: #302246; --fc-muted: #6d6579; color: var(--fc-ink); width: 100%; min-width: 0; box-sizing: border-box; max-width: 1280px; margin: 0 auto; }
+.fc-alta-heading { padding: 8px 4px 22px; }
+.fc-alta-eyebrow { color: var(--fc-accent); font-size: 11px; font-weight: 700; letter-spacing: .14em; }
+.fc-alta-heading h1 { color: var(--fc-ink); font-size: 30px; line-height: 1.25; margin: 8px 0; font-weight: 700; }
+.fc-alta-heading p, .fc-alta-section-heading p { color: var(--fc-muted); font-size: 14px; line-height: 1.5; margin: 0; }
+.fc-alta .fc-alta-form { background: transparent; border: 0; box-shadow: none; padding: 0; overflow: visible; }
+.fc-alta .fc-alta-section { background: #fff; border: 1px solid #e7e0ef; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 3px 14px rgba(59, 34, 89, .04); }
+.fc-alta-section-heading { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 22px; }
+.fc-alta-step { display: inline-flex; flex: 0 0 36px; height: 36px; justify-content: center; align-items: center; border-radius: 11px; background: #f0e9ff; color: #5825bf; font-size: 12px; font-weight: 700; }
+.fc-alta .fc-alta-section h2 { color: var(--fc-ink); font-size: 18px; line-height: 1.4; font-weight: 600; margin: 0 0 5px; }
+.fc-alta-fields { display: flex; flex-wrap: wrap; margin: 0 -10px; }
+.fc-alta-fields > [class*="col-"] { float: none; width: 50%; padding-left: 10px; padding-right: 10px; min-width: 0; }
+.fc-alta-fields > .control-group:not([class*="col-"]), .fc-alta-fields > .form-group:not([class*="col-"]) { width: 50%; padding: 0 10px; }
+.fc-alta .control-group > label, .fc-alta .form-group > label { display: block; float: none; width: 100%; text-align: left; padding: 0 0 6px; }
+.fc-alta .controls { margin-left: 0; width: 100%; min-width: 0; }
+.fc-alta label { color: #493d59; font-size: 13px; line-height: 1.5; }
+.fc-alta .form-control { border-color: #dcd4e5; border-radius: 8px; min-height: 44px; box-shadow: none; }
+.fc-alta .form-control:focus { border-color: var(--fc-accent); box-shadow: 0 0 0 3px rgba(113, 59, 190, .12); }
+.fc-alta .bootstrap-select.form-control { padding: 0; background: #fff !important; }
+.fc-alta .bootstrap-select { width: 100% !important; max-width: 100%; min-width: 0; }
+.fc-alta .bootstrap-select > .dropdown-toggle { min-height: 44px; border-radius: 8px; border: 1px solid #dcd4e5; background: #fff !important; color: #302246 !important; box-shadow: none; }
+.fc-alta .controls > [class*="col-"] { width: 100%; float: none; padding-left: 0; padding-right: 0; }
+.fc-alta textarea.form-control { min-height: 90px; resize: vertical; }
+.fc-alta .fc-alta-actions { border-top: 1px solid #e7e0ef; padding: 20px 0 4px; display: flow-root; }
+.fc-alta .fc-alta-actions .btn { min-height: 44px; border-radius: 9px; padding: 10px 24px; font-weight: 600; }
+.fc-alta .fc-alta-actions .btn-success { background: var(--fc-accent); border-color: var(--fc-accent); color: #fff; }
+.fc-alta .fc-alta-actions .btn-success:hover { background: #5825bf; border-color: #5825bf; }
+.fc-alta .btn:focus-visible { outline: 3px solid #9664d4; outline-offset: 3px; }
+.fc-alta-related { margin-top: 18px; padding: 0; }
+.fc-alta-related > div { margin-bottom: 12px; }
+@media (max-width: 767px) {
+    .fc-alta-heading h1 { font-size: 25px; }
+    .fc-alta .fc-alta-section { padding: 18px 14px; border-radius: 12px; }
+    .fc-alta-section-heading { gap: 10px; margin-bottom: 18px; }
+    .fc-alta-fields > .control-group, .fc-alta-fields > .form-group, .fc-alta-fields > [class*="col-"] { width: 100%; max-width: 100%; flex: 0 0 100%; }
+    .fc-alta .form-control, .fc-alta .bootstrap-select > .dropdown-toggle { font-size: 16px; }
+    .fc-alta .fc-alta-actions .btn { width: 100%; margin-bottom: 8px; }
+    .fc-alta-related > div { width: 100%; }
+}
+
+@media (max-width: 767px) {
+    .fc-alta #myModal .modal-dialog { top: 20px !important; margin: 12px; width: auto; }
+    .fc-alta #myModal .close { min-width: 44px; min-height: 44px; }
+}
+
+/* The shared subtitle repeats the page h1; keep its include unchanged. */
+.fc-alta .fc-alta-form > .widget-header { display: none; }
+
+.fc-alta .fc-alta-section-heading > div { min-width: 0; overflow-wrap: anywhere; }
+.fc-alta .fc-alta-fields > * { min-width: 0; box-sizing: border-box; }
+
+/* Alta de factura: opciones legibles sin modificar otros formularios. */
+#form_fc_factura_alta .bootstrap-select .dropdown-menu {
+    background: #fff;
+}
+#form_fc_factura_alta .bootstrap-select .dropdown-menu li > a {
+    color: #302246;
+    background: #fff;
+}
+#form_fc_factura_alta .bootstrap-select .dropdown-menu li > a span.text {
+    color: inherit;
+}
+#form_fc_factura_alta .bootstrap-select .dropdown-menu li > a:hover,
+#form_fc_factura_alta .bootstrap-select .dropdown-menu li > a:focus {
+    color: #302246;
+    background: #f0e9ff;
+}
+#form_fc_factura_alta .bootstrap-select .dropdown-menu li.selected > a,
+#form_fc_factura_alta .bootstrap-select .dropdown-menu li.active > a {
+    color: #fff;
+    background: #7138e2;
+}
+#form_fc_factura_alta .bootstrap-select .dropdown-menu li.disabled > a,
+#form_fc_factura_alta .bootstrap-select .dropdown-menu li.disabled > a:hover,
+#form_fc_factura_alta .bootstrap-select .dropdown-menu li.disabled > a:focus {
+    color: #6d6579;
+    background: #fff;
+}

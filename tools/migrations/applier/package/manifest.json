@@ -1,0 +1,51 @@
+{
+  "format": 1,
+  "id": "proposed-four-tables-composite-v1",
+  "new_design_not_historical_ddl": true,
+  "entries": [
+    {
+      "table": "cc_tipo_medidor",
+      "sql": "cc_tipo_medidor.sql",
+      "sha256": "9981ed61c0f9792bb87b8661c2e975c4c8b3b61e583dce9a009230c6ae9fb446",
+      "structure": "cc_tipo_medidor.json",
+      "structure_sha256": "56766dcf0d13b95f68c5e2a8fc8ba741cb7620e65b4abababea954e3884e5146",
+      "parents": []
+    },
+    {
+      "table": "cc_medidor",
+      "sql": "cc_medidor.sql",
+      "sha256": "c2bd203c10a2040b75cf9bd45feec75f3e10cb822ff1c40ca4fb7bed859ddc12",
+      "structure": "cc_medidor.json",
+      "structure_sha256": "71d093ce13739852cdf49dbfc781db2a461893a7ad659e2bfa1692cde01f1180",
+      "parents": [
+        "cc_tipo_medidor"
+      ]
+    },
+    {
+      "table": "base_movil_sesion",
+      "sql": "base_movil_sesion.sql",
+      "sha256": "9fcb50e6f0a9277f7e58c7c1cfed96c4b8fb9eb0f481945d07f4e13aad5d36cf",
+      "structure": "base_movil_sesion.json",
+      "structure_sha256": "f567a024520954a5e8ad38a990df0d17c596a1f07669841cf186181b204264e4",
+      "parents": [
+        "adm_usuario"
+      ]
+    },
+    {
+      "table": "base_movil_push_token",
+      "sql": "base_movil_push_token.sql",
+      "sha256": "1c423025d9b7629974b1876bf2c24355148c58b3c79701dd184fba74ade0972f",
+      "structure": "base_movil_push_token.json",
+      "structure_sha256": "c33a3441e4bcc4563e7e56f96f4867dd018a30af36bbd4c8c3408441d64b265b",
+      "parents": [
+        "adm_usuario",
+        "base_movil_sesion"
+      ]
+    }
+  ],
+  "external_parents": [
+    "adm_usuario"
+  ],
+  "engine_family": "MariaDB10.6",
+  "execution_status": "candidate_requires_review"
+}

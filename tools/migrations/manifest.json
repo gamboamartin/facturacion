@@ -1,0 +1,10 @@
+{
+  "format_version": 1,
+  "migrations": [],
+  "requirements": [
+    {"table": "base_movil_sesion", "status": "pending_definition", "sources": ["orm/base_movil_sesion.php:14-20", "api/base_movil/src/app_sesion.php:317-478"]},
+    {"table": "base_movil_push_token", "status": "pending_definition", "sources": ["orm/base_movil_push_token.php:16-22", "api/base_movil/src/app_push.php:52-221"]},
+    {"table": "cc_medidor", "status": "pending_definition", "sources": ["orm/cc_medidor.php"]},
+    {"table": "cc_tipo_medidor", "status": "pending_definition", "sources": ["orm/cc_tipo_medidor.php"]}
+  ]
+}

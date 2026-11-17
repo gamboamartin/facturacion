@@ -25,6 +25,7 @@ class _pdf_aguaban
     private array $relacionadas;
     private string $ruta_logo;
     private string $ruta_qr;
+    private string $tipo_documento = 'factura';
     private NumberFormatter $fmt;
 
     public function __construct()
@@ -34,94 +35,9 @@ class _pdf_aguaban
         $this->fmt = new NumberFormatter('es_MX', NumberFormatter::CURRENCY);
     }
 
-    private function set_partidas(Fpdi $pdf, $tabla_partida): void
-    {
-        $border = 0;
-        $h = 2.5;
-        $y = 96.5;
-        $partidas = 1;
-        foreach ($this->factura['partidas'] as $partida) {
-            $pdf->SetFont('Arial', '', '7');
-            $x = 7;
-            $pdf->SetXY($x, $y);
-            $pdf->MultiCell(10, $h, $partida[$tabla_partida.'_cantidad'], $border, 'C');
 
-            $x = 19;
-            $pdf->SetXY($x, $y);
-            $pdf->MultiCell(12, $h, $partida['cat_sat_unidad_codigo'], $border, 'C');
 
-            $x = 33;
-            $pdf->SetXY($x, $y);
-            $pdf->MultiCell(18, $h, $partida['com_producto_codigo_sat'], $border, 'C');
-
-            $x = 52;
-            $pdf->SetXY($x, $y);
-            $pdf->MultiCell(75, $h, mb_convert_encoding($partida[$tabla_partida.'_descripcion'], 'ISO-8859-1', 'UTF-8'), $border, 'L');
-
-            $x = 127;
-            $pdf->SetXY($x, $y);
-            $pdf->MultiCell(27, $h,
-                mb_convert_encoding($partida['cat_sat_obj_imp_descripcion'], 'ISO-8859-1', 'UTF-8'), $border, 'C');
-
-            $fc_partida_valor_unitario = round($partida[$tabla_partida.'_valor_unitario'], 2);
-            $fc_partida_valor_unitario = $this->fmt->formatCurrency($fc_partida_valor_unitario, "MXN");
-
-            $x = 155;
-            $pdf->SetXY($x, $y);
-            $pdf->MultiCell(24, $h, $fc_partida_valor_unitario, $border, 'C');
-
-            $fc_partida_sub_total = round($partida[$tabla_partida.'_sub_total'], 2);
-            $fc_partida_sub_total = $this->fmt->formatCurrency($fc_partida_sub_total, "MXN");
-
-            $x = 182;
-            $pdf->SetXY($x, $y);
-            $pdf->MultiCell(24, $h, $fc_partida_sub_total, $border, 'C');
-
-            $y = $y + $h;
-
-            $partidas++;
-            $mod = $partidas % 6;
-            if ($mod === 0) {
-                $y = 96.5;
-                $this->base_pdf(pdf: $pdf);
-            }
-        }
-    }
-
-    private function set_relacionadas(Fpdi $pdf)
-    {
-        if (count($this->relacionadas) > 0) {
-            $y = 165;
-            $pdf->SetXY(7, $y);
-            $pdf->SetFont('Arial', 'B', '9');
-            $pdf->SetTextColor(0, 0, 0);
-            $pdf->MultiCell(90, 3, 'Relaciones:', 0);
-            foreach ($this->relacionadas as $relacionada) {
-                $pdf->SetFont('Arial', 'B', '8');
-                $cat_sat_tipo_relacion_codigo = trim($relacionada['cat_sat_tipo_relacion_codigo']);
-                $cat_sat_tipo_relacion_descripcion = trim($relacionada['cat_sat_tipo_relacion_descripcion']);
-
-                $tipo_relacion = "$cat_sat_tipo_relacion_codigo $cat_sat_tipo_relacion_descripcion";
-                $tipo_relacion = mb_convert_encoding($tipo_relacion, 'ISO-8859-1', 'UTF-8');
-                $y = $y + 4;
-                $pdf->SetFont('Arial', 'B', '8');
-                $pdf->SetXY(8.5, $y);
-                $pdf->MultiCell(90, 3.5, $tipo_relacion, 0);
-
-                $folios_rel = $relacionada['fc_facturas_relacionadas'];
-
-                foreach ($folios_rel as $folio_rel) {
-                    $y = $y + 4;
-                    $pdf->SetXY(9.5, $y);
-                    $pdf->SetFont('Arial', '', '7');
-                    $pdf->MultiCell(90, 3.5, $folio_rel['fc_factura_uuid'], 0);
-                }
-
-            }
-        }
-    }
-
-    private function base_pdf(Fpdi $pdf): void
+    private function base_pdf(__CUSTOM_FPDI $pdf): void
     {
 
         $init = $this->init($pdf);
@@ -129,19 +45,16 @@ class _pdf_aguaban
             (new errores())->error(mensaje: 'Error al cargar template', data: $init);
             return;
         }
+
+        //$this->set_logo(pdf: $pdf);
         $this->set_folio(pdf: $pdf);
-        $this->set_fecha_hora_emision(pdf: $pdf);
+        if ($this->tipo_documento === 'factura') {
+            $this->set_fecha_hora_emision(pdf: $pdf);
+        }
+        $this->set_pago(pdf: $pdf);
         $this->set_receptor(pdf: $pdf);
         $this->set_emisor(pdf: $pdf);
 
-        $this->set_relacionadas(pdf: $pdf);
-
-        $this->set_pago(pdf: $pdf);
-        $this->set_montos(pdf: $pdf);
-        $this->set_datos_fiscales(pdf: $pdf);
-        $this->set_sellos(pdf: $pdf);
-        $this->set_qrcode(pdf: $pdf);
-        //$this->set_logo(pdf: $pdf);
 
     }
 
@@ -180,14 +93,26 @@ class _pdf_aguaban
         $this->tabla = $modelo_entidad->tabla;
         $tabla_partida = $modelo_partida->tabla;
 
-        $pdf = new Fpdi();
+        if ($this->tabla === 'fc_nota_credito') {
+            $this->tipo_documento = 'nota_credito';
+        }
 
-        $pdf->SetFont('Arial', '', '9');
+        $pdf = new __CUSTOM_FPDI();
+
+        $pdf->AddFont('DejaVuSans', '', 'DejaVuSans.php');
+        $pdf->AddFont('DejaVuSans', 'B', 'DejaVuSans-Bold.php');
+        $pdf->SetFont('DejaVuSans', '', '9');
         $pdf->SetTextColor(0, 0, 0);
 
         $this->base_pdf(pdf: $pdf);
 
-//        $this->set_partidas(pdf: $pdf, tabla_partida: $tabla_partida);
+        $this->set_partidas(pdf: $pdf, tabla_partida: $tabla_partida);
+
+        $this->set_montos(pdf: $pdf);
+        $this->set_relacionadas(pdf: $pdf);
+        $this->set_datos_fiscales(pdf: $pdf);
+        $this->set_sellos(pdf: $pdf);
+        $this->set_qrcode(pdf: $pdf);
 
         $key_serie = $modelo_entidad->tabla . '_serie';
         $key_folio = $modelo_entidad->tabla . '_folio';
@@ -338,10 +263,14 @@ class _pdf_aguaban
 
     private function init(Fpdi $pdf): true|array
     {
+        $plantilla = 'factura_aguaban.pdf';
+        if ($this->tipo_documento === 'nota_credito') {
+            $plantilla = 'nota_credito_aguaban.pdf';
+        }
 
         try {
             $pdf->addPage();
-            $pdf->setSourceFile($this->config_generales->path_base.'/plantillas/factura_aguaban.pdf');
+            $pdf->setSourceFile($this->config_generales->path_base . '/plantillas/' . $plantilla);
             $tplIdx = $pdf->importPage(1);
             $pdf->useTemplate($tplIdx, 0, 0, null, null, true);
         } catch (Throwable $e) {
@@ -356,10 +285,12 @@ class _pdf_aguaban
         if (isset($this->data->fecha_timbrado)) {
             $fecha_hora_emision = $this->data->fecha_timbrado;
             $fecha_hora_emision = DateTime::createFromFormat('Y-m-d\TH:i:s', $fecha_hora_emision);
-            $fecha_hora_emision = $fecha_hora_emision->format('d/m/Y H:i:s');
+            if ($fecha_hora_emision) {
+                $fecha_hora_emision = $fecha_hora_emision->format('d/m/Y H:i:s');
+            }
         }
 
-        $pdf->SetFont('Arial', '', '6');
+        $pdf->SetFont('DejaVuSans', '', '6');
         $pdf->SetTextColor(86, 117, 154);
         $pdf->SetXY(166, 25);
         $pdf->cell(30,5, $fecha_hora_emision,0, 0, 'R');
@@ -367,7 +298,7 @@ class _pdf_aguaban
 
     private function set_folio(Fpdi $pdf): void
     {
-        $pdf->SetFont('Arial', 'B', '10');
+        $pdf->SetFont('DejaVuSans', 'B', '10');
         $pdf->SetTextColor(18, 61, 112);
         $pdf->SetXY(166, 20);
         $pdf->cell(30,5, $this->factura[$this->tabla . "_folio"], 0, 0, 'R');
@@ -384,7 +315,7 @@ class _pdf_aguaban
         }
     }
 
-    private function set_receptor(Fpdi $pdf): void
+    private function set_receptor(__CUSTOM_FPDI $pdf): void
     {
         $factura = $this->factura;
 
@@ -394,6 +325,7 @@ class _pdf_aguaban
 
 
         $razon_social = mb_convert_encoding($factura['com_cliente_razon_social'], 'ISO-8859-1', 'UTF-8');
+
         $cliente_rfc = $factura['com_cliente_rfc'];
 
         $reg = mb_convert_encoding($factura['cat_sat_regimen_fiscal_cliente_codigo'] . ' ' . $factura['cat_sat_regimen_fiscal_cliente_descripcion'], 'ISO-8859-1', 'UTF-8');
@@ -408,25 +340,26 @@ class _pdf_aguaban
         $h = 3.5;
         $y = 39;
 
-        $pdf->SetFont('Arial', 'B', '8');
+        $pdf->SetFont('DejaVuSans', 'B', '8');
         $pdf->SetTextColor(18, 61, 112);
         $pdf->SetXY($x, $y);
-        $pdf->cell(60,$h, $razon_social,$border, 0, 'L');
-        $y += $h;
+        $pdf->multicell(60,$h, $razon_social,$border, 'L');
+        $lineas_razon_social = $pdf->NbLines(60, $razon_social);
+        $y += $h * $lineas_razon_social;
 
-        $pdf->SetFont('Arial', '', '8');
+        $pdf->SetFont('DejaVuSans', '', '8');
         $pdf->SetTextColor(18, 61, 112);
         $pdf->SetXY($x, $y);
         $pdf->cell(60,$h, 'RFC ' . $cliente_rfc,$border, 0, 'L');
         $y += $h;
 
-        $pdf->SetFont('Arial', '', '7');
+        $pdf->SetFont('DejaVuSans', '', '7');
         $pdf->SetTextColor(86, 117, 154);
         $pdf->SetXY($x, $y);
         $pdf->cell(60,$h, 'Regimen Fiscal '.$regimen,$border, 0, 'L');
         $y += $h;
 
-        $pdf->SetFont('Arial', '', '7');
+        $pdf->SetFont('DejaVuSans', '', '7');
         $pdf->SetTextColor(86, 117, 154);
         $pdf->SetXY($x, $y);
         $pdf->cell(60,$h, 'Uso CFDI '.$uso_cfdi,$border, 0, 'L');
@@ -443,25 +376,25 @@ class _pdf_aguaban
         $h = 3.5;
         $y = 39;
 
-        $pdf->SetFont('Arial', 'B', '8');
+        $pdf->SetFont('DejaVuSans', 'B', '8');
         $pdf->SetTextColor(18, 61, 112);
         $pdf->SetXY($x, $y);
         $pdf->cell(60,$h, mb_convert_encoding("AGUABAN · RFC AGU000614BI8", 'ISO-8859-1', 'UTF-8'),$border, 0, 'L');
         $y += $h;
 
-        $pdf->SetFont('Arial', '', '8');
+        $pdf->SetFont('DejaVuSans', '', '8');
         $pdf->SetTextColor(86, 117, 154);
         $pdf->SetXY($x, $y);
         $pdf->cell(60,$h, mb_convert_encoding("Régimen fiscal 601 - General de Ley Personas Morales", 'ISO-8859-1', 'UTF-8'),$border, 0, 'L');
         $y += $h;
 
-        $pdf->SetFont('Arial', '', '7');
+        $pdf->SetFont('DejaVuSans', '', '7');
         $pdf->SetTextColor(86, 117, 154);
         $pdf->SetXY($x, $y);
         $pdf->cell(60,$h, mb_convert_encoding("Lugar de expedición: CP 63734", 'ISO-8859-1', 'UTF-8'),$border, 0, 'L');
         $y += $h;
 
-        $pdf->SetFont('Arial', '', '7');
+        $pdf->SetFont('DejaVuSans', '', '7');
         $pdf->SetTextColor(86, 117, 154);
         $pdf->SetXY($x, $y);
         $pdf->cell(60,$h, "CFDI 4.0 " . $tipo_de_comprobante, $border, 0, 'L');
@@ -469,12 +402,144 @@ class _pdf_aguaban
 
     }
 
+    private function set_partidas(__CUSTOM_FPDI $pdf, $tabla_partida): void
+    {
+        $partidas_array = $this->factura['partidas'];
+
+        $border = 0;
+        $h = 3;
+
+        // Configuración de posiciones
+        $y_base = 88.5;
+        $y = $y_base;
+
+        $limite_y = $y_base + 69; // Altura máxima disponible para las partidas
+
+        $hay_partida_en_pagina = false; // Control de partidas dibujadas en la página actual
+
+        $pdf->SetFont('DejaVuSans', '', '7');
+
+        foreach ($partidas_array as $partida) {
+
+            // ==========================================
+            // 1. OBTENER DATOS DE LA PARTIDA
+            // ==========================================
+
+            $partida_descripcion = mb_convert_encoding($partida[$tabla_partida . '_descripcion'], 'ISO-8859-1', 'UTF-8');
+            $unidad = mb_convert_encoding($partida['cat_sat_unidad_descripcion'], 'ISO-8859-1', 'UTF-8');
+
+            // ==========================================
+            // 2. CALCULAR ALTURA DE LA PARTIDA
+            // ==========================================
+
+            $w_descripcion = 52;
+            $w_unidad = 13;
+
+            $lineas_descripcion = $pdf->NbLines($w_descripcion, $partida_descripcion);
+
+            $lineas_unidad = $pdf->NbLines($w_unidad, $unidad);
+
+            // Tomar la mayor cantidad de líneas
+            $lineas_maximas = max($lineas_unidad, $lineas_descripcion);
+
+            $altoFila = max($h, $lineas_maximas * $h);
+
+            // ==========================================
+            // 3. COMPROBAR SI LA PARTIDA CABE
+            // ==========================================
+
+            $espacio_separador = $hay_partida_en_pagina ? 2 : 0;
+
+            if (($y + $espacio_separador + $altoFila) > $limite_y) {
+                $pdf->ocultar_area(10,$limite_y+2,185,120);
+                $this->base_pdf(pdf: $pdf); // Crear nueva página
+                $y = $y_base; // Reiniciar posición vertical
+                $hay_partida_en_pagina = false; // Reiniciar control de partidas
+                $espacio_separador = 0;
+            }
+
+            // ==========================================
+            // 4. DIBUJAR SEPARADOR ENTRE PARTIDAS
+            // ==========================================
+
+            if ($hay_partida_en_pagina) {
+                $y++;
+                $pdf->SetDrawColor(220, 232, 242);
+                $pdf->SetLineWidth(0.2);
+                $pdf->Line(15, $y, 195, $y);
+                $y++;
+            }
+
+            // ==========================================
+            // 5. DIBUJAR COLUMNAS
+            // ==========================================
+
+            $x = 15; // Cantidad
+            $w = 12;
+            $pdf->SetXY($x, $y);
+            $pdf->Cell($w, $altoFila, $partida[$tabla_partida . '_cantidad'], $border, 0, 'C');
+
+            $x += $w; // Unidad
+            $w = $w_unidad;
+            $y_texto = $y + (($altoFila - ($lineas_unidad * $h)) / 2);
+            $pdf->SetXY($x, $y_texto);
+            $pdf->MultiCell($w, $h, $unidad, $border, 'C');
+
+            $x += $w; // Clave SAT
+            $w = 12;
+            $pdf->SetXY($x, $y);
+            $pdf->Cell($w, $altoFila, $partida['cat_sat_unidad_codigo'], $border, 0, 'C');
+
+
+            $x += $w; // Clave producto/servicio
+            $w = 18;
+            $pdf->SetXY($x, $y);
+            $pdf->Cell($w, $altoFila, $partida['com_producto_codigo'], $border, 0, 'C');
+
+
+            $x += $w; // Concepto / Descripción
+            $w = $w_descripcion;
+            $y_texto = $y + (($altoFila - ($lineas_descripcion * $h)) / 2);
+            $pdf->SetXY($x, $y_texto);
+            $pdf->MultiCell($w, $h, $partida_descripcion, $border, 'C');
+
+
+            $x += $w; // Valor unitario
+            $w = 16;
+            $pdf->SetXY($x, $y);
+            $pdf->Cell($w, $altoFila, $this->mx_currency($partida[$tabla_partida . '_valor_unitario']), $border, 0, 'C');
+
+
+            $x += $w; // Descuentos
+            $w = 18;
+            $pdf->SetXY($x, $y);
+            $pdf->Cell($w, $altoFila, $this->mx_currency($partida[$tabla_partida . '_descuento']), $border, 0, 'C');
+
+            $x += $w; // Impuestos / Traslados
+            $pdf->SetXY($x, $y);
+            $pdf->Cell($w, $altoFila, $this->mx_currency($partida[$tabla_partida . '_total_traslados']), $border, 0, 'C');
+
+
+            $x += $w; // Importe
+            $w = 20;
+            $pdf->SetXY($x, $y);
+            $pdf->Cell($w, $altoFila, $this->mx_currency($partida[$tabla_partida . '_sub_total']), $border, 0, 'C');
+
+            // ==========================================
+            // 6. ACTUALIZAR POSICIÓN
+            // ==========================================
+
+            $y += $altoFila;
+            $hay_partida_en_pagina = true;
+        }
+    }
+
     private function set_pago(Fpdi $pdf): void
     {
         $factura = $this->factura;
 
         $exportacion = "EXPORTACIÓN 01 - No aplica";
-        if ((int)$factura['fc_factura_exportacion'] !== 1) {
+        if ((int)$factura[$this->tabla.'_exportacion'] !== 1) {
             $exportacion = "EXPORTACIÓN 00 - Aplica";
         }
         $exportacion = mb_convert_encoding($exportacion, 'ISO-8859-1', 'UTF-8');
@@ -483,7 +548,7 @@ class _pdf_aguaban
         $metodo_pago = mb_convert_encoding($factura['cat_sat_metodo_pago_codigo'] . ' - ' . $factura['cat_sat_metodo_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
         $moneda = mb_convert_encoding($factura['cat_sat_moneda_codigo'] . ' - ' . $factura['cat_sat_moneda_descripcion'], 'ISO-8859-1', 'UTF-8');
 
-        $pdf->SetFont('Arial', '', '8');
+        $pdf->SetFont('DejaVuSans', '', '8');
         $pdf->SetTextColor(90, 128, 192);
 
         $y = 62;
@@ -508,46 +573,69 @@ class _pdf_aguaban
         $tabla = $this->tabla;
         $factura = $this->factura;
 
-        $pdf->SetFont('Arial', 'B', '9');
+        $pdf->SetFont('DejaVuSans', 'B', 9);
         $pdf->SetTextColor(0, 128, 192);
-        $fc_factura_sub_total = round($factura[$tabla.'_sub_total'], 2);
-        $fc_factura_sub_total = $this->fmt->formatCurrency($fc_factura_sub_total, "MXN");
+
+        // Subtotal
+        $fc_factura_sub_total = $this->mx_currency($factura[$tabla.'_sub_total']);
         $pdf->SetXY(165, 160.7);
-        $pdf->cell(30,9, $fc_factura_sub_total,0, 0, 'R');
+        $pdf->Cell(30, 9, $fc_factura_sub_total, 0, 0, 'R');
 
-
-        $pdf->SetFont('Arial', 'B', '9');
-        $pdf->SetTextColor(0, 128, 192);
-        $fc_factura_total_traslados = round($factura[$tabla.'_total_traslados'], 2);
-        $fc_factura_total_traslados = $this->fmt->formatCurrency($fc_factura_total_traslados, "MXN");
+        // Total de traslados
+        $fc_factura_total_traslados = $this->mx_currency($factura[$tabla.'_total_traslados']);
         $pdf->SetXY(165, 170.7);
-        $pdf->cell(30,9, $fc_factura_total_traslados,0, 0, 'R');
+        $pdf->Cell(30, 9, $fc_factura_total_traslados, 0, 0, 'R');
 
+        // Total
+        $total = (float)$factura[$tabla.'_total'];
 
-        $pdf->SetFont('Arial', 'B', '9');
-        $pdf->SetTextColor(0, 128, 192);
-        $fc_factura_total = round($factura[$tabla.'_total'], 2);
-        $fc_factura_total = $this->fmt->formatCurrency($fc_factura_total, "MXN");
+        $fc_factura_total = $this->mx_currency($total);
         $pdf->SetXY(165, 181.7);
-        $pdf->cell(30,9, $fc_factura_total,0, 0, 'R');
+        $pdf->Cell(30, 9, $fc_factura_total, 0, 0, 'R');
 
+        // Total en letras
+        $letra = $this->monto_a_letras($total);
 
-        $formatterES = new NumberFormatter("es-ES", NumberFormatter::SPELLOUT);
-        $izquierda = intval(floor($factura[$tabla.'_total']));
-        $derecha = intval(($factura[$tabla.'_total'] - floor($factura[$tabla.'_total'])) * 100);
-        $letra = $formatterES->format($izquierda) . " pesos ";
-        if ((float)$derecha === 0.0) {
-            $derecha = '00';
-        }
-        $letra .= $derecha . "/100 M.N.";
-
-        $pdf->SetFont('Arial', '', '7');
+        $pdf->SetFont('DejaVuSans', '', 7);
         $pdf->SetTextColor(0, 0, 0);
-        $letra = strtoupper($letra);
+
         $letra = mb_convert_encoding($letra, 'ISO-8859-1', 'UTF-8');
+
         $pdf->SetXY(15, 190);
         $pdf->MultiCell(144, 5, $letra, 0, 'L');
+    }
 
+    private function set_relacionadas(Fpdi $pdf): void
+    {
+
+        if (count($this->relacionadas) > 0) {
+            $relacionada = $this->relacionadas[0];
+
+            $cat_sat_tipo_relacion_codigo = trim($relacionada['cat_sat_tipo_relacion_codigo']);
+            $cat_sat_tipo_relacion_descripcion = trim($relacionada['cat_sat_tipo_relacion_descripcion']);
+            $tipo_relacion = "$cat_sat_tipo_relacion_codigo - $cat_sat_tipo_relacion_descripcion";
+            $tipo_relacion = mb_convert_encoding($tipo_relacion, 'ISO-8859-1', 'UTF-8');
+
+            $y = 202.5;
+
+            $pdf->SetFont('DejaVuSans', '', '7');
+            $pdf->SetTextColor(12, 53, 107);
+            $pdf->SetXY(x:16.8, y: $y);
+            $pdf->cell(85, 3.5, $tipo_relacion);
+
+
+            $folio_rel = '';
+
+            if (isset($relacionada['fc_facturas_relacionadas'][0]['fc_factura_uuid'])) {
+                $folio_rel = $relacionada['fc_facturas_relacionadas'][0]['fc_factura_uuid'];
+            }
+
+            $folio_rel = strtoupper($folio_rel);
+
+            $pdf->SetXY(x: 101.8, y: $y);
+            $pdf->cell(90, 3.5, $folio_rel, 0, 0, 'R');
+
+        }
     }
 
     private function set_datos_fiscales(Fpdi $pdf): void
@@ -563,7 +651,9 @@ class _pdf_aguaban
         if (isset($data->fecha_timbrado)) {
             $fecha_timbrado = $data->fecha_timbrado;
             $fecha = DateTime::createFromFormat('Y-m-d\TH:i:s', $fecha_timbrado);
-            $fecha_timbrado = $fecha->format('d/m/Y H:i:s');
+            if ($fecha) {
+                $fecha_timbrado = $fecha->format('d/m/Y H:i:s');
+            }
         }
 
         $no_certificado = '';
@@ -581,28 +671,28 @@ class _pdf_aguaban
             $rfc_proveedor = $data->rfc_proveedor;
         }
 
-        $pdf->SetFont('Arial', 'B', '7');
+        $pdf->SetFont('DejaVuSans', 'B', '7');
         $pdf->SetTextColor(100, 100, 100);
         $pdf->SetXY(36, 216);
         $pdf->cell(50,3, ': ' . mb_strtoupper($folio_fiscal),0, 0, 'L');
 
 
-        $pdf->SetFont('Arial', 'B', '7');
+        $pdf->SetFont('DejaVuSans', 'B', '7');
         $pdf->SetTextColor(100, 100, 100);
         $pdf->SetXY(48, 220.1);
         $pdf->cell(50,3, ': ' . $fecha_timbrado, 0, 0, 'L');
 
-        $pdf->SetFont('Arial', 'B', '7');
+        $pdf->SetFont('DejaVuSans', 'B', '7');
         $pdf->SetTextColor(100, 100, 100);
         $pdf->SetXY(41, 224);
         $pdf->cell(50,3, ': ' . $no_certificado,0, 0, 'L');
 
-        $pdf->SetFont('Arial', 'B', '7');
+        $pdf->SetFont('DejaVuSans', 'B', '7');
         $pdf->SetTextColor(100, 100, 100);
         $pdf->SetXY(37, 228);
         $pdf->cell(50,3, ': ' . $no_certificado_sat,0, 0, 'L');
 
-        $pdf->SetFont('Arial', 'B', '7');
+        $pdf->SetFont('DejaVuSans', 'B', '7');
         $pdf->SetTextColor(100, 100, 100);
         $pdf->SetXY(54.5, 232.1);
         $pdf->cell(50,3, ': ' . $rfc_proveedor,0, 0, 'L');
@@ -613,7 +703,7 @@ class _pdf_aguaban
     {
         $data = $this->data;
         $x = 15;
-        $pdf->SetFont('Arial', '', '6');
+        $pdf->SetFont('DejaVuSans', '', '6');
         $pdf->SetTextColor(0, 0, 0);
 
         $pdf->SetXY($x, 241);
@@ -622,7 +712,7 @@ class _pdf_aguaban
         $pdf->SetXY($x, 256);
         $pdf->MultiCell(140, 2.6, $data->sello_sat, 0);
 
-        $pdf->SetFont('Arial', '', '6');
+        $pdf->SetFont('DejaVuSans', '', '6');
         $pdf->SetAutoPageBreak(false);
         $pdf->SetXY($x, 270);
         $pdf->MultiCell(140, 2.6, $data->complento);
@@ -637,6 +727,52 @@ class _pdf_aguaban
                 $pdf->Image($this->ruta_qr, 159.5, 243, 29.5, 29.5, 'png');
             }
         }
+    }
+
+    private function monto_a_letras(float $monto): string
+    {
+        $monto = round($monto, 2);
+
+        $izquierda = (int) floor($monto);
+        $derecha = (int) round(($monto - $izquierda) * 100);
+
+        if ($derecha === 100) {
+            $izquierda++;
+            $derecha = 0;
+        }
+
+        $formatterES = new NumberFormatter(
+            "es-ES",
+            NumberFormatter::SPELLOUT
+        );
+
+        $letra = $formatterES->format($izquierda) . " pesos ";
+
+        $letra .= str_pad(
+                (string)$derecha,
+                2,
+                '0',
+                STR_PAD_LEFT
+            ) . "/100 M.N.";
+
+        return mb_strtoupper($letra, 'UTF-8');
+    }
+
+    private function mx_currency(float|int|string|null $cantidad): string
+    {
+        if ($cantidad === null || !is_numeric($cantidad)) {
+            return '';
+        }
+
+        $cantidad = round((float)$cantidad, 2);
+
+        $resultado = $this->fmt->formatCurrency($cantidad, 'MXN');
+
+        if ($resultado === false) {
+            return '';
+        }
+
+        return $resultado;
     }
 
 }

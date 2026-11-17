@@ -1,0 +1,8 @@
+{"caso":"vacio","salidas":{"original":[],"lote":[],"corregido":[]},"consultas":{"original":0,"lote":0,"corregido":0},"pasa_corregido":true}
+{"caso":"claves_duplicados","salidas":{"original":{"2":{"adm_seccion_id":1},"15":{"adm_seccion_id":4},"18":{"adm_seccion_id":4}},"lote":{"2":{"adm_seccion_id":1},"15":{"adm_seccion_id":4},"18":{"adm_seccion_id":4}},"corregido":{"2":{"adm_seccion_id":1},"15":{"adm_seccion_id":4},"18":{"adm_seccion_id":4}}},"consultas":{"original":5,"lote":1,"corregido":1},"pasa_corregido":true}
+{"caso":"string_normal","salidas":{"original":[{"adm_seccion_id":"1"}],"lote":[{"adm_seccion_id":"1"}],"corregido":[{"adm_seccion_id":"1"}]},"consultas":{"original":1,"lote":1,"corregido":1},"pasa_corregido":true}
+{"caso":"id_cero_inicial","salidas":{"original":[{"adm_seccion_id":"01"}],"lote":[],"corregido":[{"adm_seccion_id":"01"}]},"consultas":{"original":1,"lote":1,"corregido":1},"pasa_corregido":true}
+{"caso":"id_decimal","salidas":{"original":[{"adm_seccion_id":"1.0"}],"lote":[],"corregido":[{"adm_seccion_id":"1.0"}]},"consultas":{"original":1,"lote":1,"corregido":1},"pasa_corregido":true}
+{"caso":"id_float","salidas":{"original":[{"adm_seccion_id":1}],"lote":[{"adm_seccion_id":1}],"corregido":[{"adm_seccion_id":1}]},"consultas":{"original":1,"lote":1,"corregido":1},"pasa_corregido":true}
+{"caso":"sin_accion","salidas":{"original":[],"lote":[],"corregido":[]},"consultas":{"original":1,"lote":1,"corregido":1},"pasa_corregido":true}
+{"caso":"mezcla","salidas":{"original":[{"adm_seccion_id":4},{"adm_seccion_id":"01"}],"lote":[{"adm_seccion_id":4}],"corregido":[{"adm_seccion_id":4},{"adm_seccion_id":"01"}]},"consultas":{"original":2,"lote":1,"corregido":2},"pasa_corregido":true}

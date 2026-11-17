@@ -1,6 +1,10 @@
 <?php /** @var  gamboamartin\facturacion\controllers\controlador_fc_factura $controlador controlador en ejecucion */ ?>
 <?php use config\views; ?>
 
+<link rel="stylesheet" href="css/fc_factura/form-responsive.css?v=1">
+<link rel="stylesheet" href="css/fc_factura/modifica.css?v=3">
+<div id="vista_fc_factura_modifica" class="fc-modifica fc-invoice-form fc-edit">
+<header class="fc-edit-heading"><span>FACTURACIÓN</span><h1>Modificar factura</h1><p>Revisa el comprobante, sus partidas y los correos asociados.</p></header>
 <?php echo $controlador->inputs->registro_id; ?>
 
 <div class="col-lg-12">
@@ -11,7 +15,9 @@
             <?php include (new views())->ruta_templates . "head/title.php"; ?>
             <?php include (new views())->ruta_templates . "head/subtitulo.php"; ?>
             <?php include (new views())->ruta_templates . "mensajes.php"; ?>
-            <?php echo $controlador->form_data_fc; ?>
+            <div class="fc-edit-fields">
+<?php echo $controlador->form_data_fc; ?>
+</div>
             <?php include (new views())->ruta_templates . 'botons/submit/modifica_bd.php'; ?>
 
         </form>
@@ -25,11 +31,12 @@
     <div class="col-lg-12">
         <div class="widget  widget-box box-container form-main widget-form-cart" id="form">
             <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
-                <h2>Partidas</h2>
+                <h2>Agregar partida</h2>
             </div>
             <form method="post" action="#" class="form-additional" id="frm-partida">
 
-                <?php echo $controlador->inputs->partidas->com_producto_id; ?>
+                <div class="fc-edit-fields">
+<?php echo $controlador->inputs->partidas->com_producto_id; ?>
                 <?php echo $controlador->inputs->partidas->unidad; ?>
                 <?php //echo $controlador->inputs->partidas->impuesto; ?>
                 <?php echo $controlador->inputs->partidas->cuenta_predial; ?>
@@ -41,6 +48,7 @@
                 <?php echo $controlador->inputs->partidas->descuento; ?>
                 <?php echo $controlador->inputs->partidas->total; ?>
                 <?php echo $controlador->inputs->partidas->cat_sat_conf_imps_id; ?>
+</div>
 
 
                 <div class="control-group btn-alta">
@@ -173,13 +181,8 @@
 
 <?php echo $controlador->buttons_base; ?>
 
-<div class="col-md-12 buttons-form">
-    <?php
-    foreach ($controlador->buttons_parents_alta as $button) { ?>
-        <div class="col-md-4">
-            <?php echo $button; ?>
-        </div>
-    <?php } ?>
+
+
 </div>
 
 <script src="<?php echo (new \config\generales())->url_base . "js/_facturacion.js" ?>"></script>

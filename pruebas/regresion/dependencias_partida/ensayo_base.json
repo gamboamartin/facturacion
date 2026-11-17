@@ -1,0 +1,112 @@
+{
+    "scope": "isolated dependency order only; no app\/vendor changes",
+    "cases": [
+        {
+            "case": "asc",
+            "original": {
+                "fc_partida_id": "DESC"
+            },
+            "original_error": null,
+            "candidate": {
+                "fc_partida_id": "ASC"
+            },
+            "matches_expected": true
+        },
+        {
+            "case": "desc",
+            "original": {
+                "fc_partida_id": "desc"
+            },
+            "original_error": null,
+            "candidate": {
+                "fc_partida_id": "DESC"
+            },
+            "matches_expected": true
+        },
+        {
+            "case": "ASC_upper",
+            "original": {
+                "fc_partida_id": "DESC"
+            },
+            "original_error": null,
+            "candidate": {
+                "fc_partida_id": "ASC"
+            },
+            "matches_expected": true
+        },
+        {
+            "case": "last_data",
+            "original": [],
+            "original_error": null,
+            "candidate": {
+                "fc_partida_total": "ASC"
+            },
+            "matches_expected": true
+        },
+        {
+            "case": "action",
+            "original": [],
+            "original_error": null,
+            "candidate": [],
+            "matches_expected": true
+        },
+        {
+            "case": "negative",
+            "original": null,
+            "original_error": "ErrorException",
+            "candidate": [],
+            "matches_expected": true
+        },
+        {
+            "case": "too_large",
+            "original": [],
+            "original_error": null,
+            "candidate": [],
+            "matches_expected": true
+        },
+        {
+            "case": "direction_sql",
+            "original": {
+                "fc_partida_id": "DESC"
+            },
+            "original_error": null,
+            "candidate": [],
+            "matches_expected": true
+        },
+        {
+            "case": "direction_array",
+            "original": {
+                "fc_partida_id": "DESC"
+            },
+            "original_error": null,
+            "candidate": [],
+            "matches_expected": true
+        },
+        {
+            "case": "index_sql",
+            "original": null,
+            "original_error": "ErrorException",
+            "candidate": [],
+            "matches_expected": true
+        },
+        {
+            "case": "index_float",
+            "original": null,
+            "original_error": "ErrorException",
+            "candidate": [],
+            "matches_expected": true
+        },
+        {
+            "case": "no_request",
+            "original": {
+                "fc_partida_id": "DESC"
+            },
+            "original_error": null,
+            "candidate": {
+                "fc_partida_id": "DESC"
+            },
+            "matches_expected": true
+        }
+    ],
+    "success": true
+}

@@ -2582,16 +2582,34 @@ class _base_system_fc extends _base_system{
         return $this->inputs;
     }
 
+    /** Limita esta optimización al par de controladores exacto ya verificado. */
+    private function usa_catalogo_precios_factura(): bool
+    {
+        return get_class($this) === controlador_fc_factura::class
+            && get_class($this->ctl_partida) === controlador_fc_partida::class;
+    }
+
     private function nueva_partida_inicializa(int $com_cliente_id): array|stdClass{
 
-        $r_template = $this->ctl_partida->alta(header: false);
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al obtener template', data: $r_template);
-        }
+        if (($this->usa_catalogo_precios_factura()
+            && method_exists($this->ctl_partida, 'prepara_alta')
+            && method_exists(com_producto::class, 'precios_para_alta'))) {
+            $preparacion = $this->ctl_partida->prepara_alta(header: false);
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al obtener template', data: $preparacion);
+            }
+            $keys_selects = $preparacion->keys_selects;
+        } else {
+            $r_template = $this->ctl_partida->alta(header: false);
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al obtener template', data: $r_template);
+            }
 
-        $keys_selects = $this->ctl_partida->init_selects_inputs();
-        if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al inicializar selects', data: $keys_selects);
+            $keys_selects = $this->ctl_partida->init_selects_inputs();
+            if (errores::$error) {
+                return $this->errores->error(mensaje: 'Error al inicializar selects', data: $keys_selects);
+            }
+
         }
 
         $keys_selects['fc_factura_id']->id_selected = $this->registro_id;
@@ -2607,21 +2625,33 @@ class _base_system_fc extends _base_system{
             return $this->errores->error(mensaje: 'Error al obtener productos', data: $com_productos);
         }
 
-        foreach ($com_productos as $indice=>$com_producto){
-            $precio = (new com_producto(link: $this->link))->precio(com_cliente_id: $com_cliente_id,
-                com_producto_id:  $com_producto['com_producto_id']);
+        if (($this->usa_catalogo_precios_factura()
+            && method_exists($this->ctl_partida, 'prepara_alta')
+            && method_exists(com_producto::class, 'precios_para_alta'))) {
+            $com_productos = (new com_producto(link: $this->link))->precios_para_alta(
+                productos: $com_productos, com_cliente_id: $com_cliente_id);
             if (errores::$error) {
-                return $this->errores->error(mensaje: 'Error al obtener precio', data: $precio);
+                return $this->errores->error(mensaje: 'Error al obtener precio', data: $com_productos);
             }
-            $com_productos[$indice]['com_producto_precio'] = $precio;
 
-            $cat_sat_conf_imps_id = $com_producto['cat_sat_conf_imps_id'];
-            $precio_cliente_row = (new com_producto(link: $this->link))->precio_cliente_row(
-                com_cliente_id: $com_cliente_id,com_producto_id:  $com_producto['com_producto_id']);
-            if(count($precio_cliente_row)>0){
-                $cat_sat_conf_imps_id = $precio_cliente_row['cat_sat_conf_imps_id'];
+        } else {
+            foreach ($com_productos as $indice=>$com_producto){
+                $precio = (new com_producto(link: $this->link))->precio(com_cliente_id: $com_cliente_id,
+                    com_producto_id:  $com_producto['com_producto_id']);
+                if (errores::$error) {
+                    return $this->errores->error(mensaje: 'Error al obtener precio', data: $precio);
+                }
+                $com_productos[$indice]['com_producto_precio'] = $precio;
+
+                $cat_sat_conf_imps_id = $com_producto['cat_sat_conf_imps_id'];
+                $precio_cliente_row = (new com_producto(link: $this->link))->precio_cliente_row(
+                    com_cliente_id: $com_cliente_id,com_producto_id:  $com_producto['com_producto_id']);
+                if(count($precio_cliente_row)>0){
+                    $cat_sat_conf_imps_id = $precio_cliente_row['cat_sat_conf_imps_id'];
+                }
+                $com_productos[$indice]['cat_sat_conf_imps_id']  = $cat_sat_conf_imps_id;
+
             }
-            $com_productos[$indice]['cat_sat_conf_imps_id']  = $cat_sat_conf_imps_id;
 
         }
 

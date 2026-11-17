@@ -1,3 +1,76 @@
+// Pure projection of persisted totals, not a client-side financial calculation.
+function nc_totales_respuesta(json) {
+    if (!json || !json.registro_obj || !json.registro_puro) return null;
+    const campos = {
+        subtotal: 'sub_total', descuento: 'total_descuento',
+        impuestos_trasladados: 'total_traslados', impuestos_retenidos: 'total_retenciones', total: 'total'
+    };
+    const numero = function(value) {
+        return (typeof value === 'number' || (typeof value === 'string' && value.trim() !== '')) &&
+            Number.isFinite(Number(value));
+    };
+    if (!numero(json.registro_puro.total_retenciones)) return null;
+    const totales = {};
+    for (const campo of Object.keys(campos)) {
+        const valor = json.registro_obj['fc_nota_credito_' + campos[campo]];
+        if (!numero(valor)) return null;
+        totales[campo] = Number(valor).toFixed(2);
+    }
+    return totales;
+}
+
+// Modification returns the refreshed joined row in registro_actualizado, not registro_obj.
+function nc_modificacion_respuesta(json) {
+    if (!json || (json.error && json.error !== '0') || !json.registro_puro || !json.registro_actualizado) return null;
+    const id = String(json.registro_id);
+    if (!/^[1-9][0-9]*$/.test(id) || String(json.registro_puro.id) !== id) return null;
+    const cabecera = nc_totales_respuesta({registro_obj: json.registro_actualizado, registro_puro: json.registro_puro});
+    if (!cabecera) return null;
+    const partida = {};
+    for (const campo of ['cantidad', 'valor_unitario', 'descuento', 'sub_total_base', 'sub_total', 'total_traslados', 'total_retenciones', 'total']) {
+        const valor = json.registro_puro[campo];
+        if (!((typeof valor === 'number' || (typeof valor === 'string' && valor.trim() !== '')) && Number.isFinite(Number(valor)))) return null;
+        partida[campo] = String(valor);
+    }
+    return {id: id, cabecera: cabecera, partida: partida};
+}
+function nc_aplica_modificacion(contenedores, json) {
+    if (json && json.error && json.error !== '0') {
+        alert(typeof json.mensaje === 'string' ? json.mensaje : 'El servidor rechazó la modificación.');
+        return false;
+    }
+    const datos = nc_modificacion_respuesta(json);
+    const fallo = function () { alert('No fue posible actualizar los importes en pantalla. Recarga la nota antes de volver a modificarla.'); return false; };
+    if (!datos) return fallo();
+    const fila = contenedores.cte_formulario;
+    const entrada = fila.children('.tr_data_partida');
+    const resumen = entrada.next('tr').children('td');
+    const importe = entrada.children('td').eq(2).children('input[disabled]');
+    const cabecera = $('.form-main form.form-additional').first();
+    const controles = {};
+    const campos = ['cantidad', 'valor_unitario', 'descuento'];
+    if (fila.length !== 1 || entrada.length !== 1 || resumen.length !== 4 || importe.length !== 1 ||
+        String(contenedores.td_fc_partida_descripcion.data('fc_partida_factura_id')) !== datos.id) return fallo();
+    for (const campo of campos) {
+        controles[campo] = entrada.find('input.fc_partida_' + campo);
+        if (controles[campo].length !== 1) return fallo();
+    }
+    const totales = {};
+    for (const campo of Object.keys(datos.cabecera)) {
+        totales[campo] = cabecera.find('[id="' + campo + '"]');
+        if (totales[campo].length !== 1) return fallo();
+    }
+    // All response values and targets were checked before the first DOM mutation.
+    campos.forEach(function (campo) { controles[campo].val(datos.partida[campo]); });
+    importe.val(datos.partida.sub_total_base);
+    const etiquetas = ['Sub Total: ', 'Traslados: ', 'Retenciones: ', 'Total: '];
+    ['sub_total', 'total_traslados', 'total_retenciones', 'total'].forEach(function (campo, indice) {
+        resumen.eq(indice).empty().append($('<b>').text(etiquetas[indice])).append(document.createTextNode(Number(datos.partida[campo]).toFixed(2)));
+    });
+    Object.keys(totales).forEach(function (campo) { totales[campo].val(datos.cabecera[campo]); });
+    return true;
+}
+
 let session_id = getParameterByName('session_id');
 let adm_menu_id = getParameterByName('adm_menu_id');
 
@@ -111,7 +184,20 @@ btn_alta_partida.click(function () {
         // código a ejecutar si la petición es satisfactoria;
         // la respuesta es pasada como argumento a la función
         success : function(json) {
-            console.log(json);
+            // The ORM returns the refreshed NC header after regenerating totals.
+            // Validate before clearing the entry form or changing displayed amounts.
+            if (!json || (json.error && json.error !== '0')) {
+                alert(json && json.mensaje ? json.mensaje : 'No fue posible agregar la partida');
+                return false;
+            }
+            const totales = nc_totales_respuesta(json);
+            if (!totales) {
+                alert('La respuesta no contiene los totales esperados. Recarga la nota antes de volver a agregar la partida.');
+                return false;
+            }
+            Object.keys(totales).forEach(function(campo) {
+                $(".form-main form.form-additional").first().find('[id="' + campo + '"]').val(totales[campo]);
+            });
             alert(json.mensaje);
 
             sl_com_producto.val(-1);
@@ -122,12 +208,6 @@ btn_alta_partida.click(function () {
             txt_subtotal.val(0);
             txt_total.val(0);
 
-            if(!isNaN(json.error)){
-                alert(url);
-                if(json.error === 1) {
-                    return false;
-                }
-            }
 
 
             let fc_partida_id = json.registro_id;
@@ -144,9 +224,9 @@ btn_alta_partida.click(function () {
             let td_fc_partida_descuento =td_input('fc_partida_descuento','descuento',json.registro_puro.descuento);
 
 
-            let td_fc_partida_sub_total = "<tr><td><b>Sub Total: </b>"+json.registro_puro.sub_total+"</td>";
+            let td_fc_partida_sub_total = "<td><b>Sub Total: </b>"+json.registro_puro.sub_total+"</td>";
             let td_fc_partida_traslados = "<td><b>Traslados: </b>"+json.registro_puro.total_traslados+"</td>";
-            let td_fc_partida_retenciones = "<td><b>Retenciones: </b>"+json.registro_puro.retenciones+"</td>";
+            let td_fc_partida_retenciones = "<td><b>Retenciones: </b>"+json.registro_puro.total_retenciones+"</td>";
             let td_fc_partida_total = "<td><b>Total: </b>"+json.registro_puro.total+"</td>";
 
             let tr_tags =tr_tags_partida();

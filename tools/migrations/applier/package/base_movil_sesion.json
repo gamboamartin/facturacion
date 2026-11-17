@@ -1,0 +1,281 @@
+{
+  "checks": [],
+  "collation": "utf8mb4_unicode_ci",
+  "columns": [
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "auto_increment",
+      "generation": "",
+      "name": "id",
+      "nullable": false,
+      "type": "bigint"
+    },
+    {
+      "charset": "ascii",
+      "collation": "ascii_bin",
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "jti",
+      "nullable": false,
+      "type": "char(32)"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "adm_usuario_id",
+      "nullable": false,
+      "type": "bigint"
+    },
+    {
+      "charset": "ascii",
+      "collation": "ascii_bin",
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "ip",
+      "nullable": false,
+      "type": "varchar(45)"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "expira",
+      "nullable": false,
+      "type": "datetime"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "ultimo_uso",
+      "nullable": false,
+      "type": "datetime"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "cerrada_en",
+      "nullable": true,
+      "type": "datetime"
+    },
+    {
+      "charset": "utf8mb4",
+      "collation": "utf8mb4_unicode_ci",
+      "comment": "",
+      "default": "",
+      "extra": "",
+      "generation": "",
+      "name": "motivo_cierre",
+      "nullable": false,
+      "type": "varchar(255)"
+    },
+    {
+      "charset": "utf8mb4",
+      "collation": "utf8mb4_unicode_ci",
+      "comment": "",
+      "default": "activo",
+      "extra": "",
+      "generation": "",
+      "name": "status",
+      "nullable": false,
+      "type": "enum('activo','inactivo')"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "usuario_alta_id",
+      "nullable": false,
+      "type": "bigint"
+    },
+    {
+      "charset": null,
+      "collation": null,
+      "comment": "",
+      "default": null,
+      "extra": "",
+      "generation": "",
+      "name": "usuario_update_id",
+      "nullable": false,
+      "type": "bigint"
+    }
+  ],
+  "comment": "",
+  "create_options": "",
+  "engine": "InnoDB",
+  "foreign_keys": [
+    {
+      "columns": [
+        "usuario_alta_id"
+      ],
+      "delete": "RESTRICT",
+      "match": "NONE",
+      "name": "fk_bms_alta",
+      "parent": "adm_usuario",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_index": "PRIMARY",
+      "update": "RESTRICT"
+    },
+    {
+      "columns": [
+        "usuario_update_id"
+      ],
+      "delete": "RESTRICT",
+      "match": "NONE",
+      "name": "fk_bms_update",
+      "parent": "adm_usuario",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_index": "PRIMARY",
+      "update": "RESTRICT"
+    },
+    {
+      "columns": [
+        "adm_usuario_id"
+      ],
+      "delete": "RESTRICT",
+      "match": "NONE",
+      "name": "fk_bms_usuario",
+      "parent": "adm_usuario",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_index": "PRIMARY",
+      "update": "RESTRICT"
+    }
+  ],
+  "indexes": [
+    {
+      "columns": [
+        {
+          "name": "id",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true
+    },
+    {
+      "columns": [
+        {
+          "name": "usuario_alta_id",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "ix_bms_alta",
+      "type": "BTREE",
+      "unique": false
+    },
+    {
+      "columns": [
+        {
+          "name": "expira",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "ix_bms_expira",
+      "type": "BTREE",
+      "unique": false
+    },
+    {
+      "columns": [
+        {
+          "name": "usuario_update_id",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "ix_bms_update",
+      "type": "BTREE",
+      "unique": false
+    },
+    {
+      "columns": [
+        {
+          "name": "adm_usuario_id",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "ix_bms_usuario",
+      "type": "BTREE",
+      "unique": false
+    },
+    {
+      "columns": [
+        {
+          "name": "id",
+          "order": "A",
+          "prefix": null
+        },
+        {
+          "name": "adm_usuario_id",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "uq_bms_id_usuario",
+      "type": "BTREE",
+      "unique": true
+    },
+    {
+      "columns": [
+        {
+          "name": "jti",
+          "order": "A",
+          "prefix": null
+        }
+      ],
+      "comment": "",
+      "ignored": false,
+      "name": "uq_bms_jti",
+      "type": "BTREE",
+      "unique": true
+    }
+  ],
+  "row_format": "Dynamic",
+  "triggers": []
+}

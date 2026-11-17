@@ -13,6 +13,41 @@
 require_once __DIR__ . '/../logo_service.php';
 use gamboamartin\system\links_menu;
 
+// Only validated theme names and six-digit hex colors may reach markup.
+$iv_tema = 'original';
+if (property_exists(\config\generales::class, 'menu_superior_tema')) {
+    $iv_tema_propiedad = new \ReflectionProperty(\config\generales::class, 'menu_superior_tema');
+    if ($iv_tema_propiedad->isPublic() && $iv_tema_propiedad->isStatic() &&
+        isset(\config\generales::$menu_superior_tema) &&
+        \config\generales::$menu_superior_tema === 'amarillo-pastel') {
+        $iv_tema = 'amarillo-pastel';
+    }
+}
+// A declared but invalid color fails closed to original, not the legacy theme.
+$iv_tema_style = '';
+if (property_exists(\config\generales::class, 'menu_superior_color')) {
+    $iv_tema = 'original';
+    $iv_color_propiedad = new \ReflectionProperty(\config\generales::class, 'menu_superior_color');
+    if ($iv_color_propiedad->isPublic() && $iv_color_propiedad->isStatic() &&
+        isset(\config\generales::$menu_superior_color) &&
+        is_string(\config\generales::$menu_superior_color) &&
+        preg_match('/^#[0-9A-Fa-f]{6}$/D', \config\generales::$menu_superior_color) === 1) {
+        $iv_color = strtoupper(\config\generales::$menu_superior_color);
+        $iv_rgb = [];
+        foreach ([1, 3, 5] as $iv_offset) {
+            $iv_channel = hexdec(substr($iv_color, $iv_offset, 2)) / 255;
+            $iv_rgb[] = $iv_channel <= 0.04045 ? $iv_channel / 12.92 : (($iv_channel + 0.055) / 1.055) ** 2.4;
+        }
+        $iv_luminance = 0.2126 * $iv_rgb[0] + 0.7152 * $iv_rgb[1] + 0.0722 * $iv_rgb[2];
+        $iv_black_contrast = ($iv_luminance + 0.05) / 0.05;
+        $iv_white_contrast = 1.05 / ($iv_luminance + 0.05);
+        $iv_env_ink = $iv_black_contrast >= $iv_white_contrast ? '#000000' : '#FFFFFF';
+        $iv_tema = 'personalizado';
+        $iv_tema_style = '--iv-env-bg:' . $iv_color . ';--iv-env-ink:' . $iv_env_ink . ';';
+    }
+}
+// End theme enum.
+
 $iv_menus = is_array($controlador->menu_permitido ?? null) ? $controlador->menu_permitido : [];
 
 /* Cuántos módulos van en la fila principal; el resto va en la fila lavanda. */
@@ -100,7 +135,7 @@ if (empty($iv_logo)) {
 $iv_href_inicio = $links_menu->adm_session->inicio;
 $iv_sesion_activa = isset($_SESSION['activa']) && (int)$_SESSION['activa'] === 1;
 ?>
-<div class="iv-nav" data-iv-nav>
+<div class="iv-nav" data-iv-nav data-iv-theme="<?= $iv_tema ?>"<?php if ($iv_tema_style !== '') { ?> style="<?= $iv_tema_style ?>"<?php } ?>>
     <div class="iv-nav__top">
         <a class="iv-nav__brand" href="<?= $iv_e($iv_href_inicio) ?>" aria-label="Inicio">
             <?php if (!empty($iv_logo)) { ?>
