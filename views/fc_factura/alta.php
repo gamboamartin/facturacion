@@ -1,7 +1,7 @@
 <?php /** @var \gamboamartin\facturacion\controllers\controlador_fc_factura $controlador */ ?>
 <?php use config\generales;
 use config\views; ?>
-<link rel="stylesheet" href="css/fc_factura/alta.css?v=2">
+<link rel="stylesheet" href="css/fc_factura/alta.css?v=3">
 <link rel="stylesheet" href="css/fc_factura/form-responsive.css?v=1">
 <div class="fc-alta fc-invoice-form">
 <div class="fc-alta-heading">
