@@ -36,87 +36,93 @@ if (!function_exists('asset_url_framework')) {
     }
 }
 
+require_once __DIR__ . '/logo_principal_lector.php';
+
+/**
+ * Branding público existente. No representa autorización de usuario ni selecciona
+ * empresa, documento o archivo a partir de GET. Los modelos son la única fuente.
+ */
+function resolver_logo_principal_framework($link, string $almacen): ?string
+{
+    if (!$link) {
+        return null;
+    }
+    try {
+        $empresas = (new org_empresa($link))->filtro_and(
+            aplica_seguridad: false,
+            columnas: ['org_empresa_id'],
+            filtro: ['org_empresa.status' => 'activo'],
+            limit: 2,
+            order: ['org_empresa.id' => 'ASC']
+        );
+        if (errores::$error) {
+            return null;
+        }
+        $filasEmpresa = $empresas->registros;
+        $empresaId = (int)($filasEmpresa[0]['org_empresa_id'] ?? 0);
+        if ($empresaId <= 0) {
+            return null;
+        }
+        $logos = (new org_logo($link))->filtro_and(
+            aplica_seguridad: false,
+            columnas: ['org_logo_doc_documento_id', 'org_logo_org_empresa_id'],
+            filtro: [
+                'org_logo.status' => 'activo',
+                'org_logo.es_principal' => 'activo',
+                'org_logo.org_empresa_id' => $empresaId
+            ],
+            limit: 2,
+            order: ['org_logo.id' => 'DESC']
+        );
+        if (errores::$error) {
+            return null;
+        }
+        $filasLogo = $logos->registros;
+        $logo = $filasLogo[0] ?? [];
+        $documentoId = (int)($logo['org_logo_doc_documento_id'] ?? 0);
+        if ($documentoId <= 0) {
+            return null;
+        }
+        $documentos = (new doc_documento($link))->filtro_and(
+            aplica_seguridad: false,
+            columnas: ['doc_documento_ruta_relativa', 'doc_documento_doc_tipo_documento_id'],
+            filtro: ['doc_documento.id' => $documentoId],
+            limit: 1
+        );
+        if (errores::$error) {
+            return null;
+        }
+        $documento = $documentos->registros[0] ?? [];
+        $ruta = (string)($documento['doc_documento_ruta_relativa'] ?? '');
+        if ($ruta === '') {
+            return null;
+        }
+        // En ambigüedad se conserva el enlace estático histórico, sin abrir archivos.
+        $fallback = asset_url_framework($ruta);
+        if (count($filasEmpresa) !== 1 || count($filasLogo) !== 1
+            || (int)($logo['org_logo_org_empresa_id'] ?? 0) !== $empresaId
+            || (int)($documento['doc_documento_doc_tipo_documento_id'] ?? 0) !== 9) {
+            return $fallback;
+        }
+        return LectorLogoPrincipal::leer($almacen, $ruta) ?? $fallback;
+    } catch (Throwable $error) {
+        return null;
+    }
+}
+
 if (!function_exists('logo_empresa_url_framework')) {
     function logo_empresa_url_framework($link): ?string
     {
         static $cache = null;
-        static $ya = false;
-
-        if ($ya) {
-            return $cache;
-        }
-        $ya = true;
-
-        if (!$link) {
-            return null;
-        }
-
-        try {
-            $org_empresa_id = (int)($_GET['org_empresa_id'] ?? 0);
-
-            if ($org_empresa_id <= 0) {
-                $modelo_empresa = new org_empresa($link);
-                $r_emp = $modelo_empresa->filtro_and(
-                    aplica_seguridad: false,
-                    columnas: ['org_empresa_id'],
-                    filtro: ['org_empresa.status' => 'activo'],
-                    limit: 1,
-                    order: ['org_empresa.id' => 'ASC']
-                );
-                if (errores::$error) {
-                    return null;
-                }
-
-                $org_empresa_id = (int)($r_emp->registros[0]['org_empresa_id'] ?? 0);
-            }
-
-            if ($org_empresa_id <= 0) {
-                return null;
-            }
-
-            $modelo_logo = new org_logo($link);
-            $r_logo = $modelo_logo->filtro_and(
-                aplica_seguridad: false,
-                columnas: ['org_logo_doc_documento_id'],
-                filtro: [
-                    'org_logo.status' => 'activo',
-                    'org_logo.es_principal' => 'activo',
-                    'org_logo.org_empresa_id' => $org_empresa_id
-                ],
-                limit: 1,
-                order: ['org_logo.id' => 'DESC']
+        static $consultado = false;
+        if (!$consultado) {
+            $consultado = true;
+            $cache = resolver_logo_principal_framework(
+                $link,
+                dirname(__DIR__) . '/archivos/doc_documento'
             );
-            if (errores::$error) {
-                return null;
-            }
-
-            $doc_id = (int)($r_logo->registros[0]['org_logo_doc_documento_id'] ?? 0);
-            if ($doc_id <= 0) {
-                return null;
-            }
-
-            $modelo_doc = new doc_documento($link);
-            $r_doc = $modelo_doc->filtro_and(
-                aplica_seguridad: false,
-                columnas: ['doc_documento_ruta_relativa'],
-                filtro: ['doc_documento.id' => $doc_id],
-                limit: 1
-            );
-            if (errores::$error) {
-                return null;
-            }
-
-            $ruta = (string)($r_doc->registros[0]['doc_documento_ruta_relativa'] ?? '');
-            if ($ruta === '') {
-                return null;
-            }
-
-            $cache = asset_url_framework($ruta);
-            return $cache;
-
-        } catch (Throwable $e) {
-            return null;
         }
+        return $cache;
     }
 }
 

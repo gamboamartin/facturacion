@@ -58,7 +58,12 @@ class controlador_org_logo extends \gamboamartin\organigrama\controllers\control
             aplica_seguridad: false,
             columnas: [
                 'org_logo_id',
+                'org_logo_org_empresa_id',
+                'org_logo_doc_documento_id',
+                'doc_documento_id',
+                'doc_documento_doc_tipo_documento_id',
                 'org_logo_fecha_alta',
+                'org_logo_status',
                 'org_logo_es_principal',
                 'doc_documento_ruta_relativa'
             ],
@@ -82,6 +87,10 @@ class controlador_org_logo extends \gamboamartin\organigrama\controllers\control
             aplica_seguridad: false,
             columnas: [
                 'org_logo_id',
+                'org_logo_org_empresa_id',
+                'org_logo_doc_documento_id',
+                'doc_documento_id',
+                'doc_documento_doc_tipo_documento_id',
                 'org_logo_status',
                 'org_logo_es_principal',
                 'org_logo_fecha_alta',
@@ -99,6 +108,17 @@ class controlador_org_logo extends \gamboamartin\organigrama\controllers\control
         }
 
         $logos = $r_lista->registros ?? [];
+
+        // Los bytes solo acompañan la vista ya autorizada, nunca login ni respuestas WS.
+        if (!$ws && $this->puede_previsualizar_logos()) {
+            if ($logo_activo !== []) {
+                $logo_activo['imagen_privada_url'] = $this->imagen_logo_visible($logo_activo, $org_empresa_id);
+            }
+            foreach ($logos as &$logo) {
+                $logo['imagen_privada_url'] = $this->imagen_logo_visible($logo, $org_empresa_id);
+            }
+            unset($logo);
+        }
         
 
 
@@ -112,6 +132,39 @@ class controlador_org_logo extends \gamboamartin\organigrama\controllers\control
         return ['logo_activo' => $logo_activo, 'logos' => $logos, 'org_empresa_id' => $org_empresa_id];
     }
 
+
+    /** Reutiliza exactamente la ACL del dispatcher, sin crear permisos ni ámbito de empresa. */
+    private function puede_previsualizar_logos(): bool
+    {
+        if ((int)($_SESSION['activa'] ?? 0) !== 1
+            || (int)($_SESSION['usuario_id'] ?? 0) <= 0
+            || (int)($_SESSION['grupo_id'] ?? 0) <= 0) {
+            return false;
+        }
+        $permiso = (new \gamboamartin\administrador\models\adm_accion($this->link))->permiso(
+            accion: 'subir_logo',
+            seccion: 'org_logo'
+        );
+        return !\gamboamartin\errores\errores::$error && $permiso === true;
+    }
+
+    /** Solo recibe filas de las consultas de esta acción, no identificadores/rutas de la petición. */
+    private function imagen_logo_visible(array $logo, int $empresaId): ?string
+    {
+        $documentoId = (int)($logo['org_logo_doc_documento_id'] ?? 0);
+        if ($empresaId <= 0 || (int)($logo['org_logo_id'] ?? 0) <= 0
+            || (int)($logo['org_logo_org_empresa_id'] ?? 0) !== $empresaId
+            || ($logo['org_logo_status'] ?? '') !== 'activo'
+            || $documentoId <= 0 || (int)($logo['doc_documento_id'] ?? 0) !== $documentoId
+            || (int)($logo['doc_documento_doc_tipo_documento_id'] ?? 0) !== 9) {
+            return null;
+        }
+        require_once dirname(__DIR__) . '/templates/logo_principal_lector.php';
+        return \LectorLogoPrincipal::leer(
+            dirname(__DIR__) . '/archivos/doc_documento',
+            (string)($logo['doc_documento_ruta_relativa'] ?? '')
+        );
+    }
 
     public function activar_logo_bd(bool $header, bool $ws = false): array
     {
