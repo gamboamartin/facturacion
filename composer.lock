@@ -777,16 +777,16 @@
         },
         {
             "name": "gamboa.martin/administrador",
-            "version": "v22.44.1",
+            "version": "v22.44.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gamboamartin/administrador.git",
-                "reference": "21fb890eb42f2dd81c629ff4799d834db56ce9ca"
+                "reference": "a339621c69b271f793709a3a589eca7af4aab62d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gamboamartin/administrador/zipball/21fb890eb42f2dd81c629ff4799d834db56ce9ca",
-                "reference": "21fb890eb42f2dd81c629ff4799d834db56ce9ca",
+                "url": "https://api.github.com/repos/gamboamartin/administrador/zipball/a339621c69b271f793709a3a589eca7af4aab62d",
+                "reference": "a339621c69b271f793709a3a589eca7af4aab62d",
                 "shasum": ""
             },
             "require": {
@@ -849,9 +849,9 @@
             "description": "Frontend",
             "support": {
                 "issues": "https://github.com/gamboamartin/administrador/issues",
-                "source": "https://github.com/gamboamartin/administrador/tree/v22.44.1"
+                "source": "https://github.com/gamboamartin/administrador/tree/v22.44.2"
             },
-            "time": "2026-11-16T21:31:50+00:00"
+            "time": "2026-11-18T15:12:39+00:00"
         },
         {
             "name": "gamboa.martin/banco",
