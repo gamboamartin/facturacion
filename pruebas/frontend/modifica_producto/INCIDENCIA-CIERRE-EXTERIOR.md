@@ -1,0 +1,9 @@
+# Incidencia visual no resuelta
+Expectativa sin cambios: cerrar menú desde zona realmente exterior no debe cambiar selección.
+Reproducción observada en FC3 con original y candidato: abrir Unidad con botón data-id cat_sat_unidad_id, click locator heading Modifica como cierre; selección678→682. No guardar. Recargar restaura678. FiltroH87/sinresultado/Escape aislado y cierre con mismo botón conservan678.
+Investigar geometría real, elemento que recibe click y repetición manual para determinar si interacción de automatización/overlay o defecto funcional. No dar por corregido ni cambiar expectativa. Bloquea commit según regla del proyecto hasta discusión/resolución.
+
+## Investigación posterior: procedimiento de interacción
+La expectativa permanece: cierre exterior legítimo conserva selección. Se midió encabezadoH2 en x326,y282,w919,h30, centro785.5,297; elementFromPoint confirma H2, menú visible debajo, scrollY122. locator.click heading provoca scrollY0 y valor678→682. Clic de puntero en zona visible confirmada, sin scroll automático:350,295;785,297;350,295, tres repeticiones; todas cierran menú, conservan678 y scrollY122. No guardar ni operaciones.
+La evidencia acota el fallo a interacción de desplazamiento automático con superposición del menú; no demuestra defecto del cierre exterior de la aplicación. No parche JS ni cambios de expectativa. Procedimiento corregido: abrir menú, tomar screenshot fresco, confirmar que punto exterior pertenece aH2 con elementFromPoint, pulsar punto visible y verificar open0 y valor intacto. Coordenadas son evidencia de esa ventana, no constantes para otros tamaños.
+Resultado funcional de cierre exterior real:PASS3/3. Resultado del método locator anterior:fallo reproducido y conservado como diagnóstico de automatización. No se rebaja el contrato ni se elimina evidencia. Pendiente aprobación de publicación; no commit/push.

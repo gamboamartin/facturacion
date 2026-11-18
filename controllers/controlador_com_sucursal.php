@@ -8,4 +8,7 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
-class controlador_com_sucursal extends \gamboamartin\comercial\controllers\controlador_com_sucursal {}
+class controlador_com_sucursal extends \gamboamartin\comercial\controllers\controlador_com_sucursal {
+    // La tabla se alimenta mediante get_data paginado; no precargar filas descartadas.
+    public bool $lista_get_data = true;
+}

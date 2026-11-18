@@ -227,6 +227,96 @@
         "testAmbosPadresAnterioresConservanRuta",
         "testContextoFacturaConPadresAnteriores"
       ]
+    },
+    {
+      "id": "com_sucursal",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 4,
+      "fuentes": {
+        "controllers/controlador_com_sucursal.php": "945139b894463ca314825d95de8a3a2e7d3c4d3c4bc4461c22381ecda94a3ad5"
+      },
+      "limites": "Contrato de override con padre doble sin DB. No mide SQL ni certifica render o tiempo real.",
+      "clase_phpunit": "com_sucursal/SucursalListadoTest.php",
+      "casos": [
+        "testOmitePrecargaDescartada",
+        "testRepetirListaNoPrecarga",
+        "testGetDataConservaHerencia",
+        "testNoSobrescribeOperaciones"
+      ]
+    },
+    {
+      "id": "logo_principal",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 27,
+      "fuentes": {
+        "templates/logo_service.php": "b2abf7ef0258410171bc4ce9fad159c28ba74a74d65e2d0c950a15b0d3cc9aa3",
+        "templates/logo_principal_lector.php": "61efda420132b72d8311eed5fa427accda69112419e73bcd6d8bb41a909d9bda"
+      },
+      "limites": "Helper y lector reales con modelos dobles y archivos sintéticos. Sin SQL, HTTP, sesiones reales ni despliegue. Branding principal público existente, no permisos nuevos.",
+      "clase_phpunit": "logo_principal/LogoPrincipalTest.php",
+      "casos": [
+        "testLoginAnonimoConservaBrandingPrincipal",
+        "testAutenticadoSinAdministracionLogosConservaBranding",
+        "testAutenticadoAdministradorTieneMismoBranding",
+        "testGetNoSeleccionaEmpresaLogoDocumentoNiArchivo",
+        "testEmpresaAmbiguaMantieneEnlaceSinBytes",
+        "testPrincipalesAmbiguosMantienenEnlaceSinBytes",
+        "testAsociacionOtraEmpresaNoPublicaBytes",
+        "testTipoDocumentoDistintoNoPublicaBytes",
+        "testSinEmpresaNoConsultaLogos",
+        "testSinPrincipalNoConsultaDocumentos",
+        "testSinDocumentoNoPublica",
+        "testErrorModeloDetieneCadena",
+        "testConexionAusenteNoConsulta",
+        "testArchivoAusenteMantieneEnlace",
+        "testLectorRechazaRutasFueraAlmacen",
+        "testLectorRechazaSymlinkArchivo",
+        "testLectorRechazaAlmacenNoCanonico",
+        "testLectorRechazaAlmacenSymlink",
+        "testLectorRechazaSvgRenombrado",
+        "testLectorRechazaImagenVacia",
+        "testLectorRechazaMayorDosMiB",
+        "testLectorAceptaLimiteDosMiB",
+        "testLectorAceptaJpegReal",
+        "testLectorRechazaArchivoOculto",
+        "testCambioSesionNoCambiaBrandingNiConsultaPermisos",
+        "testWrapperCacheaBrandingSinDependerDeSesion",
+        "testVistasExistentesUsanHelperSinNuevoAcl"
+      ]
+    },
+    {
+      "id": "logo_preview",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 20,
+      "fuentes": {
+        "controllers/controlador_org_logo.php": "7575f7d3939dcc14d50461658889b13c1149ba6715ab51073542a802542f5359",
+        "views/org_logo/subir_logo.php": "431d3e8bf6e97bf27a6dec9d6dd743893a642bc21b0b938d2f75cd3ebb2f4dc2",
+        "templates/logo_principal_lector.php": "61efda420132b72d8311eed5fa427accda69112419e73bcd6d8bb41a909d9bda"
+      },
+      "limites": "Controlador y render PHP reales con modelos y checker ACL dobles, archivos ficticios locales. Sin SQL, HTTP, PAC ni sesiones reales. No equivale a prueba visual navegador.",
+      "clase_phpunit": "logo_preview/LogoPreviewTest.php",
+      "casos": [
+        "testPrincipalEHistoricoVisibleConAclExistente",
+        "testSinPrincipalConservaArrayVacioYVistaSinLogo",
+        "testAnonimoNoLeeBytes",
+        "testSesionInactivaNoLeeBytes",
+        "testUsuarioAusenteNoLeeBytes",
+        "testGrupoAusenteNoLeeBytes",
+        "testAclDenegadaNoLeeBytes",
+        "testErrorAclNoSeInterpretaComoPermiso",
+        "testWsNoSerializaBytesNiConsultaAclAdicional",
+        "testEmpresaDiferenteNoLeeBytes",
+        "testDocumentoNoAsociadoNoLeeBytes",
+        "testTipoNoLogoNoLeeBytes",
+        "testFilaInactivaNoLeeBytes",
+        "testFilaSinIdNoLeeBytes",
+        "testGetNoProporcionaRutaNiDocumento",
+        "testTraversalEnFilaEsRechazado",
+        "testMimeFalsoEnArchivoEsRechazado",
+        "testConsultasConservanFiltrosYLimiteDoce",
+        "testRenderRealMuestraPrincipalYListaAutorizada",
+        "testRenderDenegadoMantieneFallbackSinBytes"
+      ]
     }
   ]
 }

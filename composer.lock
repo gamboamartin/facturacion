@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "15dac224e3eb34872c500c29b8e96ccb",
+    "content-hash": "4f0c987e15ec0797d010dcf749e62434",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -623,16 +623,16 @@
         },
         {
             "name": "firebase/php-jwt",
-            "version": "v7.2.1",
+            "version": "v7.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/php-jwt.git",
-                "reference": "0501f5729b9e2448516674aff07c7d1727869b8e"
+                "reference": "99efeb17d6def8c0295777f2d45b07ff4fdb4e40"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/php-jwt/zipball/0501f5729b9e2448516674aff07c7d1727869b8e",
-                "reference": "0501f5729b9e2448516674aff07c7d1727869b8e",
+                "url": "https://api.github.com/repos/googleapis/php-jwt/zipball/99efeb17d6def8c0295777f2d45b07ff4fdb4e40",
+                "reference": "99efeb17d6def8c0295777f2d45b07ff4fdb4e40",
                 "shasum": ""
             },
             "require": {
@@ -691,9 +691,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/php-jwt/issues",
-                "source": "https://github.com/googleapis/php-jwt/tree/v7.2.1"
+                "source": "https://github.com/googleapis/php-jwt/tree/v7.2.2"
             },
-            "time": "2026-09-28T17:51:46+00:00"
+            "time": "2026-11-17T00:25:19+00:00"
         },
         {
             "name": "gamboa.martin/acl",
@@ -777,16 +777,16 @@
         },
         {
             "name": "gamboa.martin/administrador",
-            "version": "v22.44.1",
+            "version": "v22.44.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gamboamartin/administrador.git",
-                "reference": "21fb890eb42f2dd81c629ff4799d834db56ce9ca"
+                "reference": "a339621c69b271f793709a3a589eca7af4aab62d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gamboamartin/administrador/zipball/21fb890eb42f2dd81c629ff4799d834db56ce9ca",
-                "reference": "21fb890eb42f2dd81c629ff4799d834db56ce9ca",
+                "url": "https://api.github.com/repos/gamboamartin/administrador/zipball/a339621c69b271f793709a3a589eca7af4aab62d",
+                "reference": "a339621c69b271f793709a3a589eca7af4aab62d",
                 "shasum": ""
             },
             "require": {
@@ -849,9 +849,9 @@
             "description": "Frontend",
             "support": {
                 "issues": "https://github.com/gamboamartin/administrador/issues",
-                "source": "https://github.com/gamboamartin/administrador/tree/v22.44.1"
+                "source": "https://github.com/gamboamartin/administrador/tree/v22.44.2"
             },
-            "time": "2026-11-16T21:31:50+00:00"
+            "time": "2026-11-18T15:12:39+00:00"
         },
         {
             "name": "gamboa.martin/banco",
@@ -1111,16 +1111,16 @@
         },
         {
             "name": "gamboa.martin/comercial",
-            "version": "v37.21.2",
+            "version": "v37.21.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gamboamartin/comercial.git",
-                "reference": "5bf81ca65371dbefb782d8b38a09c9594f08fb8c"
+                "reference": "b149bd8561591aa3d3cfc87ab14878c9393d6807"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gamboamartin/comercial/zipball/5bf81ca65371dbefb782d8b38a09c9594f08fb8c",
-                "reference": "5bf81ca65371dbefb782d8b38a09c9594f08fb8c",
+                "url": "https://api.github.com/repos/gamboamartin/comercial/zipball/b149bd8561591aa3d3cfc87ab14878c9393d6807",
+                "reference": "b149bd8561591aa3d3cfc87ab14878c9393d6807",
                 "shasum": ""
             },
             "require": {
@@ -1193,9 +1193,9 @@
             "description": "Comercial",
             "support": {
                 "issues": "https://github.com/gamboamartin/comercial/issues",
-                "source": "https://github.com/gamboamartin/comercial/tree/v37.21.2"
+                "source": "https://github.com/gamboamartin/comercial/tree/v37.21.3"
             },
-            "time": "2025-08-26T17:08:34+00:00"
+            "time": "2026-11-17T22:56:08+00:00"
         },
         {
             "name": "gamboa.martin/compresor",
@@ -2489,22 +2489,22 @@
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "7.16.2",
+            "version": "7.16.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "22e3847536750e5a7b89d4f880f28aaf7b72e287"
+                "reference": "c88a78082757dd5a0c44191651535259fcb6e605"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/22e3847536750e5a7b89d4f880f28aaf7b72e287",
-                "reference": "22e3847536750e5a7b89d4f880f28aaf7b72e287",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/c88a78082757dd5a0c44191651535259fcb6e605",
+                "reference": "c88a78082757dd5a0c44191651535259fcb6e605",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "guzzlehttp/promises": "^2.6",
-                "guzzlehttp/psr7": "^2.13.3",
+                "guzzlehttp/psr7": "^2.13.4",
                 "php": "^7.2.5 || ^8.0",
                 "psr/http-client": "^1.0",
                 "symfony/deprecation-contracts": "^2.5 || ^3.0",
@@ -2597,7 +2597,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/guzzle/issues",
-                "source": "https://github.com/guzzle/guzzle/tree/7.16.2"
+                "source": "https://github.com/guzzle/guzzle/tree/7.16.3"
             },
             "funding": [
                 {
@@ -2613,7 +2613,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-11-17T03:22:11+00:00"
+            "time": "2026-11-17T16:23:09+00:00"
         },
         {
             "name": "guzzlehttp/promises",
@@ -2701,16 +2701,16 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "2.13.3",
+            "version": "2.13.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "6d3cd8285a97eaa352956a4ada92fa03ecce1c4e"
+                "reference": "ad5e3f872690e1151e1171de2963150fc45ea1e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/6d3cd8285a97eaa352956a4ada92fa03ecce1c4e",
-                "reference": "6d3cd8285a97eaa352956a4ada92fa03ecce1c4e",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/ad5e3f872690e1151e1171de2963150fc45ea1e3",
+                "reference": "ad5e3f872690e1151e1171de2963150fc45ea1e3",
                 "shasum": ""
             },
             "require": {
@@ -2800,7 +2800,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/psr7/issues",
-                "source": "https://github.com/guzzle/psr7/tree/2.13.3"
+                "source": "https://github.com/guzzle/psr7/tree/2.13.4"
             },
             "funding": [
                 {
@@ -2816,7 +2816,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-11-12T15:57:42+00:00"
+            "time": "2026-11-17T16:15:51+00:00"
         },
         {
             "name": "maennchen/zipstream-php",
@@ -6456,7 +6456,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -6479,6 +6479,6 @@
         "ext-mysqli": "*",
         "ext-libxml": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }

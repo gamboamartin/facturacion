@@ -11,6 +11,9 @@ class AltaProductoAncho(unittest.TestCase):
   new=(ROOT/'views/com_producto/alta.php').read_bytes()
   self.assertEqual(old.count(b'<div class="container">'),1)
   self.assertEqual(new,old.replace(b'<div class="container">',b'<div class="container-fluid">',1))
- def test_no_modifica_producto(self):
-  self.assertFalse((ROOT/'views/com_producto/modifica.php').exists())
+ def test_contrato_alta_independiente(self):
+  new=(ROOT/'views/com_producto/alta.php').read_text()
+  self.assertEqual(new.count('<div class="container-fluid">'),1)
+  self.assertIn('$controlador->link_com_producto_alta_bd',new)
+  self.assertNotIn('$controlador->link_com_producto_modifica_bd',new)
 if __name__=='__main__': unittest.main()

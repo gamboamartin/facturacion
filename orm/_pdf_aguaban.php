@@ -120,7 +120,7 @@ class _pdf_aguaban
         $nombre_documento = $this->factura[$key_serie] . $this->factura[$key_folio];
 
         if ($descarga) {
-            $pdf->Output($nombre_documento . '.pdf', 'I');
+            $pdf->Output($nombre_documento . '.pdf', 'D');
             return $nombre_documento;
         }
         if ($guarda) {
