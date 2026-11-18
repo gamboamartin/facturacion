@@ -1,0 +1,5 @@
+[ req ]
+distinguished_name = dn
+prompt = no
+[ dn ]
+CN = QA FICTICIO SIN VALIDEZ

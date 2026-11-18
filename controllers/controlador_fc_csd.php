@@ -28,6 +28,7 @@ use Throwable;
 
 class controlador_fc_csd extends system{
 
+    public array $archivos_cer_vista = ['estado' => 'no_autorizado', 'filas' => []];
     public array|stdClass $keys_selects = array();
     public controlador_fc_key_csd $controlador_fc_key_csd;
     public controlador_fc_cer_csd $controlador_fc_cer_csd;
@@ -120,63 +121,119 @@ class controlador_fc_csd extends system{
 
     public function alta_bd(bool $header, bool $ws = false): array|stdClass
     {
-        $this->link->beginTransaction();
+        $operacion = null;
+        $commit_intentado = false;
+        $commit_confirmado = false;
+        try {
+            // Nunca participar en una transacción ajena ni compensar sus archivos.
+            if ($this->link->inTransaction()) {
+                throw new \RuntimeException('Ya existe una transacción');
+            }
+            $operacion = \gamboamartin\facturacion\models\contexto_archivos_csd::iniciar(
+                (new \config\generales())->path_base
+            );
+            if (!$this->link->beginTransaction()) {
+                throw new \RuntimeException('No fue posible iniciar la transacción');
+            }
 
-        $id_retorno = -1;
-        if(isset($_POST['id_retorno'])){
-            $id_retorno = $_POST['id_retorno'];
+            $id_retorno = $_POST['id_retorno'] ?? -1;
             unset($_POST['id_retorno']);
-        }
-
-        $siguiente_view = (new actions())->init_alta_bd();
-        if(errores::$error){
-
-            return $this->retorno_error(mensaje: 'Error al obtener siguiente view', data: $siguiente_view,
-                header:  $header, ws: $ws);
-        }
-        $seccion_retorno = $this->tabla;
-        if(isset($_POST['seccion_retorno'])){
-            $seccion_retorno = $_POST['seccion_retorno'];
+            $siguiente_view = (new actions())->init_alta_bd();
+            if (errores::$error) {
+                return $this->error_alta_csd('Error al obtener siguiente view', $operacion, $header, $ws);
+            }
+            $seccion_retorno = $_POST['seccion_retorno'] ?? $this->tabla;
             unset($_POST['seccion_retorno']);
+
+            $r_alta_bd = parent::alta_bd(header: false);
+            if (errores::$error) {
+                return $this->error_alta_csd('Error al insertar csd', $operacion, $header, $ws);
+            }
+            $altas = $this->inserta_files_doc(fc_csd_id: $r_alta_bd->registro_id);
+            if (errores::$error) {
+                return $this->error_alta_csd('Error al insertar file', $operacion, $header, $ws);
+            }
+            $pems = (new fc_csd(link: $this->link))->genera_pems(fc_csd_id: $r_alta_bd->registro_id);
+            if (errores::$error) {
+                return $this->error_alta_csd('Error al generar pems', $operacion, $header, $ws);
+            }
+
+            // Un commit que arroja excepción puede haber llegado al servidor.
+            // En ese caso conservamos archivos: no adivinar el resultado de SQL.
+            $commit_intentado = true;
+            if (!$this->link->commit()) {
+                throw new \RuntimeException('Commit no confirmado');
+            }
+            $commit_confirmado = true;
+            $limpieza = $operacion->confirmar();
+            if (!$limpieza['completo']) {
+                return $this->retorno_error(mensaje: 'CSD guardado; limpieza temporal pendiente',
+                    data: ['commit_confirmado' => true, 'limpieza' => $limpieza,
+                        'recuperacion' => $this->recibo_alta_csd($operacion, 'commit_confirmado')],
+                    header: $header, ws: $ws);
+            }
+
+            $out = $this->out_alta(header: $header, id_retorno: $id_retorno, r_alta_bd: $r_alta_bd,
+                seccion_retorno: $seccion_retorno, siguiente_view: $siguiente_view, ws: $ws);
+            if (errores::$error) {
+                return $this->retorno_error(mensaje: 'CSD guardado; retorno de navegación pendiente',
+                    data: ['commit_confirmado' => true], header: $header, ws: $ws);
+            }
+            $r_alta_bd->siguiente_view = $siguiente_view;
+            return $r_alta_bd;
+        } catch (Throwable) {
+            if ($operacion !== null && !$commit_intentado) {
+                return $this->error_alta_csd('Error al completar alta CSD', $operacion, $header, $ws);
+            }
+            // No incluir excepciones, POST, certificados ni contraseña en la respuesta.
+            return $this->retorno_error(mensaje: 'Alta CSD requiere verificación',
+                data: ['commit_intentado' => $commit_intentado, 'commit_confirmado' => $commit_confirmado,
+                    'recuperacion' => $operacion === null ? null : $this->recibo_alta_csd(
+                        $operacion, $commit_confirmado ? 'commit_confirmado' : 'commit_incierto')],
+                header: $header, ws: $ws);
+        } finally {
+            if ($operacion !== null) {
+                $operacion->finalizar();
+            }
         }
+    }
 
-        $r_alta_bd =  parent::alta_bd(header: false); // TODO: Change the autogenerated stub
-        if(errores::$error){
-            $this->link->rollBack();
-            $error = $this->errores->error(mensaje: 'Error al insertar csd',data:  $r_alta_bd);
-            print_r($error);
-            die('Error');
+    /** Compensa sólo después de acreditar rollback; no devuelve datos criptográficos. */
+    private function error_alta_csd(string $mensaje,
+        \gamboamartin\facturacion\models\contexto_archivos_csd $operacion,
+        bool $header, bool $ws): array|stdClass
+    {
+        $rollback = false;
+        try {
+            $rollback = $this->link->inTransaction() && $this->link->rollBack();
+        } catch (Throwable) {
+            // Con resultado SQL incierto no retirar archivos potencialmente referenciados.
         }
-
-        $altas = $this->inserta_files_doc(fc_csd_id: $r_alta_bd->registro_id);
-        if(errores::$error){
-            $this->link->rollBack();
-            $error = $this->errores->error(mensaje: 'Error al insertar file',data:  $altas);
-            print_r($error);
-            die('Error');
+        $limpieza = ['completo' => false, 'retirados' => 0, 'pendientes' => ['rollback_no_confirmado']];
+        if ($rollback) {
+            try {
+                $limpieza = $operacion->revertir();
+            } catch (Throwable) {
+                $limpieza['pendientes'] = ['compensacion_no_confirmada'];
+            }
         }
+        $recuperacion = $limpieza['completo'] ? null : $this->recibo_alta_csd(
+            $operacion, $rollback ? 'rollback_confirmado' : 'rollback_incierto');
+        $operacion->finalizar();
+        return $this->retorno_error(mensaje: $mensaje,
+            data: ['rollback_confirmado' => $rollback, 'limpieza' => $limpieza,
+                'recuperacion' => $recuperacion], header: $header, ws: $ws);
+    }
 
-        $pems = (new fc_csd(link: $this->link))->genera_pems(fc_csd_id: $r_alta_bd->registro_id);
-        if(errores::$error){
-            $this->link->rollBack();
-            $error = $this->errores->error(mensaje: 'Error al generar pems',data:  $pems);
-            print_r($error);
-            die('Error');
+    /** Sólo devuelve un identificador opaco; el detalle permanece en almacenamiento privado. */
+    private function recibo_alta_csd(
+        \gamboamartin\facturacion\models\contexto_archivos_csd $operacion, string $estado): array
+    {
+        try {
+            return $operacion->preservar_recuperacion($estado);
+        } catch (Throwable) {
+            return ['guardado' => false, 'id' => null, 'codigo' => 'recibo_no_guardado'];
         }
-
-        $this->link->commit();
-
-
-        $out = $this->out_alta(header: $header,id_retorno:  $id_retorno,r_alta_bd:  $r_alta_bd,
-            seccion_retorno:  $seccion_retorno,siguiente_view:  $siguiente_view,ws:  $ws);
-        if(errores::$error){
-            print_r($out);
-            die('Error');
-        }
-
-        $r_alta_bd->siguiente_view = $siguiente_view;
-        return $r_alta_bd;
-
     }
 
     private function file_name(): string
@@ -185,9 +242,9 @@ class controlador_fc_csd extends system{
 
     }
 
-    private function file_name_extension(): array|string
+    private function file_name_extension(string $key_entidad = 'fc_key_csd_doc'): array|string
     {
-        $extension = (new doc_extension(link: $this->link))->extension(name_file: $_FILES['fc_key_csd_doc']['name']);
+        $extension = (new doc_extension(link: $this->link))->extension(name_file: $_FILES[$key_entidad]['name']);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al obtener extension file',data:  $extension);
         }
@@ -406,7 +463,7 @@ class controlador_fc_csd extends system{
     private function maqueta_file(string $key_entidad): array
     {
         unset($_FILES['documento']);
-        $file_name = $this->file_name_extension();
+        $file_name = $this->file_name_extension(key_entidad: $key_entidad);
         if(errores::$error){
             return $this->errores->error(mensaje: 'Error al generar file_name',data:  $file_name);
         }
@@ -423,7 +480,10 @@ class controlador_fc_csd extends system{
                 header: $header,ws:$ws);
         }
 
-        //$fc_csd_cer =
+        if (!$ws) {
+            $this->archivos_cer_vista = (new \gamboamartin\facturacion\models\csd_archivos_vista())
+                ->cargar($this->link, $this->registro_id);
+        }
 
         return $base->template;
     }

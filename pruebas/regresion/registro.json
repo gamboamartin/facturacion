@@ -318,5 +318,44 @@
         "testRenderDenegadoMantieneFallbackSinBytes"
       ]
     }
+  ],
+  "suites_complementarias": [
+    {
+      "id": "csd_archivos",
+      "registro": "pruebas/csd_archivos/registro.json",
+      "ejecutor": "pruebas/csd_archivos/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 46
+    },
+    {
+      "id": "csd_integral",
+      "tipo": "integracion",
+      "registro": "pruebas/csd_integral/registro.json",
+      "ejecutor": "pruebas/csd_integral/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 3
+    },
+    {
+      "id": "csd_fpm_local",
+      "tipo": "integracion_fpm_local",
+      "registro": "pruebas/csd_integral/fpm/registro.json",
+      "ejecutor": "pruebas/csd_integral/ejecutar_fpm.py",
+      "obligatoria_antes_commit": true,
+      "casos": 1
+    },
+    {
+      "id": "csd_vista",
+      "registro": "pruebas/csd_vista/registro.json",
+      "ejecutor": "pruebas/csd_vista/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 12
+    },
+    {
+      "id": "csd_nombres",
+      "registro": "pruebas/csd_nombres/registro.json",
+      "ejecutor": "pruebas/csd_nombres/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 8
+    }
   ]
 }

@@ -46,10 +46,10 @@
     "gamboa.martin/errores": "^6.0.0",
     "gamboa.martin/compresor": "^6.0.0",
     "gamboa.martin/validacion": "^5.0.0",
-    "gamboa.martin/plugins": "^6.0.0",
+    "gamboa.martin/plugins": "^6.22.11",
     "gamboa.martin/test": "^5.0.0",
     "gamboa.martin/configuraciones": "^1.0.0",
-    "gamboa.martin/documento": "^24.0.0",
+    "gamboa.martin/documento": "^24.3.1",
     "gamboa.martin/js_base": "^5.0.0",
     "gamboa.martin/cat_sat": "^25.0.0",
     "gamboa.martin/organigrama": "^28.0.1",
@@ -84,7 +84,9 @@
       "url": "https://paquetes.ivitec.mx",
       "canonical": true,
       "only": [
-        "gamboa.martin/configuraciones"
+        "gamboa.martin/configuraciones",
+        "gamboa.martin/plugins",
+        "gamboa.martin/documento"
       ]
     }
   ]

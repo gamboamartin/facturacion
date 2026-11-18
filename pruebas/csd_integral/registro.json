@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "csd_integral",
+  "tipo": "integracion",
+  "obligatoria": true,
+  "ejecutor": "pruebas/csd_integral/ejecutar.py",
+  "resultado": "pruebas/resultados/csd_integral.json",
+  "recursos_entorno": [
+    "QA_CSD_ENGINE_ROOT",
+    "QA_CSD_DEPS",
+    "QA_CSD_DOCUMENTO",
+    "QA_CSD_PLUGINS",
+    "QA_CSD_DDL"
+  ],
+  "casos": [
+    {
+      "id": "exito",
+      "rechazado": false
+    },
+    {
+      "id": "password_incorrecta",
+      "rechazado": true
+    },
+    {
+      "id": "par_distinto",
+      "rechazado": true
+    }
+  ],
+  "invariantes": [
+    "rollback_conteos",
+    "archivos_retirados",
+    "inventario_identico",
+    "FK activas",
+    "hashes clases efectivas",
+    "aislamiento sin red",
+    "shutdown identidad y exit0",
+    "sin_pem_nuevo_en_rechazo"
+  ],
+  "regla_ausencia": "BLOQUEADO, nunca omitida ni PASS",
+  "alcance": "ORM real y transacción revertida; no controlador HTTP ni commit de alta"
+}

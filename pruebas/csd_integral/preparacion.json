@@ -1,0 +1,119 @@
+{
+  "estado": "PASS_ORM_TRANSACCIONAL_3_CASOS_NO_HTTP",
+  "base_facturacion": "80db513ca92dc47b796f96cf368e37283cc91a77",
+  "fuentes_ddl_oficiales": {
+    "organigrama": {
+      "archivo": "instalacion/instalacion.php",
+      "sha256": "145e5eb5a25aa4a6b19899405070d9241bd38afe5c617c992a5bebcf306271cc",
+      "metodos_ddl_presentes": [
+        "_add_org_tipo_empresa",
+        "_add_org_tipo_sucursal",
+        "_add_org_empresa",
+        "_add_org_sucursal"
+      ],
+      "metodos_por_acreditar": []
+    },
+    "direccion_postal": {
+      "archivo": "instalacion/instalacion.php",
+      "sha256": "49c262a5a1d5012ffc1cfb37e2993f59fb71fcdacb400297fd0e60716a4ba999",
+      "metodos_ddl_presentes": [
+        "_add_dp_pais",
+        "_add_dp_estado",
+        "_add_dp_municipio",
+        "_add_dp_cp",
+        "_add_dp_colonia",
+        "_add_dp_colonia_postal",
+        "_add_dp_calle",
+        "_add_dp_calle_pertenece"
+      ],
+      "metodos_por_acreditar": []
+    },
+    "cat_sat": {
+      "archivo": "instalacion/instalacion.php",
+      "sha256": "e79c1775d78ffe26c68d6ab0ddb17bcf6d6f6cabc9888f0bd6a433a80e6f415b",
+      "metodos_ddl_presentes": [
+        "_add_cat_sat_regimen_fiscal",
+        "_add_cat_sat_tipo_persona",
+        "_add_cat_sat_conf_reg_tp"
+      ],
+      "metodos_por_acreditar": []
+    },
+    "proceso": {
+      "archivo": "instalacion/instalacion.php",
+      "sha256": "8428eb92d3975b77e40b130108aa029edce51a23b98db8ec902f426bcfae5ef9",
+      "metodos_ddl_presentes": [
+        "_add_pr_etapa",
+        "_add_pr_proceso",
+        "_add_pr_etapa_proceso"
+      ],
+      "metodos_por_acreditar": []
+    }
+  },
+  "dependencias_adicionales": [
+    "adm_usuario",
+    "adm_grupo",
+    "adm_seccion",
+    "adm_accion",
+    "adm_accion_grupo",
+    "doc_documento",
+    "doc_tipo_documento",
+    "doc_extension",
+    "doc_extension_permitido",
+    "doc_acl_tipo_documento",
+    "doc_conf_tipo_documento_seccion",
+    "doc_version"
+  ],
+  "proceso_sintetico": "CSD",
+  "etapas_sinteticas": [
+    "ALTA",
+    "CER INTEGRADO",
+    "KEY INTEGRADO",
+    "DOCS INTEGRADOS",
+    "CER PEM INTEGRADO",
+    "KEY PEM INTEGRADO",
+    "LISTO USO"
+  ],
+  "fixture_propuesto": {
+    "empresa": "QA CSD FICTICIA SIN VALIDEZ",
+    "rfc": "XAXX010101000",
+    "certificado": "generado local RSA2048; no CSD SAT real",
+    "password": "generada en memoria, nunca informe",
+    "documentos": [
+      "CER DER",
+      "KEY PKCS8 cifrada"
+    ]
+  },
+  "limites": [
+    "No usar instaladores que carguen usuarios o ACL existentes",
+    "DDL oficiales no equivalen automáticamente a esquema FC3 actual",
+    "No copiar registros ni CSD/PAC reales"
+  ],
+  "tablas_sin_ddl_acreditado": [
+    "fc_csd",
+    "fc_csd_etapa",
+    "fc_cer_csd",
+    "fc_key_csd",
+    "fc_cer_pem",
+    "fc_key_pem"
+  ],
+  "acreditacion_ddl_csd": "Seis esquemas metadata-only FC3 saneados en memoria: password DEFAULT ficticio y comentarios omitidos. Archivo privado externo al repositorio.",
+  "resultado_integral_06": {
+    "casos": 3,
+    "exito": true,
+    "password_incorrecta_rechazada": true,
+    "par_distinto_rechazado": false,
+    "rollback_conteos_tres": true,
+    "inventario_archivos_tres": true,
+    "motor_cerrado": true
+  },
+  "resultado_integral_08": {
+    "casos": 3,
+    "expectativas_intactas": true,
+    "par_distinto_rechazado": true,
+    "rechazos_sin_pem_nuevo": true,
+    "originales_intactos_antes_rollback": true,
+    "rollback_conteos_tres": true,
+    "inventario_archivos_tres": true,
+    "motor_cerrado": true
+  }
+}

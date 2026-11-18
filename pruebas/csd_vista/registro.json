@@ -1,0 +1,16 @@
+{
+  "casos": [
+    "anonimo_sin_consulta",
+    "id_invalido_sin_consulta",
+    "denegado_sin_consulta",
+    "error_acl_cerrado",
+    "campos_publicos_exactos",
+    "acl_contrato_get_data",
+    "consulta_acotada_columnas_y_csd",
+    "render_escapa_xss",
+    "render_sin_secretos_ni_enlaces",
+    "fila_otro_csd_rechazada",
+    "vacio_explicito",
+    "error_modelo_sin_datos"
+  ]
+}
