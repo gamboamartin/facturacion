@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1eee53b6fbde120714a74375203cbdf3",
+    "content-hash": "deaab565f6cfd452c4aafe04123c2ff8",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -777,17 +777,17 @@
         },
         {
             "name": "gamboa.martin/administrador",
-            "version": "v22.44.2",
+            "version": "v22.44.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gamboamartin/administrador.git",
-                "reference": "a339621c69b271f793709a3a589eca7af4aab62d"
+                "reference": "9f09c92192c1c6e77774ab2c3532a8b3796e1ab4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gamboamartin/administrador/zipball/a339621c69b271f793709a3a589eca7af4aab62d",
-                "reference": "a339621c69b271f793709a3a589eca7af4aab62d",
-                "shasum": ""
+                "url": "https://paquetes.ivitec.mx/dist/gamboa-martin/administrador/gamboa-martin-administrador-9f09c92192c1c6e77774ab2c3532a8b3796e1ab4-zip-0b4ce6-normalizado.zip",
+                "reference": "73957788a2e1f45c5f8f31c139328e5fd885aff1794a72fa3dc28268994dce31",
+                "shasum": "00fbff8f6282bde33ce1d7ed83bd014ec1cf5e52"
             },
             "require": {
                 "chillerlan/php-qrcode": "^4.3",
@@ -824,19 +824,18 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "orm\\": "orm/base",
-                    "base\\": "base/",
-                    "config\\": "config/",
-                    "validacion\\": "validacion/",
                     "gamboamartin\\controllers\\": "controllers",
                     "gamboamartin\\administrador\\ctl\\": "base/ctl",
-                    "gamboamartin\\administrador\\tests\\": "tests/",
+                    "config\\": "config/",
+                    "base\\": "base/",
+                    "orm\\": "orm/base",
                     "gamboamartin\\administrador\\models\\": "orm",
                     "gamboamartin\\administrador\\modelado\\": "modelado",
-                    "gamboamartin\\administrador\\instalacion\\": "instalacion"
+                    "gamboamartin\\administrador\\instalacion\\": "instalacion",
+                    "validacion\\": "validacion/",
+                    "gamboamartin\\administrador\\tests\\": "tests/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0-or-later"
             ],
@@ -846,12 +845,7 @@
                     "email": "gamboa.martin@gmail.com"
                 }
             ],
-            "description": "Frontend",
-            "support": {
-                "issues": "https://github.com/gamboamartin/administrador/issues",
-                "source": "https://github.com/gamboamartin/administrador/tree/v22.44.2"
-            },
-            "time": "2026-11-18T15:12:39+00:00"
+            "description": "Frontend"
         },
         {
             "name": "gamboa.martin/banco",
@@ -1424,8 +1418,7 @@
                     "email": "gamboa.martin@gmail.com"
                 }
             ],
-            "description": "Repositorio de documentos",
-            "published-time": "2026-11-18T22:02:55+00:00"
+            "description": "Repositorio de documentos"
         },
         {
             "name": "gamboa.martin/encripta",
@@ -1832,8 +1825,7 @@
                     "email": "gamboa.martin@gmail.com"
                 }
             ],
-            "description": "Frontend",
-            "published-time": "2026-11-18T22:02:55+00:00"
+            "description": "Frontend"
         },
         {
             "name": "gamboa.martin/proceso",
@@ -6447,7 +6439,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -6470,6 +6462,6 @@
         "ext-mysqli": "*",
         "ext-libxml": "*"
     },
-    "platform-dev": {},
-    "plugin-api-version": "2.11.0"
+    "platform-dev": [],
+    "plugin-api-version": "2.6.0"
 }

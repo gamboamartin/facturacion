@@ -16,7 +16,7 @@ if (!function_exists('base_url_framework')) {
         $scheme = $https ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-                    
+
         $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
         $dir = str_replace('\\', '/', dirname($scriptName));
         $dir = rtrim($dir, '/');
@@ -38,16 +38,51 @@ if (!function_exists('asset_url_framework')) {
 
 require_once __DIR__ . '/logo_principal_lector.php';
 
+/** Aísla los errores de una consulta opcional, dejando diagnóstico solo en servidor. */
+function consultar_branding_framework(callable $consulta, string &$etapa): ?string
+{
+    if (errores::$error) {
+        return null;
+    }
+    $errorAnterior = errores::$error;
+    $tieneSalida = property_exists(errores::class, 'out');
+    $salidaAnterior = $tieneSalida ? errores::$out : null;
+    $tieneResultado = isset($_SESSION) && array_key_exists('error_resultado', $_SESSION);
+    $resultadoAnterior = $tieneResultado ? $_SESSION['error_resultado'] : null;
+    try {
+        $resultado = $consulta();
+        if (errores::$error) {
+            error_log('[facturacion.branding] Fallo de consulta; etapa=' . $etapa);
+            return null;
+        }
+        return $resultado;
+    } catch (Throwable $error) {
+        error_log('[facturacion.branding] Excepcion al resolver branding; etapa=' . $etapa);
+        return null;
+    } finally {
+        errores::$error = $errorAnterior;
+        if ($tieneSalida) {
+            errores::$out = $salidaAnterior;
+        }
+        if ($tieneResultado) {
+            $_SESSION['error_resultado'] = $resultadoAnterior;
+        } else {
+            unset($_SESSION['error_resultado']);
+        }
+    }
+}
+
 /**
  * Branding público existente. No representa autorización de usuario ni selecciona
  * empresa, documento o archivo a partir de GET. Los modelos son la única fuente.
  */
 function resolver_logo_principal_framework($link, string $almacen): ?string
 {
-    if (!$link) {
+    if (!$link || errores::$error) {
         return null;
     }
-    try {
+    $etapa = 'org_empresa';
+    return consultar_branding_framework(static function () use ($link, $almacen, &$etapa): ?string {
         $empresas = (new org_empresa($link))->filtro_and(
             aplica_seguridad: false,
             columnas: ['org_empresa_id'],
@@ -59,10 +94,14 @@ function resolver_logo_principal_framework($link, string $almacen): ?string
             return null;
         }
         $filasEmpresa = $empresas->registros;
+        if (count($filasEmpresa) !== 1) {
+            return null;
+        }
         $empresaId = (int)($filasEmpresa[0]['org_empresa_id'] ?? 0);
         if ($empresaId <= 0) {
             return null;
         }
+        $etapa = 'org_logo';
         $logos = (new org_logo($link))->filtro_and(
             aplica_seguridad: false,
             columnas: ['org_logo_doc_documento_id', 'org_logo_org_empresa_id'],
@@ -78,11 +117,15 @@ function resolver_logo_principal_framework($link, string $almacen): ?string
             return null;
         }
         $filasLogo = $logos->registros;
+        if (count($filasLogo) !== 1) {
+            return null;
+        }
         $logo = $filasLogo[0] ?? [];
         $documentoId = (int)($logo['org_logo_doc_documento_id'] ?? 0);
         if ($documentoId <= 0) {
             return null;
         }
+        $etapa = 'doc_documento';
         $documentos = (new doc_documento($link))->filtro_and(
             aplica_seguridad: false,
             columnas: ['doc_documento_ruta_relativa', 'doc_documento_doc_tipo_documento_id'],
@@ -97,17 +140,13 @@ function resolver_logo_principal_framework($link, string $almacen): ?string
         if ($ruta === '') {
             return null;
         }
-        // En ambigüedad se conserva el enlace estático histórico, sin abrir archivos.
-        $fallback = asset_url_framework($ruta);
-        if (count($filasEmpresa) !== 1 || count($filasLogo) !== 1
-            || (int)($logo['org_logo_org_empresa_id'] ?? 0) !== $empresaId
+        if ((int)($logo['org_logo_org_empresa_id'] ?? 0) !== $empresaId
             || (int)($documento['doc_documento_doc_tipo_documento_id'] ?? 0) !== 9) {
-            return $fallback;
+            return null;
         }
-        return LectorLogoPrincipal::leer($almacen, $ruta) ?? $fallback;
-    } catch (Throwable $error) {
-        return null;
-    }
+        $etapa = 'archivo_logo';
+        return LectorLogoPrincipal::leer($almacen, $ruta);
+    }, $etapa);
 }
 
 if (!function_exists('logo_empresa_url_framework')) {
@@ -137,39 +176,34 @@ if (!function_exists('nombre_empresa_framework')) {
         }
         $ya = true;
 
-        if (!$link) {
+        if (!$link || errores::$error) {
             return null;
         }
 
-        try {
-            $org_empresa_id = (int)($_GET['org_empresa_id'] ?? 0);
-
-            $filtro = $org_empresa_id > 0
-                ? ['org_empresa.id' => $org_empresa_id]
-                : ['org_empresa.status' => 'activo'];
-
+        $etapa = 'nombre_empresa';
+        $cache = consultar_branding_framework(static function () use ($link): ?string {
             $modelo_empresa = new org_empresa($link);
             $r_emp = $modelo_empresa->filtro_and(
                 aplica_seguridad: false,
                 columnas: ['org_empresa_id', 'org_empresa_nombre_comercial'],
-                filtro: $filtro,
-                limit: 1,
+                filtro: ['org_empresa.status' => 'activo'],
+                limit: 2,
                 order: ['org_empresa.id' => 'ASC']
             );
             if (errores::$error) {
                 return null;
             }
 
+            if (count($r_emp->registros) !== 1) {
+                return null;
+            }
             $nombre = (string)($r_emp->registros[0]['org_empresa_nombre_comercial'] ?? '');
             if ($nombre === '') {
                 return null;
             }
 
-            $cache = $nombre;
-            return $cache;
-
-        } catch (Throwable $e) {
-            return null;
-        }
+            return $nombre;
+        }, $etapa);
+        return $cache;
     }
 }

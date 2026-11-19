@@ -128,10 +128,7 @@ $iv_link_menu = function (array $menu) use ($controlador, $iv_e, $iv_icono, $iv_
 $iv_primarios = array_slice($iv_menus, 0, $iv_limite_primarios);
 $iv_secundarios = array_slice($iv_menus, $iv_limite_primarios);
 
-$iv_logo = $controlador->logo_empresa_url ?? null;
-if (empty($iv_logo)) {
-    $iv_logo = logo_empresa_url_framework($controlador->link);
-}
+$iv_logo = logo_empresa_url_framework($controlador->link);
 $iv_href_inicio = $links_menu->adm_session->inicio;
 $iv_sesion_activa = isset($_SESSION['activa']) && (int)$_SESSION['activa'] === 1;
 ?>

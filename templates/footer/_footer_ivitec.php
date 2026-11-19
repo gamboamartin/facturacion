@@ -16,10 +16,7 @@ $iv_footer_e = function ($valor): string {
     return htmlspecialchars((string)$valor, ENT_QUOTES, 'UTF-8');
 };
 
-$iv_footer_logo = $controlador->logo_empresa_url ?? null;
-if (empty($iv_footer_logo)) {
-    $iv_footer_logo = logo_empresa_url_framework($controlador->link);
-}
+$iv_footer_logo = logo_empresa_url_framework($controlador->link);
 
 $iv_footer_rutas = [];
 if (property_exists(generales::class, 'footer_links') && is_array(generales::$footer_links)) {

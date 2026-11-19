@@ -46,7 +46,7 @@ final class ComplementoPagoTest extends TestCase {
     public function testColumnasCompletas(): void {
         self::assertSame(['fc_complemento_pago_id'=>['titulo'=>'Id'],'fc_complemento_pago_folio'=>['titulo'=>'Fol'],'com_cliente_razon_social'=>['titulo'=>'Cliente'],'com_cliente_rfc'=>['titulo'=>'RFC'],'fc_complemento_pago_fecha'=>['titulo'=>'Fecha'],'fc_complemento_pago_total_pagos'=>['titulo'=>'Total'],'fc_complemento_pago_uuid'=>['titulo'=>'UUID'],'fc_complemento_pago_etapa'=>['titulo'=>'Estatus']],$this->listado()->columns);
     }
-    public function testFiltrosCompletos(): void { self::assertSame(['fc_complemento_pago.folio','com_cliente.razon_social','com_cliente.rfc','fc_complemento_pago.fecha','fc_complemento_pago_etapa'],$this->listado()->filtro); }
+    public function testFiltrosCompletos(): void { self::assertSame(['fc_complemento_pago.folio','com_cliente.razon_social','com_cliente.rfc','fc_complemento_pago.fecha','fc_complemento_pago.etapa'],$this->listado()->filtro); }
     public function testMenuHabilitado(): void { self::assertSame(true,$this->listado()->menu_active); }
 
     private function referenciaInvalida(array $ids,string $mensaje,int $valor): void {

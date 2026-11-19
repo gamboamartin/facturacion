@@ -1,10 +1,47 @@
 {
   "format_version": 1,
-  "migrations": [],
+  "migrations": [
+    {
+      "id": "org_logo_es_principal",
+      "path": "sql/org_logo_es_principal.sql",
+      "sha256": "e63c95decfa0da6b78631171c5862e81502099ffc224dd6c2e12a6ed24d899b8"
+    },
+    {
+      "id": "fc_listas_esquema_20261119",
+      "path": "sql/fc_listas_esquema_20261119.sql",
+      "sha256": "092fc05a3103a6a393f42dcb86e9d18743eacf0b2068022010d702ff01cdc2d6"
+    }
+  ],
   "requirements": [
-    {"table": "base_movil_sesion", "status": "pending_definition", "sources": ["orm/base_movil_sesion.php:14-20", "api/base_movil/src/app_sesion.php:317-478"]},
-    {"table": "base_movil_push_token", "status": "pending_definition", "sources": ["orm/base_movil_push_token.php:16-22", "api/base_movil/src/app_push.php:52-221"]},
-    {"table": "cc_medidor", "status": "pending_definition", "sources": ["orm/cc_medidor.php"]},
-    {"table": "cc_tipo_medidor", "status": "pending_definition", "sources": ["orm/cc_tipo_medidor.php"]}
+    {
+      "table": "base_movil_sesion",
+      "status": "pending_definition",
+      "sources": [
+        "orm/base_movil_sesion.php:14-20",
+        "api/base_movil/src/app_sesion.php:317-478"
+      ]
+    },
+    {
+      "table": "base_movil_push_token",
+      "status": "pending_definition",
+      "sources": [
+        "orm/base_movil_push_token.php:16-22",
+        "api/base_movil/src/app_push.php:52-221"
+      ]
+    },
+    {
+      "table": "cc_medidor",
+      "status": "pending_definition",
+      "sources": [
+        "orm/cc_medidor.php"
+      ]
+    },
+    {
+      "table": "cc_tipo_medidor",
+      "status": "pending_definition",
+      "sources": [
+        "orm/cc_tipo_medidor.php"
+      ]
+    }
   ]
 }

@@ -10,7 +10,7 @@ python3 -B -m unittest discover -s tools/migrations -p 'test_*.py'
 
 `validate` y `status` validan el mismo manifest y presentan el estado completo. Código 0 significa únicamente manifest y hashes válidos; **no significa base preparada ni migraciones aplicadas**. Errores de estructura, acceso o integridad devuelven 1; argumentos incorrectos, 2. `database_status=not_inspected` y `deployment_readiness=not_assessed` permanecen explícitos incluso con un inventario vacío.
 
-## Estado inicial
+## Estado inicial histórico
 
 No hay SQL aprobado en este inventario. Las cuatro tablas figuran como requisitos `pending_definition`, no como migraciones ejecutables. Sus modelos demuestran usos, pero no determinan tipos, índices, FK, nullabilidad ni defaults. No se genera DDL a partir de ellos. Las referencias de fuentes son informativas y deben revisarse si cambia el código.
 
@@ -33,3 +33,11 @@ Un futuro aplicador tendría que implementar y probar un bloqueo exclusivo de mi
 ## Aplicador separado de diseño nuevo
 
 `applier/` contiene un CLI explícito y un paquete nuevo de cuatro tablas, probado aisladamente. No es recuperación de DDL histórico ni marca estas tablas como aplicadas. El manifest offline y sus fichas se mantienen intactos. Leer [applier/README.md](applier/README.md) y sus contratos antes de considerar cualquier ejecución; el comportamiento predeterminado es plan offline.
+
+## Campo de selección de logo principal
+
+`sql/org_logo_es_principal.sql` registra el DDL focal requerido por el controlador y el servicio de logos. Añade `VARCHAR(8) NOT NULL DEFAULT 'inactivo'`; no escoge una imagen ni contiene datos de empresa. El inventario verifica su hash, pero no consulta BD ni ejecuta SQL. Las cuatro definiciones pendientes anteriores conservan su estado.
+
+Antes de aplicar, un operador debe comprobar `SHOW COLUMNS FROM org_logo`: ejecutar solo si la tabla existe y falta `es_principal`. Si ya existe, contrastar tipo y default y no repetir el ALTER. Respaldar estructura y datos y evaluar bloqueo de tabla antes de usarlo en otro entorno. El arranque y las vistas nunca crean columnas. No usar este DDL como autorización para cambiar servidores.
+
+En esta máquina el campo se añadió durante la preparación local del 19 de noviembre de 2026, con tabla sin logos y respaldo de estructura en `/tmp/facturacion-org-logo-esquema-20261119181047.sql`. Esta entrada hace reproducible aquella modificación; no demuestra su aplicación en otros entornos. No hay selección automática ni una imagen de reemplazo.

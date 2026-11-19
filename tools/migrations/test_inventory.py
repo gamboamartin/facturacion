@@ -114,7 +114,17 @@ class InventoryTests(unittest.TestCase):
     def test_real_manifest_four_blocked(self):
         r = inventory.inspect(Path(__file__).with_name('manifest.json'))
         self.assertEqual(r['pending_definitions'], ['base_movil_push_token', 'base_movil_sesion', 'cc_medidor', 'cc_tipo_medidor'])
-        self.assertEqual(r['migration_artifacts'], [])
+        self.assertEqual(r['migration_artifacts'], [{
+            'id': 'org_logo_es_principal',
+            'artifact_status': 'hash_verified',
+            'database_status': 'unknown'
+        }, {
+            'id': 'fc_listas_esquema_20261119',
+            'artifact_status': 'hash_verified',
+            'database_status': 'unknown'
+        }])
+        self.assertFalse(r['execution_supported'])
+        self.assertEqual(r['database_status'], 'not_inspected')
 
 if __name__ == '__main__':
     unittest.main()

@@ -62,13 +62,6 @@ $errorMessage = $controlador->existe_msj ? $controlador->mensaje_html : '';
                 <div class="iv-login__client-logo">
                     <?php if ($clientLogoUrl !== ''): ?>
                         <img src="<?= $escape($clientLogoUrl) ?>" alt="Logo de <?= $escape($clientName) ?>">
-                    <?php else: ?>
-                        <div class="iv-login__client-placeholder">
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M3 21h18M5 21V8l7-4v17M12 10h7v11M8 10v1M8 14v1M8 18v1M16 13v1M16 17v1"></path>
-                            </svg>
-                            <span>LOGO</span>
-                        </div>
                     <?php endif; ?>
                 </div>
                 <div>
