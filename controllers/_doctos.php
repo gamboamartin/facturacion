@@ -9,7 +9,7 @@ use gamboamartin\facturacion\models\_data_impuestos;
 use gamboamartin\facturacion\models\_doc;
 use gamboamartin\facturacion\models\_partida;
 use gamboamartin\facturacion\models\_pdf;
-use gamboamartin\facturacion\models\_pdf_aguaban;
+use gamboamartin\facturacion\models\_PDF\aguaban\_factura_and_nota_credito;
 use gamboamartin\facturacion\models\_relacion;
 use gamboamartin\facturacion\models\_relacionada;
 use gamboamartin\facturacion\models\_sellado;
@@ -153,7 +153,7 @@ class _doctos{
 
         $proyecto_name = (string)($general->proyecto_custom_pdf ?? '');
         if ($proyecto_name === 'aguaban') {
-            $class_pdf = new _pdf_aguaban();
+            $class_pdf = new _factura_and_nota_credito();
         }
 
         $pdf = $class_pdf->pdf(descarga: $descarga, guarda: $guarda, link: $modelo_entidad->link,

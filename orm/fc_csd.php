@@ -117,6 +117,38 @@ class fc_csd extends _modelo_parent {
         return $data;
     }
 
+    /**
+     * Baja física del CSD sin borrar documentos ni alterar relaciones de negocio.
+     * Solo retira enlaces de sus archivos y el historial propio que depende del CSD.
+     */
+    final public function elimina_bd(int $id): array|stdClass
+    {
+        // El padre no debe ejecutar dependencias configurables ajenas a la lista permitida.
+        $desactiva_dependientes = $this->desactiva_dependientes;
+        $this->desactiva_dependientes = false;
+        try {
+            return (new referencias_baja_csd($this->link))->eliminar($id, function () use ($id): stdClass {
+                $resultado = parent::elimina_bd($id);
+                if (errores::$error || !($resultado instanceof stdClass)) {
+                    throw new \RuntimeException('No se pudo eliminar el CSD sin afectar sus dependencias.');
+                }
+                return $resultado;
+            });
+        } catch (\PDOException) {
+            return $this->error->error(
+                mensaje: 'No se pudo completar la baja del CSD. Revise sus dependencias.',
+                data: $id,
+                es_final: true
+            );
+        } catch (\RuntimeException $error) {
+            return $this->error->error(mensaje: $error->getMessage(), data: $id, es_final: true);
+        } catch (\Throwable) {
+            return $this->error->error(mensaje: 'No se pudo completar la baja del CSD.', data: $id, es_final: true);
+        } finally {
+            $this->desactiva_dependientes = $desactiva_dependientes;
+        }
+    }
+
     final public function data(int $fc_csd_id){
         $fc_csd = $this->registro(registro_id: $fc_csd_id, retorno_obj: true);
         if(errores::$error){
@@ -152,10 +184,24 @@ class fc_csd extends _modelo_parent {
 
     final public function genera_pems(int $fc_csd_id)
     {
+        $ssl = new \gamboamartin\plugins\ssl();
+        if (!method_exists($ssl, 'valida_par_cer_key')) {
+            return $this->error->error(mensaje: 'Dependencia SSL incompatible para validar CSD', data: []);
+        }
         $out = new stdClass();
         $data_csd = $this->data(fc_csd_id: $fc_csd_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener datos', data: $data_csd);
+        }
+        // Convertir cada archivo no demuestra que pertenezcan al mismo par.
+        // Validar localmente antes de crear cualquiera de los dos documentos PEM.
+        $par_valido = $ssl->valida_par_cer_key(
+            ruta_cer: $data_csd->ruta_cer,
+            ruta_key: $data_csd->ruta_key,
+            pass: $data_csd->fc_csd_password
+        );
+        if (errores::$error || $par_valido !== true) {
+            return $this->error->error(mensaje: 'Error al validar par CER y KEY del CSD', data: []);
         }
         $out->fc_csd = $data_csd;
 

@@ -50,6 +50,25 @@ final class LectorLogoPrincipal
                 || $dimensiones === false || ($dimensiones['mime'] ?? '') !== $mime) {
                 return null;
             }
+            // La cabecera no demuestra que la imagen esté completa ni decodifique.
+            $ancho = (int)$dimensiones[0];
+            $alto = (int)$dimensiones[1];
+            if ($ancho <= 0 || $alto <= 0 || $ancho > 8192 || $alto > 8192
+                || $ancho * $alto > 16 * 1024 * 1024
+                || !function_exists('imagecreatefromstring')) {
+                return null;
+            }
+            $imagen = @imagecreatefromstring($contenido);
+            if ($imagen === false) {
+                return null;
+            }
+            try {
+                if (imagesx($imagen) !== $ancho || imagesy($imagen) !== $alto) {
+                    return null;
+                }
+            } finally {
+                imagedestroy($imagen);
+            }
             return 'data:' . $mime . ';base64,' . base64_encode($contenido);
         } finally {
             fclose($archivo);

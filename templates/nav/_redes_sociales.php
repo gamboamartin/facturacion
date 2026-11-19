@@ -27,11 +27,7 @@ if (!$es_login && $menu_superior_nuevo) {
   <div class="clearfix">
     <div class="pull-right" style="display:flex;justify-content:space-between;width:100%;padding:0 35px;">
     <?php
-    $logo_url = $controlador->logo_empresa_url ?? null;
-
-    if (empty($logo_url)) {
-        $logo_url = logo_empresa_url_framework($controlador->link);
-    }
+    $logo_url = logo_empresa_url_framework($controlador->link);
 
     // Link del logo (inicio)
     $href_logo = $links_menu->adm_session->inicio;

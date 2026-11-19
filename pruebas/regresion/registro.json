@@ -247,7 +247,7 @@
     {
       "id": "logo_principal",
       "ejecutor": "ejecutar_phpunit.py",
-      "comprobaciones_esperadas": 27,
+      "comprobaciones_esperadas": 39,
       "fuentes": {
         "templates/logo_service.php": "b2abf7ef0258410171bc4ce9fad159c28ba74a74d65e2d0c950a15b0d3cc9aa3",
         "templates/logo_principal_lector.php": "61efda420132b72d8311eed5fa427accda69112419e73bcd6d8bb41a909d9bda"
@@ -259,8 +259,8 @@
         "testAutenticadoSinAdministracionLogosConservaBranding",
         "testAutenticadoAdministradorTieneMismoBranding",
         "testGetNoSeleccionaEmpresaLogoDocumentoNiArchivo",
-        "testEmpresaAmbiguaMantieneEnlaceSinBytes",
-        "testPrincipalesAmbiguosMantienenEnlaceSinBytes",
+        "testEmpresaAmbiguaDejaLogoEnBlanco",
+        "testPrincipalesAmbiguosDejanLogoEnBlanco",
         "testAsociacionOtraEmpresaNoPublicaBytes",
         "testTipoDocumentoDistintoNoPublicaBytes",
         "testSinEmpresaNoConsultaLogos",
@@ -268,7 +268,7 @@
         "testSinDocumentoNoPublica",
         "testErrorModeloDetieneCadena",
         "testConexionAusenteNoConsulta",
-        "testArchivoAusenteMantieneEnlace",
+        "testArchivoAusenteDejaLogoEnBlanco",
         "testLectorRechazaRutasFueraAlmacen",
         "testLectorRechazaSymlinkArchivo",
         "testLectorRechazaAlmacenNoCanonico",
@@ -281,7 +281,19 @@
         "testLectorRechazaArchivoOculto",
         "testCambioSesionNoCambiaBrandingNiConsultaPermisos",
         "testWrapperCacheaBrandingSinDependerDeSesion",
-        "testVistasExistentesUsanHelperSinNuevoAcl"
+        "testVistasExistentesUsanHelperSinNuevoAcl",
+        "testFalloConsultaRestauraContextoYDiagnosticaSinDatosPrivados",
+        "testFalloConsultaNoCreaEstadoSesionResidual",
+        "testExcepcionDevuelveAusenciaYDiagnosticoSinDetallePrivado",
+        "testAusenciasNormalesNoGeneranDiagnostico",
+        "testErrorPrevioSeConservaSinConsultasNiDiagnosticoNuevo",
+        "testNombreEmpresaIgnoraSeleccionGetYCacheaSistema",
+        "testNombreEmpresaAusenteNoGeneraError",
+        "testNombreEmpresaFalloRestauraContexto",
+        "testNombreEmpresaAmbiguaDejaNombreEnBlanco",
+        "testPngTruncadoConCabeceraValidaNoPublica",
+        "testJpegTruncadoConCabeceraValidaNoPublica",
+        "testDimensionesExcesivasNoLleganADecodificacion"
       ]
     },
     {
@@ -317,6 +329,90 @@
         "testRenderRealMuestraPrincipalYListaAutorizada",
         "testRenderDenegadoMantieneFallbackSinBytes"
       ]
+    },
+    {
+      "id": "logo_render",
+      "ejecutor": "ejecutar_phpunit.py",
+      "fuentes": {
+        "views/adm_session/login_ivitec.php": "afbf2e5f596f1504cf12ed4b70a94395d2473beb7bbfda5678eaa165a9b7f29c",
+        "templates/nav/_menu_superior.php": "0a3e9da30c33ab64d89b34167fe812f73e61935e0d57556761a3e65c16e771ec",
+        "templates/footer/_footer_ivitec.php": "d57224c2d3def0e5ea4f5203119c6d29de19c3cbaf4c2b113723005ed5677f27"
+      },
+      "limites": "Render PHP real con helpers dobles y datos sintéticos. No SQL, HTTP ni prueba visual de navegador.",
+      "clase_phpunit": "logo_render/LogoRenderTest.php",
+      "casos": [
+        "testLoginSinLogoDejaEspacioEnBlanco",
+        "testLoginConLogoUsaImagenDelSistema",
+        "testMenuSinLogoDejaEspacioEnBlanco",
+        "testMenuConLogoUsaImagenDelSistema",
+        "testFooterSinLogoDejaEspacioEnBlanco",
+        "testFooterConLogoUsaImagenDelSistema",
+        "testRedesSinLogoConservaEncabezadoEnBlanco",
+        "testRedesConLogoUsaImagenDelSistema"
+      ],
+      "comprobaciones_esperadas": 8
+    },
+    {
+      "id": "layout_render",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 3,
+      "fuentes": {
+        "views/fc_layout_nom/ver_empleados.php": "73bb33a47f728bfc11275374a3f54dab4426f44d33f5ba4546ca8748c0bd5cff",
+        "js/fc_layout_nom/ver_empleados.js": "9d7703f4e372d70c582ffeb3e7eebca23388e2de8727a91b6d58b55d112bb226"
+      },
+      "limites": "Render real tabla empleados con filas sintéticas y fragmentos de cabecera dobles. No SQL, navegador, recibos ni operaciones fiscales.",
+      "clase_phpunit": "layout_render/LayoutEmpleadosRenderTest.php",
+      "casos": [
+        "testVistaVaciaConservaVeintidosEncabezadosSinFilas",
+        "testVistaConDosFilasMantieneVeintidosDatosPorFila",
+        "testJavaScriptInicializaTablaYTargetsDentroDelRango"
+      ]
+    }
+  ],
+  "suites_complementarias": [
+    {
+      "id": "csd_archivos",
+      "registro": "pruebas/csd_archivos/registro.json",
+      "ejecutor": "pruebas/csd_archivos/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 46
+    },
+    {
+      "id": "csd_integral",
+      "tipo": "integracion",
+      "registro": "pruebas/csd_integral/registro.json",
+      "ejecutor": "pruebas/csd_integral/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 3
+    },
+    {
+      "id": "csd_baja",
+      "tipo": "integracion",
+      "registro": "pruebas/csd_baja/registro.json",
+      "ejecutor": "pruebas/csd_baja/ejecutar.py",
+      "obligatoria_antes_commit": true
+    },
+    {
+      "id": "csd_fpm_local",
+      "tipo": "integracion_fpm_local",
+      "registro": "pruebas/csd_integral/fpm/registro.json",
+      "ejecutor": "pruebas/csd_integral/ejecutar_fpm.py",
+      "obligatoria_antes_commit": true,
+      "casos": 1
+    },
+    {
+      "id": "csd_vista",
+      "registro": "pruebas/csd_vista/registro.json",
+      "ejecutor": "pruebas/csd_vista/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 12
+    },
+    {
+      "id": "csd_nombres",
+      "registro": "pruebas/csd_nombres/registro.json",
+      "ejecutor": "pruebas/csd_nombres/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 8
     }
   ]
 }

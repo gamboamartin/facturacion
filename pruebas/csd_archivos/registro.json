@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "ejecutor": "pruebas/csd_archivos/ejecutar.py",
+  "regla": "Fallo, warning, omisión o infraestructura ausente bloquea publicación.",
+  "suites": [
+    {
+      "archivo": "probar.php",
+      "casos": 13
+    },
+    {
+      "archivo": "contrato_documento.php",
+      "casos": 14
+    },
+    {
+      "archivo": "dependencia_antigua.php",
+      "casos": 1
+    },
+    {
+      "archivo": "controlador.php",
+      "escenarios": [
+        "exito",
+        "error_key",
+        "error_cer",
+        "commit_throws",
+        "rollback_throws",
+        "error_retorno",
+        "commit_false",
+        "cleanup_fallido",
+        "error_accion",
+        "error_par"
+      ],
+      "casos": 10
+    },
+    {
+      "archivo": "consumidor_cert.php",
+      "casos": 7
+    },
+    {
+      "archivo": "plugins_antiguo.php",
+      "casos": 1,
+      "sin_creacion_archivos": true
+    }
+  ],
+  "limites": "Controlador y escritores reales con modelos/SQL dobles. No sustituye 13 pruebas documentales ORM ni alta CSD integral ni prueba FPM."
+}

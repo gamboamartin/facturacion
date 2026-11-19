@@ -2,6 +2,7 @@
 namespace gamboamartin\facturacion\models;
 
 use config\generales;
+use gamboamartin\facturacion\models\contexto_archivos_csd;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\documento\models\doc_extension_permitido;
 use gamboamartin\errores\errores;
@@ -59,7 +60,9 @@ class _cert
             return $this->error->error(mensaje: "Error el documento ya existe", data: $duplicado);
         }
 
-        $doc_documento = new doc_documento($link);
+        $doc_documento = contexto_archivos_csd::actual() === null
+            ? new doc_documento($link)
+            : new doc_documento_csd($link);
         $doc_documento->registro['doc_tipo_documento_id'] = $existe->registros[0]['doc_tipo_documento_id'];
         $doc_documento->registro['descripcion'] = $_FILES[$documento]['name'];
         $doc_documento->registro['descripcion_select'] = $_FILES[$documento]['name'];
@@ -376,17 +379,28 @@ class _cert
             return $this->error->error(mensaje: 'Error al generar params', data: $params);
         }
 
-        if($modelo->tabla === 'fc_key_csd') {
-            $pem = (new ssl())->genera_key_pem(pass: $params->pass, ruta_in: $params->ruta_in, ruta_out: $params->ruta_out);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al generar pem key', data: $pem);
+        $convertir = static function (string $salida) use ($modelo, $params) {
+            if ($modelo->tabla === 'fc_key_csd') {
+                return (new ssl())->genera_key_pem(pass: $params->pass,
+                    ruta_in: $params->ruta_in, ruta_out: $salida);
             }
+            return (new ssl())->genera_cer_pem(ruta_in: $params->ruta_in, ruta_out: $salida);
+        };
+        $contexto = contexto_archivos_csd::actual();
+        try {
+            if ($contexto === null) {
+                $pem = $convertir($params->ruta_out);
+            } else {
+                $temporal = $contexto->convertir_temporal($convertir);
+                $params->ruta_out = $temporal['ruta'];
+                $pem = $temporal['resultado'];
+            }
+        } catch (\Throwable) {
+            return $this->error->error(mensaje: 'Error al generar archivo PEM privado', data: []);
         }
-        else{
-            $pem = (new ssl())->genera_cer_pem(ruta_in: $params->ruta_in, ruta_out: $params->ruta_out);
-            if (errores::$error) {
-                return $this->error->error(mensaje: 'Error al generar pem cer', data: $pem);
-            }
+        if (errores::$error) {
+            $mensaje = $modelo->tabla === 'fc_key_csd' ? 'Error al generar pem key' : 'Error al generar pem cer';
+            return $this->error->error(mensaje: $mensaje, data: $pem);
         }
 
         $params->pem = $pem;

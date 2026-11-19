@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4f0c987e15ec0797d010dcf749e62434",
+    "content-hash": "deaab565f6cfd452c4aafe04123c2ff8",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -777,17 +777,17 @@
         },
         {
             "name": "gamboa.martin/administrador",
-            "version": "v22.44.2",
+            "version": "v22.44.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gamboamartin/administrador.git",
-                "reference": "a339621c69b271f793709a3a589eca7af4aab62d"
+                "reference": "9f09c92192c1c6e77774ab2c3532a8b3796e1ab4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gamboamartin/administrador/zipball/a339621c69b271f793709a3a589eca7af4aab62d",
-                "reference": "a339621c69b271f793709a3a589eca7af4aab62d",
-                "shasum": ""
+                "url": "https://paquetes.ivitec.mx/dist/gamboa-martin/administrador/gamboa-martin-administrador-9f09c92192c1c6e77774ab2c3532a8b3796e1ab4-zip-0b4ce6-normalizado.zip",
+                "reference": "73957788a2e1f45c5f8f31c139328e5fd885aff1794a72fa3dc28268994dce31",
+                "shasum": "00fbff8f6282bde33ce1d7ed83bd014ec1cf5e52"
             },
             "require": {
                 "chillerlan/php-qrcode": "^4.3",
@@ -824,19 +824,18 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "orm\\": "orm/base",
-                    "base\\": "base/",
-                    "config\\": "config/",
-                    "validacion\\": "validacion/",
                     "gamboamartin\\controllers\\": "controllers",
                     "gamboamartin\\administrador\\ctl\\": "base/ctl",
-                    "gamboamartin\\administrador\\tests\\": "tests/",
+                    "config\\": "config/",
+                    "base\\": "base/",
+                    "orm\\": "orm/base",
                     "gamboamartin\\administrador\\models\\": "orm",
                     "gamboamartin\\administrador\\modelado\\": "modelado",
-                    "gamboamartin\\administrador\\instalacion\\": "instalacion"
+                    "gamboamartin\\administrador\\instalacion\\": "instalacion",
+                    "validacion\\": "validacion/",
+                    "gamboamartin\\administrador\\tests\\": "tests/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0-or-later"
             ],
@@ -846,12 +845,7 @@
                     "email": "gamboa.martin@gmail.com"
                 }
             ],
-            "description": "Frontend",
-            "support": {
-                "issues": "https://github.com/gamboamartin/administrador/issues",
-                "source": "https://github.com/gamboamartin/administrador/tree/v22.44.2"
-            },
-            "time": "2026-11-18T15:12:39+00:00"
+            "description": "Frontend"
         },
         {
             "name": "gamboa.martin/banco",
@@ -1354,17 +1348,17 @@
         },
         {
             "name": "gamboa.martin/documento",
-            "version": "v24.3.0",
+            "version": "v24.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gamboamartin/documento.git",
-                "reference": "41bb6d435198e427660af9cd880210caf4c97ede"
+                "reference": "c44f9f472a2027c4d1151e1013c235aebec89fa7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gamboamartin/documento/zipball/41bb6d435198e427660af9cd880210caf4c97ede",
-                "reference": "41bb6d435198e427660af9cd880210caf4c97ede",
-                "shasum": ""
+                "url": "https://paquetes.ivitec.mx/dist/gamboa-martin/documento/gamboa-martin-documento-c44f9f472a2027c4d1151e1013c235aebec89fa7-zip-92c1bf.zip",
+                "reference": "c44f9f472a2027c4d1151e1013c235aebec89fa7",
+                "shasum": "e63da6df77a7d089678149df37b3ac3597253c08"
             },
             "require": {
                 "chillerlan/php-qrcode": "^4.3",
@@ -1407,15 +1401,14 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "html\\": "templates/directivas/",
-                    "tests\\": "tests/",
-                    "config\\": "config/",
-                    "gamboamartin\\documento\\models\\": "orm",
                     "gamboamartin\\documento\\controllers\\": "controllers",
-                    "gamboamartin\\documento\\instalacion\\": "instalacion"
+                    "gamboamartin\\documento\\models\\": "orm",
+                    "gamboamartin\\documento\\instalacion\\": "instalacion",
+                    "config\\": "config/",
+                    "html\\": "templates/directivas/",
+                    "tests\\": "tests/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0-or-later"
             ],
@@ -1425,12 +1418,7 @@
                     "email": "gamboa.martin@gmail.com"
                 }
             ],
-            "description": "Repositorio de documentos",
-            "support": {
-                "issues": "https://github.com/gamboamartin/documento/issues",
-                "source": "https://github.com/gamboamartin/documento/tree/v24.3.0"
-            },
-            "time": "2025-03-06T03:52:52+00:00"
+            "description": "Repositorio de documentos"
         },
         {
             "name": "gamboa.martin/encripta",
@@ -1791,17 +1779,17 @@
         },
         {
             "name": "gamboa.martin/plugins",
-            "version": "v6.22.10",
+            "version": "v6.22.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gamboamartin/plugins.git",
-                "reference": "d67d677b1b42374b887fd0a9d59e1261e897ba04"
+                "reference": "491c8067ff20cd37ac452a00e7c073ef7c58da8e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gamboamartin/plugins/zipball/d67d677b1b42374b887fd0a9d59e1261e897ba04",
-                "reference": "d67d677b1b42374b887fd0a9d59e1261e897ba04",
-                "shasum": ""
+                "url": "https://paquetes.ivitec.mx/dist/gamboa-martin/plugins/gamboa-martin-plugins-491c8067ff20cd37ac452a00e7c073ef7c58da8e-zip-2fd04e.zip",
+                "reference": "491c8067ff20cd37ac452a00e7c073ef7c58da8e",
+                "shasum": "0aa77709ed9b5ebf54c7f033822ef5b9a51e4f4c"
             },
             "require": {
                 "endroid/qr-code": "^5.0.9",
@@ -1809,6 +1797,7 @@
                 "ext-dom": "*",
                 "ext-iconv": "*",
                 "ext-libxml": "*",
+                "ext-openssl": "*",
                 "gamboa.martin/errores": "^6.0.0",
                 "gamboa.martin/test": "^5.0.0",
                 "gamboa.martin/validacion": "^5.0.0",
@@ -1822,12 +1811,11 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "config\\": "config/",
+                    "gamboamartin\\plugins\\": "src/",
                     "gamboamartin\\test\\": "tests/",
-                    "gamboamartin\\plugins\\": "src/"
+                    "config\\": "config/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0-or-later"
             ],
@@ -1837,12 +1825,7 @@
                     "email": "gamboa.martin@gmail.com"
                 }
             ],
-            "description": "Frontend",
-            "support": {
-                "issues": "https://github.com/gamboamartin/plugins/issues",
-                "source": "https://github.com/gamboamartin/plugins/tree/v6.22.10"
-            },
-            "time": "2025-03-06T01:28:15+00:00"
+            "description": "Frontend"
         },
         {
             "name": "gamboa.martin/proceso",
@@ -6456,7 +6439,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -6479,6 +6462,6 @@
         "ext-mysqli": "*",
         "ext-libxml": "*"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }

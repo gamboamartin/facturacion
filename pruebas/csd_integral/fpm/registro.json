@@ -1,0 +1,16 @@
+{
+  "suite": "csd_fpm_local",
+  "obligatoria": true,
+  "casos": [
+    {
+      "id": "alta_exitosa_controlador_fpm_local",
+      "expectativa": "Constructor real, uploads SAPI reales y alta confirmada; CSD1, etapas9, CER1, KEY1, PEM2, documentos4; cierre completo."
+    }
+  ],
+  "limites": [
+    "No navegador/login/dispatcher/redirección",
+    "No equivalencia de versión FPM con FC3",
+    "Negativos sólo en suites ORM y focales separadas"
+  ],
+  "ultima_ejecucion": "Agregado de 11 pasos PASS, 2026-11-18 18:17 UTC; corrida 07 e históricos preservados"
+}

@@ -1,0 +1,6 @@
+{
+  "suite": "csd_nombres",
+  "casos": 8,
+  "obligatoria": true,
+  "alcance": "Metodos reales; validador doble. Integracion FPM separada."
+}

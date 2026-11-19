@@ -22,31 +22,4 @@
 
 </div>
 
-<div class="col-md-12">
-    <div class="widget widget-box box-container widget-mylistings">
-        <div class="widget-header" style="display: flex;justify-content: space-between;align-items: center;">
-            <h2>Archivos</h2>
-        </div>
-        <div class="">
-            <table id="fc_cer_csd" class="table table-striped" >
-                <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>File</th>
-                    <th>Tipo</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>Id</td>
-                    <td>File</td>
-                    <td>Tipo</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-
-
+<?php include __DIR__ . '/archivos_cer.php'; ?>

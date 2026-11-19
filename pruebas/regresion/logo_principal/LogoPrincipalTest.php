@@ -9,6 +9,7 @@ final class LogoPrincipalTest extends TestCase
 {
     private string $directorio;
     private string $png;
+    private string $logAnterior;
 
     protected function setUp(): void
     {
@@ -16,10 +17,14 @@ final class LogoPrincipalTest extends TestCase
         require_once RAIZ_REPOSITORIO_PRUEBAS . '/templates/logo_service.php';
         $this->directorio = sys_get_temp_dir() . '/logo-principal-' . bin2hex(random_bytes(6));
         mkdir($this->directorio, 0700);
-        $this->png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a9WQAAAAASUVORK5CYII=');
+        $imagen = imagecreatetruecolor(1, 1);
+        ob_start();
+        imagepng($imagen);
+        $this->png = (string)ob_get_clean();
+        imagedestroy($imagen);
         file_put_contents($this->directorio . '/logo.png', $this->png);
         Modelo::$filas = [
-            'org_empresa' => [['org_empresa_id' => 71]],
+            'org_empresa' => [['org_empresa_id' => 71, 'org_empresa_nombre_comercial' => 'Empresa del sistema']],
             'org_logo' => [[
                 'org_logo_doc_documento_id' => 91,
                 'org_logo_org_empresa_id' => 71
@@ -31,7 +36,11 @@ final class LogoPrincipalTest extends TestCase
         ];
         Modelo::$consultas = [];
         Modelo::$fallar = null;
+        Modelo::$excepcion = null;
         \gamboamartin\errores\errores::$error = false;
+        \gamboamartin\errores\errores::$out = [];
+        $this->logAnterior = (string)ini_get('error_log');
+        ini_set('error_log', $this->directorio . '/errores.log');
         $_GET = [];
         $_SESSION = [];
         $_SERVER = ['HTTPS' => 'on', 'HTTP_HOST' => 'prueba.invalid', 'SCRIPT_NAME' => '/index.php'];
@@ -39,6 +48,7 @@ final class LogoPrincipalTest extends TestCase
 
     protected function tearDown(): void
     {
+        ini_set('error_log', $this->logAnterior);
         foreach (new DirectoryIterator($this->directorio) as $archivo) {
             if (!$archivo->isDot()) {
                 unlink($archivo->getPathname());
@@ -55,11 +65,6 @@ final class LogoPrincipalTest extends TestCase
     private function imagenEsperada(): string
     {
         return 'data:image/png;base64,' . base64_encode($this->png);
-    }
-
-    private function fallback(): string
-    {
-        return 'https://prueba.invalid/archivos/doc_documento/logo.png';
     }
 
     public function testLoginAnonimoConservaBrandingPrincipal(): void
@@ -95,28 +100,28 @@ final class LogoPrincipalTest extends TestCase
         self::assertSame(['doc_documento.id' => 91], Modelo::$consultas['doc_documento'][0]['filtro']);
     }
 
-    public function testEmpresaAmbiguaMantieneEnlaceSinBytes(): void
+    public function testEmpresaAmbiguaDejaLogoEnBlanco(): void
     {
         Modelo::$filas['org_empresa'][] = ['org_empresa_id' => 72];
-        self::assertSame($this->fallback(), $this->resolver());
+        self::assertNull($this->resolver());
     }
 
-    public function testPrincipalesAmbiguosMantienenEnlaceSinBytes(): void
+    public function testPrincipalesAmbiguosDejanLogoEnBlanco(): void
     {
         Modelo::$filas['org_logo'][] = Modelo::$filas['org_logo'][0];
-        self::assertSame($this->fallback(), $this->resolver());
+        self::assertNull($this->resolver());
     }
 
     public function testAsociacionOtraEmpresaNoPublicaBytes(): void
     {
         Modelo::$filas['org_logo'][0]['org_logo_org_empresa_id'] = 72;
-        self::assertSame($this->fallback(), $this->resolver());
+        self::assertNull($this->resolver());
     }
 
     public function testTipoDocumentoDistintoNoPublicaBytes(): void
     {
         Modelo::$filas['doc_documento'][0]['doc_documento_doc_tipo_documento_id'] = 8;
-        self::assertSame($this->fallback(), $this->resolver());
+        self::assertNull($this->resolver());
     }
 
     public function testSinEmpresaNoConsultaLogos(): void
@@ -141,9 +146,20 @@ final class LogoPrincipalTest extends TestCase
 
     public function testErrorModeloDetieneCadena(): void
     {
-        Modelo::$fallar = 'org_empresa';
+        foreach (['org_empresa', 'org_logo', 'doc_documento'] as $tabla) {
+            Modelo::$consultas = [];
+            Modelo::$fallar = $tabla;
+            self::assertNull($this->resolver());
+            self::assertFalse(\gamboamartin\errores\errores::$error);
+            if ($tabla === 'org_empresa') {
+                self::assertArrayNotHasKey('org_logo', Modelo::$consultas);
+            }
+        }
+        Modelo::$consultas = [];
+        \gamboamartin\errores\errores::$error = true;
         self::assertNull($this->resolver());
-        self::assertArrayNotHasKey('org_logo', Modelo::$consultas);
+        self::assertTrue(\gamboamartin\errores\errores::$error);
+        self::assertSame([], Modelo::$consultas);
     }
 
     public function testConexionAusenteNoConsulta(): void
@@ -152,10 +168,10 @@ final class LogoPrincipalTest extends TestCase
         self::assertSame([], Modelo::$consultas);
     }
 
-    public function testArchivoAusenteMantieneEnlace(): void
+    public function testArchivoAusenteDejaLogoEnBlanco(): void
     {
         unlink($this->directorio . '/logo.png');
-        self::assertSame($this->fallback(), $this->resolver());
+        self::assertNull($this->resolver());
     }
 
     public function testLectorRechazaRutasFueraAlmacen(): void
@@ -188,19 +204,19 @@ final class LogoPrincipalTest extends TestCase
     public function testLectorRechazaSvgRenombrado(): void
     {
         file_put_contents($this->directorio . '/logo.png', '<svg xmlns="http://www.w3.org/2000/svg"></svg>');
-        self::assertSame($this->fallback(), $this->resolver());
+        self::assertNull($this->resolver());
     }
 
     public function testLectorRechazaImagenVacia(): void
     {
         file_put_contents($this->directorio . '/logo.png', '');
-        self::assertSame($this->fallback(), $this->resolver());
+        self::assertNull($this->resolver());
     }
 
     public function testLectorRechazaMayorDosMiB(): void
     {
         file_put_contents($this->directorio . '/logo.png', $this->png . str_repeat('x', 2097153));
-        self::assertSame($this->fallback(), $this->resolver());
+        self::assertNull($this->resolver());
     }
 
     public function testLectorAceptaLimiteDosMiB(): void
@@ -233,9 +249,9 @@ final class LogoPrincipalTest extends TestCase
 
     public function testWrapperCacheaBrandingSinDependerDeSesion(): void
     {
-        // Almacén de aplicación ausente en esta copia: conserva el enlace sin bytes.
+        // Almacén de aplicación ausente: cachea ausencia sin fabricar una URL rota.
         $primero = logo_empresa_url_framework(new stdClass());
-        self::assertSame($this->fallback(), $primero);
+        self::assertNull($primero);
         $consultas = Modelo::$consultas;
         $_SESSION = ['activa' => 1, 'grupo_id' => 99, 'usuario_id' => 77];
         $_GET = ['org_empresa_id' => 999];
@@ -249,6 +265,144 @@ final class LogoPrincipalTest extends TestCase
             'templates/nav/_redes_sociales.php', 'templates/footer/_footer_ivitec.php'] as $vista) {
             $fuente = file_get_contents(RAIZ_REPOSITORIO_PRUEBAS . '/' . $vista);
             self::assertStringContainsString('logo_empresa_url_framework(', $fuente);
+        }
+    }
+
+    public function testFalloConsultaRestauraContextoYDiagnosticaSinDatosPrivados(): void
+    {
+        \gamboamartin\errores\errores::$out = ['salida anterior'];
+        $_SESSION['error_resultado'] = [['mensaje' => 'anterior']];
+        $_SESSION['usuario_id'] = 5;
+        Modelo::$fallar = 'org_logo';
+        self::assertNull($this->resolver());
+        self::assertFalse(\gamboamartin\errores\errores::$error);
+        self::assertSame(['salida anterior'], \gamboamartin\errores\errores::$out);
+        self::assertSame([['mensaje' => 'anterior']], $_SESSION['error_resultado']);
+        self::assertSame(5, $_SESSION['usuario_id']);
+        $log = file_get_contents($this->directorio . '/errores.log');
+        self::assertStringContainsString('[facturacion.branding] Fallo de consulta', $log);
+        self::assertStringContainsString('etapa=org_logo', $log);
+        self::assertStringNotContainsString('Detalle privado', $log);
+    }
+
+    public function testFalloConsultaNoCreaEstadoSesionResidual(): void
+    {
+        Modelo::$fallar = 'org_empresa';
+        self::assertNull($this->resolver());
+        self::assertSame([], \gamboamartin\errores\errores::$out);
+        self::assertArrayNotHasKey('error_resultado', $_SESSION);
+    }
+
+    public function testExcepcionDevuelveAusenciaYDiagnosticoSinDetallePrivado(): void
+    {
+        Modelo::$excepcion = 'org_logo';
+        self::assertNull($this->resolver());
+        self::assertFalse(\gamboamartin\errores\errores::$error);
+        self::assertSame([], \gamboamartin\errores\errores::$out);
+        $log = file_get_contents($this->directorio . '/errores.log');
+        self::assertStringContainsString('[facturacion.branding] Excepcion', $log);
+        self::assertStringContainsString('etapa=org_logo', $log);
+        self::assertStringNotContainsString('Detalle privado', $log);
+    }
+
+    public function testAusenciasNormalesNoGeneranDiagnostico(): void
+    {
+        $filas = Modelo::$filas;
+        foreach (['org_empresa', 'org_logo', 'doc_documento'] as $tabla) {
+            Modelo::$filas = $filas;
+            Modelo::$filas[$tabla] = [];
+            self::assertNull($this->resolver());
+            self::assertFalse(\gamboamartin\errores\errores::$error);
+        }
+        self::assertFileDoesNotExist($this->directorio . '/errores.log');
+    }
+
+    public function testErrorPrevioSeConservaSinConsultasNiDiagnosticoNuevo(): void
+    {
+        \gamboamartin\errores\errores::$error = true;
+        \gamboamartin\errores\errores::$out = ['previo'];
+        $_SESSION['error_resultado'] = [['mensaje' => 'previo']];
+        self::assertNull($this->resolver());
+        self::assertNull(nombre_empresa_framework(new stdClass()));
+        self::assertTrue(\gamboamartin\errores\errores::$error);
+        self::assertSame(['previo'], \gamboamartin\errores\errores::$out);
+        self::assertSame([['mensaje' => 'previo']], $_SESSION['error_resultado']);
+        self::assertSame([], Modelo::$consultas);
+        self::assertFileDoesNotExist($this->directorio . '/errores.log');
+    }
+
+    public function testNombreEmpresaIgnoraSeleccionGetYCacheaSistema(): void
+    {
+        $_GET['org_empresa_id'] = 999;
+        self::assertSame('Empresa del sistema', nombre_empresa_framework(new stdClass()));
+        self::assertSame(['org_empresa.status' => 'activo'], Modelo::$consultas['org_empresa'][0]['filtro']);
+        self::assertSame(['org_empresa.id' => 'ASC'], Modelo::$consultas['org_empresa'][0]['order']);
+        self::assertSame(2, Modelo::$consultas['org_empresa'][0]['limit']);
+        $_GET['org_empresa_id'] = 111;
+        self::assertSame('Empresa del sistema', nombre_empresa_framework(new stdClass()));
+        self::assertCount(1, Modelo::$consultas['org_empresa']);
+    }
+
+    public function testNombreEmpresaAusenteNoGeneraError(): void
+    {
+        Modelo::$filas['org_empresa'] = [];
+        self::assertNull(nombre_empresa_framework(new stdClass()));
+        self::assertFalse(\gamboamartin\errores\errores::$error);
+        self::assertFileDoesNotExist($this->directorio . '/errores.log');
+    }
+
+    public function testNombreEmpresaFalloRestauraContexto(): void
+    {
+        Modelo::$fallar = 'org_empresa';
+        self::assertNull(nombre_empresa_framework(new stdClass()));
+        self::assertFalse(\gamboamartin\errores\errores::$error);
+        self::assertSame([], \gamboamartin\errores\errores::$out);
+        self::assertArrayNotHasKey('error_resultado', $_SESSION);
+        self::assertFileExists($this->directorio . '/errores.log');
+    }
+
+    public function testNombreEmpresaAmbiguaDejaNombreEnBlanco(): void
+    {
+        Modelo::$filas['org_empresa'][] = ['org_empresa_id' => 72, 'org_empresa_nombre_comercial' => 'Otra'];
+        self::assertNull(nombre_empresa_framework(new stdClass()));
+        self::assertFalse(\gamboamartin\errores\errores::$error);
+        self::assertFileDoesNotExist($this->directorio . '/errores.log');
+    }
+
+    public function testPngTruncadoConCabeceraValidaNoPublica(): void
+    {
+        // IHDR y MIME válidos, pero sin flujo IDAT completo.
+        $truncado = substr($this->png, 0, strpos($this->png, 'IDAT') + 5);
+        self::assertIsArray(getimagesizefromstring($truncado));
+        file_put_contents($this->directorio . '/logo.png', $truncado);
+        self::assertNull($this->resolver());
+    }
+
+    public function testJpegTruncadoConCabeceraValidaNoPublica(): void
+    {
+        $imagen = imagecreatetruecolor(10, 10);
+        ob_start();
+        imagejpeg($imagen);
+        $jpeg = (string)ob_get_clean();
+        imagedestroy($imagen);
+        // Conserva SOF (dimensiones), retira SOS y todos los datos comprimidos.
+        $truncado = substr($jpeg, 0, strpos($jpeg, "\xFF\xDA"));
+        self::assertIsArray(getimagesizefromstring($truncado));
+        file_put_contents($this->directorio . '/logo.png', $truncado);
+        self::assertNull($this->resolver());
+    }
+
+    public function testDimensionesExcesivasNoLleganADecodificacion(): void
+    {
+        foreach ([[8193, 1], [1, 8193], [4097, 4097]] as [$ancho, $alto]) {
+            // Cabecera PNG sintética: calcular CRC mantiene IHDR válido sin reservar píxeles.
+            $ihdr = pack('NNCCCCC', $ancho, $alto, 8, 2, 0, 0, 0);
+            $png = "\x89PNG\r\n\x1a\n" . pack('N', strlen($ihdr)) . 'IHDR' . $ihdr
+                . pack('N', crc32('IHDR' . $ihdr))
+                . pack('N', 0) . 'IEND' . pack('N', crc32('IEND'));
+            self::assertIsArray(getimagesizefromstring($png));
+            file_put_contents($this->directorio . '/logo.png', $png);
+            self::assertNull($this->resolver());
         }
     }
 }

@@ -27,7 +27,7 @@ final class LogoPreviewTest extends TestCase
         }
         $this->ruta = 'archivos/doc_documento/qa-preview-' . bin2hex(random_bytes(8)) . '.png';
         $this->archivo = RAIZ_REPOSITORIO_PRUEBAS . '/' . $this->ruta;
-        $this->png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a9WQAAAAASUVORK5CYII=');
+        $this->png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAADElEQVQImWNgYGAAAAAEAAGjChXjAAAAAElFTkSuQmCC');
         file_put_contents($this->archivo, $this->png);
         Estado::$logos = [$this->fila(5, 'activo'), $this->fila(4, 'inactivo')];
         Estado::$consultas = Estado::$permisos = [];
