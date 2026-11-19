@@ -1,0 +1,17 @@
+{
+  "id": "csd_baja",
+  "tipo": "integracion",
+  "aislamiento": "MariaDB verificado, socket privado, sin red ni configuración activa, esquema y datos ficticios.",
+  "alcance": "Baja física de CSD, vínculos de archivos CER/KEY/PEM y etapas propias. No elimina documentos, binarios ni relaciones de negocio.",
+  "casos": [
+    "Inventario exclusivo, conserva documentos compartidos",
+    "Etapa propia restrictiva se elimina con el CSD",
+    "FK de negocio en cascada bloquea",
+    "Referencia convencional sin FK bloquea",
+    "FK no convencional de hijo con SET NULL bloquea",
+    "CSD inexistente bloquea",
+    "Fallo parcial revierte transacción propia",
+    "Fallo parcial revierte savepoint preservando trabajo del llamador",
+    "CSD configurado para nómina bloquea antes de mutar y preserva referencias y etapas"
+  ]
+}

@@ -336,6 +336,13 @@
       "casos": 3
     },
     {
+      "id": "csd_baja",
+      "tipo": "integracion",
+      "registro": "pruebas/csd_baja/registro.json",
+      "ejecutor": "pruebas/csd_baja/ejecutar.py",
+      "obligatoria_antes_commit": true
+    },
+    {
       "id": "csd_fpm_local",
       "tipo": "integracion_fpm_local",
       "registro": "pruebas/csd_integral/fpm/registro.json",
