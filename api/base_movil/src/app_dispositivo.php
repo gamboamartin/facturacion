@@ -4,6 +4,7 @@ namespace base_movil\v1\src;
 
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\models\base_movil_dispositivo;
+use config\generales; // O el namespace correspondiente a la clase generales de tu proyecto
 use PDO;
 
 class app_dispositivo
@@ -11,7 +12,7 @@ class app_dispositivo
     private errores $errores;
     private PDO $link;
     private app_screens $screens;
-    private \stdClass $generales;
+    private generales $generales;
 
 
     public function __construct(PDO $link)
@@ -19,7 +20,7 @@ class app_dispositivo
         $this->errores = new errores();
         $this->link = $link;
         $this->screens = new app_screens($link);
-        $this->generales = new \stdClass();
+        $this->generales = new generales();
     }
 
   /**
@@ -27,16 +28,28 @@ class app_dispositivo
      */
     private function ip_en_rango_cidr(string $ip, string $cidr): bool
     {
-        $partes = explode('/', trim($cidr));
+        $ip = trim($ip);
+        $cidr = trim($cidr);
+
+        // Si pasan una IP individual sin máscara (ej. '127.0.0.1' o '192.168.31.29')
+        if (!str_contains($cidr, '/')) {
+            return $ip === $cidr;
+        }
+
+        $partes = explode('/', $cidr);
         if (count($partes) !== 2) {
             return false;
         }
 
-        [$subnet, $mascara_str] = $partes;
-        $mascara = (int)$mascara_str;
+        $subnet = trim($partes[0]);
+        $mascara = (int)$partes[1];
 
         if ($mascara < 0 || $mascara > 32) {
             return false;
+        }
+
+        if ($mascara === 0) {
+            return true;
         }
 
         $ip_long = ip2long($ip);
@@ -46,13 +59,16 @@ class app_dispositivo
             return false;
         }
 
-        if ($mascara === 0) {
+        // Cálculo seguro de máscara en 32 bits sin desbordamiento de bits en PHP 64-bit
+        $netmask = -1 << (32 - $mascara);
+        $subnet_masked = $subnet_long & $netmask;
+        $ip_masked = $ip_long & $netmask;
+
+        if ($ip_masked === $subnet_masked) {
             return true;
         }
 
-        $netmask = ~((1 << (32 - $mascara)) - 1);
-
-        return ($ip_long & $netmask) === ($subnet_long & $netmask);
+        return false;
     }
 
     /**
@@ -117,7 +133,9 @@ class app_dispositivo
             $msj_vpn = 'Conexión no segura. Debes activar la VPN corporativa para ingresar.';
             if ($es_form_submit) {
                 return array(
-                    'errors' => array(
+                    'autorizado' => false,
+                    'motivo'     => 'red',
+                    'errors'     => array(
                         'uuid' => $msj_vpn
                     )
                 );
@@ -134,6 +152,7 @@ class app_dispositivo
 
             return array(
                 'autorizado' => false,
+                'motivo'     => 'red',
                 'pantalla'   => $pantalla_bloqueo
             );
         }
@@ -160,7 +179,9 @@ class app_dispositivo
             $msj_no_reg = 'Dispositivo no registrado. Entrega este UUID a tu supervisor para darlo de alta.';
             if ($es_form_submit) {
                 return array(
-                    'errors' => array(
+                    'autorizado' => false,
+                    'motivo'     => 'no_registrado',
+                    'errors'     => array(
                         'uuid' => $msj_no_reg
                     )
                 );
@@ -177,6 +198,7 @@ class app_dispositivo
 
             return array(
                 'autorizado' => false,
+                'motivo'     => 'no_registrado',
                 'pantalla'   => $pantalla_bloqueo
             );
         }
@@ -190,6 +212,8 @@ class app_dispositivo
             'active'    => 'activo',
             'pendiente' => 'pendiente',
             'pending'   => 'pendiente',
+            'inactivo'  => 'inactivo',
+            'inactive'  => 'inactivo',
             'revocado'  => 'revocado',
             'revoked'   => 'revocado',
             'bloqueado' => 'revocado',
@@ -197,15 +221,21 @@ class app_dispositivo
 
         $estado = $mapa_estados[$estado_raw] ?? $estado_raw;
 
-        // 7. Caso: Hardware PENDIENTE o REVOCADO
-        if ($estado === 'revocado' || $estado === 'pendiente') {
-            $mensaje = ($estado === 'revocado')
-                ? 'El acceso de este dispositivo ha sido revocado.'
-                : 'Pendiente de autorización. Tu supervisor debe activarlo en la web central.';
+        // 7. Caso: Hardware PENDIENTE, INACTIVO o REVOCADO
+        if ($estado === 'revocado' || $estado === 'pendiente' || $estado === 'inactivo') {
+            $mensaje = 'Dispositivo suspendido o inactivo. Contacta a tu supervisor.';
+            if ($estado === 'revocado') {
+                $mensaje = 'El acceso de este dispositivo ha sido revocado.';
+            }
+            if ($estado === 'pendiente') {
+                $mensaje = 'Pendiente de autorización. Tu supervisor debe activarlo en la web central.';
+            }
 
             if ($es_form_submit) {
                 return array(
-                    'errors' => array(
+                    'autorizado' => false,
+                    'motivo'     => 'inactivo',
+                    'errors'     => array(
                         'uuid' => $mensaje
                     )
                 );
@@ -225,6 +255,7 @@ class app_dispositivo
 
             return array(
                 'autorizado' => false,
+                'motivo'     => 'inactivo',
                 'pantalla'   => $pantalla_bloqueo
             );
         }
@@ -233,7 +264,8 @@ class app_dispositivo
         if ($estado === 'activo') {
             if ($es_form_submit) {
                 return array(
-                    'action' => array(
+                    'autorizado' => true,
+                    'action'     => array(
                         'type'     => 'NAVIGATE',
                         'screenId' => 'login',
                         'reset'    => true
