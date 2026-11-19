@@ -37,15 +37,14 @@ final class referencias_baja_csd
      */
     public function eliminar(int $id, callable $elimina_csd): \stdClass
     {
-        // Nómina conserva su CSD por configuración, no por clave foránea.
-        if (!class_exists(\config\pac::class) || !isset(\config\pac::$fc_csd_nomina_id)
-            || !is_int(\config\pac::$fc_csd_nomina_id) || \config\pac::$fc_csd_nomina_id < 0) {
-            throw new RuntimeException('No se pudo verificar la configuración de CSD para nómina.');
-        }
-        if ($id > 0 && \config\pac::$fc_csd_nomina_id === $id) {
-            throw new RuntimeException('El CSD está asignado a nómina y no se puede eliminar.');
-        }
+        return (new bloqueo_uso_csd($this->link))->ejecutar(
+            $id,
+            fn (): \stdClass => $this->eliminar_reservado($id, $elimina_csd)
+        );
+    }
 
+    private function eliminar_reservado(int $id, callable $elimina_csd): \stdClass
+    {
         $propia = !$this->link->inTransaction();
         $punto = 'fc_csd_baja_'.bin2hex(random_bytes(8));
         if ($propia) {
@@ -125,6 +124,8 @@ final class referencias_baja_csd
             throw new RuntimeException('El CSD no existe.');
         }
 
+        $this->validar_nominas($id);
+
         $destinos = ['fc_csd' => [$id]];
         foreach (self::VINCULOS as $tabla => $vinculos) {
             $ids = $destinos[$tabla] ?? [];
@@ -143,6 +144,33 @@ final class referencias_baja_csd
             }
         }
         return $destinos;
+    }
+
+    /** La nómina conserva la identidad del certificado emisor en el CFDI sellado. */
+    private function validar_nominas(int $id): void
+    {
+        $tabla = $this->consulta(
+            'SELECT ENGINE, TABLE_TYPE FROM information_schema.TABLES '
+            .'WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?',
+            ['fc_cfdi_sellado_nomina']
+        )->fetch(PDO::FETCH_ASSOC);
+        // Sin este módulo instalado no hay CFDI de nómina almacenados en él.
+        if ($tabla === false) {
+            return;
+        }
+        if ($tabla['TABLE_TYPE'] !== 'BASE TABLE' || strcasecmp((string)$tabla['ENGINE'], 'InnoDB') !== 0) {
+            throw new RuntimeException('No se pueden verificar las nóminas asociadas al CSD.');
+        }
+        // No usar el certificado del SAT ni filtrar cancelados/inactivos. El número
+        // emisor identifica el uso histórico aunque cambie el CSD configurado.
+        if ($this->consulta(
+            'SELECT n.id FROM fc_cfdi_sellado_nomina AS n '
+            .'JOIN fc_csd AS c ON n.comprobante_no_certificado = c.no_certificado '
+            .'WHERE c.id = ? LIMIT 1 FOR UPDATE',
+            [$id]
+        )->fetchColumn() !== false) {
+            throw new RuntimeException('El CSD tiene nóminas asociadas y no se puede eliminar.');
+        }
     }
 
     private function validar_dependencias(string $padre, array $permitidas, array $ids): void

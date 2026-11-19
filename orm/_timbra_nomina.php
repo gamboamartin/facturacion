@@ -27,6 +27,27 @@ class _timbra_nomina
      */
     final public function timbra_recibo(PDO $link, int $fc_row_layout_id)
     {
+        return $this->con_csd_nomina($link, fn () => $this->timbra_recibo_bloqueado($link, $fc_row_layout_id));
+    }
+
+    private function con_csd_nomina(PDO $link, callable $operacion): array|stdClass
+    {
+        if (!class_exists(pac::class) || !isset(pac::$fc_csd_nomina_id)
+            || !is_int(pac::$fc_csd_nomina_id) || pac::$fc_csd_nomina_id <= 0) {
+            return (new errores())->error(mensaje: 'La configuración de CSD de nómina no es válida.', data: []);
+        }
+        try {
+            return (new bloqueo_uso_csd($link))->ejecutar(pac::$fc_csd_nomina_id, $operacion);
+        } catch (\Throwable $error) {
+            return (new errores())->error(
+                mensaje: 'No se pudo completar la operación de nómina con el CSD seleccionado.',
+                data: ['tipo' => get_class($error)]
+            );
+        }
+    }
+
+    private function timbra_recibo_bloqueado(PDO $link, int $fc_row_layout_id)
+    {
 
         $datos_rec = (new _datos())->datos_recibo($link, $fc_row_layout_id);
         if(errores::$error){
@@ -77,6 +98,11 @@ class _timbra_nomina
     }
 
     final public function retimbra_recibo(PDO $link, int $fc_row_layout_id): array|stdClass
+    {
+        return $this->con_csd_nomina($link, fn () => $this->retimbra_recibo_bloqueado($link, $fc_row_layout_id));
+    }
+
+    private function retimbra_recibo_bloqueado(PDO $link, int $fc_row_layout_id): array|stdClass
     {
 
         $datos_rec = (new _datos())->datos_recibo($link, $fc_row_layout_id);
