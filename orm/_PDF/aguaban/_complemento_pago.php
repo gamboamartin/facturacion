@@ -51,6 +51,9 @@ class _complemento_pago
 
         $this->set_emisor(pdf: $pdf);
 
+        $this->set_sellos(pdf: $pdf);
+        $this->set_qrcode(pdf: $pdf);
+
 
         $nombre_documento = 'nombre_temporal';
 
@@ -130,6 +133,34 @@ class _complemento_pago
         $pdf->cell(60,$h, $exportacion, $border, 0, 'L');
 
 
+    }
+
+    private function set_sellos(Fpdi $pdf): void
+    {
+        $x = 14.5;
+        $pdf->SetFont('DejaVuSans', '', '7');
+        $pdf->SetTextColor(0, 0, 0);
+
+        $pdf->SetXY($x, 219.5);
+        $pdf->MultiCell(140, 2.6, $this->datos['sellos']['sello_cfdi'], 0);
+
+        $pdf->SetXY($x, 239.5);
+        $pdf->MultiCell(140, 2.6, $this->datos['sellos']['sello_sat'], 0);
+
+        $pdf->SetAutoPageBreak(false);
+        $pdf->SetXY($x, 259.5);
+        $pdf->MultiCell(140, 2.6, $this->datos['sellos']['cadena_original']);
+        $pdf->SetAutoPageBreak(true);
+
+    }
+
+    private function set_qrcode(Fpdi $pdf): void
+    {
+        if ($this->datos['qr'] !== '') {
+            if (file_exists($this->datos['qr'])) {
+                $pdf->Image($this->datos['qr'], 159.5, 222, 31, 31, 'png');
+            }
+        }
     }
 
 
