@@ -1,12 +1,20 @@
 <?php
 
-namespace gamboamartin\facturacion\models;
+namespace gamboamartin\facturacion\models\_PDF\aguaban;
 
 use config\generales;
 use DateTime;
-use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\controllers\pdf;
+use gamboamartin\facturacion\models\_cuenta_predial;
+use gamboamartin\facturacion\models\_data_impuestos;
+use gamboamartin\facturacion\models\_doc;
+use gamboamartin\facturacion\models\_partida;
+use gamboamartin\facturacion\models\_PDF\__CUSTOM_FPDI;
+use gamboamartin\facturacion\models\_relacion;
+use gamboamartin\facturacion\models\_relacionada;
+use gamboamartin\facturacion\models\_sellado;
+use gamboamartin\facturacion\models\_transacciones_fc;
+use gamboamartin\facturacion\models\_uuid_ext;
 use gamboamartin\organigrama\models\org_logo;
 use NumberFormatter;
 use PDO;
@@ -14,7 +22,7 @@ use setasign\Fpdi\Fpdi;
 use stdClass;
 use Throwable;
 
-class _pdf_aguaban
+class _factura_and_nota_credito
 {
     private errores $error;
     private generales $config_generales;

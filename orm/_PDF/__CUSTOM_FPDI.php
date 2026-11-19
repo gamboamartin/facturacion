@@ -1,17 +1,18 @@
 <?php
 
-namespace gamboamartin\facturacion\models;
+namespace gamboamartin\facturacion\models\_PDF;
 
 use config\generales;
 use setasign\Fpdi\Fpdi;
 
 class __CUSTOM_FPDI extends Fpdi
 {
-
+    protected generales $config_generales;
     public function __construct()
     {
         parent::__construct();
-        $ruta_fonts = (new generales())->path_base.'plantillas/fonts/';
+        $this->config_generales = new generales();
+        $ruta_fonts = $this->config_generales->path_base.'plantillas/fonts/';
         $this->fontpath = $ruta_fonts;
     }
 
