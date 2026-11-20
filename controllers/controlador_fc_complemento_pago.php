@@ -820,7 +820,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
 
         $filtro = array($this->modelo->tabla.".folio","com_cliente.razon_social",
-            "com_cliente.rfc",$this->modelo->tabla.'.fecha',$this->modelo->tabla.'_etapa');
+            "com_cliente.rfc",$this->modelo->tabla.'.fecha',$this->modelo->tabla.'.etapa');
 
         $datatables = new stdClass();
         $datatables->columns = $columns;
