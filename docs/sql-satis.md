@@ -21,3 +21,9 @@ Publicar en staging y fusionar el catálogo conservando los artefactos e índice
 Primero se valida e instala en Facturación local. Los despliegues remotos requieren que el propietario indique cada destino. Consumidores con locks desde GitHub o versiones anteriores a v1.4.0 quedan pendientes de migración antes de nuevas instalaciones; no se actualizan sus versiones mayores automáticamente.
 
 Resultado local del 20 de noviembre de 2026: 17 etapas PASS; 178 pruebas unitarias/807 aserciones y 21 contratos SQL/consumidores/89 aserciones. Instalación local idéntica al candidato y acceso HTTP 200 con formulario. No se actualizaron otras dependencias. La suite focal conserva y documenta dos defectos preexistentes: el tratamiento de entradas compuestas solo por blancos puede producir IN vacío, y la normalización de espacios puede alterar literales. Su reparación requiere otra revisión/tag; no se ocultan como correcciones de esta migración.
+
+## Estado final de privacidad y retiro
+
+Verificado el 20 de noviembre de 2026: GitHub privado, webhook hacia Packagist desactivado y constructor Satis desde el repositorio privado aprobado con los seis archivos del tag original. Se repitieron la descarga sin caché con Packagist deshabilitado y las 17 etapas con GitHub privado: PASS.
+
+Las cinco versiones estables de Packagist se retiraron mediante soft-delete y dev-main se eliminó permanentemente con confirmación explícita del propietario. La UI verificó la desaparición de dev-main; las estables y su recuperación mantienen la ficha histórica. Una descarga aislada posterior al retiro completo pasó desde Satis con los seis archivos originales. No se aplicaron despliegues remotos de Facturación.
