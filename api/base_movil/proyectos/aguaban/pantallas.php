@@ -318,27 +318,54 @@ class pantallas extends proyecto
     {
         return array(
             'screenId' => 'home',
-            'title' => 'Inicio',
+            'title' => 'Bienvenida',
             'ttl' => 60,
             'components' => array(
                 array(
+                    'type' => 'Image',
+                    'id' => 'img-home-logo',
+                    'source' => 'logo',
+                    'height' => 84,
+                    'width' => 110,
+                    'accessibilityLabel' => 'Logotipo de Aguaban',
+                    'style' => array('alignSelf' => 'center', 'marginTop' => 16, 'marginBottom' => 20),
+                ),
+                array(
                     'type' => 'Text',
-                    'id' => 'txt-home-bienvenida',
-                    'content' => 'Bienvenido a Aguaban.',
-                    'style' => array('fontSize' => 16, 'marginBottom' => 12),
+                    'id' => 'txt-home-subtitulo',
+                    'content' => 'TU ACCESO ESTÁ LISTO',
+                    'style' => array(
+                        'fontSize' => 12,
+                        'fontWeight' => '600',
+                        'textAlign' => 'center',
+                        'marginBottom' => 8,
+                    ),
                 ),
                 array(
-                    'type' => 'DeviceStatus',
-                    'id' => 'estado-home',
-                    'items' => array('network', 'gps', 'location'),
-                    'layout' => 'list',
+                    'type' => 'Text',
+                    'id' => 'txt-home-titulo',
+                    'content' => '¡Bienvenidos!',
+                    'style' => array(
+                        'fontSize' => 28,
+                        'fontWeight' => 'bold',
+                        'textAlign' => 'center',
+                        'marginBottom' => 12,
+                    ),
                 ),
                 array(
-                    'type' => 'Button',
-                    'id' => 'btn-home-logout',
-                    'label' => 'Cerrar sesión',
-                    'style' => array_merge($this->estilo_boton(), array('marginTop' => 16)),
-                    'action' => array('type' => 'LOGOUT'),
+                    'type' => 'Text',
+                    'id' => 'txt-home-descripcion',
+                    'content' => 'Nos alegra tenerte aquí. Tu espacio de trabajo en AGUABAN está listo para comenzar.',
+                    'style' => array(
+                        'fontSize' => 14,
+                        'textAlign' => 'center',
+                        'marginBottom' => 24,
+                    ),
+                ),
+                array(
+                    'type'  => 'UserSessionCard',
+                    'id'    => 'card-sesion-usuario',
+                    'style' => array('marginTop' => 20), // o marginTop => 'auto' si el contenedor es flex
                 ),
             ),
         );
