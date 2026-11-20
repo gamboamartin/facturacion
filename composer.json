@@ -87,7 +87,9 @@
         "gamboa.martin/configuraciones",
         "gamboa.martin/plugins",
         "gamboa.martin/documento",
-        "gamboa.martin/administrador"
+        "gamboa.martin/administrador",
+        "gamboa.martin/errores",
+        "gamboa.martin/test"
       ]
     }
   ]

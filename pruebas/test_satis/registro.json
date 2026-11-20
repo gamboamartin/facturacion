@@ -1,0 +1,26 @@
+{
+  "id": "test_satis",
+  "tipo": "contrato_aislado",
+  "casos_previstos": 16,
+  "casos": [
+    "liberator_lee_privada_y_protegida_heredada",
+    "liberator_modifica_objeto_original",
+    "liberator_invoca_privado_con_argumentos",
+    "liberator_invoca_protegido_heredado",
+    "liberator_aisla_instancias",
+    "liberator_lectura_inexistente_retorna_error",
+    "liberator_lectura_no_inicializada_retorna_error",
+    "liberator_escritura_inexistente_no_crea_propiedad",
+    "liberator_tipo_invalido_conserva_valor",
+    "liberator_metodo_inexistente_retorna_error",
+    "liberator_excepcion_original_se_conserva",
+    "base_registro_predeterminado_activo",
+    "base_registro_sin_predeterminado",
+    "base_privado_row_base_conserva_campos_extra",
+    "base_estado_error_previo_se_propaga",
+    "aislamiento_sin_config_sesion_ni_constructor_bd"
+  ],
+  "aislamiento": "Fuentes reales de test y errores con autoload PHPUnit aislado. Objetos sintéticos, sin configuración de aplicación, sesiones PHP, bases de datos ni red. test se instancia con Reflection sin constructor.",
+  "evidencia": "Cada caso imprime su identidad y assertions; el cierre exige identidad, orden y conteo exactos y muestra SHA256 de las tres fuentes ejercitadas.",
+  "limites": "No ejecuta los constructores PDO/mysqli ni acredita conexión, SQL o inicialización UT de la base test. No sustituye la comprobación de identidad del artefacto/tag Satis ni la batería completa del proyecto."
+}

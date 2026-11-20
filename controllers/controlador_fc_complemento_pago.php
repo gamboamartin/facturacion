@@ -16,6 +16,7 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_complemento_pago_html;
 use gamboamartin\facturacion\models\_doctos_rel;
 use gamboamartin\facturacion\models\_pdf;
+use gamboamartin\facturacion\models\_PDF\aguaban\_complemento_pago;
 use gamboamartin\facturacion\models\fc_cancelacion_cp;
 use gamboamartin\facturacion\models\fc_cfdi_sellado_cp;
 use gamboamartin\facturacion\models\fc_complemento_pago;
@@ -493,28 +494,23 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         }
         return $r_alta;
     }
-    public function genera_pdf(bool $header, bool $ws = false, bool $descarga = true, bool $guarda = false)
+    public function genera_pdf(bool $header, bool $ws = false, bool $descarga = true, bool $guarda = false): void
     {
+        $bandera = true;
         $datos = $this->datos_reporte();
 
-        ob_start();
-        include __DIR__ . '/templates/reporte.php';
-        $html = ob_get_clean();
+        $proyecto_name = (string)($this->conf_generales->proyecto_custom_pdf ?? '');
+        if ($proyecto_name === 'aguaban') {
+            $bandera = false;
+            $complemento_pago = new _complemento_pago();
+            $complemento_pago->pdf(true,false, $this->link, $datos);
+        }
 
-        $options = new Options();
-        $options->set('isRemoteEnabled', true);
-        $options->set('defaultFont', 'DejaVu Sans');
-        $options->set('is_local_enabled', true);
-        $options->set('isHtml5ParserEnabled', true);
-        $dompdf = new Dompdf($options);
-        $dompdf = new Dompdf($options);
+        if ($bandera) {
+            $this->genera_pdf_dompdf(datos: $datos);
+        }
 
-        $dompdf->loadHtml($html, 'UTF-8');
-        $dompdf->setPaper('A4', 'portrait');
-
-        $dompdf->render();
-
-        $dompdf->stream($datos['folio'].'.pdf', ['Attachment' => true]);
+        exit;
     }
 
     public function datos_reporte()
@@ -644,6 +640,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $forma_pago_info = !empty($pagos) ? mb_convert_encoding($pagos['cat_sat_forma_pago_codigo'] . ' ' . $pagos['cat_sat_forma_pago_descripcion'], 'ISO-8859-1', 'UTF-8') : "";
         $monto_pago = !empty($pagos) ? $pagos['fc_pago_pago_monto'] : "";
         $moneda_pago = !empty($pagos) ? $pagos['cat_sat_moneda_codigo'] : "";
+        $moneda_descripcion_pago = !empty($pagos) ? $pagos['cat_sat_moneda_descripcion'] : "";
 
         $forma_pago = mb_convert_encoding($reporte['cat_sat_forma_pago_codigo'] . ' ' . $reporte['cat_sat_forma_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
         $metodo_pago = mb_convert_encoding($reporte['cat_sat_metodo_pago_codigo'] . ' ' . $reporte['cat_sat_metodo_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
@@ -753,6 +750,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
                 'tipo_comprobante' => $tipo_comprobante,
                 'condiciones_pago' => $condiciones_pago,
                 'moneda' => $moneda,
+                'moneda_descripcion' => $moneda_descripcion_pago,
             ],
             'relacionados' => [
                 'folio_fiscal' => $folio_fiscal,
@@ -954,6 +952,28 @@ class controlador_fc_complemento_pago extends _base_system_fc {
 
         return $r_timbra;
 
+    }
+
+    private function genera_pdf_dompdf(array $datos): void
+    {
+        ob_start();
+        include __DIR__ . '/templates/reporte.php';
+        $html = ob_get_clean();
+
+        $options = new Options();
+        $options->set('isRemoteEnabled', true);
+        $options->set('defaultFont', 'DejaVu Sans');
+        $options->set('is_local_enabled', true);
+        $options->set('isHtml5ParserEnabled', true);
+        $dompdf = new Dompdf($options);
+        $dompdf = new Dompdf($options);
+
+        $dompdf->loadHtml($html, 'UTF-8');
+        $dompdf->setPaper('A4', 'portrait');
+
+        $dompdf->render();
+
+        $dompdf->stream($datos['folio'].'.pdf', ['Attachment' => true]);
     }
 
 

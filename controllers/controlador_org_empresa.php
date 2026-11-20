@@ -8,6 +8,7 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
+use gamboamartin\facturacion\models\org_empresa;
 use gamboamartin\template\html;
 use PDO;
 use stdClass;
@@ -16,7 +17,7 @@ class controlador_org_empresa extends \gamboamartin\organigrama\controllers\cont
     public function __construct(PDO $link, html $html = new \gamboamartin\template_1\html(), stdClass $paths_conf = new stdClass())
     {
         parent::__construct(link: $link,html:  $html, paths_conf: $paths_conf);
-
-
+        // Mantener la interfaz heredada y aplicar la baja fiscal local.
+        $this->modelo = new org_empresa(link: $link);
     }
 }

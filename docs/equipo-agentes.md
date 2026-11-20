@@ -2,7 +2,7 @@
 
 ## Cómo utilizar el equipo
 
-El chat principal coordina tres especialistas: `backend`, `frontend` y `revisor`. Sus perfiles están en `.codex/agents/`; las reglas comunes y los comandos están en `AGENTS.md`. Los perfiles conservan el modelo y esfuerzo de la sesión salvo selección explícita. Los agentes heredan sus permisos: estas instrucciones no amplían acceso al sistema.
+El chat principal coordina cuatro especialistas: `backend`, `frontend`, `revisor` y `calidad`. Se activan hasta tres especialistas simultáneamente junto al coordinador; las revisiones restantes se realizan por turnos. Sus perfiles están en `.codex/agents/`; las reglas comunes y los comandos están en `AGENTS.md`. Los perfiles conservan el modelo y esfuerzo de la sesión salvo selección explícita. Los agentes heredan sus permisos: estas instrucciones no amplían acceso al sistema.
 
 Pide un resultado concreto en un chat cuyo proyecto principal sea este repositorio. Por ejemplo:
 
@@ -15,6 +15,18 @@ Para una implementación:
 Los perfiles son instrucciones reutilizables, no procesos permanentemente activos. El coordinador inicia los subagentes cuando el trabajo se beneficia de delegación. La actividad se realizó con tres agentes para la inspección inicial de este proyecto. Para sesiones futuras, abre el proyecto desde la raíz de este checkout para que Codex descubra sus instrucciones y perfiles. Si la interfaz no expone selección de perfiles, el coordinador puede leerlos y transmitir sus instrucciones a los subagentes disponibles.
 
 Referencia de configuración: [Subagentes de Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents#custom-agents).
+
+## Calidad de código
+
+El perfil `calidad` revisa legibilidad, diseño y mantenibilidad con SOLID y KISS. Trabaja con la arquitectura PHP existente y propone el cambio más pequeño que aporte claridad. Cada hallazgo debe explicar el problema concreto, su ubicación, impacto y validación necesaria. No impone patrones ni abstracciones por cumplir una etiqueta.
+
+`revisor` mantiene su función de detectar errores y regresiones y comprobar pruebas; `calidad` se centra en responsabilidades, contratos, nombres, flujo, dependencias y simplicidad. El coordinador integra ambos criterios y asigna un solo editor por archivo. Las revisiones son de lectura por defecto; una refactorización requiere asignación concreta y comprobación de comportamiento según el protocolo vigente.
+
+Ejemplo de uso:
+
+> Revisa [módulo] con el agente calidad. Evalúa SOLID, KISS y claridad con evidencia. Propón mejoras pequeñas que conserven el comportamiento; coordina cualquier implementación con backend o frontend y su validación con revisor.
+
+Las métricas proceden de las herramientas y del registro de pruebas existentes. No se inventan límites de líneas, puntuaciones de calidad ni porcentajes de cobertura.
 
 ## Flujo de la aplicación
 

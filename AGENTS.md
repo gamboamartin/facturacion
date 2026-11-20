@@ -15,7 +15,7 @@ Trabaja desde la raíz del checkout correcto. Comprueba `git status --short --br
 
 ## Roles y delegación
 
-El agente principal es el **coordinador**. Usa hasta tres especialistas cuando haya tareas independientes útiles; los cambios pequeños pueden resolverse con un solo agente. Los perfiles reutilizables están en `.codex/agents/` y conservan el modelo y permisos de la sesión si no existe una selección explícita.
+El agente principal es el **coordinador**. El equipo dispone de cuatro perfiles especialistas; activa hasta tres simultáneamente junto al coordinador y alterna los restantes según la tarea; los cambios pequeños pueden resolverse con un solo agente. Los perfiles reutilizables están en `.codex/agents/` y conservan el modelo y permisos de la sesión si no existe una selección explícita.
 
 | Rol | Responsabilidad | Archivos candidatos, sujetos a asignación |
 | --- | --- | --- |
@@ -23,6 +23,7 @@ El agente principal es el **coordinador**. Usa hasta tres especialistas cuando h
 | `backend` | Lógica PHP, modelos, controladores, API y adaptadores PAC | `controllers/`, `orm/`, `api/`, `pac/`, `templates/directivas/` |
 | `frontend` | Pantallas, formularios, estilos y comportamiento de la interfaz | `views/`, `templates/inputs/`, `templates/nav/`, `templates/inicio/`, `templates/footer/`, `templates/principal.php`, `templates/css.php`, `js/`, `css/` |
 | `revisor` | Detecta defectos/regresiones y ejecuta validaciones pertinentes; informa evidencias | Lectura general; escritura de pruebas/documentación solo con asignación explícita |
+| `calidad` | Evalúa claridad, mantenibilidad, SOLID y KISS con propuestas justificadas | Lectura transversal; refactorizaciones únicamente en archivos asignados y sin solapamientos |
 
 Los directorios orientan el reparto, pero no conceden propiedad automática de todos sus archivos. `templates/directivas/` contiene clases PHP con acceso a modelos/PDO; no debe asignarse simultáneamente a frontend y backend. El coordinador designa un único responsable para cambios transversales, `plantillas/`, migraciones o configuración.
 
@@ -33,7 +34,7 @@ Los directorios orientan el reparto, pero no conceden propiedad automática de t
 3. Acuerda contratos compartidos antes de programar en paralelo: campos, tipos, respuestas/errores, IDs de formulario, selectores y parámetros `seccion`, `accion`, `registro_id`.
 4. Dos agentes no editan el mismo archivo simultáneamente. Serializa los cambios compartidos o prepara worktrees si conviene y el entorno lo permite. Un subagente no recibe automáticamente una copia aislada del código.
 5. Cada especialista devuelve archivos cambiados, decisiones, comandos ejecutados/resultados y limitaciones. Si necesita otro archivo, informa al coordinador para reasignarlo antes de editar.
-6. El revisor comprueba la versión integrada y distingue defectos de sugerencias. El coordinador resuelve hallazgos y ejecuta las verificaciones pertinentes sobre el resultado final.
+6. En cambios de código, el coordinador encarga a `calidad` una revisión proporcional de legibilidad, SOLID y KISS antes del cierre; en cambios pequeños puede aplicar directamente sus criterios. El revisor comprueba la versión integrada y distingue defectos de sugerencias. El coordinador resuelve hallazgos y ejecuta las verificaciones pertinentes sobre el resultado final.
 7. La entrega explica qué cambió, cómo se verificó y qué no se probó. Un plan, una revisión estática y una prueba ejecutada son resultados distintos.
 
 ## Convenciones y límites del proyecto
