@@ -643,6 +643,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $moneda_descripcion_pago = !empty($pagos) ? $pagos['cat_sat_moneda_descripcion'] : "";
 
         $forma_pago = mb_convert_encoding($reporte['cat_sat_forma_pago_codigo'] . ' ' . $reporte['cat_sat_forma_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
+        $forma_pago_v2 = mb_convert_encoding($reporte['cat_sat_forma_pago_codigo'] . ' - ' . $reporte['cat_sat_forma_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
         $metodo_pago = mb_convert_encoding($reporte['cat_sat_metodo_pago_codigo'] . ' ' . $reporte['cat_sat_metodo_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
         $tipo_comprobante = mb_convert_encoding($reporte['cat_sat_tipo_de_comprobante_codigo'] . ' ' . $reporte['cat_sat_tipo_de_comprobante_descripcion'], 'ISO-8859-1', 'UTF-8');
         $condiciones_pago = mb_convert_encoding($reporte['cat_sat_metodo_pago_descripcion'], 'ISO-8859-1', 'UTF-8');
@@ -739,6 +740,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             'productos' => $productos,
             'informacion_pago' => [
                 'fecha_pago' => $fecha_pago,
+                'forma_pago_v2' => $forma_pago_v2,
                 'tipo_cambio' => $tipo_cambio,
                 'forma_pago' => $forma_pago_info,
                 'monto' => $monto_pago,
@@ -747,6 +749,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             ],
             'pagos' => [
                 'forma_pago' => $forma_pago,
+                'forma_pago_v2' => $forma_pago_v2,
                 'metodo_pago' => $metodo_pago,
                 'tipo_comprobante' => $tipo_comprobante,
                 'condiciones_pago' => $condiciones_pago,
