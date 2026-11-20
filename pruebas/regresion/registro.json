@@ -413,6 +413,14 @@
       "ejecutor": "pruebas/csd_nombres/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 8
+    },
+    {
+      "id": "empresa_baja",
+      "tipo": "integracion",
+      "registro": "pruebas/empresa_baja/registro.json",
+      "ejecutor": "pruebas/empresa_baja/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 47
     }
   ]
 }
