@@ -743,6 +743,7 @@ class controlador_fc_complemento_pago extends _base_system_fc {
                 'forma_pago' => $forma_pago_info,
                 'monto' => $monto_pago,
                 'moneda' => $moneda_pago,
+                'moneda_descripcion' => $moneda_descripcion_pago,
             ],
             'pagos' => [
                 'forma_pago' => $forma_pago,
