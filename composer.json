@@ -89,7 +89,8 @@
         "gamboa.martin/documento",
         "gamboa.martin/administrador",
         "gamboa.martin/errores",
-        "gamboa.martin/test"
+        "gamboa.martin/test",
+        "gamboa.martin/sql"
       ]
     }
   ]

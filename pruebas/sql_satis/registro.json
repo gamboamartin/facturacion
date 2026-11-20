@@ -1,0 +1,31 @@
+{
+  "id": "sql_satis",
+  "tipo": "contrato_integracion_sin_bd",
+  "casos_previstos": 21,
+  "casos": [
+    "sql_in_preserva_lista_formateada_y_alias",
+    "sql_in_ambos_vacios_omite_filtro",
+    "sql_coherencia_ambos_presentes_y_ambos_vacios",
+    "sql_coherencia_llave_sin_valores_bloquea",
+    "sql_coherencia_valores_sin_llave_bloquea",
+    "sql_in_propaga_error_de_coherencia",
+    "sql_in_estado_error_previo_no_se_oculta",
+    "sql_in_normaliza_espacios_estructurales",
+    "sql_limpieza_default_reduce_espacios_e_idempotente",
+    "sql_limpieza_preserva_tabs_saltos_y_unicode",
+    "sql_in_preserva_literals_ya_formateados",
+    "where_real_genera_in_ids_y_cero",
+    "where_real_transforma_cadenas_y_comillas",
+    "where_real_rechaza_lista_vacia",
+    "where_real_rechaza_clave_ausente",
+    "where_real_rechaza_values_no_array",
+    "administrador_real_in_sql_pasa_por_where_y_sql",
+    "administrador_real_in_sql_preserva_cadenas",
+    "administrador_real_rechaza_valores_vacios",
+    "autoload_namespace_compartido_resuelve_fuentes_distintas",
+    "aislamiento_sin_config_ni_sesion_php"
+  ],
+  "aislamiento": "Fuentes reales SQL, where, administrador, validacion, validaciones y errores. ClassLoader Composer real con prefijos seleccionados y lista cerrada de clases; sin vendor/autoload.php, configuración, PHPUnit con constructor DB, sesiones PHP ni bases de datos.",
+  "evidencia": "Casos y assertions visibles; PHP y Python verifican identidades, orden y cantidad exactos. Informa SHA256 de las ocho fuentes ejercitadas; una salida anticipada con código cero no se acepta.",
+  "limites": "Comprueba construcción de fragmentos y propagación de errores, no ejecución SQL, conexión MySQL, seguridad de parámetros arbitrarios ni DDL/DML. No sustituye la identidad del artefacto/tag ni la batería completa. Límites preexistentes de espacios en literales y entradas solo blancas se documentan en README y no se presentan como funcionalidad correcta."
+}

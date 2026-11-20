@@ -429,6 +429,14 @@
       "ejecutor": "pruebas/test_satis/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 16
+    },
+    {
+      "id": "sql_satis",
+      "tipo": "contrato_integracion_sin_bd",
+      "registro": "pruebas/sql_satis/registro.json",
+      "ejecutor": "pruebas/sql_satis/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 21
     }
   ]
 }
