@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6ea4bae93ea53633eb54a72d575e318f",
+    "content-hash": "e4e3a21d604870ea95520ac310699e32",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2167,16 +2167,11 @@
         {
             "name": "gamboa.martin/test",
             "version": "v5.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/gamboamartin/test.git",
-                "reference": "4f72a308d5fcb56e5290ccbbc91c49d2294ce123"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gamboamartin/test/zipball/4f72a308d5fcb56e5290ccbbc91c49d2294ce123",
+                "url": "https://paquetes.ivitec.mx/dist/gamboa-martin/test/gamboa-martin-test-4f72a308d5fcb56e5290ccbbc91c49d2294ce123-zip-5621d4.zip",
                 "reference": "4f72a308d5fcb56e5290ccbbc91c49d2294ce123",
-                "shasum": ""
+                "shasum": "11b3209a6b78f4c11b4dc04d6bec507863bdcc97"
             },
             "require": {
                 "ext-mysqli": "*",
@@ -2193,7 +2188,6 @@
                     "gamboamartin\\test\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0-or-later"
             ],
