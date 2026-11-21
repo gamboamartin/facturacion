@@ -23,3 +23,9 @@ La publicación se construye en staging y fusiona el catálogo conservando artef
 Primero se instala y valida en desarrollo local. Los despliegues remotos de aplicaciones se realizan solo cuando el propietario indique cada destino. Los consumidores con locks desde GitHub y versiones anteriores a v1.3.0 quedan pendientes de migración antes de nuevas instalaciones, conservando sus versiones mayores.
 
 Resultado local del 20 de noviembre de 2026: PASS de las 18 etapas registradas, con 178 pruebas unitarias/807 aserciones y 26 casos nuevos de validaciones/113 aserciones. Plataforma compatible, descarga sin caché con Packagist deshabilitado y comparación de los seis archivos del tag original. El vendor local coincide con el candidato probado, se preservaron configuración/plantillas y el acceso local responde HTTP 200 con formulario de login. No cambiaron versiones ni referencias de otros paquetes.
+
+## Estado final de privacidad y retiro
+
+Verificado el 20 de noviembre de 2026: GitHub privado, webhook hacia Packagist desactivado y constructor Satis desde el repositorio privado aprobado con los seis archivos originales. Se repitieron la descarga sin caché con Packagist deshabilitado y las 18 etapas con GitHub privado: PASS.
+
+Las cuatro versiones estables de Packagist se retiraron mediante soft-delete y dev-main se eliminó permanentemente con confirmación explícita del propietario. Tras actualizar la ficha se verificaron ausencia de dev-main y cuatro opciones de recuperación de estables; la ficha histórica permanece. Una descarga aislada posterior al retiro completo pasó desde Satis y conservó los seis archivos originales. No se aplicaron despliegues remotos de aplicaciones.
