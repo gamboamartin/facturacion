@@ -90,7 +90,8 @@
         "gamboa.martin/administrador",
         "gamboa.martin/errores",
         "gamboa.martin/test",
-        "gamboa.martin/sql"
+        "gamboa.martin/sql",
+        "gamboa.martin/validaciones"
       ]
     }
   ]
