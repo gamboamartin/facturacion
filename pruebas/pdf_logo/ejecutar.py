@@ -21,6 +21,10 @@ VENDOR=Path(os.environ.get('QA_CSD_DEPS',ROOT))/'vendor'
 def exigir(condition, message):
     if not condition: raise RuntimeError(message)
 
+def inventario(directory):
+    return {str(p.relative_to(directory)):hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted(directory.rglob('*')) if p.is_file()}
+
 def run(args, **kwargs):
     p=subprocess.run(args,capture_output=True,text=True,timeout=90,**kwargs)
     exigir(p.returncode==0, 'comando_fallido:'+str(args[0])+':'+p.stderr[-1500:])
@@ -89,15 +93,28 @@ def compare(before, after, mode, has_logo, asset_size):
 
 def main():
     report={'estado':'BLOQUEADO','fecha_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'casos':[]}
+    vendor_original=None
+    vendor_before=None
     try:
         exigir((VENDOR/'autoload.php').is_file(),'vendor_ausente')
+        vendor_original=VENDOR.resolve(strict=True)
+        vendor_before=inventario(vendor_original)
         for tool in ['php','pdftoppm','pdftotext','pdfimages']: exigir(shutil.which(tool) is not None,'herramienta_ausente:'+tool)
         registro=json.loads((HERE/'registro.json').read_text())
         manifest=json.loads((HERE/'baseline/registro.json').read_text())
         exigir(hashlib.sha256((ROOT/'plantillas/factura_finarq.pdf').read_bytes()).hexdigest()=='031f022d749ed6c6d7c3cce17b810c7111c0d7f96d5f4b4e07568e31f029d6a6','plantilla_finarq_distinta')
         base=Path(os.environ.get('QA_PDF_LOGO_OUTPUT',ROOT/'.git/qa/pdf-logo'))
+        exigir(base.resolve()!=vendor_original and vendor_original not in base.resolve().parents,'evidencia_dentro_vendor_original')
         base.mkdir(parents=True,exist_ok=True)
         work=Path(tempfile.mkdtemp(prefix='render-',dir=base));report['artefactos']=str(work)
+        vendor_copia=work/'vendor'
+        # Dompdf puede crear métricas de fuentes. Ambos lados usan esta copia privada.
+        shutil.copytree(vendor_original,vendor_copia,symlinks=False)
+        exigir(inventario(vendor_copia)==vendor_before,'copia_vendor_distinta')
+        manifest_vendor=json.dumps(vendor_before,sort_keys=True,separators=(',',':'))
+        (work/'vendor-original-inventario.json').write_text(manifest_vendor)
+        report['vendor_original_archivos']=len(vendor_before)
+        report['vendor_original_inventario_sha256']=hashlib.sha256(manifest_vendor.encode()).hexdigest()
         sources={}
         hashes={}
         for phase in ['antes','despues']:
@@ -117,7 +134,7 @@ def main():
         for mode in modes:
             for phase,variant in [('antes','sinlogo'),('despues','sinlogo'),('despues','png'),('despues','jpg'),('despues','alto')]:
                 output=work/(phase+'-'+mode+'-'+variant+'.pdf')
-                env={**os.environ,'PDF_SOURCE':str(sources[phase]),'PDF_VENDOR':str(VENDOR),'PDF_OUTPUT':str(output),'PDF_TEMPLATE':str(ROOT/'plantillas/factura_finarq.pdf')}
+                env={**os.environ,'PDF_SOURCE':str(sources[phase]),'PDF_VENDOR':str(vendor_copia),'PDF_OUTPUT':str(output),'PDF_TEMPLATE':str(ROOT/'plantillas/factura_finarq.pdf')}
                 p=run(['php','-d','allow_url_fopen=0','-d','allow_url_include=0','-d','disable_functions=fsockopen,pfsockopen,stream_socket_client,curl_exec,curl_multi_exec',str(HERE/'renderizar.php'),mode,variant],env=env)
                 exigir(p.stderr.strip()=='','stderr_render:'+output.name+':'+p.stderr[-1000:])
                 result=json.loads(p.stdout);exigir(result['estado']=='PDF_SINTETICO_GENERADO','render_no_acreditado')
@@ -137,6 +154,17 @@ def main():
                       alcance='Motores reales FPDI y Dompdf con datos y logos ficticios, PDO doble sin conexiones. Compara todos los textos y coordenadas, papel, páginas y diferencias raster fuera de cajas de logo. No certifica consulta SQL real, timbrado ni PDFs almacenados en producción.')
     except Exception as error:
         report['error']=str(error)
+    finally:
+        if vendor_before is not None:
+            try:
+                report['vendor_original_sin_cambios']=inventario(vendor_original)==vendor_before
+                if not report['vendor_original_sin_cambios']:
+                    report['estado']='BLOQUEADO'
+                    report['error_vendor']='vendor_original_modificado_durante_prueba'
+            except Exception as error:
+                report['estado']='BLOQUEADO'
+                report['vendor_original_sin_cambios']=False
+                report['error_vendor']='no_se_pudo_verificar_vendor_original:'+type(error).__name__
     output=ROOT/'pruebas/resultados/pdf_logo_render.json';output.parent.mkdir(parents=True,exist_ok=True);output.write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n')
     print(json.dumps(report,ensure_ascii=False))
     return 0 if report['estado']=='PASS_PDF_LOGO_RENDER' else 1
