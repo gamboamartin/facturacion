@@ -11,6 +11,7 @@ use PDO;
 use setasign\Fpdi\Fpdi;
 use stdClass;
 use Throwable;
+use function PhpOffice\PhpSpreadsheet\Calculation\Statistical\Distributions\ChiSquared;
 
 class _complemento_pago
 {
@@ -50,10 +51,14 @@ class _complemento_pago
             return (new errores())->error(mensaje: 'Error al cargar template', data: $init);
         }
 
+        $this->set_folio(pdf: $pdf);
+        $this->set_fecha_hora_expedicion(pdf: $pdf);
         $this->set_emisor(pdf: $pdf);
-
+        $this->set_receptor(pdf: $pdf);
         $this->set_detalle_pago(pdf: $pdf);
-        $this->documento_pagado(pdf: $pdf);
+        $this->set_documento_pagado(pdf: $pdf);
+        $this->set_informacion_impuestos(pdf: $pdf);
+        $this->set_datos_fiscales(pdf: $pdf);
         $this->set_sellos(pdf: $pdf);
         $this->set_qrcode(pdf: $pdf);
 
@@ -81,72 +86,6 @@ class _complemento_pago
 
     }
 
-    private function documento_pagado(__CUSTOM_FPDI $pdf): void
-    {// ToDo: terminarlo
-        $border = 1;
-
-        $uuid_documento_full_text = "UUID del Documento: ". strtoupper($this->datos['relacionados']['folio_fiscal']);
-        $serie_folio = "A-0225";
-        $moneda = "MXN";
-        $equivalencia = "";
-        $objeto_impuesto = "";
-        $parcialidad = "";
-        $saldo_anterior = "";
-        $importe_pagado = "";
-        $saldo_insoluto = "";
-
-        $pdf->ocultar_area(14.5, 109.3, 30, 5);
-        $pdf->SetDrawColor(0, 0, 0);
-
-        $pdf->SetFont('DejaVuSans', '', 7);
-        $pdf->SetTextColor(18, 61, 112);
-        $pdf->SetXY(14.5, 109.3);
-        $pdf->Cell(150, 5, $uuid_documento_full_text, $border, 0, 'L');
-
-        $x = 15;
-        $w = 21;
-        $pdf->SetFont('DejaVuSans', '', 7);
-        $pdf->SetTextColor(18, 61, 112);
-        $pdf->SetXY($x, 126);
-        $pdf->Cell($w, 5, $serie_folio, $border, 0, 'C');
-
-        $x += $w;
-        $w = 16;
-        $pdf->SetXY($x, 126);
-        $pdf->Cell($w, 5, $moneda, $border, 0, 'C');
-
-        $x += $w;
-        $w = 25;
-        $pdf->SetXY($x, 126);
-        $pdf->Cell($w, 5, $equivalencia, $border, 0, 'C');
-
-        $x += $w;
-        $w = 23;
-        $pdf->SetXY($x, 126);
-        $pdf->Cell($w, 5, $objeto_impuesto, $border, 0, 'C');
-
-        $x += $w;
-        $w = 25;
-        $pdf->SetXY($x, 126);
-        $pdf->Cell($w, 5, $parcialidad, $border, 0, 'C');
-
-        $x += $w;
-        $w = 23;
-        $pdf->SetXY($x, 126);
-        $pdf->Cell($w, 5, $saldo_anterior, $border, 0, 'C');
-
-        $x += $w;
-        $pdf->SetXY($x, 126);
-        $pdf->Cell($w, 5, $importe_pagado, $border, 0, 'C');
-
-        $x += $w;
-        $w = 24;
-        $pdf->SetXY($x, 126);
-        $pdf->Cell($w, 5, $saldo_insoluto, $border, 0, 'C');
-    }
-
-
-
     private function init(Fpdi $pdf): true|array
     {
         $plantilla = 'complemento_aguaban.pdf';
@@ -159,6 +98,33 @@ class _complemento_pago
             return (new errores())->error(mensaje: 'Error al cargar template', data: $e);
         }
         return true;
+    }
+
+    private function set_folio(Fpdi $pdf): void
+    {
+        $folio = $this->datos['folio'];
+        $pdf->SetFont('DejaVuSans', 'B', '10');
+        $pdf->SetTextColor(18, 61, 112);
+        $pdf->SetXY(166, 20);
+        $pdf->cell(30,5, $folio, 0, 0, 'R');
+
+    }
+
+    private function set_fecha_hora_expedicion(__CUSTOM_FPDI $pdf): void
+    {
+        $border = 0;
+
+        $x = 156;
+        $y = 25;
+        $w = 40;
+        $h = 5;
+
+        $pdf->ocultar_area($x, $y, $w, $h);
+
+        $pdf->SetFont('DejaVuSans', '', '6');
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY($x, $y);
+        $pdf->cell($w,$h, $this->fecha_certificacion(),$border, 0, 'R');
     }
 
     private function set_emisor(__CUSTOM_FPDI $pdf): void
@@ -202,6 +168,51 @@ class _complemento_pago
 
     }
 
+    private function set_receptor(__CUSTOM_FPDI $pdf): void
+    {
+
+        $border = 1;
+        $x = 138;
+        $h = 3.5;
+        $y = 39;
+
+        $razon_social = '';
+        $cliente_rfc = 'RFC ';
+        $regimen = 'Regimen Fiscal ';
+        $uso_cfdi = 'Uso CFDI ';
+
+        $razon_social = mb_convert_encoding($razon_social, 'ISO-8859-1', 'UTF-8');
+        $cliente_rfc = mb_convert_encoding($cliente_rfc, 'ISO-8859-1', 'UTF-8');
+        $regimen = mb_convert_encoding($regimen, 'ISO-8859-1', 'UTF-8');
+        $uso_cfdi = mb_convert_encoding($uso_cfdi, 'ISO-8859-1', 'UTF-8');
+
+
+        $pdf->SetFont('DejaVuSans', 'B', '8');
+        $pdf->SetTextColor(18, 61, 112);
+        $pdf->SetXY($x, $y);
+        $pdf->multicell(60,$h, $razon_social,$border, 'L');
+        $lineas_razon_social = $pdf->NbLines(60, $razon_social);
+        $y += $h * $lineas_razon_social;
+
+        $pdf->SetFont('DejaVuSans', '', '8');
+        $pdf->SetTextColor(18, 61, 112);
+        $pdf->SetXY($x, $y);
+        $pdf->cell(60,$h, $cliente_rfc,$border, 0, 'L');
+        $y += $h;
+
+        $pdf->SetFont('DejaVuSans', '', '7');
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY($x, $y);
+        $pdf->cell(60,$h, $regimen,$border, 0, 'L');
+        $y += $h;
+
+        $pdf->SetFont('DejaVuSans', '', '7');
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY($x, $y);
+        $pdf->cell(60,$h, $uso_cfdi,$border, 0, 'L');
+
+    }
+
     private function set_detalle_pago(__CUSTOM_FPDI $pdf): void
     {
         $x = 14.5;
@@ -231,7 +242,6 @@ class _complemento_pago
         $cuenta_bancaria = '---';
 
         $pdf->ocultar_area($x, 70, 120, 34);
-        $pdf->SetDrawColor(0, 0, 0);
 
         $pdf->SetFont('DejaVuSans', 'B', 12);
         $pdf->SetTextColor(18, 61, 112);
@@ -309,6 +319,171 @@ class _complemento_pago
 
     }
 
+    private function set_documento_pagado(__CUSTOM_FPDI $pdf): void
+    {// ToDo: algunos datos no vienen en el array de datos
+        $border = 0;
+
+        $uuid_documento_full_text = "UUID del Documento: ". strtoupper($this->datos['relacionados']['folio_fiscal']);
+        $serie_folio = "A-0225";
+        $moneda = strtoupper($this->datos['informacion_pago']['moneda']);
+        $equivalencia = $this->datos['informacion_pago']['tipo_cambio'];
+        $objeto_impuesto = "02 - Sí objeto de impuesto";
+        $objeto_impuesto = mb_convert_encoding($objeto_impuesto, 'ISO-8859-1', 'UTF-8');
+        $parcialidad = $this->datos['relacionados']['numero_parcialidad'];
+        $saldo_anterior = $this->datos['relacionados']['saldo_anterior'];
+        $importe_pagado = $this->datos['relacionados']['importe_pagado'];
+        $saldo_insoluto = $this->datos['relacionados']['saldo_insoluto'];
+
+        $pdf->ocultar_area(14.5, 109.3, 30, 5);
+
+        $pdf->SetFont('DejaVuSans', '', 7);
+        $pdf->SetTextColor(18, 61, 112);
+        $pdf->SetXY(14.5, 109.3);
+        $pdf->Cell(150, 5, $uuid_documento_full_text, $border, 0, 'L');
+
+        $x = 15;
+        $y = 126;
+        $w = 21;
+        $h = 8;
+        $pdf->SetFont('DejaVuSans', '', 7);
+        $pdf->SetTextColor(18, 61, 112);
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $serie_folio, $border, 0, 'C');
+
+        $x += $w;
+        $w = 16;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $moneda, $border, 0, 'C');
+
+        $x += $w;
+        $w = 25;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $equivalencia, $border, 0, 'C');
+
+        $x += $w;
+        $w = 23;
+        $pdf->SetXY($x, $y);
+        $pdf->Multicell($w, (float)($h/2), $objeto_impuesto, $border, 'C');
+
+        $x += $w;
+        $w = 25;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $parcialidad, $border, 0, 'C');
+
+        $x += $w;
+        $w = 23;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $saldo_anterior, $border, 0, 'C');
+
+        $x += $w;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $importe_pagado, $border, 0, 'C');
+
+        $x += $w;
+        $w = 24;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $saldo_insoluto, $border, 0, 'C');
+    }
+
+    private function set_informacion_impuestos(__CUSTOM_FPDI $pdf): void
+    {// ToDo: algunos datos no vienen en el array de datos
+        $border = 0;
+
+        $tipo_impuesto = " --- ";
+        $base = " --- ";
+        $impuesto = " --- ";
+        $tipo_factor = " --- ";
+        $tasa_cuota = " --- ";
+        $importe = " --- ";
+
+        $x = 15;
+        $y = 156;
+        $h = 8;
+
+
+        $w = 35;
+        $pdf->SetFont('DejaVuSans', '', 7);
+        $pdf->SetTextColor(18, 61, 112);
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $tipo_impuesto, $border, 0, 'C');
+
+        $x += $w;
+        $w = 25;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $base, $border, 0, 'C');
+
+        $x += $w;
+        $w = 32;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $impuesto, $border, 0, 'C');
+
+        $x += $w;
+        $w = 30;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $tipo_factor, $border, 0, 'C');
+
+        $x += $w;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $tasa_cuota, $border, 0, 'C');
+
+        $x += $w;
+        $w = 28;
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $importe, $border, 0, 'C');
+    }
+
+    private function set_datos_fiscales(__CUSTOM_FPDI $pdf): void
+    {
+        $border = 0;
+
+        $uuid_fiscal = "UUID / Folio fiscal: ";
+        $uuid_fiscal .= strtoupper($this->datos['fiscales']['folio_sat']);
+
+        $fecha_hora_certificacion = "Fecha y hora de certificación: ";
+        $fecha_hora_certificacion .= $this->fecha_certificacion();
+
+        $no_certificado_emisor = "No. certificado emisor: ";
+        $no_certificado_emisor .= $this->datos['fiscales']['certificado_emisor'];
+
+        $no_certificado_sat = "No. certificado SAT: ";
+        $no_certificado_sat .= $this->datos['fiscales']['certificado_sat'];
+
+        $uuid_fiscal = mb_convert_encoding($uuid_fiscal, 'ISO-8859-1', 'UTF-8');//
+        $fecha_hora_certificacion = mb_convert_encoding($fecha_hora_certificacion, 'ISO-8859-1', 'UTF-8');
+        $no_certificado_emisor = mb_convert_encoding($no_certificado_emisor, 'ISO-8859-1', 'UTF-8');
+        $no_certificado_sat = mb_convert_encoding($no_certificado_sat, 'ISO-8859-1', 'UTF-8');
+
+        $x = 14.5;
+        $y = 192.2;
+        $w = 135;
+        $h = 4;
+
+        $pdf->ocultar_area($x, $y, $w, $h*5);
+
+        $pdf->SetFont('DejaVuSans', '', 7);
+        $pdf->SetTextColor(18, 61, 112);
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $uuid_fiscal, $border, 0, 'L');
+
+        $y += $h;
+        $pdf->SetFont('DejaVuSans', '', 7);
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $fecha_hora_certificacion, $border, 0, 'L');
+
+        $y += $h;
+        $pdf->SetFont('DejaVuSans', '', 7);
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $no_certificado_emisor, $border, 0, 'L');
+
+        $y += $h;
+        $pdf->SetFont('DejaVuSans', '', 7);
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, $h, $no_certificado_sat, $border, 0, 'L');
+    }
+
     private function set_sellos(Fpdi $pdf): void
     {
         $x = 14.5;
@@ -362,6 +537,21 @@ class _complemento_pago
         }
 
         return '';
+    }
+
+    private function fecha_certificacion(): string
+    {
+        $fecha_certificacion = '';
+        if (isset($this->datos['fechas']['fecha_certificacion'])) {
+            $fecha_certificacion = $this->datos['fechas']['fecha_certificacion'];
+            $fecha_certificacion = DateTime::createFromFormat('Y-m-d\TH:i:s', $fecha_certificacion);
+            if ($fecha_certificacion) {
+                return $fecha_certificacion->format('d/m/Y H:i:s');
+            }
+
+            return '';
+        }
+        return $fecha_certificacion;
     }
 
 

@@ -117,5 +117,6 @@ class __CUSTOM_FPDI extends Fpdi
         $this->SetFillColor(255, 255, 255);
         $this->SetDrawColor(255, 255, 255);
         $this->Rect($x, $y, $ancho, $alto, 'F');
+        $this->SetDrawColor(0, 0, 0);
     }
 }
