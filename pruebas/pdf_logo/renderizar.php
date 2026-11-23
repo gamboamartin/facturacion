@@ -71,7 +71,7 @@ namespace {
             'cat_sat_metodo_pago_codigo'=>'PUE','cat_sat_metodo_pago_descripcion'=>'PAGO EN UNA EXHIBICION',
             'cat_sat_tipo_de_comprobante_codigo'=>$mode==='factura'?'I':'E','cat_sat_tipo_de_comprobante_descripcion'=>$mode==='factura'?'INGRESO':'EGRESO',
             'cat_sat_moneda_codigo'=>'MXN','cat_sat_moneda_descripcion'=>'PESO MEXICANO'] as $k=>$v)$factura[$k]=$v;
-        foreach(['folio'=>'QA-001','fecha'=>'2026-11-23 12:00:00','observaciones'=>'DATOS SINTETICOS',
+        foreach(['folio'=>(getenv('PDF_FOLIO') === false ? 'QA-001' : getenv('PDF_FOLIO')),'fecha'=>'2026-11-23 12:00:00','observaciones'=>'DATOS SINTETICOS',
             'sub_total'=>1000,'descuento'=>0,'total_traslados'=>160,'total_retenciones'=>0,'total'=>1160] as $k=>$v)$factura[$table.'_'.$k]=$v;
         $data=(object)['fecha_timbrado'=>'2026-11-23 12:00:01','folio_fiscal'=>'00000000-0000-0000-0000-000000000000',
             'no_certificado'=>'00000000000000000000','no_certificado_sat'=>'00000000000000000000',

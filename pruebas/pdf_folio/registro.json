@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "estado_esperado": "PASS_PDF_FOLIO_RENDER",
+  "casos_previstos": 8,
+  "folios": {
+    "corto": "QA-001",
+    "numerico_largo": "12345678901234567-123456",
+    "alfanumerico_largo": "SERIEALFANUMERICA123456789-ABC123",
+    "sin_guion": "ABCDEFGHIJ123456789012345678901234"
+  },
+  "casos": [
+    "factura_corto", "factura_numerico_largo", "factura_alfanumerico_largo", "factura_sin_guion",
+    "nota_credito_corto", "nota_credito_numerico_largo", "nota_credito_alfanumerico_largo", "nota_credito_sin_guion"
+  ],
+  "limites": "FPDI real con FINARQ y datos ficticios; dos cabeceras por documento. No conecta BD, red ni PAC ni regenera documentos reales."
+}

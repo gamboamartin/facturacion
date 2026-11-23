@@ -453,6 +453,30 @@
         "testCajaDeComplementoRespetaSusMedidas",
         "testDimensionesInvalidasNoProducenImagen"
       ]
+    },
+    {
+      "id": "indicadores_factura",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 12,
+      "fuentes": {
+        "orm/fc_factura.php": "ef302b23762719fded3152b9ff529eb065885466f1174ee9a484c6a66ca6a1c0"
+      },
+      "limites": "Modelo real con filas ORM dobles y datos ficticios; no certifica SQL ni operación fiscal. La consulta real se verifica por separado desde FPM.",
+      "clase_phpunit": "indicadores_factura/IndicadoresFacturaTest.php",
+      "casos": [
+        "testSinFacturasNoConsultaSellos",
+        "testTimbradoPosteriorConIdMenorEsLaUltima",
+        "testMismaFechaDesempataPorIdNormalizandoT",
+        "testFolioLargoCompuestoNoDuplicaSerieNiUsaUuid",
+        "testSerieSeparadaConservaCerosDelFolio",
+        "testSinSerieConservaFolioCompleto",
+        "testSellosDuplicadosNoDuplicanConteosNiImportes",
+        "testIgnoraSellosFueraDeLasFacturasDelResumen",
+        "testSinFechaValidaNoInventaUltimaPorIdNiUuid",
+        "testFolioVacioNoSeSustituyePorSerieNiUuid",
+        "testErrorDeFacturasNoConsultaSellos",
+        "testPropagaErrorDeConsultaDeSellos"
+      ]
     }
   ],
   "suites_complementarias": [
@@ -547,6 +571,14 @@
       "ejecutor": "pruebas/pdf_logo/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 24
+    },
+    {
+      "id": "pdf_folio_render",
+      "tipo": "integracion_render_sin_bd",
+      "registro": "pruebas/pdf_folio/registro.json",
+      "ejecutor": "pruebas/pdf_folio/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 8
     }
   ]
 }

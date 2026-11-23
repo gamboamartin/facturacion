@@ -542,7 +542,7 @@ class fc_factura extends _transacciones_fc
     public function obtener_indicadores_listado(): array
     {
         $r_facturas = $this->filtro_and(
-            columnas: ['fc_factura_id', 'fc_factura_folio', 'fc_factura_total', 'com_cliente_id'],
+            columnas: ['fc_factura_id', 'fc_factura_serie', 'fc_factura_folio', 'fc_factura_total', 'com_cliente_id'],
             filtro: ['fc_factura.etapa' => 'TIMBRADO']
         );
         if (errores::$error) {
@@ -555,18 +555,51 @@ class fc_factura extends _transacciones_fc
         $facturas = 0;
         $importe = 0.0;
         $clientes = [];
-        $ultima_id = 0;
-        $ultima_folio = '';
+        $facturas_por_id = [];
 
         foreach ($r_facturas->registros as $registro) {
             $facturas++;
             $importe += (float)$registro['fc_factura_total'];
             $clientes[$registro['com_cliente_id']] = true;
+            $facturas_por_id[(int)$registro['fc_factura_id']] = $registro;
+        }
 
-            $id = (int)$registro['fc_factura_id'];
-            if ($id > $ultima_id) {
-                $ultima_id = $id;
-                $ultima_folio = (string)$registro['fc_factura_folio'];
+        $ultima_id = 0;
+        $ultima_fecha = '';
+        $ultima_folio = '';
+        if ($facturas_por_id !== []) {
+            // El id indica cuándo se creó la factura, no cuándo se timbró. Leer el
+            // FechaTimbrado conservado del TFD sin multiplicar los totales por sellos.
+            $r_sellos = (new fc_cfdi_sellado(link: $this->link))->filtro_and(
+                columnas: ['fc_factura_id', 'fc_cfdi_sellado_complemento_tfd_fecha_timbrado'],
+                filtro: ['fc_factura.etapa' => 'TIMBRADO']
+            );
+            if (errores::$error) {
+                return $this->error->error(
+                    mensaje: 'Error al obtener fechas de timbrado para indicadores',
+                    data: $r_sellos
+                );
+            }
+            foreach ($r_sellos->registros as $sello) {
+                $id = (int)$sello['fc_factura_id'];
+                if (!isset($facturas_por_id[$id])) {
+                    continue;
+                }
+                $fecha = str_replace('T', ' ', trim((string)$sello['fc_cfdi_sellado_complemento_tfd_fecha_timbrado'], " \t\r\n"));
+                if (!preg_match('/\A[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\z/', $fecha)) {
+                    continue;
+                }
+                $instante = \DateTimeImmutable::createFromFormat('!Y-m-d H:i:s', $fecha);
+                // No convertir fechas ausentes o inválidas en una supuesta fecha de timbrado.
+                if ($instante === false || str_starts_with($fecha, '0000-')
+                    || $instante->format('Y-m-d H:i:s') !== $fecha) {
+                    continue;
+                }
+                if ($fecha > $ultima_fecha || ($fecha === $ultima_fecha && $id > $ultima_id)) {
+                    $ultima_id = $id;
+                    $ultima_fecha = $fecha;
+                    $ultima_folio = $this->folio_indicador($facturas_por_id[$id]);
+                }
             }
         }
 
@@ -576,5 +609,17 @@ class fc_factura extends _transacciones_fc
             'clientes' => count($clientes),
             'ultima' => $ultima_folio,
         ];
+    }
+
+    /** Conserva el folio completo y agrega la serie solo cuando está separada. */
+    private function folio_indicador(array $factura): string
+    {
+        $folio = trim((string)$factura['fc_factura_folio']);
+        $serie = trim((string)$factura['fc_factura_serie']);
+        if ($folio === '' || $serie === '' || $folio === $serie
+            || str_starts_with($folio, $serie.'-') || str_starts_with($folio, $serie.' ')) {
+            return $folio;
+        }
+        return $serie.'-'.$folio;
     }
 }

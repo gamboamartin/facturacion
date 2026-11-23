@@ -201,8 +201,26 @@ class _pdf
     {
         $pdf->SetFont('Arial', 'B', '10');
         $pdf->SetTextColor(255, 255, 255);
-        $pdf->SetXY($x, 0);
-        $pdf->Write(10, $factura[$tabla . "_folio"]);
+        $folio = (string)$factura[$tabla . '_folio'];
+        $ancho = 20.0;
+        // Write salta de línea fuera del recuadro cuando la serie es larga.
+        if ($pdf->GetStringWidth($folio) <= $ancho - 2.0) {
+            $pdf->SetXY($x, 0);
+            $pdf->Write(10, $folio);
+            return true;
+        }
+
+        $separador = strrpos($folio, '-');
+        $corte = $separador === false ? (int)ceil(strlen($folio) / 2) : $separador + 1;
+        $lineas = [substr($folio, 0, $corte), substr($folio, $corte)];
+        foreach ($lineas as $indice => $linea) {
+            $pdf->SetFont('Arial', 'B', 8);
+            $medida = $pdf->GetStringWidth($linea);
+            $tamano = $medida > $ancho - 2.0 ? 8.0 * ($ancho - 2.0) / $medida : 8.0;
+            $pdf->SetFont('Arial', 'B', $tamano);
+            $pdf->SetXY($x, 1.0 + $indice * 4.0);
+            $pdf->Cell($ancho, 4.0, $linea, 0, 0, 'C');
+        }
 
         return true;
 
