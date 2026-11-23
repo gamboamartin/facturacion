@@ -10,6 +10,11 @@
       "id": "fc_listas_esquema_20261119",
       "path": "sql/fc_listas_esquema_20261119.sql",
       "sha256": "092fc05a3103a6a393f42dcb86e9d18743eacf0b2068022010d702ff01cdc2d6"
+    },
+    {
+      "id": "fc_factura_informacion_global",
+      "path": "sql/fc_factura_informacion_global.sql",
+      "sha256": "9998abaad223b6928c9183abd9cfadbbdd261bd853475c3086479f4b02296f07"
     }
   ],
   "requirements": [

@@ -64,9 +64,13 @@ try:
     env={'PATH':'/usr/bin','HOME':'/tmp','QA_DOCUMENTO_NETNS':'1','QA_HOST_NET_NS':os.environ['QA_OUTER_NET'],'OPENSSL_CONF':'/qa/openssl.cnf'}
     report['pasos']=[]
     guiones=['esquema.php','precondiciones.php'] if os.environ.get('QA_SOLO_ESQUEMA')=='1' else ['esquema.php','precondiciones.php','escenario.php']
+    if os.environ.get('QA_INFORMACION_GLOBAL')=='1':
+        guiones=['informacion_global/integracion_bd.php']
     for nombre in guiones:
         report['etapa']=nombre
         script=root/'pruebas/csd_integral'/nombre
+        if os.environ.get('QA_INFORMACION_GLOBAL')=='1':
+            script=root/'pruebas'/nombre
         if not script.is_file(): raise RuntimeError('Falta guion integral '+nombre)
         paso=subprocess.run(php+[str(script)],cwd=root,env=env,capture_output=True,text=True,timeout=60)
         datos={'nombre':nombre,'exit':paso.returncode,'salida':paso.stdout,'stderr':paso.stderr}
@@ -74,10 +78,14 @@ try:
         if paso.returncode != 0: raise RuntimeError('Guion integral bloqueado: '+nombre)
         salida=json.loads(paso.stdout)
         estados={'esquema.php':'DDL_SINTETICO_PREPARADO','precondiciones.php':'METADATOS_PRESENTES_NO_PRUEBA_ALTA','escenario.php':'PASS'}
+        estados['informacion_global/integracion_bd.php']='PASS_INFORMACION_GLOBAL_BD'
         assert salida.get('estado')==estados[nombre], 'Estado de guion no acreditado: '+nombre
         if nombre=='escenario.php':
             assert salida.get('estado')=='PASS', 'Escenario sin PASS explícito'
             assert salida.get('casos_ejecutados')==3, 'Se requieren los tres escenarios originales'
+            report['pruebas_ejecutadas']=True
+        if nombre=='informacion_global/integracion_bd.php':
+            assert salida.get('casos_ejecutados')==10, 'Se requieren los diez contratos de información global'
             report['pruebas_ejecutadas']=True
     report['estado']='METADATOS_PRESENTES_NO_PRUEBA_ALTA' if os.environ.get('QA_SOLO_ESQUEMA')=='1' else 'PASS'
 

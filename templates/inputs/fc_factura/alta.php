@@ -45,6 +45,7 @@
 <?php endif; ?>
     </div>
 </section>
+<?php include __DIR__ . '/informacion_global.php'; ?>
 <div class="fc-alta-actions">
 <?php include (new views())->ruta_templates.'botons/submit/alta_bd.php';?>
 </div>

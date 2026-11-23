@@ -38,9 +38,13 @@ use gamboamartin\template\html;
 use NumberFormatter;
 use PDO;
 use stdClass;
+use Throwable;
 
 class controlador_fc_factura extends _base_system_fc
 {
+
+    /** Metadatos de presentación: solo identificadores, nunca nombres en atributos HTML. */
+    public array $informacion_global_contexto = ['sucursales' => [], 'tipos_ingreso' => []];
 
     public array|stdClass $keys_selects = array();
     public controlador_com_producto $controlador_com_producto;
@@ -165,6 +169,46 @@ class controlador_fc_factura extends _base_system_fc
         header("Location: " . $link);
         exit;
 
+    }
+
+    public function init_inputs(): array
+    {
+        $inputs = parent::init_inputs();
+        if (errores::$error || !in_array($this->accion, ['alta', 'modifica'], true)) {
+            return $inputs;
+        }
+        $this->informacion_global_contexto = ['sucursales' => [], 'tipos_ingreso' => []];
+
+        try {
+            $consulta = $this->link->prepare(
+                "SELECT 'sucursal' AS contexto, s.id, c.razon_social AS nombre
+                 FROM com_sucursal s INNER JOIN com_cliente c ON c.id = s.com_cliente_id
+                 WHERE s.status = 'activo' AND UPPER(TRIM(c.rfc)) = :rfc
+                 UNION ALL
+                 SELECT 'tipo' AS contexto, id, '' AS nombre
+                 FROM cat_sat_tipo_de_comprobante WHERE status = 'activo' AND codigo = :tipo"
+            );
+            if (!$consulta || !$consulta->execute(['rfc' => 'XAXX010101000', 'tipo' => 'I'])) {
+                throw new \RuntimeException('No se pudo consultar el contexto del formulario.');
+            }
+            foreach ($consulta->fetchAll(PDO::FETCH_ASSOC) as $fila) {
+                $id = (int)$fila['id'];
+                if ($id <= 0) {
+                    continue;
+                }
+                if ($fila['contexto'] === 'tipo') {
+                    $this->informacion_global_contexto['tipos_ingreso'][] = (string)$id;
+                    continue;
+                }
+                $nombre = strtoupper(preg_replace('/\s+/u', ' ', trim((string)$fila['nombre'])) ?? '');
+                if ($nombre === 'PUBLICO EN GENERAL') {
+                    $this->informacion_global_contexto['sucursales'][] = (string)$id;
+                }
+            }
+        } catch (Throwable $error) {
+            return (new errores())->error(mensaje: 'No se pudo identificar la información global del formulario.', data: []);
+        }
+        return $inputs;
     }
 
     public function adjunta(bool $header, bool $ws = false): array|stdClass

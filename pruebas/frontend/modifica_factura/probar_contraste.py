@@ -20,5 +20,9 @@ class ContrasteModificaFactura(unittest.TestCase):
    self.assertIn('color: '+fg+';',css);self.assertIn('background: '+bg+';',css)
    a,b=sorted([lum(fg),lum(bg)]);self.assertGreaterEqual((b+.05)/(a+.05),4.5)
  def test_vista_solo_version_css(self):
-  p=ROOT/'views/fc_factura/modifica.php';self.assertEqual(p.read_text().replace('modifica.css?v=3','modifica.css?v=2').replace(' id="vista_fc_factura_modifica"',''),(HISTORICO/p.relative_to(ROOT)).read_text())
+  p=ROOT/'views/fc_factura/modifica.php'
+  nueva_captura="            <?php include __DIR__ . '/../../templates/inputs/fc_factura/informacion_global.php'; ?>\n"
+  self.assertEqual(p.read_text().count(nueva_captura),1)
+  vista=p.read_text().replace(nueva_captura,'').replace('modifica.css?v=3','modifica.css?v=2').replace(' id="vista_fc_factura_modifica"','')
+  self.assertEqual(vista,(HISTORICO/p.relative_to(ROOT)).read_text())
 if __name__=='__main__':unittest.main()

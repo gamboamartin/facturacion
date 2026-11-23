@@ -1,0 +1,17 @@
+{
+  "suite": "informacion_global_integracion",
+  "estado_esperado": "PASS_INFORMACION_GLOBAL_INTEGRACION",
+  "casos": [
+    "ddl_nullable_varchar_defaults",
+    "insert_periodo_via_orm",
+    "insert_vacio_sql_null",
+    "update_periodo_via_orm",
+    "update_vacio_orm_cadena_vacia",
+    "lectura_vacia_normalizada_null",
+    "ordinaria_sin_global",
+    "publico_sin_periodo_rechazado",
+    "json_real_con_informacion_global",
+    "xml_real_con_informacion_global"
+  ],
+  "limites": "MariaDB efímera sin red; tabla mínima sintética, serializadores SQL reales de administrador y serializadores JSON/XML reales de xml_cfdi_4. No acredita alta completa de fc_factura, HTTP, PAC ni timbrado. UPDATE NULL del ORM actual persiste cadenas vacías, que el servicio normaliza; no se afirma que ese UPDATE persista SQL NULL."
+}

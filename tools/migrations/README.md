@@ -41,3 +41,7 @@ Un futuro aplicador tendría que implementar y probar un bloqueo exclusivo de mi
 Antes de aplicar, un operador debe comprobar `SHOW COLUMNS FROM org_logo`: ejecutar solo si la tabla existe y falta `es_principal`. Si ya existe, contrastar tipo y default y no repetir el ALTER. Respaldar estructura y datos y evaluar bloqueo de tabla antes de usarlo en otro entorno. El arranque y las vistas nunca crean columnas. No usar este DDL como autorización para cambiar servidores.
 
 En esta máquina el campo se añadió durante la preparación local del 19 de noviembre de 2026, con tabla sin logos y respaldo de estructura en `/tmp/facturacion-org-logo-esquema-20261119181047.sql`. Esta entrada hace reproducible aquella modificación; no demuestra su aplicación en otros entornos. No hay selección automática ni una imagen de reemplazo.
+
+## Información global de factura
+
+`sql/fc_factura_informacion_global.sql` incorpora tres códigos opcionales de periodicidad, meses y año. No rellena periodos ni modifica comprobantes existentes. Antes de aplicarlo, respaldar y comprobar ausencia de las tres columnas; si ya existen, verificar su definición. El arranque no ejecuta DDL. El contrato de captura, las representaciones vacías compatibles con el ORM y la validación están descritos en [información global](../../docs/informacion-global.md). El inventario acredita el archivo y su hash, no su aplicación en una base concreta.

@@ -18,6 +18,7 @@
             <div class="fc-edit-fields">
 <?php echo $controlador->form_data_fc; ?>
 </div>
+            <?php include __DIR__ . '/../../templates/inputs/fc_factura/informacion_global.php'; ?>
             <?php include (new views())->ruta_templates . 'botons/submit/modifica_bd.php'; ?>
 
         </form>

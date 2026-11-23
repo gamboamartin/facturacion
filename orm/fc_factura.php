@@ -17,6 +17,12 @@ class fc_factura extends _transacciones_fc
     {
         $tabla = 'fc_factura';
 
+        // Las sesiones previas a esta ampliación conservan el esquema anterior del ORM.
+        if (isset($_SESSION) && is_array($_SESSION) && empty($_SESSION['_fc_factura_global_columnas_v1'])) {
+            unset($_SESSION['campos_tabla'][$tabla], $_SESSION['columnas_completas'][$tabla]);
+            $_SESSION['_fc_factura_global_columnas_v1'] = true;
+        }
+
         $fc_factura_uuid = "IFNULL($tabla.folio_fiscal,'SIN UUID')";
 
         $columnas_extra['fc_factura_uuid'] = $fc_factura_uuid;
@@ -38,6 +44,13 @@ class fc_factura extends _transacciones_fc
 
     public function alta_bd(): array|stdClass
     {
+        if (array_intersect(['global_periodicidad', 'global_meses', 'global_anio'], array_keys($this->registro)) !== []) {
+            $registro = (new _informacion_global())->normaliza_registro($this->registro);
+            if (errores::$error) {
+                return $registro;
+            }
+            $this->registro = $registro;
+        }
         $this->modelo_email = new fc_email(link: $this->link);
         $this->modelo_etapa = new fc_factura_etapa(link: $this->link);
 
@@ -118,6 +131,12 @@ class fc_factura extends _transacciones_fc
     public function modifica_bd(array $registro, int $id, bool $reactiva = false,
                                 bool $verifica_permite_transaccion = true): array|stdClass
     {
+        if (array_intersect(['global_periodicidad', 'global_meses', 'global_anio'], array_keys($registro)) !== []) {
+            $registro = (new _informacion_global())->normaliza_registro($registro);
+            if (errores::$error) {
+                return $registro;
+            }
+        }
         $this->modelo_etapa = new fc_factura_etapa(link: $this->link);
 
         $r_modifica_bd = parent::modifica_bd(registro: $registro,id:  $id,reactiva:  $reactiva,

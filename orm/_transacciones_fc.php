@@ -835,6 +835,16 @@ class _transacciones_fc extends modelo
             return $this->error->error(mensaje: 'Error al obtener datos de la factura', data: $data_factura);
         }
 
+        $informacion_global = [];
+        if ($this->tabla === 'fc_factura') {
+            $informacion_global = (new _informacion_global())->resolver(registro: $factura,
+                comprobante: $data_factura->comprobante, emisor: $data_factura->emisor,
+                receptor: $data_factura->receptor, entidad: $this->tabla);
+            if (errores::$error) {
+                return $informacion_global;
+            }
+        }
+
         if(!isset($data_factura->Complemento)){
             $data_factura->Complemento = array();
         }
@@ -858,6 +868,14 @@ class _transacciones_fc extends modelo
 
         }
 
+
+        if ($informacion_global !== []) {
+            $ingreso = (new _informacion_global())->aplicar(contenido: $ingreso, tipo: $tipo,
+                informacion: $informacion_global);
+            if (errores::$error) {
+                return $ingreso;
+            }
+        }
 
         $ruta_archivos_tmp = $this->genera_ruta_archivo_tmp();
         if (errores::$error) {

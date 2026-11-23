@@ -367,6 +367,59 @@
         "testVistaConDosFilasMantieneVeintidosDatosPorFila",
         "testJavaScriptInicializaTablaYTargetsDentroDelRango"
       ]
+    },
+    {
+      "id": "informacion_global",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 27,
+      "fuentes": {
+        "orm/_informacion_global.php": "cac5a27dfd8d5afe4665b354cc04c032b95f3e1f16a71fdf7e058b12068ca87e"
+      },
+      "limites": "Servicio real y errores reales, datos ficticios; sin BD, PAC ni documentos productivos.",
+      "clase_phpunit": "informacion_global/InformacionGlobalTest.php",
+      "casos": [
+        "testRegistroSinCamposSeConserva",
+        "testCamposVaciosSeGuardanComoNull",
+        "testNormalizaSinPerderCerosNiOtrosCampos",
+        "testDatosParcialesSeRechazan",
+        "testValoresCompuestosSeRechazan",
+        "testPeriodicidadFueraDeCatalogoSeRechaza",
+        "testMesMensualNoAceptaBimestre",
+        "testBimestreNoAceptaMesIndividual",
+        "testMesRequiereDosDigitos",
+        "testAnioFuturoSeRechaza",
+        "testAnioConMasDeCincoEjerciciosSeRechaza",
+        "testQuintoEjercicioAnteriorSeAcepta",
+        "testPublicoEnGeneralExigePeriodoSinInventarlo",
+        "testFacturaGlobalResuelveCamposPrefijados",
+        "testFacturaNominativaSinGlobalNoCambia",
+        "testDatosGlobalesEnFacturaNominativaSeRechazan",
+        "testNotaCreditoYComplementoNoUsanInformacionGlobal",
+        "testBimestreExigeRegimen621DelEmisor",
+        "testBimestreValidoSeConserva",
+        "testDeteccionToleraEspaciosSinModificarReceptor",
+        "testJsonIntegraAnioUtf8YConservaContenido",
+        "testXmlIntegraPrimerNodoConNamespaceCorrecto",
+        "testXmlExistenteNoSeDuplica",
+        "testJsonExistenteNoSeSobrescribe",
+        "testJsonMalformadoSeRechaza",
+        "testXmlConDoctypeSeRechaza",
+        "testSinGlobalConservaBytesExactos"
+      ]
+    },
+    {
+      "id": "informacion_global_sesion",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 2,
+      "fuentes": {
+        "orm/fc_factura.php": "dd0da7978d166f9da00aa324d6c4d75f57b2310d3fa2020f2303564d96fcc13f"
+      },
+      "limites": "Constructor real y padre ficticio, sesión sintética; no consulta BD ni inicia sesión de usuario.",
+      "clase_phpunit": "informacion_global/InformacionGlobalSesionTest.php",
+      "casos": [
+        "testSesionAnteriorRenuevaSoloColumnasDeFactura",
+        "testSegundaInstanciaConservaEsquemaYaRenovado"
+      ]
     }
   ],
   "suites_complementarias": [
@@ -445,6 +498,14 @@
       "ejecutor": "pruebas/validaciones_satis/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 26
+    },
+    {
+      "id": "informacion_global_integral",
+      "tipo": "integracion_bd_efimera_sin_red",
+      "registro": "pruebas/informacion_global/registro.json",
+      "ejecutor": "pruebas/informacion_global/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 10
     }
   ]
 }
