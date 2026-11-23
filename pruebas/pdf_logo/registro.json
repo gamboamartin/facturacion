@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "estado_esperado": "PASS_PDF_LOGO_RENDER",
+  "casos_previstos": 24,
+  "casos": [
+    "factura_sinlogo",
+    "factura_png",
+    "factura_jpg",
+    "factura_alto",
+    "nota_credito_sinlogo",
+    "nota_credito_png",
+    "nota_credito_jpg",
+    "nota_credito_alto",
+    "complemento_sinlogo",
+    "complemento_png",
+    "complemento_jpg",
+    "complemento_alto",
+    "nomina_sinlogo",
+    "nomina_png",
+    "nomina_jpg",
+    "nomina_alto",
+    "nomina_larga_sinlogo",
+    "nomina_larga_png",
+    "nomina_larga_jpg",
+    "nomina_larga_alto",
+    "nomina_cancelada_sinlogo",
+    "nomina_cancelada_png",
+    "nomina_cancelada_jpg",
+    "nomina_cancelada_alto"
+  ],
+  "limites": "Renderizadores reales, configuración y datos sintéticos, PDO doble sin conexión; no prueba consulta SQL real, emisión fiscal ni regeneración de archivos de producción."
+}

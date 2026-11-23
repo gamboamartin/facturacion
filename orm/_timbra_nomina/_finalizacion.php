@@ -7,6 +7,7 @@ use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 use gamboamartin\documento\models\doc_documento;
 use gamboamartin\errores\errores;
+use gamboamartin\facturacion\models\_logo_pdf;
 use gamboamartin\facturacion\models\fc_cfdi_sellado_nomina;
 use gamboamartin\facturacion\models\fc_empleado;
 use gamboamartin\facturacion\models\fc_row_layout;
@@ -191,7 +192,8 @@ class _finalizacion{
 
         $pdf_string = $this->generarReciboNomina_rutaXml(
             ruta_xml: $ruta_nomina_xml_timbrado,
-            cancelado:  $recibo_cancelado
+            cancelado: $recibo_cancelado,
+            link: $link
         );
         if(errores::$error){
             return (new errores())->error('Error al generarReciboNomina_rutaXml', $pdf_string);
@@ -247,7 +249,7 @@ class _finalizacion{
         $file['name'] = $nombre_archivo;
         $file['tmp_name'] = $ruta;
 
-        $pdf_string = $this->generarReciboNomina_stringXml(string_xml: $string_xml);
+        $pdf_string = $this->generarReciboNomina_stringXml(string_xml: $string_xml, link: $link);
         if(errores::$error){
             return (new errores())->error('Error al generarReciboNomina_stringXml', $pdf_string);
         }
@@ -366,7 +368,8 @@ class _finalizacion{
 
     }
 
-    private function generarReciboNomina_rutaXml(string $ruta_xml, bool $cancelado = false): array|string|null
+    private function generarReciboNomina_rutaXml(string $ruta_xml, bool $cancelado = false,
+                                                ?PDO $link = null): array|string|null
     {
         if (empty($ruta_xml)) {
             return (new errores())->error("La ruta del XML está vacía", $ruta_xml);
@@ -383,7 +386,7 @@ class _finalizacion{
             return (new errores())->error("Error al leer XML:\n".implode("\n", $errs), []);
         }
 
-        $rs = $this->generarReciboNomina($xml, $cancelado);
+        $rs = $this->generarReciboNomina($xml, $cancelado, $link);
         if (errores::$error) {
             return (new errores())->error("Error al generarReciboNomina", $rs);
         }
@@ -391,7 +394,7 @@ class _finalizacion{
         return $rs;
     }
 
-    private function generarReciboNomina_stringXml(string $string_xml): array|string|null
+    private function generarReciboNomina_stringXml(string $string_xml, ?PDO $link = null): array|string|null
     {
         if (empty($string_xml)) {
             return (new errores())->error("El contenido del XML está vacío", $string_xml);
@@ -404,7 +407,7 @@ class _finalizacion{
             return (new errores())->error("Error al leer XML:\n".implode("\n", $errs), []);
         }
 
-        $rs = $this->generarReciboNomina($xml);
+        $rs = $this->generarReciboNomina($xml, link: $link);
         if (errores::$error) {
             return (new errores())->error("Error al generarReciboNomina", $rs);
         }
@@ -412,7 +415,7 @@ class _finalizacion{
         return $rs;
     }
 
-    private function generarReciboNomina($xml, bool $cancelado = false): array|string|null
+    private function generarReciboNomina($xml, bool $cancelado = false, ?PDO $link = null): array|string|null
     {
 
         // Namespaces
@@ -444,6 +447,7 @@ class _finalizacion{
         $emNombre = (string)($em['Nombre'] ?? '');
         $emRfc = (string)($em['Rfc'] ?? '');
         $emRegimen = (string)($em['RegimenFiscal'] ?? '');
+        $logoRecibo = $this->logo_recibo($link, $emRfc);
 
         $re = $receptor ? $receptor->attributes() : null;
         $reNombre = (string)($re['Nombre'] ?? '');
@@ -550,6 +554,7 @@ class _finalizacion{
             padding:10px;
         }
         .wrap{
+            position:relative;
             background:#fff;
             max-width:100%;
             margin:0 auto;
@@ -781,6 +786,7 @@ class _finalizacion{
         <div class="wrap">
         
             <div class="row">
+                $logoRecibo
                 <div class="col">
                     <h1>Recibo <span class="badge">CFDI 4.0</span></h1>
                     <div><strong>Serie/Folio:</strong> {$serie}{$folio}</div>
@@ -901,6 +907,30 @@ class _finalizacion{
 
         return $dompdf->output();
 
+    }
+
+    /** El logo usa el emisor del XML, sin modificar la geometría del recibo. */
+    private function logo_recibo(?PDO $link, string $rfc): string
+    {
+        if ($link === null) {
+            return '';
+        }
+        $logo = (new _logo_pdf())->para_rfc($link, $rfc);
+        if ($logo === null) {
+            return '';
+        }
+        $caja = _logo_pdf::caja($logo, 140, 85);
+        if ($caja['ancho'] <= 0 || $caja['alto'] <= 0) {
+            return '';
+        }
+        $uri = htmlspecialchars($logo['uri'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $ancho = number_format($caja['ancho'], 3, '.', '');
+        $alto = number_format($caja['alto'], 3, '.', '');
+        $izquierda = number_format((140 - $caja['ancho']) / 2, 3, '.', '');
+        $arriba = number_format((85 - $caja['alto']) / 2, 3, '.', '');
+        return '<div style="position:absolute;top:0;right:0;width:140px;height:85px;">'
+            . '<img src="'.$uri.'" alt="" style="position:absolute;left:'.$izquierda.'px;top:'.$arriba
+            .'px;width:'.$ancho.'px;height:'.$alto.'px;"></div>';
     }
 
     private function moneyMX($v): string {

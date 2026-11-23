@@ -6,7 +6,6 @@ use config\generales;
 use gamboamartin\cat_sat\models\cat_sat_regimen_fiscal;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\pdf;
-use gamboamartin\organigrama\models\org_logo;
 use NumberFormatter;
 use PDO;
 use setasign\Fpdi\Fpdi;
@@ -580,14 +579,32 @@ class _pdf
                 $pdf->Image($ruta_qr, null, null, 45, 45, 'png');
             }
         }
-        if ($ruta_logo !== '') {
-            if (file_exists($ruta_logo)) {
-                $pdf->SetXY(10, 10);
-                $pdf->Image($ruta_logo, null, null, 35, 0, 'png');
-            }
+        $this->imagen_logo(pdf: $pdf, ruta_logo: $ruta_logo);
+
+
+    }
+
+    /** Conserva la caja del formato estándar y usa el tipo real de la imagen validada. */
+    private function imagen_logo(Fpdi $pdf, string $ruta_logo): void
+    {
+        if ($ruta_logo === '') {
+            return;
         }
-
-
+        $imagen = @getimagesize($ruta_logo);
+        if ($imagen === false) {
+            return;
+        }
+        $tipo = match ($imagen['mime'] ?? '') {
+            'image/png' => 'PNG',
+            'image/jpeg' => 'JPG',
+            default => '',
+        };
+        if ($tipo === '') {
+            return;
+        }
+        $caja = _logo_pdf::caja(['ancho' => (int)$imagen[0], 'alto' => (int)$imagen[1]], 35.0, 32.0);
+        $pdf->SetXY(10, 10);
+        $pdf->Image($ruta_logo, 10, 10, $caja['ancho'], $caja['alto'], $tipo);
     }
 
    final public function pdf(bool              $descarga, bool $guarda, PDO $link, _doc $modelo_documento,
@@ -617,28 +634,11 @@ class _pdf
             return $this->error->error(mensaje: 'Error al obtener QR', data: $ruta_qr);
         }
 
-        // LOGO dinámico: principal activo por empresa
-        $filtro = array();
-        $filtro['org_logo.status'] = 'activo';
-        $filtro['org_logo.logo_pdf'] = 'activo';
-        $filtro['org_logo.org_empresa_id'] = (int)$factura['org_empresa_id'];
-
-        $r_org_logo = (new org_logo(link: $link))->filtro_and(
-            aplica_seguridad: false,
-            columnas: ['doc_documento_ruta_absoluta'],
-            filtro: $filtro,
-            limit: 1,
-            order: ['org_logo.id' => 'DESC']
-        );
+        $logo_pdf = (new _logo_pdf())->para_empresa($link, (int)$factura['org_empresa_id']);
         if (errores::$error) {
-            return $this->error->error(mensaje: 'Error al obtener Logo', data: $r_org_logo);
+            return $this->error->error(mensaje: 'Error al obtener Logo', data: []);
         }
-
-        $ruta_logo = '';
-        if ($r_org_logo->n_registros > 0) {
-            $ruta_logo = (string)$r_org_logo->registros[0]['doc_documento_ruta_absoluta'];
-        }
-        // aca termina logo dinámico
+        $ruta_logo = $logo_pdf['ruta'] ?? '';
 
         $filtro = array();
         $filtro[$modelo_entidad->key_id] = $factura[$modelo_entidad->key_id];

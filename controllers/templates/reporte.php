@@ -66,7 +66,11 @@
     <table style="width: 100%;">
         <tr>
             <td style="width: 10%; padding: 0 5px 0 0; vertical-align: top;">
-                <img src="<?= $datos['logo'] ?>" style="width: 140px; height: 110px; margin: 0 auto;">
+                <div style="position: relative; width: 100%; height: 0;">
+                    <?php if (($datos['logo'] ?? '') !== ''): ?>
+                        <img src="<?= htmlspecialchars($datos['logo'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>" style="position: absolute; top: 0; left: 0; width: <?= number_format(100 * (float)$datos['logo_ancho'] / 140, 3, '.', '') ?>%; height: auto;">
+                    <?php endif; ?>
+                </div>
             </td>
             <td style="width: 50%; padding: 0 5px 0 0; vertical-align: top;">
                 <div style="padding: 5px;">

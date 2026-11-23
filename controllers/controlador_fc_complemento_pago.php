@@ -15,6 +15,7 @@ use gamboamartin\comercial\models\com_tipo_cambio;
 use gamboamartin\errores\errores;
 use gamboamartin\facturacion\html\fc_complemento_pago_html;
 use gamboamartin\facturacion\models\_doctos_rel;
+use gamboamartin\facturacion\models\_logo_pdf;
 use gamboamartin\facturacion\models\_pdf;
 use gamboamartin\facturacion\models\_PDF\aguaban\_complemento_pago;
 use gamboamartin\facturacion\models\fc_cancelacion_cp;
@@ -36,7 +37,6 @@ use gamboamartin\facturacion\models\fc_relacion_cp;
 use gamboamartin\facturacion\models\fc_retenido_cp;
 use gamboamartin\facturacion\models\fc_traslado_cp;
 use gamboamartin\facturacion\models\fc_uuid_cp;
-use gamboamartin\organigrama\models\org_logo;
 use gamboamartin\system\actions;
 use gamboamartin\template\html;
 
@@ -549,50 +549,13 @@ class controlador_fc_complemento_pago extends _base_system_fc {
             return $this->errores->error(mensaje: 'Error al asignar datos', data: $data);
         }
 
-        /**
-         * ====== INICIO CAMBIO LOGO DINÁMICO ======
-         * Trae logo principal activo por empresa y lo convierte a base64 desde ruta absoluta.
-         */
-        $modelo_logo = new org_logo(link: $this->link);
-
-        $r_logo = $modelo_logo->filtro_and(
-            aplica_seguridad: false,
-            columnas: ['doc_documento_ruta_relativa'],
-            filtro: [
-                'org_logo.status' => 'activo',
-                'org_logo.logo_pdf' => 'activo',
-                'org_logo.org_empresa_id' => (int)$reporte['org_empresa_id']
-            ],
-            limit: 1,
-            order: ['org_logo.id' => 'DESC']
-        );
-
+        $logo_pdf = (new _logo_pdf())->para_empresa($this->link, (int)$reporte['org_empresa_id']);
         if (errores::$error) {
-            return $this->errores->error(mensaje: 'Error al obtener Logo', data: $r_logo);
+            return $this->errores->error(mensaje: 'Error al obtener Logo', data: []);
         }
-
-        $ruta_rel = $r_logo->n_registros > 0 ? (string)$r_logo->registros[0]['doc_documento_ruta_relativa'] : '';
-        $ruta_abs = '';
-        $logo_base64 = '';
-
-        if ($ruta_rel !== '') {
-            // Ajusta la raíz si tu instancia no vive en /var/www/html/facturacion/
-            $ruta_abs = '/var/www/html/facturacion/' . ltrim($ruta_rel, '/');
-        }
-
-        if ($ruta_abs !== '' && is_file($ruta_abs)) {
-            $ext = strtolower(pathinfo($ruta_abs, PATHINFO_EXTENSION));
-            $mime = match ($ext) {
-                'jpg', 'jpeg' => 'image/jpeg',
-                'webp' => 'image/webp',
-                default => 'image/png',
-            };
-
-            $logo_base64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($ruta_abs));
-        }
-        /**
-         * ====== FIN CAMBIO LOGO DINÁMICO ======
-         */
+        $logo_base64 = $logo_pdf['uri'] ?? '';
+        $logo_caja = $logo_pdf === null ? ['ancho' => 0.0, 'alto' => 0.0]
+            : _logo_pdf::caja($logo_pdf, 140.0, 110.0);
 
         $ruta_qr = (new fc_complemento_pago_documento(link: $this->link))->get_factura_documento(key_entidad_filter_id: $this->modelo->key_filtro_id,
             registro_id: $this->registro_id, tipo_documento: "qr_cfdi");
@@ -709,6 +672,8 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         $datos = [
             'folio' => $reporte['fc_complemento_pago_folio'],
             'logo' => $logo_base64,
+            'logo_ancho' => $logo_caja['ancho'],
+            'logo_alto' => $logo_caja['alto'],
             'qr' => $ruta_qr,
             'emisor' => [
                 'emisor' => $reporte['org_empresa_razon_social'],

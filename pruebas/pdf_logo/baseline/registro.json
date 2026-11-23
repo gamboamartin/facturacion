@@ -1,0 +1,17 @@
+{
+  "commit": "0236a470ed0ffa92ff60e2def3094a2c04261517",
+  "archivos": {
+    "orm/_pdf.php": {
+      "archivo": "orm___pdf.php.gz",
+      "sha256": "15d4182d41324e4d82e62683c91a8f8e78bad7cab3d0bd479aa0e3f15882dca0"
+    },
+    "controllers/templates/reporte.php": {
+      "archivo": "controllers__templates__reporte.php.gz",
+      "sha256": "455a1a7c049b4923982e0605e19638c82e1a80c6e4298f90a7c4de136f69a759"
+    },
+    "orm/_timbra_nomina/_finalizacion.php": {
+      "archivo": "orm___timbra_nomina___finalizacion.php.gz",
+      "sha256": "69ff4f2fb63bbb797fa0f50e26f938d815d7fde5c6933810c670d297594d69f9"
+    }
+  }
+}

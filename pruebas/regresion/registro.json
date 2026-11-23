@@ -420,6 +420,39 @@
         "testSesionAnteriorRenuevaSoloColumnasDeFactura",
         "testSegundaInstanciaConservaEsquemaYaRenovado"
       ]
+    },
+    {
+      "id": "pdf_logo_proveedor",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 21,
+      "fuentes": {
+        "orm/_logo_pdf.php": "89cfe79545a1d562f1e8fa23ba1b285f45fd8e0053482f348f7c4652e490e9eb"
+      },
+      "limites": "Proveedor real con PDO simulado e imágenes ficticias; no acredita consulta a BD real ni render de PDF.",
+      "clase_phpunit": "pdf_logo/LogoPdfProveedorTest.php",
+      "casos": [
+        "testJpegUsaRaizDeLaInstalacionYMimeReal",
+        "testPngConservaTipoYContenido",
+        "testAusenciaDeLogoNoSeleccionaPrincipalNiOtraEmpresa",
+        "testConsultaRespetaEmpresaSolicitada",
+        "testEmpresaInvalidaNoConsulta",
+        "testArchivoAusenteDejaBlanco",
+        "testNoPermiteArchivoFueraDelAlmacen",
+        "testNoPermiteUrlRemota",
+        "testNoPermiteEnlaceSimbolico",
+        "testImagenInvalidaDejaBlanco",
+        "testExtensionNoDeterminaElFormato",
+        "testFalloSqlEsOpcionalSinRevelarExcepcion",
+        "testPreparacionFallidaDejaBlanco",
+        "testRfcVacioNoConsulta",
+        "testRfcConEmpresaAmbiguaNoTomaLogoArbitrario",
+        "testRfcAusenteNoTomaLogoGlobal",
+        "testRfcUnicoSeResuelveALaEmpresaDelXml",
+        "testCajaHorizontalRespetaProporcion",
+        "testCajaVerticalNoInvadeCabecera",
+        "testCajaDeComplementoRespetaSusMedidas",
+        "testDimensionesInvalidasNoProducenImagen"
+      ]
     }
   ],
   "suites_complementarias": [
@@ -506,6 +539,14 @@
       "ejecutor": "pruebas/informacion_global/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 10
+    },
+    {
+      "id": "pdf_logo_render",
+      "tipo": "integracion_render_sin_bd",
+      "registro": "pruebas/pdf_logo/registro.json",
+      "ejecutor": "pruebas/pdf_logo/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 24
     }
   ]
 }
