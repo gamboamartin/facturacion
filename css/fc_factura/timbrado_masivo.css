@@ -1,0 +1,76 @@
+#vista_fc_factura_timbrado_masivo {
+    color: #26334b;
+    min-width: 0;
+}
+#vista_fc_factura_timbrado_masivo [hidden] { display: none !important; }
+#vista_fc_factura_timbrado_masivo h1 { margin: 0; }
+#vista_fc_factura_timbrado_masivo h2 { font-size: 1.25rem; margin: 1rem 0 .6rem; color: #26334b; }
+#vista_fc_factura_timbrado_masivo p { line-height: 1.55; }
+#vista_fc_factura_timbrado_masivo .tm-filtros {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1rem;
+    padding: 1.25rem;
+    margin: 1rem 0;
+    background: #fff;
+    border: 1px solid #dbe1eb;
+    border-radius: 12px;
+}
+#vista_fc_factura_timbrado_masivo label { display: block; color: #26334b; font-weight: 600; margin-bottom: .35rem; }
+#vista_fc_factura_timbrado_masivo input:not([type="checkbox"]),
+#vista_fc_factura_timbrado_masivo select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: .55rem .65rem;
+    color: #26334b;
+    background: #fff;
+    border: 1px solid #a8b3c5;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+#vista_fc_factura_timbrado_masivo input:focus,
+#vista_fc_factura_timbrado_masivo select:focus,
+#vista_fc_factura_timbrado_masivo button:focus-visible,
+#vista_fc_factura_timbrado_masivo a:focus-visible {
+    outline: 3px solid #285fc4;
+    outline-offset: 2px;
+}
+#vista_fc_factura_timbrado_masivo .tm-filtros-acciones,
+#vista_fc_factura_timbrado_masivo .tm-acciones { display: flex; flex-wrap: wrap; gap: .65rem; align-items: center; }
+#vista_fc_factura_timbrado_masivo .tm-filtros-acciones { grid-column: 1 / -1; }
+#vista_fc_factura_timbrado_masivo .tm-acciones { margin: .8rem 0; }
+#vista_fc_factura_timbrado_masivo .iv-btn { white-space: normal; text-align: center; min-height: 42px; }
+#vista_fc_factura_timbrado_masivo button:disabled { opacity: .55; cursor: not-allowed; }
+#vista_fc_factura_timbrado_masivo .tm-checkbox { display: inline-flex; gap: .5rem; align-items: center; margin: 0; }
+#vista_fc_factura_timbrado_masivo input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; margin: 0; }
+#vista_fc_factura_timbrado_masivo .tm-seleccion { margin: 1rem 0; }
+#vista_fc_factura_timbrado_masivo .tm-ayuda { color: #495970; font-size: .95rem; }
+#vista_fc_factura_timbrado_masivo .tm-paginacion { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; align-items: center; margin: 1rem 0; }
+#vista_fc_factura_timbrado_masivo .tm-tabla { width: 100%; margin: 0; color: #26334b; background: #fff; border-collapse: collapse; }
+#vista_fc_factura_timbrado_masivo .tm-tabla th { background: #eef2f8; color: #26334b; }
+#vista_fc_factura_timbrado_masivo .tm-tabla th,
+#vista_fc_factura_timbrado_masivo .tm-tabla td { padding: .8rem; vertical-align: top; border-bottom: 1px solid #e0e5ee; }
+#vista_fc_factura_timbrado_masivo .tm-tabla td { white-space: normal; overflow-wrap: anywhere; max-width: 28rem; }
+#vista_fc_factura_timbrado_masivo .tm-tabla th:nth-child(2),
+#vista_fc_factura_timbrado_masivo .tm-tabla td:nth-child(2) { min-width: 7rem; }
+#vista_fc_factura_timbrado_masivo .table-scroll { max-width: 100%; overflow-x: auto; }
+#vista_fc_factura_timbrado_masivo .tm-confirmacion { border: 2px solid #285fc4; border-radius: 12px; background: #f2f6ff; padding: 1.25rem; margin: 1.5rem 0; }
+#vista_fc_factura_timbrado_masivo .tm-confirmacion ul { padding-left: 1.25rem; }
+#vista_fc_factura_timbrado_masivo .tm-aviso { background: #eef4ff; color: #1d3b68; border: 1px solid #92add4; padding: 1rem; border-radius: 8px; }
+#vista_fc_factura_timbrado_masivo .tm-aviso[data-tipo="error"] { background: #fff1f0; color: #8c2420; border-color: #c98985; }
+#vista_fc_factura_timbrado_masivo .tm-aviso[data-tipo="exito"] { background: #eaf6ef; color: #1e603c; border-color: #8cbda1; }
+#vista_fc_factura_timbrado_masivo .tm-resumen { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0; }
+#vista_fc_factura_timbrado_masivo .tm-resumen span { background: #eef2f8; color: #26334b; border: 1px solid #dbe1eb; border-radius: 8px; padding: .6rem .8rem; }
+#vista_fc_factura_timbrado_masivo progress { display: block; width: 100%; height: 20px; accent-color: #285fc4; }
+#vista_fc_factura_timbrado_masivo .tm-estado { font-weight: 600; }
+#vista_fc_factura_timbrado_masivo .tm-estado[data-estado="timbrada"] { color: #1e603c; }
+#vista_fc_factura_timbrado_masivo .tm-estado[data-estado="rechazada"],
+#vista_fc_factura_timbrado_masivo .tm-estado[data-estado="revision_requerida"] { color: #8c2420; }
+#vista_fc_factura_timbrado_masivo .tm-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+@media (max-width: 600px) {
+    #vista_fc_factura_timbrado_masivo .tm-filtros { grid-template-columns: 1fr; padding: 1rem; }
+    #vista_fc_factura_timbrado_masivo .tm-acciones .iv-btn { width: 100%; }
+    #vista_fc_factura_timbrado_masivo .tm-tabla { min-width: 680px; }
+    #vista_fc_factura_timbrado_masivo .agentes-header { flex-wrap: wrap; gap: .8rem; }
+}

@@ -122,6 +122,14 @@ class InventoryTests(unittest.TestCase):
             'id': 'fc_listas_esquema_20261119',
             'artifact_status': 'hash_verified',
             'database_status': 'unknown'
+        }, {
+            'id': 'fc_factura_informacion_global',
+            'artifact_status': 'hash_verified',
+            'database_status': 'unknown'
+        }, {
+            'id': 'fc_timbrado_masivo',
+            'artifact_status': 'hash_verified',
+            'database_status': 'unknown'
         }])
         self.assertFalse(r['execution_supported'])
         self.assertEqual(r['database_status'], 'not_inspected')

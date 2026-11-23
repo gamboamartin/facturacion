@@ -477,6 +477,89 @@
         "testErrorDeFacturasNoConsultaSellos",
         "testPropagaErrorDeConsultaDeSellos"
       ]
+    },
+    {
+      "id": "timbrado_guardia",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 23,
+      "fuentes": {
+        "orm/_timbrado_guardia.php": "cb1264da88015f8ef67fc6395c8dbbae53eba10be17326c98cd56c8c4c2833a9",
+        "orm/fc_factura.php": "fcca4c2c89674275e54d63057d3122e0ab25878f6ad2b8ab65a8354496d70f0c",
+        "orm/_transacciones_fc.php": "c3b09dadc0db69a29ca2c089f37e1ac713d00ea8d2d4f29a13bfadf3dc483e97"
+      },
+      "limites": "PDO, fiscal y sesión simulados; no emite timbres ni conecta a BD/servicios reales. La suite integral acredita SQL y bloqueos por separado.",
+      "clase_phpunit": "timbrado_guardia/TimbradoGuardiaTest.php",
+      "casos": [
+        "testExitoArchivaXmlAntesDePersistirYCompleta",
+        "testSinMigracionNoInvocaOperacion",
+        "testTransaccionExternaSeRechazaSinRevertirla",
+        "testAutocommitDesactivadoSeRechaza",
+        "testFacturaOcupadaNoInvocaPac",
+        "testCsdOcupadoLiberaFacturaSinPrepararEnvio",
+        "testErrorPrevioPreservaBanderaYPermiteNuevaPreparacion",
+        "testFalloAlGuardarEnvioImpideLaLlamadaPac",
+        "testTimeoutDespuesDelEnvioExigeRevisionSinReintento",
+        "testEstadosInciertosPersistentesImpidenNuevoEnvio",
+        "testFalloLocalConRespuestaAceptadaConservaXmlYUuid",
+        "testUuidLocalEvitaOtroEnvioYConservaAvisoDeRevision",
+        "testRechazoCfdiTipificadoPermiteCorregirSinExponerDetalle",
+        "testTextoQuePareceRechazoNoAutorizaReenvio",
+        "testRespuestaXmlSinTfdNoContinuaPersistenciaLegacy",
+        "testCodigoCfdiFueraDeListaExigeRevisionSinReenvio",
+        "testCambioDeCsdAntesDelEnvioLoImpide",
+        "testEvidenciaLocalInvalidaNoDevuelveExitoNiEnvia",
+        "testSelloAparecidoDurantePreparacionImpideEnvio",
+        "testSinPersistenciaLocalNoDeclaraCompletoAunquePacAcepto",
+        "testUuidLocalDiferenteDeRespuestaRequiereRevision",
+        "testMarcadorSinUuidSinSelloPermitePrimerIntento",
+        "testMarcadorSinUuidConSelloExigeRevisionSinReenvio"
+      ]
+    },
+    {
+      "id": "timbrado_modelo",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 5,
+      "fuentes": {
+        "orm/_timbrado_guardia.php": "cb1264da88015f8ef67fc6395c8dbbae53eba10be17326c98cd56c8c4c2833a9",
+        "orm/fc_factura.php": "fcca4c2c89674275e54d63057d3122e0ab25878f6ad2b8ab65a8354496d70f0c",
+        "orm/_transacciones_fc.php": "c3b09dadc0db69a29ca2c089f37e1ac713d00ea8d2d4f29a13bfadf3dc483e97"
+      },
+      "limites": "PDO, fiscal y sesión simulados; no emite timbres ni conecta a BD/servicios reales. La suite integral acredita SQL y bloqueos por separado.",
+      "clase_phpunit": "timbrado_guardia/TimbradoModeloTest.php",
+      "casos": [
+        "testModeloConectaGuardiaYHooksAntesDePersistir",
+        "testModeloConservaErrorLegacyYRespuestaParaRevision",
+        "testModeloSinMigracionNoEntraAlTimbradoLegacy",
+        "testModeloNoReenviaCuandoExisteUuidLocal",
+        "testModeloSanitizaExcepcionPosteriorAlEnvio"
+      ]
+    },
+    {
+      "id": "seguridad_timbrado_masivo",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 14,
+      "fuentes": {
+        "controllers/_timbrado_masivo.php": "3a7fdbe6f6e4ad7dba698b463daaa6121d8f04fe1db3a098bc947c9fd093b506",
+        "orm/_timbrado_pendientes.php": "247649179ab2c4eaabfbe44ccbe56ddadc90604f010783a277af30801a1ef272"
+      },
+      "limites": "PDO, fiscal y sesión simulados; no emite timbres ni conecta a BD/servicios reales. La suite integral acredita SQL y bloqueos por separado.",
+      "clase_phpunit": "timbrado_masivo/SeguridadTimbradoMasivoTest.php",
+      "casos": [
+        "testNormalizaFiltrosVaciosSinInventarFechas",
+        "testRechazaFiltroSqlArbitrario",
+        "testRechazaFechaInexistente",
+        "testRechazaRangoInvertido",
+        "testRechazaImportesNegativos",
+        "testRechazaImportesInvertidos",
+        "testRechazaNulYValoresCompuestos",
+        "testSinUsuarioNoConsultaPermisos",
+        "testExigeLosTresPermisosAunqueSesionLosTengaEnCache",
+        "testReconsultaRevocacionDePermiso",
+        "testPostSinCsrfNoInicializaLoteNiPac",
+        "testPostConCsrfAjenoNoInicializaLoteNiPac",
+        "testGetConParametrosDeProcesarSoloPreparaVista",
+        "testSalidaLegacyNoFiltraXmlNiEnsuciaSesion"
+      ]
     }
   ],
   "suites_complementarias": [
@@ -579,6 +662,14 @@
       "ejecutor": "pruebas/pdf_folio/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 8
+    },
+    {
+      "id": "timbrado_masivo_integral",
+      "tipo": "integracion_bd_efimera_sin_red",
+      "registro": "pruebas/timbrado_masivo/registro.json",
+      "ejecutor": "pruebas/timbrado_masivo/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 36
     }
   ]
 }

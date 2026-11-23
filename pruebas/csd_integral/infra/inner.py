@@ -66,10 +66,12 @@ try:
     guiones=['esquema.php','precondiciones.php'] if os.environ.get('QA_SOLO_ESQUEMA')=='1' else ['esquema.php','precondiciones.php','escenario.php']
     if os.environ.get('QA_INFORMACION_GLOBAL')=='1':
         guiones=['informacion_global/integracion_bd.php']
+    if os.environ.get('QA_TIMBRADO_MASIVO')=='1':
+        guiones=['timbrado_masivo/integracion_bd.php']
     for nombre in guiones:
         report['etapa']=nombre
         script=root/'pruebas/csd_integral'/nombre
-        if os.environ.get('QA_INFORMACION_GLOBAL')=='1':
+        if os.environ.get('QA_INFORMACION_GLOBAL')=='1' or os.environ.get('QA_TIMBRADO_MASIVO')=='1':
             script=root/'pruebas'/nombre
         if not script.is_file(): raise RuntimeError('Falta guion integral '+nombre)
         paso=subprocess.run(php+[str(script)],cwd=root,env=env,capture_output=True,text=True,timeout=60)
@@ -79,6 +81,7 @@ try:
         salida=json.loads(paso.stdout)
         estados={'esquema.php':'DDL_SINTETICO_PREPARADO','precondiciones.php':'METADATOS_PRESENTES_NO_PRUEBA_ALTA','escenario.php':'PASS'}
         estados['informacion_global/integracion_bd.php']='PASS_INFORMACION_GLOBAL_BD'
+        estados['timbrado_masivo/integracion_bd.php']='PASS_TIMBRADO_MASIVO_BD'
         assert salida.get('estado')==estados[nombre], 'Estado de guion no acreditado: '+nombre
         if nombre=='escenario.php':
             assert salida.get('estado')=='PASS', 'Escenario sin PASS explícito'
@@ -86,6 +89,11 @@ try:
             report['pruebas_ejecutadas']=True
         if nombre=='informacion_global/integracion_bd.php':
             assert salida.get('casos_ejecutados')==10, 'Se requieren los diez contratos de información global'
+            report['pruebas_ejecutadas']=True
+        if nombre=='timbrado_masivo/integracion_bd.php':
+            registro=json.loads((root/'pruebas/timbrado_masivo/registro.json').read_text())
+            assert salida.get('casos')==registro['casos'], 'Contratos del lote incompletos'
+            assert salida.get('casos_ejecutados')==len(registro['casos'])
             report['pruebas_ejecutadas']=True
     report['estado']='METADATOS_PRESENTES_NO_PRUEBA_ALTA' if os.environ.get('QA_SOLO_ESQUEMA')=='1' else 'PASS'
 

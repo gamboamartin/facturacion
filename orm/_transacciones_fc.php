@@ -1964,6 +1964,15 @@ class _transacciones_fc extends modelo
         return $subtotal;
     }
 
+    /** Puntos de seguimiento locales; otras entidades conservan su comportamiento. */
+    protected function antes_timbrar_pac(int $registro_id): void
+    {
+    }
+
+    protected function respuesta_timbrado_pac(int $registro_id, mixed $respuesta, bool $error): void
+    {
+    }
+
     public function timbra_xml(_doc $modelo_documento, _etapa $modelo_etapa, _partida $modelo_partida,
                                _cuenta_predial $modelo_predial, _relacion $modelo_relacion,
                                _relacionada $modelo_relacionada, _data_impuestos $modelo_retencion,
@@ -2041,8 +2050,15 @@ class _transacciones_fc extends modelo
 
 
         $pac_prov = (new pac())->pac_prov;
-        $xml_timbrado = (new timbra())->timbra(contenido_xml: $xml_contenido,
-            ruta_cer_pem: $ruta_cer_pem, ruta_key_pem: $ruta_key_pem, pac_prov: $pac_prov);
+        $this->antes_timbrar_pac($registro_id);
+        try {
+            $xml_timbrado = (new timbra())->timbra(contenido_xml: $xml_contenido,
+                ruta_cer_pem: $ruta_cer_pem, ruta_key_pem: $ruta_key_pem, pac_prov: $pac_prov);
+        } catch (\Throwable $error_pac) {
+            $this->respuesta_timbrado_pac($registro_id, null, true);
+            throw $error_pac;
+        }
+        $this->respuesta_timbrado_pac($registro_id, $xml_timbrado, errores::$error);
         if (errores::$error) {
             return $this->error->error(mensaje: 'Error al timbrar XML', data: $xml_timbrado,params: array($fc_factura));
         }

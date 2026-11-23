@@ -45,3 +45,24 @@ En esta máquina el campo se añadió durante la preparación local del 19 de no
 ## Información global de factura
 
 `sql/fc_factura_informacion_global.sql` incorpora tres códigos opcionales de periodicidad, meses y año. No rellena periodos ni modifica comprobantes existentes. Antes de aplicarlo, respaldar y comprobar ausencia de las tres columnas; si ya existen, verificar su definición. El arranque no ejecuta DDL. El contrato de captura, las representaciones vacías compatibles con el ORM y la validación están descritos en [información global](../../docs/informacion-global.md). El inventario acredita el archivo y su hash, no su aplicación en una base concreta.
+
+## Timbrado masivo de facturas
+
+`sql/fc_timbrado_masivo.sql` define el lote, sus resultados y el control de intentos compartido con el timbrado individual/API. La acción permite hasta 100 facturas y procesa una por petición. El navegador debe permanecer abierto; al volver a la dirección del lote se pueden consultar sus resultados y reanudar solo pendientes. Una selección de todas contiene los IDs revisados; si cambia el conjunto del filtro, se exige revisarlo de nuevo.
+
+Las tres tablas requieren InnoDB, las claves únicas y la relación lote/elementos. El validador contrasta columnas, tipos, defaults, índices y relación antes de habilitar la acción. El instalador no transforma definiciones distintas ni vuelve a conceder permisos de una acción ya existente. Inicialmente solo copia grupos con permisos activos de `lista` y `timbra_xml`; cada petición comprueba nuevamente esos permisos y `timbrado_masivo` contra BD, además del propietario y CSRF.
+
+El marcador heredado `SIN UUID`, predeterminado en `fc_factura.folio_fiscal`, representa ausencia de folio fiscal. Se reconoce al leer sin reescribir la factura. Un sello existente o cualquier otra evidencia fiscal siempre bloquean otro envío; los estados inciertos no se ofrecen como pendientes seleccionables.
+
+Preparación explícita **solo en desarrollo local**, desde la raíz del proyecto:
+
+```sh
+php tools/migrations/timbrado_masivo.php --database=facturacion
+php tools/migrations/timbrado_masivo.php --database=facturacion --development --apply
+```
+
+El primer comando es un plan de lectura. El segundo crea las tablas ausentes y registra la nueva acción; no modifica facturas, certificados, folios ni XML y no contacta al PAC. La migración debe estar aplicada antes de usar esta versión para timbrar individualmente o por API, porque comparten la protección de intentos. Un despliegue requiere respaldo y aplicación explícita del esquema/catálogo: este instalador no autoriza cambios de producción.
+
+`fc_timbrado_intento.xml_respuesta` conserva el XML aceptado antes de las escrituras posteriores. No se devuelve en JSON ni se publica en archivos web. Los fallos antes del envío son corregibles; una aceptación incompleta o respuesta incierta queda para revisión y bloquea nuevos envíos de esa factura. Solo los rechazos estructurados inequívocos actualmente reconocidos (`CFDI40130`, `CFDI40145`) permiten un nuevo intento explícito después de corregir la factura. Nunca liberar un intento incierto borrando filas o cambiando su estado: primero debe verificarse el resultado con el PAC y recuperar, si existe, el comprobante original.
+
+Las pruebas fiscales son simuladas. Las suites de integración usan una BD efímera sin red y comprueban exclusión real entre conexiones, recuperación, selección congelada y esquema; el navegador prueba progreso, confirmación y resultados con respuestas interceptadas. No acreditan un timbrado real ni una conciliación automática con el proveedor.

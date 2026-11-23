@@ -12,6 +12,7 @@ use stdClass;
 class fc_factura extends _transacciones_fc
 {
     private bool $aplica_relacion_agentes = false;
+    private ?_timbrado_guardia $guardia_timbrado = null;
 
     public function __construct(PDO $link, bool $valida_atributos_criticos = true)
     {
@@ -40,6 +41,59 @@ class fc_factura extends _transacciones_fc
             $this->aplica_relacion_agentes =$conf_generales->aplica_relacion_agentes;
         }
 
+    }
+
+    public function timbra_xml(_doc $modelo_documento, _etapa $modelo_etapa, _partida $modelo_partida,
+                               _cuenta_predial $modelo_predial, _relacion $modelo_relacion,
+                               _relacionada $modelo_relacionada, _data_impuestos $modelo_retencion,
+                               _sellado $modelo_sello, _data_impuestos $modelo_traslado, _uuid_ext $modelo_uuid_ext,
+                               int $registro_id): array|stdClass
+    {
+        $guardia = new _timbrado_guardia($this->link);
+        try {
+            $resultado = $guardia->ejecutar($registro_id, function () use ($guardia, $modelo_documento, $modelo_etapa,
+                $modelo_partida, $modelo_predial, $modelo_relacion, $modelo_relacionada, $modelo_retencion,
+                $modelo_sello, $modelo_traslado, $modelo_uuid_ext, $registro_id): array|stdClass {
+                $this->guardia_timbrado = $guardia;
+                try {
+                    return parent::timbra_xml(
+                        modelo_documento: $modelo_documento, modelo_etapa: $modelo_etapa,
+                        modelo_partida: $modelo_partida, modelo_predial: $modelo_predial,
+                        modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
+                        modelo_retencion: $modelo_retencion, modelo_sello: $modelo_sello,
+                        modelo_traslado: $modelo_traslado, modelo_uuid_ext: $modelo_uuid_ext, registro_id: $registro_id
+                    );
+                } finally {
+                    $this->guardia_timbrado = null;
+                }
+            });
+            if (is_array($resultado) && !empty($resultado['ya_timbrada'])) {
+                return $this->error->error(mensaje: 'Error: la factura ya ha sido timbrada', data: $resultado);
+            }
+            return $resultado;
+        } catch (PDOException) {
+            return $this->error->error(mensaje: 'No se pudo conservar el control del timbrado. Revise el estado del intento.', data: $registro_id);
+        } catch (\RuntimeException $error) {
+            return $this->error->error(mensaje: $error->getMessage(), data: $registro_id);
+        } catch (\Throwable) {
+            return $this->error->error(mensaje: 'No se pudo completar el timbrado. Revise el estado del intento.', data: $registro_id);
+        }
+    }
+
+    protected function antes_timbrar_pac(int $registro_id): void
+    {
+        if ($this->guardia_timbrado === null) {
+            throw new \RuntimeException('No se inicializó la protección del intento de timbrado.');
+        }
+        $this->guardia_timbrado->antes_pac($registro_id);
+    }
+
+    protected function respuesta_timbrado_pac(int $registro_id, mixed $respuesta, bool $error): void
+    {
+        if ($this->guardia_timbrado === null) {
+            throw new \RuntimeException('No se inicializó la protección del intento de timbrado.');
+        }
+        $this->guardia_timbrado->respuesta_pac($registro_id, $respuesta, $error);
     }
 
     public function alta_bd(): array|stdClass

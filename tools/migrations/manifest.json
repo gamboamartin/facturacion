@@ -15,6 +15,11 @@
       "id": "fc_factura_informacion_global",
       "path": "sql/fc_factura_informacion_global.sql",
       "sha256": "9998abaad223b6928c9183abd9cfadbbdd261bd853475c3086479f4b02296f07"
+    },
+    {
+      "id": "fc_timbrado_masivo",
+      "path": "sql/fc_timbrado_masivo.sql",
+      "sha256": "bfb270556806c64261195bdf97d6f0e36c4580b5c2968eaed30253aa98f7b4d1"
     }
   ],
   "requirements": [
