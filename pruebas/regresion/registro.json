@@ -659,7 +659,7 @@
       "ejecutor": "ejecutar_phpunit.py",
       "comprobaciones_esperadas": 8,
       "fuentes": {
-        "orm/_datos_pdf_complemento.php": "708c371269105e0d1e59c427b15a6dd154e77d7ab93ccbf7d975ccbe45bd5070"
+        "orm/_datos_pdf_complemento.php": "0c149f7ca106cd269b79edf095f8530be5dae15a83ca3eaaf65c6a60c6116e8d"
       },
       "limites": "Parser real de XML ficticio Pagos 2.0; no valida firma ni XSD ni conecta SAT.",
       "clase_phpunit": "pdf_complemento/DatosPdfComplementoTest.php",
@@ -679,7 +679,8 @@
       "ejecutor": "ejecutar_phpunit.py",
       "comprobaciones_esperadas": 3,
       "fuentes": {
-        "orm/_formato_pdf_complemento.php": "aa94241f98f7b0889a89890d5352afe8c3ad3601df9b148daaafea8992758b71"
+        "orm/_formato_pdf_complemento.php": "aa94241f98f7b0889a89890d5352afe8c3ad3601df9b148daaafea8992758b71",
+        "orm/_datos_pdf_complemento.php": "0c149f7ca106cd269b79edf095f8530be5dae15a83ca3eaaf65c6a60c6116e8d"
       },
       "limites": "Selección explícita y compatibilidad de configuración; sin configuración privada.",
       "clase_phpunit": "pdf_complemento/FormatoPdfComplementoTest.php",
@@ -694,7 +695,7 @@
       "ejecutor": "ejecutar_phpunit.py",
       "comprobaciones_esperadas": 5,
       "fuentes": {
-        "orm/_datos_pdf_complemento.php": "708c371269105e0d1e59c427b15a6dd154e77d7ab93ccbf7d975ccbe45bd5070"
+        "orm/_datos_pdf_complemento.php": "0c149f7ca106cd269b79edf095f8530be5dae15a83ca3eaaf65c6a60c6116e8d"
       },
       "limites": "Lector real con PDO simulado y archivos XML ficticios locales; no certifica SQL del servidor, que requiere EXPLAIN/integración aparte.",
       "clase_phpunit": "pdf_complemento/CargaDatosPdfComplementoTest.php",
@@ -714,7 +715,8 @@
         "orm/_pdf.php": "ecbde74dd952a090b0be9f63c92571d27a5307a0835665d80b48736b84332fa0",
         "controllers/_doctos.php": "69d838a88c30ff7281aacf3502c02baa6bd185196d28e98497c90c82b7030fef",
         "controllers/controlador_fc_complemento_pago.php": "5456b14c2c60e4dc40043dbd2400c06bd3ff0b784e1c66862110210deda51ea7",
-        "orm/_formato_pdf_complemento.php": "aa94241f98f7b0889a89890d5352afe8c3ad3601df9b148daaafea8992758b71"
+        "orm/_formato_pdf_complemento.php": "aa94241f98f7b0889a89890d5352afe8c3ad3601df9b148daaafea8992758b71",
+        "orm/_datos_pdf_complemento.php": "0c149f7ca106cd269b79edf095f8530be5dae15a83ca3eaaf65c6a60c6116e8d"
       },
       "limites": "Dispatch real, bytes de salida, persistencia de archivo y contrato de registro de adjunto con lectura/renderer/modelos simulados; no envía correo ni escribe BD real.",
       "clase_phpunit": "pdf_complemento/EntregaPdfComplementoTest.php",
@@ -860,7 +862,7 @@
       "registro": "pruebas/complemento_orm_real/registro.json",
       "ejecutor": "pruebas/complemento_orm_real/ejecutar.py",
       "obligatoria_antes_commit": true,
-      "casos": 5
+      "casos": 6
     },
     {
       "id": "pdf_complemento_aguaban",

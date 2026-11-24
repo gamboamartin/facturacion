@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 use gamboamartin\errores\errores;
-use gamboamartin\facturacion\models\{_complemento_desde_factura,fc_complemento_pago,fc_pago_pago,fc_docto_relacionado};
+use gamboamartin\facturacion\models\{_complemento_desde_factura,_datos_pdf_complemento,fc_complemento_pago,fc_pago_pago,fc_docto_relacionado};
 require '/qa/bootstrap.php';
 require __DIR__.'/fixture.php';
 require __DIR__.'/iva.php';
@@ -15,7 +15,7 @@ function snapshot_orm(PDO $p):array{$a=[];foreach(['fc_complemento_pago','fc_par
 ob_start();
 try{
  $insertar=fixture_cp_orm($link);
- foreach([_complemento_desde_factura::class,fc_complemento_pago::class,fc_pago_pago::class,fc_docto_relacionado::class,\gamboamartin\facturacion\models\_saldos_fc::class,\base\orm\modelo::class,\base\orm\inserts::class,\gamboamartin\proceso\models\pr_proceso::class,\gamboamartin\comercial\models\com_tipo_cambio::class]as$c){$f=(new ReflectionClass($c))->getFileName();$fuentes[$c]=['archivo'=>$f,'sha256'=>hash_file('sha256',$f)];}
+ foreach([_complemento_desde_factura::class,_datos_pdf_complemento::class,fc_complemento_pago::class,fc_pago_pago::class,fc_docto_relacionado::class,\gamboamartin\facturacion\models\_saldos_fc::class,\base\orm\modelo::class,\base\orm\inserts::class,\gamboamartin\proceso\models\pr_proceso::class,\gamboamartin\comercial\models\com_tipo_cambio::class]as$c){$f=(new ReflectionClass($c))->getFileName();$fuentes[$c]=['archivo'=>$f,'sha256'=>hash_file('sha256',$f)];}
  $svc=new _complemento_desde_factura($link,1,static fn():bool=>true);
  $datos=['clave_solicitud'=>str_repeat('a',32),'monto'=>'40.00','fecha_pago'=>'2026-11-24T12:00','fc_csd_id'=>1,'cat_sat_forma_pago_id'=>2,'com_tipo_cambio_id'=>1];
  caso_orm('alta_real_estructura_saldos_totales',function()use($svc,$datos,$link){
@@ -35,6 +35,27 @@ try{
   exigir_orm($rechazado,'fallo_propagado');exigir_orm(str_contains(json_encode($_SESSION['error_resultado']??[],JSON_THROW_ON_ERROR),'QA_FALLO_CONTROLADO'),'fallo_inyectado_alcanzado');exigir_orm(!$link->inTransaction(),'sin_transaccion_abierta');exigir_orm(snapshot_orm($link)===$antes,'rollback_cabecera_partida_pagos_totales_saldo');errores::$error=false;
  });
  caso_orm('iva_16_real_traslados_y_totales',function()use($link,$insertar){probar_iva_orm($link,$insertar);});
+ caso_orm('pdf_pendiente_real_domicilio_fiscal_cliente',function()use($link,$svc,$datos){
+  $link->exec("UPDATE com_cliente SET cp='45010' WHERE id=1");
+  $link->exec("UPDATE com_sucursal SET cp='11560' WHERE id=1");
+  $entrada=$datos;$entrada['clave_solicitud']=str_repeat('e',32);$entrada['monto']='29.00';
+  $creado=$svc->crear(2,$entrada);
+  exigir_orm($creado['reutilizado']===false,'alta_nueva_para_lectura_pdf');
+  $pdf=(new _datos_pdf_complemento())->cargar($link,(int)$creado['fc_complemento_pago_id'],'/var/www/html/facturacion');
+  exigir_orm($pdf['estado']==='pendiente','pdf_pendiente_sin_certificacion');
+  exigir_orm($pdf['receptor']['cp']==='45010','pdf_cp_fiscal_del_cliente');
+  exigir_orm($pdf['receptor']['cp']!=='11560','pdf_no_usa_cp_envio_sucursal');
+  exigir_orm(count($pdf['pagos'])===1&&(float)$pdf['pagos'][0]['monto']===29.0,'pdf_pago_real');
+  exigir_orm(count($pdf['pagos'][0]['doctos'])===1,'pdf_documento_real');$doc=$pdf['pagos'][0]['doctos'][0];
+  exigir_orm($doc['uuid']==='00000000-0000-4000-8000-000000000002','pdf_uuid_factura_real');
+  exigir_orm((int)$doc['parcialidad']===2&&(float)$doc['saldo_anterior']===58.0
+    &&(float)$doc['importe_pagado']===29.0&&(float)$doc['saldo_insoluto']===29.0,'pdf_saldos_y_parcialidad_reales');
+  exigir_orm(count($doc['impuestos'])===1&&(float)$doc['impuestos'][0]['base']===25.0
+    &&(float)$doc['impuestos'][0]['importe']===4.0,'pdf_impuestos_documento_reales');
+  exigir_orm(count($pdf['pagos'][0]['impuestos'])===1&&(float)$pdf['pagos'][0]['impuestos'][0]['base']===25.0
+    &&(float)$pdf['pagos'][0]['impuestos'][0]['importe']===4.0,'pdf_impuestos_pago_reales');
+  exigir_orm($pdf['fiscales']['uuid']===''&&$pdf['qr']===''&&$pdf['qr_url']==='','pdf_no_inventa_timbre_o_qr');
+ });
  $codigo=0;
 }catch(Throwable $e){$fallo=['tipo'=>get_class($e),'mensaje'=>$e->getMessage()];$mensajes=[];$rec=function($x)use(&$rec,&$mensajes){if(is_array($x)){if(isset($x['mensaje_limpio']))$mensajes[]=$x['mensaje_limpio'];foreach($x as $v)if(is_array($v))$rec($v);}};$rec($_SESSION['error_resultado']??[]);$rec(errores::$out);$fallo['modelo_mensajes']=array_values(array_unique($mensajes));}
 finally{

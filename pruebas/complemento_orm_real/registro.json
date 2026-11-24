@@ -5,7 +5,8 @@
     "reintento_real_no_duplica",
     "segunda_parcialidad_real",
     "fallo_docto_revierte_cadena_real",
-    "iva_16_real_traslados_y_totales"
+    "iva_16_real_traslados_y_totales",
+    "pdf_pendiente_real_domicilio_fiscal_cliente"
   ],
   "fuentes": [
     "orm/_complemento_desde_factura.php",
@@ -16,7 +17,8 @@
     "vendor/gamboa.martin/administrador/base/orm/inserts.php",
     "vendor/gamboa.martin/proceso/orm/pr_proceso.php",
     "vendor/gamboa.martin/comercial/orm/com_tipo_cambio.php",
-    "orm/_saldos_fc.php"
+    "orm/_saldos_fc.php",
+    "orm/_datos_pdf_complemento.php"
   ],
   "precondiciones": {
     "sql_mode": "",

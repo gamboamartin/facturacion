@@ -61,7 +61,16 @@
         "adm_namespace",
         "adm_menu",
         "adm_usuario",
-        "adm_grupo"
+        "adm_grupo",
+        "fc_complemento_pago_documento",
+        "doc_documento",
+        "doc_tipo_documento",
+        "fc_relacion_cp",
+        "fc_complemento_pago_relacionada",
+        "fc_uuid_cp",
+        "fc_uuid",
+        "doc_extension",
+        "fc_cfdi_sellado_cp"
     ],
     "missing": [],
     "tables": {
@@ -12806,6 +12815,1240 @@
                 }
             ],
             "foreign_keys": []
+        },
+        "fc_complemento_pago_documento": {
+            "ddl": "CREATE TABLE `fc_complemento_pago_documento` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `codigo` varchar(200) NOT NULL,\n  `status` varchar(255) NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) NOT NULL,\n  `alias` varchar(255) NOT NULL,\n  `codigo_bis` varchar(255) NOT NULL,\n  `descripcion` varchar(255) NOT NULL,\n  `fc_complemento_pago_id` bigint NOT NULL,\n  `doc_documento_id` bigint DEFAULT NULL,\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE,\n  KEY `fc_cfd_ibfk_1` (`fc_complemento_pago_id`) USING BTREE,\n  KEY `doc_documento_id` (`doc_documento_id`) USING BTREE,\n  CONSTRAINT `fc_complemento_pago_documento_ibfk_2` FOREIGN KEY (`doc_documento_id`) REFERENCES `doc_documento` (`id`),\n  CONSTRAINT `fc_complemento_pago_documento_ibfk_3` FOREIGN KEY (`fc_complemento_pago_id`) REFERENCES `fc_complemento_pago` (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='18\\n\\nTR TG 25'",
+            "sha256": "a857725af48f5f58e6470d4c9bc8dca7c887b6960bf2bfdf41f2fb524f4970c5",
+            "columns": [
+                {
+                    "Field": "id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "PRI",
+                    "Default": null,
+                    "Extra": "auto_increment"
+                },
+                {
+                    "Field": "codigo",
+                    "Type": "varchar(200)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "status",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_alta_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_update_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fecha_alta",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED"
+                },
+                {
+                    "Field": "fecha_update",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+                },
+                {
+                    "Field": "descripcion_select",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "alias",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo_bis",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "UNI",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "descripcion",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fc_complemento_pago_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "doc_documento_id",
+                    "Type": "bigint",
+                    "Null": "YES",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "TABLE_NAME": "fc_complemento_pago_documento",
+                    "COLUMN_NAME": "doc_documento_id",
+                    "REFERENCED_TABLE_NAME": "doc_documento",
+                    "REFERENCED_COLUMN_NAME": "id"
+                },
+                {
+                    "TABLE_NAME": "fc_complemento_pago_documento",
+                    "COLUMN_NAME": "fc_complemento_pago_id",
+                    "REFERENCED_TABLE_NAME": "fc_complemento_pago",
+                    "REFERENCED_COLUMN_NAME": "id"
+                }
+            ]
+        },
+        "doc_documento": {
+            "ddl": "CREATE TABLE `doc_documento` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `nombre` varchar(255) NOT NULL,\n  `status` varchar(255) NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `ruta_absoluta` varchar(255) NOT NULL,\n  `ruta_relativa` varchar(255) NOT NULL,\n  `doc_tipo_documento_id` bigint NOT NULL,\n  `doc_extension_id` bigint NOT NULL,\n  `descripcion` varchar(255) DEFAULT NULL,\n  `descripcion_select` varchar(255) DEFAULT NULL,\n  `codigo` varchar(255) NOT NULL,\n  `alias` varchar(255) NOT NULL,\n  `codigo_bis` varchar(255) NOT NULL,\n  `name_out` varchar(255) NOT NULL DEFAULT 'SN',\n  PRIMARY KEY (`id`) USING BTREE,\n  KEY `doc_tipo_documento_id` (`doc_tipo_documento_id`) USING BTREE,\n  KEY `doc_extension_id` (`doc_extension_id`) USING BTREE,\n  CONSTRAINT `doc_documento_ibfk_1` FOREIGN KEY (`doc_tipo_documento_id`) REFERENCES `doc_tipo_documento` (`id`),\n  CONSTRAINT `doc_documento_ibfk_2` FOREIGN KEY (`doc_extension_id`) REFERENCES `doc_extension` (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3",
+            "sha256": "bfbcf56eca476d4c013a60cd95dd30d578c3cfaa91a14594c1dddec722870abb",
+            "columns": [
+                {
+                    "Field": "id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "PRI",
+                    "Default": null,
+                    "Extra": "auto_increment"
+                },
+                {
+                    "Field": "nombre",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "status",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_alta_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_update_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fecha_alta",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED"
+                },
+                {
+                    "Field": "fecha_update",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+                },
+                {
+                    "Field": "ruta_absoluta",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "ruta_relativa",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "doc_tipo_documento_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "doc_extension_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "descripcion",
+                    "Type": "varchar(255)",
+                    "Null": "YES",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "descripcion_select",
+                    "Type": "varchar(255)",
+                    "Null": "YES",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "alias",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo_bis",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "name_out",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "SN",
+                    "Extra": ""
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "TABLE_NAME": "doc_documento",
+                    "COLUMN_NAME": "doc_tipo_documento_id",
+                    "REFERENCED_TABLE_NAME": "doc_tipo_documento",
+                    "REFERENCED_COLUMN_NAME": "id"
+                },
+                {
+                    "TABLE_NAME": "doc_documento",
+                    "COLUMN_NAME": "doc_extension_id",
+                    "REFERENCED_TABLE_NAME": "doc_extension",
+                    "REFERENCED_COLUMN_NAME": "id"
+                }
+            ]
+        },
+        "doc_tipo_documento": {
+            "ddl": "CREATE TABLE `doc_tipo_documento` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) NOT NULL,\n  `codigo` varchar(200) NOT NULL,\n  `status` varchar(255) NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) NOT NULL,\n  `alias` varchar(255) NOT NULL,\n  `codigo_bis` varchar(255) NOT NULL,\n  `predeterminado` varchar(255) NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3",
+            "sha256": "6ecd2308c51e4f277c192741442fcda8cee351963d7eab3d83e9f1249f095224",
+            "columns": [
+                {
+                    "Field": "id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "PRI",
+                    "Default": null,
+                    "Extra": "auto_increment"
+                },
+                {
+                    "Field": "descripcion",
+                    "Type": "varchar(200)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo",
+                    "Type": "varchar(200)",
+                    "Null": "NO",
+                    "Key": "UNI",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "status",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_alta_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_update_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fecha_alta",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED"
+                },
+                {
+                    "Field": "fecha_update",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+                },
+                {
+                    "Field": "descripcion_select",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "alias",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo_bis",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "predeterminado",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                }
+            ],
+            "foreign_keys": []
+        },
+        "fc_relacion_cp": {
+            "ddl": "CREATE TABLE `fc_relacion_cp` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `codigo` varchar(200) NOT NULL,\n  `status` varchar(255) NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) NOT NULL,\n  `alias` varchar(255) NOT NULL,\n  `codigo_bis` varchar(255) NOT NULL,\n  `descripcion` varchar(255) NOT NULL,\n  `cat_sat_tipo_relacion_id` bigint NOT NULL,\n  `fc_complemento_pago_id` bigint NOT NULL,\n  PRIMARY KEY (`id`) USING BTREE,\n  KEY `cat_sat_tipo_relacion_id` (`cat_sat_tipo_relacion_id`) USING BTREE,\n  KEY `fc_complemento_pago_id` (`fc_complemento_pago_id`) USING BTREE,\n  CONSTRAINT `fc_relacion_cp_ibfk_1` FOREIGN KEY (`cat_sat_tipo_relacion_id`) REFERENCES `cat_sat_tipo_relacion` (`id`),\n  CONSTRAINT `fc_relacion_cp_ibfk_2` FOREIGN KEY (`fc_complemento_pago_id`) REFERENCES `fc_complemento_pago` (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='Por generar, Integra los cfdis relacionados, es encabezado'",
+            "sha256": "13ea051c044cdde6260667dec47f091225ceb30088e0c1929d92462e74b7cff5",
+            "columns": [
+                {
+                    "Field": "id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "PRI",
+                    "Default": null,
+                    "Extra": "auto_increment"
+                },
+                {
+                    "Field": "codigo",
+                    "Type": "varchar(200)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "status",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_alta_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_update_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fecha_alta",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED"
+                },
+                {
+                    "Field": "fecha_update",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+                },
+                {
+                    "Field": "descripcion_select",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "alias",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo_bis",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "descripcion",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "cat_sat_tipo_relacion_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fc_complemento_pago_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "TABLE_NAME": "fc_relacion_cp",
+                    "COLUMN_NAME": "cat_sat_tipo_relacion_id",
+                    "REFERENCED_TABLE_NAME": "cat_sat_tipo_relacion",
+                    "REFERENCED_COLUMN_NAME": "id"
+                },
+                {
+                    "TABLE_NAME": "fc_relacion_cp",
+                    "COLUMN_NAME": "fc_complemento_pago_id",
+                    "REFERENCED_TABLE_NAME": "fc_complemento_pago",
+                    "REFERENCED_COLUMN_NAME": "id"
+                }
+            ]
+        },
+        "fc_complemento_pago_relacionada": {
+            "ddl": "CREATE TABLE `fc_complemento_pago_relacionada` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `codigo` varchar(200) NOT NULL,\n  `status` varchar(255) NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) NOT NULL,\n  `alias` varchar(255) NOT NULL,\n  `codigo_bis` varchar(255) NOT NULL,\n  `descripcion` varchar(255) NOT NULL,\n  `fc_relacion_cp_id` bigint NOT NULL,\n  `fc_complemento_pago_id` bigint NOT NULL,\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `fc_relacion_nc_id_2` (`fc_relacion_cp_id`,`fc_complemento_pago_id`) USING BTREE,\n  KEY `fc_complemento_pago_id` (`fc_complemento_pago_id`) USING BTREE,\n  KEY `fc_relacion_cp_id` (`fc_relacion_cp_id`) USING BTREE,\n  CONSTRAINT `fc_complemento_pago_relacionada_ibfk_1` FOREIGN KEY (`fc_relacion_cp_id`) REFERENCES `fc_relacion_cp` (`id`),\n  CONSTRAINT `fc_complemento_pago_relacionada_ibfk_2` FOREIGN KEY (`fc_complemento_pago_id`) REFERENCES `fc_complemento_pago` (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='Por generar, Integra los cfdis relacionados, es encabezado'",
+            "sha256": "dba09f3b29191dbe7fe20840b76e1f86cb07c97644a4b41a86e5e2c61a3dce65",
+            "columns": [
+                {
+                    "Field": "id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "PRI",
+                    "Default": null,
+                    "Extra": "auto_increment"
+                },
+                {
+                    "Field": "codigo",
+                    "Type": "varchar(200)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "status",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_alta_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_update_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fecha_alta",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED"
+                },
+                {
+                    "Field": "fecha_update",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+                },
+                {
+                    "Field": "descripcion_select",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "alias",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo_bis",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "descripcion",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fc_relacion_cp_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fc_complemento_pago_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "TABLE_NAME": "fc_complemento_pago_relacionada",
+                    "COLUMN_NAME": "fc_relacion_cp_id",
+                    "REFERENCED_TABLE_NAME": "fc_relacion_cp",
+                    "REFERENCED_COLUMN_NAME": "id"
+                },
+                {
+                    "TABLE_NAME": "fc_complemento_pago_relacionada",
+                    "COLUMN_NAME": "fc_complemento_pago_id",
+                    "REFERENCED_TABLE_NAME": "fc_complemento_pago",
+                    "REFERENCED_COLUMN_NAME": "id"
+                }
+            ]
+        },
+        "fc_uuid_cp": {
+            "ddl": "CREATE TABLE `fc_uuid_cp` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) NOT NULL,\n  `codigo` varchar(200) NOT NULL,\n  `status` varchar(255) NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) NOT NULL,\n  `alias` varchar(255) NOT NULL,\n  `codigo_bis` varchar(255) NOT NULL,\n  `predeterminado` varchar(255) NOT NULL DEFAULT 'inactivo',\n  `fc_uuid_id` bigint NOT NULL,\n  `fc_relacion_cp_id` bigint NOT NULL,\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE,\n  KEY `fc_uuid_id` (`fc_uuid_id`) USING BTREE,\n  KEY `fc_relacion_cp_id` (`fc_relacion_cp_id`) USING BTREE,\n  CONSTRAINT `fc_uuid_cp_ibfk_1` FOREIGN KEY (`fc_uuid_id`) REFERENCES `fc_uuid` (`id`),\n  CONSTRAINT `fc_uuid_cp_ibfk_2` FOREIGN KEY (`fc_relacion_cp_id`) REFERENCES `fc_relacion_cp` (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='Por generar, se integra mapara movtos de escuelas'",
+            "sha256": "b52e20ba91e2019623d848e50f85a20d58079689e61eb9b2138899120bb5ae81",
+            "columns": [
+                {
+                    "Field": "id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "PRI",
+                    "Default": null,
+                    "Extra": "auto_increment"
+                },
+                {
+                    "Field": "descripcion",
+                    "Type": "varchar(200)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo",
+                    "Type": "varchar(200)",
+                    "Null": "NO",
+                    "Key": "UNI",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "status",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_alta_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_update_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fecha_alta",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED"
+                },
+                {
+                    "Field": "fecha_update",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+                },
+                {
+                    "Field": "descripcion_select",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "alias",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo_bis",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "UNI",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "predeterminado",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                },
+                {
+                    "Field": "fc_uuid_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fc_relacion_cp_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "TABLE_NAME": "fc_uuid_cp",
+                    "COLUMN_NAME": "fc_uuid_id",
+                    "REFERENCED_TABLE_NAME": "fc_uuid",
+                    "REFERENCED_COLUMN_NAME": "id"
+                },
+                {
+                    "TABLE_NAME": "fc_uuid_cp",
+                    "COLUMN_NAME": "fc_relacion_cp_id",
+                    "REFERENCED_TABLE_NAME": "fc_relacion_cp",
+                    "REFERENCED_COLUMN_NAME": "id"
+                }
+            ]
+        },
+        "fc_uuid": {
+            "ddl": "CREATE TABLE `fc_uuid` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) NOT NULL,\n  `codigo` varchar(200) NOT NULL,\n  `status` varchar(255) NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) NOT NULL,\n  `alias` varchar(255) NOT NULL,\n  `codigo_bis` varchar(255) NOT NULL,\n  `predeterminado` varchar(255) NOT NULL DEFAULT 'inactivo',\n  `uuid` varchar(255) NOT NULL,\n  `fc_csd_id` bigint NOT NULL,\n  `com_sucursal_id` bigint NOT NULL,\n  `fecha` date DEFAULT NULL,\n  `total` double(100,4) NOT NULL,\n  `folio` varchar(255) NOT NULL,\n  `cat_sat_tipo_de_comprobante_id` bigint NOT NULL,\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE,\n  KEY `com_sucursal_id` (`com_sucursal_id`) USING BTREE,\n  KEY `cat_sat_tipo_de_comprobante_id` (`cat_sat_tipo_de_comprobante_id`) USING BTREE,\n  KEY `fc_csd_id` (`fc_csd_id`) USING BTREE,\n  CONSTRAINT `fc_uuid_ibfk_2` FOREIGN KEY (`com_sucursal_id`) REFERENCES `com_sucursal` (`id`),\n  CONSTRAINT `fc_uuid_ibfk_3` FOREIGN KEY (`cat_sat_tipo_de_comprobante_id`) REFERENCES `cat_sat_tipo_de_comprobante` (`id`),\n  CONSTRAINT `fc_uuid_ibfk_4` FOREIGN KEY (`fc_csd_id`) REFERENCES `fc_csd` (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='Por generar, se integra mapara movtos de escuelas'",
+            "sha256": "ca438591fa4d07729428713c69ca5bfa632ace64b6da37f7256582442fdae044",
+            "columns": [
+                {
+                    "Field": "id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "PRI",
+                    "Default": null,
+                    "Extra": "auto_increment"
+                },
+                {
+                    "Field": "descripcion",
+                    "Type": "varchar(200)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo",
+                    "Type": "varchar(200)",
+                    "Null": "NO",
+                    "Key": "UNI",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "status",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_alta_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_update_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fecha_alta",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED"
+                },
+                {
+                    "Field": "fecha_update",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+                },
+                {
+                    "Field": "descripcion_select",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "alias",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo_bis",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "UNI",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "predeterminado",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                },
+                {
+                    "Field": "uuid",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fc_csd_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "com_sucursal_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fecha",
+                    "Type": "date",
+                    "Null": "YES",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "total",
+                    "Type": "double(100,4)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "folio",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "cat_sat_tipo_de_comprobante_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "TABLE_NAME": "fc_uuid",
+                    "COLUMN_NAME": "com_sucursal_id",
+                    "REFERENCED_TABLE_NAME": "com_sucursal",
+                    "REFERENCED_COLUMN_NAME": "id"
+                },
+                {
+                    "TABLE_NAME": "fc_uuid",
+                    "COLUMN_NAME": "cat_sat_tipo_de_comprobante_id",
+                    "REFERENCED_TABLE_NAME": "cat_sat_tipo_de_comprobante",
+                    "REFERENCED_COLUMN_NAME": "id"
+                },
+                {
+                    "TABLE_NAME": "fc_uuid",
+                    "COLUMN_NAME": "fc_csd_id",
+                    "REFERENCED_TABLE_NAME": "fc_csd",
+                    "REFERENCED_COLUMN_NAME": "id"
+                }
+            ]
+        },
+        "doc_extension": {
+            "ddl": "CREATE TABLE `doc_extension` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) NOT NULL,\n  `codigo` varchar(200) NOT NULL,\n  `status` varchar(255) NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `es_imagen` varchar(255) NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3",
+            "sha256": "a44a89ac96841d63a548dad42aa251d9158ff813a899a0c13e38e71f432b2113",
+            "columns": [
+                {
+                    "Field": "id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "PRI",
+                    "Default": null,
+                    "Extra": "auto_increment"
+                },
+                {
+                    "Field": "descripcion",
+                    "Type": "varchar(200)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo",
+                    "Type": "varchar(200)",
+                    "Null": "NO",
+                    "Key": "UNI",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "status",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_alta_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_update_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fecha_alta",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED"
+                },
+                {
+                    "Field": "fecha_update",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+                },
+                {
+                    "Field": "es_imagen",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                }
+            ],
+            "foreign_keys": []
+        },
+        "fc_cfdi_sellado_cp": {
+            "ddl": "CREATE TABLE `fc_cfdi_sellado_cp` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `codigo` varchar(200) NOT NULL,\n  `status` varchar(255) NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) NOT NULL,\n  `alias` varchar(255) NOT NULL,\n  `codigo_bis` varchar(255) NOT NULL,\n  `descripcion` varchar(255) NOT NULL,\n  `comprobante_sello` longblob NOT NULL,\n  `comprobante_certificado` longblob NOT NULL,\n  `comprobante_no_certificado` varchar(255) NOT NULL,\n  `complemento_tfd_sl` longblob NOT NULL,\n  `complemento_tfd_fecha_timbrado` varchar(255) NOT NULL,\n  `complemento_tfd_no_certificado_sat` varchar(255) NOT NULL,\n  `complemento_tfd_rfc_prov_certif` varchar(255) NOT NULL,\n  `complemento_tfd_sello_cfd` longblob NOT NULL,\n  `complemento_tfd_sello_sat` longblob NOT NULL,\n  `uuid` varchar(255) NOT NULL,\n  `complemento_tfd_tfd` varchar(255) NOT NULL,\n  `cadena_complemento_sat` longblob,\n  `fc_complemento_pago_id` bigint NOT NULL,\n  `fecha_pago` datetime NOT NULL DEFAULT '1900-01-01 00:00:00',\n  PRIMARY KEY (`id`) USING BTREE,\n  KEY `fc_complemento_pago_id` (`fc_complemento_pago_id`) USING BTREE,\n  CONSTRAINT `fc_cfdi_sellado_cp_ibfk_1` FOREIGN KEY (`fc_complemento_pago_id`) REFERENCES `fc_complemento_pago` (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3",
+            "sha256": "4f4b9ac671fd4473d2a916e95eab63955f269a185d7190e7afcc99a0a937c8c3",
+            "columns": [
+                {
+                    "Field": "id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "PRI",
+                    "Default": null,
+                    "Extra": "auto_increment"
+                },
+                {
+                    "Field": "codigo",
+                    "Type": "varchar(200)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "status",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "inactivo",
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_alta_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "usuario_update_id",
+                    "Type": "int",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fecha_alta",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED"
+                },
+                {
+                    "Field": "fecha_update",
+                    "Type": "timestamp",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+                },
+                {
+                    "Field": "descripcion_select",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "alias",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "codigo_bis",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "descripcion",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "comprobante_sello",
+                    "Type": "longblob",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "comprobante_certificado",
+                    "Type": "longblob",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "comprobante_no_certificado",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "complemento_tfd_sl",
+                    "Type": "longblob",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "complemento_tfd_fecha_timbrado",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "complemento_tfd_no_certificado_sat",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "complemento_tfd_rfc_prov_certif",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "complemento_tfd_sello_cfd",
+                    "Type": "longblob",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "complemento_tfd_sello_sat",
+                    "Type": "longblob",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "uuid",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "complemento_tfd_tfd",
+                    "Type": "varchar(255)",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "cadena_complemento_sat",
+                    "Type": "longblob",
+                    "Null": "YES",
+                    "Key": "",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fc_complemento_pago_id",
+                    "Type": "bigint",
+                    "Null": "NO",
+                    "Key": "MUL",
+                    "Default": null,
+                    "Extra": ""
+                },
+                {
+                    "Field": "fecha_pago",
+                    "Type": "datetime",
+                    "Null": "NO",
+                    "Key": "",
+                    "Default": "1900-01-01 00:00:00",
+                    "Extra": ""
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "TABLE_NAME": "fc_cfdi_sellado_cp",
+                    "COLUMN_NAME": "fc_complemento_pago_id",
+                    "REFERENCED_TABLE_NAME": "fc_complemento_pago",
+                    "REFERENCED_COLUMN_NAME": "id"
+                }
+            ]
         }
     }
 }

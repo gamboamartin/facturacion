@@ -19,7 +19,7 @@ final class _datos_pdf_complemento
         $cabeceras = $this->filas($link, "SELECT c.*,e.rfc AS emisor_rfc,e.razon_social AS emisor_nombre,
             e.telefono_1 AS emisor_telefono,rf.codigo AS emisor_regimen,cl.rfc AS receptor_rfc,
             cl.razon_social AS receptor_nombre,rfc.codigo AS receptor_regimen,u.codigo AS uso_cfdi,
-            cs.calle,cs.numero_exterior,cs.numero_interior,cs.colonia,cs.municipio,cs.estado,cs.cp AS receptor_cp,
+            cs.calle,cs.numero_exterior,cs.numero_interior,cs.colonia,cs.municipio,cs.estado,cl.cp AS receptor_cp,
             cp.descripcion AS cp_expedicion
             FROM fc_complemento_pago c INNER JOIN fc_csd cert ON cert.id=c.fc_csd_id
             INNER JOIN org_sucursal os ON os.id=cert.org_sucursal_id INNER JOIN org_empresa e ON e.id=os.org_empresa_id
