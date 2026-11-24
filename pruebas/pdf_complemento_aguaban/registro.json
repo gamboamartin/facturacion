@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "estado_esperado": "PASS_PDF_COMPLEMENTO_AGUABAN",
+  "casos_previstos": 6,
+  "casos": [
+    "un_pago_un_documento",
+    "dos_pagos_24_documentos",
+    "sellos_largos_y_unicode",
+    "pendiente_sin_certificacion",
+    "datos_parecidos_a_html",
+    "xml_pagos20_a_pdf"
+  ],
+  "limites": "Parser XML Pagos 2.0 y render mPDF/FPDI real con PDF de diseño registrado y datos sintéticos; valida contenido completo, papel, límites de texto, paginación y QR. No conecta BD/red/PAC, no valida certificados fiscales ni ejecuta acciones web. Inspección visual adicional del coordinador."
+}

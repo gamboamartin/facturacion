@@ -653,6 +653,88 @@
         "testPostCsrfAjenoNoConsultaNiCrea",
         "testPostSinPermisoConCsrfValidoNoCrea"
       ]
+    },
+    {
+      "id": "pdf_complemento_xml",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 8,
+      "fuentes": {
+        "orm/_datos_pdf_complemento.php": "708c371269105e0d1e59c427b15a6dd154e77d7ab93ccbf7d975ccbe45bd5070"
+      },
+      "limites": "Parser real de XML ficticio Pagos 2.0; no valida firma ni XSD ni conecta SAT.",
+      "clase_phpunit": "pdf_complemento/DatosPdfComplementoTest.php",
+      "casos": [
+        "testConservaTodosLosPagosYDocumentosDelXml",
+        "testFechasEmisionCobroYCertificacionSonDistintas",
+        "testNoInventarImpuestosExentosNiRetenciones",
+        "testIdentidadesUnicodeYRelacionSonDelXml",
+        "testPendienteNoAdoptaCertificacionNiQrRecibido",
+        "testCadenaTimbreCanonicaYLeyendaOpcional",
+        "testQrUsaTotalDelCfdiYNoMontoDePago",
+        "testRechazaXmlRotoEntidadesYComprobanteDistinto"
+      ]
+    },
+    {
+      "id": "pdf_complemento_selector",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 3,
+      "fuentes": {
+        "orm/_formato_pdf_complemento.php": "aa94241f98f7b0889a89890d5352afe8c3ad3601df9b148daaafea8992758b71"
+      },
+      "limites": "Selección explícita y compatibilidad de configuración; sin configuración privada.",
+      "clase_phpunit": "pdf_complemento/FormatoPdfComplementoTest.php",
+      "casos": [
+        "testSeleccionExplicitaSoloParaComplemento",
+        "testConfiguracionAnteriorConservaCompatibilidad",
+        "testOpcionesDesconocidasNoSonRutasNiClasesDinamicas"
+      ]
+    },
+    {
+      "id": "pdf_complemento_lectura",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 5,
+      "fuentes": {
+        "orm/_datos_pdf_complemento.php": "708c371269105e0d1e59c427b15a6dd154e77d7ab93ccbf7d975ccbe45bd5070"
+      },
+      "limites": "Lector real con PDO simulado y archivos XML ficticios locales; no certifica SQL del servidor, que requiere EXPLAIN/integración aparte.",
+      "clase_phpunit": "pdf_complemento/CargaDatosPdfComplementoTest.php",
+      "casos": [
+        "testPendienteDesdeBdUsaSaldosParcialidadEImpuestosReales",
+        "testXmlHistoricoEsAutoridadYNoConsultaPagosActuales",
+        "testXmlAjenoEnUuidRfcOSerieSeRechaza",
+        "testFaltaXmlCertificadoNoImprimeDatosActualesComoTimbrados",
+        "testRutaFueraDeInstalacionYArchivoDuplicadoSeRechazan"
+      ]
+    },
+    {
+      "id": "pdf_complemento_entrega",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 15,
+      "fuentes": {
+        "orm/_pdf.php": "ecbde74dd952a090b0be9f63c92571d27a5307a0835665d80b48736b84332fa0",
+        "controllers/_doctos.php": "69d838a88c30ff7281aacf3502c02baa6bd185196d28e98497c90c82b7030fef",
+        "controllers/controlador_fc_complemento_pago.php": "5456b14c2c60e4dc40043dbd2400c06bd3ff0b784e1c66862110210deda51ea7",
+        "orm/_formato_pdf_complemento.php": "aa94241f98f7b0889a89890d5352afe8c3ad3601df9b148daaafea8992758b71"
+      },
+      "limites": "Dispatch real, bytes de salida, persistencia de archivo y contrato de registro de adjunto con lectura/renderer/modelos simulados; no envía correo ni escribe BD real.",
+      "clase_phpunit": "pdf_complemento/EntregaPdfComplementoTest.php",
+      "casos": [
+        "testDescargaEntregaBytesExactosYNombre",
+        "testGuardarParaAdjuntoConservaExactamenteLosMismosBytes",
+        "testDescargaMantienePrioridadSobreGuardar",
+        "testSeleccionEstandarConProyectoAguabanEntraAlFlujoGeneral",
+        "testSelectorDeComplementoNoAfectaFacturaNiNotaCredito",
+        "testDoctosRegistraComplementoGuardadoConProyectoAguaban",
+        "testDoctosConservaRendererLegacyDeFacturaYNotaCredito",
+        "testRenderInvalidoNoGuardaArchivoNiEnviaSalida",
+        "testComplementosConMismoFolioNoCompartenArchivo",
+        "testDosGuardadosDelMismoComplementoNoSePisan",
+        "testFalloDePublicacionRetiraTemporalSinDejarPdf",
+        "testFalloPosteriorAlPublicarRetiraAmbasRutas",
+        "testErrorDeCargaNoDejaIntermedioHuerfano",
+        "testErrorDeRegistroRetiraIntermedioSinBorrarCopiaDelCargador",
+        "testRutaRegistradaIgualAlIntermedioNuncaSeElimina"
+      ]
     }
   ],
   "suites_complementarias": [
@@ -779,6 +861,14 @@
       "ejecutor": "pruebas/complemento_orm_real/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 5
+    },
+    {
+      "id": "pdf_complemento_aguaban",
+      "tipo": "render_pdf_real_sintetico",
+      "registro": "pruebas/pdf_complemento_aguaban/registro.json",
+      "ejecutor": "pruebas/pdf_complemento_aguaban/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 6
     }
   ]
 }

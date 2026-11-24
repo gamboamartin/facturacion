@@ -17,7 +17,6 @@ use gamboamartin\facturacion\html\fc_complemento_pago_html;
 use gamboamartin\facturacion\models\_doctos_rel;
 use gamboamartin\facturacion\models\_logo_pdf;
 use gamboamartin\facturacion\models\_pdf;
-use gamboamartin\facturacion\models\_PDF\aguaban\_complemento_pago;
 use gamboamartin\facturacion\models\fc_cancelacion_cp;
 use gamboamartin\facturacion\models\fc_cfdi_sellado_cp;
 use gamboamartin\facturacion\models\fc_complemento_pago;
@@ -494,21 +493,29 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         }
         return $r_alta;
     }
-    public function genera_pdf(bool $header, bool $ws = false, bool $descarga = true, bool $guarda = false): void
+    public function genera_pdf(bool $header, bool $ws = false, bool $descarga = true, bool $guarda = false)
     {
-        $bandera = true;
+        try {
+            $formato = \gamboamartin\facturacion\models\_formato_pdf_complemento::seleccionar($this->conf_generales);
+        } catch (\InvalidArgumentException $error) {
+            $this->retorno_error(mensaje: $error->getMessage(), data: [], header: $header, ws: $ws);
+            return;
+        }
+        if ($guarda && !$descarga) {
+            return parent::genera_pdf(header: $header, ws: $ws, descarga: false, guarda: true);
+        }
+        if ($formato === 'aguaban') {
+            $resultado = (new \gamboamartin\facturacion\models\_pdf())->pdf_complemento_pago_aguaban(
+                descarga: $descarga, guarda: $guarda, link: $this->link, registro_id: $this->registro_id);
+            if (errores::$error) {
+                $this->retorno_error(mensaje: 'Error al generar el PDF del complemento.', data: $resultado, header: $header, ws: $ws);
+                return;
+            }
+            if ($descarga) { exit; }
+            return;
+        }
         $datos = $this->datos_reporte();
-
-        $proyecto_name = (string)($this->conf_generales->proyecto_custom_pdf ?? '');
-        if ($proyecto_name === 'aguaban') {
-            $bandera = false;
-            $complemento_pago = new _complemento_pago();
-            $complemento_pago->pdf(true,false, $this->link, $datos);
-        }
-
-        if ($bandera) {
-            $this->genera_pdf_dompdf(datos: $datos);
-        }
+        $this->genera_pdf_dompdf(datos: $datos);
 
         exit;
     }

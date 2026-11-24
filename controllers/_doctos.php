@@ -152,7 +152,7 @@ class _doctos{
         $general = new generales();
 
         $proyecto_name = (string)($general->proyecto_custom_pdf ?? '');
-        if ($proyecto_name === 'aguaban') {
+        if ($proyecto_name === 'aguaban' && $modelo_entidad->tabla !== 'fc_complemento_pago') {
             $class_pdf = new _factura_and_nota_credito();
         }
 
@@ -161,22 +161,36 @@ class _doctos{
             modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
             modelo_retencion: $modelo_retencion, modelo_sellado: $modelo_sello, modelo_traslado: $modelo_traslado,
             modelo_uuid_ext: $modelo_uuid_ext, registro_id: $row_entidad_id);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al generar pdf',data:  $pdf);
+        $intermedio = is_string($pdf) && $guarda && !$descarga
+            && $modelo_entidad->tabla === 'fc_complemento_pago'
+            && \gamboamartin\facturacion\models\_formato_pdf_complemento::seleccionar($general) === 'aguaban'
+            && dirname($pdf) === rtrim($general->path_base, '/\\').'/archivos'
+            && preg_match('/^complemento-'.preg_quote((string)$row_entidad_id, '/').'-[a-f0-9]{32}\.pdf$/D', basename($pdf));
+        $r_fc_factura_documento = null;
+        try {
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al generar pdf',data:  $pdf);
+            }
+
+
+
+            $row_entidad = $modelo_entidad->registro(registro_id: $row_entidad_id, retorno_obj: true);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al obtener factura',data:  $row_entidad);
+            }
+
+            $r_fc_factura_documento = $this->inicializa_factura_documento(modelo_documento: $modelo_documento, pdf: $pdf,
+                registro_id: $row_entidad_id, row_entidad: $row_entidad,tabla_fc: $modelo_entidad->tabla);
+            if(errores::$error){
+                return $this->error->error(mensaje: 'Error al al insertar factura_doc',data:  $r_fc_factura_documento);
+            }
+            return $r_fc_factura_documento;
+        } finally {
+            // El cargador copia el contenido a doc_documento; solo se retira nuestro archivo intermedio.
+            $registrada = is_object($r_fc_factura_documento)
+                ? ($r_fc_factura_documento->registro_obj->doc_documento_ruta_absoluta ?? null) : null;
+            $mismaRuta = is_string($registrada) && realpath($registrada) !== false && realpath($registrada) === realpath($pdf);
+            if ($intermedio && !$mismaRuta && is_file($pdf)) { @unlink($pdf); }
         }
-
-
-
-        $row_entidad = $modelo_entidad->registro(registro_id: $row_entidad_id, retorno_obj: true);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al obtener factura',data:  $row_entidad);
-        }
-
-        $r_fc_factura_documento = $this->inicializa_factura_documento(modelo_documento: $modelo_documento, pdf: $pdf,
-            registro_id: $row_entidad_id, row_entidad: $row_entidad,tabla_fc: $modelo_entidad->tabla);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al al insertar factura_doc',data:  $r_fc_factura_documento);
-        }
-        return $r_fc_factura_documento;
     }
 }

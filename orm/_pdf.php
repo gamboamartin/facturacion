@@ -625,6 +625,65 @@ class _pdf
         $pdf->Image($ruta_logo, 10, 10, $caja['ancho'], $caja['alto'], $tipo);
     }
 
+    /** Una sola representación para descarga y PDF guardado/adjunto. No timbra ni modifica registros. */
+    final public function pdf_complemento_pago_aguaban(bool $descarga, bool $guarda, PDO $link, int $registro_id): array|string|bool
+    {
+        $temporal = null;
+        $publicado = null;
+        try {
+            $config = new generales();
+            $datos = (new _datos_pdf_complemento())->cargar($link, $registro_id, $config->path_base);
+            $contenido = (new \gamboamartin\facturacion\models\_PDF\aguaban\_complemento_pago())->render($datos);
+            if (!str_starts_with($contenido, '%PDF-')) {
+                throw new \RuntimeException('No se pudo construir el PDF del complemento.');
+            }
+            $nombre = (string)$datos['nombre_documento'];
+            if ($this->cambios_titulo_pdf) {
+                $razon = preg_replace('/[^A-Za-z0-9_\-]/', '_', $datos['receptor']['nombre']);
+                $nombre .= '_'.$razon.'_'.number_format((float)$datos['total_comprobante'], 2, '.', '');
+            }
+            $nombre = preg_replace('/[^A-Za-z0-9_.-]/', '_', $nombre);
+            if ($nombre === '' || $nombre === '.' || $nombre === '..') { $nombre = 'complemento-'.$registro_id; }
+            if ($descarga) {
+                if (headers_sent()) { throw new \RuntimeException('No se puede enviar el PDF después de iniciar otra respuesta.'); }
+                header('Content-Type: application/pdf');
+                header('Content-Disposition: attachment; filename="'.$nombre.'.pdf"');
+                echo $contenido;
+                return $nombre;
+            }
+            if ($guarda) {
+                $directorio = rtrim($config->path_base, '/\\').'/archivos';
+                if (!is_dir($directorio) && !@mkdir($directorio, 0755, true) && !is_dir($directorio)) {
+                    throw new \RuntimeException('No se pudo preparar el directorio del PDF.');
+                }
+                $temporal = @tempnam($directorio, '.complemento-');
+                if ($temporal === false || @file_put_contents($temporal, $contenido, LOCK_EX) !== strlen($contenido)) {
+                    throw new \RuntimeException('No se pudo guardar el PDF completo.');
+                }
+                $destino = $directorio.'/complemento-'.$registro_id.'-'.bin2hex(random_bytes(16)).'.pdf';
+                if (!@chmod($temporal, 0644)) {
+                    throw new \RuntimeException('No se pudieron ajustar los permisos del PDF guardado.');
+                }
+                // El enlace publica el archivo completo de forma exclusiva: nunca reemplaza otra solicitud.
+                if (!@link($temporal, $destino)) { throw new \RuntimeException('No se pudo publicar el PDF guardado.'); }
+                $publicado = $destino;
+                if (!@unlink($temporal)) { throw new \RuntimeException('No se pudo concluir el guardado del PDF.'); }
+                $temporal = null;
+                $publicado = null;
+                return $destino;
+            }
+            return [];
+        } catch (Throwable $error) {
+            if (is_string($publicado) && is_file($publicado)) { @unlink($publicado); }
+            $mensaje = $error instanceof \PDOException ? 'No se pudo leer el complemento para imprimir.'
+                : (($error instanceof \InvalidArgumentException || $error instanceof \RuntimeException)
+                    ? $error->getMessage() : 'No se pudo generar el PDF del complemento.');
+            return $this->error->error(mensaje: $mensaje, data: []);
+        } finally {
+            if (is_string($temporal) && is_file($temporal)) { @unlink($temporal); }
+        }
+    }
+
    final public function pdf(bool              $descarga, bool $guarda, PDO $link, _doc $modelo_documento,
                               _transacciones_fc $modelo_entidad, _partida $modelo_partida,
                               _cuenta_predial   $modelo_predial, _relacion $modelo_relacion,
@@ -632,6 +691,16 @@ class _pdf
                               _sellado          $modelo_sellado, _data_impuestos $modelo_traslado, _uuid_ext $modelo_uuid_ext,
                               int               $registro_id): array|string|bool
     {
+
+        if ($modelo_entidad->tabla === 'fc_complemento_pago') {
+            try {
+                if (_formato_pdf_complemento::seleccionar(new generales()) === 'aguaban') {
+                    return $this->pdf_complemento_pago_aguaban($descarga, $guarda, $link, $registro_id);
+                }
+            } catch (\InvalidArgumentException $error) {
+                return $this->error->error(mensaje: $error->getMessage(), data: []);
+            }
+        }
 
         $factura = $modelo_entidad->get_factura(modelo_partida: $modelo_partida,
             modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion,
