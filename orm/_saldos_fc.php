@@ -4,6 +4,7 @@ namespace gamboamartin\facturacion\models;
 
 use gamboamartin\errores\errores;
 use PDO;
+use Throwable;
 
 class _saldos_fc{
 
@@ -112,12 +113,19 @@ class _saldos_fc{
         $fc_factura_upd['monto_saldo_aplicado'] = $monto_saldo_aplicado;
         $fc_factura_upd['saldo'] = $fc_factura['fc_factura_total'] - $monto_saldo_aplicado;
 
-        $upd = $fc_factura_modelo->modifica_bd(registro: $fc_factura_upd,id:  $fc_factura_id,
-            verifica_permite_transaccion: false);
-        if(errores::$error){
-            return $this->error->error(mensaje: 'Error al actualizar saldos',data:  $upd);
+        // Actualizar la cache de saldos no recalcula comisiones ni altera los importes fiscales.
+        try {
+            $upd = $link->prepare('UPDATE fc_factura SET monto_pago_nc=:monto_pago_nc,
+                monto_pago_cp=:monto_pago_cp, monto_saldo_aplicado=:monto_saldo_aplicado,
+                saldo=:saldo WHERE id=:id');
+            if ($upd === false || !$upd->execute($fc_factura_upd + ['id'=>$fc_factura_id])) {
+                return $this->error->error(mensaje: 'Error al actualizar saldos', data: $fc_factura_id);
+            }
+            return (object)['registro_id'=>$fc_factura_id, 'registro'=>$fc_factura_upd,
+                'n_registros'=>$upd->rowCount()];
+        } catch (Throwable) {
+            return $this->error->error(mensaje: 'Error al actualizar saldos', data: $fc_factura_id);
         }
-        return $upd;
     }
 
     /**

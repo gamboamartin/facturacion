@@ -41,10 +41,12 @@ use stdClass;
 use Throwable;
 
 require_once __DIR__.'/_timbrado_masivo.php';
+require_once __DIR__.'/_complemento_desde_factura.php';
 
 class controlador_fc_factura extends _base_system_fc
 {
     use _timbrado_masivo;
+    use _complemento_desde_factura;
 
     /** Metadatos de presentación: solo identificadores, nunca nombres en atributos HTML. */
     public array $informacion_global_contexto = ['sucursales' => [], 'tipos_ingreso' => []];

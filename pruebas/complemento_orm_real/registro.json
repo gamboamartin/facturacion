@@ -1,0 +1,29 @@
+{
+  "id": "complemento_orm_real",
+  "casos": [
+    "alta_real_estructura_saldos_totales",
+    "reintento_real_no_duplica",
+    "segunda_parcialidad_real",
+    "fallo_docto_revierte_cadena_real",
+    "iva_16_real_traslados_y_totales"
+  ],
+  "fuentes": [
+    "orm/_complemento_desde_factura.php",
+    "orm/fc_complemento_pago.php",
+    "orm/fc_pago_pago.php",
+    "orm/fc_docto_relacionado.php",
+    "vendor/gamboa.martin/administrador/base/orm/modelo.php",
+    "vendor/gamboa.martin/administrador/base/orm/inserts.php",
+    "vendor/gamboa.martin/proceso/orm/pr_proceso.php",
+    "vendor/gamboa.martin/comercial/orm/com_tipo_cambio.php",
+    "orm/_saldos_fc.php"
+  ],
+  "precondiciones": {
+    "sql_mode": "",
+    "ddl": "SHOW CREATE TABLE sin filas; AUTO_INCREMENT sanitizado",
+    "red": "deshabilitada",
+    "sin_sql_estricto": true
+  },
+  "estado_esperado": "PASS_COMPLEMENTO_ORM_REAL_INTEGRACION",
+  "suite": "complemento_orm_real_integracion"
+}

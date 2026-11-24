@@ -1,0 +1,37 @@
+{
+  "suite": "complemento_desde_factura_integracion",
+  "estado_esperado": "PASS_COMPLEMENTO_DESDE_FACTURA_INTEGRACION",
+  "casos": [
+    "columnas_fixture_contrastadas_con_metadatos_reales",
+    "catalogo_plan_solo_lectura",
+    "catalogo_alta_limitada_y_revocacion_preservada",
+    "acl_sql_real_revocacion_ve_estado_actual_en_tx",
+    "permiso_revocado_no_lee_ni_crea",
+    "preparar_sin_escrituras_y_codigo_factura_intacto",
+    "crear_estructura_unica_y_datos_releidos",
+    "monto_parcial_editable_y_saldo_actualizado",
+    "idempotencia_misma_solicitud_y_payload_distinto",
+    "fallo_callback_revierte_toda_estructura",
+    "facturas_no_elegibles_no_generan_cp",
+    "uuid_local_inconsistente_y_sello_duplicado",
+    "csd_otro_emisor_y_forma_inactiva_rechazados",
+    "rotacion_csd_mismo_emisor_admitida",
+    "transaccion_ajena_no_revierte_datos",
+    "autocommit_cero_no_inicia_operacion",
+    "saldo_ignora_cache_y_considera_notas_activas",
+    "campos_de_autoridad_del_browser_se_ignoran",
+    "dos_conexiones_no_crean_dos_complementos_simultaneos",
+    "revocacion_durante_preparacion_no_escribe",
+    "callback_no_persistido_no_devuelve_exito",
+    "guardia_compartida_ve_pago_posterior_a_snapshot_ajeno",
+    "guardia_compartida_bloquea_factura_para_otra_conexion",
+    "alta_docto_real_revierte_error_con_tx_propia_y_savepoint"
+  ],
+  "fuentes": [
+    "orm/_complemento_desde_factura.php",
+    "tools/migrations/_accion_complemento_desde_factura.php",
+    "orm/fc_docto_relacionado.php",
+    "controllers/_complemento_desde_factura.php"
+  ],
+  "limites": "Servicio real con SQL sintético y callback falso; sin modelos legacy completos, HTTP/ACL real ni PAC."
+}

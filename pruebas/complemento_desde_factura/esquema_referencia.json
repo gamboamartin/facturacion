@@ -1,0 +1,1208 @@
+{
+  "origen": "Export SHOW CREATE/COLUMNS/FK de desarrollo, sin filas; /tmp/cp-orm-real-audit-20261124/metadatos.json",
+  "origen_sha256": "f90161cd5413ed9e87cf94b297e5c4bd75fa91e96f73f29698bd3f6497ab1992",
+  "alcance": "Solo columnas/relaciones reales de las tablas de dominio usadas por fixture mínimo. ACL sintético se valida aparte; no replica restricciones/defaults completos del ORM.",
+  "tablas": {
+    "org_empresa": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "cat_sat_regimen_fiscal_id",
+        "logo",
+        "nombre_comercial",
+        "fecha_inicio_operaciones",
+        "fecha_ultimo_cambio_sat",
+        "dp_calle_pertenece_id",
+        "exterior",
+        "interior",
+        "dp_calle_pertenece_entre1_id",
+        "dp_calle_pertenece_entre2_id",
+        "email_sat",
+        "telefono_1",
+        "telefono_2",
+        "telefono_3",
+        "rfc",
+        "razon_social",
+        "pagina_web",
+        "org_tipo_empresa_id",
+        "cat_sat_tipo_persona_id"
+      ],
+      "ddl_sha256": "0ab13094b7ddfb7e847fae6ebbfc43e72e6f9b5d64db4268d723d74ee947a7a5",
+      "relaciones": [
+        {
+          "TABLE_NAME": "org_empresa",
+          "COLUMN_NAME": "cat_sat_regimen_fiscal_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_regimen_fiscal",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "org_empresa",
+          "COLUMN_NAME": "dp_calle_pertenece_id",
+          "REFERENCED_TABLE_NAME": "dp_calle_pertenece",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "org_empresa",
+          "COLUMN_NAME": "dp_calle_pertenece_entre1_id",
+          "REFERENCED_TABLE_NAME": "dp_calle_pertenece",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "org_empresa",
+          "COLUMN_NAME": "dp_calle_pertenece_entre2_id",
+          "REFERENCED_TABLE_NAME": "dp_calle_pertenece",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "org_empresa",
+          "COLUMN_NAME": "org_tipo_empresa_id",
+          "REFERENCED_TABLE_NAME": "org_tipo_empresa",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "org_empresa",
+          "COLUMN_NAME": "cat_sat_tipo_persona_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_tipo_persona",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "org_sucursal": {
+      "columnas": [
+        "id",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "codigo_bis",
+        "fecha_inicio_operaciones",
+        "dp_calle_pertenece_id",
+        "exterior",
+        "interior",
+        "telefono_1",
+        "telefono_2",
+        "telefono_3",
+        "org_empresa_id",
+        "descripcion",
+        "descripcion_select",
+        "alias",
+        "org_tipo_sucursal_id",
+        "serie"
+      ],
+      "ddl_sha256": "0d1724f24362a6287fd452e51a0f8f602a6c98ec40cf83da0f0caa09c3ef5c28",
+      "relaciones": [
+        {
+          "TABLE_NAME": "org_sucursal",
+          "COLUMN_NAME": "org_empresa_id",
+          "REFERENCED_TABLE_NAME": "org_empresa",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "org_sucursal",
+          "COLUMN_NAME": "dp_calle_pertenece_id",
+          "REFERENCED_TABLE_NAME": "dp_calle_pertenece",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "org_sucursal",
+          "COLUMN_NAME": "org_tipo_sucursal_id",
+          "REFERENCED_TABLE_NAME": "org_tipo_sucursal",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "fc_csd": {
+      "columnas": [
+        "id",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "serie",
+        "org_sucursal_id",
+        "descripcion",
+        "no_certificado",
+        "password",
+        "etapa"
+      ],
+      "ddl_sha256": "614cb5c3192b3ef6311ee3ec00cc975162d648b7f6d26ec2f5b2752b6a24a6ad",
+      "relaciones": [
+        {
+          "TABLE_NAME": "fc_csd",
+          "COLUMN_NAME": "org_sucursal_id",
+          "REFERENCED_TABLE_NAME": "org_sucursal",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "com_cliente": {
+      "columnas": [
+        "id",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "razon_social",
+        "rfc",
+        "numero_exterior",
+        "numero_interior",
+        "telefono",
+        "cat_sat_regimen_fiscal_id",
+        "cat_sat_moneda_id",
+        "cat_sat_forma_pago_id",
+        "cat_sat_metodo_pago_id",
+        "cat_sat_uso_cfdi_id",
+        "cat_sat_tipo_de_comprobante_id",
+        "codigo",
+        "descripcion",
+        "predeterminado",
+        "com_tipo_cliente_id",
+        "cat_sat_tipo_persona_id",
+        "dp_municipio_id",
+        "pais",
+        "estado",
+        "municipio",
+        "colonia",
+        "calle",
+        "cp"
+      ],
+      "ddl_sha256": "e87b4b9abef2aedd895e20ccb1dfddd06621b890260068ba5c5f30af08ee8bed",
+      "relaciones": [
+        {
+          "TABLE_NAME": "com_cliente",
+          "COLUMN_NAME": "dp_municipio_id",
+          "REFERENCED_TABLE_NAME": "dp_municipio",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "com_cliente",
+          "COLUMN_NAME": "cat_sat_regimen_fiscal_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_regimen_fiscal",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "com_cliente",
+          "COLUMN_NAME": "cat_sat_moneda_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_moneda",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "com_cliente",
+          "COLUMN_NAME": "cat_sat_forma_pago_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_forma_pago",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "com_cliente",
+          "COLUMN_NAME": "cat_sat_uso_cfdi_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_uso_cfdi",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "com_cliente",
+          "COLUMN_NAME": "cat_sat_tipo_de_comprobante_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_tipo_de_comprobante",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "com_cliente",
+          "COLUMN_NAME": "cat_sat_metodo_pago_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_metodo_pago",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "com_cliente",
+          "COLUMN_NAME": "com_tipo_cliente_id",
+          "REFERENCED_TABLE_NAME": "com_tipo_cliente",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "com_cliente",
+          "COLUMN_NAME": "cat_sat_tipo_persona_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_tipo_persona",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "com_sucursal": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "numero_interior",
+        "numero_exterior",
+        "nombre_contacto",
+        "telefono_1",
+        "telefono_2",
+        "telefono_3",
+        "com_cliente_id",
+        "dp_calle_pertenece_id",
+        "predeterminado",
+        "com_tipo_sucursal_id",
+        "dp_municipio_id",
+        "pais",
+        "estado",
+        "municipio",
+        "colonia",
+        "calle",
+        "cp"
+      ],
+      "ddl_sha256": "623eac72d66fbfc1cadef2c174c0c796c20881fef2f17fd50ef91f4170f22fab",
+      "relaciones": [
+        {
+          "TABLE_NAME": "com_sucursal",
+          "COLUMN_NAME": "dp_municipio_id",
+          "REFERENCED_TABLE_NAME": "dp_municipio",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "com_sucursal",
+          "COLUMN_NAME": "com_cliente_id",
+          "REFERENCED_TABLE_NAME": "com_cliente",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "com_sucursal",
+          "COLUMN_NAME": "dp_calle_pertenece_id",
+          "REFERENCED_TABLE_NAME": "dp_calle_pertenece",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "com_sucursal",
+          "COLUMN_NAME": "com_tipo_sucursal_id",
+          "REFERENCED_TABLE_NAME": "com_tipo_sucursal",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "cat_sat_moneda": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "dp_pais_id",
+        "predeterminado"
+      ],
+      "ddl_sha256": "3411c0c43b8205a8d53f69bdb718b88f54a92e378905c450a3ce805e277970bc",
+      "relaciones": [
+        {
+          "TABLE_NAME": "cat_sat_moneda",
+          "COLUMN_NAME": "dp_pais_id",
+          "REFERENCED_TABLE_NAME": "dp_pais",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "cat_sat_metodo_pago": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "predeterminado"
+      ],
+      "ddl_sha256": "88cf3dd18f238b709c92481268956418aea40c9160205f66dc2d914943e12e0d",
+      "relaciones": []
+    },
+    "cat_sat_forma_pago": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "predeterminado"
+      ],
+      "ddl_sha256": "0adafb6e86983b81b4a14398add61822eeda9cb8257cdb0f799d453609d0d701",
+      "relaciones": []
+    },
+    "cat_sat_uso_cfdi": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "predeterminado"
+      ],
+      "ddl_sha256": "bc69fae55f70d7c551a126e983771ff99341a415c472e0ae4a2409c852785a8c",
+      "relaciones": []
+    },
+    "cat_sat_tipo_de_comprobante": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "predeterminado"
+      ],
+      "ddl_sha256": "1184896574b7e29a8715689244efd60f176b56db2a419527480e6dbc6852b515",
+      "relaciones": []
+    },
+    "com_tipo_cambio": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "fecha",
+        "cat_sat_moneda_id",
+        "predeterminado",
+        "monto"
+      ],
+      "ddl_sha256": "0bc5ff9e753cbb0a52501687752b85f5c80cefefa379257bdf5ecaf99f289dd2",
+      "relaciones": [
+        {
+          "TABLE_NAME": "com_tipo_cambio",
+          "COLUMN_NAME": "cat_sat_moneda_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_moneda",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "fc_factura": {
+      "columnas": [
+        "id",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "fc_csd_id",
+        "folio",
+        "serie",
+        "cat_sat_forma_pago_id",
+        "cat_sat_metodo_pago_id",
+        "cat_sat_moneda_id",
+        "com_tipo_cambio_id",
+        "cat_sat_uso_cfdi_id",
+        "version",
+        "fecha",
+        "cat_sat_tipo_de_comprobante_id",
+        "dp_calle_pertenece_id",
+        "exportacion",
+        "cat_sat_regimen_fiscal_id",
+        "com_sucursal_id",
+        "descripcion",
+        "observaciones",
+        "total_descuento",
+        "sub_total_base",
+        "sub_total",
+        "total_traslados",
+        "total_retenciones",
+        "aplica_saldo",
+        "total",
+        "monto_pago_nc",
+        "monto_pago_cp",
+        "saldo",
+        "monto_saldo_aplicado",
+        "folio_fiscal",
+        "etapa",
+        "es_plantilla",
+        "cantidad",
+        "valor_unitario",
+        "descuento",
+        "com_tipo_producto_id",
+        "global_periodicidad",
+        "global_meses",
+        "global_anio"
+      ],
+      "ddl_sha256": "f5e28439aaf44f01ea08bb84eb8b58ab2e6ede10b21684fac2f53c1089c303b8",
+      "relaciones": [
+        {
+          "TABLE_NAME": "fc_factura",
+          "COLUMN_NAME": "dp_calle_pertenece_id",
+          "REFERENCED_TABLE_NAME": "dp_calle_pertenece",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_factura",
+          "COLUMN_NAME": "cat_sat_regimen_fiscal_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_regimen_fiscal",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_factura",
+          "COLUMN_NAME": "com_sucursal_id",
+          "REFERENCED_TABLE_NAME": "com_sucursal",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_factura",
+          "COLUMN_NAME": "fc_csd_id",
+          "REFERENCED_TABLE_NAME": "fc_csd",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_factura",
+          "COLUMN_NAME": "cat_sat_forma_pago_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_forma_pago",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_factura",
+          "COLUMN_NAME": "cat_sat_metodo_pago_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_metodo_pago",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_factura",
+          "COLUMN_NAME": "cat_sat_moneda_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_moneda",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_factura",
+          "COLUMN_NAME": "com_tipo_cambio_id",
+          "REFERENCED_TABLE_NAME": "com_tipo_cambio",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_factura",
+          "COLUMN_NAME": "cat_sat_uso_cfdi_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_uso_cfdi",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_factura",
+          "COLUMN_NAME": "cat_sat_tipo_de_comprobante_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_tipo_de_comprobante",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "pr_etapa": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "codigo_bis",
+        "descripcion_select",
+        "alias"
+      ],
+      "ddl_sha256": "0618f40d49abb45b8f3767df8cc53568e87c2a1b67dae301aff3620ea46d5445",
+      "relaciones": []
+    },
+    "pr_etapa_proceso": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "codigo_bis",
+        "descripcion_select",
+        "alias",
+        "pr_proceso_id",
+        "pr_etapa_id",
+        "adm_accion_id"
+      ],
+      "ddl_sha256": "5e7d2a5cd3aabbb554f1e8a651d857d88d9496f4c729819d1f939748bfaad09c",
+      "relaciones": [
+        {
+          "TABLE_NAME": "pr_etapa_proceso",
+          "COLUMN_NAME": "pr_proceso_id",
+          "REFERENCED_TABLE_NAME": "pr_proceso",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "pr_etapa_proceso",
+          "COLUMN_NAME": "pr_etapa_id",
+          "REFERENCED_TABLE_NAME": "pr_etapa",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "pr_etapa_proceso",
+          "COLUMN_NAME": "adm_accion_id",
+          "REFERENCED_TABLE_NAME": "adm_accion",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "fc_factura_etapa": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "predeterminado",
+        "pr_etapa_proceso_id",
+        "fc_factura_id",
+        "fecha"
+      ],
+      "ddl_sha256": "5779ae98e14b17a11e6a8a3a658cca3605b32cec7e5feb1469825fc075218cd8",
+      "relaciones": [
+        {
+          "TABLE_NAME": "fc_factura_etapa",
+          "COLUMN_NAME": "pr_etapa_proceso_id",
+          "REFERENCED_TABLE_NAME": "pr_etapa_proceso",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_factura_etapa",
+          "COLUMN_NAME": "fc_factura_id",
+          "REFERENCED_TABLE_NAME": "fc_factura",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "fc_cfdi_sellado": {
+      "columnas": [
+        "id",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "descripcion",
+        "fc_factura_id",
+        "comprobante_sello",
+        "comprobante_certificado",
+        "comprobante_no_certificado",
+        "complemento_tfd_sl",
+        "complemento_tfd_fecha_timbrado",
+        "complemento_tfd_no_certificado_sat",
+        "complemento_tfd_rfc_prov_certif",
+        "complemento_tfd_sello_cfd",
+        "complemento_tfd_sello_sat",
+        "uuid",
+        "complemento_tfd_tfd",
+        "cadena_complemento_sat",
+        "fecha_pago"
+      ],
+      "ddl_sha256": "a839137477fbd95c6bdda6b59eb4e42be1fea50d6797972cb111911113f0ec96",
+      "relaciones": [
+        {
+          "TABLE_NAME": "fc_cfdi_sellado",
+          "COLUMN_NAME": "fc_factura_id",
+          "REFERENCED_TABLE_NAME": "fc_factura",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "fc_complemento_pago": {
+      "columnas": [
+        "id",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "fc_csd_id",
+        "folio",
+        "serie",
+        "cat_sat_forma_pago_id",
+        "cat_sat_metodo_pago_id",
+        "cat_sat_moneda_id",
+        "com_tipo_cambio_id",
+        "cat_sat_uso_cfdi_id",
+        "version",
+        "fecha",
+        "cat_sat_tipo_de_comprobante_id",
+        "dp_calle_pertenece_id",
+        "exportacion",
+        "cat_sat_regimen_fiscal_id",
+        "com_sucursal_id",
+        "descripcion",
+        "observaciones",
+        "total_descuento",
+        "sub_total_base",
+        "sub_total",
+        "total_traslados",
+        "total_retenciones",
+        "aplica_saldo",
+        "total",
+        "monto_pago_nc",
+        "monto_pago_cp",
+        "saldo",
+        "monto_saldo_aplicado",
+        "folio_fiscal",
+        "etapa",
+        "es_plantilla",
+        "cantidad",
+        "valor_unitario",
+        "descuento",
+        "com_tipo_producto_id"
+      ],
+      "ddl_sha256": "f8b72f57642c127921a8773398d1c6bfb3838ef7c5517491b7248c1c29ef2a92",
+      "relaciones": [
+        {
+          "TABLE_NAME": "fc_complemento_pago",
+          "COLUMN_NAME": "dp_calle_pertenece_id",
+          "REFERENCED_TABLE_NAME": "dp_calle_pertenece",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_complemento_pago",
+          "COLUMN_NAME": "cat_sat_tipo_de_comprobante_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_tipo_de_comprobante",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_complemento_pago",
+          "COLUMN_NAME": "cat_sat_regimen_fiscal_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_regimen_fiscal",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_complemento_pago",
+          "COLUMN_NAME": "com_sucursal_id",
+          "REFERENCED_TABLE_NAME": "com_sucursal",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_complemento_pago",
+          "COLUMN_NAME": "fc_csd_id",
+          "REFERENCED_TABLE_NAME": "fc_csd",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_complemento_pago",
+          "COLUMN_NAME": "cat_sat_forma_pago_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_forma_pago",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_complemento_pago",
+          "COLUMN_NAME": "cat_sat_metodo_pago_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_metodo_pago",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_complemento_pago",
+          "COLUMN_NAME": "cat_sat_moneda_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_moneda",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_complemento_pago",
+          "COLUMN_NAME": "com_tipo_cambio_id",
+          "REFERENCED_TABLE_NAME": "com_tipo_cambio",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_complemento_pago",
+          "COLUMN_NAME": "cat_sat_uso_cfdi_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_uso_cfdi",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "fc_pago": {
+      "columnas": [
+        "id",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "fc_complemento_pago_id",
+        "version"
+      ],
+      "ddl_sha256": "b814efe2605b5ca84e8db26e984e427c92f1b13a9b4d33a2b9497d8db0c7416d",
+      "relaciones": [
+        {
+          "TABLE_NAME": "fc_pago",
+          "COLUMN_NAME": "fc_complemento_pago_id",
+          "REFERENCED_TABLE_NAME": "fc_complemento_pago",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "fc_pago_pago": {
+      "columnas": [
+        "id",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "fc_pago_id",
+        "fecha_pago",
+        "cat_sat_forma_pago_id",
+        "cat_sat_moneda_id",
+        "com_tipo_cambio_id",
+        "monto"
+      ],
+      "ddl_sha256": "fe62b48fd2e8bace2a7fe5c79886a826e5a24a0a8ba7644527f7d0a0a3fb68e8",
+      "relaciones": [
+        {
+          "TABLE_NAME": "fc_pago_pago",
+          "COLUMN_NAME": "fc_pago_id",
+          "REFERENCED_TABLE_NAME": "fc_pago",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_pago_pago",
+          "COLUMN_NAME": "cat_sat_forma_pago_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_forma_pago",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_pago_pago",
+          "COLUMN_NAME": "cat_sat_moneda_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_moneda",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_pago_pago",
+          "COLUMN_NAME": "com_tipo_cambio_id",
+          "REFERENCED_TABLE_NAME": "com_tipo_cambio",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "fc_docto_relacionado": {
+      "columnas": [
+        "id",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "fc_factura_id",
+        "equivalencia_dr",
+        "num_parcialidad",
+        "imp_saldo_ant",
+        "imp_pagado",
+        "imp_saldo_insoluto",
+        "cat_sat_obj_imp_id",
+        "fc_pago_pago_id",
+        "total_factura",
+        "total_factura_tc",
+        "imp_pagado_tc",
+        "saldo_factura_tc"
+      ],
+      "ddl_sha256": "d4f4f334b26ed992041dedd0a1a18888a294dc1f990e939a0d8869380ce937f4",
+      "relaciones": [
+        {
+          "TABLE_NAME": "fc_docto_relacionado",
+          "COLUMN_NAME": "fc_factura_id",
+          "REFERENCED_TABLE_NAME": "fc_factura",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_docto_relacionado",
+          "COLUMN_NAME": "cat_sat_obj_imp_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_obj_imp",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_docto_relacionado",
+          "COLUMN_NAME": "fc_pago_pago_id",
+          "REFERENCED_TABLE_NAME": "fc_pago_pago",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "fc_nota_credito": {
+      "columnas": [
+        "id",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "fc_csd_id",
+        "folio",
+        "serie",
+        "cat_sat_forma_pago_id",
+        "cat_sat_metodo_pago_id",
+        "cat_sat_moneda_id",
+        "com_tipo_cambio_id",
+        "cat_sat_uso_cfdi_id",
+        "version",
+        "fecha",
+        "cat_sat_tipo_de_comprobante_id",
+        "dp_calle_pertenece_id",
+        "exportacion",
+        "cat_sat_regimen_fiscal_id",
+        "com_sucursal_id",
+        "descripcion",
+        "observaciones",
+        "total_descuento",
+        "sub_total_base",
+        "sub_total",
+        "total_traslados",
+        "total_retenciones",
+        "aplica_saldo",
+        "total",
+        "monto_pago_nc",
+        "monto_pago_cp",
+        "saldo",
+        "monto_saldo_aplicado",
+        "folio_fiscal",
+        "etapa",
+        "es_plantilla",
+        "cantidad",
+        "valor_unitario",
+        "descuento"
+      ],
+      "ddl_sha256": "18b614f9df46724e8ee6e5d154b80cbbee1efd1d750a3ff7544c1f0a15b7f859",
+      "relaciones": [
+        {
+          "TABLE_NAME": "fc_nota_credito",
+          "COLUMN_NAME": "dp_calle_pertenece_id",
+          "REFERENCED_TABLE_NAME": "dp_calle_pertenece",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_nota_credito",
+          "COLUMN_NAME": "cat_sat_tipo_de_comprobante_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_tipo_de_comprobante",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_nota_credito",
+          "COLUMN_NAME": "cat_sat_regimen_fiscal_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_regimen_fiscal",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_nota_credito",
+          "COLUMN_NAME": "com_sucursal_id",
+          "REFERENCED_TABLE_NAME": "com_sucursal",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_nota_credito",
+          "COLUMN_NAME": "fc_csd_id",
+          "REFERENCED_TABLE_NAME": "fc_csd",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_nota_credito",
+          "COLUMN_NAME": "cat_sat_forma_pago_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_forma_pago",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_nota_credito",
+          "COLUMN_NAME": "cat_sat_metodo_pago_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_metodo_pago",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_nota_credito",
+          "COLUMN_NAME": "cat_sat_moneda_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_moneda",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_nota_credito",
+          "COLUMN_NAME": "com_tipo_cambio_id",
+          "REFERENCED_TABLE_NAME": "com_tipo_cambio",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_nota_credito",
+          "COLUMN_NAME": "cat_sat_uso_cfdi_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_uso_cfdi",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "fc_relacion_nc": {
+      "columnas": [
+        "id",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "descripcion",
+        "cat_sat_tipo_relacion_id",
+        "fc_nota_credito_id"
+      ],
+      "ddl_sha256": "3e358cc40625ef8b34b838c2f376795066d09f2d003cad658f2580675eb3c1cd",
+      "relaciones": [
+        {
+          "TABLE_NAME": "fc_relacion_nc",
+          "COLUMN_NAME": "cat_sat_tipo_relacion_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_tipo_relacion",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_relacion_nc",
+          "COLUMN_NAME": "fc_nota_credito_id",
+          "REFERENCED_TABLE_NAME": "fc_nota_credito",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "fc_nc_rel": {
+      "columnas": [
+        "id",
+        "codigo",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "descripcion_select",
+        "alias",
+        "codigo_bis",
+        "descripcion",
+        "fc_relacion_nc_id",
+        "fc_factura_id",
+        "monto_aplicado_factura"
+      ],
+      "ddl_sha256": "0156b929afc86e70b39fe5d4feea9c5adbd9b83164040c5bfd4203debf6496f0",
+      "relaciones": [
+        {
+          "TABLE_NAME": "fc_nc_rel",
+          "COLUMN_NAME": "fc_relacion_nc_id",
+          "REFERENCED_TABLE_NAME": "fc_relacion_nc",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "fc_nc_rel",
+          "COLUMN_NAME": "fc_factura_id",
+          "REFERENCED_TABLE_NAME": "fc_factura",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "adm_grupo": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "root",
+        "descripcion_select",
+        "codigo",
+        "codigo_bis",
+        "alias"
+      ],
+      "ddl_sha256": "0a92be80ce53f8c8263d34b19a1e8c5ecbfc0f1c818f70feeb95b22a3957ec95",
+      "relaciones": []
+    },
+    "adm_usuario": {
+      "columnas": [
+        "id",
+        "user",
+        "password",
+        "email",
+        "adm_grupo_id",
+        "status",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "fecha_alta",
+        "fecha_update",
+        "session",
+        "telefono",
+        "nombre",
+        "ap",
+        "am",
+        "codigo",
+        "descripcion_select",
+        "descripcion",
+        "codigo_bis",
+        "predeterminado"
+      ],
+      "ddl_sha256": "48c5a53dad1b5a08142a741db33b3369d3b8c48b3e90f1bb5480ba49468dbd12",
+      "relaciones": [
+        {
+          "TABLE_NAME": "adm_usuario",
+          "COLUMN_NAME": "adm_grupo_id",
+          "REFERENCED_TABLE_NAME": "adm_grupo",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "adm_seccion": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "etiqueta_label",
+        "status",
+        "adm_menu_id",
+        "icono",
+        "fecha_alta",
+        "fecha_update",
+        "usuario_alta_id",
+        "usuario_update_id",
+        "codigo",
+        "codigo_bis",
+        "descripcion_select",
+        "alias",
+        "adm_namespace_id"
+      ],
+      "ddl_sha256": "4eba55dd8acd7713006e87744ec35cdfd0a55315391bba4a6eb431668630e6e6",
+      "relaciones": [
+        {
+          "TABLE_NAME": "adm_seccion",
+          "COLUMN_NAME": "adm_menu_id",
+          "REFERENCED_TABLE_NAME": "adm_menu",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "adm_seccion",
+          "COLUMN_NAME": "adm_namespace_id",
+          "REFERENCED_TABLE_NAME": "adm_namespace",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "adm_accion": {
+      "columnas": [
+        "id",
+        "descripcion",
+        "etiqueta_label",
+        "adm_seccion_id",
+        "status",
+        "icono",
+        "visible",
+        "inicio",
+        "lista",
+        "seguridad",
+        "usuario_update_id",
+        "usuario_alta_id",
+        "fecha_alta",
+        "fecha_update",
+        "es_modal",
+        "es_view",
+        "titulo",
+        "css",
+        "es_status",
+        "descripcion_select",
+        "codigo",
+        "codigo_bis",
+        "alias",
+        "es_lista",
+        "muestra_icono_btn",
+        "muestra_titulo_btn",
+        "target"
+      ],
+      "ddl_sha256": "616e874546e6e02030b88ff7dfad6af0d7c252f9220bec82f16d54873ebd077f",
+      "relaciones": [
+        {
+          "TABLE_NAME": "adm_accion",
+          "COLUMN_NAME": "adm_seccion_id",
+          "REFERENCED_TABLE_NAME": "adm_seccion",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    }
+  }
+}

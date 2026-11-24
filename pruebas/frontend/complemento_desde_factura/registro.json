@@ -1,0 +1,17 @@
+{
+  "suite": "complemento_desde_factura_frontend",
+  "tipo": "navegador_interceptado",
+  "casos_navegador": [
+    "precarga_referencia_y_saldo_sin_operaciones_automaticas",
+    "responsive_320_390_1366_sin_desbordamiento",
+    "datos_factura_y_catalogos_escapados",
+    "confirmacion_obligatoria_doble_click_y_doble_script_solo_un_post",
+    "error_conserva_datos_y_clave_para_reintento",
+    "cambio_moneda_limpia_importe_sin_convertir_y_misma_moneda_conserva",
+    "endpoint_externo_bloqueado_sin_peticiones",
+    "redireccion_externa_bloqueada_despues_de_crear",
+    "fallo_red_conserva_clave_y_no_reintenta_automaticamente",
+    "catalogos_ausentes_impiden_guardar"
+  ],
+  "alcance": "Vista PHP real y JavaScript real con Chromium y todas las respuestas interceptadas; solo datos ficticios, sin aplicación, configuración privada, base de datos ni timbrado real."
+}

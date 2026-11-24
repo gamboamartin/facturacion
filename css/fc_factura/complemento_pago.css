@@ -1,0 +1,137 @@
+/* La nueva captura conserva los estilos del resto de las pantallas de facturación. */
+#vista_fc_factura_complemento_pago {
+    color: #302246;
+    min-width: 0;
+}
+#vista_fc_factura_complemento_pago .cdf-introduccion {
+    margin: 0 0 1.25rem;
+    max-width: 75ch;
+}
+#vista_fc_factura_complemento_pago .cdf-panel {
+    background: #fff;
+    border: 1px solid #e8e1f2;
+    border-radius: 14px;
+    padding: clamp(1rem, 2vw, 1.6rem);
+    margin-bottom: 1.25rem;
+    min-width: 0;
+}
+#vista_fc_factura_complemento_pago h2 {
+    color: #302246;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+}
+#vista_fc_factura_complemento_pago .cdf-referencia,
+#vista_fc_factura_complemento_pago .cdf-campos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.5rem;
+}
+#vista_fc_factura_complemento_pago .cdf-referencia {
+    margin: 0 0 1rem;
+}
+#vista_fc_factura_complemento_pago .cdf-referencia dt {
+    font-size: .9rem;
+    color: #594b6a;
+    margin-bottom: .25rem;
+}
+#vista_fc_factura_complemento_pago .cdf-referencia dd {
+    margin: 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+#vista_fc_factura_complemento_pago .cdf-campo {
+    min-width: 0;
+}
+#vista_fc_factura_complemento_pago .cdf-campo-ancho {
+    grid-column: 1 / -1;
+}
+#vista_fc_factura_complemento_pago .cdf-campo > label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: .45rem;
+}
+#vista_fc_factura_complemento_pago .cdf-campo input,
+#vista_fc_factura_complemento_pago .cdf-campo select {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-height: 44px;
+    box-sizing: border-box;
+    color: #302246;
+    background: #fff;
+    border: 1px solid #bcb0ce;
+    border-radius: 7px;
+    padding: .6rem .75rem;
+    font: inherit;
+}
+#vista_fc_factura_complemento_pago .cdf-campo option {
+    color: #302246;
+    background: #fff;
+}
+#vista_fc_factura_complemento_pago :is(input, select, button, a):focus-visible {
+    outline: 3px solid #7138e2;
+    outline-offset: 3px;
+}
+#vista_fc_factura_complemento_pago .cdf-ayuda {
+    font-size: .9rem;
+    color: #594b6a;
+    line-height: 1.5;
+    margin: .5rem 0 0;
+}
+#vista_fc_factura_complemento_pago .cdf-confirmacion {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    margin: 1.4rem 0 .7rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+#vista_fc_factura_complemento_pago .cdf-confirmacion input {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    margin: .1rem 0 0;
+    accent-color: #7138e2;
+}
+#vista_fc_factura_complemento_pago .cdf-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .8rem;
+    margin-top: 1.2rem;
+}
+#vista_fc_factura_complemento_pago .cdf-acciones button {
+    min-height: 44px;
+}
+#vista_fc_factura_complemento_pago .cdf-aviso {
+    border: 1px solid #bcb0ce;
+    border-radius: 8px;
+    background: #f5f0fc;
+    color: #302246;
+    padding: 1rem;
+    margin: 0 0 1.25rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+#vista_fc_factura_complemento_pago .cdf-aviso[data-tipo="error"] {
+    background: #fff1f0;
+    border-color: #c5453e;
+    color: #8c221c;
+}
+#vista_fc_factura_complemento_pago .cdf-aviso[hidden] {
+    display: none;
+}
+#vista_fc_factura_complemento_pago :disabled {
+    cursor: not-allowed;
+    opacity: .65;
+}
+@media (max-width: 760px) {
+    #vista_fc_factura_complemento_pago .cdf-referencia,
+    #vista_fc_factura_complemento_pago .cdf-campos {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    #vista_fc_factura_complemento_pago .cdf-acciones button {
+        width: 100%;
+        white-space: normal;
+    }
+}

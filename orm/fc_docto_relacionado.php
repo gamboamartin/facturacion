@@ -7,9 +7,11 @@ use gamboamartin\errores\errores;
 use gamboamartin\facturacion\controllers\_pagos;
 use PDO;
 use stdClass;
+use Throwable;
 
 
 class fc_docto_relacionado extends _modelo_parent{
+    private ?int $parcialidades_bloqueadas = null;
     public function __construct(PDO $link)
     {
         $tabla = 'fc_docto_relacionado';
@@ -46,6 +48,68 @@ class fc_docto_relacionado extends _modelo_parent{
     }
 
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
+    {
+        $valida = $this->valida_alta_docto();
+        if (errores::$error) { return $this->error->error(mensaje: 'Error al validar', data: $valida); }
+        $propia = !$this->link->inTransaction();
+        $savepoint = 'cp_docto_'.bin2hex(random_bytes(6));
+        if ($propia) { $this->link->beginTransaction(); }
+        else { $this->link->exec('SAVEPOINT '.$savepoint); }
+        try {
+            // Todas las vías de alta comparten el bloqueo, incluyendo los formularios heredados.
+            $this->sincroniza_saldo_bloqueado((int)$this->registro['fc_factura_id']);
+            $resultado = $this->alta_bd_con_bloqueo($keys_integra_ds);
+            if (errores::$error) {
+                if ($propia) { $this->link->rollBack(); }
+                else { $this->link->exec('ROLLBACK TO SAVEPOINT '.$savepoint); $this->link->exec('RELEASE SAVEPOINT '.$savepoint); }
+                return $resultado;
+            }
+            // Lectura actual también con una transacción externa cuyo snapshot preceda al bloqueo.
+            $this->sincroniza_saldo_bloqueado((int)$this->registro['fc_factura_id']);
+            if ($propia) { $this->link->commit(); }
+            else { $this->link->exec('RELEASE SAVEPOINT '.$savepoint); }
+            return $resultado;
+        } catch (Throwable $error) {
+            if ($this->link->inTransaction()) {
+                if ($propia) { $this->link->rollBack(); }
+                else { $this->link->exec('ROLLBACK TO SAVEPOINT '.$savepoint); $this->link->exec('RELEASE SAVEPOINT '.$savepoint); }
+            }
+            return $this->error->error(mensaje: 'No se pudo guardar el documento relacionado de forma completa.', data: []);
+        } finally {
+            $this->parcialidades_bloqueadas = null;
+        }
+    }
+
+    /** Reproduce la política actual de saldos; no cambia el cálculo de impuestos ni conversiones. */
+    private function sincroniza_saldo_bloqueado(int $facturaId): void
+    {
+        $q = $this->link->prepare('SELECT total,status FROM fc_factura WHERE id=? FOR UPDATE');
+        if (!$q || !$q->execute([$facturaId])) { throw new \RuntimeException('No se pudo bloquear la factura.'); }
+        $factura = $q->fetch(PDO::FETCH_ASSOC);
+        if (!$factura) { throw new \RuntimeException('Factura inexistente.'); }
+        $q = $this->link->prepare('SELECT d.imp_pagado,d.status,c.status AS cp_status,c.aplica_saldo FROM fc_docto_relacionado d
+            INNER JOIN fc_pago_pago pp ON pp.id=d.fc_pago_pago_id INNER JOIN fc_pago p ON p.id=pp.fc_pago_id
+            INNER JOIN fc_complemento_pago c ON c.id=p.fc_complemento_pago_id WHERE d.fc_factura_id=? FOR UPDATE');
+        if (!$q || !$q->execute([$facturaId])) { throw new \RuntimeException('No se pudo consultar el saldo de pagos.'); }
+        $cp = 0.0; $parcialidades = 0;
+        foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if ($row['aplica_saldo'] === 'activo') { $cp += round((float)$row['imp_pagado'], 2); }
+            if ($factura['status'] === 'activo' && $row['status'] === 'activo' && $row['cp_status'] === 'activo') { $parcialidades++; }
+        }
+        $q = $this->link->prepare("SELECT r.monto_aplicado_factura FROM fc_nc_rel r
+            INNER JOIN fc_relacion_nc rn ON rn.id=r.fc_relacion_nc_id INNER JOIN fc_nota_credito n ON n.id=rn.fc_nota_credito_id
+            WHERE r.fc_factura_id=? AND n.aplica_saldo='activo' FOR UPDATE");
+        if (!$q || !$q->execute([$facturaId])) { throw new \RuntimeException('No se pudo consultar el saldo de notas de crédito.'); }
+        $nc = 0.0;
+        foreach ($q->fetchAll(PDO::FETCH_COLUMN) as $monto) { $nc += round((float)$monto, 2); }
+        $q = $this->link->prepare('UPDATE fc_factura SET monto_pago_cp=?,monto_pago_nc=?,monto_saldo_aplicado=?,saldo=? WHERE id=?');
+        if (!$q || !$q->execute([$cp, $nc, $cp + $nc, round((float)$factura['total'] - $cp - $nc, 2), $facturaId])) {
+            throw new \RuntimeException('No se pudo sincronizar el saldo de la factura.');
+        }
+        $this->parcialidades_bloqueadas = $parcialidades;
+    }
+
+    private function alta_bd_con_bloqueo(array $keys_integra_ds): array|stdClass
     {
 
         $valida = $this->valida_alta_docto();
@@ -567,6 +631,10 @@ class fc_docto_relacionado extends _modelo_parent{
     }
 
     private function num_parcialidad_alta(array $registro){
+        if ($this->parcialidades_bloqueadas !== null) {
+            $registro['num_parcialidad'] = $this->parcialidades_bloqueadas + 1;
+            return $registro;
+        }
         $n_parcialidades = (new _pagos())->n_parcialidades(fc_factura_id: $registro['fc_factura_id'],link: $this->link);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al obtener n_parcialidades',data:  $n_parcialidades);

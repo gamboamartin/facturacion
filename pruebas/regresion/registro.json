@@ -560,6 +560,99 @@
         "testGetConParametrosDeProcesarSoloPreparaVista",
         "testSalidaLegacyNoFiltraXmlNiEnsuciaSesion"
       ]
+    },
+    {
+      "id": "complemento_desde_factura_ComplementoDesdeFacturaTest",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 9,
+      "fuentes": {
+        "orm/_complemento_desde_factura.php": "b4cf4b95f4f5ab3f57470d4625fb2fbbdf20ea95d0777a67e4ee96a3ba8832ac",
+        "controllers/_complemento_desde_factura.php": "d3f757767837e9cf881a45cd9d7685071f11ae0fa7c109c12829fd4295607b62",
+        "orm/fc_docto_relacionado.php": "5ae10a73c624ceaa15fe0259633df8dafff7d13ca2548e3277532bfaaa2c534c",
+        "orm/_saldos_fc.php": "f723dff10fe5fe02187bf78b4cbd7a00a04308d70003db5aaec516378ac6276a"
+      },
+      "limites": "Contratos unitarios con PDO o modelos dobles y trait real; no certifica persistencia ni PAC. La cadena ORM con SQL real tiene suite separada.",
+      "clase_phpunit": "complemento_desde_factura/ComplementoDesdeFacturaTest.php",
+      "casos": [
+        "testPrepararSinPermisoNoConsultaFactura",
+        "testCrearSinPermisoNoIniciaTransaccionNiCallback",
+        "testUsuarioCeroNoPuedePrepararAunqueCallbackAutorice",
+        "testUsuarioCeroNoPuedeCrearAunqueCallbackAutorice",
+        "testIdFacturaInvalidoNoLeeContexto",
+        "testImportesNoPositivosOAmbiguosNoAccedenSql",
+        "testClaveSolicitudInvalidaNoAccedeSql",
+        "testFechaInexistenteOIncompletaNoAccedeSql",
+        "testCatalogosCompuestosONegativosNoAccedenSql"
+      ]
+    },
+    {
+      "id": "complemento_desde_factura_ModelosComplementoDesdeFacturaTest",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 6,
+      "fuentes": {
+        "orm/_complemento_desde_factura.php": "b4cf4b95f4f5ab3f57470d4625fb2fbbdf20ea95d0777a67e4ee96a3ba8832ac",
+        "controllers/_complemento_desde_factura.php": "d3f757767837e9cf881a45cd9d7685071f11ae0fa7c109c12829fd4295607b62",
+        "orm/fc_docto_relacionado.php": "5ae10a73c624ceaa15fe0259633df8dafff7d13ca2548e3277532bfaaa2c534c",
+        "orm/_saldos_fc.php": "f723dff10fe5fe02187bf78b4cbd7a00a04308d70003db5aaec516378ac6276a"
+      },
+      "limites": "Contratos unitarios con PDO o modelos dobles y trait real; no certifica persistencia ni PAC. La cadena ORM con SQL real tiene suite separada.",
+      "clase_phpunit": "complemento_desde_factura/ModelosComplementoDesdeFacturaTest.php",
+      "casos": [
+        "testEncadenaIdsYConservaPayloadDeLosTresModelos",
+        "testFalloCabeceraNoCreaPagoNiDocto",
+        "testSinContenedorDePagoNoCreaContrapartes",
+        "testContenedoresDuplicadosNoEligeUnoArbitrario",
+        "testFalloPagoNoCreaDocumentoRelacionado",
+        "testFalloDocumentoRelacionadoNoSeDevuelveComoExito"
+      ]
+    },
+    {
+      "id": "complemento_desde_factura_SaldosComplementoDesdeFacturaTest",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 10,
+      "fuentes": {
+        "orm/_complemento_desde_factura.php": "b4cf4b95f4f5ab3f57470d4625fb2fbbdf20ea95d0777a67e4ee96a3ba8832ac",
+        "controllers/_complemento_desde_factura.php": "d3f757767837e9cf881a45cd9d7685071f11ae0fa7c109c12829fd4295607b62",
+        "orm/fc_docto_relacionado.php": "5ae10a73c624ceaa15fe0259633df8dafff7d13ca2548e3277532bfaaa2c534c",
+        "orm/_saldos_fc.php": "f723dff10fe5fe02187bf78b4cbd7a00a04308d70003db5aaec516378ac6276a"
+      },
+      "limites": "Contratos unitarios con PDO o modelos dobles y trait real; no certifica persistencia ni PAC. La cadena ORM con SQL real tiene suite separada.",
+      "clase_phpunit": "complemento_desde_factura/SaldosComplementoDesdeFacturaTest.php",
+      "casos": [
+        "testActualizaSoloCuatroImportesSaldoSesentaSinComisiones",
+        "testConservaRedondeoPorPagoYPoliticaAplicaSaldo",
+        "testSaldosIdenticosConRowCountCeroSiguenSiendoExito",
+        "testFalloFacturaNoActualizaNada",
+        "testFalloNotasNoActualizaNada",
+        "testFalloPagosNoActualizaNada",
+        "testIdInvalidoNoActualizaNada",
+        "testPrepareFalseNoSeReportaComoExito",
+        "testExecuteFalseNoSeReportaComoExito",
+        "testExcepcionPdoNoFiltraContenidoNiSeReportaExito"
+      ]
+    },
+    {
+      "id": "complemento_desde_factura_SeguridadComplementoDesdeFacturaTest",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 8,
+      "fuentes": {
+        "orm/_complemento_desde_factura.php": "b4cf4b95f4f5ab3f57470d4625fb2fbbdf20ea95d0777a67e4ee96a3ba8832ac",
+        "controllers/_complemento_desde_factura.php": "d3f757767837e9cf881a45cd9d7685071f11ae0fa7c109c12829fd4295607b62",
+        "orm/fc_docto_relacionado.php": "5ae10a73c624ceaa15fe0259633df8dafff7d13ca2548e3277532bfaaa2c534c",
+        "orm/_saldos_fc.php": "f723dff10fe5fe02187bf78b4cbd7a00a04308d70003db5aaec516378ac6276a"
+      },
+      "limites": "Contratos unitarios con PDO o modelos dobles y trait real; no certifica persistencia ni PAC. La cadena ORM con SQL real tiene suite separada.",
+      "clase_phpunit": "complemento_desde_factura/SeguridadComplementoDesdeFacturaTest.php",
+      "casos": [
+        "testSinUsuarioNoConsultaPermisos",
+        "testExigeCuatroPermisosActivosAunqueSesionTengaCache",
+        "testRevocacionSeReconsultaEnLaMismaSesion",
+        "testFalloLegacyNoFiltraNiEnsuciaSesionPosterior",
+        "testExitLegacyNoFiltraNiEnsuciaSesionPosterior",
+        "testPostSinCsrfNoConsultaNiCrea",
+        "testPostCsrfAjenoNoConsultaNiCrea",
+        "testPostSinPermisoConCsrfValidoNoCrea"
+      ]
     }
   ],
   "suites_complementarias": [
@@ -670,6 +763,22 @@
       "ejecutor": "pruebas/timbrado_masivo/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 36
+    },
+    {
+      "id": "complemento_desde_factura_integral",
+      "tipo": "integracion_bd_efimera_sin_red",
+      "registro": "pruebas/complemento_desde_factura/registro.json",
+      "ejecutor": "pruebas/complemento_desde_factura/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 24
+    },
+    {
+      "id": "complemento_orm_real_integral",
+      "tipo": "integracion_bd_efimera_sin_red",
+      "registro": "pruebas/complemento_orm_real/registro.json",
+      "ejecutor": "pruebas/complemento_orm_real/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 5
     }
   ]
 }
