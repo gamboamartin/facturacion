@@ -171,15 +171,18 @@ class _complemento_pago
     private function set_receptor(__CUSTOM_FPDI $pdf): void
     {
 
-        $border = 1;
-        $x = 138;
-        $h = 3.5;
+        $border = 0;
+        $x = 127;
         $y = 39;
+        $h = 4.5;
+        $h2 = 3.5;
+        $w = 70;
 
-        $razon_social = '';
-        $cliente_rfc = 'RFC ';
-        $regimen = 'Regimen Fiscal ';
-        $uso_cfdi = 'Uso CFDI ';
+        $razon_social = $this->datos['receptor']['nombre'];
+        $cliente_rfc = 'RFC ' . $this->datos['receptor']['rfc'];
+        $regimen = 'Regimen Fiscal ' . $this->datos['receptor']['regimen'];
+        $domicilio_fiscal = 'Domicilio fiscal : CP ' . $this->datos['receptor']['codigo_postal'];
+        $uso_cfdi = 'Uso CFDI ' . $this->datos['receptor']['uso_cfdi'];
 
         $razon_social = mb_convert_encoding($razon_social, 'ISO-8859-1', 'UTF-8');
         $cliente_rfc = mb_convert_encoding($cliente_rfc, 'ISO-8859-1', 'UTF-8');
@@ -190,26 +193,32 @@ class _complemento_pago
         $pdf->SetFont('DejaVuSans', 'B', '8');
         $pdf->SetTextColor(18, 61, 112);
         $pdf->SetXY($x, $y);
-        $pdf->multicell(60,$h, $razon_social,$border, 'L');
-        $lineas_razon_social = $pdf->NbLines(60, $razon_social);
+        $pdf->multicell($w,$h, $razon_social,$border, 'L');
+        $lineas_razon_social = $pdf->NbLines($w, $razon_social);
         $y += $h * $lineas_razon_social;
 
         $pdf->SetFont('DejaVuSans', '', '8');
         $pdf->SetTextColor(18, 61, 112);
         $pdf->SetXY($x, $y);
-        $pdf->cell(60,$h, $cliente_rfc,$border, 0, 'L');
-        $y += $h;
+        $pdf->cell($w,$h2, $cliente_rfc,$border, 0, 'L');
+        $y += $h2;
 
         $pdf->SetFont('DejaVuSans', '', '7');
         $pdf->SetTextColor(86, 117, 154);
         $pdf->SetXY($x, $y);
-        $pdf->cell(60,$h, $regimen,$border, 0, 'L');
-        $y += $h;
+        $pdf->cell($w,$h2, $regimen,$border, 0, 'L');
+        $y += $h2;
 
         $pdf->SetFont('DejaVuSans', '', '7');
         $pdf->SetTextColor(86, 117, 154);
         $pdf->SetXY($x, $y);
-        $pdf->cell(60,$h, $uso_cfdi,$border, 0, 'L');
+        $pdf->cell($w,$h2, $domicilio_fiscal, $border, 0, 'L');
+        $y += $h2;
+
+        $pdf->SetFont('DejaVuSans', '', '7');
+        $pdf->SetTextColor(86, 117, 154);
+        $pdf->SetXY($x, $y);
+        $pdf->cell($w,$h2, $uso_cfdi, $border, 0, 'L');
 
     }
 
@@ -330,9 +339,9 @@ class _complemento_pago
         $objeto_impuesto = "02 - Sí objeto de impuesto";
         $objeto_impuesto = mb_convert_encoding($objeto_impuesto, 'ISO-8859-1', 'UTF-8');
         $parcialidad = $this->datos['relacionados']['numero_parcialidad'];
-        $saldo_anterior = $this->datos['relacionados']['saldo_anterior'];
-        $importe_pagado = $this->datos['relacionados']['importe_pagado'];
-        $saldo_insoluto = $this->datos['relacionados']['saldo_insoluto'];
+        $saldo_anterior = $this->datos['relacionados']['saldo_anterior']; // este valor bien hardcodeado en 0
+        $importe_pagado = $this->datos['relacionados']['importe_pagado']; // este valor bien hardcodeado en 0
+        $saldo_insoluto = $this->datos['relacionados']['saldo_insoluto']; // este valor bien hardcodeado en 0
 
         $pdf->ocultar_area(14.5, 109.3, 30, 5);
 

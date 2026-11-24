@@ -693,7 +693,8 @@ class controlador_fc_complemento_pago extends _base_system_fc {
                 'rfc' => $reporte['com_cliente_rfc'],
                 'uso_cfdi' => $uso_cfdi,
                 'direccion' => $domicilio_receptor,
-                'regimen' => $regimen
+                'regimen' => $regimen,
+                'codigo_postal' => $reporte['com_cliente_cp'],
             ],
             'fiscales' => [
                 'folio_sat' => $folio_fiscal,
