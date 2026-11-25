@@ -871,6 +871,14 @@
       "ejecutor": "pruebas/pdf_complemento_aguaban/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 6
+    },
+    {
+      "id": "base_modelos_satis",
+      "tipo": "contrato_integracion_sin_bd",
+      "registro": "pruebas/base_modelos_satis/registro.json",
+      "ejecutor": "pruebas/base_modelos_satis/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 29
     }
   ]
 }

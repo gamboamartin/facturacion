@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5d94338067e05fc9bef81c2ee0b917d3",
+    "content-hash": "db75a86615a2be4f01cd0be64510bccf",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -934,16 +934,11 @@
         {
             "name": "gamboa.martin/base_modelos",
             "version": "v5.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/gamboamartin/base_modelos.git",
-                "reference": "23e0c34a27f5afc8d14b1973654631b91004ec3e"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gamboamartin/base_modelos/zipball/23e0c34a27f5afc8d14b1973654631b91004ec3e",
+                "url": "https://paquetes.ivitec.mx/dist/gamboa-martin/base_modelos/gamboa-martin-base_modelos-23e0c34a27f5afc8d14b1973654631b91004ec3e-zip-9f19ae.zip",
                 "reference": "23e0c34a27f5afc8d14b1973654631b91004ec3e",
-                "shasum": ""
+                "shasum": "e22d4c9f242173441bf2c5b38439d2fcef9d97f6"
             },
             "require": {
                 "gamboa.martin/errores": "^6.0.0",
@@ -955,12 +950,11 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "config\\": "config",
+                    "gamboamartin\\base_modelos\\": "src/",
                     "gamboamartin\\test\\": "tests/",
-                    "gamboamartin\\base_modelos\\": "src/"
+                    "config\\": "config"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0-or-later"
             ],
@@ -970,12 +964,7 @@
                     "email": "gamboa.martin@gmail.com"
                 }
             ],
-            "description": "Validaciones basicas",
-            "support": {
-                "issues": "https://github.com/gamboamartin/base_modelos/issues",
-                "source": "https://github.com/gamboamartin/base_modelos/tree/v5.1.0"
-            },
-            "time": "2025-03-15T15:10:24+00:00"
+            "description": "Validaciones basicas"
         },
         {
             "name": "gamboa.martin/calculo",

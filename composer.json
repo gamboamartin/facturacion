@@ -91,7 +91,8 @@
         "gamboa.martin/errores",
         "gamboa.martin/test",
         "gamboa.martin/sql",
-        "gamboa.martin/validaciones"
+        "gamboa.martin/validaciones",
+        "gamboa.martin/base_modelos"
       ]
     }
   ]
