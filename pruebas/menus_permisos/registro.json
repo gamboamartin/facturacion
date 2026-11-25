@@ -1,9 +1,9 @@
 {
   "id": "menus_permisos",
   "tipo": "equivalencia_codigo_real_con_catalogo_ficticio_sin_bd_red",
-  "casos_previstos": 20,
-  "aserciones_previstas": 46,
+  "casos_previstos": 21,
+  "aserciones_previstas": 47,
   "consultas_fixture_antes": 46,
   "consultas_fixture_despues": 5,
-  "alcance": "Equivalencia estricta frente a versión anterior, usuarios restringidos, revocación, aislamiento por sistema, duplicados, visibilidad, errores e identificadores inválidos. No acredita por sí sola el SQL ni tiempos productivos."
+  "alcance": "Equivalencia estricta frente a versión anterior, usuarios restringidos, revocación, aislamiento por sistema, duplicados, visibilidad, errores e identificadores inválidos. No acredita por sí sola el SQL ni tiempos productivos. Nuevo caso: el ORM recibe ORDER BY id ASC en secciones y acciones; el orden de menús se conserva."
 }

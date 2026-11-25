@@ -916,7 +916,7 @@
       "registro": "pruebas/menus_permisos/registro.json",
       "ejecutor": "pruebas/menus_permisos/ejecutar.py",
       "obligatoria_antes_commit": true,
-      "casos": 20
+      "casos": 21
     }
   ]
 }
