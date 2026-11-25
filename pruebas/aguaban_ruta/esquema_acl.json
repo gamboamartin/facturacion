@@ -1,0 +1,2758 @@
+{
+  "scope": "SOLO_METADATOS_SIN_FILAS",
+  "origen": "pruebas/complemento_orm_real/esquema.json",
+  "origen_sha256": "7df3aa8a281ddfed27aff309371b4b7024457cda79eaec6f5bc2ccd00a118de0",
+  "tables": {
+    "adm_grupo": {
+      "ddl": "CREATE TABLE `adm_grupo` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` bigint NOT NULL DEFAULT '2',\n  `usuario_update_id` bigint NOT NULL DEFAULT '2',\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `root` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'SD',\n  `codigo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'SA',\n  PRIMARY KEY (`id`) USING BTREE,\n  KEY `descripcion` (`descripcion`) USING BTREE,\n  KEY `id` (`id`) USING BTREE,\n  KEY `usuario_alta_id` (`usuario_alta_id`) USING BTREE,\n  KEY `usuario_update_id` (`usuario_update_id`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3",
+      "sha256": "0a92be80ce53f8c8263d34b19a1e8c5ecbfc0f1c818f70feeb95b22a3957ec95",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": "2",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": "2",
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "root",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "SD",
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "SA",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "adm_menu": {
+      "ddl": "CREATE TABLE `adm_menu` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `etiqueta_label` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `icono` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,\n  `status` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_update_id` bigint NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `usuario_alta_id` bigint NOT NULL,\n  `codigo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `titulo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'ST',\n  PRIMARY KEY (`id`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3",
+      "sha256": "6ae193cdacd4d88736043f03e53969f9437c06e5d1ac11669df8123be31adeda",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "etiqueta_label",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "icono",
+          "Type": "varchar(200)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "titulo",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "ST",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "adm_namespace": {
+      "ddl": "CREATE TABLE `adm_namespace` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_update_id` bigint NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `usuario_alta_id` bigint NOT NULL,\n  `codigo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `predeterminado` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'SIN NAME',\n  PRIMARY KEY (`id`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3",
+      "sha256": "37cca85991c43ab662ef5fbb406aeed24452bfe247d4bd1a574d14d777fb7ba8",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "predeterminado",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "name",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "SIN NAME",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "adm_usuario": {
+      "ddl": "CREATE TABLE `adm_usuario` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `user` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `password` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `email` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,\n  `adm_grupo_id` bigint NOT NULL,\n  `status` varchar(11) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` bigint NOT NULL,\n  `usuario_update_id` bigint NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `session` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '-1',\n  `telefono` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '3333333333',\n  `nombre` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'SIN NOMBRE',\n  `ap` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'SIN AP',\n  `am` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,\n  `codigo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,\n  `descripcion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,\n  `predeterminado` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `user` (`user`) USING BTREE,\n  KEY `adm_grupo_id` (`adm_grupo_id`) USING BTREE,\n  CONSTRAINT `adm_usuario_ibfk_1` FOREIGN KEY (`adm_grupo_id`) REFERENCES `adm_grupo` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Administracion de usuarios de sistema'",
+      "sha256": "48c5a53dad1b5a08142a741db33b3369d3b8c48b3e90f1bb5480ba49468dbd12",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "user",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "password",
+          "Type": "varchar(50)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "email",
+          "Type": "varchar(200)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "adm_grupo_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(11)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "session",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "-1",
+          "Extra": ""
+        },
+        {
+          "Field": "telefono",
+          "Type": "varchar(100)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "3333333333",
+          "Extra": ""
+        },
+        {
+          "Field": "nombre",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "SIN NOMBRE",
+          "Extra": ""
+        },
+        {
+          "Field": "ap",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "SIN AP",
+          "Extra": ""
+        },
+        {
+          "Field": "am",
+          "Type": "varchar(255)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(255)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(255)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "predeterminado",
+          "Type": "varchar(255)",
+          "Null": "YES",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": [
+        {
+          "TABLE_NAME": "adm_usuario",
+          "COLUMN_NAME": "adm_grupo_id",
+          "REFERENCED_TABLE_NAME": "adm_grupo",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "adm_seccion": {
+      "ddl": "CREATE TABLE `adm_seccion` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `etiqueta_label` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `adm_menu_id` bigint NOT NULL,\n  `icono` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `usuario_alta_id` bigint NOT NULL,\n  `usuario_update_id` bigint NOT NULL,\n  `codigo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `adm_namespace_id` bigint NOT NULL DEFAULT '1',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `descripcion_unique` (`descripcion`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  KEY `adm_menu_id` (`adm_menu_id`) USING BTREE,\n  KEY `adm_namespace_id` (`adm_namespace_id`) USING BTREE,\n  CONSTRAINT `adm_seccion_ibfk_1` FOREIGN KEY (`adm_menu_id`) REFERENCES `adm_menu` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `adm_seccion_ibfk_2` FOREIGN KEY (`adm_namespace_id`) REFERENCES `adm_namespace` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3",
+      "sha256": "4eba55dd8acd7713006e87744ec35cdfd0a55315391bba4a6eb431668630e6e6",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "etiqueta_label",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "adm_menu_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "icono",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(255)",
+          "Null": "YES",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "adm_namespace_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": "1",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": [
+        {
+          "TABLE_NAME": "adm_seccion",
+          "COLUMN_NAME": "adm_menu_id",
+          "REFERENCED_TABLE_NAME": "adm_menu",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "adm_seccion",
+          "COLUMN_NAME": "adm_namespace_id",
+          "REFERENCED_TABLE_NAME": "adm_namespace",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "adm_accion": {
+      "ddl": "CREATE TABLE `adm_accion` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `etiqueta_label` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `adm_seccion_id` bigint NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `icono` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `visible` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `inicio` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `lista` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `seguridad` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'activo',\n  `usuario_update_id` bigint NOT NULL,\n  `usuario_alta_id` bigint NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `es_modal` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo' COMMENT 'Aplica para generar modal en botones de acciones en front',\n  `es_view` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'activo',\n  `titulo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'ST',\n  `css` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'info',\n  `es_status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PD',\n  `codigo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'SC',\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'SC',\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'SA',\n  `es_lista` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'activo',\n  `muestra_icono_btn` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `muestra_titulo_btn` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'activo',\n  `target` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT '',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `descripcion_2` (`descripcion`,`adm_seccion_id`) USING BTREE,\n  KEY `id` (`id`) USING BTREE,\n  KEY `adm_seccion_id` (`adm_seccion_id`) USING BTREE,\n  KEY `descripcion` (`descripcion`) USING BTREE,\n  KEY `usuario_alta_id` (`usuario_alta_id`) USING BTREE,\n  KEY `usuario_update_id` (`usuario_update_id`) USING BTREE,\n  CONSTRAINT `adm_accion_ibfk_1` FOREIGN KEY (`adm_seccion_id`) REFERENCES `adm_seccion` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='Tabla de acciones de ejecucion debe existir una accion por cada accion en controlador, esta se validara conforme accion_grupo para su permiso'",
+      "sha256": "616e874546e6e02030b88ff7dfad6af0d7c252f9220bec82f16d54873ebd077f",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "etiqueta_label",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "adm_seccion_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "icono",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "visible",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "inicio",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "lista",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "seguridad",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "activo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "es_modal",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "es_view",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "activo",
+          "Extra": ""
+        },
+        {
+          "Field": "titulo",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "ST",
+          "Extra": ""
+        },
+        {
+          "Field": "css",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "info",
+          "Extra": ""
+        },
+        {
+          "Field": "es_status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PD",
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "SC",
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "SC",
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "SA",
+          "Extra": ""
+        },
+        {
+          "Field": "es_lista",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "activo",
+          "Extra": ""
+        },
+        {
+          "Field": "muestra_icono_btn",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "muestra_titulo_btn",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "activo",
+          "Extra": ""
+        },
+        {
+          "Field": "target",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": [
+        {
+          "TABLE_NAME": "adm_accion",
+          "COLUMN_NAME": "adm_seccion_id",
+          "REFERENCED_TABLE_NAME": "adm_seccion",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "adm_sistema": {
+      "ddl": "CREATE TABLE `adm_sistema` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `descripcion` (`descripcion`) USING BTREE\n) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb3",
+      "sha256": "4173e4d7e8d3429429b91948981c6d4c958970eba8aac7eaae9add09f77f5686",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "adm_seccion_pertenece": {
+      "ddl": "CREATE TABLE `adm_seccion_pertenece` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `usuario_alta_id` bigint NOT NULL,\n  `usuario_update_id` bigint NOT NULL,\n  `codigo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'PA',\n  `adm_sistema_id` bigint NOT NULL,\n  `adm_seccion_id` bigint NOT NULL,\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `descripcion_unique` (`descripcion`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `adm_sistema_id_2` (`adm_sistema_id`,`adm_seccion_id`) USING BTREE,\n  KEY `adm_sistema_id` (`adm_sistema_id`) USING BTREE,\n  KEY `adm_seccion_id` (`adm_seccion_id`) USING BTREE,\n  CONSTRAINT `adm_seccion_pertenece_ibfk_1` FOREIGN KEY (`adm_sistema_id`) REFERENCES `adm_sistema` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `adm_seccion_pertenece_ibfk_2` FOREIGN KEY (`adm_seccion_id`) REFERENCES `adm_seccion` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT\n) ENGINE=InnoDB AUTO_INCREMENT=246 DEFAULT CHARSET=utf8mb3",
+      "sha256": "f59822738381d347e61c7f0be85fb1be291d15069d99698022c7797265e3c1bf",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "PA",
+          "Extra": ""
+        },
+        {
+          "Field": "adm_sistema_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "adm_seccion_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": [
+        {
+          "TABLE_NAME": "adm_seccion_pertenece",
+          "COLUMN_NAME": "adm_sistema_id",
+          "REFERENCED_TABLE_NAME": "adm_sistema",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "adm_seccion_pertenece",
+          "COLUMN_NAME": "adm_seccion_id",
+          "REFERENCED_TABLE_NAME": "adm_seccion",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "adm_session": {
+      "ddl": "CREATE TABLE `adm_session` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `name` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,\n  `adm_usuario_id` bigint NOT NULL,\n  `numero_empresa` bigint NOT NULL,\n  `fecha` date NOT NULL,\n  `fecha_ultima_ejecucion` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,\n  `usuario_alta_id` bigint NOT NULL,\n  `usuario_update_id` bigint NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `status` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT 'activo',\n  `ip_publica` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `permanente` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  KEY `adm_usuario_id` (`adm_usuario_id`) USING BTREE,\n  CONSTRAINT `adm_session_ibfk_1` FOREIGN KEY (`adm_usuario_id`) REFERENCES `adm_usuario` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT\n) ENGINE=InnoDB AUTO_INCREMENT=34344 DEFAULT CHARSET=utf8mb3",
+      "sha256": "ee1c3fb516201ab96dca4c537b0f99b657996356ef0d444f8a3a2507b80813bc",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "name",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "adm_usuario_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "numero_empresa",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha",
+          "Type": "date",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_ultima_ejecucion",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(100)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "activo",
+          "Extra": ""
+        },
+        {
+          "Field": "ip_publica",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "permanente",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": [
+        {
+          "TABLE_NAME": "adm_session",
+          "COLUMN_NAME": "adm_usuario_id",
+          "REFERENCED_TABLE_NAME": "adm_usuario",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "org_empresa": {
+      "ddl": "CREATE TABLE `org_empresa` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `cat_sat_regimen_fiscal_id` bigint DEFAULT NULL,\n  `logo` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci,\n  `nombre_comercial` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `fecha_inicio_operaciones` date NOT NULL,\n  `fecha_ultimo_cambio_sat` date NOT NULL,\n  `dp_calle_pertenece_id` bigint DEFAULT NULL,\n  `exterior` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,\n  `interior` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,\n  `dp_calle_pertenece_entre1_id` bigint DEFAULT NULL,\n  `dp_calle_pertenece_entre2_id` bigint DEFAULT NULL,\n  `email_sat` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `telefono_1` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `telefono_2` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,\n  `telefono_3` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,\n  `rfc` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `razon_social` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `pagina_web` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,\n  `org_tipo_empresa_id` bigint DEFAULT NULL,\n  `cat_sat_tipo_persona_id` bigint DEFAULT NULL,\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `rfc` (`rfc`) USING BTREE COMMENT 'Registro Federal de Contribuyentes, no se puede repetir',\n  UNIQUE KEY `descripcion` (`descripcion`) USING BTREE,\n  KEY `cat_sat_regimen_fiscal_id` (`cat_sat_regimen_fiscal_id`) USING BTREE COMMENT 'Regimen Fiscal del SAT en el que esta dada de alta la empresa',\n  KEY `dp_calle_pertenece_id` (`dp_calle_pertenece_id`) USING BTREE COMMENT 'Calle donde esta ubicada la matriz de la empresa',\n  KEY `dp_calle_pertenece_entre1_id` (`dp_calle_pertenece_entre1_id`) USING BTREE COMMENT 'Calle con la que cruza',\n  KEY `dp_calle_pertenece_entre2_id` (`dp_calle_pertenece_entre2_id`) USING BTREE COMMENT 'Calle con la que cruza',\n  KEY `org_tipo_empresa_id` (`org_tipo_empresa_id`) USING BTREE,\n  KEY `cat_sat_tipo_persona_id` (`cat_sat_tipo_persona_id`) USING BTREE,\n  CONSTRAINT `org_empresa_ibfk_1` FOREIGN KEY (`cat_sat_regimen_fiscal_id`) REFERENCES `cat_sat_regimen_fiscal` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `org_empresa_ibfk_2` FOREIGN KEY (`dp_calle_pertenece_id`) REFERENCES `dp_calle_pertenece` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `org_empresa_ibfk_3` FOREIGN KEY (`dp_calle_pertenece_entre1_id`) REFERENCES `dp_calle_pertenece` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `org_empresa_ibfk_4` FOREIGN KEY (`dp_calle_pertenece_entre2_id`) REFERENCES `dp_calle_pertenece` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `org_empresa_ibfk_5` FOREIGN KEY (`org_tipo_empresa_id`) REFERENCES `org_tipo_empresa` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `org_empresa_ibfk_6` FOREIGN KEY (`cat_sat_tipo_persona_id`) REFERENCES `cat_sat_tipo_persona` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='REVISADO\\n\\nPOR TR TG 11'",
+      "sha256": "0ab13094b7ddfb7e847fae6ebbfc43e72e6f9b5d64db4268d723d74ee947a7a5",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "cat_sat_regimen_fiscal_id",
+          "Type": "bigint",
+          "Null": "YES",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "logo",
+          "Type": "text",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "nombre_comercial",
+          "Type": "text",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_inicio_operaciones",
+          "Type": "date",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_ultimo_cambio_sat",
+          "Type": "date",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "dp_calle_pertenece_id",
+          "Type": "bigint",
+          "Null": "YES",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "exterior",
+          "Type": "varchar(255)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "interior",
+          "Type": "varchar(255)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "dp_calle_pertenece_entre1_id",
+          "Type": "bigint",
+          "Null": "YES",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "dp_calle_pertenece_entre2_id",
+          "Type": "bigint",
+          "Null": "YES",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "email_sat",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "telefono_1",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "telefono_2",
+          "Type": "varchar(255)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "telefono_3",
+          "Type": "varchar(255)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "rfc",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "razon_social",
+          "Type": "text",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "pagina_web",
+          "Type": "varchar(255)",
+          "Null": "YES",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "org_tipo_empresa_id",
+          "Type": "bigint",
+          "Null": "YES",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "cat_sat_tipo_persona_id",
+          "Type": "bigint",
+          "Null": "YES",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": [
+        {
+          "TABLE_NAME": "org_empresa",
+          "COLUMN_NAME": "cat_sat_regimen_fiscal_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_regimen_fiscal",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "org_empresa",
+          "COLUMN_NAME": "dp_calle_pertenece_id",
+          "REFERENCED_TABLE_NAME": "dp_calle_pertenece",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "org_empresa",
+          "COLUMN_NAME": "dp_calle_pertenece_entre1_id",
+          "REFERENCED_TABLE_NAME": "dp_calle_pertenece",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "org_empresa",
+          "COLUMN_NAME": "dp_calle_pertenece_entre2_id",
+          "REFERENCED_TABLE_NAME": "dp_calle_pertenece",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "org_empresa",
+          "COLUMN_NAME": "org_tipo_empresa_id",
+          "REFERENCED_TABLE_NAME": "org_tipo_empresa",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "org_empresa",
+          "COLUMN_NAME": "cat_sat_tipo_persona_id",
+          "REFERENCED_TABLE_NAME": "cat_sat_tipo_persona",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "cat_sat_tipo_persona": {
+      "ddl": "CREATE TABLE `cat_sat_tipo_persona` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `valida_persona_fisica` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3",
+      "sha256": "4ed5265fee28ca79b88cc9fa9f48f1f4218f8d7b13c5d97ebf6ed1993e39e2be",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "valida_persona_fisica",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "org_tipo_empresa": {
+      "ddl": "CREATE TABLE `org_tipo_empresa` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='Revisado Catalogo de clasificacion de empresas \\nTRASALADA TG\\nCHILDRENS EMPRESAS NO PRIORI\\n\\nENTREGAR\\nTIQUE       NO\\nESCUELA  NO\\nTG            NO'",
+      "sha256": "fc4f751375312b90e2f12bcb6b358a1c9571f54651996a3f2c9acd0ffd7c4b93",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "dp_calle_pertenece": {
+      "ddl": "CREATE TABLE `dp_calle_pertenece` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `dp_calle_id` bigint NOT NULL,\n  `dp_colonia_postal_id` bigint NOT NULL,\n  `georeferencia` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `predeterminado` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE,\n  UNIQUE KEY `dp_calle_id_2` (`dp_calle_id`,`dp_colonia_postal_id`) USING BTREE,\n  KEY `dp_calle_id` (`dp_calle_id`) USING BTREE,\n  KEY `dp_colonia_postal_id` (`dp_colonia_postal_id`) USING BTREE,\n  CONSTRAINT `dp_calle_pertenece_ibfk_1` FOREIGN KEY (`dp_calle_id`) REFERENCES `dp_calle` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `dp_calle_pertenece_ibfk_2` FOREIGN KEY (`dp_colonia_postal_id`) REFERENCES `dp_colonia_postal` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='POR REVISAR\\n\\n'",
+      "sha256": "18216ee40117dda119bedc380f39923f032bca919e3646b29290754c1b9d4a4e",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "dp_calle_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "dp_colonia_postal_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "georeferencia",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "predeterminado",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": [
+        {
+          "TABLE_NAME": "dp_calle_pertenece",
+          "COLUMN_NAME": "dp_calle_id",
+          "REFERENCED_TABLE_NAME": "dp_calle",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "dp_calle_pertenece",
+          "COLUMN_NAME": "dp_colonia_postal_id",
+          "REFERENCED_TABLE_NAME": "dp_colonia_postal",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "dp_colonia_postal": {
+      "ddl": "CREATE TABLE `dp_colonia_postal` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `dp_cp_id` bigint NOT NULL,\n  `dp_colonia_id` bigint NOT NULL,\n  `predeterminado` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE,\n  KEY `dp_pais_id` (`dp_cp_id`) USING BTREE,\n  KEY `dp_colonia_id` (`dp_colonia_id`) USING BTREE,\n  CONSTRAINT `dp_colonia_postal_ibfk_1` FOREIGN KEY (`dp_cp_id`) REFERENCES `dp_cp` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,\n  CONSTRAINT `dp_colonia_postal_ibfk_2` FOREIGN KEY (`dp_colonia_id`) REFERENCES `dp_colonia` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='POR TRG TG 7\\n\\nENTREGAR \\nTIQUE      SI\\nESCUELA SI\\nTG           NO'",
+      "sha256": "a70883096f62f1df0d235db8223299113705c30e0c04faf2e7fe17440ff01b74",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "dp_cp_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "dp_colonia_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "predeterminado",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": [
+        {
+          "TABLE_NAME": "dp_colonia_postal",
+          "COLUMN_NAME": "dp_cp_id",
+          "REFERENCED_TABLE_NAME": "dp_cp",
+          "REFERENCED_COLUMN_NAME": "id"
+        },
+        {
+          "TABLE_NAME": "dp_colonia_postal",
+          "COLUMN_NAME": "dp_colonia_id",
+          "REFERENCED_TABLE_NAME": "dp_colonia",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "dp_colonia": {
+      "ddl": "CREATE TABLE `dp_colonia` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `georeferencia` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `predeterminado` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='POR TRASLADAR TG\\n\\nPOR ENTREGAR\\nTIQUE      SI\\nESCUELA SI\\nTG           NO'",
+      "sha256": "12d9778d17cef9db4d6be7608ba6c9bca77931867df5b1547bbfda24f7459fd3",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "georeferencia",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "predeterminado",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "dp_cp": {
+      "ddl": "CREATE TABLE `dp_cp` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `dp_municipio_id` bigint NOT NULL,\n  `georeferencia` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `predeterminado` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE,\n  KEY `dp_pais_id` (`dp_municipio_id`) USING BTREE,\n  CONSTRAINT `dp_cp_ibfk_1` FOREIGN KEY (`dp_municipio_id`) REFERENCES `dp_municipio` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='POR TRAS TG 6\\n\\nENTREGAR \\nTIQUE      SI\\nESCUELA SI\\nTG           NO'",
+      "sha256": "ebe54f134339489c2e147b224ec86def4ee89520030514d982b779794dcbbc6e",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "dp_municipio_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "georeferencia",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "predeterminado",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": [
+        {
+          "TABLE_NAME": "dp_cp",
+          "COLUMN_NAME": "dp_municipio_id",
+          "REFERENCED_TABLE_NAME": "dp_municipio",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "dp_municipio": {
+      "ddl": "CREATE TABLE `dp_municipio` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `dp_estado_id` bigint NOT NULL,\n  `predeterminado` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  KEY `dp_estado_id` (`dp_estado_id`) USING BTREE,\n  CONSTRAINT `dp_municipio_ibfk_1` FOREIGN KEY (`dp_estado_id`) REFERENCES `dp_estado` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='POR TRS 5\\n\\nENTREGAR \\nTIQUE      SI\\nESCUELA SI\\nTG           NO'",
+      "sha256": "56fc0c831daf70ed164becef33821b7d02e82368210e0bca572cc06d6530d3d0",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "dp_estado_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "predeterminado",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": [
+        {
+          "TABLE_NAME": "dp_municipio",
+          "COLUMN_NAME": "dp_estado_id",
+          "REFERENCED_TABLE_NAME": "dp_estado",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "dp_estado": {
+      "ddl": "CREATE TABLE `dp_estado` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `dp_pais_id` bigint NOT NULL,\n  `predeterminado` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE,\n  KEY `dp_pais_id` (`dp_pais_id`) USING BTREE,\n  CONSTRAINT `dp_estado_ibfk_1` FOREIGN KEY (`dp_pais_id`) REFERENCES `dp_pais` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='POR TRAS TG 4\\n\\nENTREGAR \\nTIQUE      SI\\nESCUELA SI\\nTG           NO'",
+      "sha256": "cb9f945a946e9e448783b95ca73cfd7b5a53ad794a8d60ada9f6442195036c61",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "dp_pais_id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "MUL",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "predeterminado",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": [
+        {
+          "TABLE_NAME": "dp_estado",
+          "COLUMN_NAME": "dp_pais_id",
+          "REFERENCED_TABLE_NAME": "dp_pais",
+          "REFERENCED_COLUMN_NAME": "id"
+        }
+      ]
+    },
+    "dp_pais": {
+      "ddl": "CREATE TABLE `dp_pais` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `predeterminado` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='POR TRASLADAR TG 3\\n\\nENTREGAR \\nTIQUE      SI\\nESCUELA SI\\nTG           NO'",
+      "sha256": "7f31da3eaf7fbee4be80fa872dbe5104495f19df9bca40fce845b454e7b3468b",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "predeterminado",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "dp_calle": {
+      "ddl": "CREATE TABLE `dp_calle` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `predeterminado` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='POR TRS TG 8'",
+      "sha256": "6f0e8d9f7cea67df76074c69b15de9f9047437905df677773778aa3eb08fe561",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "predeterminado",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": []
+    },
+    "cat_sat_regimen_fiscal": {
+      "ddl": "CREATE TABLE `cat_sat_regimen_fiscal` (\n  `id` bigint NOT NULL AUTO_INCREMENT,\n  `descripcion` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  `usuario_alta_id` int NOT NULL,\n  `usuario_update_id` int NOT NULL,\n  `fecha_alta` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `fecha_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `descripcion_select` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `alias` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `codigo_bis` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,\n  `predeterminado` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL DEFAULT 'inactivo',\n  PRIMARY KEY (`id`) USING BTREE,\n  UNIQUE KEY `codigo` (`codigo`) USING BTREE,\n  UNIQUE KEY `codigo_bis` (`codigo_bis`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='Revisado\\nCatalogo proveniente del SAT\\nTRAS TG 10'",
+      "sha256": "7569ac4da187182e44afaf31c9037da7c32be7be0b3ede447b667c75485d5477",
+      "columns": [
+        {
+          "Field": "id",
+          "Type": "bigint",
+          "Null": "NO",
+          "Key": "PRI",
+          "Default": null,
+          "Extra": "auto_increment"
+        },
+        {
+          "Field": "descripcion",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo",
+          "Type": "varchar(200)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "status",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_alta_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "usuario_update_id",
+          "Type": "int",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "fecha_alta",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED"
+        },
+        {
+          "Field": "fecha_update",
+          "Type": "timestamp",
+          "Null": "NO",
+          "Key": "",
+          "Default": "CURRENT_TIMESTAMP",
+          "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+        },
+        {
+          "Field": "descripcion_select",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "alias",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "codigo_bis",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "UNI",
+          "Default": null,
+          "Extra": ""
+        },
+        {
+          "Field": "predeterminado",
+          "Type": "varchar(255)",
+          "Null": "NO",
+          "Key": "",
+          "Default": "inactivo",
+          "Extra": ""
+        }
+      ],
+      "foreign_keys": []
+    }
+  },
+  "fuentes_adicionales": "SHOW CREATE/COLUMNS/FK de adm_sistema, adm_seccion_pertenece y adm_session; sin consulta ni extracción de filas (2026-11-25)"
+}

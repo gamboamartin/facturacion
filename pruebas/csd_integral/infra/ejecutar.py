@@ -13,6 +13,7 @@ modo.add_argument('--informacion-global', action='store_true')
 modo.add_argument('--timbrado-masivo', action='store_true')
 modo.add_argument('--complemento-desde-factura', action='store_true')
 modo.add_argument('--complemento-orm-real', action='store_true')
+modo.add_argument('--aguaban-ruta', action='store_true')
 args=parser.parse_args()
 deps=args.deps.resolve(strict=True)
 documento=args.documento.resolve(strict=True)
@@ -44,8 +45,20 @@ if args.complemento_orm_real:
     fuentes += sorted((deps/'vendor/gamboa.martin/administrador/base/orm').glob('*.php'))
     fuentes += [deps/'vendor/gamboa.martin/comercial/orm/com_tipo_cambio.php',
                 deps/'vendor/gamboa.martin/proceso/orm/pr_proceso.php']
+if args.aguaban_ruta:
+    fuentes += [p for p in sorted((repo/'pruebas/aguaban_ruta').rglob('*')) if p.is_file() and '__pycache__' not in p.parts]
+    fuentes += [repo/'controllers/controlador_aguaban_ruta.php',
+                repo/'tools/migrations/_aguaban_ruta.php', repo/'tools/migrations/aguaban_ruta.php',
+                qa/'ejecutar.py', qa/'inner.py']
+    fuentes += sorted((repo/'views/aguaban_ruta').glob('*.php'))
+    fuentes += [repo/n for n in ['templates/nav/_sidebar.php','templates/nav/_menu_superior.php','templates/logo_service.php','templates/logo_principal_lector.php']]
+    fuentes += sorted((deps/'vendor/gamboa.martin/administrador/orm').glob('*.php'))
+    fuentes += [deps/'vendor/gamboa.martin/system/src/links_menu.php',deps/'vendor/gamboa.martin/template_1/src/nav.php',deps/'vendor/gamboa.martin/organigrama/orm/org_empresa.php']
+    fuentes += sorted((deps/'vendor/gamboa.martin/administrador/base/orm').glob('*.php'))
+    fuentes += [deps/'vendor/gamboa.martin/administrador/base/controller'/n for n in ['controler.php','init.php','salida_data.php','custom.php']]
+config_aislada = repo/'pruebas/aguaban_ruta/config' if args.aguaban_ruta else qa/'config'
 hashes_previos = {str(f):hashlib.sha256(f.read_bytes()).hexdigest() for f in fuentes}
-cmd=['/usr/bin/taskset','-c',','.join(map(str,sorted(os.sched_getaffinity(0))[:2])),'/usr/bin/timeout','--signal=TERM','--kill-after=5s','180s','/usr/bin/unshare','--user','--map-current-user','--net','--','/usr/bin/bwrap','--unshare-pid','--unshare-ipc','--unshare-uts','--die-with-parent','--new-session','--cap-drop','ALL','--ro-bind','/usr','/usr','--symlink','usr/lib','/lib','--symlink','usr/lib64','/lib64','--proc','/proc','--dev','/dev','--dir','/etc','--dir','/home','--dir','/var/lib','--dir','/var/log','--dir','/run','--size',str(1948*1024**2),'--tmpfs','/var/lib/mysql','--size',str(4*1024**2),'--tmpfs','/run/mysqld','--size',str(64*1024**2),'--tmpfs','/tmp','--size',str(32*1024**2),'--tmpfs','/var/log/mysql','--ro-bind',str(engine/'usr/sbin/mariadbd'),'/usr/sbin/mysqld','--ro-bind',str(engine/'usr/share/mysql'),'/usr/share/mysql','--ro-bind',str(qa/'empty-plugins'),'/usr/lib/mysql/plugin','--dir','/var/www/html/facturacion','--ro-bind',str(qa/'config'),'/var/www/html/facturacion/config','--size',str(64*1024**2),'--tmpfs','/var/www/html/facturacion/archivos','--ro-bind',str(qa),'/qa','--remount-ro','/dev','--remount-ro','/','/usr/bin/python3','-B','/qa/inner.py']
+cmd=['/usr/bin/taskset','-c',','.join(map(str,sorted(os.sched_getaffinity(0))[:2])),'/usr/bin/timeout','--signal=TERM','--kill-after=5s','180s','/usr/bin/unshare','--user','--map-current-user','--net','--','/usr/bin/bwrap','--unshare-pid','--unshare-ipc','--unshare-uts','--die-with-parent','--new-session','--cap-drop','ALL','--ro-bind','/usr','/usr','--symlink','usr/lib','/lib','--symlink','usr/lib64','/lib64','--proc','/proc','--dev','/dev','--dir','/etc','--dir','/home','--dir','/var/lib','--dir','/var/log','--dir','/run','--size',str(1948*1024**2),'--tmpfs','/var/lib/mysql','--size',str(4*1024**2),'--tmpfs','/run/mysqld','--size',str(64*1024**2),'--tmpfs','/tmp','--size',str(32*1024**2),'--tmpfs','/var/log/mysql','--ro-bind',str(engine/'usr/sbin/mariadbd'),'/usr/sbin/mysqld','--ro-bind',str(engine/'usr/share/mysql'),'/usr/share/mysql','--ro-bind',str(qa/'empty-plugins'),'/usr/lib/mysql/plugin','--dir','/var/www/html/facturacion','--ro-bind',str(config_aislada),'/var/www/html/facturacion/config','--size',str(64*1024**2),'--tmpfs','/var/www/html/facturacion/archivos','--ro-bind',str(qa),'/qa','--remount-ro','/dev','--remount-ro','/','/usr/bin/python3','-B','/qa/inner.py']
 at=cmd.index('--remount-ro')
 mounts=[]
 for item in sorted(repo.iterdir()):
@@ -67,7 +80,7 @@ def limites():
     resource.setrlimit(resource.RLIMIT_CPU,(150,150))
     resource.setrlimit(resource.RLIMIT_NOFILE,(512,512))
     resource.setrlimit(resource.RLIMIT_CORE,(0,0))
-env={'PATH':'/usr/bin:/usr/sbin','HOME':'/tmp','LANG':'C','QA_OUTER_NET':os.readlink('/proc/self/ns/net'),'QA_SOLO_ESQUEMA':'1' if args.solo_esquema else '0','QA_INFORMACION_GLOBAL':'1' if args.informacion_global else '0','QA_TIMBRADO_MASIVO':'1' if args.timbrado_masivo else '0','QA_COMPLEMENTO_DESDE_FACTURA':'1' if args.complemento_desde_factura else '0','QA_COMPLEMENTO_ORM_REAL':'1' if args.complemento_orm_real else '0'}
+env={'PATH':'/usr/bin:/usr/sbin','HOME':'/tmp','LANG':'C','QA_OUTER_NET':os.readlink('/proc/self/ns/net'),'QA_SOLO_ESQUEMA':'1' if args.solo_esquema else '0','QA_INFORMACION_GLOBAL':'1' if args.informacion_global else '0','QA_TIMBRADO_MASIVO':'1' if args.timbrado_masivo else '0','QA_COMPLEMENTO_DESDE_FACTURA':'1' if args.complemento_desde_factura else '0','QA_COMPLEMENTO_ORM_REAL':'1' if args.complemento_orm_real else '0','QA_AGUABAN_RUTA':'1' if args.aguaban_ruta else '0'}
 p=subprocess.Popen(cmd,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,preexec_fn=limites,start_new_session=True)
 stdout=stderr=''
 try:

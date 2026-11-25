@@ -879,6 +879,14 @@
       "ejecutor": "pruebas/base_modelos_satis/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 29
+    },
+    {
+      "id": "aguaban_ruta_integral",
+      "tipo": "integracion_bd_efimera_sin_red",
+      "registro": "pruebas/aguaban_ruta/registro.json",
+      "ejecutor": "pruebas/aguaban_ruta/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 46
     }
   ]
 }

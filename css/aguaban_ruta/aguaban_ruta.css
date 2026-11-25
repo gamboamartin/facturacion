@@ -1,0 +1,34 @@
+#aguaban-rutas { color: #26334b; width: 100%; min-width: 0; }
+#aguaban-rutas .rutas-encabezado { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+#aguaban-rutas h1 { margin: 0; font-size: 2rem; color: #17233b; }
+#aguaban-rutas h2 { font-size: 1.35rem; }
+#aguaban-rutas p { line-height: 1.6; }
+#aguaban-rutas .rutas-contexto { margin: 0 0 .2rem; font-weight: 600; color: #6b21a8; }
+#aguaban-rutas .rutas-tarjeta { background: #fff; border: 1px solid #dce1eb; border-radius: 12px; padding: 1.3rem; margin-bottom: 1.25rem; min-width: 0; }
+#aguaban-rutas .rutas-formulario, #aguaban-rutas .rutas-filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 1rem; align-items: end; }
+#aguaban-rutas .rutas-ancho { grid-column: 1 / -1; }
+#aguaban-rutas label { display: block; font-weight: 600; margin-bottom: .4rem; }
+#aguaban-rutas input:not([type=hidden]), #aguaban-rutas select { box-sizing: border-box; width: 100%; min-width: 0; min-height: 44px; border: 1px solid #8b97ab; border-radius: 7px; padding: .6rem; color: #26334b; background: #fff; font: inherit; }
+#aguaban-rutas .rutas-acciones { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+#aguaban-rutas .rutas-acciones form { margin: 0; }
+#aguaban-rutas .ruta-boton { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 42px; padding: .6rem 1rem; border: 1px solid transparent; border-radius: 7px; font: inherit; font-weight: 600; line-height: 1.4; text-decoration: none; cursor: pointer; }
+#aguaban-rutas .ruta-primario { background: #6b21a8; color: #fff; }
+#aguaban-rutas .ruta-secundario { background: #fff; color: #4c257a; border-color: #a899bd; }
+#aguaban-rutas .ruta-peligro { background: #a91c30; color: #fff; }
+#aguaban-rutas :is(a,button,input,select):focus-visible { outline: 3px solid #263f8d; outline-offset: 3px; }
+#aguaban-rutas .rutas-aviso { border-left: 4px solid; border-radius: 6px; padding: .9rem 1rem; }
+#aguaban-rutas .rutas-error { color: #8f1425; background: #fff0f2; border-color: #a91c30; }
+#aguaban-rutas .rutas-exito { color: #14532d; background: #effbf2; border-color: #24753e; }
+#aguaban-rutas .rutas-ayuda { color: #4c5870; }
+#aguaban-rutas .rutas-tabla { overflow-x: auto; }
+#aguaban-rutas table { width: 100%; min-width: 820px; border-collapse: collapse; text-align: left; }
+#aguaban-rutas caption { caption-side: top; text-align: left; color: #4c5870; padding-bottom: .75rem; }
+#aguaban-rutas th { background: #f4effb; color: #392255; }
+#aguaban-rutas th, #aguaban-rutas td { padding: .85rem; border-bottom: 1px solid #e1e5ee; overflow-wrap: anywhere; }
+#aguaban-rutas td:last-child { min-width: 230px; }
+#aguaban-rutas .ruta-estado { display: inline-block; padding: .25rem .6rem; border-radius: 6px; background: #eef0f4; color: #3f4a5c; }
+#aguaban-rutas .ruta-activo { background: #e6f5eb; color: #14532d; }
+#aguaban-rutas .rutas-paginacion { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 1rem; margin-top: 1rem; }
+#aguaban-rutas .rutas-detalle { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 1.25rem; }
+#aguaban-rutas dt { color: #4c5870; font-weight: 600; }
+#aguaban-rutas dd { margin: .3rem 0 0; overflow-wrap: anywhere; }

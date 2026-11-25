@@ -1,0 +1,13 @@
+# Rutas de medición de Aguaban
+
+El módulo se encuentra en **Aguaban → Rutas**. Implementa lista filtrable por código, descripción, sector, operador y estado, con paginación; alta, consulta, modificación, activación/desactivación y eliminación confirmada. La navegación utiliza las mismas secciones, acciones y sesión de Facturación. Las vistas funcionan con los formatos de interfaz existentes y no requieren JavaScript para guardar o filtrar.
+
+Se conserva el esquema solicitado de once columnas, InnoDB, utf8mb4_unicode_ci, código único y referencia opcional a adm_usuario. Código y descripción son obligatorios; sector y operador admiten ausencia. Los operadores sin descripción utilizan su nombre o usuario y los inactivos se identifican en la selección. El sistema genera hash_version y los campos de auditoría, sin admitir valores manipulados en el formulario. No se implementa un endpoint HTTP 304 ni una API de sincronización como parte de este catálogo.
+
+Los nueve permisos se inicializan exclusivamente para el grupo activo **PA / Administrador Sistema**, identificado por código y descripción, sin asumir su ID. Cada operación comprueba el usuario y grupo actuales y el permiso activo de esa acción en la base de datos. Los enlaces ocultos no sustituyen esta comprobación. El administrador puede retirar permisos mediante el catálogo de seguridad; repetir el instalador no los restablece. El operador asignado no recibe acceso al CRUD por esa asignación.
+
+Las escrituras requieren POST y token CSRF de sesión. La eliminación tiene una pantalla de confirmación y se rechaza con un mensaje claro si la ruta tiene referencias que impiden borrarla. Las consultas preparadas, el límite de caracteres, los estados permitidos y la referencia del operador se comprueban en el servidor. Los errores de SQL no se presentan al usuario. Se conserva el formulario cuando un dato no es válido.
+
+El modelo utiliza PDO directamente para respetar las once columnas y evitar las columnas auxiliares y operaciones heredadas de otros catálogos del framework. El controlador y las vistas mantienen la entrada MVC existente. No se modifican dependencias en vendor ni archivos Composer.
+
+La instalación es explícita y está separada del arranque web; consultar [aguaban-ruta-migracion.md](aguaban-ruta-migracion.md). Primero se verifica en un motor SQL efímero y se ejecuta la batería registrada completa en una copia aislada, sin configuración privada ni PAC. Antes de aplicar en desarrollo se respalda la base y se registran los catálogos y archivos privados para comprobar que las autorizaciones anteriores se conservan. La creación del CRUD no despliega automáticamente en los servidores.
