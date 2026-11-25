@@ -10,6 +10,7 @@ namespace gamboamartin\facturacion\controllers;
 
 use config\generales;
 use gamboamartin\errores\errores;
+use gamboamartin\direccion_postal\models\dp_pais;
 use gamboamartin\facturacion\models\com_agente;
 use gamboamartin\facturacion\models\com_cliente;
 use gamboamartin\facturacion\models\com_contacto;
@@ -520,6 +521,42 @@ class controlador_com_cliente extends \gamboamartin\comercial\controllers\contro
 
         header("Location: " . $link);
         exit;
+    }
+
+    public function init_selects_inputs(): array
+    {
+        $keys_selects = parent::init_selects_inputs();
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al inicializar selectores de cliente', data: $keys_selects);
+        }
+
+        // El país predeterminado solo corresponde a un alta sin país capturado.
+        $pais_capturado = (int)($_POST['dp_pais_id'] ?? $this->row_upd->dp_pais_id ?? 0);
+        if (($this->accion ?? '') !== 'alta' || $pais_capturado > 0 ||
+            (int)($keys_selects['dp_pais_id']->id_selected ?? -1) > 0) {
+            return $keys_selects;
+        }
+
+        $pais = (new dp_pais(link: $this->link))->filtro_and(filtro: [
+            'dp_pais.codigo' => 'MEX',
+            'dp_pais.status' => 'activo',
+        ]);
+        if (errores::$error) {
+            return $this->errores->error(mensaje: 'Error al consultar el país predeterminado del cliente', data: $pais);
+        }
+        if ((int)$pais->n_registros !== 1) {
+            return $keys_selects;
+        }
+
+        $pais_id = (int)$pais->registros[0]['dp_pais_id'];
+        $keys_selects['dp_pais_id']->id_selected = $pais_id;
+        $keys_selects['dp_estado_id']->con_registros = true;
+        $keys_selects['dp_estado_id']->filtro = [
+            'dp_pais.id' => $pais_id,
+            'dp_estado.status' => 'activo',
+        ];
+
+        return $keys_selects;
     }
 
   public function alta(bool $header, bool $ws = false): array|string

@@ -7,7 +7,7 @@ $cliente_titulos = [
 ];
 [$cliente_titulo, $cliente_descripcion] = $cliente_titulos[$controlador->accion] ?? ['Clientes', 'Administración de clientes.'];
 ?>
-<link rel="stylesheet" href="css/com_cliente/clientes.css?v=20261125">
+<link rel="stylesheet" href="css/com_cliente/clientes.css?v=<?php echo (int)filemtime(dirname(__DIR__, 2) . '/css/com_cliente/clientes.css'); ?>">
 <header class="com-cliente-header">
     <div class="com-cliente-heading">
         <span class="com-cliente-icon" aria-hidden="true"><i class="bi bi-people"></i></span>

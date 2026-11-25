@@ -86,8 +86,33 @@
 .com-cliente .bootstrap-select > .dropdown-toggle { border:1px solid #ddd5e7 !important; border-radius:9px; background:#fff !important; color:var(--cliente-ink) !important; min-height:44px; padding:10px 30px 10px 12px; box-shadow:none; font-size:13px; }
 .com-cliente .bootstrap-select .filter-option { text-overflow:ellipsis; padding-right:8px; }
 .com-cliente .bootstrap-select .dropdown-menu { background:#fff; border-color:var(--cliente-line); border-radius:9px; }
-.com-cliente .bootstrap-select .dropdown-menu li a { padding-top:9px; padding-bottom:9px; font-size:12px; white-space:normal; line-height:1.5; }
-.com-cliente .bootstrap-select .dropdown-menu li.selected a { background:var(--cliente-soft); color:var(--cliente-accent-dark); }
+/* The legacy theme assigns white text to every selectpicker option. Define
+   explicit foreground/background pairs for each state within Customers only. */
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li { background:transparent; }
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li > a { padding:9px 15px; min-height:38px; color:var(--cliente-ink); background:#fff; font-size:12px; white-space:normal; line-height:1.5; }
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li > a span.text,
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li > a small,
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li > a .text-muted,
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li > a span.check-mark { color:inherit; }
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li > a:hover,
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li > a:focus { color:var(--cliente-ink); background:var(--cliente-soft); }
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li.selected > a { color:var(--cliente-accent-dark); background:var(--cliente-soft); font-weight:600; }
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li.selected > a:hover,
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li.selected > a:focus { color:var(--cliente-accent-dark); background:#e9dcfc; }
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li.active > a,
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li.active > a:hover,
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li.active > a:focus { color:#fff; background:var(--cliente-accent); }
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li > a:focus-visible { outline:2px solid var(--cliente-accent-dark); outline-offset:-2px; }
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li.active > a:focus-visible { outline-color:#fff; }
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li.disabled > a,
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li.disabled > a:hover,
+.com-cliente .bootstrap-select.btn-group .dropdown-menu li.disabled > a:focus { color:var(--cliente-muted); background:#f8f6fb; cursor:not-allowed; opacity:1; }
+.com-cliente .bootstrap-select.btn-group .dropdown-menu .dropdown-header,
+.com-cliente .bootstrap-select.btn-group .dropdown-menu .no-results { color:var(--cliente-muted); background:#fff; font-size:12px; line-height:1.5; }
+.com-cliente .bootstrap-select.btn-group .bs-searchbox { padding:8px 10px; background:#fff; }
+.com-cliente .bootstrap-select.btn-group .bs-searchbox .form-control { color:var(--cliente-ink); background:#fff; border:1px solid #ddd5e7; }
+.com-cliente .bootstrap-select.btn-group .bs-searchbox .form-control::placeholder { color:var(--cliente-muted); opacity:1; }
+.com-cliente .bootstrap-select.btn-group .bs-searchbox .form-control:focus { border-color:var(--cliente-accent); box-shadow:0 0 0 3px #7038d814; }
 .com-cliente .bootstrap-select.open > .dropdown-toggle, .com-cliente .bootstrap-select > .dropdown-toggle:focus { border-color:var(--cliente-accent) !important; outline:0 !important; box-shadow:0 0 0 3px #7038d814; }
 .com-cliente .com-cliente-save-bar { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:21px 24px; margin-top:4px; background:#fff; border:1px solid var(--cliente-line); border-radius:14px; }
 .com-cliente-save-bar p { font-size:12px; color:var(--cliente-muted); line-height:1.5; margin:0; }
