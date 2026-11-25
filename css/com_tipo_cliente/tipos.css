@@ -1,0 +1,11 @@
+/* Reuse the customer component styles, with compact catalog-specific details. */
+.com-tipo-cliente .com-tipo-form { margin:0; }
+.com-tipo-cliente .com-tipo-form-card { max-width:880px; }
+.com-tipo-cliente .com-tipo-fields > .control-group { width:100%; max-width:650px; }
+.com-tipo-cliente .com-cliente-save-bar { max-width:880px; }
+.com-tipo-cliente .com-tipo-actions a[aria-current=page] { display:none; }
+.com-tipo-cliente .com-cliente-table-wrap .dropdown-menu { min-width:165px; border-color:var(--cliente-line); box-shadow:0 8px 22px #37235316; border-radius:10px; }
+.com-tipo-cliente .com-cliente-table-wrap .dropdown-menu a { font-size:12px; padding:9px 13px; }
+.com-tipo-cliente .com-cliente-table-wrap .dropdown-menu a:focus-visible { outline-offset:-3px; }
+.com-tipo-cliente .com-cliente-save-bar .bi { color:var(--cliente-accent); }
+@media (max-width:600px) { .com-tipo-cliente .com-tipo-fields > .control-group { max-width:none; } }

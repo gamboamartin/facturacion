@@ -57,6 +57,10 @@ class generales{
     // public static bool $inicio_v2 = true; //quitarle el // a la variables el los archivos que tengas una configuracion personalizada
     // public static bool $inicio_color_konsulta2 = false; //quitarle el // a la variables el los archivos que tengas una configuracion personalizada
 
+    // Marca opcional de la interfaz, sin crear una empresa fiscal. PNG/JPEG local
+    // en archivos/doc_documento/. El logo principal de org_logo tiene prioridad.
+    public static string $logo_interfaz = '';
+
     public function __construct(){
         $this->path_base = '/var/www/html/facturacion/'; // aqui va la ruta base del sistema, se usa para generar rutas absolutas en los templates y en el sistema en general
 

@@ -149,6 +149,26 @@ function resolver_logo_principal_framework($link, string $almacen): ?string
     }, $etapa);
 }
 
+/** La marca explícita de la interfaz solo se usa cuando no existe un logo principal. */
+function resolver_logo_interfaz_framework($link, string $almacen): ?string
+{
+    $principal = resolver_logo_principal_framework($link, $almacen);
+    if ($principal !== null || errores::$error || !class_exists(\config\generales::class)
+        || !property_exists(\config\generales::class, 'logo_interfaz')) {
+        return $principal;
+    }
+
+    $propiedad = new ReflectionProperty(\config\generales::class, 'logo_interfaz');
+    if (!$propiedad->isPublic() || !$propiedad->isStatic()
+        || !isset(\config\generales::$logo_interfaz)) {
+        return null;
+    }
+    $ruta = \config\generales::$logo_interfaz;
+    return is_string($ruta) && trim($ruta) !== ''
+        ? LectorLogoPrincipal::leer($almacen, $ruta)
+        : null;
+}
+
 if (!function_exists('logo_empresa_url_framework')) {
     function logo_empresa_url_framework($link): ?string
     {
@@ -156,7 +176,7 @@ if (!function_exists('logo_empresa_url_framework')) {
         static $consultado = false;
         if (!$consultado) {
             $consultado = true;
-            $cache = resolver_logo_principal_framework(
+            $cache = resolver_logo_interfaz_framework(
                 $link,
                 dirname(__DIR__) . '/archivos/doc_documento'
             );
