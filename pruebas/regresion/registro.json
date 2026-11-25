@@ -909,6 +909,14 @@
       "ejecutor": "pruebas/aguaban_ruta/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 46
+    },
+    {
+      "id": "menus_permisos",
+      "tipo": "equivalencia_sin_bd_red",
+      "registro": "pruebas/menus_permisos/registro.json",
+      "ejecutor": "pruebas/menus_permisos/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 20
     }
   ]
 }

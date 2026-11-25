@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "db75a86615a2be4f01cd0be64510bccf",
+    "content-hash": "3ad8296d2bc5f453b771800b10b65fc7",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -777,17 +777,17 @@
         },
         {
             "name": "gamboa.martin/administrador",
-            "version": "v22.44.3",
+            "version": "v22.44.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gamboamartin/administrador.git",
-                "reference": "9f09c92192c1c6e77774ab2c3532a8b3796e1ab4"
+                "reference": "6aba697648c805b25fe6422d4ae0540b3dcd0f96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://paquetes.ivitec.mx/dist/gamboa-martin/administrador/gamboa-martin-administrador-9f09c92192c1c6e77774ab2c3532a8b3796e1ab4-zip-0b4ce6-normalizado.zip",
-                "reference": "73957788a2e1f45c5f8f31c139328e5fd885aff1794a72fa3dc28268994dce31",
-                "shasum": "00fbff8f6282bde33ce1d7ed83bd014ec1cf5e52"
+                "url": "https://paquetes.ivitec.mx/dist/gamboa-martin/administrador/administrador-22.44.4-6aba697648c805b25fe6422d4ae0540b3dcd0f96.zip",
+                "reference": "6aba697648c805b25fe6422d4ae0540b3dcd0f96",
+                "shasum": "235fd3fe3638c65591421721d6008fbb787b198d"
             },
             "require": {
                 "chillerlan/php-qrcode": "^4.3",
