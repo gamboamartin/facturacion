@@ -759,6 +759,28 @@
         "testPeticionNoSeleccionaLaMarca",
         "testErrorPrevioNoSeOcultaNiPublicaMarca"
       ]
+    },
+    {
+      "id": "configuracion_agentes",
+      "ejecutor": "ejecutar_phpunit.py",
+      "comprobaciones_esperadas": 7,
+      "fuentes": {
+        "controllers/controlador_com_agente.php": "d0b75aea3ad1ee4cf3fd80156ea52c80a66c82678edb32bb7e4f152863542e28",
+        "orm/com_agente.php": "a0ab87b8012ce22a1672f45afb58e366b85e8dc35708351148fa6bdb0adc67da",
+        "config/example.generales.php": "a8ae1b121cb67ad677714e9e17ee02b77fbe9de2de41a18915f4f31c491f8092",
+        ".gitignore": "e33d7392c313d0bfad960973229e693a30250b78340db876fa4166fc2fa23bdb"
+      },
+      "limites": "Controlador y modelo reales con configuración y registros ficticios, sin autoload de aplicación ni conexión SQL; no ejecuta alta real ni timbrado.",
+      "clase_phpunit": "com_agente/ConfiguracionAgentesTest.php",
+      "casos": [
+        "testSinPropiedadNoFallaNiCuentaAsesorFicticio",
+        "testTipoConfiguradoMantieneIdYRelacion",
+        "testConfiguracionNulaSeTrataComoAusente",
+        "testPropiedadSinInicializarNoFalla",
+        "testIdNoPositivoNoSeInterpretaComoAsesor",
+        "testConfiguracionLegacyInvalidaNoActivaAsesor",
+        "testIdNumericoLegacyConservado"
+      ]
     }
   ],
   "suites_complementarias": [

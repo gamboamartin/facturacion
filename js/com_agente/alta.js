@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function actualizar_numero_asesor() {
         const tipo_agente_id = Number(tipo_agente.value);
 
-        const es_asesor = tipo_agente_id === tipo_agente_asesor_id;
+        const es_asesor = tipo_agente_asesor_id > 0 && tipo_agente_id === tipo_agente_asesor_id;
 
         num_asesor_container.style.display = es_asesor ? '' : 'none';
         num_asesor.disabled = !es_asesor;

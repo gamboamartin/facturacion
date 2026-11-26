@@ -60,3 +60,7 @@ archivos
 .idea/*
 .phpunit.result.cache
 test.php
+
+# Plantillas privadas de cada instalación; las plantillas comunes siguen versionadas.
+/plantillas/Plantilla_Factura_ivitec.pdf
+/plantillas/local/

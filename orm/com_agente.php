@@ -8,6 +8,17 @@ use stdClass;
 
 class com_agente extends \gamboamartin\comercial\models\com_agente {
 
+    /** El tipo es opcional por instalación; -1 significa que no hay asesor configurado. */
+    public static function tipo_agente_asesor_configurado(): int
+    {
+        $tipo = generales::$tipo_agente_asesor ?? -1;
+        if (!is_int($tipo) && !is_string($tipo)) {
+            return -1;
+        }
+        $id = filter_var($tipo, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        return $id === false ? -1 : $id;
+    }
+
     public function alta_bd(array $keys_integra_ds = array('descripcion')): array|stdClass
     {
         if (isset($_POST['num_asesor'])){
@@ -244,13 +255,14 @@ class com_agente extends \gamboamartin\comercial\models\com_agente {
         $total_agentes = 0;
         $agentes_activos = 0;
         $agentes_asesores = 0;
+        $tipo_asesor = self::tipo_agente_asesor_configurado();
 
         foreach ($rs->registros as  $registro_agente) {
             $total_agentes++;
             if ($registro_agente['com_agente_status'] === 'activo') {
                 $agentes_activos++;
             }
-            if ((int)$registro_agente['com_agente_com_tipo_agente_id'] === generales::$tipo_agente_asesor) {
+            if ($tipo_asesor > 0 && (int)$registro_agente['com_agente_com_tipo_agente_id'] === $tipo_asesor) {
                 $agentes_asesores++;
             }
         }

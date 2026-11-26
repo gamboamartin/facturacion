@@ -22,7 +22,7 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
     public string $url_submit = '#';
     private array $ids_grupo_validos = [4,5];
     public int $com_tipo_agente_id;
-    public int $tipo_agente_asesor_id;
+    public int $tipo_agente_asesor_id = -1;
     public string $numero_asesor;
     public int $info_total_agentes;
     public int $info_agentes_activos;
@@ -42,7 +42,7 @@ class controlador_com_agente extends \gamboamartin\comercial\controllers\control
         if (isset($config_general->aplica_relacion_agentes)) {
             $this->aplica_relacion_agentes = $config_general->aplica_relacion_agentes;
         }
-        $this->tipo_agente_asesor_id = $this->conf_generales::$tipo_agente_asesor;
+        $this->tipo_agente_asesor_id = com_agente::tipo_agente_asesor_configurado();
 
         $tipos_agente = (new com_tipo_agente($link))->filtro_and(
             columnas: ['com_tipo_agente_id', 'com_tipo_agente_descripcion']

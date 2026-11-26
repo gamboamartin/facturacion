@@ -32,7 +32,7 @@ class generales{
     public static int $grupo_id_asesor = 5; //se requiere siempre que se aplique la relacion de agentes
     public static int $tipo_agente_operador = 1; // especifico de konsulta
     //se requiere siempre que se aplique la relacion de agentes
-    public static int $tipo_agente_asesor = 2; // especifico de konsulta
+    public static int $tipo_agente_asesor = 2; // ejemplo Konsulta; opcional si no se usa asesor, el sistema asume -1
     //se requiere siempre que se aplique la relacion de agentes
     public static string $empresa_pagadora_reportes = 'RECURSOS Y RESULTADOS HARIMENI'; // especifico de konsulta
     public static string $key_n8n = 'VHn9JjiujaWPok5yNMb5sYj9';
