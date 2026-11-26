@@ -1,0 +1,11 @@
+{
+  "casos": [
+    "plan_sin_escrituras",
+    "fallo_diario_revierte",
+    "solo_permisos_PA",
+    "idempotente",
+    "respeta_revocaciones",
+    "vista_dos_descargas"
+  ],
+  "limites": "Catálogo ficticio en motor aislado sin red y render PHP; no timbra ni utiliza documentos reales."
+}

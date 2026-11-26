@@ -955,6 +955,14 @@
       "ejecutor": "pruebas/producto_precio/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos_previstos": 38
+    },
+    {
+      "id": "descargas_complemento",
+      "tipo": "integracion_catalogo_ficticio_y_vista",
+      "registro": "pruebas/descargas_complemento/registro.json",
+      "ejecutor": "pruebas/descargas_complemento/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 6
     }
   ]
 }

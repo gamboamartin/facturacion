@@ -370,6 +370,11 @@ class controlador_fc_complemento_pago extends _base_system_fc {
         return $r_template;
     }
 
+    public function descargar_por_separado(bool $header, bool $ws = false): array|stdClass
+    {
+        return $this->datos_descarga_por_separado(header: $header, ws: $ws);
+    }
+
     public function envia_cfdi(bool $header, bool $ws = false)
     {
         $this->modelo_email = new fc_email_cp(link: $this->link);
