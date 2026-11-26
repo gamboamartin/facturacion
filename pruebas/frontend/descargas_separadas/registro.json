@@ -1,0 +1,21 @@
+{
+  "id": "descargas_separadas_ui",
+  "casos_python": 6,
+  "casos_navegador": [
+    "fc_factura_xml_pdf_contenido_nombre_orden",
+    "fc_nota_credito_xml_pdf_contenido_nombre_orden",
+    "fc_complemento_pago_xml_pdf_contenido_nombre_orden",
+    "xml_lento_mas_de_seis_segundos_no_cancela_ni_adelanta_pdf",
+    "xml_html_200_error_claro_conserva_otro_documento",
+    "xml_html_con_mime_xml_error_claro_conserva_otro_documento",
+    "xml_invalido_error_claro_conserva_otro_documento",
+    "xml_http_403_error_claro_conserva_otro_documento",
+    "pdf_html_200_error_claro_conserva_otro_documento",
+    "pdf_firma_invalida_error_claro_conserva_otro_documento",
+    "redireccion_no_sigue_url_ajena_ni_descarga_login",
+    "filename_utf8_content_disposition",
+    "url_externa_mutada_no_se_solicita",
+    "bloqueo_multiple_mantiene_enlaces_manuales_operables"
+  ],
+  "limites": "Chromium real con HTTP interceptado, HTML y documentos completamente ficticios; verifica eventos download, nombres y bytes sin abrir la aplicación, BD, PAC o documentos de producción. No certifica guardado del usuario ni políticas de cada navegador."
+}

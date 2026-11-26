@@ -49,9 +49,11 @@ try {
     try { DescargasComplementoAdmin::preparar($pdo,true,static function($d){}); throw new LogicException('No rechazó permiso revocado'); }
     catch(RuntimeException $e){verifica(instantanea($pdo,$tablas)===$antes,'Reactivó revocación');}
     $casos[]='respeta_revocaciones';
-    $controlador=(object)['registro'=>(object)['genera_pdf'=>'index.php?seccion=fc_complemento_pago&accion=genera_pdf&registro_id=7','descarga_xml'=>'index.php?seccion=fc_complemento_pago&accion=descarga_xml&registro_id=7']];
+    $controlador=(object)['registro_id'=>7,'registro'=>(object)['genera_pdf'=>'index.php?seccion=fc_complemento_pago&accion=genera_pdf&registro_id=7','descarga_xml'=>'index.php?seccion=fc_complemento_pago&accion=descarga_xml&registro_id=7']];
     ob_start();require dirname(__DIR__,2).'/views/fc_complemento_pago/descargar_por_separado.php';$html=ob_get_clean();
-    verifica(substr_count($html,'<iframe')===2 && str_contains($html,'&amp;accion=genera_pdf&amp;') && str_contains($html,'&amp;accion=descarga_xml&amp;'),'Vista no genera ambas descargas');
+    // El orden ahora lo certifica fetch secuencial en navegador; los iframes paralelos no lo garantizaban.
+    verifica(!str_contains($html,'<iframe') && str_contains($html,'&amp;accion=genera_pdf&amp;') && str_contains($html,'&amp;accion=descarga_xml&amp;')
+        && str_contains($html,'js/descargas/por_separado.js') && strpos($html,'Descargar XML') < strpos($html,'Descargar PDF'),'Vista no prepara ambas descargas en orden');
     $casos[]='vista_dos_descargas';
     verifica(str_contains($html,'Descargar PDF') && str_contains($html,'Descargar XML') && substr_count($html,'target="_blank"')===2,'Faltan enlaces individuales para reintentar');
     $casos[]='enlaces_individuales_disponibles';

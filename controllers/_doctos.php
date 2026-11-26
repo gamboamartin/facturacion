@@ -161,6 +161,14 @@ class _doctos{
             modelo_predial: $modelo_predial, modelo_relacion: $modelo_relacion, modelo_relacionada: $modelo_relacionada,
             modelo_retencion: $modelo_retencion, modelo_sellado: $modelo_sello, modelo_traslado: $modelo_traslado,
             modelo_uuid_ext: $modelo_uuid_ext, registro_id: $row_entidad_id);
+        if (errores::$error) {
+            return $this->error->error(mensaje: 'Error al generar pdf', data: $pdf);
+        }
+        // El renderizador ya envió la descarga; no se registra como archivo guardado.
+        if ($descarga) {
+            return $pdf;
+        }
+
         $intermedio = is_string($pdf) && $guarda && !$descarga
             && $modelo_entidad->tabla === 'fc_complemento_pago'
             && \gamboamartin\facturacion\models\_formato_pdf_complemento::seleccionar($general) === 'aguaban'
@@ -168,12 +176,6 @@ class _doctos{
             && preg_match('/^complemento-'.preg_quote((string)$row_entidad_id, '/').'-[a-f0-9]{32}\.pdf$/D', basename($pdf));
         $r_fc_factura_documento = null;
         try {
-            if(errores::$error){
-                return $this->error->error(mensaje: 'Error al generar pdf',data:  $pdf);
-            }
-
-
-
             $row_entidad = $modelo_entidad->registro(registro_id: $row_entidad_id, retorno_obj: true);
             if(errores::$error){
                 return $this->error->error(mensaje: 'Error al obtener factura',data:  $row_entidad);

@@ -1,2 +1,1 @@
-// La descarga puede tardar más que un temporizador fijo.
-// La pestaña permanece abierta hasta que el usuario decida cerrarla.
+// La vista carga js/descargas/por_separado.js, compartido por los tres comprobantes.

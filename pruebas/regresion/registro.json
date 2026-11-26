@@ -963,6 +963,14 @@
       "ejecutor": "pruebas/descargas_complemento/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 9
+    },
+    {
+      "id": "descargas_documentos",
+      "tipo": "integracion_sql_cli_y_controladores_aislados",
+      "registro": "pruebas/descargas_documentos/registro.json",
+      "ejecutor": "pruebas/descargas_documentos/ejecutar.py",
+      "casos_previstos": 52,
+      "obligatoria_antes_commit": true
     }
   ]
 }
