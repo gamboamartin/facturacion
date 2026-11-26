@@ -5,7 +5,10 @@
     "solo_permisos_PA",
     "idempotente",
     "respeta_revocaciones",
-    "vista_dos_descargas"
+    "vista_dos_descargas",
+    "enlaces_individuales_disponibles",
+    "sin_enlaces_no_hay_peticiones",
+    "sin_cierre_automatico"
   ],
   "limites": "Catálogo ficticio en motor aislado sin red y render PHP; no timbra ni utiliza documentos reales."
 }

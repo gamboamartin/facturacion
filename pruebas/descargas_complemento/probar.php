@@ -53,6 +53,16 @@ try {
     ob_start();require dirname(__DIR__,2).'/views/fc_complemento_pago/descargar_por_separado.php';$html=ob_get_clean();
     verifica(substr_count($html,'<iframe')===2 && str_contains($html,'&amp;accion=genera_pdf&amp;') && str_contains($html,'&amp;accion=descarga_xml&amp;'),'Vista no genera ambas descargas');
     $casos[]='vista_dos_descargas';
+    verifica(str_contains($html,'Descargar PDF') && str_contains($html,'Descargar XML') && substr_count($html,'target="_blank"')===2,'Faltan enlaces individuales para reintentar');
+    $casos[]='enlaces_individuales_disponibles';
+    $controlador->registro->genera_pdf='';$controlador->registro->descarga_xml='';
+    ob_start();require dirname(__DIR__,2).'/views/fc_complemento_pago/descargar_por_separado.php';$sin=ob_get_clean();
+    verifica(!str_contains($sin,'<iframe') && !str_contains($sin,'href=') && str_contains($sin,'No hay enlaces de descarga disponibles'),'Render de sesión sin permisos genera peticiones');
+    $casos[]='sin_enlaces_no_hay_peticiones';
+    $js=file_get_contents(dirname(__DIR__,2).'/js/fc_complemento_pago/descargar_por_separado.js');
+    verifica(!preg_match('/\b(?:setTimeout|setInterval)\s*\(|\bwindow\s*\.\s*close\s*\(/',$js),'El temporizador vuelve a cerrar descargas');
+    $casos[]='sin_cierre_automatico';
+
     echo json_encode(['estado'=>'PASS_DESCARGAS_COMPLEMENTO','casos'=>$casos],JSON_THROW_ON_ERROR).PHP_EOL;
 } finally {
     if($pdo instanceof PDO && $creadas){if($pdo->inTransaction())$pdo->rollBack();foreach($tablas as $t)$pdo->exec('DROP TABLE IF EXISTS '.$t);}

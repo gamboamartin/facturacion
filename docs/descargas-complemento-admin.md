@@ -8,3 +8,5 @@ El diario contiene los identificadores de las filas nuevas antes de confirmar la
 
 ## Verificación
 La suite registrada `pruebas/descargas_complemento/ejecutar.py` usa únicamente un esquema efímero, ficticio, vacío y sin red; comprueba plan, transacción, grupo PA, idempotencia, revocaciones y render de los dos enlaces. No genera CFDI ni ejecuta pagos reales. Revisar también frontend y la batería completa vigente.
+
+La vista del complemento conserva sus dos descargas automáticas y muestra enlaces individuales para reintentar. No usa un temporizador de cierre: una respuesta lenta puede superar seis segundos y el cierre de pestaña cancela las solicitudes (Nginx 499). Las sesiones sin enlaces no generan iframes vacíos.

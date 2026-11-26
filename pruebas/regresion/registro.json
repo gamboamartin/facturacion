@@ -962,7 +962,7 @@
       "registro": "pruebas/descargas_complemento/registro.json",
       "ejecutor": "pruebas/descargas_complemento/ejecutar.py",
       "obligatoria_antes_commit": true,
-      "casos": 6
+      "casos": 9
     }
   ]
 }
