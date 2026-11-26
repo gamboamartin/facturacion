@@ -14,6 +14,46 @@ class _etapa extends _modelo_parent_sin_codigo{
 
     public function alta_bd(array $keys_integra_ds = array('descripcion','pr_etapa_proceso_id', 'fecha')): array|stdClass
     {
+        $propia = !$this->link->inTransaction();
+        $punto = 'etapa_fc_'.bin2hex(random_bytes(6));
+        try {
+            if ($propia) { $this->link->beginTransaction(); }
+            else { $this->link->exec('SAVEPOINT '.$punto); }
+            $tabla = $this->modelo_entidad->tabla;
+            if (!preg_match('/^[a-z_][a-z0-9_]*$/D', $tabla)) {
+                throw new \RuntimeException('Modelo de etapa inválido.');
+            }
+            $q = $this->link->prepare('SELECT id FROM `'.$tabla.'` WHERE id=? FOR UPDATE');
+            if (!$q || !$q->execute([$this->registro[$this->modelo_entidad->key_id]]) || !$q->fetchColumn()) {
+                throw new \RuntimeException('No se pudo bloquear el documento de la etapa.');
+            }
+            $resultado = $this->alta_bd_con_bloqueo($keys_integra_ds);
+            if (errores::$error) {
+                if ($propia) { $this->link->rollBack(); }
+                else {
+                    $this->link->exec('ROLLBACK TO SAVEPOINT '.$punto);
+                    $this->link->exec('RELEASE SAVEPOINT '.$punto);
+                }
+                return $resultado;
+            }
+            if ($propia) { $this->link->commit(); }
+            else { $this->link->exec('RELEASE SAVEPOINT '.$punto); }
+            return $resultado;
+        } catch (\Throwable $error) {
+            if ($this->link->inTransaction()) {
+                if ($propia) { $this->link->rollBack(); }
+                else {
+                    $this->link->exec('ROLLBACK TO SAVEPOINT '.$punto);
+                    $this->link->exec('RELEASE SAVEPOINT '.$punto);
+                }
+            }
+            return $this->error->error(mensaje: 'No se pudo registrar la etapa y actualizar el documento de forma completa.',
+                data: []);
+        }
+    }
+
+    private function alta_bd_con_bloqueo(array $keys_integra_ds): array|stdClass
+    {
         $pr_etapa_proceso = (new pr_etapa_proceso(link: $this->link))->registro(
             registro_id: $this->registro['pr_etapa_proceso_id'], retorno_obj: true);
         if(errores::$error){
@@ -32,6 +72,14 @@ class _etapa extends _modelo_parent_sin_codigo{
                 $row_entidad->$key_folio.' '.$this->registro['fecha'];
 
             $this->registro['descripcion'] = $descripcion;
+        }
+
+        // El folio y la fecha describen el evento, pero no identifican una fila del historial.
+        // Un mismo folio puede existir en distintos emisores y una etapa puede repetirse.
+        if (!isset($this->registro['codigo'])) {
+            $this->registro['codigo'] = $this->modelo_entidad->tabla.'-'.
+                $this->registro[$this->modelo_entidad->key_id].'-'.
+                $this->registro['pr_etapa_proceso_id'].'-'.bin2hex(random_bytes(16));
         }
 
         $row_entidad_base['etapa'] = $pr_etapa_proceso->pr_etapa_descripcion;

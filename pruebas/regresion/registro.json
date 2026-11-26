@@ -971,6 +971,14 @@
       "ejecutor": "pruebas/descargas_documentos/ejecutar.py",
       "casos_previstos": 52,
       "obligatoria_antes_commit": true
+    },
+    {
+      "id": "cancelacion_etapa",
+      "tipo": "integracion_sql_transacciones_concurrencia_pac_ficticio",
+      "registro": "pruebas/cancelacion_etapa/registro.json",
+      "ejecutor": "pruebas/cancelacion_etapa/ejecutar.py",
+      "casos_previstos": 40,
+      "obligatoria_antes_commit": true
     }
   ]
 }
