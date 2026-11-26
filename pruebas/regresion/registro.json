@@ -917,6 +917,22 @@
       "ejecutor": "pruebas/menus_permisos/ejecutar.py",
       "obligatoria_antes_commit": true,
       "casos": 21
+    },
+    {
+      "id": "aguaban_productos_permisos",
+      "tipo": "integracion_sql_catalogo_efimero_sin_datos_negocio",
+      "registro": "pruebas/aguaban_productos_permisos/registro.json",
+      "ejecutor": "pruebas/aguaban_productos_permisos/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos": 17
+    },
+    {
+      "id": "producto_precio",
+      "tipo": "contrato_modelo_sin_bd",
+      "registro": "pruebas/producto_precio/registro.json",
+      "ejecutor": "pruebas/producto_precio/ejecutar.py",
+      "obligatoria_antes_commit": true,
+      "casos_previstos": 38
     }
   ]
 }

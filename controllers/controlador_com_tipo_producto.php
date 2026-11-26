@@ -8,4 +8,7 @@
  */
 namespace gamboamartin\facturacion\controllers;
 
-class controlador_com_tipo_producto extends \gamboamartin\comercial\controllers\controlador_com_tipo_producto {}
+class controlador_com_tipo_producto extends \gamboamartin\comercial\controllers\controlador_com_tipo_producto
+{
+    public bool $lista_get_data = true;
+}

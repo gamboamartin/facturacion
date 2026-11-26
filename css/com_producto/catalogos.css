@@ -1,0 +1,25 @@
+/* Product catalogs reuse the customer component; these rules only size their fields. */
+.com-producto-form { margin:0; }
+.com-producto-tipo-card, .com-tipo-producto-form .com-cliente-save-bar { max-width:880px; }
+.com-cliente .com-producto-tipo-fields > .control-group { width:100%; max-width:650px; }
+.com-cliente .com-producto-sat-campo > .control-group { width:100%; }
+.com-producto-fiscal-campos { margin-top:22px; }
+.com-producto-resultados { margin:15px 0 0; border:1px solid var(--cliente-line); border-radius:12px; background:#fcfaff; overflow:hidden; }
+.com-producto-tabla-sat { max-height:340px; overflow:auto; }
+.com-producto-tabla-sat table { width:100%; margin:0; border:0; background:#fff; border-collapse:collapse; }
+.com-producto-tabla-sat th { color:#51465e; background:#f7f4fc; font-size:12px; padding:11px 14px; border-bottom:1px solid var(--cliente-line); }
+.com-producto-tabla-sat td { font-size:13px; color:var(--cliente-ink); padding:12px 14px; border-bottom:1px solid var(--cliente-line); vertical-align:middle; overflow-wrap:anywhere; }
+.com-producto-tabla-sat td:last-child { width:120px; }
+.com-producto-tabla-sat label { display:flex; align-items:center; gap:9px; margin:0; cursor:pointer; min-height:35px; font-size:12px; font-weight:600; }
+.com-producto-tabla-sat input[type=radio] { width:18px; height:18px; accent-color:var(--cliente-accent); flex:0 0 18px; margin:0; }
+.com-producto-tabla-sat input[type=radio]:focus-visible { outline:3px solid #b99ae8; outline-offset:3px; }
+.com-producto-tabla-sat tr.is-selected td { background:var(--cliente-soft); }
+.com-producto-sat-estado { margin:0; padding:12px 14px; color:var(--cliente-muted); font-size:12px; line-height:1.6; }
+.com-producto-sat-estado[data-state=error] { color:#92273f; }
+.com-producto-sat-actual { padding:16px 18px; border:1px solid var(--cliente-line); border-radius:11px; background:#faf7fe; margin:13px 0 0; overflow-wrap:anywhere; }
+.com-producto-sat-actual span { display:block; font-size:11px; color:var(--cliente-muted); margin-bottom:5px; }
+.com-producto-sat-actual strong { color:var(--cliente-ink); font-size:14px; font-weight:600; line-height:1.6; }
+.com-producto-actions a[aria-current=page] { display:none; }
+.com-producto-catalogo .dropdown-menu { min-width:165px; border-color:var(--cliente-line); box-shadow:0 8px 22px #37235316; border-radius:10px; }
+.com-producto-catalogo .dropdown-menu a { font-size:12px; padding:9px 13px; }
+@media(max-width:600px) { .com-producto-tabla-sat th,.com-producto-tabla-sat td { padding:10px; } .com-producto-tabla-sat td:last-child { width:94px; } }

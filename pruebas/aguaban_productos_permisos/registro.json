@@ -1,0 +1,34 @@
+{
+  "id": "aguaban_productos_permisos",
+  "tipo": "integracion_mysql_esquema_vacio_ficticio",
+  "casos": [
+    "plan_sin_escrituras_18_pendientes",
+    "aplicar_44_cliente_admin_y_diario_antes_commit",
+    "reaplicacion_idempotente",
+    "rollback_solo_filas_propias_y_timestamp_original",
+    "rollback_idempotente",
+    "fallo_diario_revierte_transaccion",
+    "diario_pendiente_recupera_fallo_despues_commit",
+    "aplicar_exige_diario",
+    "laboratorio_exige_optin",
+    "aguaban_rechaza_bandera_desarrollo_antes_transaccion",
+    "perfil_root_rechazado",
+    "accion_faltante_sin_cambios",
+    "accion_duplicada_rechazada",
+    "revocacion_preexistente_no_se_reactiva",
+    "rollback_protege_permiso_editado",
+    "rollback_protege_accion_editada",
+    "rollback_protege_nuevos_permisos_ajenos"
+  ],
+  "casos_previstos": 17,
+  "aserciones_previstas": 33,
+  "fuentes": [
+    "tools/migrations/_aguaban_productos_permisos.php",
+    "tools/migrations/aguaban_productos_permisos.php",
+    "pruebas/aguaban_productos_permisos/probar.php",
+    "pruebas/aguaban_productos_permisos/ejecutar.py",
+    "pruebas/aguaban_productos_permisos/registro.json"
+  ],
+  "recurso": "QA_PRODUCTOS_SECRET_FILE (JSON 0600 con dsn/user/password), o variables QA_PRODUCTOS_DSN/DB_USER/DB_PASSWORD. Schema debe estar vacío, llamarse qa_productos_permisos_*, y usuario limitado a ese schema.",
+  "limites": "Prueba la política y transacciones con siete tablas ficticias del motor real. No carga configuración de aplicación, datos reales, formularios ni PAC. No certifica por sí sola HTTP, UI o el esquema completo del tenant."
+}
