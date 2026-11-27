@@ -1314,22 +1314,25 @@ class _base_system_fc extends _base_system{
 
     protected function datos_descarga_por_separado(bool $header, bool $ws = false): array|stdClass
     {
-        $genera_pdf = $this->obj_link->link_con_id('genera_pdf', $this->link, $this->registro_id, $this->seccion);
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error $genera_pdf', data: $genera_pdf, header: $header, ws: $ws);
-        }
-
-        $descarga_xml = $this->obj_link->link_con_id('descarga_xml', $this->link, $this->registro_id, $this->seccion);
-        if (errores::$error) {
-            return $this->retorno_error(mensaje: 'Error $descarga_xml', data: $descarga_xml, header: $header, ws: $ws);
-        }
-
         $this->registro = new stdClass();
-        $this->registro->genera_pdf = $genera_pdf;
-        $this->registro->descarga_xml = $descarga_xml;
-
+        $usuario = new \gamboamartin\administrador\models\adm_usuario($this->link);
+        foreach (['descarga_xml', 'genera_pdf'] as $accion) {
+            $permiso = $usuario->tengo_permiso(
+                adm_accion: $accion, adm_seccion: $this->seccion);
+            if (errores::$error) {
+                return $this->retorno_error(mensaje: 'Error al validar permiso de descarga', data: $permiso,
+                    header: $header, ws: $ws);
+            }
+            $enlace = $permiso === true
+                ? $this->obj_link->link_con_id($accion, $this->link, $this->registro_id, $this->seccion)
+                : '';
+            if (errores::$error) {
+                return $this->retorno_error(mensaje: 'Error al generar enlace de descarga', data: $enlace,
+                    header: $header, ws: $ws);
+            }
+            $this->registro->{$accion} = $enlace;
+        }
         return $this->registro;
-
     }
 
 
@@ -1741,6 +1744,12 @@ class _base_system_fc extends _base_system{
             return $this->retorno_error(mensaje: 'Error al generar pdf',data:  $pdf, header: $header,ws:$ws);
         }
 
+
+        if ($descarga) {
+            // Evita anexar HTML o intentar leer un registro después del PDF binario.
+            if ($header) { exit; }
+            return $pdf;
+        }
 
         if($header){
             $fichero = $pdf->registro_obj->doc_documento_ruta_absoluta;

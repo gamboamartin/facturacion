@@ -245,6 +245,11 @@ class controlador_fc_nota_credito extends _base_system_fc {
         return $r_template;
     }
 
+    public function descargar_por_separado(bool $header, bool $ws = false): array|stdClass
+    {
+        return $this->datos_descarga_por_separado(header: $header, ws: $ws);
+    }
+
     public function duplica(bool $header, bool $ws = false)
     {
         $this->modelo_entidad = new fc_nota_credito(link: $this->link);

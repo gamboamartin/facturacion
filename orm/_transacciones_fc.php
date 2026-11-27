@@ -239,6 +239,95 @@ class _transacciones_fc extends modelo
     public function cancela_bd(int $cat_sat_motivo_cancelacion_id, _cancelacion $modelo_cancelacion,
                                _etapa $modelo_etapa, int $registro_id): array|stdClass
     {
+        if ($registro_id <= 0) {
+            return $this->error->error(mensaje: 'El documento a cancelar debe existir.', data: []);
+        }
+        $propia = !$this->link->inTransaction();
+        $punto = 'cancelacion_fc_'.bin2hex(random_bytes(6));
+        $verifica_previa = $modelo_etapa->verifica_permite_transaccion;
+        try {
+            if ($propia) { $this->link->beginTransaction(); }
+            else { $this->link->exec('SAVEPOINT '.$punto); }
+
+            $validacion = $this->valida_cancelacion_bloqueada($modelo_cancelacion, $modelo_etapa, $registro_id);
+            $resultado = errores::$error ? $validacion : $this->cancela_bd_con_bloqueo(
+                $cat_sat_motivo_cancelacion_id, $modelo_cancelacion, $modelo_etapa, $registro_id);
+            if (errores::$error) {
+                if ($propia) { $this->link->rollBack(); }
+                else {
+                    $this->link->exec('ROLLBACK TO SAVEPOINT '.$punto);
+                    $this->link->exec('RELEASE SAVEPOINT '.$punto);
+                }
+                return $resultado;
+            }
+            if ($propia) { $this->link->commit(); }
+            else { $this->link->exec('RELEASE SAVEPOINT '.$punto); }
+            return $resultado;
+        } catch (\Throwable $error) {
+            if ($this->link->inTransaction()) {
+                if ($propia) { $this->link->rollBack(); }
+                else {
+                    $this->link->exec('ROLLBACK TO SAVEPOINT '.$punto);
+                    $this->link->exec('RELEASE SAVEPOINT '.$punto);
+                }
+            }
+            return $this->error->error(
+                mensaje: 'No se pudo completar el registro de la cancelación. Verifica su estado antes de reintentar.',
+                data: []);
+        } finally {
+            $modelo_etapa->verifica_permite_transaccion = $verifica_previa;
+        }
+    }
+
+    /** Lecturas actuales bajo el bloqueo del documento; también con snapshot externo previo. */
+    private function valida_cancelacion_bloqueada(_cancelacion $modelo_cancelacion, _etapa $modelo_etapa,
+                                                  int $registro_id): array|bool
+    {
+        foreach ([$this->tabla, $this->key_id, $modelo_cancelacion->tabla, $modelo_etapa->tabla] as $nombre) {
+            if (!preg_match('/^[a-z_][a-z0-9_]*$/D', $nombre)) {
+                throw new \RuntimeException('Modelo de cancelación inválido.');
+            }
+        }
+        $q = $this->link->prepare('SELECT etapa FROM `'.$this->tabla.'` WHERE id=? FOR UPDATE');
+        if (!$q || !$q->execute([$registro_id])) {
+            throw new \RuntimeException('No se pudo bloquear el documento.');
+        }
+        $documento = $q->fetch(PDO::FETCH_ASSOC);
+        if (!$documento) {
+            return $this->error->error(mensaje: 'El documento a cancelar no existe.', data: []);
+        }
+        if ($documento['etapa'] === 'CANCELADO') {
+            return $this->error->error(
+                mensaje: 'El documento ya tiene una cancelación registrada. No se enviará otra solicitud al PAC.',
+                data: ['registro_id' => $registro_id]);
+        }
+        $q = $this->link->prepare('SELECT id FROM `'.$modelo_cancelacion->tabla.'` WHERE `'.
+            $this->key_id.'`=? LIMIT 1 FOR UPDATE');
+        if (!$q || !$q->execute([$registro_id])) {
+            throw new \RuntimeException('No se pudo consultar la cancelación.');
+        }
+        if ($q->fetch(PDO::FETCH_ASSOC)) {
+            return $this->error->error(
+                mensaje: 'Ya existe una solicitud de cancelación registrada; verifica su estado antes de volver a enviarla.',
+                data: ['registro_id' => $registro_id]);
+        }
+        $q = $this->link->prepare('SELECT e.id FROM `'.$modelo_etapa->tabla.'` e '.
+            'JOIN pr_etapa_proceso p ON p.id=e.pr_etapa_proceso_id JOIN pr_etapa t ON t.id=p.pr_etapa_id '.
+            'WHERE e.`'.$this->key_id.'`=? AND t.descripcion=? LIMIT 1 FOR UPDATE');
+        if (!$q || !$q->execute([$registro_id, 'CANCELADO'])) {
+            throw new \RuntimeException('No se pudo consultar el historial de cancelación.');
+        }
+        if ($q->fetch(PDO::FETCH_ASSOC)) {
+            return $this->error->error(
+                mensaje: 'El historial del documento ya registra una cancelación; verifica su estado antes de volver a enviarla.',
+                data: ['registro_id' => $registro_id]);
+        }
+        return true;
+    }
+
+    private function cancela_bd_con_bloqueo(int $cat_sat_motivo_cancelacion_id, _cancelacion $modelo_cancelacion,
+                                           _etapa $modelo_etapa, int $registro_id): array|stdClass
+    {
         $fc_cancelacion_ins[$this->key_id] = $registro_id;
         $fc_cancelacion_ins['cat_sat_motivo_cancelacion_id'] = $cat_sat_motivo_cancelacion_id;
 
@@ -249,7 +338,7 @@ class _transacciones_fc extends modelo
 
         $modelo_etapa->verifica_permite_transaccion = false;
 
-        $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: __FUNCTION__, fecha: '',
+        $r_alta_factura_etapa = (new pr_proceso(link: $this->link))->inserta_etapa(adm_accion: 'cancela_bd', fecha: '',
             modelo: $this, modelo_etapa: $modelo_etapa, registro_id: $registro_id);
         if(errores::$error){
             return $this->error->error(mensaje: 'Error al insertar etapa', data: $r_alta_factura_etapa);
