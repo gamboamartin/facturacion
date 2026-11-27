@@ -46,6 +46,16 @@ class pantallas extends proyecto
         return $this->pantalla_dispositivo_bloqueado($uuid, $ip_tunel, $mensaje);
     }
 
+    public function construye_login(string $usuario_asignado = ''): array
+    {
+        return $this->pantalla_login($usuario_asignado);
+    }
+
+    public function construye_home(string $usuario_activo = ''): array
+    {
+        return $this->pantalla_home($usuario_activo);
+    }
+
     protected function pantalla_dispositivo_bloqueado(string $uuid = '', string $ip_tunel = '', string $mensaje = ''): array
     {
         $alerta = $mensaje !== '' ? $mensaje : 'Este equipo requiere autorización del supervisor en sistema central para operar.';
@@ -124,52 +134,51 @@ class pantallas extends proyecto
                             'items' => array('network', 'gps'),
                             'layout' => 'list',
                         ),
-                        // Aquí envolvemos los inputs y el botón dentro de un Form
                         array(
                             'type' => 'Form',
                             'id' => 'form-bloqueo',
                             'style' => array('gap' => 12),
                             'children' => array(
-                               array(
-                                'type' => 'Input',
-                                'id' => 'in-bloqueo-uuid',
-                                'name' => 'uuid',
-                                'inputType' => 'text',
-                                'label' => 'UUID del Dispositivo',
-                                'value' => (string)$uuid,
-                                'readOnly' => true,
-                                'disabled' => true,
-                                'editable' => false,
-                                'copyable' => true,
-                                'style' => $this->estilo_campo(),
-                            ),
-                            array(
-                                'type' => 'Input',
-                                'id' => 'in-bloqueo-ip',
-                                'name' => 'ip_tunel',
-                                'inputType' => 'text',
-                                'label' => 'IP WireGuard',
-                                'value' => (string)$ip_tunel,
-                                'readOnly' => true,
-                                'disabled' => true,
-                                'editable' => false,
-                                'copyable' => true,
-                                'style' => $this->estilo_campo(),
-                            ),
-                            array(
-                                'type' => 'Button',
-                                'id' => 'btn-reintentar-bloqueo',
-                                'label' => 'Comprobar Autorización',
-                                'style' => $this->estilo_boton(),
-                                'action' => array(
-                                    'type' => 'SUBMIT',
-                                    'method' => 'valida_dispositivo',
-                                    'values' => array(
-                                        'uuid' => (string)$uuid,
-                                        'ip_tunel' => (string)$ip_tunel,
-                                    )
+                                array(
+                                    'type' => 'Input',
+                                    'id' => 'in-bloqueo-uuid',
+                                    'name' => 'uuid',
+                                    'inputType' => 'text',
+                                    'label' => 'UUID del Dispositivo',
+                                    'value' => (string)$uuid,
+                                    'readOnly' => true,
+                                    'disabled' => true,
+                                    'editable' => false,
+                                    'copyable' => true,
+                                    'style' => $this->estilo_campo(),
                                 ),
-                            ),
+                                array(
+                                    'type' => 'Input',
+                                    'id' => 'in-bloqueo-ip',
+                                    'name' => 'ip_tunel',
+                                    'inputType' => 'text',
+                                    'label' => 'IP WireGuard',
+                                    'value' => (string)$ip_tunel,
+                                    'readOnly' => true,
+                                    'disabled' => true,
+                                    'editable' => false,
+                                    'copyable' => true,
+                                    'style' => $this->estilo_campo(),
+                                ),
+                                array(
+                                    'type' => 'Button',
+                                    'id' => 'btn-reintentar-bloqueo',
+                                    'label' => 'Comprobar Autorización',
+                                    'style' => $this->estilo_boton(),
+                                    'action' => array(
+                                        'type' => 'SUBMIT',
+                                        'method' => 'valida_dispositivo',
+                                        'values' => array(
+                                            'uuid' => (string)$uuid,
+                                            'ip_tunel' => (string)$ip_tunel,
+                                        ),
+                                    ),
+                                ),
                             ),
                         ),
                     ),
@@ -191,42 +200,50 @@ class pantallas extends proyecto
         );
     }
 
-   protected function pantalla_login(): array
+    protected function pantalla_login(string $usuario_asignado = ''): array
     {
+        $usuario = $usuario_asignado;
+
         return array(
             'screenId' => 'login',
             'title' => '',
-            'ttl' => 0, // En 0 para invalidar la caché local en desarrollo
+            'ttl' => 0,
             'components' => array(
-                // Logo oficial de Aguaban (s.logo: width 105, height 66)
+                // 1. Header de barra horizontal: Logo a la izquierda y ACTIVACIÓN SEGURA a la derecha
                 array(
-                    'type' => 'Image',
-                    'id' => 'img-login-logo',
-                    'source' => 'logo',
-                    'width' => 105,
-                    'height' => 66,
-                    'accessibilityLabel' => 'Logotipo de Aguaban',
+                    'type' => 'Container',
+                    'id' => 'cnt-login-header',
                     'style' => array(
-                        'alignSelf' => 'center',
-                        'marginTop' => 24,
-                        'marginBottom' => 16,
+                        'flexDirection' => 'row',
+                        'justifyContent' => 'space-between',
+                        'alignItems' => 'center',
+                        'width' => '100%',
+                        'marginBottom' => 24,
+                    ),
+                    'children' => array(
+                        array(
+                            'type' => 'Image',
+                            'id' => 'img-login-logo',
+                            'source' => 'logo',
+                            'width' => 105,
+                            'height' => 56,
+                            'accessibilityLabel' => 'Logotipo de Aguaban',
+                        ),
+                        array(
+                            'type' => 'Text',
+                            'id' => 'txt-login-header-activacion',
+                            'content' => 'ACTIVACIÓN SEGURA',
+                            'style' => array(
+                                'fontSize' => 11,
+                                'fontWeight' => '800',
+                                'color' => '#0A3156',
+                                'letterSpacing' => 1.2,
+                                'dark' => array('color' => '#F4F7FA'),
+                            ),
+                        ),
                     ),
                 ),
-                // Subtítulo / Eyebrow (s.stepEyebrow: C.blue, 10px, spacing 2, bold 800)
-                array(
-                    'type' => 'Text',
-                    'id' => 'txt-login-eyebrow',
-                    'content' => 'APLICACIÓN MÓVIL',
-                    'style' => array(
-                        'fontSize' => 10,
-                        'fontWeight' => '800',
-                        'letterSpacing' => 2,
-                        'textAlign' => 'center',
-                        'color' => '#1679B8',
-                        'dark' => array('color' => '#5AAEC8'),
-                    ),
-                ),
-                // Título principal (s.title: C.navy, 27px, spacing -0.8, bold 800)
+                // 2. Título y Descripción
                 array(
                     'type' => 'Text',
                     'id' => 'txt-login-titulo',
@@ -235,177 +252,310 @@ class pantallas extends proyecto
                         'fontSize' => 27,
                         'fontWeight' => '800',
                         'letterSpacing' => -0.8,
-                        'textAlign' => 'center',
                         'color' => '#0A3156',
-                        'marginTop' => 13,
-                        'marginBottom' => 9,
+                        'marginBottom' => 8,
                         'dark' => array('color' => '#F4F7FA'),
                     ),
                 ),
-                // Descripción (s.description: C.secondary, 13px, lineHeight 21)
                 array(
                     'type' => 'Text',
                     'id' => 'txt-login-descripcion',
-                    'content' => 'Ingresa con el usuario y la contraseña que te asignaron.',
+                    'content' => 'Accede con la cuenta asignada a este dispositivo.',
                     'style' => array(
-                        'fontSize' => 13,
-                        'lineHeight' => 21,
-                        'textAlign' => 'center',
+                        'fontSize' => 14,
+                        'lineHeight' => 20,
                         'color' => '#708391',
                         'marginBottom' => 24,
                         'dark' => array('color' => '#A2B2BB'),
                     ),
                 ),
-                // Tarjeta contenedora blanca (s.card: C.white, border C.border, radius 16, padding 14)
+                // 3. Formulario de Inicio de Sesión
                 array(
-                    'type' => 'Container',
-                    'id' => 'cnt-login-tarjeta',
-                    'style' => array(
-                        'backgroundColor' => '#FFFFFF',
-                        'borderWidth' => 1,
-                        'borderColor' => '#E0E9EE',
-                        'borderRadius' => 16,
-                        'padding' => 14,
-                        'dark' => array('backgroundColor' => '#1E1E1E', 'borderColor' => '#2E3A44'),
-                    ),
+                    'type' => 'Form',
+                    'id' => 'form-login',
+                    'style' => array('gap' => 12),
                     'children' => array(
                         array(
-                            'type' => 'Form',
-                            'id' => 'form-login',
-                            'style' => array('gap' => 14),
-                            'children' => array(
-                                array(
-                                    'type' => 'Input',
-                                    'id' => 'in-login-usuario',
-                                    'name' => 'usuario',
-                                    'inputType' => 'text',
-                                    'label' => 'Usuario',
-                                    'required' => true,
-                                    'placeholder' => 'Tu usuario',
-                                    'style' => $this->estilo_campo(),
-                                ),
-                                array(
-                                    'type' => 'Input',
-                                    'id' => 'in-login-password',
-                                    'name' => 'password',
-                                    'inputType' => 'password',
-                                    'label' => 'Contraseña',
-                                    'required' => true,
-                                    'placeholder' => 'Ingresa tu contraseña',
-                                    'revealable' => true,
-                                    'style' => $this->estilo_campo(),
-                                ),
-                                array(
-                                    'type' => 'Button',
-                                    'id' => 'btn-login',
-                                    'label' => 'Iniciar sesión',
-                                    'style' => $this->estilo_boton(),
-                                    'action' => array('type' => 'SUBMIT', 'method' => 'login'),
+                            'type' => 'Input',
+                            'id' => 'in-login-usuario',
+                            'name' => 'usuario',
+                            'label' => 'Usuario',
+                            'inputType' => 'text',
+                            'value' => $usuario,
+                            'placeholder' => 'Ingresa tu usuario',
+                            'required' => true,
+                            'style' => array(
+                                'borderColor' => '#E0E9EE',
+                                'borderRadius' => 12,
+                                'minHeight' => 52,
+                                'borderWidth' => 1,
+                                'padding' => 14,
+                                'fontSize' => 14,
+                                'color' => '#0A3156',
+                                'backgroundColor' => '#FFFFFF',
+                                'dark' => array(
+                                    'borderColor' => '#334155',
+                                    'backgroundColor' => '#1E293B',
+                                    'color' => '#F4F7FA',
                                 ),
                             ),
                         ),
-                    ),
-                ),
-                // Pie de página (s.footer: 9px, spacing 1.1, color #A2B2BB)
-                array(
-                    'type' => 'Text',
-                    'id' => 'txt-login-pie',
-                    'content' => 'SEGURIDAD Y DESARROLLO · IVITEC',
-                    'style' => array(
-                        'fontSize' => 9,
-                        'letterSpacing' => 1.1,
-                        'textAlign' => 'center',
-                        'color' => '#A2B2BB',
-                        'marginTop' => 22,
-                        'dark' => array('color' => '#708391'),
+                        array(
+                            'type' => 'Input',
+                            'id' => 'in-login-password',
+                            'name' => 'password',
+                            'label' => 'Contraseña',
+                            'inputType' => 'password',
+                            'required' => true,
+                            'placeholder' => 'Ingresa tu contraseña',
+                            'revealable' => true,
+                            'style' => array(
+                                'borderColor' => '#E0E9EE',
+                                'borderRadius' => 12,
+                                'minHeight' => 52,
+                                'borderWidth' => 1,
+                                'padding' => 14,
+                                'fontSize' => 14,
+                                'color' => '#0A3156',
+                                'backgroundColor' => '#FFFFFF',
+                                'dark' => array(
+                                    'borderColor' => '#334155',
+                                    'backgroundColor' => '#1E293B',
+                                    'color' => '#F4F7FA',
+                                ),
+                            ),
+                        ),
+                        array(
+                            'type' => 'Button',
+                            'id' => 'btn-login',
+                            'label' => 'Iniciar sesión',
+                            'style' => array(
+                                'backgroundColor' => '#14527F',
+                                'color' => '#FFFFFF',
+                                'minHeight' => 52,
+                                'borderRadius' => 12,
+                                'fontWeight' => '800',
+                                'fontSize' => 15,
+                                'textAlign' => 'center',
+                                'justifyContent' => 'center',
+                                'alignItems' => 'center',
+                                'marginTop' => 8,
+                                'dark' => array('backgroundColor' => '#5AAEC8', 'color' => '#0A3156'),
+                            ),
+                            'action' => array('type' => 'SUBMIT', 'method' => 'login'),
+                        ),
                     ),
                 ),
             ),
         );
     }
 
-    protected function pantalla_home(): array
+    protected function pantalla_home(string $usuario_activo = ''): array
     {
+        $usuario = $this->usuario_autenticado($usuario_activo);
+
         return array(
             'screenId' => 'home',
             'title' => 'Bienvenida',
             'ttl' => 60,
             'components' => array(
+                // 1. Caja de Logotipo Central
                 array(
-                    'type' => 'Image',
-                    'id' => 'img-home-logo',
-                    'source' => 'logo',
-                    'height' => 84,
-                    'width' => 110,
-                    'accessibilityLabel' => 'Logotipo de Aguaban',
-                    'style' => array('alignSelf' => 'center', 'marginTop' => 16, 'marginBottom' => 20),
+                    'type' => 'Container',
+                    'id' => 'cnt-home-logo-central',
+                    'style' => array(
+                        'backgroundColor' => '#F1F7FA',
+                        'borderRadius' => 24,
+                        'padding' => 28,
+                        'alignItems' => 'center',
+                        'justifyContent' => 'center',
+                        'alignSelf' => 'center',
+                        'marginTop' => 16,
+                        'marginBottom' => 24,
+                        'dark' => array('backgroundColor' => '#1A2634'),
+                    ),
+                    'children' => array(
+                        array(
+                            'type' => 'Image',
+                            'id' => 'img-home-logo-central',
+                            'source' => 'logo',
+                            'width' => 120,
+                            'height' => 76,
+                            'accessibilityLabel' => 'Logotipo corporativo de Aguaban',
+                        ),
+                    ),
                 ),
+                // 2. Subtítulo: TU ACCESO ESTÁ LISTO
                 array(
                     'type' => 'Text',
                     'id' => 'txt-home-subtitulo',
                     'content' => 'TU ACCESO ESTÁ LISTO',
                     'style' => array(
                         'fontSize' => 12,
-                        'fontWeight' => '600',
+                        'fontWeight' => '800',
+                        'letterSpacing' => 1.5,
                         'textAlign' => 'center',
+                        'color' => '#1679B8',
                         'marginBottom' => 8,
+                        'dark' => array('color' => '#5AAEC8'),
                     ),
                 ),
+                // 3. Título: ¡Bienvenidos!
                 array(
                     'type' => 'Text',
                     'id' => 'txt-home-titulo',
                     'content' => '¡Bienvenidos!',
                     'style' => array(
-                        'fontSize' => 28,
-                        'fontWeight' => 'bold',
+                        'fontSize' => 32,
+                        'fontWeight' => '800',
                         'textAlign' => 'center',
+                        'color' => '#0A3156',
                         'marginBottom' => 12,
+                        'dark' => array('color' => '#F4F7FA'),
                     ),
                 ),
+                // 4. Descripción
                 array(
                     'type' => 'Text',
                     'id' => 'txt-home-descripcion',
-                    'content' => 'Nos alegra tenerte aquí. Tu espacio de trabajo en AGUABAN está listo para comenzar.',
+                    'content' => "Nos alegra tenerte aquí.\nTu espacio de trabajo en AGUABAN está listo para comenzar.",
                     'style' => array(
-                        'fontSize' => 14,
+                        'fontSize' => 15,
+                        'lineHeight' => 22,
+                        'color' => '#708391',
                         'textAlign' => 'center',
-                        'marginBottom' => 24,
+                        'marginBottom' => 32,
+                        'dark' => array('color' => '#A2B2BB'),
                     ),
                 ),
+                // 5. Tarjeta de Sesión Activa (card-sesion-usuario)
                 array(
-                    'type'  => 'UserSessionCard',
-                    'id'    => 'card-sesion-usuario',
-                    'style' => array('marginTop' => 20), // o marginTop => 'auto' si el contenedor es flex
+                    'type' => 'Container',
+                    'id' => 'card-sesion-usuario',
+                    'style' => array(
+                        'backgroundColor' => '#F1F7FA',
+                        'borderRadius' => 14,
+                        'padding' => 14,
+                        'marginTop' => 24,
+                        'dark' => array('backgroundColor' => '#1A2634'),
+                    ),
+                    'children' => array(
+                        array(
+                            'type' => 'Text',
+                            'id' => 'lbl-sesion-usuario',
+                            'content' => 'HAS INICIADO SESIÓN COMO',
+                            'style' => array(
+                                'fontSize' => 11,
+                                'fontWeight' => '700',
+                                'color' => '#708391',
+                                'marginBottom' => 4,
+                                'dark' => array('color' => '#94A3B8'),
+                            ),
+                        ),
+                        array(
+                            'type' => 'Text',
+                            'id' => 'val-sesion-usuario',
+                            'content' => $usuario,
+                            'style' => array(
+                                'fontSize' => 14,
+                                'fontWeight' => 'bold',
+                                'color' => '#0A3156',
+                                'dark' => array('color' => '#F4F7FA'),
+                            ),
+                        ),
+                    ),
                 ),
             ),
         );
     }
 
-   private function estilo_boton(): array
+    private function usuario_autenticado(string $fallback = ''): string
+    {
+        if ($fallback !== '') {
+            return $fallback;
+        }
+
+        if (isset($_SESSION['usuario']) && is_string($_SESSION['usuario']) && trim($_SESSION['usuario']) !== '') {
+            return trim($_SESSION['usuario']);
+        }
+
+        if (isset($_SESSION['user']) && is_string($_SESSION['user']) && trim($_SESSION['user']) !== '') {
+            return trim($_SESSION['user']);
+        }
+
+        $token = $this->token_autorizacion();
+        if ($token !== '') {
+            $payload = $this->payload_jwt($token);
+            if (isset($payload['usuario']) && is_string($payload['usuario']) && trim($payload['usuario']) !== '') {
+                return trim($payload['usuario']);
+            }
+            if (isset($payload['user']) && is_string($payload['user']) && trim($payload['user']) !== '') {
+                return trim($payload['user']);
+            }
+        }
+
+        return 'admin';
+    }
+
+    private function token_autorizacion(): string
+    {
+        $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        if ($header === '' && function_exists('apache_request_headers')) {
+            $headers = apache_request_headers();
+            $header = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+        }
+        if (is_string($header) && preg_match('/^Bearer\s+(.+)$/i', $header, $matches) === 1) {
+            return trim($matches[1]);
+        }
+        return '';
+    }
+
+    private function payload_jwt(string $token): array
+    {
+        $partes = explode('.', $token);
+        if (count($partes) < 2) {
+            return array();
+        }
+        $json = base64_decode(strtr($partes[1], '-_', '+/'));
+        if (!is_string($json) || $json === '') {
+            return array();
+        }
+        $data = json_decode($json, true);
+        if (!is_array($data)) {
+            return array();
+        }
+        return $data;
+    }
+
+    private function estilo_boton(): array
     {
         return array(
-            'backgroundColor' => '#14527F', // C.primary
-            'color'           => '#FFFFFF', // C.white
-            'minHeight'       => 52,        // s.action
+            'backgroundColor' => '#14527F',
+            'color'           => '#FFFFFF',
+            'minHeight'       => 52,
             'padding'         => 14,
-            'borderRadius'    => 11,        // s.action.borderRadius
-            'fontWeight'      => '800',     // s.actionText
-            'fontSize'        => 14,        // s.actionText
+            'borderRadius'    => 12,
+            'fontWeight'      => '800',
+            'fontSize'        => 15,
             'textAlign'       => 'center',
-            'marginTop'       => 6,
+            'justifyContent'  => 'center',
+            'alignItems'      => 'center',
+            'marginTop'       => 12,
             'dark'            => array('backgroundColor' => '#5AAEC8', 'color' => '#0A3156'),
         );
     }
 
-  private function estilo_campo(): array
+    private function estilo_campo(): array
     {
         return array(
-            'borderColor'     => '#E0E9EE', // C.border
-            'borderRadius'    => 10,        // s.input
-            'minHeight'       => 48,        // s.input
+            'borderColor'     => '#E0E9EE',
+            'borderRadius'    => 12,
+            'minHeight'       => 52,
+            'borderWidth'     => 1,
             'padding'         => 12,
-            'fontSize'        => 14,        // s.input
-            'color'           => '#0A3156', // C.navy
+            'fontSize'        => 14,
+            'color'           => '#0A3156',
+            'backgroundColor' => '#FFFFFF',
             'dark'            => array(
                 'borderColor'     => '#334155',
                 'backgroundColor' => '#1E293B',

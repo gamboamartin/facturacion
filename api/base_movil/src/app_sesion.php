@@ -112,10 +112,14 @@ class app_sesion
         $ahora = time();
         $claims = array(
             'sub' => (string)$usuario_id,
+            'usuario' => trim($usuario),
+            'user' => trim($usuario),
             'iat' => $ahora,
             'exp' => $ahora + $this->duracion_sesion(),
             'jti' => bin2hex(random_bytes(16)),
         );
+        $_SESSION['usuario'] = trim($usuario);
+        $_SESSION['user'] = trim($usuario);
 
         // Sin su fila de sesión el token no serviría: si no se puede guardar,
         // el login falla en lugar de entregar un token inútil.
