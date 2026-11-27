@@ -191,49 +191,58 @@ class pantallas extends proyecto
         );
     }
 
-    protected function pantalla_login(): array
+   protected function pantalla_login(): array
     {
         return array(
             'screenId' => 'login',
             'title' => '',
-            'ttl' => 86400, // casi nunca cambia: 1 día
+            'ttl' => 0, // En 0 para invalidar la caché local en desarrollo
             'components' => array(
+                // Logo oficial de Aguaban (s.logo: width 105, height 66)
                 array(
                     'type' => 'Image',
                     'id' => 'img-login-logo',
                     'source' => 'logo',
-                    'height' => 84,
-                    'width' => 110,
+                    'width' => 105,
+                    'height' => 66,
                     'accessibilityLabel' => 'Logotipo de Aguaban',
-                    'style' => array('alignSelf' => 'center', 'marginTop' => 16, 'marginBottom' => 20),
+                    'style' => array(
+                        'alignSelf' => 'center',
+                        'marginTop' => 24,
+                        'marginBottom' => 16,
+                    ),
                 ),
+                // Subtítulo / Eyebrow (s.stepEyebrow: C.blue, 10px, spacing 2, bold 800)
                 array(
                     'type' => 'Text',
                     'id' => 'txt-login-eyebrow',
                     'content' => 'APLICACIÓN MÓVIL',
                     'style' => array(
                         'fontSize' => 10,
-                        'fontWeight' => 'bold',
+                        'fontWeight' => '800',
                         'letterSpacing' => 2,
                         'textAlign' => 'center',
                         'color' => '#1679B8',
                         'dark' => array('color' => '#5AAEC8'),
                     ),
                 ),
+                // Título principal (s.title: C.navy, 27px, spacing -0.8, bold 800)
                 array(
                     'type' => 'Text',
                     'id' => 'txt-login-titulo',
                     'content' => 'Inicia sesión',
                     'style' => array(
                         'fontSize' => 27,
-                        'fontWeight' => 'bold',
+                        'fontWeight' => '800',
                         'letterSpacing' => -0.8,
                         'textAlign' => 'center',
                         'color' => '#0A3156',
-                        'marginTop' => 10,
-                        'dark' => array('color' => '#F5F5F5'),
+                        'marginTop' => 13,
+                        'marginBottom' => 9,
+                        'dark' => array('color' => '#F4F7FA'),
                     ),
                 ),
+                // Descripción (s.description: C.secondary, 13px, lineHeight 21)
                 array(
                     'type' => 'Text',
                     'id' => 'txt-login-descripcion',
@@ -243,11 +252,11 @@ class pantallas extends proyecto
                         'lineHeight' => 21,
                         'textAlign' => 'center',
                         'color' => '#708391',
-                        'marginTop' => 8,
                         'marginBottom' => 24,
-                        'dark' => array('color' => '#B3B3B3'),
+                        'dark' => array('color' => '#A2B2BB'),
                     ),
                 ),
+                // Tarjeta contenedora blanca (s.card: C.white, border C.border, radius 16, padding 14)
                 array(
                     'type' => 'Container',
                     'id' => 'cnt-login-tarjeta',
@@ -256,14 +265,14 @@ class pantallas extends proyecto
                         'borderWidth' => 1,
                         'borderColor' => '#E0E9EE',
                         'borderRadius' => 16,
-                        'padding' => 16,
+                        'padding' => 14,
                         'dark' => array('backgroundColor' => '#1E1E1E', 'borderColor' => '#2E3A44'),
                     ),
                     'children' => array(
                         array(
                             'type' => 'Form',
                             'id' => 'form-login',
-                            'style' => array('gap' => 12),
+                            'style' => array('gap' => 14),
                             'children' => array(
                                 array(
                                     'type' => 'Input',
@@ -297,6 +306,7 @@ class pantallas extends proyecto
                         ),
                     ),
                 ),
+                // Pie de página (s.footer: 9px, spacing 1.1, color #A2B2BB)
                 array(
                     'type' => 'Text',
                     'id' => 'txt-login-pie',
@@ -306,8 +316,8 @@ class pantallas extends proyecto
                         'letterSpacing' => 1.1,
                         'textAlign' => 'center',
                         'color' => '#A2B2BB',
-                        'marginTop' => 24,
-                        'dark' => array('color' => '#6B7A84'),
+                        'marginTop' => 22,
+                        'dark' => array('color' => '#708391'),
                     ),
                 ),
             ),
@@ -371,28 +381,36 @@ class pantallas extends proyecto
         );
     }
 
-    private function estilo_boton(): array
+   private function estilo_boton(): array
     {
         return array(
-            'backgroundColor' => '#14527F',
-            'color' => '#FFFFFF',
-            'padding' => 14,
-            'borderRadius' => 12,
-            'fontWeight' => 'bold',
-            'textAlign' => 'center',
-            'marginTop' => 4,
-            'dark' => array('backgroundColor' => '#5AAEC8', 'color' => '#0A3156'),
+            'backgroundColor' => '#14527F', // C.primary
+            'color'           => '#FFFFFF', // C.white
+            'minHeight'       => 52,        // s.action
+            'padding'         => 14,
+            'borderRadius'    => 11,        // s.action.borderRadius
+            'fontWeight'      => '800',     // s.actionText
+            'fontSize'        => 14,        // s.actionText
+            'textAlign'       => 'center',
+            'marginTop'       => 6,
+            'dark'            => array('backgroundColor' => '#5AAEC8', 'color' => '#0A3156'),
         );
     }
 
-    private function estilo_campo(): array
+  private function estilo_campo(): array
     {
         return array(
-            'borderColor' => '#E0E9EE',
-            'borderRadius' => 10,
-            'fontSize' => 14,
-            'color' => '#0A3156',
-            'dark' => array('borderColor' => '#3D3D3D', 'backgroundColor' => '#2A2A2A', 'color' => '#F5F5F5'),
+            'borderColor'     => '#E0E9EE', // C.border
+            'borderRadius'    => 10,        // s.input
+            'minHeight'       => 48,        // s.input
+            'padding'         => 12,
+            'fontSize'        => 14,        // s.input
+            'color'           => '#0A3156', // C.navy
+            'dark'            => array(
+                'borderColor'     => '#334155',
+                'backgroundColor' => '#1E293B',
+                'color'           => '#F4F7FA',
+            ),
         );
     }
 }
